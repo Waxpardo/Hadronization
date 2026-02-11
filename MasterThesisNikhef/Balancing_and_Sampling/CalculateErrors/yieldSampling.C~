@@ -1,0 +1,4 @@
+// yieldSampling.C
+// Macro that takes the batched yield outputs and adds them together into a histogram
+// This is done per associate per tune per configuration
+// (e.g. error for B- associate in MONASH for low-low pT)

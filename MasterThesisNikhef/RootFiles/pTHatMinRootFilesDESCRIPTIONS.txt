@@ -1,0 +1,79 @@
+There are 4 types of root files in this directory..
+
+outputPythia files are generated with different Pythia settings and are checked by the YieldRatioSpectra_DpDmBpBm.C code. This script returns histograms containing particle IDs and plots with particle spectra. It only works for b-particles at this moment!
+
+Some outputPythia files are accompanied by complete_root folders that contain all the different angular correlations considered.
+-> There are again two seperations, one for charm and one for beauty.
+-> Then for charm there is another seperation: one generated to match Ioannis's results and one with the `HardQCDccbar` setting to save on statistics and to more accurately match the settings used in the bbbar scripts.
+--------------------------------------------------------------------------------
+//
+//
+//
+//
+//
+//
+//
+//
+--------------------------------------------------------------------------------
+- outputPythia is generated with pTHatMin = 1 and excited b-states are not allowed to decay. 100 million events were generated.
+-> it is followed by BplusBminus_1.root
+
+- outputPythia_2 contains events from Pythia where the HardQCD:bbbaronly setting was us\
+ed, in addition to enabling the excited B meson states to decay, to check whether this would ex\
+plain the ~14% abundance of excited states c.f. ~6% abundance of normal B mesons. 10 million ev\
+ents were generated in this simulation. -> no follow-up angular correlations was needed.
+
+- outputPythia_3 contains events from Pythia where the HardQCD:bbbaronly setting was u\
+sed, but with PhaseSpace:PtHatMin = 4. instead of PhaseSpace:PtHatMin = 1. as was used before, \
+in order to see if this would change b-hadron yields and relative abundances. This simulation w\
+ill be followed by a larger sample to study the effect of the PtHatMin around the beauty mass. \
+10 million events were generated in this simulation. -> no follow-up angular correlations was n\
+eeded.
+
+- outputPythia4 does not exist as it was too large (7 GB). It used both the HardQCD:bbbaronly, pTHatMin = 4 and excited decay allowed options. 100 million events were generated.
+-> BplusBminus_4.root does exist
+
+- outputPythia5 is the same as 4, but meant to be smaller in size with 10 million events.
+-> followed up by BplusBminus_4.root
+
+- output6 has the same idea and settings as (3), however now with PhaseSpace:PtHatMin = 10.
+
+- complete_root_cc_general_3 contains the azimuthal angle correlations plots from Pythia simulations on c-hadrons with pTHatMin = 4 and excited c-decay allowed. 1 billion events were generated.
+
+- complete_root_cc_only_4 contains D production in Pythia with pTHatMin = 1 and Ds* decay allowed, but using the Hard\
+QCD:ccbar setting. 10 million events were generated.
+-> DplusDminus_4.root
+
+- complete_root_cc_only_40 is the same as (4), but with 1 billion events generated to get more statistics. In some sense, this can be seen as the 'non-prompt' standard for charm correlations as there are no beauty quarks involved in the simulation, while complete_root_cc_both_6 takes the 'prompt and non-prompt' approach.
+
+- complete_root_cc_only_5 contains the same as (4), but with pTHatMin = 4. 10 million events were generated.
+The idea was to be able to compare the effect of pTHatMin on the angular correlations in D+D-
+
+- complete_root_bb_general_7 generates	events using HardQCD:all instead of HardQCD:hardbbbar. Decay of\
+ excited b-states is allowed and pTMinHat = 1. 1 billion events	were generated.
+ -> BplusBminus_7.root
+- For complete_root_bb_general_70 10 billion events were generated.
+
+- complete_root_cc_both_6 uses both HardQCD:ccbar and HardQCD:bbbar to see if there are large differences arising with using only HardQCD:ccbar. pTHatMin = 1, excited c-states are allowed to decay and 100 million events were generated.
+- complete_root_cc_both_60 contains 1 billion events.
+- complete_root_cc_both_60_3D should be the same as (60), but with the 3D mother ID histogram added for trigger and associate
+- complete_root_cc_both_60_2D is the same as above, but due to memory limitations only has 2D histograms.
+- complete_root_cc_both_60_prompt_non_prompt is the same as (60), but also investigates the prompt/non-prompt combinations of trigger/a\
+ssociate origin using Pythia status codes.
+- output_600 is not an improvement of number of events, but rather it also includes mother2 histograms for the Pythia production. This \
+is interesting as a mother2 != 0 implies that we don't have a normal decay mode.
+
+- complete_root_cc_both_7 is the same as (6) but with pTHatMin = 4 and 10 million events generated.
+
+- complete_root_cc_both_8 is the same as (6) but with pTHatMin = 10 and 10 million events generated.
+
+BplusBminus_8.root uses HardQCD:bbbar with pTHatMin = 1 and allowed excited b decay. 100 million events were generated.
+(80) contains 1 billion events.
+(82) has OS and SS simulations for B+ yields
+-> BplusBminus_9.root has the same as (8) but with pTHatMin = 10 and 10 million events.
+
+- output_bb_rest_12 uses what's not in HardQCD:bbbar, but in HardQCD:all to check whether the description of HardQCD:all matches with the 'heavy' and 'rest' sections.
+-> same for D+D- with output_cc_rest_9
+
+
+

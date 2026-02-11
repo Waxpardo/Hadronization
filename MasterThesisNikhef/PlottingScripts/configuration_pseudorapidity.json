@@ -1,0 +1,1814 @@
+{
+  "VERBOSE": false,
+  "calculate_errors": false,
+  "bb_bar_complete_root_dir_sub_samples":"/Users/pv280546/alice/GitHub/MasterThesisNikhef/RootFiles/SUBSAMPLES/combined_root_subSamples_bb_250",
+  "cc_bar_complete_root_dir_sub_samples":"/Users/pv280546/alice/GitHub/MasterThesisNikhef/RootFiles/SUBSAMPLES/combined_root_subSamples_cc_250",
+  "nSubSamples": 10,
+
+  "base_dir": "/Users/pv280546/alice/GitHub/MasterThesisNikhef/RootFiles",
+  "PYTHIA_TUNES": [
+      "MONASH",
+      "JUNCTIONS"
+  ],
+  "bb_bar_complete_root_dir": "complete_root_bb_215",
+  "cc_bar_complete_root_dir": "complete_root_cc_215",
+
+  "beauty_correlations_to_analyse": [
+    {
+      "trigger": "Bˆ{+}",
+      "associateOS": "B-",
+      "associateSS": "Bˆ{+}",
+      "OS": "BplusBminus.root",
+      "SS": "BplusBplus.root"
+    },
+    {
+      "trigger": "Bˆ{+}",
+      "associateOS": "B0-bar",
+      "associateSS": "Bˆ{0}",
+      "OS": "BplusBzerobar.root",
+      "SS": "BplusBzero.root"
+    },
+    {
+      "trigger": "Bˆ{+}",
+      "associateOS": "Bs0-bar",
+      "associateSS": "B_{s}ˆ{0}",
+      "OS": "BplusBszerobar.root",
+      "SS": "BplusBszero.root"
+    },
+    {
+      "trigger": "Bˆ{+}",
+      "associateOS": "Bc-",
+      "associateSS": "B_{c}ˆ{+}",
+      "OS": "BplusBcminus.root",
+      "SS": "BplusBcplus.root"
+    },
+    {
+      "trigger": "Bˆ{+}",
+      "associateOS": "Lambda_b",
+      "associateSS": "Lambda_b-bar",
+      "OS": "BplusLb.root",
+      "SS": "BplusLbbar.root"
+    },
+    {
+      "trigger": "Bˆ{+}",
+      "associateOS": "Sigma_b+",
+      "associateSS": "Sigma_b(+)-bar",
+      "OS": "BplusSigmabplus.root",
+      "SS": "BplusSigmabplusbar.root"
+    },
+    {
+      "trigger": "Bˆ{+}",
+      "associateOS": "Sigma_b0",
+      "associateSS": "Sigma_b(0)-bar",
+      "OS": "BplusSigmabzero.root",
+      "SS": "BplusSigmabzerobar.root"
+    },
+    {
+      "trigger": "Bˆ{+}",
+      "associateOS": "Sigma_b-",
+      "associateSS": "Sigma_b(-)-bar",
+      "OS": "BplusSigmabminus.root",
+      "SS": "BplusSigmabminusbar.root"
+    }
+  ],
+
+  "charm_correlations_to_analyse": [
+    {
+      "trigger": "Dˆ{+}",
+      "associateOS": "D-",
+      "associateSS": "Dˆ{+}",
+      "OS": "DplusDminus.root",
+      "SS": "DplusDplus.root"
+    },
+    {
+      "trigger": "Dˆ{+}",
+      "associateOS": "D0-bar",
+      "associateSS": "Dˆ{0}",
+      "OS": "DplusDzerobar.root",
+      "SS": "DplusDzero.root"
+    },
+    {
+      "trigger": "Dˆ{+}",
+      "associateOS": "Ds-",
+      "associateSS": "Ds+",
+      "OS": "DplusDsminus.root",
+      "SS": "DplusDsplus.root"
+    },
+    {
+      "trigger": "Dˆ{+}",
+      "associateOS": "Lambda_c(+)-bar",
+      "associateSS": "Lambda_c(+)",
+      "OS": "DplusLambdacplusbar.root",
+      "SS": "DplusLambdacplus.root"
+    },
+    {
+      "trigger": "Dˆ{+}",
+      "associateOS": "Sigma_c(++)-bar",
+      "associateSS": "Sigma_c(++)",
+      "OS": "DplusSigmacplusplusbar.root",
+      "SS": "DplusSigmacplusplus.root"
+    },
+    {
+      "trigger": "Dˆ{+}",
+      "associateOS": "Sigma_c(+)-bar",
+      "associateSS": "Sigma_c(+)",
+      "OS": "DplusSigmacplusbar.root",
+      "SS": "DplusSigmacplus.root"
+    },
+    {
+      "trigger": "Dˆ{+}",
+      "associateOS": "Sigma_c(0)-bar",
+      "associateSS": "Sigma_c(0)",
+      "OS": "DplusSigmaczerobar.root",
+      "SS": "DplusSigmaczero.root"
+    }
+  ],
+
+  "histograms_to_analyse": [
+    {
+      "hDPhi": "hDPhiEtaCC",
+      "hTrPt": "hTrPtEtaC"
+    },
+    {
+      "hDPhi": "hDPhiEtaCF",
+      "hTrPt": "hTrPtEtaC"
+    },
+    {
+      "hDPhi": "hDPhiEtaFC",
+      "hTrPt": "hTrPtEtaF"
+    },
+    {
+      "hDPhi": "hDPhiEtaFF",
+      "hTrPt": "hTrPtEtaF"
+    }
+  ],
+
+  "canvases_to_be_drawn": [
+    {
+      "canvas_name": "beauty_balancing_all",
+      "draw_function_to_use": "drawBalancingPlots",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "/Users/pv280546/Desktop/Plots",
+      "write_name": "beauty_balancing_all",
+      "canvas_title": "beauty balancing",
+      "x_axis_title": "associate",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": -1,
+      "x_max_mini_pad": -1,
+      "y_min_mini_pad": -1,
+      "y_max_mini_pad": -1,
+      "top_margin_mini_pad": -1,
+      "bottom_margin_mini_pad": -1,
+      "left_margin_mini_pad": -1,
+      "right_margin_mini_pad": -1,
+      "y_min_axis": 1e-4,
+      "y_max_axis": 0.8,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "hDPhiEtaCC",
+          "display_name": "central-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaCF",
+          "display_name": "central-forward eta"
+        },
+        {
+          "object_name": "hDPhiEtaFC",
+          "display_name": "forward-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaFF",
+          "display_name": "forward-forward eta"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "MONASH",
+          "colour": 1
+        },
+        {
+          "TUNE_name": "JUNCTIONS",
+          "colour": 2
+        }
+      ],
+      "dependency_line_styles": [
+        {
+          "dependency_name": "hDPhiEtaCC",
+          "line_style": 1
+        },
+        {
+          "dependency_name": "hDPhiEtaCF",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiEtaFC",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiEtaFF",
+          "line_style": 4
+        }
+      ],
+      "baryon_line_styles": [
+      ]
+    },
+    {
+      "canvas_name": "beauty_balancing_JUNCTIONS_over_MONASH",
+      "draw_function_to_use": "drawBalancingPlotsTUNERatios",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "JUNCTIONS",
+      "denominator_TUNE": "MONASH",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "/Users/pv280546/Desktop/Plots",
+      "write_name": "beauty_balancing_JUNCTIONS_over_MONASH",
+      "canvas_title": "beauty balancing ratio",
+      "x_axis_title": "associate",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": -1,
+      "x_max_mini_pad": -1,
+      "y_min_mini_pad": -1,
+      "y_max_mini_pad": -1,
+      "top_margin_mini_pad": -1,
+      "bottom_margin_mini_pad": -1,
+      "left_margin_mini_pad": -1,
+      "right_margin_mini_pad": -1,
+      "y_min_axis": 1e-1,
+      "y_max_axis": 1e3,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "hDPhiEtaCC",
+          "display_name": "central-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaCF",
+          "display_name": "central-forward eta"
+        },
+        {
+          "object_name": "hDPhiEtaFC",
+          "display_name": "forward-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaFF",
+          "display_name": "forward-forward eta"
+        }
+      ],
+      "TUNE_colours": [
+      ],
+      "dependency_line_styles": [
+        {
+          "dependency_name": "hDPhiEtaCC",
+          "line_style": 1
+        },
+        {
+          "dependency_name": "hDPhiEtaCF",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiEtaFC",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiEtaFF",
+          "line_style": 4
+        }
+      ],
+      "baryon_line_styles": [
+      ]
+    },
+    {
+      "canvas_name": "beauty_balancing_baryon_over_meson_ratio",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlots",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_b",
+        "Sigma_b0"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "/Users/pv280546/Desktop/Plots",
+      "write_name": "beauty_balancing_baryon_over_meson_ratio",
+      "canvas_title": "beauty balancing baryon/meson ratio",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": -1,
+      "x_max_mini_pad": -1,
+      "y_min_mini_pad": -1,
+      "y_max_mini_pad": -1,
+      "top_margin_mini_pad": -1,
+      "bottom_margin_mini_pad": -1,
+      "left_margin_mini_pad": -1,
+      "right_margin_mini_pad": -1,
+      "y_min_axis": 1e-4,
+      "y_max_axis": 1e2,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_b",
+          "display_name": "B+ Lambda_b"
+        },
+        {
+          "object_name": "Sigma_b0",
+          "display_name": "B+ Sigma_b0"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "MONASH",
+          "colour": 1
+        },
+        {
+          "TUNE_name": "JUNCTIONS",
+          "colour": 2
+        }
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_b",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_b0",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlotsTUNERatios",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "JUNCTIONS",
+      "denominator_TUNE": "MONASH",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_b",
+        "Sigma_b0"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "/Users/pv280546/Desktop/Plots",
+      "write_name": "beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH",
+      "canvas_title": "beauty balancing ratio of baryon/meson ratio",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": -1,
+      "x_max_mini_pad": -1,
+      "y_min_mini_pad": -1,
+      "y_max_mini_pad": -1,
+      "top_margin_mini_pad": -1,
+      "bottom_margin_mini_pad": -1,
+      "left_margin_mini_pad": -1,
+      "right_margin_mini_pad": -1,
+      "y_min_axis": 1e-1,
+      "y_max_axis": 6e2,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_b",
+          "display_name": "B+ Lambda_b"
+        },
+        {
+          "object_name": "Sigma_b0",
+          "display_name": "B+ Sigma_b0"
+        }
+      ],
+      "TUNE_colours": [
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_b",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_b0",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "charm_balancing_all",
+      "draw_function_to_use": "drawBalancingPlots",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "/Users/pv280546/Desktop/Plots",
+      "write_name": "charm_balancing_all",
+      "canvas_title": "charm balancing",
+      "x_axis_title": "associate",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": -1,
+      "x_max_mini_pad": -1,
+      "y_min_mini_pad": -1,
+      "y_max_mini_pad": -1,
+      "top_margin_mini_pad": -1,
+      "bottom_margin_mini_pad": -1,
+      "left_margin_mini_pad": -1,
+      "right_margin_mini_pad": -1,
+      "y_min_axis": 1e-4,
+      "y_max_axis": 0.8,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "hDPhiEtaCC",
+          "display_name": "central-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaCF",
+          "display_name": "central-forward eta"
+        },
+        {
+          "object_name": "hDPhiEtaFC",
+          "display_name": "forward-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaFF",
+          "display_name": "forward-forward eta"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "MONASH",
+          "colour": 1
+        },
+        {
+          "TUNE_name": "JUNCTIONS",
+          "colour": 2
+        }
+      ],
+      "dependency_line_styles": [
+        {
+          "dependency_name": "hDPhiEtaCC",
+          "line_style": 1
+        },
+        {
+          "dependency_name": "hDPhiEtaCF",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiEtaFC",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiEtaFF",
+          "line_style": 4
+        }
+      ],
+      "baryon_line_styles": [
+      ]
+    },
+    {
+      "canvas_name": "charm_balancing_JUNCTIONS_over_MONASH",
+      "draw_function_to_use": "drawBalancingPlotsTUNERatios",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "JUNCTIONS",
+      "denominator_TUNE": "MONASH",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "/Users/pv280546/Desktop/Plots",
+      "write_name": "charm_balancing_JUNCTIONS_over_MONASH",
+      "canvas_title": "charm balancing ratio",
+      "x_axis_title": "associate",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": -1,
+      "x_max_mini_pad": -1,
+      "y_min_mini_pad": -1,
+      "y_max_mini_pad": -1,
+      "top_margin_mini_pad": -1,
+      "bottom_margin_mini_pad": -1,
+      "left_margin_mini_pad": -1,
+      "right_margin_mini_pad": -1,
+      "y_min_axis": 1e-1,
+      "y_max_axis": 1e3,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "hDPhiEtaCC",
+          "display_name": "central-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaCF",
+          "display_name": "central-forward eta"
+        },
+        {
+          "object_name": "hDPhiEtaFC",
+          "display_name": "forward-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaFF",
+          "display_name": "forward-forward eta"
+        }
+      ],
+      "TUNE_colours": [
+      ],
+      "dependency_line_styles": [
+        {
+          "dependency_name": "hDPhiEtaCC",
+          "line_style": 1
+        },
+        {
+          "dependency_name": "hDPhiEtaCF",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiEtaFC",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiEtaFF",
+          "line_style": 4
+        }
+      ],
+      "baryon_line_styles": [
+      ]
+    },
+    {
+      "canvas_name": "charm_balancing_baryon_over_meson_ratio",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlots",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_c(+)-bar",
+        "Sigma_c(+)-bar"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "/Users/pv280546/Desktop/Plots",
+      "write_name": "charm_balancing_baryon_over_meson_ratio",
+      "canvas_title": "charm balancing baryon/meson ratio",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": -1,
+      "x_max_mini_pad": -1,
+      "y_min_mini_pad": -1,
+      "y_max_mini_pad": -1,
+      "top_margin_mini_pad": -1,
+      "bottom_margin_mini_pad": -1,
+      "left_margin_mini_pad": -1,
+      "right_margin_mini_pad": -1,
+      "y_min_axis": 1e-4,
+      "y_max_axis": 1e2,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_c(+)-bar",
+          "display_name": "D+ Lambda_c(+)-bar"
+        },
+        {
+          "object_name": "Sigma_c(+)-bar",
+          "display_name": "D+ Sigma_c(+)-bar"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "MONASH",
+          "colour": 1
+        },
+        {
+          "TUNE_name": "JUNCTIONS",
+          "colour": 2
+        }
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_c(+)-bar",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_c(+)-bar",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlotsTUNERatios",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "JUNCTIONS",
+      "denominator_TUNE": "MONASH",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_c(+)-bar",
+        "Sigma_c(+)-bar"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "/Users/pv280546/Desktop/Plots",
+      "write_name": "charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH",
+      "canvas_title": "charm balancing ratio of baryon/meson ratio",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": -1,
+      "x_max_mini_pad": -1,
+      "y_min_mini_pad": -1,
+      "y_max_mini_pad": -1,
+      "top_margin_mini_pad": -1,
+      "bottom_margin_mini_pad": -1,
+      "left_margin_mini_pad": -1,
+      "right_margin_mini_pad": -1,
+      "y_min_axis": 1e-1,
+      "y_max_axis": 1e2,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_c(+)-bar",
+          "display_name": "D+ Lambda_c(+)-bar"
+        },
+        {
+          "object_name": "Sigma_c(+)-bar",
+          "display_name": "D+ Sigma_c(+)-bar"
+        }
+      ],
+      "TUNE_colours": [
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_c(+)-bar",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_c(+)-bar",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "mini_beauty_balancing_MONASH",
+      "draw_function_to_use": "drawBalancingPlots",
+      "TUNES": [
+        "MONASH"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.05,
+      "x_max_mini_pad": 0.50,
+      "y_min_mini_pad": 0.35,
+      "y_max_mini_pad": 0.649,
+      "top_margin_mini_pad": 1e-3,
+      "bottom_margin_mini_pad": 1e-3,
+      "left_margin_mini_pad": 0.05,
+      "right_margin_mini_pad": 1e-3,
+      "y_min_axis": 1e-4,
+      "y_max_axis": 0.8,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "hDPhiEtaCC",
+          "display_name": "central-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaCF",
+          "display_name": "central-forward eta"
+        },
+        {
+          "object_name": "hDPhiEtaFC",
+          "display_name": "forward-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaFF",
+          "display_name": "forward-forward eta"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "MONASH",
+          "colour": 2
+        }
+      ],
+      "dependency_line_styles": [
+        {
+          "dependency_name": "hDPhiEtaCC",
+          "line_style": 1
+        },
+        {
+          "dependency_name": "hDPhiEtaCF",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiEtaFC",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiEtaFF",
+          "line_style": 4
+        }
+      ],
+      "baryon_line_styles": [
+      ]
+    },
+    {
+      "canvas_name": "mini_beauty_balancing_JUNCTIONS",
+      "draw_function_to_use": "drawBalancingPlots",
+      "TUNES": [
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.05,
+      "x_max_mini_pad": 0.50,
+      "y_min_mini_pad": 0.651,
+      "y_max_mini_pad": 0.95,
+      "top_margin_mini_pad": 0,
+      "bottom_margin_mini_pad": 1e-3,
+      "left_margin_mini_pad": 0.05,
+      "right_margin_mini_pad": 1e-3,
+      "y_min_axis": 1e-4,
+      "y_max_axis": 0.8,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "hDPhiEtaCC",
+          "display_name": "central-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaCF",
+          "display_name": "central-forward eta"
+        },
+        {
+          "object_name": "hDPhiEtaFC",
+          "display_name": "forward-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaFF",
+          "display_name": "forward-forward eta"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "JUNCTIONS",
+          "colour": 2
+        }
+      ],
+      "dependency_line_styles": [
+        {
+          "dependency_name": "hDPhiEtaCC",
+          "line_style": 1
+        },
+        {
+          "dependency_name": "hDPhiEtaCF",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiEtaFC",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiEtaFF",
+          "line_style": 4
+        }
+      ],
+      "baryon_line_styles": [
+      ]
+    },
+    {
+      "canvas_name": "mini_beauty_balancing_JUNCTIONS_over_MONASH",
+      "draw_function_to_use": "drawBalancingPlotsTUNERatios",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "JUNCTIONS",
+      "denominator_TUNE": "MONASH",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "",
+      "y_axis_title": "JUN/MON",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.05,
+      "x_max_mini_pad": 0.50,
+      "y_min_mini_pad": 0,
+      "y_max_mini_pad": 0.349,
+      "top_margin_mini_pad": 1e-3,
+      "bottom_margin_mini_pad": 0.20,
+      "left_margin_mini_pad": 0.05,
+      "right_margin_mini_pad": 1e-3,
+      "y_min_axis": 1e-1,
+      "y_max_axis": 1e3,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": -1,
+      "x_max_legend": -1,
+      "y_min_legend": -1,
+      "y_max_legend": -1,
+      "legend_entries": [
+        {
+          "object_name": "hDPhiEtaCC",
+          "display_name": "central-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaCF",
+          "display_name": "central-forward eta"
+        },
+        {
+          "object_name": "hDPhiEtaFC",
+          "display_name": "forward-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaFF",
+          "display_name": "forward-forward eta"
+        }
+      ],
+      "TUNE_colours": [
+      ],
+      "dependency_line_styles": [
+        {
+          "dependency_name": "hDPhiEtaCC",
+          "line_style": 1
+        },
+        {
+          "dependency_name": "hDPhiEtaCF",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiEtaFC",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiEtaFF",
+          "line_style": 4
+        }
+      ],
+      "baryon_line_styles": [
+      ]
+    },
+    {
+      "canvas_name": "mini_charm_balancing_MONASH",
+      "draw_function_to_use": "drawBalancingPlots",
+      "TUNES": [
+        "MONASH"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "",
+      "y_axis_title": "",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.501,
+      "x_max_mini_pad": 0.95,
+      "y_min_mini_pad": 0.35,
+      "y_max_mini_pad": 0.649,
+      "top_margin_mini_pad": 1e-3,
+      "bottom_margin_mini_pad": 1e-3,
+      "left_margin_mini_pad": 0,
+      "right_margin_mini_pad": 0.05,
+      "y_min_axis": 1e-4,
+      "y_max_axis": 0.8,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "hDPhiEtaCC",
+          "display_name": "central-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaCF",
+          "display_name": "central-forward eta"
+        },
+        {
+          "object_name": "hDPhiEtaFC",
+          "display_name": "forward-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaFF",
+          "display_name": "forward-forward eta"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "MONASH",
+          "colour": 4
+        }
+      ],
+      "dependency_line_styles": [
+        {
+          "dependency_name": "hDPhiEtaCC",
+          "line_style": 1
+        },
+        {
+          "dependency_name": "hDPhiEtaCF",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiEtaFC",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiEtaFF",
+          "line_style": 4
+        }
+      ],
+      "baryon_line_styles": [
+      ]
+    },
+    {
+      "canvas_name": "mini_charm_balancing_JUNCTIONS",
+      "draw_function_to_use": "drawBalancingPlots",
+      "TUNES": [
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "",
+      "y_axis_title": "",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.501,
+      "x_max_mini_pad": 0.95,
+      "y_min_mini_pad": 0.651,
+      "y_max_mini_pad": 0.95,
+      "top_margin_mini_pad": 0,
+      "bottom_margin_mini_pad": 1e-3,
+      "left_margin_mini_pad": 0,
+      "right_margin_mini_pad": 0.05,
+      "y_min_axis": 1e-4,
+      "y_max_axis": 0.8,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "hDPhiEtaCC",
+          "display_name": "central-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaCF",
+          "display_name": "central-forward eta"
+        },
+        {
+          "object_name": "hDPhiEtaFC",
+          "display_name": "forward-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaFF",
+          "display_name": "forward-forward eta"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "JUNCTIONS",
+          "colour": 4
+        }
+      ],
+      "dependency_line_styles": [
+        {
+          "dependency_name": "hDPhiEtaCC",
+          "line_style": 1
+        },
+        {
+          "dependency_name": "hDPhiEtaCF",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiEtaFC",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiEtaFF",
+          "line_style": 4
+        }
+      ],
+      "baryon_line_styles": [
+      ]
+    },
+    {
+      "canvas_name": "mini_charm_balancing_JUNCTIONS_over_MONASH",
+      "draw_function_to_use": "drawBalancingPlotsTUNERatios",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "JUNCTIONS",
+      "denominator_TUNE": "MONASH",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "associate",
+      "y_axis_title": "",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.501,
+      "x_max_mini_pad": 0.95,
+      "y_min_mini_pad": 0,
+      "y_max_mini_pad": 0.349,
+      "top_margin_mini_pad": 1e-3,
+      "bottom_margin_mini_pad": 0.20,
+      "left_margin_mini_pad": 0,
+      "right_margin_mini_pad": 0.05,
+      "y_min_axis": 1e-1,
+      "y_max_axis": 1e3,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": -1,
+      "x_max_legend": -1,
+      "y_min_legend": -1,
+      "y_max_legend": -1,
+      "legend_entries": [
+        {
+          "object_name": "hDPhiEtaCC",
+          "display_name": "central-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaCF",
+          "display_name": "central-forward eta"
+        },
+        {
+          "object_name": "hDPhiEtaFC",
+          "display_name": "forward-central eta"
+        },
+        {
+          "object_name": "hDPhiEtaFF",
+          "display_name": "forward-forward eta"
+        }
+      ],
+      "TUNE_colours": [
+      ],
+      "dependency_line_styles": [
+        {
+          "dependency_name": "hDPhiEtaCC",
+          "line_style": 1
+        },
+        {
+          "dependency_name": "hDPhiEtaCF",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiEtaFC",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiEtaFF",
+          "line_style": 4
+        }
+      ],
+      "baryon_line_styles": [
+      ]
+    },
+    {
+      "canvas_name": "mini_beauty_balancing_baryon_over_meson_ratio_lambda_only",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlots",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_b"
+      ],
+      "use_hard_coded_settings": true,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.05,
+      "x_max_mini_pad": 0.50,
+      "y_min_mini_pad": 0.675,
+      "y_max_mini_pad": 0.95,
+      "top_margin_mini_pad": 0,
+      "bottom_margin_mini_pad": 1e-3,
+      "left_margin_mini_pad": 0.10,
+      "right_margin_mini_pad": 1e-3,
+      "y_min_axis": 0.0,
+      "y_max_axis": 1.0,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": false,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_b",
+          "display_name": "B+ Lambda_b"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "MONASH",
+          "colour": 1
+        },
+        {
+          "TUNE_name": "JUNCTIONS",
+          "colour": 2
+        }
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_b",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_b0",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlots",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_b",
+        "Sigma_b0"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.05,
+      "x_max_mini_pad": 0.50,
+      "y_min_mini_pad": 0.20,
+      "y_max_mini_pad": 0.475,
+      "top_margin_mini_pad": 0,
+      "bottom_margin_mini_pad": 1e-3,
+      "left_margin_mini_pad": 0.10,
+      "right_margin_mini_pad": 1e-3,
+      "y_min_axis": 1e-4,
+      "y_max_axis": 1e2,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_b",
+          "display_name": "B+ Lambda_b"
+        },
+        {
+          "object_name": "Sigma_b0",
+          "display_name": "B+ Sigma_b0"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "MONASH",
+          "colour": 1
+        },
+        {
+          "TUNE_name": "JUNCTIONS",
+          "colour": 2
+        }
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_b",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_b0",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlotsTUNERatios",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "JUNCTIONS",
+      "denominator_TUNE": "MONASH",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_b"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.05,
+      "x_max_mini_pad": 0.50,
+      "y_min_mini_pad": 0.575,
+      "y_max_mini_pad": 0.676,
+      "top_margin_mini_pad": 0,
+      "bottom_margin_mini_pad": 0.40,
+      "left_margin_mini_pad": 0.10,
+      "right_margin_mini_pad": 1e-3,
+      "y_min_axis": 0.0,
+      "y_max_axis": 8.0,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": false,
+      "x_min_legend": -1,
+      "x_max_legend": -1,
+      "y_min_legend": -1,
+      "y_max_legend": -1,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_b",
+          "display_name": "B+ Lambda_b"
+        }
+      ],
+      "TUNE_colours": [
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_b",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_b0",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlotsTUNERatios",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "BEAUTY",
+      "nominator_TUNE": "JUNCTIONS",
+      "denominator_TUNE": "MONASH",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_b",
+        "Sigma_b0"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.05,
+      "x_max_mini_pad": 0.50,
+      "y_min_mini_pad": 0.10,
+      "y_max_mini_pad": 0.201,
+      "top_margin_mini_pad": 0,
+      "bottom_margin_mini_pad": 0.40,
+      "left_margin_mini_pad": 0.10,
+      "right_margin_mini_pad": 1e-3,
+      "y_min_axis": 1e-1,
+      "y_max_axis": 6e2,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": -1,
+      "x_max_legend": -1,
+      "y_min_legend": -1,
+      "y_max_legend": -1,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_b",
+          "display_name": "B+ Lambda_b"
+        },
+        {
+          "object_name": "Sigma_b0",
+          "display_name": "B+ Sigma_b0"
+        }
+      ],
+      "TUNE_colours": [
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_b",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_b0",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "mini_charm_balancing_baryon_over_meson_ratio_lambda_only",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlots",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_c(+)-bar"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.501,
+      "x_max_mini_pad": 0.95,
+      "y_min_mini_pad": 0.675,
+      "y_max_mini_pad": 0.95,
+      "top_margin_mini_pad": 0,
+      "bottom_margin_mini_pad": 1e-3,
+      "left_margin_mini_pad": 0,
+      "right_margin_mini_pad": 0.05,
+      "y_min_axis": 0.0,
+      "y_max_axis": 1.0,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": false,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_c(+)-bar",
+          "display_name": "D+ Lambda_c(+)-bar"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "MONASH",
+          "colour": 1
+        },
+        {
+          "TUNE_name": "JUNCTIONS",
+          "colour": 4
+        }
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_c(+)-bar",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_c(+)-bar",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlots",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "NONE",
+      "denominator_TUNE": "NONE",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_c(+)-bar",
+        "Sigma_c(+)-bar"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.501,
+      "x_max_mini_pad": 0.95,
+      "y_min_mini_pad": 0.20,
+      "y_max_mini_pad": 0.475,
+      "top_margin_mini_pad": 0,
+      "bottom_margin_mini_pad": 1e-3,
+      "left_margin_mini_pad": 0,
+      "right_margin_mini_pad": 0.05,
+      "y_min_axis": 1e-4,
+      "y_max_axis": 1e2,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": 0.63,
+      "x_max_legend": 0.90,
+      "y_min_legend": 0.68,
+      "y_max_legend": 0.88,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_c(+)-bar",
+          "display_name": "D+ Lambda_c(+)-bar"
+        },
+        {
+          "object_name": "Sigma_c(+)-bar",
+          "display_name": "D+ Sigma_c(+)-bar"
+        }
+      ],
+      "TUNE_colours": [
+        {
+          "TUNE_name": "MONASH",
+          "colour": 1
+        },
+        {
+          "TUNE_name": "JUNCTIONS",
+          "colour": 4
+        }
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_c(+)-bar",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_c(+)-bar",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlotsTUNERatios",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "JUNCTIONS",
+      "denominator_TUNE": "MONASH",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_c(+)-bar"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.501,
+      "x_max_mini_pad": 0.95,
+      "y_min_mini_pad": 0.575,
+      "y_max_mini_pad": 0.676,
+      "top_margin_mini_pad": 0,
+      "bottom_margin_mini_pad": 0.40,
+      "left_margin_mini_pad": 0,
+      "right_margin_mini_pad": 0.05,
+      "y_min_axis": 0.0,
+      "y_max_axis": 8.0,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": false,
+      "x_min_legend": -1,
+      "x_max_legend": -1,
+      "y_min_legend": -1,
+      "y_max_legend": -1,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_c(+)-bar",
+          "display_name": "D+ Lambda_c(+)-bar"
+        }
+      ],
+      "TUNE_colours": [
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_c(+)-bar",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_c(+)-bar",
+          "line_style": 2
+        }
+      ]
+    },
+    {
+      "canvas_name": "mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma",
+      "draw_function_to_use": "drawBalancingBaryonMesonRatioPlotsTUNERatios",
+      "TUNES": [
+        "MONASH",
+        "JUNCTIONS"
+      ],
+      "FLAVOUR": "CHARM",
+      "nominator_TUNE": "JUNCTIONS",
+      "denominator_TUNE": "MONASH",
+      "baryons_to_plot_in_baryon/meson_ratio": [
+        "Lambda_c(+)-bar",
+        "Sigma_c(+)-bar"
+      ],
+      "use_hard_coded_settings": false,
+      "write": false,
+      "write_path": "NONE",
+      "write_name": "NONE",
+      "canvas_title": "",
+      "x_axis_title": "pT",
+      "y_axis_title": "yield",
+      "x_size_canvas": 800,
+      "y_size_canvas": 600,
+      "x_min_mini_pad": 0.501,
+      "x_max_mini_pad": 0.95,
+      "y_min_mini_pad": 0.10,
+      "y_max_mini_pad": 0.201,
+      "top_margin_mini_pad": 0,
+      "bottom_margin_mini_pad": 0.40,
+      "left_margin_mini_pad": 0,
+      "right_margin_mini_pad": 0.05,
+      "y_min_axis": 1e-1,
+      "y_max_axis": 6e2,
+      "histogram_minimum": -1,
+      "histogram_maximum": -1,
+      "set_log_y": true,
+      "x_min_legend": -1,
+      "x_max_legend": -1,
+      "y_min_legend": -1,
+      "y_max_legend": -1,
+      "legend_entries": [
+        {
+          "object_name": "Lambda_c(+)-bar",
+          "display_name": "D+ Lambda_c(+)-bar"
+        },
+        {
+          "object_name": "Sigma_c(+)-bar",
+          "display_name": "D+ Sigma_c(+)-bar"
+        }
+      ],
+      "TUNE_colours": [
+      ],
+      "dependency_line_styles": [
+      ],
+      "baryon_line_styles": [
+        {
+          "baryon_name": "Lambda_c(+)-bar",
+          "line_style": 1
+        },
+        {
+          "baryon_name": "Sigma_c(+)-bar",
+          "line_style": 2
+        }
+      ]
+    }
+  ],
+
+  "global_canvases_to_be_drawn": [
+    {
+      "canvas_name": "global_balancing_plots",
+      "canvas_title": "balancing in beauty and charm",
+      "mini_canvases": [
+        "mini_beauty_balancing_MONASH",
+        "mini_beauty_balancing_JUNCTIONS",
+        "mini_beauty_balancing_JUNCTIONS_over_MONASH",
+        "mini_charm_balancing_MONASH",
+        "mini_charm_balancing_JUNCTIONS",
+        "mini_charm_balancing_JUNCTIONS_over_MONASH"
+      ],
+      "write": false,
+      "write_path": "/Users/pv280546/Desktop/Plots",
+      "write_name": "global_balancing_plots_pseudorapidity",
+      "x_size_canvas": 900,
+      "y_size_canvas": 700
+    },
+    {
+      "canvas_name": "global_balancing_baryon_over_meson_ratio",
+      "canvas_title": "balancing in beauty and charm: baryon/meson ratios",
+      "mini_canvases": [
+        "mini_beauty_balancing_baryon_over_meson_ratio_lambda_only",
+        "mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma",
+        "mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only",
+        "mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma",
+        "mini_charm_balancing_baryon_over_meson_ratio_lambda_only",
+        "mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma",
+        "mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only",
+        "mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma"
+      ],
+      "write": false,
+      "write_path": "/Users/pv280546/Desktop/Plots",
+      "write_name": "global_balancing_baryon_over_meson_ratio_pseudorapidity",
+      "x_size_canvas": 900,
+      "y_size_canvas": 700
+    }
+  ]
+
+}

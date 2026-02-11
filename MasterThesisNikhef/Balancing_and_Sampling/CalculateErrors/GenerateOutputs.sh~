@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Loop through i from 1 to 40
+for ((i = 1; i <= 1; i++)); do
+    root -l -b -q "B_Balancing_MakeOutputYields.C($i, \"/home/pveen/scripts/Nikhef/MasterThesis/RootFiles/SAMPLING_MONASH_bb_214/SAMPLING_MONASH$i/\", \"/home/pveen/scripts/Nikhef/MasterThesis/RootFiles/SAMPLING_MONASH_bb_JUNCTIONS_214/SAMPLING_MONASH$i/\")"
+done

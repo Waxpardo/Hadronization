@@ -1,0 +1,5 @@
+Double counting was implemented in previous versions of the code, but is NOT implemented in the newest versions (from 23 dec onwards) so they will have to be divided by 2 manually in the double counting code, or certain combinations have to be made to account for this (e.g. BpBm + BmBp / BpBp + BmBm)
+
+Though it seems like the double counting doesn't affect anything,
+as the normalisation by number of triggers anyways counters this, but remains
+to be checked

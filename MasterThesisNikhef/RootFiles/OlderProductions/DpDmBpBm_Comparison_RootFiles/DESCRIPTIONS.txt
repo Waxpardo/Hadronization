@@ -1,0 +1,24 @@
+NOTE: ROOT files generated with older simulation codes (lost in the renaming incident). Plots shown in my thesis are made with these ROOT files however, so that's the main motivation to keep them here.
+Whenever I feel satisfied with the new simulation outputs, I'll add them here
+and as they contain all histograms from the start, it also improves clarity.
+
+In particular: these root files were created with the wrong multiplicity definition and using inclusive charms, though this difference should be minimal and will
+not affect any results as long as the multiplicity is ignored.
+
+It is recommended to use these root files to test the scripts or any changes that will be made to them.
+
+- BplusBminus_80.root
+ROOT file generated with HardQCD:hardbbbar, PhaseSpace:pTHatMin=1 settings and other settings as in pythiasettings_Hard_Low_bb.cmnd.
+
+- DplusDminus_60.root
+ROOT file generated with HardQCD:hardbbbar, HardQCD:hardccbar, PhaseSpace:pTHatMin=1 settings and other settings as in pythiasettings_Hard_Low_cc.cmnd.
+
+- DplusDminus_60_prompt_non_prompt.root
+ROOT file with same settings as DplusDminus_60.root, but including angular correlation histograms divided by prompt and non-prompt origin.
+
+- DplusDminus_60_2D.root
+ROOT file with same settings as DplusDminus_60.root, but including 2-dimensional histograms of angular correlations and mother PDG IDs.
+
+- DplusDminus_600.root
+ROOT file with same settings as DplusDminus_60.root, but including 2-dimensional histograms of angular correlations of trigger mother and associate mother
+and their PDG IDs.

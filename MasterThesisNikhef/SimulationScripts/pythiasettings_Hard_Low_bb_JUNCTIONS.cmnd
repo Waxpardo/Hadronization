@@ -1,0 +1,95 @@
+! Called from file: bbbarcorrelations_status.cpp
+! This script defines the settings in order to simulate collision events which are used to calculate azimuthal angular correlations between beauty hadrons.
+! Lines starting with (!) are comments
+
+! General settings
+
+
+! Number of events
+Main:numberOfEvents = 1000000
+
+! More information about these commands can be found on https://pythia.org/latest-manual/MainProgramSettings.html
+Init:showMultipartonInteractions = off
+Next:numberCount = 0                            ! no progress is printed.
+! Next:numberShowEvent = 0
+
+! Setting up beams and tune
+! More information about tunes can be found here: https://pythia.org//latest-manual/Welcome.html
+! More information about Beams parameters can be found here: https://pythia.org/latest-manual/BeamParameters.html
+
+Beams:eCM = 14000				! sqrt(s) = 14 TeV (eCM counts as GeV)
+Beams:idA = 2212 				! beam 1 proton
+Beams:idB = 2212 				! beam 2 proton
+Tune:pp = 14 					! tune 14 = MONASH
+
+! JUNCTIONS tune
+! mode 2 QCD from skands
+
+StringPT:sigma = 0.335
+StringZ:aLund = 0.36
+StringZ:bLund = 0.56
+StringFlav:probQQtoQ = 0.078
+StringFlav:ProbStoUD = 0.2
+StringFlav:probQQ1toQQ0join = 0.0275,0.0275,0.0275,0.0275
+
+MultiPartonInteractions:pT0Ref = 2.15
+
+BeamRemnants:remnantMode = 1
+BeamRemnants:saturation = 5
+
+ColourReconnection:mode = 1			! 1 = More QCD scheme (this is also used in "mode 2" from skands, confusingly enough)
+ColourReconnection:allowDoubleJunRem = off
+ColourReconnection:m0 = 0.3
+ColourReconnection:allowJunctions = on
+ColourReconnection:junctionCorrection = 1.20
+ColourReconnection:timeDilationMode = 2
+ColourReconnection:timeDilationPar = 0.18
+
+! Physics part
+
+
+! Processes
+! Hard QCD processes: https://pythia.org//latest-manual/QCDHardProcesses.html
+
+! HardQCD:all = on
+! HardQCD:hardccbar = on
+HardQCD:hardbbbar = on
+
+! HardQCD:gg2gg = on
+! HardQCD:gg2qqbar = on
+! HardQCD:qg2qg = on
+! HardQCD:qq2qq = on
+! HardQCD:qqbar2gg = on
+! HardQCD:qqbar2qqbarNew = on
+
+! Processes become divergent at low pT, need to define a lower bound
+PhaseSpace:pTHatMin = 1.
+ 
+! Decay supression
+! More information about decay supression can be found here: https://pythia.org/latest-manual/ParticleDecays.html
+
+! tau0Max = 0.01 ~ 1e-14 s
+! typical decay time for b ~ 1e-13 s
+ParticleDecays:limitTau0 = on			! Particles with tau0 > tau0Max are not allowed to decay.
+ParticleDecays:tau0Max = 0.01			! tau0Max is suppressing the weak decays so the produced beauty particles will not decay
+			 			! This tau0max is expressed in mm/c which is around 1e-12 seconds
+! We shut this off in order to analyse production from decay and instead manually define which particles to `make stable`
+! Most particles are unstable by default in PYTHIA, so only mayDecay = off is meaningful in the lines below
+
+521:mayDecay = off				! B+
+-521:mayDecay = off				! B-
+511:mayDecay = off				! B0
+-511:mayDecay = off				! B0bar
+531:mayDecay = off   	 			! Bs
+-531:mayDecay = off				! Bsbar
+541:mayDecay = off    				! Bc+
+-541:mayDecay = off				! Bc-
+5122:mayDecay = off   				! Λb
+-5122:mayDecay = off 				! Λbbar
+
+5112:mayDecay = off                             ! Sigmab-
+-5112:mayDecay = off                            ! Sigmab-bar
+5212:mayDecay = off                             ! Sigmab0
+-5212:mayDecay = off                            ! Sigmab0bar
+5222:mayDecay = off                             ! Sigmab+
+-5222:mayDecay = off                            ! Sigmab+bar

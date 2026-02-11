@@ -1,0 +1,105 @@
+! Called from file: ccbarcorrelations_status.cpp
+! This script defines the settings in order to simulate collision events which are used to calculate azimuthal angular correlations between charm hadrons.
+! Lines starting with (!) are comments
+
+
+! General settings
+
+
+! Number of events
+Main:numberOfEvents = 1000000
+
+! More information about these commands can be found on https://pythia.org/latest-manual/MainProgramSettings.html
+Init:showMultipartonInteractions = off
+Next:numberCount = 0                            ! no progress is printed.
+! Next:numberShowEvent = 0
+
+! Setting up beams and tune
+! More information about tunes can be found here: https://pythia.org//latest-manual/Welcome.html
+! More information about Beams parameters can be found here: https://pythia.org/latest-manual/BeamParameters.html
+
+Beams:eCM = 14000				! sqrt(s) = 14 TeV (eCM counts as GeV)
+Beams:idA = 2212 				! beam 1 proton
+Beams:idB = 2212 				! beam 2 proton
+Tune:pp = 14 					! tune 14 = MONASH
+
+
+! Physics part
+
+
+! Processes
+! Hard QCD processes: https://pythia.org//latest-manual/QCDHardProcesses.html
+
+! HardQCD:all = on
+HardQCD:hardccbar = on
+! HardQCD:hardbbbar = on
+
+! HardQCD:gg2gg = on
+! HardQCD:gg2qqbar = on
+! HardQCD:qg2qg = on
+! HardQCD:qq2qq = on
+! HardQCD:qqbar2gg = on
+! HardQCD:qqbar2qqbarNew = on
+
+! Processes become divergent at low pT, need to define a lower bound
+PhaseSpace:pTHatMin = 1.
+
+! Decay supression
+! More information about decay supression can be found here: https://pythia.org/latest-manual/ParticleDecays.html
+
+ParticleDecays:limitTau0 = on			! Particles with tau0 > tau0Max are not allowed to decay.
+ParticleDecays:tau0Max = 0.01			! tau0Max is suppressing the weak decays so the produced charm particles will not decay
+						! This tau0max is expressed in mm/c which is around 1e-12 seconds
+
+! We shut this off in order to anlyze production from decay and instead manually define which particles to `make stable`
+! Most particles are unstable by default in PYTHIA, so only mayDecay = off is meaningful in the lines below
+
+411:mayDecay = off				! D+
+-411:mayDecay = off				! D-
+421:mayDecay = off				! D0
+-421:mayDecay = off				! D0bar
+431:mayDecay = off				! Ds+
+-431:mayDecay = off				! Ds-
+
+423:mayDecay = on				! D*(2007)0
+-423:mayDecay = on				! D*(2007)0bar
+433:mayDecay = on				! Ds*+
+-433:mayDecay = on				! Ds*-
+
+! 441:mayDecay = off				! etac
+! -441:mayDecay = off
+! 443:mayDecay = off				! J/psi
+! -443:mayDecay = off
+! 445:mayDecay = off				! chi
+! -445:mayDecay = off
+
+4122:mayDecay = off				! Lamdac+
+-4122:mayDecay = off
+
+4222:mayDecay = off				! Sigmac++
+-4222:mayDecay = off
+4212:mayDecay = off				! Sigmac+
+-4212:mayDecay = off
+4112:mayDecay = off				! Sigmac0
+-4112:mayDecay = off
+
+! 4232:mayDecay = off				! Xic+
+! -4232:mayDecay = off
+! 4132:mayDecay = off				! Xic0
+! -4132:mayDecay = off
+! 4322:mayDecay = off				! Xic'+
+! -4322:mayDecay = off
+! 4312:mayDecay = off				! Xi'c0
+! -4312:mayDecay = off
+! 4414:mayDecay = off				! Xi+cc
+! -4414:mayDecay = off
+! 4424:mayDecay = off				! Xi++cc
+! -4424:mayDecay = off
+! 4444:mayDecay = off				! Omega++ccc
+! -4444:mayDecay = off
+! 4332:mayDecay = off				! Omega0c
+! -4332:mayDecay = off
+! 2224:mayDecay = off				! Delta++
+! -2224:mayDecay = off
+! 2214:mayDecay = off				! Delta0
+! -2214:mayDecay = off

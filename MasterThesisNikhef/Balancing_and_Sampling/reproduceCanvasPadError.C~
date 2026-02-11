@@ -1,0 +1,54 @@
+int reproduceCanvasPadError() {
+
+  // Before the calls of the plotting function, we set up global pads
+  // in order to draw several outputs on the same canvas
+  // Define the global yield canvas for the condensed multiplicity bins
+  TCanvas* c2x2_yields = new TCanvas("c2x2_yields", "balancing yields for beauty and charm on a 2x2 canvas", 1200, 1000);
+  setCanvasMargins(c2x2_yields, 0.1, 0.1, 0.1, 0.05);
+  c2x2_yields->cd();
+  
+  // Necessary to avoid overlapping of axes
+  Double_t eps = 1e-3;
+    
+  TPad* c00_yields = new TPad("c00_yields", "yields for JUNCTIONS beauty", 0.05, 0.60, 0.50, 1.0);
+  // c00_yields->SetLeftMargin(0.20);
+  c00_yields->SetRightMargin(eps);
+  c00_yields->SetBottomMargin(eps);
+  c00_yields->Draw();
+
+  TPad* c01_yields = new TPad("c01_yields", "yields for JUNCTIONS beauty", 0.50+eps, 0.60, 0.95, 1.0);
+  c01_yields->SetLeftMargin(0);
+  c01_yields->SetBottomMargin(eps);
+  c01_yields->Draw();
+  
+  TPad* c10_yields = new TPad("c10_yields", "yields for MONASH charm", 0.05, 0.20, 0.50, 0.60+eps);
+  // c10_yields->SetLeftMargin(0.20);
+  c10_yields->SetRightMargin(eps);
+  c10_yields->SetTopMargin(0);
+  c10_yields->SetBottomMargin(0);
+  c10_yields->Draw();
+  
+  TPad* c11_yields = new TPad("c11_yields", "yields for MONASH charm", 0.50+eps, 0.20, 0.95, 0.60+eps);
+  c11_yields->SetLeftMargin(0);
+  c11_yields->SetTopMargin(0);
+  c11_yields->SetBottomMargin(0);
+  c11_yields->Draw();
+
+  // Minipads
+  TPad* c20mini_yields = new TPad("c20mini_yields", "yields ratio for beauty", 0.05, 0.10, 0.50, 0.20+eps);
+  // c20mini_yields->SetLeftMargin(0.20);
+  c20mini_yields->SetRightMargin(eps);
+  c20mini_yields->SetTopMargin(0);
+  c20mini_yields->SetBottomMargin(0.30);
+  c20mini_yields->Draw();
+  
+  TPad* c21mini_yields = new TPad("c21mini_yields", "yields ratio for charm", 0.50+eps, 0.10, 0.95, 0.20+eps);
+  c21mini_yields->SetLeftMargin(0);
+  c21mini_yields->SetTopMargin(0);
+  c21mini_yields->SetBottomMargin(0.30);
+  c21mini_yields->Draw();
+  //
+  
+  return 0;
+
+}

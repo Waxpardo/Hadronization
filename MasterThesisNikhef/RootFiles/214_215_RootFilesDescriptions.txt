@@ -1,0 +1,59 @@
+ROOT files starting with 200 or higher are made with the simulations that are up-to-date with the simulations that have been done before 1/12/2023
+For other ROOT files it can not be (and likely will not be) guaruanteed that the same PYTHIA settings were used, so be careful.
+
+Files are from the MONASH tune of PYTHIA8, unless stated differently.
+
+
+
+
+     ***Beautiful list***
+
+(bb_80_new) has pTHatMin = 1, hardQCD:hardbbbar and 1 billion events (1 million per job * 1000 jobs). Contrary to (cc-80), this already included proper mayDecay settings that only save (make stable) the hadrons we are interested in for the yields
+(80-original) has *presumably* the same settings as (80-new) with (1 million per job * 100 jobs) 100 million events. Uses the exact same configurations for the simulations (mayDecay in particular) as the old (80) in order to check if the differences arising in (80-new) were caused by the mayDecay settings or perhaps by something else
+
+(bb_90_new) has pTHatMin = 10, hardQCD:hardbbbar and 100 million events (eventually, still ramping up, testing has 1000 jobs * 1e5 events)
+
+(bb_150) has pTHatMin = 1, hardQCD:all (1e5 events = 2 mins) (1e6 events = 17 mins) has 10 billion events (10e6 per job * 1000 jobs)
+
+(taumax) has pTHatMin = 1, hardQCD:hardbbbar (1e6 events = 180 mins) (1e6 * 100 jobs) has 100 million events and enables different taumax settings in a experimenting way to find out the effect of using this parameter versus using the mayDecay options -> CONCLUSION: taumax gives essentially the same results as the mayDecay settings from before (only 1% difference)
+
+(bb_211) has pTHatMin = 1, hardQCD:hardbbbar (1e5 events = 20 mins) of 1 billion events (1e6 events * 1000 jobs)
+
+(bb_212) the same settings and number of events as (bb_211) above, but it also has rapidity information besides pseudorapidity
+
+-- (bb_213) is an analysis only version of bb_212 where I try to find the correct way of filling my trigger pT histograms by filling only when the trigger passes a certain condition
+
+(bb_JUNCTIONS_213) same as (bb_213), but now with the JUNCTIONS tune of 1 billion events (1e4 events = 15 mins) (0.5e6 events * 2000 jobs)
+
+(bb_214/bb_JUNCTIONS_214) version of (bb_213) with mayDecay settings turned off for Lambda_b and Sigma_b particles
+
+(bb_215/bb_JUNCTIONS_215) version of (bb_214) with multiplicity to be defined correctly, i.e. with charged primaries only, by making use of the taumax setting.
+
+(bb_221) has pTHatMin = 10, hardQCD:hardbbbar (1e5 events = 26 mins) of 1 billion events (1e6 events * 1000 jobs)
+
+(bb_231) has pTHatMin = 1, hardQCD:allQCD (1e6 events = 22 mins) of 10 billion events (1e7 events * 1000 jobs)
+
+(bb_241) has pTHatMin = 10, hardQCD:allQCD (1e5 events = 26 mins) of 1 billion events (1e6 events * 1000 jobs)
+
+
+
+     ***Charming list***
+
+(cc_80_new) is for charm studies, pTHatMin = 1, hardQCD:ccbar + hardQCD:bbbar (1e6 events = 60 mins) has 1 billion jobs (1000 jobs * 1e6 per job)
+
+(cc_81_new) with 100 million events (1e6 per job * 100 jobs) has the same settings as (cc-80), however the mayDecay settings are quite different, only making the hadrons stable that we are interested in, and not saying anything about the others (they depend on the taumax). This study is done to check the effects of the mayDecay settings for cc-production (1e5 events = 5 mins)
+Update dec 27: some small changes were made in e.g. variable names and some histograms were added to make the code work with the DPhi of mothers study of the local scripts
+
+(cc_213) is similar to (bb_213). It is the version with correct trigger normalisation (e.g. L instead of LL), though still lacks correct normalisation for the 2D mother ID study plots.
+The sample contains 1 billion events (1e6 events * 1000 jobs) (1e5 events = 5 mins).
+
+(cc_JUNCTIONS_213) is identical to (cc_213) but generated with the JUNCTIONS extension of PYTHIA MONASH. The simulation contains 1 billion events (2e6 events * 500 jobs) (1e4 = 2 mins).
+
+(bb_214/bb_JUNCTIONS_214) version of (bb_213) [and resp for cc] with mayDecay settings turned off for Lambda_c+ and Sigma_c particles.
+
+(cc_prompt_214) is the same as 214, but generated using only the HardQCD:hardccbar setting.
+
+(cc_prompt_JUNCTIONS_214) is again the same as 214, but it is generated using only the HardQCD:hardccbar setting. 
+
+(cc_215/cc_JUNCTIONS_215) version of (cc_214) with multiplicity to be defined correctly, i.e. with charged primaries only, by making use of the taumax setting.
+The new multiplicity definition only works for PROMPT charm, so this study is PROMPT ONLY

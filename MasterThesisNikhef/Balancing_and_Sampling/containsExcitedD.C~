@@ -1,0 +1,9 @@
+// containsExcitedD.C
+// Simple macro to investigate particle contents of the 'prompt' ccbar simulation outputs
+// (in order to see if they are really 'prompt')
+
+int containsExcitedD() {
+
+  return 0;
+
+}
