@@ -1,0 +1,7 @@
+>>> JOBID   = 3
+>>> CHANNEL = ccbar
+>>> TUNE    = JUNCTIONS
+>>> WORKDIR = /data/alice/ipardoza/HRP_clean/jobs/ccbar/JUNCTIONS/job_3
+>>> OUTDIR  = /data/alice/ipardoza/HRP_clean/RootFiles/ccbar/JUNCTIONS
+>>> NEVT_PER_JOB = 1000
+ERROR: Executable not found or not executable: /data/alice/ipardoza/HRP_clean/MasterThesisNikhef/SimulationScripts/ccbarcorrelations_status_JUNCTIONS

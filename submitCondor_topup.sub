@@ -1,0 +1,95 @@
+universe   = vanilla
+
+# Wrapper that sets up env and runs Pythia
+executable = /data/alice/ipardoza/HRP_clean/runCondorJob.sh
+initialdir = /data/alice/ipardoza/HRP_clean
+
+# Inherit basic env (HOME, etc.). setupEnv.sh is still sourced inside.
+getenv = True
+
+request_cpus   = 1
+request_memory = 2GB
+request_disk   = 2GB
+
+# Required by Stoomboot
++JobCategory = "short"
++UseOS       = "el9"
+
+# Logging
+log    = logs/job_$(Cluster)_$(Process)_$(CHANNEL)_$(TUNE).log
+output = logs/job_$(Cluster)_$(Process)_$(CHANNEL)_$(TUNE).out
+error  = logs/job_$(Cluster)_$(Process)_$(CHANNEL)_$(TUNE).err
+
+# Arguments for runCondorJob.sh:
+#   JOBID   = $$([ProcId + 10000])   (unique, large; avoids overwriting old jobs)
+#   CHANNEL = $(CHANNEL)
+#   TUNE    = $(TUNE)
+#   NEVT    = $(NEVT_PER_JOB)
+arguments = $$([ProcId + 10000]) $(CHANNEL) $(TUNE) $(NEVT_PER_JOB)
+
+# Shared filesystem (/data/alice), no Condor file transfer
+should_transfer_files = NO
+
+
+########################
+# bbbar  MONASH top-up #
+########################
+# Missing: 11,721,235 events
+# => 117 jobs × 100,000 + 1 job × 21,235
+
+CHANNEL = bbbar
+TUNE    = MONASH
+
+NEVT_PER_JOB = 100000
+queue 117
+
+NEVT_PER_JOB = 21235
+queue 1
+
+
+############################
+# bbbar  JUNCTIONS top-up  #
+############################
+# Missing: 12,666,086 events
+# => 126 jobs × 100,000 + 1 job × 66,086
+
+CHANNEL = bbbar
+TUNE    = JUNCTIONS
+
+NEVT_PER_JOB = 100000
+queue 126
+
+NEVT_PER_JOB = 66086
+queue 1
+
+
+########################
+# ccbar  MONASH top-up #
+########################
+# Missing: 23,262,219 events
+# => 232 jobs × 100,000 + 1 job × 62,219
+
+CHANNEL = ccbar
+TUNE    = MONASH
+
+NEVT_PER_JOB = 100000
+queue 232
+
+NEVT_PER_JOB = 62219
+queue 1
+
+
+############################
+# ccbar  JUNCTIONS top-up  #
+############################
+# Missing: 24,198,117 events
+# => 241 jobs × 100,000 + 1 job × 98,117
+
+CHANNEL = ccbar
+TUNE    = JUNCTIONS
+
+NEVT_PER_JOB = 100000
+queue 241
+
+NEVT_PER_JOB = 98117
+queue 1

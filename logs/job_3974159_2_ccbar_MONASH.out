@@ -1,0 +1,7 @@
+>>> JOBID   = 2
+>>> CHANNEL = ccbar
+>>> TUNE    = MONASH
+>>> WORKDIR = /data/alice/ipardoza/HRP_clean/jobs/ccbar/MONASH/job_2
+>>> OUTDIR  = /data/alice/ipardoza/HRP_clean/RootFiles/ccbar/MONASH
+>>> NEVT_PER_JOB = 1000
+ERROR: Executable not found or not executable: /data/alice/ipardoza/HRP_clean/MasterThesisNikhef/SimulationScripts/ccbarcorrelations_status

@@ -1,0 +1,58 @@
+universe   = vanilla
+
+# Wrapper that sets up env and runs Pythia
+executable = /data/alice/ipardoza/HRP_clean/runCondorJob.sh
+initialdir = /data/alice/ipardoza/HRP_clean
+
+# Inherit basic env (HOME, etc.). setupEnv.sh is still sourced inside.
+getenv = True
+
+request_cpus   = 1
+request_memory = 4GB
+request_disk   = 10GB
+
+# Required by Stoomboot
++JobCategory = "short"
++UseOS       = "el9"
+
+# Logging
+log    = logs/job_$(Cluster)_$(Process)_$(CHANNEL)_$(TUNE).log
+output = logs/job_$(Cluster)_$(Process)_$(CHANNEL)_$(TUNE).out
+error  = logs/job_$(Cluster)_$(Process)_$(CHANNEL)_$(TUNE).err
+
+# Shared filesystem (/data/alice), no Condor file transfer
+should_transfer_files = NO
+
+# -------------------------------------------------
+# EVENTS PER JOB
+# 1,000,000 events/job × 100 jobs/combo = 100,000,000 events/combo (I am doing only 1000 events and one job)
+# -------------------------------------------------
+NEVT_PER_JOB = 1000
+
+# Arguments to runCondorJob.sh:
+#   JOBID   = $(Process)
+#   CHANNEL = $(CHANNEL)
+#   TUNE    = $(TUNE)
+#   NEVT_PER_JOB = $(NEVT_PER_JOB)
+arguments = $(Process) $(CHANNEL) $(TUNE) $(NEVT_PER_JOB)
+
+# ------------------ JOB BLOCKS -------------------
+# bbbar MONASH: 1 jobs
+CHANNEL = bbbar
+TUNE    = MONASH
+queue 1
+
+# bbbar JUNCTIONS: 1 jobs
+CHANNEL = bbbar
+TUNE    = JUNCTIONS
+queue 1
+
+# ccbar MONASH: 1 jobs
+CHANNEL = ccbar
+TUNE    = MONASH
+queue 1
+
+# ccbar JUNCTIONS: 1 jobs
+CHANNEL = ccbar
+TUNE    = JUNCTIONS
+queue 1

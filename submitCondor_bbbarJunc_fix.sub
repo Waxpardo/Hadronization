@@ -1,0 +1,28 @@
+universe   = vanilla
+
+executable = /data/alice/ipardoza/HRP_clean/runCondorJob.sh
+initialdir = /data/alice/ipardoza/HRP_clean
+getenv     = True
+
+request_cpus   = 1
+request_memory = 2GB
+request_disk   = 2GB
+
++JobCategory = "short"
++UseOS       = "el9"
+
+log    = logs/job_$(Cluster)_$(Process)_bbbar_JUNCTIONS_fix.log
+output = logs/job_$(Cluster)_$(Process)_bbbar_JUNCTIONS_fix.out
+error  = logs/job_$(Cluster)_$(Process)_bbbar_JUNCTIONS_fix.err
+
+# <<< CHANGE THIS TO THE MISSING INDEX >>>
+JOBID        = 676767
+CHANNEL      = bbbar
+TUNE         = JUNCTIONS
+NEVT_PER_JOB = 200000
+
+arguments = $(JOBID) $(CHANNEL) $(TUNE) $(NEVT_PER_JOB)
+
+should_transfer_files = NO
+
+queue

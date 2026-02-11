@@ -1,0 +1,22 @@
+universe   = vanilla
+
+executable = /data/alice/ipardoza/HRP_clean/Code/runCondorJob_ssbar.sh
+initialdir = /data/alice/ipardoza/HRP_clean/Code
+
+getenv = True
+request_cpus   = 1
+request_memory = 4GB
+request_disk   = 10GB
+
++JobCategory = "short"
++UseOS       = "el9"
+
+log    = /data/alice/ipardoza/HRP_clean/logs/job_$(Cluster)_$(Process)_ssbar_MONASH.log
+output = /data/alice/ipardoza/HRP_clean/logs/job_$(Cluster)_$(Process)_ssbar_MONASH.out
+error  = /data/alice/ipardoza/HRP_clean/logs/job_$(Cluster)_$(Process)_ssbar_MONASH.err
+
+should_transfer_files = NO
+
+arguments = $(Process)
+
+queue 10
