@@ -3,12 +3,13 @@
 // Count total number of events in all ROOT files for each tune & channel.
 // Assumes each file has a TTree named "tree" with one entry per event.
 //
-// Usage from HRP_clean:
-//   root -l -b -q 'count_events_bb_cc.C++'
+// Usage from the Hadronization base:
+//   root -l -b -q 'AnalysisScripts/CountEvents/count_events_bb_cc.C++'
 
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -18,6 +19,23 @@
 #include "TList.h"
 #include "TCollection.h"  // instead of TIter.h
 #include "TString.h"
+#include "TSystem.h"
+
+// Resolve Hadronization base path.
+TString GetBaseDir()
+{
+  const char* env = gSystem->Getenv("HADRONIZATION_BASE");
+  if (env && env[0] != '\0') return TString(env);
+
+  std::ifstream fin("base_path.txt");
+  if (fin) {
+    std::string line;
+    std::getline(fin, line);
+    if (!line.empty()) return TString(line.c_str());
+  }
+
+  return TString(".");
+}
 
 
 Long64_t CountEventsInDir(const char* inputDir)
@@ -77,10 +95,11 @@ Long64_t CountEventsInDir(const char* inputDir)
 
 void count_events_bb_cc()
 {
-  Long64_t bbMonash    = CountEventsInDir("RootFiles/bbbar/MONASH");
-  Long64_t bbJunctions = CountEventsInDir("RootFiles/bbbar/JUNCTIONS");
-  Long64_t ccMonash    = CountEventsInDir("RootFiles/ccbar/MONASH");
-  Long64_t ccJunctions = CountEventsInDir("RootFiles/ccbar/JUNCTIONS");
+  TString base = GetBaseDir();
+  Long64_t bbMonash    = CountEventsInDir((base + "/RootFiles/bbbar/MONASH").Data());
+  Long64_t bbJunctions = CountEventsInDir((base + "/RootFiles/bbbar/JUNCTIONS").Data());
+  Long64_t ccMonash    = CountEventsInDir((base + "/RootFiles/ccbar/MONASH").Data());
+  Long64_t ccJunctions = CountEventsInDir((base + "/RootFiles/ccbar/JUNCTIONS").Data());
 
   std::cout << "================ SUMMARY ================" << std::endl;
   std::cout << "bbbar MONASH    total events: " << bbMonash    << std::endl;

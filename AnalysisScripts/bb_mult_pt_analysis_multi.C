@@ -5,7 +5,7 @@
 // splitting the total statistics into N subsamples with (almost)
 // equal number of events using round-robin event assignment.
 //
-// Usage (from HRP_clean):
+// Usage (from Hadronization base):
 //   root -l -b -q 'AnalysisScripts/bb_mult_pt_analysis_multi.C+(10)'
 //
 // This will:
@@ -38,6 +38,7 @@
 #include <string>
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -49,8 +50,26 @@
 #include "TSystemFile.h"
 #include "TList.h"
 #include "TCollection.h"
+#include "TSystem.h"
 
 namespace {
+
+  // ---------- Base path resolution ----------
+
+  TString GetBaseDir()
+  {
+    const char* env = gSystem->Getenv("HADRONIZATION_BASE");
+    if (env && env[0] != '\0') return TString(env);
+
+    std::ifstream fin("base_path.txt");
+    if (fin) {
+      std::string line;
+      std::getline(fin, line);
+      if (!line.empty()) return TString(line.c_str());
+    }
+
+    return TString(".");
+  }
 
   // ---------- PDG-based classification ----------
 
@@ -58,11 +77,14 @@ namespace {
   {
     pdg = std::abs(pdg);
 
-    // Common B mesons:
+    // Common open-beauty mesons:
     if (pdg == 511 || pdg == 521 || pdg == 531 || pdg == 541) return true;
 
-    // Generic safety net: 5xx (includes excited B states and bottomonium 55x)
-    if (pdg >= 500 && pdg < 600) return true;
+    // Generic safety net: 5xx (includes excited open-B), exclude bottomonium (55x)
+    if (pdg >= 500 && pdg < 600) {
+      const int tens = (pdg / 10) % 10;
+      if (tens != 5) return true; // exclude 55x (bottomonium)
+    }
 
     return false;
   }
@@ -562,14 +584,18 @@ namespace {
 // ----------------------------------------------------------------------
 void bb_mult_pt_analysis_multi(int nSubSamples = 10)
 {
+  // Ensure output directory exists
+  TString base = GetBaseDir();
+  TString outDir = base + "/AnalysisScripts/AnalyzedData";
+  gSystem->mkdir(outDir, true);
+
   // MONASH
-  AnalyzeBBbarMultiplicityPt_Multi("RootFiles/bbbar/MONASH",
-                                   "bbbar_MONASH_sub",
+  AnalyzeBBbarMultiplicityPt_Multi((base + "/RootFiles/bbbar/MONASH").Data(),
+                                   (outDir + "/bbbar_MONASH_sub").Data(),
                                    nSubSamples);
 
   // JUNCTIONS
-  AnalyzeBBbarMultiplicityPt_Multi("RootFiles/bbbar/JUNCTIONS",
-                                   "bbbar_JUNCTIONS_sub",
+  AnalyzeBBbarMultiplicityPt_Multi((base + "/RootFiles/bbbar/JUNCTIONS").Data(),
+                                   (outDir + "/bbbar_JUNCTIONS_sub").Data(),
                                    nSubSamples);
 }
-

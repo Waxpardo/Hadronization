@@ -1,31 +1,27 @@
-// bbbarcorrelations_status.cpp
+// bbbarcorrelations_status_JUNCTIONS.cpp (JUNCTIONS)
 //
-// PYTHIA8 event generator + ROOT output
-// - Generates pp -> bbbar events using settings from pythiasettings_Hard_Low_bb.cmnd
-// - Saves BEAUTY final-state particles AND PIONS (pi+, pi-, pi0) into the output TTree
-// - Computes multiplicity Nch from charged "primary" particles (e, mu, pi, K, p)
-// The variables saved are necessary to create azimuthal angular correlation plots for beauty hadrons, which are defined as follows:
-// pT = transverse momentum
-// eta = pseudorapidity
-// phi = azimuthal angle
-// ID = PDG ID of particle
-// mother = index of mother particle 
-// motherID = PDG ID of mother particle
+// Purpose:
+// - Generate pp -> b bbar events with PYTHIA8 using pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd.
+// - Save final-state beauty hadrons and pions (pi+, pi-, pi0) into a ROOT TTree.
+// - Compute charged multiplicity Nch from prompt charged primaries (e, mu, pi, K, p).
 //
-// Build example (adjust include/library flags as needed):
-//   g++ -O2 -std=c++17 bbbarcorrelations_status.cpp \
+// The saved variables are used to build azimuthal angular correlations for beauty hadrons:
+// pT = transverse momentum, eta = pseudorapidity, phi = azimuthal angle,
+// ID = PDG ID, mother = index of mother, motherID = PDG ID of mother.
+//
+// Build example (adjust to local environment):
+//   g++ -O2 -std=c++17 bbbarcorrelations_status_JUNCTIONS.cpp \
 //       $(pythia8-config --cxxflags --libs) $(root-config --cflags --libs) \
-//       -o bbbarcorrelations_status
+//       -o bbbarcorrelations_status_JUNCTIONS
 //
 // Run:
-//   ./bbbarcorrelations_status output.root 123 456
+//   ./bbbarcorrelations_status_JUNCTIONS output.root 123 456
 
 #include <iostream>
 #include <cmath>
 #include <chrono>
 #include <vector>
 #include <string>
-#include <cstdlib>
 #include <unistd.h>   // getpid()
 
 #include "Pythia8/Pythia.h"
@@ -39,10 +35,10 @@
 using namespace std;
 using namespace Pythia8;
 
-// Checks if a PDG code contains a b-quark using PDG digit structure.
+// Check whether a PDG code contains a b-quark using the PDG digit structure.
 bool IsBeauty(int particlepdg) {
   int pdg = std::abs(particlepdg);
-  pdg /= 10;               // ignore last digit (spin/excitation)
+  pdg /= 10;               // drop last digit (spin/excitation)
   if (pdg % 10 == 5) return true;
   pdg /= 10;
   if (pdg % 10 == 5) return true;
@@ -51,17 +47,18 @@ bool IsBeauty(int particlepdg) {
   return false;
 }
 
+// Identify pions by PDG code (pi± or pi0).
 bool IsPion(int particlepdg) {
   const int apdg = std::abs(particlepdg);
   return (apdg == 211 || apdg == 111); // pi± or pi0
 }
 
-// Returns delta phi in range [-pi/2, 3pi/2)
+// Return delta phi in the range [-pi/2, 3pi/2) for correlation histograms.
 double DeltaPhi(double phi1, double phi2) {
   return std::fmod(phi1 - phi2 + 2.5 * PI, 2.0 * PI) - 0.5 * PI;
 }
 
-// "Primary" charged particles used for multiplicity definition
+// "Primary" charged particles used for multiplicity definition.
 bool IsChargedPrimaryForMult(int pdgAbs) {
   return (pdgAbs == 11   || // e
           pdgAbs == 13   || // mu
@@ -70,9 +67,7 @@ bool IsChargedPrimaryForMult(int pdgAbs) {
           pdgAbs == 2212);  // p
 }
 
-// Prompt-like selection using status codes (kept to match your intent).
-// Note: status-code semantics can vary with generator settings; if you want
-// truly robust prompt definitions, use Pythia flags and/or ancestry checks.
+// Prompt-like selection using status codes.
 bool IsPromptByStatus(int status) {
   return (status >= 81 && status <= 89);
 }
@@ -80,34 +75,34 @@ bool IsPromptByStatus(int status) {
 int main(int argc, char** argv) {
   auto start = std::chrono::high_resolution_clock::now();
 
+  // Expect output filename and two integers for RNG seeding.
   if (argc != 4) {
     std::cout << "Error: wrong number of arguments.\n"
               << "Expected:\n"
-              << "  ./bbbarcorrelations_status output_name.root random_number1 random_number2\n";
+              << "  ./bbbarcorrelations_status_JUNCTIONS output_name.root random_number1 random_number2\n";
     return 1;
   }
 
   const char* outName = argv[1];
 
-  // Create output ROOT file (RECREATE will overwrite existing; use CREATE if you want to fail instead)
-  // If you want to *fail* if exists, use "CREATE". We'll implement that behavior:
+  // Create output ROOT file; "CREATE" fails if the file already exists.
   TFile* output = TFile::Open(outName, "CREATE");
   if (!output || output->IsZombie()) {
     std::cerr << "Error: could not create output file '" << outName
-              << "'. It may already exist or path is invalid.\n";
+              << "'. It may already exist or the path is invalid.\n";
     if (output) output->Close();
     return 1;
   }
 
-  // Define output TTree
-  TTree* tree = new TTree("tree", "bbbar correlations");
+  // Define TTree that will contain event information.
+  TTree* tree = new TTree("tree", "bbbar correlations (JUNCTIONS)");
 
-  // Scalars
-  Int_t  MULTIPLICITY = 0;
-  Int_t  nEvents = 0;
-  Int_t  beautiness = 0;
+  // Scalars (reset each event).
+  Int_t MULTIPLICITY = 0;
+  Int_t nEvents = 0;
+  Int_t beautiness = 0;
 
-  // Per-particle vectors saved to tree
+  // Event-level vectors.
   std::vector<Int_t>    vID;
   std::vector<Double_t> vPt;
   std::vector<Double_t> vEta;
@@ -118,7 +113,7 @@ int main(int argc, char** argv) {
   std::vector<Double_t> vMother1;
   std::vector<Double_t> vMotherID;
 
-  // Branches
+  // Branches.
   tree->Branch("ID",       &vID);
   tree->Branch("PT",       &vPt);
   tree->Branch("ETA",      &vEta);
@@ -130,7 +125,7 @@ int main(int argc, char** argv) {
   tree->Branch("MOTHERID", &vMotherID);
   tree->Branch("MULTIPLICITY", &MULTIPLICITY, "MULTIPLICITY/I");
 
-  // QA histograms
+  // QA histograms for multiplicity, PDG content, and correlations.
   TH1D* hMULTIPLICITY = new TH1D("hMULTIPLICITY", "Multiplicity;N_{ch};Events", 301, -0.5, 300.5);
   TH1D* hidBeauty     = new TH1D("hidBeauty",     "PDG Codes for Beauty hadrons;PDG;Counts", 12000, -6000, 6000);
   TH1D* hPtTrigger    = new TH1D("hPtTrigger",    "p_{T} for trigger B^{+};p_{T} (GeV/c);Counts", 50, 0, 10);
@@ -138,16 +133,18 @@ int main(int argc, char** argv) {
   TH1D* hDeltaPhiBB   = new TH1D("hDeltaPhiBB",   "B^{+}B^{-} correlations;#Delta#phi;Counts", 100, -PI/2, 3*PI/2);
   TH1D* hBeautyPart   = new TH1D("hBeautyPart",   "Beauty Particles Per Event;N_{beauty};Events", 200, -0.5, 200.5);
 
-  // Kinematic constraints (applied to *saved* particles and to multiplicity counting)
+  // Kinematic acceptance for multiplicity and saved particles.
   const double pTmin  = 0.15;
   const double etamax = 4.0;
 
-  // Setup PYTHIA
+  // Setup PYTHIA.
   Pythia pythia;
-  pythia.readFile("pythiasettings_Hard_Low_bb.cmnd");
+
+  // JUNCTIONS settings.
+  pythia.readFile("pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd");
   nEvents = pythia.mode("Main:numberOfEvents");
 
-  // Random seed
+  // Random seed from time, process id, and user-provided modifiers.
   const int processid = getpid();
   const int seedMod1  = std::stoi(argv[2]);
   const int seedMod2  = std::stoi(argv[3]);
@@ -156,11 +153,11 @@ int main(int argc, char** argv) {
   pythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = " + std::to_string(seed));
 
+  // Init.
   pythia.init();
+  std::cout << "Generating " << nEvents << " events (JUNCTIONS) with seed " << seed << "...\n";
 
-  std::cout << "Generating " << nEvents << " events with seed " << seed << "...\n";
-
-  // Event loop
+  // Event loop.
   for (int iEvent = 0; iEvent < nEvents; ++iEvent) {
     if (!pythia.next()) continue;
 
@@ -179,11 +176,11 @@ int main(int argc, char** argv) {
     vMother1.clear();
     vMotherID.clear();
 
-    // Particle loop: compute multiplicity from final-state charged primaries,
-    // and save final-state BEAUTY and PIONS with kinematic cuts.
+    // Particle loop:
+    // - compute multiplicity from final-state charged primaries
+    // - save final-state beauty hadrons and pions within acceptance
     for (int iPart = 0; iPart < nPart; ++iPart) {
       const Particle& particle = pythia.event[iPart];
-
       if (!particle.isFinal()) continue;
 
       const int    id     = particle.id();
@@ -195,33 +192,30 @@ int main(int argc, char** argv) {
       const double charge = particle.charge();
       const int    istat  = particle.status();
 
-      // multiplicity selection (charged primaries, within kinematic acceptance)
+      // Multiplicity selection (charged primaries within acceptance).
       if (pT >= pTmin && std::abs(eta) <= etamax) {
-        if (IsChargedPrimaryForMult(apdg)) {
-          // charged requirement: protect against any weirdness
-          if (particle.isCharged()) {
-            if (IsPromptByStatus(istat)) {
-              MULTIPLICITY++;
-            }
+        if (IsChargedPrimaryForMult(apdg) && particle.isCharged()) {
+          if (IsPromptByStatus(istat)) {
+            MULTIPLICITY++;
           }
         }
       }
 
-      // Save to tree: BEAUTY hadrons OR PIONS (pi± and pi0), within kinematic acceptance
+      // Save to tree: beauty hadrons OR pions within acceptance.
       if (!(IsBeauty(id) || IsPion(id))) continue;
       if (pT < pTmin || std::abs(eta) > etamax) continue;
 
-      // Mother protection
+      // Safe mother access.
       const int m1 = particle.mother1();
-      const int motherID = (m1 > 0 && m1 < nPart) ? pythia.event[m1].id() : 0;
+      const int mID = (m1 > 0 && m1 < nPart) ? pythia.event[m1].id() : 0;
 
-      // Count beauty entries saved (for QA)
+      // QA: count and histogram beauty entries.
       if (IsBeauty(id)) {
         hidBeauty->Fill(static_cast<double>(id));
         beautiness++;
       }
 
-      // Fill vectors
+      // Fill vectors for the TTree.
       vID.push_back(id);
       vPt.push_back(pT);
       vEta.push_back(eta);
@@ -230,14 +224,13 @@ int main(int argc, char** argv) {
       vCharge.push_back(charge);
       vStatus.push_back(static_cast<double>(istat));
       vMother1.push_back(static_cast<double>(m1));
-      vMotherID.push_back(static_cast<double>(motherID));
+      vMotherID.push_back(static_cast<double>(mID));
     }
 
     hMULTIPLICITY->Fill(static_cast<double>(MULTIPLICITY));
     hBeautyPart->Fill(static_cast<double>(beautiness));
 
-    // B+ B- correlation QA (use final-state only + acceptance)
-    // Note: since you force many B hadrons stable in the .cmnd, they should appear as final.
+    // QA: B+ B- correlations using final-state particles within acceptance.
     for (int iPart = 0; iPart < nPart; ++iPart) {
       const Particle& pTrig = pythia.event[iPart];
       if (!pTrig.isFinal()) continue;
@@ -258,12 +251,13 @@ int main(int argc, char** argv) {
       }
     }
 
-    // Avoid filling empty events (optional: you can remove this if you want all events saved)
+    // Skip empty events to keep the tree compact.
     if (vID.empty()) continue;
 
     tree->Fill();
   }
 
+  // Write output and close the ROOT file.
   output->cd();
   tree->Write();
   hMULTIPLICITY->Write();
@@ -276,9 +270,10 @@ int main(int argc, char** argv) {
   std::cout << "File created: " << output->GetName() << "\n";
   output->Close();
 
+  // Report runtime in minutes.
   auto end = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::minutes>(end - start);
-  std::cout << "This script took " << duration.count() << " minutes.\n";
+  std::cout << "This script took " << duration.count() << " minutes to run.\n";
 
   return 0;
 }

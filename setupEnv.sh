@@ -1,9 +1,21 @@
 #!/bin/bash
-# Global setupEnv.sh for HRP_clean (works for Code/ and MasterThesisNikhef)
+# Global setupEnv.sh for Hadronization
 
 # IMPORTANT: do NOT use 'set -u' here; ALICE login.sh expects some vars to be unset.
 set -e
 set -o pipefail
+
+# Resolve and export HADRONIZATION_BASE from base_path.txt if not already set
+if [ -z "${HADRONIZATION_BASE:-}" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [ -f "${SCRIPT_DIR}/base_path.txt" ]; then
+    HADRONIZATION_BASE="$(cat "${SCRIPT_DIR}/base_path.txt")"
+  else
+    HADRONIZATION_BASE="${SCRIPT_DIR}"
+  fi
+  HADRONIZATION_BASE="${HADRONIZATION_BASE%/}"
+  export HADRONIZATION_BASE
+fi
 
 # 1. Get alienv from ALICE CVMFS
 if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then

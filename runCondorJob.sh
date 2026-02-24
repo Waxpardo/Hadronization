@@ -5,22 +5,20 @@
 #   runCondorJob.sh JOBID CHANNEL TUNE
 #
 #   JOBID   : integer (for book-keeping / output naming)
-#   CHANNEL : ssbar | ccbar | bbbar
+#   CHANNEL : ccbar | bbbar
 #   TUNE    : MONASH | JUNCTIONS
 #
-# For ssbar:
-#   - runs ssbar_generate with a per-job .cmnd file
 # For ccbar/bbbar:
 #   - runs {cc,bb}barcorrelations_status[_JUNCTIONS] OUTNAME SEED1 SEED2
 #   - uses a per-job copy of the appropriate pythiasettings_*.cmnd in WORKDIR
-#   - enforces Main:numberOfEvents = 100 in that copy
+#   - enforces Main:numberOfEvents = NEVT_PER_JOB in that copy
 
 set -euo pipefail
 
 # Now allow optional 4th argument: NEVT_PER_JOB
 if [ "$#" -lt 3 ] || [ "$#" -gt 4 ]; then
   echo "Usage: $0 JOBID CHANNEL TUNE [NEVT_PER_JOB]"
-  echo "  CHANNEL = ssbar | ccbar | bbbar"
+  echo "  CHANNEL = ccbar | bbbar"
   echo "  TUNE    = MONASH | JUNCTIONS"
   echo "  NEVT_PER_JOB (optional, default 100)"
   exit 1
@@ -32,21 +30,37 @@ TUNE="$3"
 NEVT_PER_JOB="${4:-100}"   # default to 100 if not given
 
 # ----- Base directories -----
+#
+# Priority:
+# 1) HADRONIZATION_BASE (environment)
+# 2) base_path.txt next to this script
+# 3) script directory
+# 4) fallback fixed path
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+FALLBACK_BASEDIR="/data/alice/ipardoza/Hadronization"
 
-BASEDIR="/data/alice/ipardoza/HRP_clean"
+if [ -n "${HADRONIZATION_BASE:-}" ]; then
+  BASEDIR="${HADRONIZATION_BASE}"
+elif [ -f "${SCRIPT_DIR}/base_path.txt" ]; then
+  BASEDIR="$(cat "${SCRIPT_DIR}/base_path.txt")"
+else
+  BASEDIR="${SCRIPT_DIR}"
+fi
 
-# Panos' ssbar code
-SSBAR_CODEDIR="${BASEDIR}/Code"
+BASEDIR="${BASEDIR%/}"
+if [ -z "${BASEDIR}" ]; then
+  BASEDIR="${FALLBACK_BASEDIR}"
+fi
 
-# Paul's heavy-quark code
-HEAVY_CODEDIR="${BASEDIR}/MasterThesisNikhef/SimulationScripts"
+# Heavy-quark code (same tree as this script)
+HEAVY_CODEDIR="${BASEDIR}/SimulationScripts"
 
 # Where to store output
 OUTDIR="${BASEDIR}/RootFiles/${CHANNEL}/${TUNE}"
 mkdir -p "${OUTDIR}"
 
-# Worker-local scratch (MORE ORGANIZED NOW)
-WORKDIR_BASE="${BASEDIR}/jobs/${CHANNEL}/${TUNE}"
+# Worker-local scratch inside the Hadronization tree
+WORKDIR_BASE="${BASEDIR}/Jobs/${CHANNEL}/${TUNE}"
 mkdir -p "${WORKDIR_BASE}"
 WORKDIR="${WORKDIR_BASE}/job_${JOBID}"
 
@@ -60,6 +74,16 @@ echo ">>> OUTDIR  = ${OUTDIR}"
 echo ">>> NEVT_PER_JOB = ${NEVT_PER_JOB}"
 
 # ----- Environment -----
+
+if [ ! -d "${HEAVY_CODEDIR}" ]; then
+  echo "ERROR: SimulationScripts directory not found at ${HEAVY_CODEDIR}"
+  exit 1
+fi
+
+if [ ! -f "${BASEDIR}/setupEnv.sh" ]; then
+  echo "ERROR: setupEnv.sh not found at ${BASEDIR}/setupEnv.sh"
+  exit 1
+fi
 
 cd "${BASEDIR}"
 export SETUPENV_QUIET=1
@@ -75,22 +99,6 @@ EXE=""
 CFG_TEMPLATE=""
 
 case "${CHANNEL}" in
-  ssbar)
-    EXE="${SSBAR_CODEDIR}/ssbar_generate"
-    case "${TUNE}" in
-      MONASH)
-        CFG_TEMPLATE="${SSBAR_CODEDIR}/ssbar_monash.cmnd"
-        ;;
-      JUNCTIONS)
-        CFG_TEMPLATE="${SSBAR_CODEDIR}/ssbar_junctions.cmnd"
-        ;;
-      *)
-        echo "ERROR: Unsupported TUNE='${TUNE}' for ssbar."
-        exit 1
-        ;;
-    esac
-    ;;
-
   ccbar)
     case "${TUNE}" in
       MONASH)
@@ -126,7 +134,7 @@ case "${CHANNEL}" in
     ;;
 
   *)
-    echo "ERROR: Unsupported CHANNEL='${CHANNEL}'. Use ssbar | ccbar | bbbar."
+    echo "ERROR: Unsupported CHANNEL='${CHANNEL}'. Use ccbar | bbbar."
     exit 1
     ;;
 esac
@@ -143,7 +151,7 @@ fi
 
 CFG_BASENAME="$(basename "${CFG_TEMPLATE}")"
 
-# ----- Create per-job .cmnd with 100 events *inside WORKDIR* -----
+# ----- Create per-job .cmnd with NEVT_PER_JOB *inside WORKDIR* -----
 
 cd "${WORKDIR}"
 
@@ -161,60 +169,31 @@ fi
 echo "Using .cmnd file (first few lines):"
 head -n 10 "${JOB_CMND}" || true
 
-# ----- Run according to channel -----
+# ----- Run ccbar / bbbar -----
+# Executable expects: EXE output_name random_number1 random_number2
+# and reads pythiasettings_*.cmnd in CWD.
+#
+# Program writes a ROOT file with the exact output_name (sometimes without .root).
 
-if [ "${CHANNEL}" = "ssbar" ]; then
+echo "Running (${CHANNEL}): ${EXE} ${OUTBASENAME} ${SEED1} ${SEED2}"
+"${EXE}" "${OUTBASENAME}" "${SEED1}" "${SEED2}"
 
-  # ssbar_generate expects: ssbar_generate config.cmnd
-  echo "Running (ssbar): ${EXE} ${JOB_CMND}"
-  "${EXE}" "${JOB_CMND}"
+RAWFILE=""
 
-  # Collect all .root files
-  shopt -s nullglob
-  ROOTFILES=( "${WORKDIR}"/*.root )
-  shopt -u nullglob
-
-  if [ "${#ROOTFILES[@]}" -eq 0 ]; then
-    echo "WARNING: No .root files produced in ${WORKDIR} for ssbar"
-    ls -l "${WORKDIR}"
-    exit 1
-  fi
-
-  for f in "${ROOTFILES[@]}"; do
-    base="$(basename "${f}")"
-    NEWNAME="ssbar_${TUNE}_job${JOBID}_${base}"
-    mv "${f}" "${OUTDIR}/${NEWNAME}"
-    echo "Moved: ${base} -> ${OUTDIR}/${NEWNAME}"
-  done
-
-else
-  # ccbar / bbbar:
-  #   Executable expects: EXE output_name random_number1 random_number2
-  #   and reads pythiasettings_*.cmnd in CWD.
-  #
-  # Program prints: "File has been created and its name is: <output_name>"
-  # and writes a ROOT file with that exact name (no .root extension).
-
-  echo "Running (${CHANNEL}): ${EXE} ${OUTBASENAME} ${SEED1} ${SEED2}"
-  "${EXE}" "${OUTBASENAME}" "${SEED1}" "${SEED2}"
-
-  RAWFILE=""
-
-  if [ -f "${WORKDIR}/${OUTBASENAME}" ]; then
-    RAWFILE="${WORKDIR}/${OUTBASENAME}"
-  elif [ -f "${WORKDIR}/${OUTBASENAME}.root" ]; then
-    RAWFILE="${WORKDIR}/${OUTBASENAME}.root"
-  fi
-
-  if [ -z "${RAWFILE}" ]; then
-    echo "ERROR: Expected output file '${OUTBASENAME}' (or with .root) not found in ${WORKDIR}"
-    ls -l "${WORKDIR}"
-    exit 1
-  fi
-
-  NEWNAME="${CHANNEL}_${TUNE}_job${JOBID}.root"
-  mv "${RAWFILE}" "${OUTDIR}/${NEWNAME}"
-  echo "Moved: $(basename "${RAWFILE}") -> ${OUTDIR}/${NEWNAME}"
+if [ -f "${WORKDIR}/${OUTBASENAME}" ]; then
+  RAWFILE="${WORKDIR}/${OUTBASENAME}"
+elif [ -f "${WORKDIR}/${OUTBASENAME}.root" ]; then
+  RAWFILE="${WORKDIR}/${OUTBASENAME}.root"
 fi
+
+if [ -z "${RAWFILE}" ]; then
+  echo "ERROR: Expected output file '${OUTBASENAME}' (or with .root) not found in ${WORKDIR}"
+  ls -l "${WORKDIR}"
+  exit 1
+fi
+
+NEWNAME="${CHANNEL}_${TUNE}_job${JOBID}.root"
+mv "${RAWFILE}" "${OUTDIR}/${NEWNAME}"
+echo "Moved: $(basename "${RAWFILE}") -> ${OUTDIR}/${NEWNAME}"
 
 echo "Done."

@@ -35,6 +35,7 @@
 #include <string>
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -46,8 +47,26 @@
 #include "TSystemFile.h"
 #include "TList.h"
 #include "TCollection.h"
+#include "TSystem.h"
 
 namespace {
+
+  // ---------- Base path resolution ----------
+
+  TString GetBaseDir()
+  {
+    const char* env = gSystem->Getenv("HADRONIZATION_BASE");
+    if (env && env[0] != '\0') return TString(env);
+
+    std::ifstream fin("base_path.txt");
+    if (fin) {
+      std::string line;
+      std::getline(fin, line);
+      if (!line.empty()) return TString(line.c_str());
+    }
+
+    return TString(".");
+  }
 
   // ---------- PDG-based classification ----------
 
@@ -58,8 +77,11 @@ namespace {
     // Common open-charm mesons
     if (pdg == 411 || pdg == 421 || pdg == 431) return true; // D+, D0, Ds+
 
-    // Generic safety net: 4xx includes excited D states and charmonium (44x)
-    if (pdg >= 400 && pdg < 500) return true;
+    // Generic safety net: 4xx includes excited D states; exclude charmonium (44x)
+    if (pdg >= 400 && pdg < 500) {
+      const int tens = (pdg / 10) % 10;
+      if (tens != 4) return true; // exclude 44x (charmonium)
+    }
 
     return false;
   }
@@ -539,13 +561,18 @@ namespace {
 // ----------------------------------------------------------------------
 void cc_mult_pt_analysis_multi(int nSubSamples = 10)
 {
+  // Ensure output directory exists
+  TString base = GetBaseDir();
+  TString outDir = base + "/AnalysisScripts/AnalyzedData";
+  gSystem->mkdir(outDir, true);
+
   // MONASH
-  AnalyzeCCbarMultiplicityPt_Multi("RootFiles/ccbar/MONASH",
-                                   "ccbar_MONASH_sub",
+  AnalyzeCCbarMultiplicityPt_Multi((base + "/RootFiles/ccbar/MONASH").Data(),
+                                   (outDir + "/ccbar_MONASH_sub").Data(),
                                    nSubSamples);
 
   // JUNCTIONS
-  AnalyzeCCbarMultiplicityPt_Multi("RootFiles/ccbar/JUNCTIONS",
-                                   "ccbar_JUNCTIONS_sub",
+  AnalyzeCCbarMultiplicityPt_Multi((base + "/RootFiles/ccbar/JUNCTIONS").Data(),
+                                   (outDir + "/ccbar_JUNCTIONS_sub").Data(),
                                    nSubSamples);
 }

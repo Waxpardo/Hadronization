@@ -1,8 +1,8 @@
 universe   = vanilla
 
 # Wrapper that sets up env and runs Pythia
-executable = /data/alice/ipardoza/HRP_clean/runCondorJob.sh
-initialdir = /data/alice/ipardoza/HRP_clean
+executable = /data/alice/ipardoza/Hadronization/runCondorJob.sh
+initialdir = /data/alice/ipardoza/Hadronization
 
 # Inherit basic env (HOME, etc.). setupEnv.sh is still sourced inside.
 getenv = True
@@ -25,9 +25,9 @@ should_transfer_files = NO
 
 # -------------------------------------------------
 # EVENTS PER JOB
-# 1,000,000 events/job × 100 jobs/combo = 100,000,000 events/combo (I am doing only 1000 events and one job)
+# 1,000,000 events/job × 100 jobs/combo = 100,000,000 events/combo
 # -------------------------------------------------
-NEVT_PER_JOB = 1000
+NEVT_PER_JOB = 1000000
 
 # Arguments to runCondorJob.sh:
 #   JOBID   = $(Process)
@@ -37,22 +37,22 @@ NEVT_PER_JOB = 1000
 arguments = $(Process) $(CHANNEL) $(TUNE) $(NEVT_PER_JOB)
 
 # ------------------ JOB BLOCKS -------------------
-# bbbar MONASH: 1 jobs
+# bbbar MONASH: 100 jobs
 CHANNEL = bbbar
 TUNE    = MONASH
-queue 1
+queue 100
 
-# bbbar JUNCTIONS: 1 jobs
+# bbbar JUNCTIONS: 100 jobs
 CHANNEL = bbbar
 TUNE    = JUNCTIONS
-queue 1
+queue 100
 
-# ccbar MONASH: 1 jobs
+# ccbar MONASH: 100 jobs
 CHANNEL = ccbar
 TUNE    = MONASH
-queue 1
+queue 100
 
-# ccbar JUNCTIONS: 1 jobs
+# ccbar JUNCTIONS: 100 jobs
 CHANNEL = ccbar
 TUNE    = JUNCTIONS
-queue 1
+queue 100

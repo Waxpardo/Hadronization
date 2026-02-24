@@ -1,7 +1,0 @@
->>> JOBID   = 1
->>> CHANNEL = bbbar
->>> TUNE    = JUNCTIONS
->>> WORKDIR = /data/alice/ipardoza/HRP_clean/jobs/bbbar/JUNCTIONS/job_1
->>> OUTDIR  = /data/alice/ipardoza/HRP_clean/RootFiles/bbbar/JUNCTIONS
->>> NEVT_PER_JOB = 1000
-ERROR: Executable not found or not executable: /data/alice/ipardoza/HRP_clean/MasterThesisNikhef/SimulationScripts/bbbarcorrelations_status_JUNCTIONS

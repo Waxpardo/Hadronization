@@ -1,3 +1,5 @@
 
 # Large binary outputs
 *.root
+.DS_Store
+.vscode/settings.json
