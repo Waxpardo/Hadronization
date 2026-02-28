@@ -2,18 +2,31 @@
 
 CXX      := g++
 
-ROOT_CXXFLAGS := $(shell root-config --cflags)
-ROOT_LIBS     := $(shell root-config --libs)
-
-# Try pythia8-config; if not found, fall back to $PYTHIA8
+ROOT_CONFIG    := $(shell command -v root-config 2>/dev/null)
 PYTHIA8_CONFIG := $(shell command -v pythia8-config 2>/dev/null)
 
-ifeq ($(PYTHIA8_CONFIG),)
+# Do not require external tools for "make clean".
+ifneq ($(MAKECMDGOALS),clean)
+
+ifeq ($(ROOT_CONFIG),)
+  $(error root-config not found. Load the ROOT environment first, for example with "source ../setupEnv.sh")
+endif
+
+ROOT_CXXFLAGS := $(shell $(ROOT_CONFIG) --cflags)
+ROOT_LIBS     := $(shell $(ROOT_CONFIG) --libs)
+
+# Prefer the explicit PYTHIA8 environment path because some cluster
+# pythia8-config scripts exist but do not return usable flags.
+ifneq ($(strip $(PYTHIA8)),)
   PYTHIA_CXXFLAGS := -I$(PYTHIA8)/include
   PYTHIA_LIBS     := -L$(PYTHIA8)/lib -lpythia8
+else ifneq ($(PYTHIA8_CONFIG),)
+  PYTHIA_CXXFLAGS := $(shell $(PYTHIA8_CONFIG) --cxxflags 2>/dev/null)
+  PYTHIA_LIBS     := $(shell $(PYTHIA8_CONFIG) --libs 2>/dev/null)
 else
-  PYTHIA_CXXFLAGS := $(shell pythia8-config --cxxflags)
-  PYTHIA_LIBS     := $(shell pythia8-config --libs)
+  $(error Neither PYTHIA8 nor pythia8-config is available. Load the PYTHIA8 environment first, for example with "source ../setupEnv.sh")
+endif
+
 endif
 
 CXXFLAGS := -O2 -std=c++17 -Wall -Wextra -pedantic $(ROOT_CXXFLAGS) $(PYTHIA_CXXFLAGS)

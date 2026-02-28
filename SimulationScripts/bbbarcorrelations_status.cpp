@@ -20,6 +20,7 @@
 #include <iostream>
 #include <cmath>
 #include <chrono>
+#include <ctime>
 #include <vector>
 #include <string>
 #include <cstdlib>
