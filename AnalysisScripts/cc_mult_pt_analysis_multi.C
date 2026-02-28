@@ -10,8 +10,8 @@
 //     int            MULTIPLICITY
 // - Splits total stats into N subsamples via round-robin assignment
 // - Writes one ROOT output per subsample per tune:
-//     ccbar_MONASH_sub0.root ... sub(N-1).root
-//     ccbar_JUNCTIONS_sub0.root ... sub(N-1).root
+//     AnalyzedData/<tag>/Charm/ccbar_MONASH_sub0.root ... sub(N-1).root
+//     AnalyzedData/<tag>/Charm/ccbar_JUNCTIONS_sub0.root ... sub(N-1).root
 //
 // Output histograms per subsample file:
 //   TH1D fHistMultiplicity
@@ -28,7 +28,7 @@
 // - Prints WARNING if zero pions were stored (usually means producer didn't write them).
 //
 // Usage:
-//   root -l -b -q 'AnalysisScripts/cc_mult_pt_analysis_multi.C+(10)'
+//   root -l -b -q 'AnalysisScripts/cc_mult_pt_analysis_multi.C+(10, "12-01-2026")'
 // ----------------------------------------------------------------------
 
 #include <vector>
@@ -66,6 +66,15 @@ namespace {
     }
 
     return TString(".");
+  }
+
+  TString SanitizeOutputTag(const char* outputTag)
+  {
+    TString tag = outputTag ? TString(outputTag) : TString("");
+    tag = tag.Strip(TString::kBoth);
+    if (tag.IsNull()) tag = "default";
+    tag.ReplaceAll("/", "_");
+    return tag;
   }
 
   // ---------- PDG-based classification ----------
@@ -559,20 +568,25 @@ namespace {
 // ----------------------------------------------------------------------
 // ROOT-friendly wrapper
 // ----------------------------------------------------------------------
-void cc_mult_pt_analysis_multi(int nSubSamples = 10)
+void cc_mult_pt_analysis_multi(int nSubSamples = 10, const char* outputTag = "default")
 {
-  // Ensure output directory exists
+  // Create the dated output directory and both heavy-flavor subdirectories.
   TString base = GetBaseDir();
-  TString outDir = base + "/AnalysisScripts/AnalyzedData";
-  gSystem->mkdir(outDir, true);
+  TString tag = SanitizeOutputTag(outputTag);
+  TString dateDir = base + "/AnalyzedData/" + tag;
+  TString beautyDir = dateDir + "/Beauty";
+  TString charmDir = dateDir + "/Charm";
+  gSystem->mkdir(dateDir, true);
+  gSystem->mkdir(beautyDir, true);
+  gSystem->mkdir(charmDir, true);
 
   // MONASH
   AnalyzeCCbarMultiplicityPt_Multi((base + "/RootFiles/ccbar/MONASH").Data(),
-                                   (outDir + "/ccbar_MONASH_sub").Data(),
+                                   (charmDir + "/ccbar_MONASH_sub").Data(),
                                    nSubSamples);
 
   // JUNCTIONS
   AnalyzeCCbarMultiplicityPt_Multi((base + "/RootFiles/ccbar/JUNCTIONS").Data(),
-                                   (outDir + "/ccbar_JUNCTIONS_sub").Data(),
+                                   (charmDir + "/ccbar_JUNCTIONS_sub").Data(),
                                    nSubSamples);
 }

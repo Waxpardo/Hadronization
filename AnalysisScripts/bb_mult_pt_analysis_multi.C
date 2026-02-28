@@ -6,13 +6,13 @@
 // equal number of events using round-robin event assignment.
 //
 // Usage (from Hadronization base):
-//   root -l -b -q 'AnalysisScripts/bb_mult_pt_analysis_multi.C+(10)'
+//   root -l -b -q 'AnalysisScripts/bb_mult_pt_analysis_multi.C+(10, "12-01-2026")'
 //
 // This will:
 //   - For MONASH   : read RootFiles/bbbar/MONASH/*.root
-//                    write bbbar_MONASH_sub0.root, ..., sub(N-1).root
+//                    write AnalyzedData/<tag>/Beauty/bbbar_MONASH_sub0.root, ..., sub(N-1).root
 //   - For JUNCTIONS: read RootFiles/bbbar/JUNCTIONS/*.root
-//                    write bbbar_JUNCTIONS_sub0.root, ..., sub(N-1).root
+//                    write AnalyzedData/<tag>/Beauty/bbbar_JUNCTIONS_sub0.root, ..., sub(N-1).root
 //
 // Input files (each):
 //   TTree "tree" with branches:
@@ -69,6 +69,15 @@ namespace {
     }
 
     return TString(".");
+  }
+
+  TString SanitizeOutputTag(const char* outputTag)
+  {
+    TString tag = outputTag ? TString(outputTag) : TString("");
+    tag = tag.Strip(TString::kBoth);
+    if (tag.IsNull()) tag = "default";
+    tag.ReplaceAll("/", "_");
+    return tag;
   }
 
   // ---------- PDG-based classification ----------
@@ -582,20 +591,25 @@ namespace {
 // ----------------------------------------------------------------------
 // ROOT-friendly wrapper
 // ----------------------------------------------------------------------
-void bb_mult_pt_analysis_multi(int nSubSamples = 10)
+void bb_mult_pt_analysis_multi(int nSubSamples = 10, const char* outputTag = "default")
 {
-  // Ensure output directory exists
+  // Create the dated output directory and both heavy-flavor subdirectories.
   TString base = GetBaseDir();
-  TString outDir = base + "/AnalysisScripts/AnalyzedData";
-  gSystem->mkdir(outDir, true);
+  TString tag = SanitizeOutputTag(outputTag);
+  TString dateDir = base + "/AnalyzedData/" + tag;
+  TString beautyDir = dateDir + "/Beauty";
+  TString charmDir = dateDir + "/Charm";
+  gSystem->mkdir(dateDir, true);
+  gSystem->mkdir(beautyDir, true);
+  gSystem->mkdir(charmDir, true);
 
   // MONASH
   AnalyzeBBbarMultiplicityPt_Multi((base + "/RootFiles/bbbar/MONASH").Data(),
-                                   (outDir + "/bbbar_MONASH_sub").Data(),
+                                   (beautyDir + "/bbbar_MONASH_sub").Data(),
                                    nSubSamples);
 
   // JUNCTIONS
   AnalyzeBBbarMultiplicityPt_Multi((base + "/RootFiles/bbbar/JUNCTIONS").Data(),
-                                   (outDir + "/bbbar_JUNCTIONS_sub").Data(),
+                                   (beautyDir + "/bbbar_JUNCTIONS_sub").Data(),
                                    nSubSamples);
 }
