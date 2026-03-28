@@ -21,6 +21,8 @@
 //
 // The per-event yield is therefore:
 //   (combined histogram integral) / N_events
+// and the plotted uncertainty is taken from the spread of the per-subsample
+// yields (mean ± SEM).
 //
 // Usage:
 //   root -l -b -q \
@@ -56,6 +58,8 @@
 #include "TSystemFile.h"
 #include "TLatex.h"
 
+#include "../HistogramErrorUtils.h"
+
 namespace {
 
 enum class SampleKind {
@@ -73,9 +77,25 @@ struct SpeciesDef {
 
 struct YieldStats {
   double mean = 0.0;
-  double sem = 0.0;
+  double error = 0.0;
   int nLoaded = 0;
 };
+
+std::pair<double,double> MeanSEM(const std::vector<double>& values)
+{
+  if (values.empty()) return std::make_pair(0.0, 0.0);
+
+  double mean = 0.0;
+  for (double value : values) mean += value;
+  mean /= static_cast<double>(values.size());
+
+  if (values.size() == 1) return std::make_pair(mean, 0.0);
+
+  double var = 0.0;
+  for (double value : values) var += (value - mean) * (value - mean);
+  const double sem = std::sqrt(var / (values.size() * (values.size() - 1)));
+  return std::make_pair(mean, sem);
+}
 
 TString ResolveAbsolutePath(const char* path)
 {
@@ -303,7 +323,10 @@ TH2* CloneTH2(TH2* h, const char* cloneName)
 {
   if (!h) return nullptr;
   TH2* clone = dynamic_cast<TH2*>(h->Clone(cloneName));
-  if (clone) clone->SetDirectory(nullptr);
+  if (clone) {
+    clone->SetDirectory(nullptr);
+    PlotErrorUtils::EnsureSumw2(clone);
+  }
   return clone;
 }
 
@@ -325,6 +348,7 @@ TH2* GetChargeCombinedTH2(TFile* file,
 
     TH2* combined = CloneTH2(hParticle, cloneName);
     if (!combined) continue;
+    PlotErrorUtils::EnsureSumw2(hBar);
     combined->Add(hBar);
     return combined;
   }
@@ -365,6 +389,7 @@ YieldStats ComputeYieldStats(const TString& dateTag,
   double totalSpecies = 0.0;
   double totalEvents = 0.0;
   std::vector<double> subYields;
+  subYields.reserve(nSub);
 
   for (int iSub = 0; iSub < nSub; ++iSub) {
     const TString filePath = Form("%s/%s/%s/%s%d.root",
@@ -403,11 +428,13 @@ YieldStats ComputeYieldStats(const TString& dateTag,
       continue;
     }
 
-    const double speciesCount = hSpecies->Integral(1, hSpecies->GetNbinsX(),
-                                                   1, hSpecies->GetNbinsY());
+    const double speciesCount = hSpecies->Integral(1,
+                                                   hSpecies->GetNbinsX(),
+                                                   1,
+                                                   hSpecies->GetNbinsY());
 
-    const double yield = species.scaleFactor * speciesCount / nEvents;
-    subYields.push_back(yield);
+    const double subYield = species.scaleFactor * speciesCount / nEvents;
+    subYields.push_back(subYield);
     totalSpecies += species.scaleFactor * speciesCount;
     totalEvents += nEvents;
     stats.nLoaded++;
@@ -420,18 +447,7 @@ YieldStats ComputeYieldStats(const TString& dateTag,
   if (stats.nLoaded == 0 || totalEvents <= 0.0) return stats;
 
   stats.mean = totalSpecies / totalEvents;
-
-  if (subYields.size() > 1) {
-    double avg = 0.0;
-    for (double y : subYields) avg += y;
-    avg /= static_cast<double>(subYields.size());
-
-    double var = 0.0;
-    for (double y : subYields) var += (y - avg) * (y - avg);
-    stats.sem = std::sqrt(var / (subYields.size() * (subYields.size() - 1)));
-  } else {
-    stats.sem = 0.0;
-  }
+  stats.error = MeanSEM(subYields).second;
 
   return stats;
 }
@@ -459,7 +475,7 @@ TGraphErrors* BuildYieldGraph(const TString& dateTag,
     const YieldStats stats = ComputeYieldStats(dateTag, flavour, tune, speciesDefs[i], nSub);
     const double x = static_cast<double>(i + 1) + xShift;
     graph->SetPoint(i, x, stats.mean);
-    graph->SetPointError(i, xError, stats.sem);
+    graph->SetPointError(i, xError, stats.error);
   }
 
   return graph;

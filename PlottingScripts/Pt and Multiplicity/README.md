@@ -46,6 +46,16 @@ The number of subsamples passed to the plotting macro must match the number of s
 
 For species-resolved plots, the macros assume charge-conjugate-combined histogram names first. If a combined histogram is not found, they look for the split `Particle` and `Bar` histograms and sum them on the fly.
 
+## Statistical errors
+
+The plotting macros assume the analyzed ROOT files were produced by the current `*_mult_pt_analysis_multi.C` scripts, which write histograms with `Sumw2` enabled and an explicit `fHistEventCount`.
+
+The main statistical-error conventions are:
+
+- pT spectra plots normalize each subsample spectrum first and then use the mean and SEM across subsamples for the plotted bin contents and uncertainties.
+- pT baryon-to-meson ratio plots build the ratio in each subsample and then use the mean and SEM across subsamples for the final error bars.
+- multiplicity-percentile ratio plots build one ratio point per subsample in each multiplicity class and then use the mean and SEM across subsamples for the final uncertainty.
+
 ## Date handling
 
 - If a date is passed explicitly, the macro reads that folder.

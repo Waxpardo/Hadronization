@@ -6,9 +6,8 @@
 //   (1) (#Lambda_c + #bar{#Lambda}_c) / D^{#pm}   vs mult percentile
 //   (2) (#Lambda_b + #bar{#Lambda}_b) / B^{#pm}   vs mult percentile
 //
-// For each tune, ratio points are computed per subsample as:
-//   r = (Integral over pT of TH2 in mult-range for Lambda) / same for D (or B)
-// Then combined across subsamples: mean ± SEM.
+// For each tune, ratio points are computed per subsample and the plotted
+// uncertainties are taken from the spread across subsamples (mean ± SEM).
 //
 // Usage:
 //   .L Plot_HF_Ratios_vsMultiplicityPercentile_subsamples.C
@@ -37,6 +36,7 @@
 #include "TROOT.h"
 
 #include "PlottingPathUtils.h"
+#include "../HistogramErrorUtils.h"
 
 namespace {
 
@@ -63,7 +63,10 @@ TH2* CloneTH2(TH2* h, const char* cloneName)
 {
   if (!h) return nullptr;
   TH2* clone = dynamic_cast<TH2*>(h->Clone(cloneName));
-  if (clone) clone->SetDirectory(nullptr);
+  if (clone) {
+    clone->SetDirectory(nullptr);
+    PlotErrorUtils::EnsureSumw2(clone);
+  }
   return clone;
 }
 
@@ -85,6 +88,7 @@ TH2* GetChargeCombinedHist(TFile* f,
 
     TH2* combined = CloneTH2(hParticle, cloneName);
     if (!combined) continue;
+    PlotErrorUtils::EnsureSumw2(hBar);
     combined->Add(hBar);
     return combined;
   }
@@ -172,24 +176,23 @@ double YieldInClass(TH2* h2, std::pair<int,int> yr, double ptMin, double ptMax)
     x2 = std::min(h2->GetXaxis()->GetNbins(), h2->GetXaxis()->FindBin(ptMax - 1e-9));
   }
 
-  // counts (not width-corrected) — correct for yields
   return h2->Integral(x1, x2, yr.first, yr.second);
 }
 
-// mean ± SEM over subsamples
-std::pair<double,double> MeanSEM(const std::vector<double>& v)
+std::pair<double,double> MeanSEM(const std::vector<double>& values)
 {
-  if (v.empty()) return {0.0, 0.0};
-  double mean = 0.0;
-  for (double x : v) mean += x;
-  mean /= (double)v.size();
+  if (values.empty()) return {0.0, 0.0};
 
-  if (v.size() == 1) return {mean, 0.0};
+  double mean = 0.0;
+  for (double v : values) mean += v;
+  mean /= static_cast<double>(values.size());
+
+  if (values.size() == 1) return {mean, 0.0};
 
   double var = 0.0;
-  for (double x : v) var += (x-mean)*(x-mean);
+  for (double v : values) var += (v - mean) * (v - mean);
 
-  double sem = std::sqrt(var / (v.size() * (v.size()-1)));
+  const double sem = std::sqrt(var / (values.size() * (values.size() - 1)));
   return {mean, sem};
 }
 
@@ -278,15 +281,18 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
 
   const char* MULT_HIST = "fHistMultiplicity";
 
-  // storage: for each class we’ll accumulate subsample ratios, then mean±SEM
+  // For each class we build the ratio in each subsample and use the spread
+  // across subsamples to estimate the plotted uncertainty.
   const int nC = (int)kClasses.size();
 
   // ----- Lambda_c / D -----
   std::vector<double> yLCM(nC,0), eLCM(nC,0), yLCJ(nC,0), eLCJ(nC,0);
 
   for (int ic=0; ic<nC; ++ic){
-    std::vector<double> rM, rJ;
-    rM.reserve(nSub); rJ.reserve(nSub);
+    std::vector<double> ratiosM;
+    std::vector<double> ratiosJ;
+    ratiosM.reserve(nSub);
+    ratiosJ.reserve(nSub);
 
     for (int is=0; is<nSub; ++is){
       TFile* fM = TFile::Open(Form("%s%d.root", cPrefixMONASH, is), "READ");
@@ -306,12 +312,11 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
 
       double NLcM = YieldInClass(hLcM, yrM, ptMin, ptMax);
       double NDM  = YieldInClass(hDM,  yrM, ptMin, ptMax);
-
       double NLcJ = YieldInClass(hLcJ, yrJ, ptMin, ptMax);
       double NDJ  = YieldInClass(hDJ,  yrJ, ptMin, ptMax);
 
-      if (NDM > 0) rM.push_back(NLcM/NDM);
-      if (NDJ > 0) rJ.push_back(NLcJ/NDJ);
+      if (NDM > 0.0) ratiosM.push_back(NLcM / NDM);
+      if (NDJ > 0.0) ratiosJ.push_back(NLcJ / NDJ);
 
       delete hLcM;
       delete hDM;
@@ -320,11 +325,12 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
       fM->Close(); fJ->Close();
     }
 
-    auto [mM, sM] = MeanSEM(rM);
-    auto [mJ, sJ] = MeanSEM(rJ);
-
-    yLCM[ic]=mM; eLCM[ic]=sM;
-    yLCJ[ic]=mJ; eLCJ[ic]=sJ;
+    auto [meanM, semM] = MeanSEM(ratiosM);
+    auto [meanJ, semJ] = MeanSEM(ratiosJ);
+    yLCM[ic] = meanM;
+    eLCM[ic] = semM;
+    yLCJ[ic] = meanJ;
+    eLCJ[ic] = semJ;
   }
 
   DrawRatioVsMult(
@@ -338,8 +344,10 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
   std::vector<double> yLBM(nC,0), eLBM(nC,0), yLBJ(nC,0), eLBJ(nC,0);
 
   for (int ic=0; ic<nC; ++ic){
-    std::vector<double> rM, rJ;
-    rM.reserve(nSub); rJ.reserve(nSub);
+    std::vector<double> ratiosM;
+    std::vector<double> ratiosJ;
+    ratiosM.reserve(nSub);
+    ratiosJ.reserve(nSub);
 
     for (int is=0; is<nSub; ++is){
       TFile* fM = TFile::Open(Form("%s%d.root", bPrefixMONASH, is), "READ");
@@ -359,12 +367,11 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
 
       double NLbM = YieldInClass(hLbM, yrM, ptMin, ptMax);
       double NBM  = YieldInClass(hBM,  yrM, ptMin, ptMax);
-
       double NLbJ = YieldInClass(hLbJ, yrJ, ptMin, ptMax);
       double NBJ  = YieldInClass(hBJ,  yrJ, ptMin, ptMax);
 
-      if (NBM > 0) rM.push_back(NLbM/NBM);
-      if (NBJ > 0) rJ.push_back(NLbJ/NBJ);
+      if (NBM > 0.0) ratiosM.push_back(NLbM / NBM);
+      if (NBJ > 0.0) ratiosJ.push_back(NLbJ / NBJ);
 
       delete hLbM;
       delete hBM;
@@ -373,11 +380,12 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
       fM->Close(); fJ->Close();
     }
 
-    auto [mM, sM] = MeanSEM(rM);
-    auto [mJ, sJ] = MeanSEM(rJ);
-
-    yLBM[ic]=mM; eLBM[ic]=sM;
-    yLBJ[ic]=mJ; eLBJ[ic]=sJ;
+    auto [meanM, semM] = MeanSEM(ratiosM);
+    auto [meanJ, semJ] = MeanSEM(ratiosJ);
+    yLBM[ic] = meanM;
+    eLBM[ic] = semM;
+    yLBJ[ic] = meanJ;
+    eLBJ[ic] = semJ;
   }
 
   DrawRatioVsMult(

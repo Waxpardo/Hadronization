@@ -26,6 +26,9 @@
 //
 //   root -l -b -q \
 //     'PlottingScripts/FinalAnalysis/Plot_MultiplicityDistributions_TwoSamples.C("12-01-2026","27-03-2026",10,true)'
+//
+// When normalization is enabled, the plotted bin uncertainties are taken from
+// the spread across normalized subsamples (mean ± SEM).
 // ---------------------------------------------------------------------------
 
 #include <algorithm>
@@ -48,7 +51,27 @@
 #include "TSystemFile.h"
 #include "TLatex.h"
 
+#include "../HistogramErrorUtils.h"
+
 namespace {
+
+std::pair<double,double> MeanSEM(const std::vector<double>& values)
+{
+  if (values.empty()) return std::make_pair(0.0, 0.0);
+
+  double mean = 0.0;
+  for (double value : values) mean += value;
+  mean /= static_cast<double>(values.size());
+
+  if (values.size() == 1) return std::make_pair(mean, 0.0);
+
+  double var = 0.0;
+  for (double value : values) var += (value - mean) * (value - mean);
+  const double sem = std::sqrt(var / (values.size() * (values.size() - 1)));
+  return std::make_pair(mean, sem);
+}
+
+void NormalizeToUnity(TH1D* h);
 
 TString ResolveAbsolutePath(const char* path)
 {
@@ -275,10 +298,11 @@ TString ResolvePrefixStem(const TString& dateTag,
   return TString("");
 }
 
-TH1D* LoadSummedMultiplicity(const TString& dateTag,
-                             const TString& flavour,
-                             const TString& tune,
-                             int nSub)
+TH1D* LoadMultiplicityWithSubsampleErrors(const TString& dateTag,
+                                          const TString& flavour,
+                                          const TString& tune,
+                                          int nSub,
+                                          bool normalize)
 {
   const TString prefixStem = ResolvePrefixStem(dateTag, flavour, tune);
   if (prefixStem.IsNull()) {
@@ -287,8 +311,8 @@ TH1D* LoadSummedMultiplicity(const TString& dateTag,
     return nullptr;
   }
 
-  TH1D* hSum = nullptr;
-  int nLoaded = 0;
+  std::vector<TH1D*> subHists;
+  TH1D* hCombined = nullptr;
 
   for (int iSub = 0; iSub < nSub; ++iSub) {
     const TString filePath = BuildSubsamplePath(dateTag, flavour, prefixStem, iSub);
@@ -314,36 +338,52 @@ TH1D* LoadSummedMultiplicity(const TString& dateTag,
       continue;
     }
 
-    if (!hSum) {
-      hSum = dynamic_cast<TH1D*>(hMult->Clone(
-        Form("hMult_%s_%s_%s", dateTag.Data(), flavour.Data(), tune.Data())
-      ));
-      hSum->SetDirectory(nullptr);
-      hSum->Reset("ICES");
+    TH1D* hSub = dynamic_cast<TH1D*>(hMult->Clone(
+      Form("hMult_%s_%s_%s_sub%d", dateTag.Data(), flavour.Data(), tune.Data(), iSub)
+    ));
+    if (hSub) {
+      hSub->SetDirectory(nullptr);
+      PlotErrorUtils::EnsureSumw2(hSub);
+      if (normalize) NormalizeToUnity(hSub);
+      subHists.push_back(hSub);
     }
-
-    hSum->Add(hMult);
-    ++nLoaded;
 
     inputFile->Close();
     delete inputFile;
   }
 
-  if (!hSum || nLoaded == 0) {
-    delete hSum;
+  if (subHists.empty()) {
+    delete hCombined;
     std::cerr << "No multiplicity histograms were loaded for "
               << flavour << " " << tune << " in sample " << dateTag << ".\n";
     return nullptr;
   }
 
-  return hSum;
+  hCombined = dynamic_cast<TH1D*>(subHists.front()->Clone(
+    Form("hMult_%s_%s_%s", dateTag.Data(), flavour.Data(), tune.Data())
+  ));
+  hCombined->SetDirectory(nullptr);
+  PlotErrorUtils::EnsureSumw2(hCombined);
+  hCombined->Reset("ICES");
+
+  const double scale = (normalize ? 1.0 : static_cast<double>(subHists.size()));
+  for (int iBin = 1; iBin <= hCombined->GetNbinsX(); ++iBin) {
+    std::vector<double> values;
+    values.reserve(subHists.size());
+    for (TH1D* hSub : subHists) values.push_back(hSub->GetBinContent(iBin));
+
+    const auto stats = MeanSEM(values);
+    hCombined->SetBinContent(iBin, stats.first * scale);
+    hCombined->SetBinError(iBin, stats.second * scale);
+  }
+
+  for (TH1D* hSub : subHists) delete hSub;
+  return hCombined;
 }
 
 void NormalizeToUnity(TH1D* h)
 {
-  if (!h) return;
-  const double integral = h->Integral(1, h->GetNbinsX());
-  if (integral > 0.0) h->Scale(1.0 / integral);
+  PlotErrorUtils::NormalizeToUnitShape(h);
 }
 
 double FindPositiveMinimum(TH1D* h)
@@ -386,18 +426,13 @@ void DrawMultiplicityComparison(const TString& dateA,
                                 int nSub,
                                 bool normalize)
 {
-  TH1D* hA = LoadSummedMultiplicity(dateA, flavour, tune, nSub);
-  TH1D* hB = LoadSummedMultiplicity(dateB, flavour, tune, nSub);
+  TH1D* hA = LoadMultiplicityWithSubsampleErrors(dateA, flavour, tune, nSub, normalize);
+  TH1D* hB = LoadMultiplicityWithSubsampleErrors(dateB, flavour, tune, nSub, normalize);
 
   if (!hA || !hB) {
     delete hA;
     delete hB;
     return;
-  }
-
-  if (normalize) {
-    NormalizeToUnity(hA);
-    NormalizeToUnity(hB);
   }
 
   StyleHistogram(hA, kBlue + 1, 1);

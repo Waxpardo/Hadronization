@@ -98,6 +98,15 @@ namespace {
     return false;
   }
 
+  void EnableDefaultHistogramErrors()
+  {
+    static bool enabled = false;
+    if (enabled) return;
+
+    TH1::SetDefaultSumw2(kTRUE);
+    enabled = true;
+  }
+
   // ---------- PDG-based classification ----------
 
   bool IsCharmMeson(int pdg)
@@ -780,6 +789,8 @@ void cc_mult_pt_analysis_multi(int nSubSamples = 10,
                                const char* outputTag = "default",
                                const char* chargeMode = "combined")
 {
+  EnableDefaultHistogramErrors();
+
   // Create the dated output directory and both heavy-flavor subdirectories.
   TString base = GetBaseDir();
   TString tag = SanitizeOutputTag(outputTag);

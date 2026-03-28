@@ -12,8 +12,8 @@
 //
 // The spectra are built using file-level subsamples:
 //   - For each subsample and mult class: TH2 -> ProjectionX in mult Y-range
-//   - Normalize each projected spectrum to unit integral (shape comparison)
-//   - Combine subsamples bin-by-bin: mean ± SEM
+//   - Normalize each projected spectrum to unit integral
+//   - Combine the subsample spectra bin-by-bin with mean ± SEM
 //
 // X-axis is auto-cropped to the last pT bin that has content in ANY class curve,
 // with a small margin, to avoid white space to the right.
@@ -73,6 +73,7 @@
 #include "TROOT.h"
 
 #include "PlottingPathUtils.h"
+#include "../HistogramErrorUtils.h"
 
 namespace {
 
@@ -102,7 +103,10 @@ TH2* CloneTH2(TH2* h, const char* cloneName)
 {
     if (!h) return nullptr;
     TH2* clone = dynamic_cast<TH2*>(h->Clone(cloneName));
-    if (clone) clone->SetDirectory(nullptr);
+    if (clone) {
+        clone->SetDirectory(nullptr);
+        PlotErrorUtils::EnsureSumw2(clone);
+    }
     return clone;
 }
 
@@ -124,6 +128,7 @@ TH2* GetChargeCombinedHist(TFile* f,
 
         TH2* combined = CloneTH2(hParticle, cloneName);
         if (!combined) continue;
+        PlotErrorUtils::EnsureSumw2(hBar);
         combined->Add(hBar);
         return combined;
     }
@@ -183,12 +188,10 @@ std::pair<int,int> PercentileRange(TH1* hMult, double pTop, double pBot)
 
 void NormalizeToUnity(TH1D* h)
 {
-    if (!h) return;
-    double I = h->Integral(1, h->GetNbinsX());
-    if (I > 0) h->Scale(1.0 / I);
+    PlotErrorUtils::NormalizeToUnitShape(h);
 }
 
-// One subsample: TH2 -> projection in mult range, then normalize to unit integral
+// One subsample: TH2 -> projection in mult range, then normalize to unit integral.
 TH1D* BuildSpectrumOneSub(TH2* h2, std::pair<int,int> yr,
                           const char* name,
                           const char* xtitle,
@@ -205,13 +208,12 @@ TH1D* BuildSpectrumOneSub(TH2* h2, std::pair<int,int> yr,
     h->SetTitle("");
     h->GetXaxis()->SetTitle(xtitle);
     h->GetYaxis()->SetTitle(ytitle);
-    if (h->GetSumw2N() == 0) h->Sumw2();
-
+    PlotErrorUtils::EnsureSumw2(h);
     NormalizeToUnity(h);
     return h;
 }
 
-// Combine subsamples bin-by-bin: mean ± SEM (assumes all hists share binning)
+// Combine subsamples bin-by-bin: mean ± SEM across the normalized subsamples.
 TH1D* CombineSubsampleSpectra(const std::vector<TH1D*>& hs,
                               const char* name,
                               const char* xtitle,
@@ -227,24 +229,30 @@ TH1D* CombineSubsampleSpectra(const std::vector<TH1D*>& hs,
     TH1D* hC = new TH1D(name, "", nbx, xmin, xmax);
     hC->GetXaxis()->SetTitle(xtitle);
     hC->GetYaxis()->SetTitle(ytitle);
-    if (hC->GetSumw2N() == 0) hC->Sumw2();
+    PlotErrorUtils::EnsureSumw2(hC);
 
-    const int ns = (int)hs.size();
+    const int nSubsamples = static_cast<int>(hs.size());
 
-    for (int bx=1; bx<=nbx; ++bx){
-        std::vector<double> vals;
-        vals.reserve(ns);
-        for (auto* h : hs) vals.push_back(h->GetBinContent(bx));
+    for (int bx = 1; bx <= nbx; ++bx) {
+        std::vector<double> values;
+        values.reserve(nSubsamples);
+        for (auto* h : hs) {
+            if (!h) continue;
+            values.push_back(h->GetBinContent(bx));
+        }
+
+        if (values.empty()) continue;
 
         double mean = 0.0;
-        for (double x : vals) mean += x;
-        mean /= (double)vals.size();
-
-        double var = 0.0;
-        for (double x : vals) var += (x-mean)*(x-mean);
+        for (double v : values) mean += v;
+        mean /= static_cast<double>(values.size());
 
         double sem = 0.0;
-        if (vals.size() > 1) sem = std::sqrt(var / (vals.size() * (vals.size()-1)));
+        if (values.size() > 1) {
+            double var = 0.0;
+            for (double v : values) var += (v - mean) * (v - mean);
+            sem = std::sqrt(var / (values.size() * (values.size() - 1)));
+        }
 
         hC->SetBinContent(bx, mean);
         hC->SetBinError(bx, sem);

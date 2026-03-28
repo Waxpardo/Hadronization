@@ -29,6 +29,8 @@ For each plot, the macro overlays two samples:
 
 The plot title is centered and the output is written in multiple formats.
 
+When the normalized multiplicity-shape option is enabled, the macro normalizes each subsample histogram first and then uses the mean and SEM across subsamples for the plotted bin contents and uncertainties.
+
 ## Automatic sample selection
 
 If the macro is run with no date arguments, it automatically:
@@ -142,7 +144,7 @@ For both schemes, the macro reads the histogram:
 fHistMultiplicity
 ```
 
-from each subsample ROOT file and sums the subsamples before drawing.
+from each subsample ROOT file. For normalized shape plots it normalizes each subsample first and then uses the mean and SEM across subsamples when drawing the final histogram.
 
 ## Output files
 
@@ -264,6 +266,7 @@ histogram integral / N_events
 ```
 
 It takes `N_events` from `fHistEventCount` when that histogram is available and falls back to the multiplicity integral for older analyzed files.
+The plotted yield uncertainties are taken from the spread of the per-subsample yields, reported as SEM across the available subsamples.
 
 ### Input histogram mapping
 

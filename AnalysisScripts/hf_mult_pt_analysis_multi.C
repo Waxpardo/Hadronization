@@ -91,6 +91,15 @@ namespace {
     return false;
   }
 
+  void EnableDefaultHistogramErrors()
+  {
+    static bool enabled = false;
+    if (enabled) return;
+
+    TH1::SetDefaultSumw2(kTRUE);
+    enabled = true;
+  }
+
   // --------------------------------------------------
   // Classification helpers
   // --------------------------------------------------
@@ -1033,6 +1042,8 @@ void hf_mult_pt_analysis_multi(int nSubSamples = 10,
                                const char* outputTag = "default",
                                const char* chargeMode = "combined")
 {
+  EnableDefaultHistogramErrors();
+
   TString base = GetBaseDir();
   TString tag  = SanitizeOutputTag(outputTag);
   const bool writeSeparateChargeHists = UseSeparateChargeHistograms(chargeMode);

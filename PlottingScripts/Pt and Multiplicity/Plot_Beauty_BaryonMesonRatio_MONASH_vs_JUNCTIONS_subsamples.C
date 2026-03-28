@@ -32,7 +32,8 @@
 //
 // where XX_YY are the percentile bounds (0_20, 20_40, ..., 80_100).
 //
-// Uncertainties come from the spread across the N subsamples.
+// Uncertainties are taken from the spread across the subsample ratios
+// (mean ± SEM).
 //
 // New:
 //   - All baryon/meson plots share the same y-axis range.
@@ -63,6 +64,7 @@
 #include "TString.h"
 
 #include "PlottingPathUtils.h"
+#include "../HistogramErrorUtils.h"
 
 namespace {
 
@@ -88,7 +90,10 @@ TH2* CloneTH2(TH2* h, const char* cloneName)
 {
     if (!h) return nullptr;
     TH2* clone = dynamic_cast<TH2*>(h->Clone(cloneName));
-    if (clone) clone->SetDirectory(nullptr);
+    if (clone) {
+        clone->SetDirectory(nullptr);
+        PlotErrorUtils::EnsureSumw2(clone);
+    }
     return clone;
 }
 
@@ -110,6 +115,7 @@ TH2* GetChargeCombinedHist(TFile* f,
 
         TH2* combined = CloneTH2(hParticle, cloneName);
         if (!combined) continue;
+        PlotErrorUtils::EnsureSumw2(hBar);
         combined->Add(hBar);
         return combined;
     }
@@ -154,8 +160,8 @@ std::pair<int,int> PercentileRange(TH1* hMult, double pTop, double pBot)
     return {yL, yH};
 }
 
-// Build ratio for ONE subsample, for a given multiplicity Y-range
-// num2D / den2D → hRatio(pt), no internal subsampling (errors set later).
+// Build ratio for ONE subsample, for a given multiplicity Y-range.
+// The statistical errors are propagated directly from the projected counts.
 TH1D* BuildRatioOneSub(TH2* hNum, TH2* hDen,
                        std::pair<int,int> yr,
                        const char* name,
@@ -167,29 +173,18 @@ TH1D* BuildRatioOneSub(TH2* hNum, TH2* hDen,
                                        yr.first, yr.second,"e");
     TH1D* hNumFull = hNum->ProjectionX(Form("%s_N_full",name),
                                        yr.first, yr.second,"e");
+    PlotErrorUtils::EnsureSumw2(hDenFull);
+    PlotErrorUtils::EnsureSumw2(hNumFull);
 
-    TH1D* hR = new TH1D(name,"",
-                        hDenFull->GetNbinsX(),
-                        hDenFull->GetXaxis()->GetXmin(),
-                        hDenFull->GetXaxis()->GetXmax());
-    hR->GetYaxis()->SetTitle(ytitle);
-    hR->GetXaxis()->SetTitle("p_{T} (GeV/c)");
-    hR->Sumw2(); // but we will overwrite errors later
-
-    for (int bx=1; bx<=hR->GetNbinsX(); ++bx){
-        double D = hDenFull->GetBinContent(bx);
-        double N = hNumFull->GetBinContent(bx);
-        double R = (D > 0.0 ? N/D : 0.0);
-        hR->SetBinContent(bx, R);
-        hR->SetBinError(bx, 0.0); // errors from subsample spread later
-    }
+    TH1D* hR = PlotErrorUtils::BuildRatioHistogram(hNumFull, hDenFull, name, ytitle);
+    if (hR) hR->GetXaxis()->SetTitle("p_{T} (GeV/c)");
 
     delete hDenFull;
     delete hNumFull;
     return hR;
 }
 
-// Combine ratios from all subsamples: mean ± SEM across subsamples
+// Combine ratios from all subsamples: mean ± SEM across subsamples.
 TH1D* CombineSubsampleRatios(const std::vector<TH1D*>& rs,
                              const char* name,
                              const char* ytitle)
@@ -206,24 +201,26 @@ TH1D* CombineSubsampleRatios(const std::vector<TH1D*>& rs,
     hC->GetYaxis()->SetTitle(ytitle);
     hC->Sumw2();
 
-    const int ns = (int)rs.size();
-
     for (int bx=1; bx<=nbx; ++bx){
         std::vector<double> vals;
-        vals.reserve(ns);
+        vals.reserve(rs.size());
+
         for (auto* h : rs){
+            if (!h) continue;
             vals.push_back(h->GetBinContent(bx));
         }
 
         double mean = 0.0;
-        for (double x : vals) mean += x;
-        mean /= (vals.empty() ? 1.0 : (double)vals.size());
-
-        double var = 0.0;
-        for (double x : vals) var += (x - mean)*(x - mean);
-
         double sem = 0.0;
+
+        if (!vals.empty()) {
+            for (double x : vals) mean += x;
+            mean /= static_cast<double>(vals.size());
+        }
+
         if (vals.size() > 1) {
+            double var = 0.0;
+            for (double x : vals) var += (x - mean) * (x - mean);
             sem = std::sqrt(var / (vals.size() * (vals.size() - 1)));
         }
 

@@ -64,6 +64,7 @@ This structure is designed so that:
 
 All three `*_mult_pt_analysis_multi.C` macros now also write:
 - `fHistEventCount` for explicit event normalization
+- histogram bin uncertainties with `Sumw2` enabled by default, so downstream plotting macros can propagate statistical errors explicitly
 
 By default, species-resolved histograms are charge-conjugate combined. The macros can also optionally write additional `Particle` and `Bar` split histograms while keeping the combined histogram names for compatibility.
 
