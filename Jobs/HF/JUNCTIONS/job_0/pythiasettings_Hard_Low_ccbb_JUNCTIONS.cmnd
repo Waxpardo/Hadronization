@@ -1,0 +1,69 @@
+! Called from file: heavyflavourcorrelations_status.cpp
+! Single PYTHIA run saving both charm and beauty hadrons for balancing studies
+! JUNCTIONS / QCD-based CR version
+! Lines starting with (!) are comments
+
+! General settings
+Main:numberOfEvents = 1000000
+
+Init:showMultipartonInteractions = off
+Next:numberCount = 0
+! Next:numberShowEvent = 0
+
+! Beams and tune
+Beams:eCM = 14000
+Beams:idA = 2212
+Beams:idB = 2212
+Tune:pp = 14
+
+! JUNCTIONS tune
+StringPT:sigma = 0.335
+StringZ:aLund = 0.36
+StringZ:bLund = 0.56
+StringFlav:probQQtoQ = 0.078
+StringFlav:ProbStoUD = 0.2
+StringFlav:probQQ1toQQ0join = 0.0275,0.0275,0.0275,0.0275
+
+MultipartonInteractions:pT0Ref = 2.15
+
+BeamRemnants:remnantMode = 1
+BeamRemnants:saturation = 5
+
+ColourReconnection:mode = 1
+ColourReconnection:allowDoubleJunRem = off
+ColourReconnection:m0 = 0.3
+ColourReconnection:allowJunctions = on
+ColourReconnection:junctionCorrection = 1.20
+ColourReconnection:timeDilationMode = 2
+ColourReconnection:timeDilationPar = 0.18
+
+! Physics part
+! Enable BOTH heavy-flavour channels in the same run
+HardQCD:hardccbar = on
+HardQCD:hardbbbar = on
+
+! Processes become divergent at low pT, need to define a lower bound
+PhaseSpace:pTHatMin = 1.
+
+! Decay suppression
+ParticleDecays:limitTau0 = on
+ParticleDecays:tau0Max = 0.01
+
+! Optional explicit stability for selected weakly decaying charm hadrons
+411:mayDecay = off      ! D+
+421:mayDecay = off      ! D0
+431:mayDecay = off      ! Ds+
+4122:mayDecay = off     ! Lambdac+
+4132:mayDecay = off     ! Xic0
+4232:mayDecay = off     ! Xic+
+4332:mayDecay = off     ! Omegac0
+
+! Explicit stability for selected beauty hadrons
+521:mayDecay = off      ! B+
+511:mayDecay = off      ! B0
+531:mayDecay = off      ! Bs
+541:mayDecay = off      ! Bc+
+5122:mayDecay = off     ! Lambdab
+5112:mayDecay = off     ! Sigmab-
+5212:mayDecay = off     ! Sigmab0
+5222:mayDecay = off     ! Sigmab+
