@@ -560,10 +560,14 @@ void Plot_BaryonMesonRatio_CharmBeauty_MONASH_vs_JUNCTIONS_subsamples(const char
     TString resolvedDate = PlotPathUtils::ResolveAnalysisDate(dateTag);
     if (resolvedDate.Length() == 0) return;
 
-    TString bPrefixMONASH = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Beauty", "bbbar_MONASH_sub");
-    TString bPrefixJUN    = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Beauty", "bbbar_JUNCTIONS_sub");
-    TString cPrefixMONASH = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Charm",  "ccbar_MONASH_sub");
-    TString cPrefixJUN    = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Charm",  "ccbar_JUNCTIONS_sub");
+    TString bPrefixMONASH = PlotPathUtils::ResolveAnalyzedPrefix(
+        resolvedDate, "Beauty", {"hf_MONASH_sub", "bbbar_MONASH_sub"});
+    TString bPrefixJUN = PlotPathUtils::ResolveAnalyzedPrefix(
+        resolvedDate, "Beauty", {"hf_JUNCTIONS_sub", "bbbar_JUNCTIONS_sub"});
+    TString cPrefixMONASH = PlotPathUtils::ResolveAnalyzedPrefix(
+        resolvedDate, "Charm", {"hf_MONASH_sub", "ccbar_MONASH_sub"});
+    TString cPrefixJUN = PlotPathUtils::ResolveAnalyzedPrefix(
+        resolvedDate, "Charm", {"hf_JUNCTIONS_sub", "ccbar_JUNCTIONS_sub"});
 
     std::cout << "Combined charm/beauty input date: " << resolvedDate << "\n";
     std::cout << "  Beauty MONASH    : " << bPrefixMONASH << "*.root\n";

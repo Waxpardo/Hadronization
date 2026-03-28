@@ -62,6 +62,11 @@ This structure is designed so that:
 - the subsamples can be used later for statistical comparisons and uncertainty propagation
 - MONASH and JUNCTIONS can be analyzed with the same code path
 
+All three `*_mult_pt_analysis_multi.C` macros now also write:
+- `fHistEventCount` for explicit event normalization
+
+By default, species-resolved histograms are charge-conjugate combined. The macros can also optionally write additional `Particle` and `Bar` split histograms while keeping the combined histogram names for compatibility.
+
 ---
 
 ## Legacy split analysis scripts
@@ -92,6 +97,7 @@ The legacy beauty macro expects the input `tree` to contain:
 
 ### Main output histograms
 Examples of histograms written by the beauty macro:
+- `fHistEventCount`
 - `fHistMultiplicity`
 - `fHistPDGMult`
 - `fHistPtBeautyMesons`
@@ -138,6 +144,7 @@ The legacy charm macro expects the input `tree` to contain:
 
 ### Main output histograms
 Examples of histograms written by the charm macro:
+- `fHistEventCount`
 - `fHistMultiplicity`
 - `fHistPDGMult`
 - `fHistPtCharmMesons`
@@ -163,18 +170,21 @@ It:
 - resolves the Hadronization base path
 - exports `HADRONIZATION_BASE`
 - moves to the Hadronization base directory
-- calls the ROOT macro with the requested number of subsamples
+- sources `setupEnv.sh` so that `root` is available
+- calls the ROOT macro with the requested number of subsamples and charge mode
 
 ### Usage
-´´´bash
-./AnalysisScripts/run_bb_analysis.sh OUTPUT_TAG [NSUB]
-´´´
+```bash
+./AnalysisScripts/run_bb_analysis.sh OUTPUT_TAG [NSUB] [CHARGE_MODE]
+./AnalysisScripts/run_bb_analysis.sh OUTPUT_TAG [CHARGE_MODE] [NSUB]
+```
 
 Example:
-´´´bash
+```bash
 ./AnalysisScripts/run_bb_analysis.sh 12-01-2026
 ./AnalysisScripts/run_bb_analysis.sh 12-01-2026 20
-´´´
+./AnalysisScripts/run_bb_analysis.sh 12-01-2026 20 separate
+```
 
 ---
 
@@ -186,18 +196,21 @@ It:
 - resolves the Hadronization base path
 - exports `HADRONIZATION_BASE`
 - moves to the Hadronization base directory
-- calls the ROOT macro with the requested number of subsamples
+- sources `setupEnv.sh` so that `root` is available
+- calls the ROOT macro with the requested number of subsamples and charge mode
 
 ### Usage
-´´´bash
-./AnalysisScripts/run_cc_analysis.sh OUTPUT_TAG [NSUB]
-´´´
+```bash
+./AnalysisScripts/run_cc_analysis.sh OUTPUT_TAG [NSUB] [CHARGE_MODE]
+./AnalysisScripts/run_cc_analysis.sh OUTPUT_TAG [CHARGE_MODE] [NSUB]
+```
 
 Example:
-´´´bash
+```bash
 ./AnalysisScripts/run_cc_analysis.sh 12-01-2026
 ./AnalysisScripts/run_cc_analysis.sh 12-01-2026 20
-´´´
+./AnalysisScripts/run_cc_analysis.sh 12-01-2026 20 separate
+```
 
 ---
 
@@ -251,39 +264,40 @@ If you want `Bc` included in Charm too, this can be changed in the macro logic.
 
 ### Input directories
 The unified macro reads from:
-´´´text
+```text
 RootFiles/HF/MONASH/
 RootFiles/HF/JUNCTIONS/
-´´´
+```
 
 ### Output directories
 The unified macro writes to:
-´´´text
+```text
 AnalyzedData/<OUTPUT_TAG>/Beauty/
 AnalyzedData/<OUTPUT_TAG>/Charm/
-´´´
+```
 
 ### Output filenames
 Beauty outputs:
-´´´text
+```text
 AnalyzedData/<OUTPUT_TAG>/Beauty/hf_MONASH_sub0.root
 AnalyzedData/<OUTPUT_TAG>/Beauty/hf_MONASH_sub1.root
 ...
 AnalyzedData/<OUTPUT_TAG>/Beauty/hf_JUNCTIONS_sub0.root
 ...
-´´´
+```
 
 Charm outputs:
-´´´text
+```text
 AnalyzedData/<OUTPUT_TAG>/Charm/hf_MONASH_sub0.root
 AnalyzedData/<OUTPUT_TAG>/Charm/hf_MONASH_sub1.root
 ...
 AnalyzedData/<OUTPUT_TAG>/Charm/hf_JUNCTIONS_sub0.root
 ...
-´´´
+```
 
 ### Main Beauty histograms written
 Examples:
+- `fHistEventCount`
 - `fHistMultiplicity`
 - `fHistPDGMult`
 - `fHistPtBeautyMesons`
@@ -303,6 +317,7 @@ Examples:
 
 ### Main Charm histograms written
 Examples:
+- `fHistEventCount`
 - `fHistMultiplicity`
 - `fHistPDGMult`
 - `fHistPtCharmMesons`
@@ -328,46 +343,49 @@ It:
 - sources `setupEnv.sh` so that `root` is available
 - runs:
   - `AnalysisScripts/hf_mult_pt_analysis_multi.C`
+- accepts an optional charge mode for writing extra split `Particle` and `Bar` histograms
 
 ### Usage
-´´´bash
-./AnalysisScripts/run_hf_analysis.sh OUTPUT_TAG [NSUB]
-´´´
+```bash
+./AnalysisScripts/run_hf_analysis.sh OUTPUT_TAG [NSUB] [CHARGE_MODE]
+./AnalysisScripts/run_hf_analysis.sh OUTPUT_TAG [CHARGE_MODE] [NSUB]
+```
 
 ### Examples
-´´´bash
+```bash
 ./AnalysisScripts/run_hf_analysis.sh 27-03-2026
 ./AnalysisScripts/run_hf_analysis.sh 27-03-2026 20
-´´´
+./AnalysisScripts/run_hf_analysis.sh 27-03-2026 20 separate
+```
 
 ### Meaning of `OUTPUT_TAG`
 `OUTPUT_TAG` is simply the output folder name under `AnalyzedData/`.
 
 For example:
 
-´´´bash
+```bash
 ./AnalysisScripts/run_hf_analysis.sh 27-03-2026
-´´´
+```
 
 creates outputs in:
 
-´´´text
+```text
 AnalyzedData/27-03-2026/Beauty/
 AnalyzedData/27-03-2026/Charm/
-´´´
+```
 
 You can also use more descriptive tags, e.g.
 
-´´´bash
+```bash
 ./AnalysisScripts/run_hf_analysis.sh 27-03-2026_HF_10M
-´´´
+```
 
 which creates:
 
-´´´text
+```text
 AnalyzedData/27-03-2026_HF_10M/Beauty/
 AnalyzedData/27-03-2026_HF_10M/Charm/
-´´´
+```
 
 ---
 
@@ -377,17 +395,24 @@ AnalyzedData/27-03-2026_HF_10M/Charm/
 
 From the Hadronization base:
 
-´´´bash
+```bash
 ./AnalysisScripts/run_bb_analysis.sh 12-01-2026
 ./AnalysisScripts/run_cc_analysis.sh 12-01-2026
-´´´
+```
 
 To choose a different number of subsamples:
 
-´´´bash
+```bash
 ./AnalysisScripts/run_bb_analysis.sh 12-01-2026 20
 ./AnalysisScripts/run_cc_analysis.sh 12-01-2026 20
-´´´
+```
+
+To also write split charge-conjugate histograms:
+
+```bash
+./AnalysisScripts/run_bb_analysis.sh 12-01-2026 20 separate
+./AnalysisScripts/run_cc_analysis.sh 12-01-2026 20 separate
+```
 
 ---
 
@@ -395,15 +420,21 @@ To choose a different number of subsamples:
 
 From the Hadronization base:
 
-´´´bash
+```bash
 ./AnalysisScripts/run_hf_analysis.sh 27-03-2026
-´´´
+```
 
 With a different number of subsamples:
 
-´´´bash
+```bash
 ./AnalysisScripts/run_hf_analysis.sh 27-03-2026 20
-´´´
+```
+
+To also write split charge-conjugate histograms:
+
+```bash
+./AnalysisScripts/run_hf_analysis.sh 27-03-2026 20 separate
+```
 
 ---
 
@@ -412,17 +443,17 @@ With a different number of subsamples:
 ## Legacy split macros
 From the Hadronization base:
 
-´´´bash
-root -l -b -q 'AnalysisScripts/bb_mult_pt_analysis_multi.C+(10, "12-01-2026")'
-root -l -b -q 'AnalysisScripts/cc_mult_pt_analysis_multi.C+(10, "12-01-2026")'
-´´´
+```bash
+root -l -b -q 'AnalysisScripts/bb_mult_pt_analysis_multi.C+(10, "12-01-2026", "combined")'
+root -l -b -q 'AnalysisScripts/cc_mult_pt_analysis_multi.C+(10, "12-01-2026", "combined")'
+```
 
 ## Unified heavy-flavour macro
 From the Hadronization base:
 
-´´´bash
-root -l -b -q 'AnalysisScripts/hf_mult_pt_analysis_multi.C+(10, "27-03-2026")'
-´´´
+```bash
+root -l -b -q 'AnalysisScripts/hf_mult_pt_analysis_multi.C+(10, "27-03-2026", "combined")'
+```
 
 ---
 
@@ -432,12 +463,12 @@ root -l -b -q 'AnalysisScripts/hf_mult_pt_analysis_multi.C+(10, "27-03-2026")'
 
 The legacy split analysis expects simulation outputs in:
 
-´´´text
+```text
 RootFiles/bbbar/MONASH/
 RootFiles/bbbar/JUNCTIONS/
 RootFiles/ccbar/MONASH/
 RootFiles/ccbar/JUNCTIONS/
-´´´
+```
 
 Each `.root` file must contain a `tree` with at least:
 - `ID`
@@ -448,10 +479,10 @@ Each `.root` file must contain a `tree` with at least:
 
 The unified analysis expects simulation outputs in:
 
-´´´text
+```text
 RootFiles/HF/MONASH/
 RootFiles/HF/JUNCTIONS/
-´´´
+```
 
 Each `.root` file must contain a `tree` with at least:
 - `ID`
@@ -469,31 +500,31 @@ If `AnalyzedData/<OUTPUT_TAG>/` does not exist, the macros create the needed dir
 
 Typical structure:
 
-´´´text
+```text
 AnalyzedData/<OUTPUT_TAG>/
 AnalyzedData/<OUTPUT_TAG>/Beauty/
 AnalyzedData/<OUTPUT_TAG>/Charm/
-´´´
+```
 
 ### Legacy split outputs
 - Beauty outputs are written to:
-  ´´´text
+  ```text
   AnalyzedData/<OUTPUT_TAG>/Beauty/
-  ´´´
+  ```
 - Charm outputs are written to:
-  ´´´text
+  ```text
   AnalyzedData/<OUTPUT_TAG>/Charm/
-  ´´´
+  ```
 
 ### Unified outputs
 - Beauty outputs are written to:
-  ´´´text
+  ```text
   AnalyzedData/<OUTPUT_TAG>/Beauty/
-  ´´´
+  ```
 - Charm outputs are written to:
-  ´´´text
+  ```text
   AnalyzedData/<OUTPUT_TAG>/Charm/
-  ´´´
+  ```
 
 The directory layout is the same; only the input source and analysis logic differ.
 
@@ -528,9 +559,9 @@ This is useful when later building:
 ## ROOT histogram replacement warnings
 When many histogram sets are created in a single ROOT session with identical histogram names, ROOT may print warnings like:
 
-´´´text
+```text
 Warning in <TROOT::Append>: Replacing existing TH1: ...
-´´´
+```
 
 These warnings are usually harmless in this workflow, because:
 - the histogram sets belong to different subsamples and/or different output files
@@ -538,24 +569,24 @@ These warnings are usually harmless in this workflow, because:
 
 They can be avoided by disabling automatic histogram registration in memory:
 
-´´´cpp
+```cpp
 TH1::AddDirectory(kFALSE);
-´´´
+```
 
 This is recommended for large batch analyses.
 
 ## Missing `root` command
 If a wrapper script fails with:
 
-´´´text
+```text
 root: command not found
-´´´
+```
 
-then the environment was not loaded. The wrapper should source `setupEnv.sh`, or you should do:
+then the environment was not loaded. The wrappers in this repo now source `setupEnv.sh` automatically, but for direct ROOT usage you should still do:
 
-´´´bash
+```bash
 source ./setupEnv.sh
-´´´
+```
 
 before running the wrapper manually.
 
@@ -571,15 +602,15 @@ Some macros include warnings if zero pion entries are found in the input TTrees.
 
 The event-count scripts are in:
 
-´´´text
+```text
 AnalysisScripts/CountEvents/
-´´´
+```
 
 Run them with:
 
-´´´bash
+```bash
 ./AnalysisScripts/CountEvents/count_events.sh
-´´´
+```
 
 The legacy count scripts are typically organized for the old split layout:
 - `RootFiles/bbbar/MONASH`
@@ -589,10 +620,10 @@ The legacy count scripts are typically organized for the old split layout:
 
 If you are working with the new unified heavy-flavour production, adapt the count scripts or create a new one for:
 
-´´´text
+```text
 RootFiles/HF/MONASH
 RootFiles/HF/JUNCTIONS
-´´´
+```
 
 ---
 
@@ -611,9 +642,9 @@ RootFiles/HF/JUNCTIONS
 
 For the current combined charm+beauty production, the recommended entry point is:
 
-´´´bash
-./AnalysisScripts/run_hf_analysis.sh <OUTPUT_TAG> [NSUB]
-´´´
+```bash
+./AnalysisScripts/run_hf_analysis.sh <OUTPUT_TAG> [NSUB] [CHARGE_MODE]
+```
 
 ---
 

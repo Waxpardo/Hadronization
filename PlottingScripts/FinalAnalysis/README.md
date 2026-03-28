@@ -263,6 +263,8 @@ The macro therefore uses the full combined analyzed histogram yield:
 histogram integral / N_events
 ```
 
+It takes `N_events` from `fHistEventCount` when that histogram is available and falls back to the multiplicity integral for older analyzed files.
+
 ### Input histogram mapping
 
 The macro reads from the analyzed species histograms written by the analysis macros:
@@ -276,6 +278,8 @@ The macro reads from the analyzed species histograms written by the analysis mac
   - `fHistPtDzero`
   - `fHistPtLambdac` as the canonical charge-conjugate-combined histogram name
   - `fHistPtLambdacPlus` as a legacy compatibility fallback
+
+If the combined species histogram is not found, the macro also looks for the split `Particle` and `Bar` histograms and combines them internally.
 
 ### Wrapper function
 

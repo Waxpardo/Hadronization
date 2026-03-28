@@ -6,7 +6,7 @@
 // equal number of events using round-robin event assignment.
 //
 // Usage (from Hadronization base):
-//   root -l -b -q 'AnalysisScripts/bb_mult_pt_analysis_multi.C+(10, "12-01-2026")'
+//   root -l -b -q 'AnalysisScripts/bb_mult_pt_analysis_multi.C+(10, "12-01-2026", "combined")'
 //
 // This will:
 //   - For MONASH   : read RootFiles/bbbar/MONASH/*.root
@@ -21,6 +21,7 @@
 //     int            MULTIPLICITY
 //
 // Output files (per tune, per subsample) contain:
+//   TH1D fHistEventCount
 //   TH1D fHistMultiplicity
 //   TH2D fHistPDGMult
 //   TH2D fHistPtBeautyMesons
@@ -32,11 +33,11 @@
 // Each subsample ROOT file has the SAME histogram names; they live in
 // different files, so there are no name clashes.
 //
-// Species-resolved histograms are filled using abs(PDG), so these histograms
-// are charge-conjugate combined. For example:
-//   fHistPtBplus   -> B^{#pm}
-//   fHistPtBzero   -> B^{0}/#bar{B}^{0}
-//   fHistPtLambdab -> #Lambda_{b}^{0}/#bar{#Lambda}_{b}^{0}
+// Charge-conjugate mode:
+// - "combined" (default): current species histograms stay charge-conjugate combined
+// - "separate"          : the current combined histograms are still written, and
+//                         extra particle-only / anti-particle histograms are added
+//                         with the suffixes "Particle" and "Bar"
 //
 // ----------------------------------------------------------------------
 
@@ -86,6 +87,20 @@ namespace {
     return tag;
   }
 
+  bool UseSeparateChargeHistograms(const char* chargeMode)
+  {
+    TString mode = chargeMode ? TString(chargeMode) : TString("");
+    mode = mode.Strip(TString::kBoth);
+    mode.ToLower();
+
+    if (mode.IsNull() || mode == "combined" || mode == "combine") return false;
+    if (mode == "separate" || mode == "split" || mode == "individual") return true;
+
+    Warning("UseSeparateChargeHistograms",
+            "Unknown charge mode '%s', falling back to combined", mode.Data());
+    return false;
+  }
+
   // ---------- PDG-based classification ----------
 
   bool IsBeautyMeson(int pdg)
@@ -129,10 +144,63 @@ namespace {
     return (apdg == 211 || apdg == 111); // pi+/- and pi0
   }
 
+  TH1D* CreateEventCountHist()
+  {
+    TH1D* h = new TH1D("fHistEventCount", "Event count;Counter;Events", 1, 0.5, 1.5);
+    h->GetXaxis()->SetBinLabel(1, "events");
+    return h;
+  }
+
+  void InitChargeSplitHistPair(TH2D*& particleHist,
+                               TH2D*& barHist,
+                               bool enable,
+                               const char* baseName,
+                               const char* particleLabel,
+                               const char* barLabel,
+                               int nPtBins,
+                               double ptMin,
+                               double ptMax,
+                               int nMultBins,
+                               double multMin,
+                               double multMax)
+  {
+    particleHist = nullptr;
+    barHist = nullptr;
+    if (!enable) return;
+
+    const TString particleName = TString::Format("%sParticle", baseName);
+    const TString barName = TString::Format("%sBar", baseName);
+    const TString particleTitle = TString::Format("%s: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+                                                  particleLabel);
+    const TString barTitle = TString::Format("%s: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+                                             barLabel);
+
+    particleHist = new TH2D(particleName.Data(), particleTitle.Data(),
+                            nPtBins, ptMin, ptMax,
+                            nMultBins, multMin, multMax);
+    barHist = new TH2D(barName.Data(), barTitle.Data(),
+                       nPtBins, ptMin, ptMax,
+                       nMultBins, multMin, multMax);
+  }
+
+  void FillChargeSplitHists(TH2D* particleHist,
+                            TH2D* barHist,
+                            int pdg,
+                            double pt,
+                            int multiplicity)
+  {
+    if (pdg > 0) {
+      if (particleHist) particleHist->Fill(pt, multiplicity);
+    } else if (pdg < 0) {
+      if (barHist) barHist->Fill(pt, multiplicity);
+    }
+  }
+
   // ---------- Histogram container ----------
 
   struct BBHistSet {
     // event-level
+    TH1D* fHistEventCount;
     TH1D* fHistMultiplicity;
 
     // debugging / QA
@@ -144,17 +212,39 @@ namespace {
 
     // beauty species
     TH2D* fHistPtBplus;
+    TH2D* fHistPtBplusParticle;
+    TH2D* fHistPtBplusBar;
     TH2D* fHistPtBzero;
+    TH2D* fHistPtBzeroParticle;
+    TH2D* fHistPtBzeroBar;
     TH2D* fHistPtBs0;
+    TH2D* fHistPtBs0Particle;
+    TH2D* fHistPtBs0Bar;
     TH2D* fHistPtBcplus;
+    TH2D* fHistPtBcplusParticle;
+    TH2D* fHistPtBcplusBar;
 
     TH2D* fHistPtLambdab;
+    TH2D* fHistPtLambdabParticle;
+    TH2D* fHistPtLambdabBar;
     TH2D* fHistPtSigmabPlus;
+    TH2D* fHistPtSigmabPlusParticle;
+    TH2D* fHistPtSigmabPlusBar;
     TH2D* fHistPtSigmabZero;
+    TH2D* fHistPtSigmabZeroParticle;
+    TH2D* fHistPtSigmabZeroBar;
     TH2D* fHistPtSigmabMinus;
+    TH2D* fHistPtSigmabMinusParticle;
+    TH2D* fHistPtSigmabMinusBar;
     TH2D* fHistPtXibZero;
+    TH2D* fHistPtXibZeroParticle;
+    TH2D* fHistPtXibZeroBar;
     TH2D* fHistPtXibMinus;
+    TH2D* fHistPtXibMinusParticle;
+    TH2D* fHistPtXibMinusBar;
     TH2D* fHistPtOmegabMinus;
+    TH2D* fHistPtOmegabMinusParticle;
+    TH2D* fHistPtOmegabMinusBar;
 
     // pions
     TH2D* fHistPtPionsCharged; // pi+ and pi-
@@ -165,7 +255,7 @@ namespace {
 
   // ---------- Create one full histogram set ----------
 
-  BBHistSet* CreateBBHistSet()
+  BBHistSet* CreateBBHistSet(bool writeSeparateChargeHists)
   {
     const int    nMultBins = 300;
     const double multMin   = 0.0;
@@ -176,6 +266,8 @@ namespace {
     const double ptMax     = 120.0;
 
     BBHistSet* h = new BBHistSet;
+
+    h->fHistEventCount = CreateEventCountHist();
 
     h->fHistMultiplicity = new TH1D(
       "fHistMultiplicity",
@@ -211,6 +303,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtBplusParticle, h->fHistPtBplusBar,
+                            writeSeparateChargeHists,
+                            "fHistPtBplus", "B^{+}", "B^{-}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     h->fHistPtBzero = new TH2D(
       "fHistPtBzero",
@@ -218,6 +314,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtBzeroParticle, h->fHistPtBzeroBar,
+                            writeSeparateChargeHists,
+                            "fHistPtBzero", "B^{0}", "#bar{B}^{0}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     h->fHistPtBs0 = new TH2D(
       "fHistPtBs0",
@@ -225,6 +325,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtBs0Particle, h->fHistPtBs0Bar,
+                            writeSeparateChargeHists,
+                            "fHistPtBs0", "B_{s}^{0}", "#bar{B}_{s}^{0}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     h->fHistPtBcplus = new TH2D(
       "fHistPtBcplus",
@@ -232,6 +336,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtBcplusParticle, h->fHistPtBcplusBar,
+                            writeSeparateChargeHists,
+                            "fHistPtBcplus", "B_{c}^{+}", "B_{c}^{-}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     // beauty baryons
     h->fHistPtLambdab = new TH2D(
@@ -240,6 +348,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtLambdabParticle, h->fHistPtLambdabBar,
+                            writeSeparateChargeHists,
+                            "fHistPtLambdab", "#Lambda_{b}^{0}", "#bar{#Lambda}_{b}^{0}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     h->fHistPtSigmabPlus = new TH2D(
       "fHistPtSigmabPlus",
@@ -247,6 +359,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtSigmabPlusParticle, h->fHistPtSigmabPlusBar,
+                            writeSeparateChargeHists,
+                            "fHistPtSigmabPlus", "#Sigma_{b}^{+}", "#bar{#Sigma}_{b}^{-}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     h->fHistPtSigmabZero = new TH2D(
       "fHistPtSigmabZero",
@@ -254,6 +370,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtSigmabZeroParticle, h->fHistPtSigmabZeroBar,
+                            writeSeparateChargeHists,
+                            "fHistPtSigmabZero", "#Sigma_{b}^{0}", "#bar{#Sigma}_{b}^{0}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     h->fHistPtSigmabMinus = new TH2D(
       "fHistPtSigmabMinus",
@@ -261,6 +381,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtSigmabMinusParticle, h->fHistPtSigmabMinusBar,
+                            writeSeparateChargeHists,
+                            "fHistPtSigmabMinus", "#Sigma_{b}^{-}", "#bar{#Sigma}_{b}^{+}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     h->fHistPtXibZero = new TH2D(
       "fHistPtXibZero",
@@ -268,6 +392,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtXibZeroParticle, h->fHistPtXibZeroBar,
+                            writeSeparateChargeHists,
+                            "fHistPtXibZero", "#Xi_{b}^{0}", "#bar{#Xi}_{b}^{0}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     h->fHistPtXibMinus = new TH2D(
       "fHistPtXibMinus",
@@ -275,6 +403,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtXibMinusParticle, h->fHistPtXibMinusBar,
+                            writeSeparateChargeHists,
+                            "fHistPtXibMinus", "#Xi_{b}^{-}", "#bar{#Xi}_{b}^{+}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     h->fHistPtOmegabMinus = new TH2D(
       "fHistPtOmegabMinus",
@@ -282,6 +414,10 @@ namespace {
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
+    InitChargeSplitHistPair(h->fHistPtOmegabMinusParticle, h->fHistPtOmegabMinusBar,
+                            writeSeparateChargeHists,
+                            "fHistPtOmegabMinus", "#Omega_{b}^{-}", "#bar{#Omega}_{b}^{+}",
+                            nPtBins, ptMin, ptMax, nMultBins, multMin, multMax);
 
     // pions
     h->fHistPtPionsCharged = new TH2D(
@@ -328,6 +464,7 @@ namespace {
       return;
     }
 
+    hset->fHistEventCount->Write();
     hset->fHistMultiplicity->Write();
     hset->fHistPDGMult->Write();
 
@@ -335,17 +472,39 @@ namespace {
     hset->fHistPtBeautyBaryons->Write();
 
     hset->fHistPtBplus->Write();
+    if (hset->fHistPtBplusParticle) hset->fHistPtBplusParticle->Write();
+    if (hset->fHistPtBplusBar) hset->fHistPtBplusBar->Write();
     hset->fHistPtBzero->Write();
+    if (hset->fHistPtBzeroParticle) hset->fHistPtBzeroParticle->Write();
+    if (hset->fHistPtBzeroBar) hset->fHistPtBzeroBar->Write();
     hset->fHistPtBs0->Write();
+    if (hset->fHistPtBs0Particle) hset->fHistPtBs0Particle->Write();
+    if (hset->fHistPtBs0Bar) hset->fHistPtBs0Bar->Write();
     hset->fHistPtBcplus->Write();
+    if (hset->fHistPtBcplusParticle) hset->fHistPtBcplusParticle->Write();
+    if (hset->fHistPtBcplusBar) hset->fHistPtBcplusBar->Write();
 
     hset->fHistPtLambdab->Write();
+    if (hset->fHistPtLambdabParticle) hset->fHistPtLambdabParticle->Write();
+    if (hset->fHistPtLambdabBar) hset->fHistPtLambdabBar->Write();
     hset->fHistPtSigmabPlus->Write();
+    if (hset->fHistPtSigmabPlusParticle) hset->fHistPtSigmabPlusParticle->Write();
+    if (hset->fHistPtSigmabPlusBar) hset->fHistPtSigmabPlusBar->Write();
     hset->fHistPtSigmabZero->Write();
+    if (hset->fHistPtSigmabZeroParticle) hset->fHistPtSigmabZeroParticle->Write();
+    if (hset->fHistPtSigmabZeroBar) hset->fHistPtSigmabZeroBar->Write();
     hset->fHistPtSigmabMinus->Write();
+    if (hset->fHistPtSigmabMinusParticle) hset->fHistPtSigmabMinusParticle->Write();
+    if (hset->fHistPtSigmabMinusBar) hset->fHistPtSigmabMinusBar->Write();
     hset->fHistPtXibZero->Write();
+    if (hset->fHistPtXibZeroParticle) hset->fHistPtXibZeroParticle->Write();
+    if (hset->fHistPtXibZeroBar) hset->fHistPtXibZeroBar->Write();
     hset->fHistPtXibMinus->Write();
+    if (hset->fHistPtXibMinusParticle) hset->fHistPtXibMinusParticle->Write();
+    if (hset->fHistPtXibMinusBar) hset->fHistPtXibMinusBar->Write();
     hset->fHistPtOmegabMinus->Write();
+    if (hset->fHistPtOmegabMinusParticle) hset->fHistPtOmegabMinusParticle->Write();
+    if (hset->fHistPtOmegabMinusBar) hset->fHistPtOmegabMinusBar->Write();
 
     // pions
     hset->fHistPtPionsCharged->Write();
@@ -407,6 +566,7 @@ namespace {
       BBHistSet* hset = hsets[subIndex];
       if (!hset) continue;
 
+      hset->fHistEventCount->Fill(1.0);
       hset->fHistMultiplicity->Fill(MULTIPLICITY);
 
       if (!ID || !PT) continue;
@@ -445,29 +605,51 @@ namespace {
         // Filled with abs(PDG), so the species histograms are charge-conjugate combined.
         if (apdg == 521) {           // B^{#pm}
           hset->fHistPtBplus->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtBplusParticle, hset->fHistPtBplusBar,
+                               pdg, pt, MULTIPLICITY);
         } else if (apdg == 511) {    // B^{0}/#bar{B}^{0}
           hset->fHistPtBzero->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtBzeroParticle, hset->fHistPtBzeroBar,
+                               pdg, pt, MULTIPLICITY);
         } else if (apdg == 531) {    // Bs0
           hset->fHistPtBs0->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtBs0Particle, hset->fHistPtBs0Bar,
+                               pdg, pt, MULTIPLICITY);
         } else if (apdg == 541) {    // Bc+
           hset->fHistPtBcplus->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtBcplusParticle, hset->fHistPtBcplusBar,
+                               pdg, pt, MULTIPLICITY);
         }
 
         // --------- species-resolved beauty baryons ---------
         if (apdg == 5122) {          // #Lambda_{b}^{0}/#bar{#Lambda}_{b}^{0}
           hset->fHistPtLambdab->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtLambdabParticle, hset->fHistPtLambdabBar,
+                               pdg, pt, MULTIPLICITY);
         } else if (apdg == 5222) {   // Sigma_b^+
           hset->fHistPtSigmabPlus->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtSigmabPlusParticle, hset->fHistPtSigmabPlusBar,
+                               pdg, pt, MULTIPLICITY);
         } else if (apdg == 5212) {   // Sigma_b^0
           hset->fHistPtSigmabZero->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtSigmabZeroParticle, hset->fHistPtSigmabZeroBar,
+                               pdg, pt, MULTIPLICITY);
         } else if (apdg == 5112) {   // Sigma_b^-
           hset->fHistPtSigmabMinus->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtSigmabMinusParticle, hset->fHistPtSigmabMinusBar,
+                               pdg, pt, MULTIPLICITY);
         } else if (apdg == 5232) {   // Xi_b^0
           hset->fHistPtXibZero->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtXibZeroParticle, hset->fHistPtXibZeroBar,
+                               pdg, pt, MULTIPLICITY);
         } else if (apdg == 5132) {   // Xi_b^-
           hset->fHistPtXibMinus->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtXibMinusParticle, hset->fHistPtXibMinusBar,
+                               pdg, pt, MULTIPLICITY);
         } else if (apdg == 5332) {   // Omega_b^-
           hset->fHistPtOmegabMinus->Fill(pt, MULTIPLICITY);
+          FillChargeSplitHists(hset->fHistPtOmegabMinusParticle, hset->fHistPtOmegabMinusBar,
+                               pdg, pt, MULTIPLICITY);
         }
       }
     }
@@ -479,7 +661,8 @@ namespace {
 
   void AnalyzeBBbarMultiplicityPt_Multi(const char* inputDir,
                                         const char* outPrefix,
-                                        int nSubSamples)
+                                        int nSubSamples,
+                                        bool writeSeparateChargeHists)
   {
     if (nSubSamples <= 0) {
       Error("AnalyzeBBbarMultiplicityPt_Multi",
@@ -496,7 +679,7 @@ namespace {
     std::vector<BBHistSet*> hsets;
     hsets.reserve(nSubSamples);
     for (int i = 0; i < nSubSamples; ++i) {
-      hsets.push_back(CreateBBHistSet());
+      hsets.push_back(CreateBBHistSet(writeSeparateChargeHists));
     }
 
     // 2) List all ROOT files in inputDir
@@ -565,6 +748,7 @@ namespace {
     // Cleanup (nice-to-have in long ROOT sessions)
     for (auto* hs : hsets) {
       if (!hs) continue;
+      delete hs->fHistEventCount;
       delete hs->fHistMultiplicity;
       delete hs->fHistPDGMult;
 
@@ -572,17 +756,39 @@ namespace {
       delete hs->fHistPtBeautyBaryons;
 
       delete hs->fHistPtBplus;
+      delete hs->fHistPtBplusParticle;
+      delete hs->fHistPtBplusBar;
       delete hs->fHistPtBzero;
+      delete hs->fHistPtBzeroParticle;
+      delete hs->fHistPtBzeroBar;
       delete hs->fHistPtBs0;
+      delete hs->fHistPtBs0Particle;
+      delete hs->fHistPtBs0Bar;
       delete hs->fHistPtBcplus;
+      delete hs->fHistPtBcplusParticle;
+      delete hs->fHistPtBcplusBar;
 
       delete hs->fHistPtLambdab;
+      delete hs->fHistPtLambdabParticle;
+      delete hs->fHistPtLambdabBar;
       delete hs->fHistPtSigmabPlus;
+      delete hs->fHistPtSigmabPlusParticle;
+      delete hs->fHistPtSigmabPlusBar;
       delete hs->fHistPtSigmabZero;
+      delete hs->fHistPtSigmabZeroParticle;
+      delete hs->fHistPtSigmabZeroBar;
       delete hs->fHistPtSigmabMinus;
+      delete hs->fHistPtSigmabMinusParticle;
+      delete hs->fHistPtSigmabMinusBar;
       delete hs->fHistPtXibZero;
+      delete hs->fHistPtXibZeroParticle;
+      delete hs->fHistPtXibZeroBar;
       delete hs->fHistPtXibMinus;
+      delete hs->fHistPtXibMinusParticle;
+      delete hs->fHistPtXibMinusBar;
       delete hs->fHistPtOmegabMinus;
+      delete hs->fHistPtOmegabMinusParticle;
+      delete hs->fHistPtOmegabMinusBar;
 
       delete hs->fHistPtPionsCharged;
       delete hs->fHistPtPiPlus;
@@ -598,7 +804,9 @@ namespace {
 // ----------------------------------------------------------------------
 // ROOT-friendly wrapper
 // ----------------------------------------------------------------------
-void bb_mult_pt_analysis_multi(int nSubSamples = 10, const char* outputTag = "default")
+void bb_mult_pt_analysis_multi(int nSubSamples = 10,
+                               const char* outputTag = "default",
+                               const char* chargeMode = "combined")
 {
   // Create the dated output directory and both heavy-flavor subdirectories.
   TString base = GetBaseDir();
@@ -610,13 +818,20 @@ void bb_mult_pt_analysis_multi(int nSubSamples = 10, const char* outputTag = "de
   gSystem->mkdir(beautyDir, true);
   gSystem->mkdir(charmDir, true);
 
+  const bool writeSeparateChargeHists = UseSeparateChargeHistograms(chargeMode);
+  std::cout << "Beauty analysis charge mode: "
+            << (writeSeparateChargeHists ? "separate" : "combined")
+            << std::endl;
+
   // MONASH
   AnalyzeBBbarMultiplicityPt_Multi((base + "/RootFiles/bbbar/MONASH").Data(),
                                    (beautyDir + "/bbbar_MONASH_sub").Data(),
-                                   nSubSamples);
+                                   nSubSamples,
+                                   writeSeparateChargeHists);
 
   // JUNCTIONS
   AnalyzeBBbarMultiplicityPt_Multi((base + "/RootFiles/bbbar/JUNCTIONS").Data(),
                                    (beautyDir + "/bbbar_JUNCTIONS_sub").Data(),
-                                   nSubSamples);
+                                   nSubSamples,
+                                   writeSeparateChargeHists);
 }

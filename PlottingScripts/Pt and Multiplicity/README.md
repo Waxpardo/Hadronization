@@ -26,16 +26,25 @@ Hadronization/PlottingScripts/Pt and Multiplicity/Plots/
 
 ## Input structure
 
-The plotting macros expect files with names like:
+The plotting macros support both analyzed filename layouts:
 
 ```text
 AnalyzedData/<DATE>/Beauty/bbbar_MONASH_sub0.root
 AnalyzedData/<DATE>/Beauty/bbbar_JUNCTIONS_sub0.root
 AnalyzedData/<DATE>/Charm/ccbar_MONASH_sub0.root
 AnalyzedData/<DATE>/Charm/ccbar_JUNCTIONS_sub0.root
+
+AnalyzedData/<DATE>/Beauty/hf_MONASH_sub0.root
+AnalyzedData/<DATE>/Beauty/hf_JUNCTIONS_sub0.root
+AnalyzedData/<DATE>/Charm/hf_MONASH_sub0.root
+AnalyzedData/<DATE>/Charm/hf_JUNCTIONS_sub0.root
 ```
 
+For date-based entry points, the macros automatically prefer the unified `hf_...` files when they are present and otherwise fall back to the legacy `ccbar_...` or `bbbar_...` files.
+
 The number of subsamples passed to the plotting macro must match the number of subsamples produced by the analysis step.
+
+For species-resolved plots, the macros assume charge-conjugate-combined histogram names first. If a combined histogram is not found, they look for the split `Particle` and `Bar` histograms and sum them on the fly.
 
 ## Date handling
 
@@ -316,12 +325,14 @@ Spectra_Bpm_JUNCTIONS.png
 Advanced custom-prefix wrapper:
 
 ```cpp
-runHFSpectraWithPrefixes("/full/path/to/ccbar_MONASH_sub",
-                         "/full/path/to/ccbar_JUNCTIONS_sub",
-                         "/full/path/to/bbbar_MONASH_sub",
-                         "/full/path/to/bbbar_JUNCTIONS_sub",
+runHFSpectraWithPrefixes("/full/path/to/Charm/hf_MONASH_sub",
+                         "/full/path/to/Charm/hf_JUNCTIONS_sub",
+                         "/full/path/to/Beauty/hf_MONASH_sub",
+                         "/full/path/to/Beauty/hf_JUNCTIONS_sub",
                          10);
 ```
+
+You can also pass the legacy `ccbar_...` and `bbbar_...` stems explicitly if you are plotting an older split analysis sample.
 
 ### 5. Heavy-flavor ratios vs multiplicity percentile
 

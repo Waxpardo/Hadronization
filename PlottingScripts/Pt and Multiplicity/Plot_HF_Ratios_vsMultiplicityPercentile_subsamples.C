@@ -59,11 +59,62 @@ T* GetObj(TFile* f, const char* name) {
   return f ? dynamic_cast<T*>(f->Get(name)) : nullptr;
 }
 
-TH2* GetCharmLambdaHist(TFile* f)
+TH2* CloneTH2(TH2* h, const char* cloneName)
+{
+  if (!h) return nullptr;
+  TH2* clone = dynamic_cast<TH2*>(h->Clone(cloneName));
+  if (clone) clone->SetDirectory(nullptr);
+  return clone;
+}
+
+TH2* GetChargeCombinedHist(TFile* f,
+                           const std::vector<TString>& combinedNames,
+                           const std::vector<TString>& splitBases,
+                           const char* cloneName)
 {
   if (!f) return nullptr;
-  if (TH2* h = GetObj<TH2>(f, "fHistPtLambdac")) return h;
-  return GetObj<TH2>(f, "fHistPtLambdacPlus");
+
+  for (const TString& name : combinedNames) {
+    if (TH2* h = GetObj<TH2>(f, name.Data())) return CloneTH2(h, cloneName);
+  }
+
+  for (const TString& base : splitBases) {
+    TH2* hParticle = GetObj<TH2>(f, Form("%sParticle", base.Data()));
+    TH2* hBar = GetObj<TH2>(f, Form("%sBar", base.Data()));
+    if (!hParticle || !hBar) continue;
+
+    TH2* combined = CloneTH2(hParticle, cloneName);
+    if (!combined) continue;
+    combined->Add(hBar);
+    return combined;
+  }
+
+  return nullptr;
+}
+
+TH2* GetCharmLambdaHist(TFile* f, const char* cloneName)
+{
+  return GetChargeCombinedHist(
+    f,
+    {"fHistPtLambdac", "fHistPtLambdacPlus"},
+    {"fHistPtLambdac", "fHistPtLambdacPlus"},
+    cloneName
+  );
+}
+
+TH2* GetCharmDHist(TFile* f, const char* cloneName)
+{
+  return GetChargeCombinedHist(f, {"fHistPtDplus"}, {"fHistPtDplus"}, cloneName);
+}
+
+TH2* GetBeautyLambdaHist(TFile* f, const char* cloneName)
+{
+  return GetChargeCombinedHist(f, {"fHistPtLambdab"}, {"fHistPtLambdab"}, cloneName);
+}
+
+TH2* GetBeautyBHist(TFile* f, const char* cloneName)
+{
+  return GetChargeCombinedHist(f, {"fHistPtBplus"}, {"fHistPtBplus"}, cloneName);
 }
 
 // same logic as your spectra macro
@@ -227,11 +278,6 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
 
   const char* MULT_HIST = "fHistMultiplicity";
 
-  const char* HC_D  = "fHistPtDplus";
-
-  const char* HB_LB = "fHistPtLambdab";
-  const char* HB_B  = "fHistPtBplus";
-
   // storage: for each class we’ll accumulate subsample ratios, then mean±SEM
   const int nC = (int)kClasses.size();
 
@@ -248,12 +294,12 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
       if (!fM || fM->IsZombie() || !fJ || fJ->IsZombie()) { if(fM)fM->Close(); if(fJ)fJ->Close(); continue; }
 
       TH1* hMultM = GetObj<TH1>(fM, MULT_HIST);
-      TH2* hLcM   = GetCharmLambdaHist(fM);
-      TH2* hDM    = GetObj<TH2>(fM, HC_D);
+      TH2* hLcM   = GetCharmLambdaHist(fM, Form("hLcM_%d_%d", ic, is));
+      TH2* hDM    = GetCharmDHist(fM, Form("hDM_%d_%d", ic, is));
 
       TH1* hMultJ = GetObj<TH1>(fJ, MULT_HIST);
-      TH2* hLcJ   = GetCharmLambdaHist(fJ);
-      TH2* hDJ    = GetObj<TH2>(fJ, HC_D);
+      TH2* hLcJ   = GetCharmLambdaHist(fJ, Form("hLcJ_%d_%d", ic, is));
+      TH2* hDJ    = GetCharmDHist(fJ, Form("hDJ_%d_%d", ic, is));
 
       auto yrM = PercentileRange(hMultM, kClasses[ic].pTop, kClasses[ic].pBot);
       auto yrJ = PercentileRange(hMultJ, kClasses[ic].pTop, kClasses[ic].pBot);
@@ -267,6 +313,10 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
       if (NDM > 0) rM.push_back(NLcM/NDM);
       if (NDJ > 0) rJ.push_back(NLcJ/NDJ);
 
+      delete hLcM;
+      delete hDM;
+      delete hLcJ;
+      delete hDJ;
       fM->Close(); fJ->Close();
     }
 
@@ -297,12 +347,12 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
       if (!fM || fM->IsZombie() || !fJ || fJ->IsZombie()) { if(fM)fM->Close(); if(fJ)fJ->Close(); continue; }
 
       TH1* hMultM = GetObj<TH1>(fM, MULT_HIST);
-      TH2* hLbM   = GetObj<TH2>(fM, HB_LB);
-      TH2* hBM    = GetObj<TH2>(fM, HB_B);
+      TH2* hLbM   = GetBeautyLambdaHist(fM, Form("hLbM_%d_%d", ic, is));
+      TH2* hBM    = GetBeautyBHist(fM, Form("hBM_%d_%d", ic, is));
 
       TH1* hMultJ = GetObj<TH1>(fJ, MULT_HIST);
-      TH2* hLbJ   = GetObj<TH2>(fJ, HB_LB);
-      TH2* hBJ    = GetObj<TH2>(fJ, HB_B);
+      TH2* hLbJ   = GetBeautyLambdaHist(fJ, Form("hLbJ_%d_%d", ic, is));
+      TH2* hBJ    = GetBeautyBHist(fJ, Form("hBJ_%d_%d", ic, is));
 
       auto yrM = PercentileRange(hMultM, kClasses[ic].pTop, kClasses[ic].pBot);
       auto yrJ = PercentileRange(hMultJ, kClasses[ic].pTop, kClasses[ic].pBot);
@@ -316,6 +366,10 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
       if (NBM > 0) rM.push_back(NLbM/NBM);
       if (NBJ > 0) rJ.push_back(NLbJ/NBJ);
 
+      delete hLbM;
+      delete hBM;
+      delete hLbJ;
+      delete hBJ;
       fM->Close(); fJ->Close();
     }
 
@@ -349,10 +403,14 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples(const char* dateTag = ""
   TString resolvedDate = PlotPathUtils::ResolveAnalysisDate(dateTag);
   if (resolvedDate.Length() == 0) return;
 
-  TString cPrefixMONASH = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Charm",  "ccbar_MONASH_sub");
-  TString cPrefixJUN    = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Charm",  "ccbar_JUNCTIONS_sub");
-  TString bPrefixMONASH = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Beauty", "bbbar_MONASH_sub");
-  TString bPrefixJUN    = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Beauty", "bbbar_JUNCTIONS_sub");
+  TString cPrefixMONASH = PlotPathUtils::ResolveAnalyzedPrefix(
+    resolvedDate, "Charm", {"hf_MONASH_sub", "ccbar_MONASH_sub"});
+  TString cPrefixJUN = PlotPathUtils::ResolveAnalyzedPrefix(
+    resolvedDate, "Charm", {"hf_JUNCTIONS_sub", "ccbar_JUNCTIONS_sub"});
+  TString bPrefixMONASH = PlotPathUtils::ResolveAnalyzedPrefix(
+    resolvedDate, "Beauty", {"hf_MONASH_sub", "bbbar_MONASH_sub"});
+  TString bPrefixJUN = PlotPathUtils::ResolveAnalyzedPrefix(
+    resolvedDate, "Beauty", {"hf_JUNCTIONS_sub", "bbbar_JUNCTIONS_sub"});
 
   std::cout << "HF ratio input date: " << resolvedDate << "\n";
   std::cout << "  Charm MONASH     : " << cPrefixMONASH << "*.root\n";

@@ -98,11 +98,62 @@ T* GetObj(TFile* f, const char* name) {
     return f ? dynamic_cast<T*>(f->Get(name)) : nullptr;
 }
 
-TH2* GetCharmLambdaHist(TFile* f)
+TH2* CloneTH2(TH2* h, const char* cloneName)
+{
+    if (!h) return nullptr;
+    TH2* clone = dynamic_cast<TH2*>(h->Clone(cloneName));
+    if (clone) clone->SetDirectory(nullptr);
+    return clone;
+}
+
+TH2* GetChargeCombinedHist(TFile* f,
+                           const std::vector<TString>& combinedNames,
+                           const std::vector<TString>& splitBases,
+                           const char* cloneName)
 {
     if (!f) return nullptr;
-    if (TH2* h = GetObj<TH2>(f, "fHistPtLambdac")) return h;
-    return GetObj<TH2>(f, "fHistPtLambdacPlus");
+
+    for (const TString& name : combinedNames) {
+        if (TH2* h = GetObj<TH2>(f, name.Data())) return CloneTH2(h, cloneName);
+    }
+
+    for (const TString& base : splitBases) {
+        TH2* hParticle = GetObj<TH2>(f, Form("%sParticle", base.Data()));
+        TH2* hBar = GetObj<TH2>(f, Form("%sBar", base.Data()));
+        if (!hParticle || !hBar) continue;
+
+        TH2* combined = CloneTH2(hParticle, cloneName);
+        if (!combined) continue;
+        combined->Add(hBar);
+        return combined;
+    }
+
+    return nullptr;
+}
+
+TH2* GetCharmLambdaHist(TFile* f, const char* cloneName)
+{
+    return GetChargeCombinedHist(
+        f,
+        {"fHistPtLambdac", "fHistPtLambdacPlus"},
+        {"fHistPtLambdac", "fHistPtLambdacPlus"},
+        cloneName
+    );
+}
+
+TH2* GetCharmDHist(TFile* f, const char* cloneName)
+{
+    return GetChargeCombinedHist(f, {"fHistPtDplus"}, {"fHistPtDplus"}, cloneName);
+}
+
+TH2* GetBeautyLambdaHist(TFile* f, const char* cloneName)
+{
+    return GetChargeCombinedHist(f, {"fHistPtLambdab"}, {"fHistPtLambdab"}, cloneName);
+}
+
+TH2* GetBeautyBHist(TFile* f, const char* cloneName)
+{
+    return GetChargeCombinedHist(f, {"fHistPtBplus"}, {"fHistPtBplus"}, cloneName);
 }
 
 // Percentile range: highest multiplicity = highest mult bin
@@ -338,13 +389,6 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
 
     const char* MULT_HIST = "fHistMultiplicity";
 
-    // Charm
-    const char* HC_D  = "fHistPtDplus";
-
-    // Beauty
-    const char* HB_LB = "fHistPtLambdab";
-    const char* HB_B  = "fHistPtBplus";
-
     // ---------- Load files ----------
     std::vector<TFile*> fCM(nSub,nullptr), fCJ(nSub,nullptr);
     std::vector<TFile*> fBM(nSub,nullptr), fBJ(nSub,nullptr);
@@ -369,12 +413,12 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
 
         if (ok){
             cM[i].mult = GetObj<TH1>(fCM[i], MULT_HIST);
-            cM[i].lc   = GetCharmLambdaHist(fCM[i]);
-            cM[i].d    = GetObj<TH2>(fCM[i], HC_D);
+            cM[i].lc   = GetCharmLambdaHist(fCM[i], Form("hLcCM_sub%d", i));
+            cM[i].d    = GetCharmDHist(fCM[i], Form("hDCM_sub%d", i));
 
             cJ[i].mult = GetObj<TH1>(fCJ[i], MULT_HIST);
-            cJ[i].lc   = GetCharmLambdaHist(fCJ[i]);
-            cJ[i].d    = GetObj<TH2>(fCJ[i], HC_D);
+            cJ[i].lc   = GetCharmLambdaHist(fCJ[i], Form("hLcCJ_sub%d", i));
+            cJ[i].d    = GetCharmDHist(fCJ[i], Form("hDCJ_sub%d", i));
 
             if (!(cM[i].mult && cM[i].lc && cM[i].d)) { std::cout<<"Missing charm MONASH hists in "<<cNameM<<"\n"; ok=false; }
             if (!(cJ[i].mult && cJ[i].lc && cJ[i].d)) { std::cout<<"Missing charm JUNCTIONS hists in "<<cNameJ<<"\n"; ok=false; }
@@ -391,12 +435,12 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
 
         if (ok){
             bM[i].mult = GetObj<TH1>(fBM[i], MULT_HIST);
-            bM[i].lb   = GetObj<TH2>(fBM[i], HB_LB);
-            bM[i].b    = GetObj<TH2>(fBM[i], HB_B);
+            bM[i].lb   = GetBeautyLambdaHist(fBM[i], Form("hLbBM_sub%d", i));
+            bM[i].b    = GetBeautyBHist(fBM[i], Form("hBBM_sub%d", i));
 
             bJ[i].mult = GetObj<TH1>(fBJ[i], MULT_HIST);
-            bJ[i].lb   = GetObj<TH2>(fBJ[i], HB_LB);
-            bJ[i].b    = GetObj<TH2>(fBJ[i], HB_B);
+            bJ[i].lb   = GetBeautyLambdaHist(fBJ[i], Form("hLbBJ_sub%d", i));
+            bJ[i].b    = GetBeautyBHist(fBJ[i], Form("hBBJ_sub%d", i));
 
             if (!(bM[i].mult && bM[i].lb && bM[i].b)) { std::cout<<"Missing beauty MONASH hists in "<<bNameM<<"\n"; ok=false; }
             if (!(bJ[i].mult && bJ[i].lb && bJ[i].b)) { std::cout<<"Missing beauty JUNCTIONS hists in "<<bNameJ<<"\n"; ok=false; }
@@ -406,6 +450,22 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
     }
 
     if (!ok){
+        for (auto& sample : cM) {
+            delete sample.lc;
+            delete sample.d;
+        }
+        for (auto& sample : cJ) {
+            delete sample.lc;
+            delete sample.d;
+        }
+        for (auto& sample : bM) {
+            delete sample.lb;
+            delete sample.b;
+        }
+        for (auto& sample : bJ) {
+            delete sample.lb;
+            delete sample.b;
+        }
         for (auto* f : fCM) if (f) f->Close();
         for (auto* f : fCJ) if (f) f->Close();
         for (auto* f : fBM) if (f) f->Close();
@@ -556,6 +616,23 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
     for (auto* h : lb_BJ) if (h) delete h;
     for (auto* h : b_BJ)  if (h) delete h;
 
+    for (auto& sample : cM) {
+        delete sample.lc;
+        delete sample.d;
+    }
+    for (auto& sample : cJ) {
+        delete sample.lc;
+        delete sample.d;
+    }
+    for (auto& sample : bM) {
+        delete sample.lb;
+        delete sample.b;
+    }
+    for (auto& sample : bJ) {
+        delete sample.lb;
+        delete sample.b;
+    }
+
     for (auto* f : fCM) if (f) f->Close();
     for (auto* f : fCJ) if (f) f->Close();
     for (auto* f : fBM) if (f) f->Close();
@@ -579,10 +656,14 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples(const char* da
     TString resolvedDate = PlotPathUtils::ResolveAnalysisDate(dateTag);
     if (resolvedDate.Length() == 0) return;
 
-    TString cPrefixMONASH = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Charm",  "ccbar_MONASH_sub");
-    TString cPrefixJUN    = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Charm",  "ccbar_JUNCTIONS_sub");
-    TString bPrefixMONASH = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Beauty", "bbbar_MONASH_sub");
-    TString bPrefixJUN    = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Beauty", "bbbar_JUNCTIONS_sub");
+    TString cPrefixMONASH = PlotPathUtils::ResolveAnalyzedPrefix(
+        resolvedDate, "Charm", {"hf_MONASH_sub", "ccbar_MONASH_sub"});
+    TString cPrefixJUN = PlotPathUtils::ResolveAnalyzedPrefix(
+        resolvedDate, "Charm", {"hf_JUNCTIONS_sub", "ccbar_JUNCTIONS_sub"});
+    TString bPrefixMONASH = PlotPathUtils::ResolveAnalyzedPrefix(
+        resolvedDate, "Beauty", {"hf_MONASH_sub", "bbbar_MONASH_sub"});
+    TString bPrefixJUN = PlotPathUtils::ResolveAnalyzedPrefix(
+        resolvedDate, "Beauty", {"hf_JUNCTIONS_sub", "bbbar_JUNCTIONS_sub"});
 
     std::cout << "HF spectra input date: " << resolvedDate << "\n";
     std::cout << "  Charm MONASH     : " << cPrefixMONASH << "*.root\n";

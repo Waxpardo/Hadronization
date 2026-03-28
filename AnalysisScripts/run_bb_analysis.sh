@@ -1,15 +1,45 @@
 #!/bin/bash
 # run_bb_mult_pt_analysis_multi.sh
 
-if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
-  echo "Usage: $0 OUTPUT_TAG [NSUB]"
+set -euo pipefail
+
+if [ "$#" -lt 1 ] || [ "$#" -gt 3 ]; then
+  echo "Usage: $0 OUTPUT_TAG [NSUB] [CHARGE_MODE]"
+  echo "   or: $0 OUTPUT_TAG [CHARGE_MODE] [NSUB]"
   echo "  OUTPUT_TAG = output folder name inside AnalyzedData (example: 12-01-2026)"
   echo "  NSUB       = number of subsamples (optional, default 10)"
+  echo "  CHARGE_MODE = combined or separate (optional, default combined)"
   exit 1
 fi
 
 OUTPUT_TAG="$1"
-NSUB="${2:-10}"
+NSUB="10"
+CHARGE_MODE="combined"
+
+if [ "$#" -ge 2 ]; then
+  if [[ "$2" =~ ^[0-9]+$ ]]; then
+    NSUB="$2"
+    CHARGE_MODE="${3:-combined}"
+  else
+    CHARGE_MODE="$2"
+    if [ "$#" -ge 3 ]; then
+      NSUB="$3"
+    fi
+  fi
+fi
+
+case "${CHARGE_MODE}" in
+  combined|separate) ;;
+  *)
+    echo "ERROR: CHARGE_MODE must be 'combined' or 'separate' (got '${CHARGE_MODE}')"
+    exit 1
+    ;;
+esac
+
+if ! [[ "${NSUB}" =~ ^[0-9]+$ ]]; then
+  echo "ERROR: NSUB must be an integer (got '${NSUB}')"
+  exit 1
+fi
 
 # Resolve Hadronization base from base_path.txt
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -22,6 +52,14 @@ BASEDIR="${BASEDIR%/}"
 export HADRONIZATION_BASE="${BASEDIR}"
 
 cd "${BASEDIR}" || exit 1
+
+if [ ! -f "${BASEDIR}/setupEnv.sh" ]; then
+  echo "ERROR: setupEnv.sh not found at ${BASEDIR}/setupEnv.sh"
+  exit 1
+fi
+
+export SETUPENV_QUIET=1
+source "${BASEDIR}/setupEnv.sh"
 
 MONASH_DIR="${BASEDIR}/RootFiles/bbbar/MONASH"
 JUNCTIONS_DIR="${BASEDIR}/RootFiles/bbbar/JUNCTIONS"
@@ -40,4 +78,4 @@ echo "Running split beauty analysis from:"
 echo "  ${MONASH_DIR}"
 echo "  ${JUNCTIONS_DIR}"
 
-root -l -b -q "AnalysisScripts/bb_mult_pt_analysis_multi.C+(${NSUB}, \"${OUTPUT_TAG}\")"
+root -l -b -q "AnalysisScripts/bb_mult_pt_analysis_multi.C+(${NSUB}, \"${OUTPUT_TAG}\", \"${CHARGE_MODE}\")"

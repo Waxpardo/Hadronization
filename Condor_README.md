@@ -24,10 +24,10 @@ The unified workflow is the recommended setup for the current balancing and hadr
 
 From the Hadronization base on the shared filesystem:
 
-´´´bash
+```bash
 ./update_submit_paths.sh
 condor_submit submitCondor_10M.sub
-´´´
+```
 
 This submits `10 x 1,000,000` jobs for each of:
 - `bbbar MONASH`
@@ -41,9 +41,10 @@ This submits `10 x 1,000,000` jobs for each of:
 
 From the Hadronization base on the shared filesystem:
 
-´´´bash
+```bash
+./update_submit_paths.sh
 condor_submit submitCondor_hf_10M.sub
-´´´
+```
 
 This submits jobs for the unified heavy-flavour executable, typically for:
 - `MONASH`
@@ -58,6 +59,8 @@ Example:
 ## What gets executed
 
 Both submit files call `runCondorJob.sh` from the Hadronization base.
+
+The submit files in the repo carry an absolute path that should be refreshed with `./update_submit_paths.sh` whenever the project is moved.
 
 The wrapper script:
 1. resolves the Hadronization base path
@@ -78,33 +81,33 @@ In the legacy split setup, `runCondorJob.sh` selects the correct executable base
 
 Typical executables:
 
-´´´text
+```text
 Hadronization/SimulationScripts/bbbarcorrelations_status
 Hadronization/SimulationScripts/bbbarcorrelations_status_JUNCTIONS
 Hadronization/SimulationScripts/ccbarcorrelations_status
 Hadronization/SimulationScripts/ccbarcorrelations_status_JUNCTIONS
-´´´
+```
 
 Typical `.cmnd` templates:
 
-´´´text
+```text
 Hadronization/SimulationScripts/pythiasettings_Hard_Low_bb.cmnd
 Hadronization/SimulationScripts/pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd
 Hadronization/SimulationScripts/pythiasettings_Hard_Low_cc.cmnd
 Hadronization/SimulationScripts/pythiasettings_Hard_Low_cc_JUNCTIONS.cmnd
-´´´
+```
 
 Each legacy job typically:
 1. creates a per-job `.cmnd` file
 2. runs the chosen split executable
 3. writes output under:
-   ´´´text
+   ```text
    Hadronization/RootFiles/<CHANNEL>/<TUNE>/
-   ´´´
+   ```
 4. uses a working directory under:
-   ´´´text
+   ```text
    Hadronization/Jobs/<CHANNEL>/<TUNE>/...
-   ´´´
+   ```
 
 ---
 
@@ -115,28 +118,28 @@ In the unified setup, `runCondorJob.sh` selects the executable based on:
 
 Typical executable:
 
-´´´text
+```text
 Hadronization/SimulationScripts/heavyflavourcorrelations_status
-´´´
+```
 
 Typical `.cmnd` templates:
 
-´´´text
+```text
 Hadronization/SimulationScripts/pythiasettings_Hard_Low_ccbb_MONASH.cmnd
 Hadronization/SimulationScripts/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd
-´´´
+```
 
 Each unified job typically:
 1. creates a per-job `.cmnd` file
 2. runs the unified heavy-flavour executable in either `monash` or `junctions` mode
 3. writes output under:
-   ´´´text
+   ```text
    Hadronization/RootFiles/HF/<TUNE>/
-   ´´´
+   ```
 4. uses a working directory under:
-   ´´´text
+   ```text
    Hadronization/Jobs/HF/<TUNE>/...
-   ´´´
+   ```
 
 ---
 
@@ -146,12 +149,12 @@ The current Condor submit files pass `CLUSTERID` into `runCondorJob.sh`, so batc
 
 Typical Condor-managed paths now look like:
 
-´´´text
+```text
 Jobs/HF/JUNCTIONS/cluster_<CLUSTERID>/job_<JOBID>/
 RootFiles/HF/JUNCTIONS/hf_JUNCTIONS_cluster<CLUSTERID>_job<JOBID>.root
 Jobs/bbbar/MONASH/cluster_<CLUSTERID>/job_<JOBID>/
 RootFiles/bbbar/MONASH/bbbar_MONASH_cluster<CLUSTERID>_job<JOBID>.root
-´´´
+```
 
 This prevents collisions between different Condor submissions for the same workflow and tune.
 
@@ -165,9 +168,9 @@ For manual runs without a cluster id, the wrapper still uses the simpler `job_<J
 
 Current legacy argument layout:
 
-´´´text
+```text
 CLUSTERID JOBID CHANNEL TUNE NEVT_PER_JOB
-´´´
+```
 
 where:
 - `CLUSTERID` = Condor cluster id
@@ -182,9 +185,9 @@ where:
 
 Current unified argument layout:
 
-´´´text
+```text
 CLUSTERID JOBID TUNE NEVT_PER_JOB
-´´´
+```
 
 where:
 - `CLUSTERID` = Condor cluster id
@@ -200,21 +203,21 @@ where:
 
 Outputs are written to:
 
-´´´text
+```text
 Hadronization/RootFiles/bbbar/MONASH/
 Hadronization/RootFiles/bbbar/JUNCTIONS/
 Hadronization/RootFiles/ccbar/MONASH/
 Hadronization/RootFiles/ccbar/JUNCTIONS/
-´´´
+```
 
 Working directories are typically under:
 
-´´´text
+```text
 Hadronization/Jobs/bbbar/MONASH/cluster_<CLUSTERID>/job_<JOBID>/
 Hadronization/Jobs/bbbar/JUNCTIONS/cluster_<CLUSTERID>/job_<JOBID>/
 Hadronization/Jobs/ccbar/MONASH/cluster_<CLUSTERID>/job_<JOBID>/
 Hadronization/Jobs/ccbar/JUNCTIONS/cluster_<CLUSTERID>/job_<JOBID>/
-´´´
+```
 
 ---
 
@@ -222,28 +225,28 @@ Hadronization/Jobs/ccbar/JUNCTIONS/cluster_<CLUSTERID>/job_<JOBID>/
 
 Outputs are written to:
 
-´´´text
+```text
 Hadronization/RootFiles/HF/MONASH/
 Hadronization/RootFiles/HF/JUNCTIONS/
-´´´
+```
 
 Working directories are typically under:
 
-´´´text
+```text
 Hadronization/Jobs/HF/MONASH/cluster_<CLUSTERID>/job_<JOBID>/
 Hadronization/Jobs/HF/JUNCTIONS/cluster_<CLUSTERID>/job_<JOBID>/
-´´´
+```
 
 Logs go to:
 
-´´´text
+```text
 Hadronization/logs/HF/MONASH/
 Hadronization/logs/HF/JUNCTIONS/
 Hadronization/logs/bbbar/MONASH/
 Hadronization/logs/bbbar/JUNCTIONS/
 Hadronization/logs/ccbar/MONASH/
 Hadronization/logs/ccbar/JUNCTIONS/
-´´´
+```
 
 ---
 
@@ -272,21 +275,21 @@ If you want to inspect a running job, check the work directory first.
 
 Typical variables in a legacy submit file:
 
-´´´text
+```text
 NEVT_PER_JOB = 1000000
 CHANNEL = bbbar
 TUNE = MONASH
-´´´
+```
 
 Typical arguments line:
 
-´´´text
+```text
 arguments = $(Cluster) $(JOBID) $(CHANNEL) $(TUNE) $(NEVT_PER_JOB)
-´´´
+```
 
 Typical queue blocks:
 
-´´´text
+```text
 CHANNEL = bbbar
 TUNE = MONASH
 queue JOBID from (
@@ -322,7 +325,7 @@ queue JOBID from (
 ...
 9
 )
-´´´
+```
 
 ---
 
@@ -330,33 +333,33 @@ queue JOBID from (
 
 Typical variables in a unified submit file:
 
-´´´text
+```text
 NEVT_PER_JOB = 1000000
 NJOBS = 10
 TUNE = MONASH or JUNCTIONS
-´´´
+```
 
 Recommended arguments line:
 
-´´´text
+```text
 arguments = $(Cluster) $(JOBID) $(TUNE) $(NEVT_PER_JOB)
-´´´
+```
 
 Example for `10M` per tune using `10 jobs × 1M`:
 
-´´´text
+```text
 NEVT_PER_JOB = 1000000
-´´´
+```
 
 Example for `10M` per tune using `20 jobs × 500k`:
 
-´´´text
+```text
 NEVT_PER_JOB = 500000
-´´´
+```
 
 ### Example queue itemdata block for a unified submit file
 
-´´´text
+```text
 queue JOBID, TUNE from (
 0, MONASH
 1, MONASH
@@ -379,11 +382,11 @@ queue JOBID, TUNE from (
 8, JUNCTIONS
 9, JUNCTIONS
 )
-´´´
+```
 
 Or for a JUNCTIONS-only test run:
 
-´´´text
+```text
 queue JOBID, TUNE from (
 0, JUNCTIONS
 1, JUNCTIONS
@@ -391,7 +394,7 @@ queue JOBID, TUNE from (
 ...
 9, JUNCTIONS
 )
-´´´
+```
 
 ---
 
@@ -399,9 +402,9 @@ queue JOBID, TUNE from (
 
 The base path is stored in:
 
-´´´text
+```text
 base_path.txt
-´´´
+```
 
 Scripts resolve the base path in this order:
 1. `HADRONIZATION_BASE` environment variable
@@ -423,9 +426,9 @@ you must update them when the base path changes.
 
 In the older workflow, this was done with:
 
-´´´bash
+```bash
 ./update_submit_paths.sh
-´´´
+```
 
 This typically rewrites submit files such as:
 - `submitCondor_10M.sub`
@@ -433,10 +436,10 @@ This typically rewrites submit files such as:
 
 so that:
 
-´´´text
+```text
 executable = <BASE>/runCondorJob.sh
 initialdir = <BASE>
-´´´
+```
 
 If your newer submit files already use the correct absolute base path, no rewrite step is needed.
 
@@ -448,15 +451,15 @@ If your newer submit files already use the correct absolute base path, no rewrit
 
 To see your current jobs:
 
-´´´bash
+```bash
 condor_q <username>
-´´´
+```
 
 Example:
 
-´´´bash
+```bash
 condor_q ipardoza
-´´´
+```
 
 This shows:
 - `DONE`
@@ -471,15 +474,15 @@ This shows:
 
 For one specific job:
 
-´´´bash
+```bash
 condor_q <cluster>.<proc> -better-analyze
-´´´
+```
 
 Example:
 
-´´´bash
+```bash
 condor_q 4174875.0 -better-analyze
-´´´
+```
 
 ---
 
@@ -487,21 +490,21 @@ condor_q 4174875.0 -better-analyze
 
 To see all held jobs:
 
-´´´bash
+```bash
 condor_q <username> -hold
-´´´
+```
 
 To print hold reasons:
 
-´´´bash
+```bash
 condor_q <cluster> -af:j ClusterId ProcId HoldReason
-´´´
+```
 
 Example:
 
-´´´bash
+```bash
 condor_q 4174992 -af:j ClusterId ProcId HoldReason
-´´´
+```
 
 ---
 
@@ -509,27 +512,27 @@ condor_q 4174992 -af:j ClusterId ProcId HoldReason
 
 To remove an entire cluster:
 
-´´´bash
+```bash
 condor_rm <clusterid>
-´´´
+```
 
 Example:
 
-´´´bash
+```bash
 condor_rm 4174875
-´´´
+```
 
 To remove one specific job:
 
-´´´bash
+```bash
 condor_rm <clusterid>.<procid>
-´´´
+```
 
 Example:
 
-´´´bash
+```bash
 condor_rm 4174875.0
-´´´
+```
 
 ---
 
@@ -537,15 +540,15 @@ condor_rm 4174875.0
 
 To inspect completed jobs:
 
-´´´bash
+```bash
 condor_history <clusterid>
-´´´
+```
 
 Example:
 
-´´´bash
+```bash
 condor_history 4174875
-´´´
+```
 
 ---
 
@@ -553,10 +556,10 @@ condor_history 4174875
 
 Logs are written under:
 
-´´´text
+```text
 Hadronization/logs/HF/<TUNE>/
 Hadronization/logs/<CHANNEL>/<TUNE>/
-´´´
+```
 
 Typical filenames include:
 - cluster id
@@ -566,21 +569,21 @@ Typical filenames include:
 
 Examples:
 
-´´´text
+```text
 logs/HF/MONASH/job_4174875_0.out
 logs/HF/MONASH/job_4174875_0.err
 logs/bbbar/JUNCTIONS/job_4175667_7.out
 logs/ccbar/JUNCTIONS/job_4175667_7.err
-´´´
+```
 
 Use:
 
-´´´bash
+```bash
 tail -n 50 logs/HF/<TUNE>/job_<CLUSTER>_<JOBID>.out
 tail -n 50 logs/HF/<TUNE>/job_<CLUSTER>_<JOBID>.err
 tail -n 50 logs/<CHANNEL>/<TUNE>/job_<CLUSTER>_<JOBID>.out
 tail -n 50 logs/<CHANNEL>/<TUNE>/job_<CLUSTER>_<JOBID>.err
-´´´
+```
 
 Empty `.err` files are usually a good sign.
 
@@ -600,12 +603,12 @@ Healthy `.out` logs typically show:
 
 Check output directories with:
 
-´´´bash
+```bash
 ls -lh RootFiles/bbbar/MONASH
 ls -lh RootFiles/bbbar/JUNCTIONS
 ls -lh RootFiles/ccbar/MONASH
 ls -lh RootFiles/ccbar/JUNCTIONS
-´´´
+```
 
 ---
 
@@ -613,27 +616,27 @@ ls -lh RootFiles/ccbar/JUNCTIONS
 
 Check output directories with:
 
-´´´bash
+```bash
 ls -lh RootFiles/HF/MONASH
 ls -lh RootFiles/HF/JUNCTIONS
-´´´
+```
 
 Count how many ROOT files are present:
 
-´´´bash
+```bash
 find RootFiles/HF/MONASH -maxdepth 1 -name '*.root' | wc -l
 find RootFiles/HF/JUNCTIONS -maxdepth 1 -name '*.root' | wc -l
-´´´
+```
 
 ### Important note
 If jobs are still running, the output directory may not yet contain files, because files are often moved there only at the end of a successful job.
 
 In that case, inspect the work directory:
 
-´´´bash
+```bash
 ls -lh Jobs/HF/MONASH
 ls -lh Jobs/HF/JUNCTIONS
-´´´
+```
 
 ---
 
@@ -657,18 +660,18 @@ Use a fresh output/work directory namespace for the resubmission, or extend the 
 
 ## 2. Executable not found
 If logs show:
-´´´text
+```text
 ERROR: Executable not found or not executable
-´´´
+```
 then:
 - the executable was not compiled
 - or the path in `runCondorJob.sh` is wrong
 
 Check:
 
-´´´bash
+```bash
 ls -l SimulationScripts/heavyflavourcorrelations_status
-´´´
+```
 
 or the corresponding legacy executable.
 
@@ -676,29 +679,29 @@ or the corresponding legacy executable.
 
 ## 3. `.cmnd` template not found
 If logs show:
-´´´text
+```text
 ERROR: Config template not found
-´´´
+```
 check that the required `.cmnd` file exists in `SimulationScripts/`.
 
 ---
 
 ## 4. `root` or PYTHIA environment not found
 If an analysis or build step says:
-´´´text
+```text
 root: command not found
-´´´
+```
 or
-´´´text
+```text
 pythia8-config: command not found
-´´´
+```
 then the environment was not loaded.
 
 Load it with:
 
-´´´bash
+```bash
 source ./setupEnv.sh
-´´´
+```
 
 ---
 
@@ -727,19 +730,19 @@ Before submitting jobs, check:
 
 Recommended checks:
 
-´´´bash
+```bash
 ls -l SimulationScripts/
 ls -l SimulationScripts/pythiasettings_Hard_Low_ccbb_MONASH.cmnd
 ls -l SimulationScripts/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd
 ./update_submit_paths.sh
-´´´
+```
 
 For unified heavy-flavour production:
 
-´´´bash
+```bash
 mkdir -p RootFiles/HF/MONASH RootFiles/HF/JUNCTIONS
 mkdir -p Jobs/HF/MONASH Jobs/HF/JUNCTIONS
-´´´
+```
 
 ---
 

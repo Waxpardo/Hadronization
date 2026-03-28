@@ -1,215 +1,204 @@
-# Simulation Scripts (bbbar/ccbar correlations and unified heavy-flavour generation)
+# Simulation Scripts
 
-This directory contains the simulation programs used to generate heavy-flavour events with PYTHIA8 and store final-state information in ROOT files for multiplicity, pT, balancing, and azimuthal angular-correlation studies.
+This directory contains the PYTHIA8 producers used to generate heavy-flavour events and store the
+selected final-state information in ROOT files for the downstream multiplicity, spectra, balancing,
+and angular-correlation studies.
 
-The directory now supports **two workflows**:
+The simulation layer supports two workflows:
 
-1. **Legacy split generation**
-   - separate **bbbar** and **ccbar** producers
-   - each run generates only one hard heavy-flavour channel at a time
+1. Unified heavy-flavour generation
+   The recommended workflow. Charm and beauty are generated in the same PYTHIA run and saved into
+   a common output tree.
+2. Legacy split generation
+   Charm and beauty are generated independently in separate runs. This is still useful for
+   reference samples and direct comparisons to older studies.
 
-2. **Unified heavy-flavour generation**
-   - a single producer generates **both charm and beauty in the same PYTHIA run**
-   - the event record is scanned once and both heavy-flavour sectors are saved together
-   - this is the recommended setup for the current balancing and hadronization studies
 
----
+## Main files
 
-## Overview of available scripts
+### Unified heavy-flavour producer
 
-## Legacy split generation scripts
-
-These four scripts generate one heavy-flavour channel per run.
-
-### MONASH (baseline tune)
-- `bbbarcorrelations_status.cpp`  
-  Uses `pythiasettings_Hard_Low_bb.cmnd` and generates **bbbar** events.
-
-- `ccbarcorrelations_status.cpp`  
-  Uses `pythiasettings_Hard_Low_cc.cmnd` and generates **ccbar** events.
-
-### JUNCTIONS (modified tune with junctions / CR changes)
-- `bbbarcorrelations_status_JUNCTIONS.cpp`  
-  Uses `pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd` and generates **bbbar** events.
-
-- `ccbarcorrelations_status_JUNCTIONS.cpp`  
-  Uses `pythiasettings_Hard_Low_cc_JUNCTIONS.cmnd` and generates **ccbar** events.
-
-These scripts are still useful when a clean single-channel reference sample is needed.
-
----
-
-## Unified heavy-flavour generation script
-
-### Single executable with tune selector
 - `heavyflavourcorrelations_status.cpp`
 
-This program:
-1. Loads either a MONASH or JUNCTIONS settings card from a command-line mode argument.
-2. Runs a **single PYTHIA generation**.
-3. Enables **both hard charm and hard beauty production** in that same run through the `.cmnd` file.
-4. Builds event-level charged multiplicity from charged primaries.
-5. Saves final-state charm hadrons, beauty hadrons, `Bc` hadrons, and pions into one ROOT TTree.
-6. Fills QA histograms for charm and beauty observables.
+  Single executable that runs a unified heavy-flavour production and stores charm hadrons, beauty
+  hadrons, `Bc` hadrons, pions, multiplicity, and per-event heavy-flavour counters in one output
+  ROOT file.
 
-The two settings files used by this executable are:
+Settings cards:
+
 - `pythiasettings_Hard_Low_ccbb_MONASH.cmnd`
 - `pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd`
 
-This unified script is the recommended production mode for:
-- charm vs beauty balancing comparisons
-- MONASH vs JUNCTIONS hadronization comparisons
-- shared-event analyses where both sectors should come from the same production sample
+### Legacy split producers
 
----
+- `bbbarcorrelations_status.cpp`
+- `bbbarcorrelations_status_JUNCTIONS.cpp`
+- `ccbarcorrelations_status.cpp`
+- `ccbarcorrelations_status_JUNCTIONS.cpp`
 
-## Common workflow of the simulation scripts
+These generate one heavy-flavour channel per run and are the producers used for the independent
+beauty-only and charm-only samples.
 
-All scripts follow the same general structure:
+Settings cards:
 
-1. Configure PYTHIA8 from a `.cmnd` file.
-2. Generate events.
-3. Compute event-level multiplicity from charged primaries.
-4. Save selected final-state particles into a `TTree`.
-5. Fill QA histograms for multiplicity, PDG content, pT, and angular correlations.
+- `pythiasettings_Hard_Low_bb.cmnd`
+- `pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd`
+- `pythiasettings_Hard_Low_cc.cmnd`
+- `pythiasettings_Hard_Low_cc_JUNCTIONS.cmnd`
 
----
+### Build and helper files
 
-## What each type of script stores
+- `Makefile`
+  Builds all split and unified simulation executables.
+- `Batching_MONASH.sh`
+  Helper for regrouping older production outputs into batch directories.
 
-## Legacy split scripts
 
-The legacy split scripts store:
-- final-state heavy-flavour hadrons of the relevant channel
-- pions (`pi+`, `pi-`, `pi0`)
+## Recommended workflow
+
+For current production and hadronization studies, use:
+
+1. `heavyflavourcorrelations_status.cpp`
+2. `AnalysisScripts/hf_mult_pt_analysis_multi.C`
+3. `PlottingScripts/Pt and Multiplicity/...`
+4. `PlottingScripts/FinalAnalysis/...`
+
+Use the split producers only when you explicitly want an independent charm-only or beauty-only
+sample.
+
+
+## What the programs store
+
+All simulation programs follow the same broad pattern:
+
+1. Load a `.cmnd` file.
+2. Generate events in PYTHIA8.
+3. Build an event-level charged-particle multiplicity.
+4. Select and store only the final-state particles relevant for the downstream studies.
+5. Fill a small set of QA histograms.
+
+### Legacy split outputs
+
+The split producers store:
+
+- the selected heavy-flavour hadrons for the chosen channel
+- pions
 - event multiplicity
 
-### Legacy output structure
+Output structure:
 
-Each script writes a ROOT file with:
+- `TTree` named `tree`
+- branches:
+  - `ID`
+  - `PT`
+  - `ETA`
+  - `Y`
+  - `PHI`
+  - `CHARGE`
+  - `STATUS`
+  - `MOTHER`
+  - `MOTHERID`
+  - `MULTIPLICITY`
+- QA histograms such as:
+  - `hMULTIPLICITY`
+  - `hidBeauty` or `hidCharm`
+  - `hPtTrigger`
+  - `hPtAssociate`
+  - `hDeltaPhiBB` or `hDeltaPhiDD`
+  - `hBeautyPart` or `hCharmPart`
 
-**TTree:** `tree`
+### Unified heavy-flavour outputs
 
-Branches:
-- `ID`
-- `PT`
-- `ETA`
-- `Y`
-- `PHI`
-- `CHARGE`
-- `STATUS`
-- `MOTHER`
-- `MOTHERID`
-- `MULTIPLICITY`
+The unified producer stores:
 
-**QA histograms:**
-- `hMULTIPLICITY`
-- `hidBeauty` or `hidCharm`
-- `hPtTrigger`
-- `hPtAssociate`
-- `hDeltaPhiBB` or `hDeltaPhiDD`
-- `hBeautyPart` or `hCharmPart`
-
----
-
-## Unified heavy-flavour script
-
-The unified script stores:
 - charm hadrons
 - beauty hadrons
 - `Bc` hadrons
 - pions
 - event multiplicity
 - event process code
-- per-event heavy-flavour counts
+- per-event charm, beauty, and `Bc` counters
 
-### Unified output structure
+Output structure:
 
-Each unified heavy-flavour run writes a ROOT file with:
+- `TTree` named `tree`
+- branches:
+  - `ID`
+  - `HFCLASS`
+  - `PT`
+  - `ETA`
+  - `Y`
+  - `PHI`
+  - `CHARGE`
+  - `STATUS`
+  - `MOTHER`
+  - `MOTHERID`
+  - `MULTIPLICITY`
+  - `PROCESSCODE`
+  - `NCHARM`
+  - `NBEAUTY`
+  - `NBC`
+- QA histograms such as:
+  - `hMULTIPLICITY`
+  - `hidCharm`
+  - `hidBeauty`
+  - `hidBc`
+  - `hCharmPart`
+  - `hBeautyPart`
+  - `hBcPart`
+  - `hPtTriggerDD`
+  - `hPtAssociateDD`
+  - `hDeltaPhiDD`
+  - `hPtTriggerBB`
+  - `hPtAssociateBB`
+  - `hDeltaPhiBB`
 
-**TTree:** `tree`
+Meaning of `HFCLASS`:
 
-Branches:
-- `ID`
-- `HFCLASS`
-- `PT`
-- `ETA`
-- `Y`
-- `PHI`
-- `CHARGE`
-- `STATUS`
-- `MOTHER`
-- `MOTHERID`
-- `MULTIPLICITY`
-- `PROCESSCODE`
-- `NCHARM`
-- `NBEAUTY`
-- `NBC`
+- `5`   beauty hadron only
+- `4`   charm hadron only
+- `45`  `Bc` hadron
+- `0`   pion
 
-### Meaning of `HFCLASS`
-- `5`  = beauty hadron only
-- `4`  = charm hadron only
-- `45` = `Bc` hadron
-- `0`  = pion
+Important physics note:
 
-### Unified QA histograms
-- `hMULTIPLICITY`
-- `hidCharm`
-- `hidBeauty`
-- `hidBc`
-- `hCharmPart`
-- `hBeautyPart`
-- `hBcPart`
-- `hPtTriggerDD`
-- `hPtAssociateDD`
-- `hDeltaPhiDD`
-- `hPtTriggerBB`
-- `hPtAssociateBB`
-- `hDeltaPhiBB`
+The unified workflow does not mean every event contains both a hard `c cbar` and a hard `b bbar`
+subprocess. It means the same production configuration allows both channels and the event record
+is scanned for both sectors.
 
----
 
-## How to build the scripts
+## Build instructions
 
-## Legacy split scripts
+From the repository base:
 
-Example build command:
+```bash
+source ./setupEnv.sh
+make -C SimulationScripts
+```
 
-´´´bash
-g++ -O2 -std=c++17 bbbarcorrelations_status.cpp \
-  $(pythia8-config --cxxflags --libs) $(root-config --cflags --libs) \
-  -o bbbarcorrelations_status
-'''
+Useful specific targets:
 
-Similarly:
-'''bash
-g++ -O2 -std=c++17 ccbarcorrelations_status.cpp \
-  $(pythia8-config --cxxflags --libs) $(root-config --cflags --libs) \
-  -o ccbarcorrelations_status
+```bash
+make -C SimulationScripts heavyflavourcorrelations_status
+make -C SimulationScripts bbbarcorrelations_status
+make -C SimulationScripts ccbarcorrelations_status
+make -C SimulationScripts clean
+```
 
-g++ -O2 -std=c++17 bbbarcorrelations_status_JUNCTIONS.cpp \
-  $(pythia8-config --cxxflags --libs) $(root-config --cflags --libs) \
-  -o bbbarcorrelations_status_JUNCTIONS
+The `Makefile` builds:
 
-g++ -O2 -std=c++17 ccbarcorrelations_status_JUNCTIONS.cpp \
-  $(pythia8-config --cxxflags --libs) $(root-config --cflags --libs) \
-  -o ccbarcorrelations_status_JUNCTIONS
-'''
+- `bbbarcorrelations_status`
+- `bbbarcorrelations_status_JUNCTIONS`
+- `ccbarcorrelations_status`
+- `ccbarcorrelations_status_JUNCTIONS`
+- `heavyflavourcorrelations_status`
 
-## Unified heavy-flavour script
+### Manual build fallback
 
-Example build command:
+If `pythia8-config` is not usable on the current machine, load the environment and compile with
+the explicit `PYTHIA8` include and library paths:
 
-'''bash
-g++ -O2 -std=c++17 heavyflavourcorrelations_status.cpp \
-  $(pythia8-config --cxxflags --libs) $(root-config --cflags --libs) \
-  -o heavyflavourcorrelations_status
-'''
-
-### Manual build on environments where `pythia8-config` does not work
-If the environment provides `PYTHIA8` but `pythia8-config` is not usable, compile manually:
-
-'''bash
+```bash
 source ./setupEnv.sh
 
 PY8_LIBDIR="$PYTHIA8/lib"
@@ -223,299 +212,178 @@ g++ -O2 -std=c++17 SimulationScripts/heavyflavourcorrelations_status.cpp \
   -L"$PY8_LIBDIR" -Wl,-rpath,"$PY8_LIBDIR" -lpythia8 \
   $(root-config --libs) \
   -o SimulationScripts/heavyflavourcorrelations_status
-'''
+```
 
----
 
-## How to run the scripts
+## Running locally
 
-## Legacy split scripts
-
-Run format:
-
-'''bash
-./bbbarcorrelations_status output.root 123 456
-./ccbarcorrelations_status output.root 123 456
-./bbbarcorrelations_status_JUNCTIONS output.root 123 456
-./ccbarcorrelations_status_JUNCTIONS output.root 123 456
-'''
-
-The two integer arguments are used to decorrelate the RNG seed.
-
-### Examples
-'''bash
-./bbbarcorrelations_status bbbar_MONASH.root 123 456
-./ccbarcorrelations_status ccbar_MONASH.root 123 456
-./bbbarcorrelations_status_JUNCTIONS bbbar_JUNCTIONS.root 123 456
-./ccbarcorrelations_status_JUNCTIONS ccbar_JUNCTIONS.root 123 456
-'''
-
----
-
-## Unified heavy-flavour script
+### Unified heavy-flavour producer
 
 Run format:
 
-'''bash
-./heavyflavourcorrelations_status MODE output.root 123 456
-'''
+```bash
+./SimulationScripts/heavyflavourcorrelations_status MODE output.root 123 456
+```
 
 where:
+
 - `MODE = monash` or `junctions`
-- `output.root` is the ROOT output filename
-- the two integers are used to decorrelate the RNG seed
+- `output.root` is the output ROOT filename
+- the final two integers decorrelate the RNG seed
 
-### Examples
-'''bash
-./heavyflavourcorrelations_status monash hf_MONASH.root 123 456
-./heavyflavourcorrelations_status junctions hf_JUNCTIONS.root 123 456
-'''
+Examples:
 
-### What the mode argument does
-The mode selects the `.cmnd` file:
-- `monash`     → `pythiasettings_Hard_Low_ccbb_MONASH.cmnd`
-- `junctions`  → `pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd`
+```bash
+./SimulationScripts/heavyflavourcorrelations_status monash \
+  RootFiles/HF/MONASH/hf_MONASH_test.root 123 456
 
-This keeps the executable identical between tunes and changes only the settings card.
+./SimulationScripts/heavyflavourcorrelations_status junctions \
+  RootFiles/HF/JUNCTIONS/hf_JUNCTIONS_test.root 123 456
+```
 
----
+### Legacy split producers
 
-## How the PYTHIA settings are configured
+Run format:
 
-## Legacy split `.cmnd` files
+```bash
+./SimulationScripts/bbbarcorrelations_status output.root 123 456
+./SimulationScripts/ccbarcorrelations_status output.root 123 456
+./SimulationScripts/bbbarcorrelations_status_JUNCTIONS output.root 123 456
+./SimulationScripts/ccbarcorrelations_status_JUNCTIONS output.root 123 456
+```
 
-The split `.cmnd` files control:
+Examples:
 
-- **Number of events**  
-  `Main:numberOfEvents = 1000000`
+```bash
+./SimulationScripts/bbbarcorrelations_status \
+  RootFiles/bbbar/MONASH/bbbar_MONASH_test.root 123 456
 
-- **Beams and energy**  
-  `Beams:eCM = 14000`  
-  `Beams:idA = 2212`  
-  `Beams:idB = 2212`
+./SimulationScripts/ccbarcorrelations_status \
+  RootFiles/ccbar/MONASH/ccbar_MONASH_test.root 123 456
+```
 
-- **Tune**  
-  `Tune:pp = 14`
 
-- **Hard process**
-  - `HardQCD:hardbbbar = on` for beauty-only runs
-  - `HardQCD:hardccbar = on` for charm-only runs
+## PYTHIA settings
 
-- **Low-pT cutoff**  
-  `PhaseSpace:pTHatMin = 1.`
+### Split settings cards
 
-- **Decay suppression**
-  - `ParticleDecays:limitTau0 = on`
-  - `ParticleDecays:tau0Max = 0.01`
-  - explicit `mayDecay = off` for selected heavy-flavour hadrons
+The split cards enable exactly one hard heavy-flavour process:
 
-## Unified heavy-flavour `.cmnd` files
+- `HardQCD:hardbbbar = on`
+- or `HardQCD:hardccbar = on`
 
-The unified `.cmnd` files use the same beam/tune logic, but enable **both** hard heavy-flavour channels:
+### Unified settings cards
+
+The unified cards enable both:
 
 - `HardQCD:hardccbar = on`
 - `HardQCD:hardbbbar = on`
 
-This means the run can generate events from both hard charm and hard beauty production channels in the same production job.
-
-### Important physics note
-This does **not** mean every event contains both a hard `c cbar` and a hard `b bbar` subprocess. It means the same production run allows both channels, and the resulting event record is scanned for both charm and beauty hadrons.
-
----
-
-## JUNCTIONS-specific settings
-
-The JUNCTIONS `.cmnd` files modify hadronization relative to the MONASH baseline. Typical settings include:
-
-- String fragmentation parameters:
-  - `StringPT:sigma`
-  - `StringZ:aLund`
-  - `StringZ:bLund`
-
-- Diquark and strange suppression:
-  - `StringFlav:probQQtoQ`
-  - `StringFlav:ProbStoUD`
-  - `StringFlav:probQQ1toQQ0join`
-
-- MPI scale:
-  - `MultipartonInteractions:pT0Ref`
-
-- Beam remnants:
-  - `BeamRemnants:remnantMode`
-  - `BeamRemnants:saturation`
-
-- Color reconnection and junctions:
-  - `ColourReconnection:mode`
-  - `ColourReconnection:allowDoubleJunRem`
-  - `ColourReconnection:allowJunctions`
-  - `ColourReconnection:junctionCorrection`
-  - `ColourReconnection:timeDilationMode`
-  - `ColourReconnection:timeDilationPar`
-
-These parameters change hadronization and baryon production relative to the MONASH baseline.
-
----
-
-## How to change the settings
-
-## Change event count or beam energy
-Edit the relevant `.cmnd` file:
+Other commonly edited settings include:
 
 - `Main:numberOfEvents`
 - `Beams:eCM`
-- `Beams:idA`
-- `Beams:idB`
+- `PhaseSpace:pTHatMin`
+- `ParticleDecays:limitTau0`
+- `ParticleDecays:tau0Max`
+- `###:mayDecay`
 
-## Change the hard process
+Important note on decay configuration:
 
-### Legacy split production
-Use one of:
-- `HardQCD:hardbbbar = on`
-- `HardQCD:hardccbar = on`
+For `mayDecay`, use the positive PDG id. Do not rely on separate negative-PDG `mayDecay` lines.
 
-### Unified production
-Use both:
-- `HardQCD:hardccbar = on`
-- `HardQCD:hardbbbar = on`
+The JUNCTIONS cards modify hadronization relative to MONASH through the color-reconnection,
+junction, fragmentation, and beam-remnant settings.
 
-## Change the low-pT cutoff
-Edit:
 
-'''text
-PhaseSpace:pTHatMin = <value>
-'''
+## Condor workflow
 
-## Control decays
+The repository root contains the Condor helper scripts:
 
-Two layers affect decays:
+- `runCondorJob.sh`
+- `submitCondor_10M.sub`
+- `submitCondor_hf_10M.sub`
+- `update_submit_paths.sh`
+- `base_path.txt`
 
-1. Global lifetime cut:
-   - `ParticleDecays:limitTau0 = on`
-   - `ParticleDecays:tau0Max = <value>`
+Recommended setup:
 
-2. Explicit per-particle stability:
-   - `###:mayDecay = off` to keep a given hadron stable
-   - set to `on` if decay products are needed
+1. Write the repository path to `base_path.txt`.
+2. Run `./update_submit_paths.sh`.
+3. Submit the desired workflow.
 
-### Important note on PDG sign
-For `mayDecay`, use the **positive PDG id** only. Do not rely on separate negative-PDG `mayDecay` lines.
+Unified heavy-flavour submission:
 
-## Change acceptance or multiplicity definition
-These are controlled in the C++ source, not the `.cmnd` file.
+```bash
+condor_submit submitCondor_hf_10M.sub
+```
 
-Examples:
-- acceptance cuts:
-  - `pTmin`
-  - `etamax`
+Legacy split submission:
 
-- multiplicity definition:
-  - `IsChargedPrimaryForMult()`
-  - `IsPromptByStatus()`
+```bash
+condor_submit submitCondor_10M.sub
+```
 
-## Change how `Bc` hadrons are treated
-In the unified script, `Bc` hadrons are tagged separately with:
-- `HFCLASS = 45`
+`runCondorJob.sh` supports both workflows:
 
-This allows the downstream analysis to:
-- include them with beauty only
-- include them with charm too
-- exclude them from one side to avoid double counting
+- unified:
+  - `runCondorJob.sh JOBID TUNE NEVT_PER_JOB`
+  - `runCondorJob.sh CLUSTERID JOBID TUNE NEVT_PER_JOB`
+- split:
+  - `runCondorJob.sh JOBID CHANNEL TUNE NEVT_PER_JOB`
+  - `runCondorJob.sh CLUSTERID JOBID CHANNEL TUNE NEVT_PER_JOB`
 
----
 
-## Recommended generation workflow
+## Output locations
 
-## When to use the legacy split scripts
-Use the split scripts when you want:
-- a clean charm-only or beauty-only reference sample
-- direct continuity with older `bbbar` / `ccbar` studies
-- compatibility with older analysis pipelines built around split channels
+Typical simulation output directories:
 
-## When to use the unified heavy-flavour script
-Use the unified script when you want:
-- one consistent charm+beauty production sample
-- balancing studies comparing charm and beauty from the same run
-- direct MONASH vs JUNCTIONS hadronization comparisons in a shared framework
-- the newer `HFCLASS`-based analysis chain
-
-This is the preferred setup for the current heavy-flavour balancing and hadronization studies.
-
----
-
-## Output locations and directory structure
-
-## Legacy split workflow
-Typical outputs are organized under:
-
-'''text
+```text
+RootFiles/HF/MONASH/
+RootFiles/HF/JUNCTIONS/
 RootFiles/bbbar/MONASH/
 RootFiles/bbbar/JUNCTIONS/
 RootFiles/ccbar/MONASH/
 RootFiles/ccbar/JUNCTIONS/
-'''
+```
 
-## Unified heavy-flavour workflow
-Typical outputs are organized under:
+Typical Condor work directories:
 
-'''text
-RootFiles/HF/MONASH/
-RootFiles/HF/JUNCTIONS/
-'''
-
-Temporary per-job working directories are usually placed under:
-
-'''text
+```text
 Jobs/HF/MONASH/
 Jobs/HF/JUNCTIONS/
 Jobs/bbbar/MONASH/
 Jobs/bbbar/JUNCTIONS/
 Jobs/ccbar/MONASH/
 Jobs/ccbar/JUNCTIONS/
-'''
+```
 
-Condor logs are typically organized under:
+Typical log directories:
 
-'''text
+```text
 logs/HF/MONASH/
 logs/HF/JUNCTIONS/
 logs/bbbar/MONASH/
 logs/bbbar/JUNCTIONS/
 logs/ccbar/MONASH/
 logs/ccbar/JUNCTIONS/
-'''
+```
 
-Analysis outputs are written under:
+The downstream analysis outputs are written under:
 
-'''text
+```text
 AnalyzedData/<TAG>/Beauty/
 AnalyzedData/<TAG>/Charm/
-'''
+```
 
----
 
 ## Notes
 
-- The scripts only store selected final-state particles, not the full event record.
-- The legacy split scripts store only the chosen heavy-flavour sector plus pions.
-- The unified script stores charm hadrons, beauty hadrons, `Bc` hadrons, and pions in the same tree.
-- The output ROOT files are created with mode `CREATE`, so existing files with the same name are not overwritten.
-- When using batch production, it is strongly recommended to include the **Condor cluster id** in work-directory names and output filenames to avoid collisions between different submissions.
-- In ROOT-based analyses, if many histogram sets are created with identical histogram names in memory, ROOT may warn about replacing existing histograms. This is typically harmless in batch analysis if outputs are written to separate files, but can be avoided by calling:
-  '''cpp
-  TH1::AddDirectory(kFALSE);
-  '''
-
----
-
-## Base path
-
-The Hadronization base path is defined in `base_path.txt` or via the `HADRONIZATION_BASE` environment variable. Condor and analysis tools use this base to locate:
-
-'''text
-SimulationScripts/
-RootFiles/
-Jobs/
-AnalyzedData/
-AnalysisScripts/
-logs/
-'''
+- The simulation outputs are written with ROOT file mode `CREATE`, so an existing file with the
+  same name will not be overwritten by the producer.
+- Only the selected particles needed for the downstream analyses are stored, not the full event
+  record.
+- If you need to regroup older production outputs into larger batches, use `Batching_MONASH.sh`
+  with an explicit base directory instead of editing the script for a new machine.
+- The repository base path is resolved from `base_path.txt` or `HADRONIZATION_BASE` by the Condor
+  and helper scripts, so those files should be refreshed after moving the project.

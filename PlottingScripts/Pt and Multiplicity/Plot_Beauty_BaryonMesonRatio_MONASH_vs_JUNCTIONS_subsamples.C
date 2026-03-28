@@ -84,6 +84,49 @@ T* GetObj(TFile* f, const char* name) {
     return f ? dynamic_cast<T*>(f->Get(name)) : nullptr;
 }
 
+TH2* CloneTH2(TH2* h, const char* cloneName)
+{
+    if (!h) return nullptr;
+    TH2* clone = dynamic_cast<TH2*>(h->Clone(cloneName));
+    if (clone) clone->SetDirectory(nullptr);
+    return clone;
+}
+
+TH2* GetChargeCombinedHist(TFile* f,
+                           const std::vector<TString>& combinedNames,
+                           const std::vector<TString>& splitBases,
+                           const char* cloneName)
+{
+    if (!f) return nullptr;
+
+    for (const TString& name : combinedNames) {
+        if (TH2* h = GetObj<TH2>(f, name.Data())) return CloneTH2(h, cloneName);
+    }
+
+    for (const TString& base : splitBases) {
+        TH2* hParticle = GetObj<TH2>(f, Form("%sParticle", base.Data()));
+        TH2* hBar = GetObj<TH2>(f, Form("%sBar", base.Data()));
+        if (!hParticle || !hBar) continue;
+
+        TH2* combined = CloneTH2(hParticle, cloneName);
+        if (!combined) continue;
+        combined->Add(hBar);
+        return combined;
+    }
+
+    return nullptr;
+}
+
+TH2* GetBeautyLambdaHist(TFile* f, const char* cloneName)
+{
+    return GetChargeCombinedHist(f, {"fHistPtLambdab"}, {"fHistPtLambdab"}, cloneName);
+}
+
+TH2* GetBeautyBHist(TFile* f, const char* cloneName)
+{
+    return GetChargeCombinedHist(f, {"fHistPtBplus"}, {"fHistPtBplus"}, cloneName);
+}
+
 // Find Y-bin range corresponding to percentile class (top = highest mult)
 std::pair<int,int> PercentileRange(TH1* hMult, double pTop, double pBot)
 {
@@ -229,9 +272,6 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
     const char* MULT_HIST     = "fHistMultiplicity";
     const char* MESON_HIST    = "fHistPtBeautyMesons";
     const char* BARYON_HIST   = "fHistPtBeautyBaryons";
-    const char* LAMBDA_B_HIST = "fHistPtLambdab";
-    const char* BPLUS_HIST    = "fHistPtBplus";
-
     // --- Load all subsamples for MONASH and JUNCTIONS ---
     std::vector<TFile*> fM(nSub, nullptr), fJ(nSub, nullptr);
     std::vector<SampleHists> monash(nSub), jun(nSub);
@@ -252,8 +292,8 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
             monash[i].hMult   = GetObj<TH1>(fM[i], MULT_HIST);
             monash[i].hMeson  = GetObj<TH2>(fM[i], MESON_HIST);
             monash[i].hBaryon = GetObj<TH2>(fM[i], BARYON_HIST);
-            monash[i].hLb     = GetObj<TH2>(fM[i], LAMBDA_B_HIST);
-            monash[i].hBplus  = GetObj<TH2>(fM[i], BPLUS_HIST);
+            monash[i].hLb     = GetBeautyLambdaHist(fM[i], Form("hLbM_sub%d", i));
+            monash[i].hBplus  = GetBeautyBHist(fM[i], Form("hBplusM_sub%d", i));
             if (! (monash[i].hMult && monash[i].hMeson && monash[i].hBaryon &&
                    monash[i].hLb   && monash[i].hBplus) ) {
                 std::cout << "Missing MONASH histos in subsample " << i
@@ -269,8 +309,8 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
             jun[i].hMult   = GetObj<TH1>(fJ[i], MULT_HIST);
             jun[i].hMeson  = GetObj<TH2>(fJ[i], MESON_HIST);
             jun[i].hBaryon = GetObj<TH2>(fJ[i], BARYON_HIST);
-            jun[i].hLb     = GetObj<TH2>(fJ[i], LAMBDA_B_HIST);
-            jun[i].hBplus  = GetObj<TH2>(fJ[i], BPLUS_HIST);
+            jun[i].hLb     = GetBeautyLambdaHist(fJ[i], Form("hLbJ_sub%d", i));
+            jun[i].hBplus  = GetBeautyBHist(fJ[i], Form("hBplusJ_sub%d", i));
             if (! (jun[i].hMult && jun[i].hMeson && jun[i].hBaryon &&
                    jun[i].hLb   && jun[i].hBplus) ) {
                 std::cout << "Missing JUNCTIONS histos in subsample " << i
@@ -282,6 +322,14 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
 
     if (!okAllM || !okAllJ) {
         std::cout << "Aborting due to missing files/histograms.\n";
+        for (auto& sample : monash) {
+            delete sample.hLb;
+            delete sample.hBplus;
+        }
+        for (auto& sample : jun) {
+            delete sample.hLb;
+            delete sample.hBplus;
+        }
         for (auto* f : fM) if (f) f->Close();
         for (auto* f : fJ) if (f) f->Close();
         return;
@@ -528,6 +576,15 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
         delete CR.rLamJ;
     }
 
+    for (auto& sample : monash) {
+        delete sample.hLb;
+        delete sample.hBplus;
+    }
+    for (auto& sample : jun) {
+        delete sample.hLb;
+        delete sample.hBplus;
+    }
+
     for (auto* f : fM) if (f) f->Close();
     for (auto* f : fJ) if (f) f->Close();
 
@@ -545,8 +602,10 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples(const char* dat
     TString resolvedDate = PlotPathUtils::ResolveAnalysisDate(dateTag);
     if (resolvedDate.Length() == 0) return;
 
-    TString prefixMONASH = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Beauty", "bbbar_MONASH_sub");
-    TString prefixJUN    = PlotPathUtils::BuildAnalyzedPrefix(resolvedDate, "Beauty", "bbbar_JUNCTIONS_sub");
+    TString prefixMONASH = PlotPathUtils::ResolveAnalyzedPrefix(
+        resolvedDate, "Beauty", {"hf_MONASH_sub", "bbbar_MONASH_sub"});
+    TString prefixJUN = PlotPathUtils::ResolveAnalyzedPrefix(
+        resolvedDate, "Beauty", {"hf_JUNCTIONS_sub", "bbbar_JUNCTIONS_sub"});
 
     std::cout << "Beauty input date: " << resolvedDate << "\n";
     std::cout << "  MONASH    : " << prefixMONASH << "*.root\n";

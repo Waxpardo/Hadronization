@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "TCollection.h"
 #include "TList.h"
@@ -157,6 +158,24 @@ inline TString BuildAnalyzedPrefix(const TString& dateTag,
                                    const char* prefixStem)
 {
     return GetAnalyzedDataDir() + "/" + dateTag + "/" + flavorDir + "/" + prefixStem;
+}
+
+inline bool FileExists(const TString& path)
+{
+    return !gSystem->AccessPathName(path.Data());
+}
+
+inline TString ResolveAnalyzedPrefix(const TString& dateTag,
+                                     const char* flavorDir,
+                                     const std::vector<TString>& prefixStems)
+{
+    for (const TString& stem : prefixStems) {
+        TString prefix = BuildAnalyzedPrefix(dateTag, flavorDir, stem.Data());
+        if (FileExists(prefix + "0.root")) return prefix;
+    }
+
+    if (prefixStems.empty()) return TString("");
+    return BuildAnalyzedPrefix(dateTag, flavorDir, prefixStems.front().Data());
 }
 
 inline TString GetPtMultiplicityPlotsDir()

@@ -66,7 +66,8 @@ enum class SampleKind {
 
 struct SpeciesDef {
   TString label;
-  std::vector<TString> histCandidates;
+  std::vector<TString> combinedHistCandidates;
+  std::vector<TString> splitHistBases;
   double scaleFactor;
 };
 
@@ -298,16 +299,52 @@ TString ResolvePrefixStem(const TString& dateTag,
   return TString("");
 }
 
-TH2* GetFirstMatchingTH2(TFile* file, const std::vector<TString>& names)
+TH2* CloneTH2(TH2* h, const char* cloneName)
+{
+  if (!h) return nullptr;
+  TH2* clone = dynamic_cast<TH2*>(h->Clone(cloneName));
+  if (clone) clone->SetDirectory(nullptr);
+  return clone;
+}
+
+TH2* GetChargeCombinedTH2(TFile* file,
+                          const SpeciesDef& species,
+                          const char* cloneName)
 {
   if (!file) return nullptr;
 
-  for (const TString& name : names) {
+  for (const TString& name : species.combinedHistCandidates) {
     TH2* h = dynamic_cast<TH2*>(file->Get(name));
-    if (h) return h;
+    if (h) return CloneTH2(h, cloneName);
+  }
+
+  for (const TString& base : species.splitHistBases) {
+    TH2* hParticle = dynamic_cast<TH2*>(file->Get(Form("%sParticle", base.Data())));
+    TH2* hBar = dynamic_cast<TH2*>(file->Get(Form("%sBar", base.Data())));
+    if (!hParticle || !hBar) continue;
+
+    TH2* combined = CloneTH2(hParticle, cloneName);
+    if (!combined) continue;
+    combined->Add(hBar);
+    return combined;
   }
 
   return nullptr;
+}
+
+double GetEventCount(TFile* file)
+{
+  if (!file) return 0.0;
+
+  if (TH1* hEventCount = dynamic_cast<TH1*>(file->Get("fHistEventCount"))) {
+    return hEventCount->Integral(1, hEventCount->GetNbinsX());
+  }
+
+  if (TH1* hMult = dynamic_cast<TH1*>(file->Get("fHistMultiplicity"))) {
+    return hMult->Integral(1, hMult->GetNbinsX());
+  }
+
+  return 0.0;
 }
 
 YieldStats ComputeYieldStats(const TString& dateTag,
@@ -349,26 +386,25 @@ YieldStats ComputeYieldStats(const TString& dateTag,
       continue;
     }
 
-    TH1* hMult = dynamic_cast<TH1*>(inputFile->Get("fHistMultiplicity"));
-    TH2* hSpecies = GetFirstMatchingTH2(inputFile, species.histCandidates);
+    TH2* hSpecies = GetChargeCombinedTH2(
+      inputFile, species, Form("hSpecies_%s_%s_%s_sub%d",
+                               flavour.Data(),
+                               tune.Data(),
+                               dateTag.Data(),
+                               iSub));
+    const double nEvents = GetEventCount(inputFile);
 
-    if (!hMult || !hSpecies) {
+    if (!hSpecies || nEvents <= 0.0) {
       std::cerr << "Warning: missing required histograms in " << filePath
                 << " for " << species.label << "\n";
+      delete hSpecies;
       inputFile->Close();
       delete inputFile;
       continue;
     }
 
-    const double nEvents = hMult->Integral(1, hMult->GetNbinsX());
     const double speciesCount = hSpecies->Integral(1, hSpecies->GetNbinsX(),
                                                    1, hSpecies->GetNbinsY());
-
-    if (nEvents <= 0.0) {
-      inputFile->Close();
-      delete inputFile;
-      continue;
-    }
 
     const double yield = species.scaleFactor * speciesCount / nEvents;
     subYields.push_back(yield);
@@ -376,6 +412,7 @@ YieldStats ComputeYieldStats(const TString& dateTag,
     totalEvents += nEvents;
     stats.nLoaded++;
 
+    delete hSpecies;
     inputFile->Close();
     delete inputFile;
   }
@@ -478,18 +515,18 @@ void SaveCanvas(TCanvas* canvas, const TString& outBase)
 std::vector<SpeciesDef> BeautySpecies()
 {
   return {
-    {"B^{#pm}",                              {"fHistPtBplus"},        1.0},
-    {"B^{0}/#bar{B}^{0}",                    {"fHistPtBzero"},        1.0},
-    {"#Lambda_{b}^{0}/#bar{#Lambda}_{b}^{0}",{"fHistPtLambdab"},      1.0}
+    {"B^{#pm}",                              {"fHistPtBplus"},                        {"fHistPtBplus"},                        1.0},
+    {"B^{0}/#bar{B}^{0}",                    {"fHistPtBzero"},                        {"fHistPtBzero"},                        1.0},
+    {"#Lambda_{b}^{0}/#bar{#Lambda}_{b}^{0}",{"fHistPtLambdab"},                      {"fHistPtLambdab"},                      1.0}
   };
 }
 
 std::vector<SpeciesDef> CharmSpecies()
 {
   return {
-    {"D^{#pm}",                              {"fHistPtDplus"},                        1.0},
-    {"D^{0}/#bar{D}^{0}",                    {"fHistPtDzero"},                        1.0},
-    {"#Lambda_{c}^{+}/#bar{#Lambda}_{c}^{-}",{"fHistPtLambdac", "fHistPtLambdacPlus"},1.0}
+    {"D^{#pm}",                              {"fHistPtDplus"},                        {"fHistPtDplus"},                        1.0},
+    {"D^{0}/#bar{D}^{0}",                    {"fHistPtDzero"},                        {"fHistPtDzero"},                        1.0},
+    {"#Lambda_{c}^{+}/#bar{#Lambda}_{c}^{-}",{"fHistPtLambdac", "fHistPtLambdacPlus"},{"fHistPtLambdac", "fHistPtLambdacPlus"},1.0}
   };
 }
 
