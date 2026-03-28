@@ -19,9 +19,15 @@
 //   TH2D fHistPtCharmMesons
 //   TH2D fHistPtCharmBaryons
 //   TH2D fHistPtDplus, fHistPtDzero, fHistPtDsplus
-//   TH2D fHistPtLambdacPlus, fHistPtSigmacPlusPlus, fHistPtSigmacPlus,
+//   TH2D fHistPtLambdacPlus, fHistPtLambdac, fHistPtSigmacPlusPlus, fHistPtSigmacPlus,
 //        fHistPtSigmacZero, fHistPtXicPlus, fHistPtXicZero, fHistPtOmegacZero
 //   TH2D fHistPtPionsCharged, fHistPtPiPlus, fHistPtPiMinus, fHistPtPi0
+//
+// Species-resolved histograms are filled using abs(PDG), so these histograms
+// are charge-conjugate combined. For example:
+//   fHistPtDplus        -> D^{#pm}
+//   fHistPtDzero        -> D^{0}/#bar{D}^{0}
+//   fHistPtLambdacPlus  -> #Lambda_{c}^{+}/#bar{#Lambda}_{c}^{-}
 //
 // Pion protection:
 // - Counts pion entries found in the TTrees (pi±/pi0).
@@ -189,14 +195,14 @@ namespace {
     // Mesons
     h->fHistPtDplus = new TH2D(
       "fHistPtDplus",
-      "D^{+}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+      "D^{#pm} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
 
     h->fHistPtDzero = new TH2D(
       "fHistPtDzero",
-      "D^{0}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+      "D^{0}/#bar{D}^{0} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
@@ -211,7 +217,7 @@ namespace {
     // Baryons
     h->fHistPtLambdacPlus = new TH2D(
       "fHistPtLambdacPlus",
-      "#Lambda_{c}^{+}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+      "#Lambda_{c}^{+}/#bar{#Lambda}_{c}^{-} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
@@ -314,6 +320,13 @@ namespace {
     hset->fHistPtDsplus->Write();
 
     hset->fHistPtLambdacPlus->Write();
+    {
+      TH2D* hLambdacAlias = dynamic_cast<TH2D*>(hset->fHistPtLambdacPlus->Clone("fHistPtLambdac"));
+      if (hLambdacAlias) {
+        hLambdacAlias->Write();
+        delete hLambdacAlias;
+      }
+    }
     hset->fHistPtSigmacPlusPlus->Write();
     hset->fHistPtSigmacPlus->Write();
     hset->fHistPtSigmacZero->Write();
@@ -416,16 +429,17 @@ namespace {
         }
 
         // --------- species-resolved charm mesons ---------
-        if (apdg == 411) {          // D+
+        // Filled with abs(PDG), so the species histograms are charge-conjugate combined.
+        if (apdg == 411) {          // D^{#pm}
           hset->fHistPtDplus->Fill(pt, MULTIPLICITY);
-        } else if (apdg == 421) {   // D0
+        } else if (apdg == 421) {   // D^{0}/#bar{D}^{0}
           hset->fHistPtDzero->Fill(pt, MULTIPLICITY);
         } else if (apdg == 431) {   // Ds+
           hset->fHistPtDsplus->Fill(pt, MULTIPLICITY);
         }
 
         // --------- species-resolved charm baryons ---------
-        if (apdg == 4122) {         // Lambda_c^+
+        if (apdg == 4122) {         // #Lambda_{c}^{+}/#bar{#Lambda}_{c}^{-}
           hset->fHistPtLambdacPlus->Fill(pt, MULTIPLICITY);
         } else if (apdg == 4222) {  // Sigma_c^{++}
           hset->fHistPtSigmacPlusPlus->Fill(pt, MULTIPLICITY);

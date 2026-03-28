@@ -15,7 +15,7 @@
 //   TH1D  fHistMultiplicity
 //   TH2D  fHistPtCharmMesons
 //   TH2D  fHistPtCharmBaryons
-//   TH2D  fHistPtLambdacPlus
+//   TH2D  fHistPtLambdac
 //   TH2D  fHistPtDplus
 //
 // For each of the 5 multiplicity percentile classes
@@ -27,9 +27,9 @@
 //        fHistPtCharmBaryons / fHistPtCharmMesons
 //      → Ratio_CharmBaryonMeson_MONASH_vs_JUNCTIONS_XX_YY.png
 //
-//   2) Lambda_c^+ / D^+ ratio:
-//        fHistPtLambdacPlus / fHistPtDplus
-//      → Ratio_LambdacOverDplus_MONASH_vs_JUNCTIONS_XX_YY.png
+//   2) (#Lambda_c + #bar{#Lambda}_c) / D^{#pm} ratio:
+//        fHistPtLambdac / fHistPtDplus
+//      → Ratio_LambdacOverDpm_MONASH_vs_JUNCTIONS_XX_YY.png
 //
 // where XX_YY are the percentile bounds (0_20, ..., 80_100).
 //
@@ -37,7 +37,7 @@
 //
 // New:
 //   - All baryon/meson plots share the same y-axis range.
-//   - All Lambda_c^+/D^+ plots share the same y-axis range.
+//   - All (#Lambda_c + #bar{#Lambda}_c)/D^{#pm} plots share the same y-axis range.
 //   - Optional pT rebinning of the final ratio histograms (default: factor 2).
 //
 // Usage (example):
@@ -85,6 +85,13 @@ void SetStyle() {
 template<class T>
 T* GetObj(TFile* f, const char* name) {
     return f ? dynamic_cast<T*>(f->Get(name)) : nullptr;
+}
+
+TH2* GetCharmLambdaHist(TFile* f)
+{
+    if (!f) return nullptr;
+    if (TH2* h = GetObj<TH2>(f, "fHistPtLambdac")) return h;
+    return GetObj<TH2>(f, "fHistPtLambdacPlus");
 }
 
 // Find Y-bin range corresponding to percentile class (top = highest mult)
@@ -198,8 +205,8 @@ struct SampleHists {
     TH1* hMult   = nullptr;
     TH2* hMeson  = nullptr;
     TH2* hBaryon = nullptr;
-    TH2* hLc     = nullptr;  // Lambda_c^+
-    TH2* hDplus  = nullptr;  // D^+
+    TH2* hLc     = nullptr;  // #Lambda_{c}^{+}/#bar{#Lambda}_{c}^{-}
+    TH2* hDplus  = nullptr;  // D^{#pm}
 };
 
 } // end namespace
@@ -232,7 +239,6 @@ void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
     const char* MULT_HIST      = "fHistMultiplicity";
     const char* MESON_HIST     = "fHistPtCharmMesons";
     const char* BARYON_HIST    = "fHistPtCharmBaryons";
-    const char* LAMBDAC_HIST   = "fHistPtLambdacPlus";
     const char* DPLUS_HIST     = "fHistPtDplus";
 
     // --- Load all subsamples for MONASH and JUNCTIONS ---
@@ -255,7 +261,7 @@ void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
             monash[i].hMult   = GetObj<TH1>(fM[i], MULT_HIST);
             monash[i].hMeson  = GetObj<TH2>(fM[i], MESON_HIST);
             monash[i].hBaryon = GetObj<TH2>(fM[i], BARYON_HIST);
-            monash[i].hLc     = GetObj<TH2>(fM[i], LAMBDAC_HIST);
+            monash[i].hLc     = GetCharmLambdaHist(fM[i]);
             monash[i].hDplus  = GetObj<TH2>(fM[i], DPLUS_HIST);
             if (! (monash[i].hMult && monash[i].hMeson && monash[i].hBaryon &&
                    monash[i].hLc   && monash[i].hDplus) ) {
@@ -272,7 +278,7 @@ void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
             jun[i].hMult   = GetObj<TH1>(fJ[i], MULT_HIST);
             jun[i].hMeson  = GetObj<TH2>(fJ[i], MESON_HIST);
             jun[i].hBaryon = GetObj<TH2>(fJ[i], BARYON_HIST);
-            jun[i].hLc     = GetObj<TH2>(fJ[i], LAMBDAC_HIST);
+            jun[i].hLc     = GetCharmLambdaHist(fJ[i]);
             jun[i].hDplus  = GetObj<TH2>(fJ[i], DPLUS_HIST);
             if (! (jun[i].hMult && jun[i].hMeson && jun[i].hBaryon &&
                    jun[i].hLc   && jun[i].hDplus) ) {
@@ -305,15 +311,15 @@ void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
         CDef  cls;
         TH1D* rGlobM = nullptr;  // MONASH charm baryon/meson
         TH1D* rGlobJ = nullptr;  // JUNCTIONS charm baryon/meson
-        TH1D* rLcM   = nullptr;  // MONASH Lambdac^+ / D^+
-        TH1D* rLcJ   = nullptr;  // JUNCTIONS Lambdac^+ / D^+
+        TH1D* rLcM   = nullptr;  // MONASH (#Lambda_c + #bar{#Lambda}_c) / D^{#pm}
+        TH1D* rLcJ   = nullptr;  // JUNCTIONS (#Lambda_c + #bar{#Lambda}_c) / D^{#pm}
     };
 
     std::vector<ClassRatios> allRatios;
     allRatios.reserve(classes.size());
 
     double globalMaxGlob = 0.0; // for all baryon/meson plots
-    double globalMaxLc   = 0.0; // for all Lambdac^+/D^+ plots
+    double globalMaxLc   = 0.0; // for all (#Lambda_c + #bar{#Lambda}_c)/D^{#pm} plots
 
     // --- Loop over multiplicity classes: build and combine ratios ---
     for (auto C : classes){
@@ -335,15 +341,15 @@ void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
                                          Form("rGlobCharm_J_sub%d_%s", i, C.tag),
                                          "Charm baryon / Charm meson");
 
-            // Lambda_c^+ / D^+
+            // (#Lambda_c + #bar{#Lambda}_c) / D^{#pm}
             TH1D* rLM = BuildRatioOneSub(monash[i].hLc, monash[i].hDplus,
                                          yrM,
                                          Form("rLcOverD_M_sub%d_%s", i, C.tag),
-                                         "#Lambda_{c}^{+} / D^{+}");
+                                         "(#Lambda_{c}^{+} + #bar{#Lambda}_{c}^{-}) / D^{#pm}");
             TH1D* rLJ = BuildRatioOneSub(jun[i].hLc, jun[i].hDplus,
                                          yrJ,
                                          Form("rLcOverD_J_sub%d_%s", i, C.tag),
-                                         "#Lambda_{c}^{+} / D^{+}");
+                                         "(#Lambda_{c}^{+} + #bar{#Lambda}_{c}^{-}) / D^{#pm}");
 
             if (rGM && rGJ && rLM && rLJ) {
                 rGlobM_sub.push_back(rGM);
@@ -382,10 +388,10 @@ void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
 
         TH1D* rLcM   = CombineSubsampleRatios(rLcM_sub,
                             Form("ratioLambdacOverD_MONASH_%s",C.tag),
-                            "#Lambda_{c}^{+} / D^{+}");
+                            "(#Lambda_{c}^{+} + #bar{#Lambda}_{c}^{-}) / D^{#pm}");
         TH1D* rLcJ   = CombineSubsampleRatios(rLcJ_sub,
                             Form("ratioLambdacOverD_JUNCTIONS_%s",C.tag),
-                            "#Lambda_{c}^{+} / D^{+}");
+                            "(#Lambda_{c}^{+} + #bar{#Lambda}_{c}^{-}) / D^{#pm}");
 
         // Clean up individual subsample ratio histos
         for (auto* h : rGlobM_sub) delete h;
@@ -489,7 +495,7 @@ void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
             delete cGlob;
         }
 
-        // --- 2) Lambda_c^+ / D^+ ratio ---
+        // --- 2) (#Lambda_c + #bar{#Lambda}_c) / D^{#pm} ratio ---
         if (CR.rLcM && CR.rLcJ) {
             CR.rLcM->SetLineColor(kRed+1);
             CR.rLcM->SetMarkerColor(kRed+1);
@@ -500,14 +506,13 @@ void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
             CR.rLcJ->SetMarkerStyle(21);
 
             TCanvas* cLc = new TCanvas(Form("c_ratioLambdacOverD_%s",C.tag),
-                                       Form("#Lambda_{c}^{+}/D^{+} vs. p_{T} %s", C.label),
+                                       Form("(#Lambda_{c}^{+} + #bar{#Lambda}_{c}^{-})/D^{#pm} vs. p_{T} %s", C.label),
                                        900,650);
 
             CR.rLcM->SetMinimum(0.0);
             CR.rLcM->SetMaximum(globalMaxLc);
 
-            // *** NEW: set histogram title so the plot shows the requested text ***
-            CR.rLcM->SetTitle(Form("#Lambda_{c}^{+}/D^{+} vs. p_{T} %s", C.label));
+            CR.rLcM->SetTitle(Form("(#Lambda_{c}^{+} + #bar{#Lambda}_{c}^{-})/D^{#pm} vs. p_{T} %s", C.label));
 
             CR.rLcM->Draw("E1");
             CR.rLcJ->Draw("E1 SAME");
@@ -517,7 +522,7 @@ void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
             legLc->AddEntry(CR.rLcJ,"JUNCTIONS","lep");
             legLc->Draw();
 
-            TString outLc = Form("Ratio_LambdacOverDplus_MONASH_vs_JUNCTIONS_%s.png",
+            TString outLc = Form("Ratio_LambdacOverDpm_MONASH_vs_JUNCTIONS_%s.png",
                                  C.tag);
             cLc->SaveAs(PlotPathUtils::BuildPtMultiplicityPlotPath(outLc.Data()));
 
@@ -538,7 +543,7 @@ void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
     std::cout << "  " << PlotPathUtils::GetPtMultiplicityPlotsDir()
               << "/Ratio_CharmBaryonMeson_MONASH_vs_JUNCTIONS_*.png\n";
     std::cout << "  " << PlotPathUtils::GetPtMultiplicityPlotsDir()
-              << "/Ratio_LambdacOverDplus_MONASH_vs_JUNCTIONS_*.png\n";
+              << "/Ratio_LambdacOverDpm_MONASH_vs_JUNCTIONS_*.png\n";
 }
 
 void Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples(const char* dateTag = "",

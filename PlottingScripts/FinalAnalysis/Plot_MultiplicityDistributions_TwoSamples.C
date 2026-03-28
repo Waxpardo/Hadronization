@@ -3,9 +3,8 @@
 //
 // Compare multiplicity distributions between two analyzed-data samples.
 //
-// By default, this macro compares:
-//   - AnalyzedData/12-01-2026
-//   - AnalyzedData/27-03-2026
+// By default, this macro compares the two most recent dated folders in:
+//   - AnalyzedData/<DD-MM-YYYY>
 //
 // and produces four plots:
 //   - Charm MONASH
@@ -30,17 +29,23 @@
 // ---------------------------------------------------------------------------
 
 #include <algorithm>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <utility>
 #include <vector>
 
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TH1D.h"
 #include "TLegend.h"
+#include "TList.h"
+#include "TObject.h"
 #include "TString.h"
 #include "TStyle.h"
 #include "TSystem.h"
+#include "TSystemDirectory.h"
+#include "TSystemFile.h"
 #include "TLatex.h"
 
 namespace {
@@ -99,6 +104,119 @@ TString GetHadronizationBaseDir()
 TString GetAnalyzedDataDir()
 {
   return GetHadronizationBaseDir() + "/AnalyzedData";
+}
+
+bool FileExists(const TString& path)
+{
+  return !gSystem->AccessPathName(path.Data());
+}
+
+bool ParseDateTag(const TString& tag, int& year, int& month, int& day)
+{
+  unsigned int d = 0;
+  unsigned int m = 0;
+  unsigned int y = 0;
+
+  if (std::sscanf(tag.Data(), "%u-%u-%u", &d, &m, &y) != 3) return false;
+  if (d < 1 || d > 31) return false;
+  if (m < 1 || m > 12) return false;
+  if (y < 1900) return false;
+
+  day = static_cast<int>(d);
+  month = static_cast<int>(m);
+  year = static_cast<int>(y);
+  return true;
+}
+
+std::vector<TString> GetSortedAnalysisDates()
+{
+  std::vector<std::pair<long long, TString>> datedFolders;
+
+  TSystemDirectory dir("AnalyzedData", GetAnalyzedDataDir());
+  TList* entries = dir.GetListOfFiles();
+  if (!entries) return {};
+
+  TIter next(entries);
+  while (TObject* obj = next()) {
+    TSystemFile* file = dynamic_cast<TSystemFile*>(obj);
+    if (!file || !file->IsDirectory()) continue;
+
+    const TString name = file->GetName();
+    if (name == "." || name == "..") continue;
+
+    int year = 0;
+    int month = 0;
+    int day = 0;
+    if (!ParseDateTag(name, year, month, day)) continue;
+
+    const long long key = 10000LL * year + 100LL * month + day;
+    datedFolders.push_back(std::make_pair(key, name));
+  }
+
+  std::sort(datedFolders.begin(), datedFolders.end(),
+            [](const std::pair<long long, TString>& a,
+               const std::pair<long long, TString>& b) {
+              return a.first < b.first;
+            });
+
+  std::vector<TString> sortedDates;
+  sortedDates.reserve(datedFolders.size());
+  for (const auto& entry : datedFolders) sortedDates.push_back(entry.second);
+  return sortedDates;
+}
+
+bool ResolveLastTwoAnalysisDates(TString& olderDate, TString& newerDate)
+{
+  const std::vector<TString> sortedDates = GetSortedAnalysisDates();
+  if (sortedDates.size() < 2) return false;
+
+  olderDate = sortedDates[sortedDates.size() - 2];
+  newerDate = sortedDates[sortedDates.size() - 1];
+  return true;
+}
+
+enum class SampleKind {
+  Unknown,
+  Independent,
+  Combined
+};
+
+SampleKind DetectSampleKind(const TString& dateTag)
+{
+  const TString analyzedDir = GetAnalyzedDataDir() + "/" + dateTag;
+
+  const std::vector<TString> combinedCandidates = {
+    analyzedDir + "/Charm/hf_MONASH_sub0.root",
+    analyzedDir + "/Charm/hf_JUNCTIONS_sub0.root",
+    analyzedDir + "/Beauty/hf_MONASH_sub0.root",
+    analyzedDir + "/Beauty/hf_JUNCTIONS_sub0.root"
+  };
+
+  for (const TString& path : combinedCandidates) {
+    if (FileExists(path)) return SampleKind::Combined;
+  }
+
+  const std::vector<TString> independentCandidates = {
+    analyzedDir + "/Charm/ccbar_MONASH_sub0.root",
+    analyzedDir + "/Charm/ccbar_JUNCTIONS_sub0.root",
+    analyzedDir + "/Beauty/bbbar_MONASH_sub0.root",
+    analyzedDir + "/Beauty/bbbar_JUNCTIONS_sub0.root"
+  };
+
+  for (const TString& path : independentCandidates) {
+    if (FileExists(path)) return SampleKind::Independent;
+  }
+
+  return SampleKind::Unknown;
+}
+
+TString SampleKindLabel(SampleKind kind)
+{
+  switch (kind) {
+    case SampleKind::Independent: return "Independent Sample";
+    case SampleKind::Combined:    return "Combined Sample";
+    default:                      return "Sample";
+  }
 }
 
 TString GetOutputDir()
@@ -261,6 +379,8 @@ void SaveCanvas(TCanvas* canvas, const TString& outBase)
 
 void DrawMultiplicityComparison(const TString& dateA,
                                 const TString& dateB,
+                                const TString& sampleLabelA,
+                                const TString& sampleLabelB,
                                 const TString& flavour,
                                 const TString& tune,
                                 int nSub,
@@ -306,8 +426,8 @@ void DrawMultiplicityComparison(const TString& dateA,
   TLegend* legend = new TLegend(0.52, 0.70, 0.88, 0.84);
   legend->SetFillStyle(0);
   legend->SetTextSize(0.032);
-  legend->AddEntry(hA, "Independent Sample", "l");
-  legend->AddEntry(hB, "Combined Sample", "l");
+  legend->AddEntry(hA, sampleLabelA.Data(), "l");
+  legend->AddEntry(hB, sampleLabelB.Data(), "l");
   legend->Draw();
 
   TLatex latex;
@@ -337,24 +457,49 @@ void DrawMultiplicityComparison(const TString& dateA,
 
 } // namespace
 
-void Plot_MultiplicityDistributions_TwoSamples(const char* dateA = "12-01-2026",
-                                               const char* dateB = "27-03-2026",
+void Plot_MultiplicityDistributions_TwoSamples(const char* dateA = "",
+                                               const char* dateB = "",
                                                int nSub = 10,
                                                bool normalize = true)
 {
   SetStyle();
 
-  DrawMultiplicityComparison(dateA, dateB, "Charm",  "MONASH",    nSub, normalize);
-  DrawMultiplicityComparison(dateA, dateB, "Charm",  "JUNCTIONS", nSub, normalize);
-  DrawMultiplicityComparison(dateA, dateB, "Beauty", "MONASH",    nSub, normalize);
-  DrawMultiplicityComparison(dateA, dateB, "Beauty", "JUNCTIONS", nSub, normalize);
+  TString resolvedDateA = dateA ? TString(dateA).Strip(TString::kBoth) : TString("");
+  TString resolvedDateB = dateB ? TString(dateB).Strip(TString::kBoth) : TString("");
+
+  if (resolvedDateA.IsNull() && resolvedDateB.IsNull()) {
+    if (!ResolveLastTwoAnalysisDates(resolvedDateA, resolvedDateB)) {
+      std::cerr << "Could not find at least two dated folders under "
+                << GetAnalyzedDataDir() << "\n";
+      return;
+    }
+  } else if (resolvedDateA.IsNull() || resolvedDateB.IsNull()) {
+    std::cerr << "Provide either both date folders or no dates at all.\n";
+    return;
+  }
+
+  const TString sampleLabelA = SampleKindLabel(DetectSampleKind(resolvedDateA));
+  const TString sampleLabelB = SampleKindLabel(DetectSampleKind(resolvedDateB));
+
+  std::cout << "Using analysis folders:\n"
+            << "  " << resolvedDateA << " -> " << sampleLabelA << "\n"
+            << "  " << resolvedDateB << " -> " << sampleLabelB << "\n";
+
+  DrawMultiplicityComparison(resolvedDateA, resolvedDateB, sampleLabelA, sampleLabelB,
+                             "Charm",  "MONASH",    nSub, normalize);
+  DrawMultiplicityComparison(resolvedDateA, resolvedDateB, sampleLabelA, sampleLabelB,
+                             "Charm",  "JUNCTIONS", nSub, normalize);
+  DrawMultiplicityComparison(resolvedDateA, resolvedDateB, sampleLabelA, sampleLabelB,
+                             "Beauty", "MONASH",    nSub, normalize);
+  DrawMultiplicityComparison(resolvedDateA, resolvedDateB, sampleLabelA, sampleLabelB,
+                             "Beauty", "JUNCTIONS", nSub, normalize);
 
   std::cout << "Wrote multiplicity comparison plots to:\n"
             << "  " << GetOutputDir() << "\n";
 }
 
-void runFinalMultiplicityComparison(const char* dateA = "12-01-2026",
-                                    const char* dateB = "27-03-2026",
+void runFinalMultiplicityComparison(const char* dateA = "",
+                                    const char* dateB = "",
                                     int nSub = 10,
                                     bool normalize = true)
 {

@@ -18,25 +18,25 @@
 //   TH2D  fHistPtLambdab
 //   TH2D  fHistPtBplus
 //
-// For each of the 10 multiplicity percentile classes
-//   [0–10], [10–20], ..., [90–100]% (0–10% = highest multiplicity)
+// For each of the 5 multiplicity percentile classes
+//   [0–20], [20–40], [40–60], [60–80], [80–100]% (0–20% = highest multiplicity)
 // it produces:
 //
 //   1) Global beauty baryon / beauty meson ratio:
 //        fHistPtBeautyBaryons / fHistPtBeautyMesons
 //      → Ratio_BeautyBaryonMeson_MONASH_vs_JUNCTIONS_XX_YY.png
 //
-//   2) Lambda_b / B+ ratio:
+//   2) (#Lambda_b + #bar{#Lambda}_b) / B^{#pm} ratio:
 //        fHistPtLambdab / fHistPtBplus
-//      → Ratio_LambdabOverBplus_MONASH_vs_JUNCTIONS_XX_YY.png
+//      → Ratio_LambdabOverBpm_MONASH_vs_JUNCTIONS_XX_YY.png
 //
-// where XX_YY are the percentile bounds (0_10, 10_20, ..., 90_100).
+// where XX_YY are the percentile bounds (0_20, 20_40, ..., 80_100).
 //
 // Uncertainties come from the spread across the N subsamples.
 //
 // New:
 //   - All baryon/meson plots share the same y-axis range.
-//   - All Lambda_b/B+ plots share the same y-axis range.
+//   - All (#Lambda_b + #bar{#Lambda}_b)/B^{#pm} plots share the same y-axis range.
 //   - Optional pT rebinning of the final ratio histograms (default: factor 2).
 //
 // Usage (example):
@@ -311,7 +311,7 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
     allRatios.reserve(classes.size());
 
     double globalMaxGlob = 0.0; // for all baryon/meson plots
-    double globalMaxLam  = 0.0; // for all Lambda_b/B+ plots
+    double globalMaxLam  = 0.0; // for all (#Lambda_b + #bar{#Lambda}_b)/B^{#pm} plots
 
     // --- Loop over multiplicity classes: build and combine ratios ---
     for (auto C : classes){
@@ -333,15 +333,15 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
                                          Form("rGlob_J_sub%d_%s", i, C.tag),
                                          "Beauty baryon / Beauty meson");
 
-            // Lambda_b / B+
+            // (#Lambda_b + #bar{#Lambda}_b) / B^{#pm}
             TH1D* rLM = BuildRatioOneSub(monash[i].hLb, monash[i].hBplus,
                                          yrM,
                                          Form("rLam_M_sub%d_%s", i, C.tag),
-                                         "#Lambda_{b}^{0} / B^{+}");
+                                         "(#Lambda_{b}^{0} + #bar{#Lambda}_{b}^{0}) / B^{#pm}");
             TH1D* rLJ = BuildRatioOneSub(jun[i].hLb, jun[i].hBplus,
                                          yrJ,
                                          Form("rLam_J_sub%d_%s", i, C.tag),
-                                         "#Lambda_{b}^{0} / B^{+}");
+                                         "(#Lambda_{b}^{0} + #bar{#Lambda}_{b}^{0}) / B^{#pm}");
 
             if (rGM && rGJ && rLM && rLJ) {
                 rGlobM_sub.push_back(rGM);
@@ -380,10 +380,10 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
 
         TH1D* rLamM  = CombineSubsampleRatios(rLamM_sub,
                             Form("ratioLamB_MONASH_%s",C.tag),
-                            "#Lambda_{b}^{0} / B^{+}");
+                            "(#Lambda_{b}^{0} + #bar{#Lambda}_{b}^{0}) / B^{#pm}");
         TH1D* rLamJ  = CombineSubsampleRatios(rLamJ_sub,
                             Form("ratioLamB_JUNCTIONS_%s",C.tag),
-                            "#Lambda_{b}^{0} / B^{+}");
+                            "(#Lambda_{b}^{0} + #bar{#Lambda}_{b}^{0}) / B^{#pm}");
 
         // Clean up individual subsample ratio histos
         for (auto* h : rGlobM_sub) delete h;
@@ -487,7 +487,7 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
             delete cGlob;
         }
 
-        // --- 2) Lambda_b^0 / B+ ratio ---
+        // --- 2) (#Lambda_b + #bar{#Lambda}_b) / B^{#pm} ratio ---
         if (CR.rLamM && CR.rLamJ) {
             CR.rLamM->SetLineColor(kRed+1);
             CR.rLamM->SetMarkerColor(kRed+1);
@@ -498,14 +498,13 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
             CR.rLamJ->SetMarkerStyle(21);
 
             TCanvas* cLam = new TCanvas(Form("c_ratioLamB_%s",C.tag),
-                                        Form("#Lambda_{b}^{0}/B^{+} vs. p_{T} %s", C.label),
+                                        Form("(#Lambda_{b}^{0} + #bar{#Lambda}_{b}^{0})/B^{#pm} vs. p_{T} %s", C.label),
                                         900,650);
 
             CR.rLamM->SetMinimum(0.0);
             CR.rLamM->SetMaximum(globalMaxLam);
 
-            // NEW: set histogram title to match requested format
-            CR.rLamM->SetTitle(Form("#Lambda_{b}^{0}/B^{+} vs. p_{T} %s", C.label));
+            CR.rLamM->SetTitle(Form("(#Lambda_{b}^{0} + #bar{#Lambda}_{b}^{0})/B^{#pm} vs. p_{T} %s", C.label));
 
             CR.rLamM->Draw("E1");
             CR.rLamJ->Draw("E1 SAME");
@@ -515,7 +514,7 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
             legLam->AddEntry(CR.rLamJ,"JUNCTIONS","lep");
             legLam->Draw();
 
-            TString outLam = Form("Ratio_LambdabOverBplus_MONASH_vs_JUNCTIONS_%s.png",
+            TString outLam = Form("Ratio_LambdabOverBpm_MONASH_vs_JUNCTIONS_%s.png",
                                   C.tag);
             cLam->SaveAs(PlotPathUtils::BuildPtMultiplicityPlotPath(outLam.Data()));
 
@@ -536,7 +535,7 @@ void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples_WithPrefixes(
     std::cout << "  " << PlotPathUtils::GetPtMultiplicityPlotsDir()
               << "/Ratio_BeautyBaryonMeson_MONASH_vs_JUNCTIONS_*.png\n";
     std::cout << "  " << PlotPathUtils::GetPtMultiplicityPlotsDir()
-              << "/Ratio_LambdabOverBplus_MONASH_vs_JUNCTIONS_*.png\n";
+              << "/Ratio_LambdabOverBpm_MONASH_vs_JUNCTIONS_*.png\n";
 }
 
 void Plot_Beauty_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples(const char* dateTag = "",

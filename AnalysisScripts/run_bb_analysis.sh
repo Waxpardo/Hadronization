@@ -23,4 +23,21 @@ export HADRONIZATION_BASE="${BASEDIR}"
 
 cd "${BASEDIR}" || exit 1
 
+MONASH_DIR="${BASEDIR}/RootFiles/bbbar/MONASH"
+JUNCTIONS_DIR="${BASEDIR}/RootFiles/bbbar/JUNCTIONS"
+
+if [ ! -d "${MONASH_DIR}" ]; then
+  echo "ERROR: Expected split beauty input directory not found: ${MONASH_DIR}"
+  exit 1
+fi
+
+if [ ! -d "${JUNCTIONS_DIR}" ]; then
+  echo "ERROR: Expected split beauty input directory not found: ${JUNCTIONS_DIR}"
+  exit 1
+fi
+
+echo "Running split beauty analysis from:"
+echo "  ${MONASH_DIR}"
+echo "  ${JUNCTIONS_DIR}"
+
 root -l -b -q "AnalysisScripts/bb_mult_pt_analysis_multi.C+(${NSUB}, \"${OUTPUT_TAG}\")"

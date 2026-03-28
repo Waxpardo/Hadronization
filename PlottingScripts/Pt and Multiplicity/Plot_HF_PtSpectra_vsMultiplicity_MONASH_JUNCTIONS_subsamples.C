@@ -2,8 +2,8 @@
 // Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples.C
 //
 // Plots pT spectra vs multiplicity percentile for:
-//   Charm:  Lambda_c^+ and D^+
-//   Beauty: Lambda_b^0 and B^+
+//   Charm:  (#Lambda_c + #bar{#Lambda}_c) and D^{#pm}
+//   Beauty: (#Lambda_b + #bar{#Lambda}_b) and B^{#pm}
 //
 // For each tune (MONASH and JUNCTIONS) separately, you get ONE plot per species,
 // each plot containing 5 multiplicity classes as colored line curves:
@@ -33,7 +33,7 @@
 //
 // Expected histograms in charm files:
 //   TH1D fHistMultiplicity
-//   TH2D fHistPtLambdacPlus
+//   TH2D fHistPtLambdac
 //   TH2D fHistPtDplus
 //
 // Expected histograms in beauty files:
@@ -96,6 +96,13 @@ static const double kFixedXMax = 100.0; // set <=0 to enable auto-crop
 template<class T>
 T* GetObj(TFile* f, const char* name) {
     return f ? dynamic_cast<T*>(f->Get(name)) : nullptr;
+}
+
+TH2* GetCharmLambdaHist(TFile* f)
+{
+    if (!f) return nullptr;
+    if (TH2* h = GetObj<TH2>(f, "fHistPtLambdac")) return h;
+    return GetObj<TH2>(f, "fHistPtLambdacPlus");
 }
 
 // Percentile range: highest multiplicity = highest mult bin
@@ -332,7 +339,6 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
     const char* MULT_HIST = "fHistMultiplicity";
 
     // Charm
-    const char* HC_LC = "fHistPtLambdacPlus";
     const char* HC_D  = "fHistPtDplus";
 
     // Beauty
@@ -363,11 +369,11 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
 
         if (ok){
             cM[i].mult = GetObj<TH1>(fCM[i], MULT_HIST);
-            cM[i].lc   = GetObj<TH2>(fCM[i], HC_LC);
+            cM[i].lc   = GetCharmLambdaHist(fCM[i]);
             cM[i].d    = GetObj<TH2>(fCM[i], HC_D);
 
             cJ[i].mult = GetObj<TH1>(fCJ[i], MULT_HIST);
-            cJ[i].lc   = GetObj<TH2>(fCJ[i], HC_LC);
+            cJ[i].lc   = GetCharmLambdaHist(fCJ[i]);
             cJ[i].d    = GetObj<TH2>(fCJ[i], HC_D);
 
             if (!(cM[i].mult && cM[i].lc && cM[i].d)) { std::cout<<"Missing charm MONASH hists in "<<cNameM<<"\n"; ok=false; }
@@ -412,8 +418,8 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
     // We will produce 8 plots:
     //   Charm MONASH: Lambdac, D
     //   Charm JUN:    Lambdac, D
-    //   Beauty MONASH: Lambdab, Bplus
-    //   Beauty JUN:    Lambdab, Bplus
+    //   Beauty MONASH: Lambdab, Bpm
+    //   Beauty JUN:    Lambdab, Bpm
 
     auto buildCurves = [&](const char* speciesTag,
                            const char* xtitle,
@@ -463,7 +469,7 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
         [&](int i){ return cM[i].mult; },
         [&](int i){ return cM[i].lc; }
     );
-    auto d_CM = buildCurves("Dplus_CM",
+    auto d_CM = buildCurves("Dpm_CM",
         "p_{T} (GeV/c)", "Normalized Counts",
         [&](int i){ return cM[i].mult; },
         [&](int i){ return cM[i].d; }
@@ -475,7 +481,7 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
         [&](int i){ return cJ[i].mult; },
         [&](int i){ return cJ[i].lc; }
     );
-    auto d_CJ = buildCurves("Dplus_CJ",
+    auto d_CJ = buildCurves("Dpm_CJ",
         "p_{T} (GeV/c)", "Normalized Counts",
         [&](int i){ return cJ[i].mult; },
         [&](int i){ return cJ[i].d; }
@@ -487,7 +493,7 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
         [&](int i){ return bM[i].mult; },
         [&](int i){ return bM[i].lb; }
     );
-    auto b_BM = buildCurves("Bplus_BM",
+    auto b_BM = buildCurves("Bpm_BM",
         "p_{T} (GeV/c)", "Normalized Counts",
         [&](int i){ return bM[i].mult; },
         [&](int i){ return bM[i].b; }
@@ -499,7 +505,7 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
         [&](int i){ return bJ[i].mult; },
         [&](int i){ return bJ[i].lb; }
     );
-    auto b_BJ = buildCurves("Bplus_BJ",
+    auto b_BJ = buildCurves("Bpm_BJ",
         "p_{T} (GeV/c)", "Normalized Counts",
         [&](int i){ return bJ[i].mult; },
         [&](int i){ return bJ[i].b; }
@@ -508,36 +514,36 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
     // ---------- Draw ----------
     // Titles/outnames tuned to look like your example figure
     DrawSpectraPlot(lc_CJ, "c_Lambdac_Junctions",
-        "#Lambda_{c}^{+} p_{T} Spectra by Multiplicity Percentile (JUNCTIONS)",
+        "(#Lambda_{c}^{+} + #bar{#Lambda}_{c}^{-}) p_{T} Spectra by Multiplicity Percentile (JUNCTIONS)",
         "Spectra_Lambdac_JUNCTIONS.png");
 
     DrawSpectraPlot(lc_CM, "c_Lambdac_Monash",
-        "#Lambda_{c}^{+} p_{T} Spectra by Multiplicity Percentile (MONASH)",
+        "(#Lambda_{c}^{+} + #bar{#Lambda}_{c}^{-}) p_{T} Spectra by Multiplicity Percentile (MONASH)",
         "Spectra_Lambdac_MONASH.png");
 
-    DrawSpectraPlot(d_CJ, "c_Dplus_Junctions",
-        "D^{+} p_{T} Spectra by Multiplicity Percentile (JUNCTIONS)",
-        "Spectra_Dplus_JUNCTIONS.png");
+    DrawSpectraPlot(d_CJ, "c_Dpm_Junctions",
+        "D^{#pm} p_{T} Spectra by Multiplicity Percentile (JUNCTIONS)",
+        "Spectra_Dpm_JUNCTIONS.png");
 
-    DrawSpectraPlot(d_CM, "c_Dplus_Monash",
-        "D^{+} p_{T} Spectra by Multiplicity Percentile (MONASH)",
-        "Spectra_Dplus_MONASH.png");
+    DrawSpectraPlot(d_CM, "c_Dpm_Monash",
+        "D^{#pm} p_{T} Spectra by Multiplicity Percentile (MONASH)",
+        "Spectra_Dpm_MONASH.png");
 
     DrawSpectraPlot(lb_BJ, "c_Lambdab_Junctions",
-        "#Lambda_{b}^{0} p_{T} Spectra by Multiplicity Percentile (JUNCTIONS)",
+        "(#Lambda_{b}^{0} + #bar{#Lambda}_{b}^{0}) p_{T} Spectra by Multiplicity Percentile (JUNCTIONS)",
         "Spectra_Lambdab_JUNCTIONS.png");
 
     DrawSpectraPlot(lb_BM, "c_Lambdab_Monash",
-        "#Lambda_{b}^{0} p_{T} Spectra by Multiplicity Percentile (MONASH)",
+        "(#Lambda_{b}^{0} + #bar{#Lambda}_{b}^{0}) p_{T} Spectra by Multiplicity Percentile (MONASH)",
         "Spectra_Lambdab_MONASH.png");
 
-    DrawSpectraPlot(b_BJ, "c_Bplus_Junctions",
-        "B^{+} p_{T} Spectra by Multiplicity Percentile (JUNCTIONS)",
-        "Spectra_Bplus_JUNCTIONS.png");
+    DrawSpectraPlot(b_BJ, "c_Bpm_Junctions",
+        "B^{#pm} p_{T} Spectra by Multiplicity Percentile (JUNCTIONS)",
+        "Spectra_Bpm_JUNCTIONS.png");
 
-    DrawSpectraPlot(b_BM, "c_Bplus_Monash",
-        "B^{+} p_{T} Spectra by Multiplicity Percentile (MONASH)",
-        "Spectra_Bplus_MONASH.png");
+    DrawSpectraPlot(b_BM, "c_Bpm_Monash",
+        "B^{#pm} p_{T} Spectra by Multiplicity Percentile (MONASH)",
+        "Spectra_Bpm_MONASH.png");
 
     // ---------- Cleanup ----------
     for (auto* h : lc_CM) if (h) delete h;
@@ -559,11 +565,11 @@ void Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples_WithPrefixes(
               << "  " << PlotPathUtils::GetPtMultiplicityPlotsDir()
               << "/Spectra_Lambdac_{MONASH,JUNCTIONS}.png\n"
               << "  " << PlotPathUtils::GetPtMultiplicityPlotsDir()
-              << "/Spectra_Dplus_{MONASH,JUNCTIONS}.png\n"
+              << "/Spectra_Dpm_{MONASH,JUNCTIONS}.png\n"
               << "  " << PlotPathUtils::GetPtMultiplicityPlotsDir()
               << "/Spectra_Lambdab_{MONASH,JUNCTIONS}.png\n"
               << "  " << PlotPathUtils::GetPtMultiplicityPlotsDir()
-              << "/Spectra_Bplus_{MONASH,JUNCTIONS}.png\n";
+              << "/Spectra_Bpm_{MONASH,JUNCTIONS}.png\n";
 }
 
 

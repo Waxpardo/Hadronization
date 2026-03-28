@@ -18,6 +18,14 @@
 // Notes:
 // - Uses round-robin event assignment into N subsamples
 // - Reads the unified TTree once and fills both Beauty and Charm outputs
+// - Species-resolved histograms are filled using abs(PDG), so they are
+//   charge-conjugate combined. For example:
+//     * fHistPtBplus   -> B^{#pm}
+//     * fHistPtBzero   -> B^{0}/#bar{B}^{0}
+//     * fHistPtLambdab -> #Lambda_{b}^{0}/#bar{#Lambda}_{b}^{0}
+//     * fHistPtDplus   -> D^{#pm}
+//     * fHistPtDzero   -> D^{0}/#bar{D}^{0}
+//     * fHistPtLambdac -> #Lambda_{c}^{+}/#bar{#Lambda}_{c}^{-}
 // - Default convention:
 //     * Beauty takes HFCLASS == 5 or 45
 //     * Charm  takes HFCLASS == 4 only
@@ -217,12 +225,12 @@ namespace {
                                        nMultBins, multMin, multMax);
 
     h->fHistPtBplus = new TH2D("fHistPtBplus",
-                               "B^{+}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+                               "B^{#pm} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
                                nPtBins, ptMin, ptMax,
                                nMultBins, multMin, multMax);
 
     h->fHistPtBzero = new TH2D("fHistPtBzero",
-                               "B^{0}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+                               "B^{0}/#bar{B}^{0} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
                                nPtBins, ptMin, ptMax,
                                nMultBins, multMin, multMax);
 
@@ -237,7 +245,7 @@ namespace {
                                 nMultBins, multMin, multMax);
 
     h->fHistPtLambdab = new TH2D("fHistPtLambdab",
-                                 "#Lambda_{b}^{0}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+                                 "#Lambda_{b}^{0}/#bar{#Lambda}_{b}^{0} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
                                  nPtBins, ptMin, ptMax,
                                  nMultBins, multMin, multMax);
 
@@ -384,12 +392,12 @@ namespace {
                                       nMultBins, multMin, multMax);
 
     h->fHistPtDplus = new TH2D("fHistPtDplus",
-                               "D^{+}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+                               "D^{#pm} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
                                nPtBins, ptMin, ptMax,
                                nMultBins, multMin, multMax);
 
     h->fHistPtDzero = new TH2D("fHistPtDzero",
-                               "D^{0}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+                               "D^{0}/#bar{D}^{0} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
                                nPtBins, ptMin, ptMax,
                                nMultBins, multMin, multMax);
 
@@ -399,7 +407,7 @@ namespace {
                                 nMultBins, multMin, multMax);
 
     h->fHistPtLambdac = new TH2D("fHistPtLambdac",
-                                 "#Lambda_{c}^{+}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+                                 "#Lambda_{c}^{+}/#bar{#Lambda}_{c}^{-} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
                                  nPtBins, ptMin, ptMax,
                                  nMultBins, multMin, multMax);
 
@@ -447,6 +455,13 @@ namespace {
     hset->fHistPtDzero->Write();
     hset->fHistPtDsplus->Write();
     hset->fHistPtLambdac->Write();
+    {
+      TH2D* hLambdacAlias = dynamic_cast<TH2D*>(hset->fHistPtLambdac->Clone("fHistPtLambdacPlus"));
+      if (hLambdacAlias) {
+        hLambdacAlias->Write();
+        delete hLambdacAlias;
+      }
+    }
 
     hset->fHistPtPionsCharged->Write();
     hset->fHistPtPiPlus->Write();
@@ -605,11 +620,12 @@ namespace {
           if (IsBeautyMeson(pdg))  bset->fHistPtBeautyMesons->Fill(pt, MULTIPLICITY);
           if (IsBeautyBaryon(pdg)) bset->fHistPtBeautyBaryons->Fill(pt, MULTIPLICITY);
 
-          if      (apdg == 521)  bset->fHistPtBplus->Fill(pt, MULTIPLICITY);
-          else if (apdg == 511)  bset->fHistPtBzero->Fill(pt, MULTIPLICITY);
+          // Species histograms are filled with abs(PDG), so they are charge-conjugate combined.
+          if      (apdg == 521)  bset->fHistPtBplus->Fill(pt, MULTIPLICITY);   // B^{#pm}
+          else if (apdg == 511)  bset->fHistPtBzero->Fill(pt, MULTIPLICITY);   // B^{0}/#bar{B}^{0}
           else if (apdg == 531)  bset->fHistPtBs0->Fill(pt, MULTIPLICITY);
           else if (apdg == 541)  bset->fHistPtBcplus->Fill(pt, MULTIPLICITY);
-          else if (apdg == 5122) bset->fHistPtLambdab->Fill(pt, MULTIPLICITY);
+          else if (apdg == 5122) bset->fHistPtLambdab->Fill(pt, MULTIPLICITY); // #Lambda_{b}^{0}/#bar{#Lambda}_{b}^{0}
           else if (apdg == 5222) bset->fHistPtSigmabPlus->Fill(pt, MULTIPLICITY);
           else if (apdg == 5212) bset->fHistPtSigmabZero->Fill(pt, MULTIPLICITY);
           else if (apdg == 5112) bset->fHistPtSigmabMinus->Fill(pt, MULTIPLICITY);
@@ -628,10 +644,10 @@ namespace {
           if (IsCharmMeson(pdg))  cset->fHistPtCharmMesons->Fill(pt, MULTIPLICITY);
           if (IsCharmBaryon(pdg)) cset->fHistPtCharmBaryons->Fill(pt, MULTIPLICITY);
 
-          if      (apdg == 411)  cset->fHistPtDplus->Fill(pt, MULTIPLICITY);
-          else if (apdg == 421)  cset->fHistPtDzero->Fill(pt, MULTIPLICITY);
+          if      (apdg == 411)  cset->fHistPtDplus->Fill(pt, MULTIPLICITY);   // D^{#pm}
+          else if (apdg == 421)  cset->fHistPtDzero->Fill(pt, MULTIPLICITY);   // D^{0}/#bar{D}^{0}
           else if (apdg == 431)  cset->fHistPtDsplus->Fill(pt, MULTIPLICITY);
-          else if (apdg == 4122) cset->fHistPtLambdac->Fill(pt, MULTIPLICITY);
+          else if (apdg == 4122) cset->fHistPtLambdac->Fill(pt, MULTIPLICITY); // #Lambda_{c}^{+}/#bar{#Lambda}_{c}^{-}
         }
       }
     }

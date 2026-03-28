@@ -30,3 +30,25 @@ update_file() {
 
 update_file "${SCRIPT_DIR}/submitCondor_10M.sub"
 update_file "${SCRIPT_DIR}/submitCondor_hf_10M.sub"
+
+mkdir -p \
+  "${BASE}/RootFiles/HF/MONASH" \
+  "${BASE}/RootFiles/HF/JUNCTIONS" \
+  "${BASE}/RootFiles/bbbar/MONASH" \
+  "${BASE}/RootFiles/bbbar/JUNCTIONS" \
+  "${BASE}/RootFiles/ccbar/MONASH" \
+  "${BASE}/RootFiles/ccbar/JUNCTIONS" \
+  "${BASE}/Jobs/HF/MONASH" \
+  "${BASE}/Jobs/HF/JUNCTIONS" \
+  "${BASE}/Jobs/bbbar/MONASH" \
+  "${BASE}/Jobs/bbbar/JUNCTIONS" \
+  "${BASE}/Jobs/ccbar/MONASH" \
+  "${BASE}/Jobs/ccbar/JUNCTIONS" \
+  "${BASE}/logs/HF/MONASH" \
+  "${BASE}/logs/HF/JUNCTIONS" \
+  "${BASE}/logs/bbbar/MONASH" \
+  "${BASE}/logs/bbbar/JUNCTIONS" \
+  "${BASE}/logs/ccbar/MONASH" \
+  "${BASE}/logs/ccbar/JUNCTIONS"
+
+echo "Ensured output/work/log directory structure under: ${BASE}"

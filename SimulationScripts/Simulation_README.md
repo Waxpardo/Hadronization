@@ -467,6 +467,21 @@ Temporary per-job working directories are usually placed under:
 '''text
 Jobs/HF/MONASH/
 Jobs/HF/JUNCTIONS/
+Jobs/bbbar/MONASH/
+Jobs/bbbar/JUNCTIONS/
+Jobs/ccbar/MONASH/
+Jobs/ccbar/JUNCTIONS/
+'''
+
+Condor logs are typically organized under:
+
+'''text
+logs/HF/MONASH/
+logs/HF/JUNCTIONS/
+logs/bbbar/MONASH/
+logs/bbbar/JUNCTIONS/
+logs/ccbar/MONASH/
+logs/ccbar/JUNCTIONS/
 '''
 
 Analysis outputs are written under:

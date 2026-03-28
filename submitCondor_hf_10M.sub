@@ -16,9 +16,9 @@ request_disk   = 10GB
 +UseOS       = "el9"
 
 # Logging
-log    = logs/job_$(Cluster)_$(JOBID)_$(TUNE).log
-output = logs/job_$(Cluster)_$(JOBID)_$(TUNE).out
-error  = logs/job_$(Cluster)_$(JOBID)_$(TUNE).err
+log    = logs/HF/$(TUNE)/job_$(Cluster)_$(JOBID).log
+output = logs/HF/$(TUNE)/job_$(Cluster)_$(JOBID).out
+error  = logs/HF/$(TUNE)/job_$(Cluster)_$(JOBID).err
 
 # Shared filesystem (/data/alice), no Condor file transfer
 should_transfer_files = NO
@@ -27,10 +27,11 @@ should_transfer_files = NO
 NEVT_PER_JOB = 1000000
 
 # Arguments to runCondorJob.sh:
-#   JOBID = $(JOBID)
-#   TUNE  = $(TUNE)
-#   NEVT  = $(NEVT_PER_JOB)
-arguments = $(JOBID) $(TUNE) $(NEVT_PER_JOB)
+#   CLUSTERID = $(Cluster)
+#   JOBID     = $(JOBID)
+#   TUNE      = $(TUNE)
+#   NEVT      = $(NEVT_PER_JOB)
+arguments = $(Cluster) $(JOBID) $(TUNE) $(NEVT_PER_JOB)
 
 queue JOBID, TUNE from (
 0, MONASH
@@ -43,14 +44,14 @@ queue JOBID, TUNE from (
 7, MONASH
 8, MONASH
 9, MONASH
-10, JUNCTIONS
-11, JUNCTIONS
-12, JUNCTIONS
-13, JUNCTIONS
-14, JUNCTIONS
-15, JUNCTIONS
-16, JUNCTIONS
-17, JUNCTIONS
-18, JUNCTIONS
-19, JUNCTIONS
+0, JUNCTIONS
+1, JUNCTIONS
+2, JUNCTIONS
+3, JUNCTIONS
+4, JUNCTIONS
+5, JUNCTIONS
+6, JUNCTIONS
+7, JUNCTIONS
+8, JUNCTIONS
+9, JUNCTIONS
 )

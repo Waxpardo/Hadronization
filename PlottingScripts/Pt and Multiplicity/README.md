@@ -156,7 +156,7 @@ Main outputs:
 
 ```text
 Ratio_BeautyBaryonMeson_MONASH_vs_JUNCTIONS_*.png
-Ratio_LambdabOverBplus_MONASH_vs_JUNCTIONS_*.png
+Ratio_LambdabOverBpm_MONASH_vs_JUNCTIONS_*.png
 ```
 
 ### 2. Charm baryon/meson ratios
@@ -170,7 +170,7 @@ Plot_Charm_BaryonMesonRatio_MONASH_vs_JUNCTIONS_subsamples.C
 What it makes:
 
 - Charm baryon / charm meson ratio vs `pT`
-- `Lambda_c / D+` ratio vs `pT`
+- `(#Lambda_c + #bar{#Lambda}_c) / D^{#pm}` ratio vs `pT`
 - One plot per multiplicity percentile class
 
 Default call:
@@ -202,7 +202,7 @@ Main outputs:
 
 ```text
 Ratio_CharmBaryonMeson_MONASH_vs_JUNCTIONS_*.png
-Ratio_LambdacOverDplus_MONASH_vs_JUNCTIONS_*.png
+Ratio_LambdacOverDpm_MONASH_vs_JUNCTIONS_*.png
 ```
 
 ### 3. Combined charm and beauty baryon/meson ratios
@@ -269,10 +269,10 @@ Plot_HF_PtSpectra_vsMultiplicity_MONASH_JUNCTIONS_subsamples.C
 
 What it makes:
 
-- `Lambda_c` spectra by multiplicity percentile
-- `D+` spectra by multiplicity percentile
-- `Lambda_b` spectra by multiplicity percentile
-- `B+` spectra by multiplicity percentile
+- `#Lambda_c + #bar{#Lambda}_c` spectra by multiplicity percentile
+- `D^{#pm}` spectra by multiplicity percentile
+- `#Lambda_b + #bar{#Lambda}_b` spectra by multiplicity percentile
+- `B^{#pm}` spectra by multiplicity percentile
 - Separate plots for MONASH and JUNCTIONS
 
 Default call:
@@ -305,12 +305,12 @@ Main outputs:
 ```text
 Spectra_Lambdac_MONASH.png
 Spectra_Lambdac_JUNCTIONS.png
-Spectra_Dplus_MONASH.png
-Spectra_Dplus_JUNCTIONS.png
+Spectra_Dpm_MONASH.png
+Spectra_Dpm_JUNCTIONS.png
 Spectra_Lambdab_MONASH.png
 Spectra_Lambdab_JUNCTIONS.png
-Spectra_Bplus_MONASH.png
-Spectra_Bplus_JUNCTIONS.png
+Spectra_Bpm_MONASH.png
+Spectra_Bpm_JUNCTIONS.png
 ```
 
 Advanced custom-prefix wrapper:
@@ -333,8 +333,8 @@ Plot_HF_Ratios_vsMultiplicityPercentile_subsamples.C
 
 What it makes:
 
-- `Lambda_c / D+` vs multiplicity percentile
-- `Lambda_b / B+` vs multiplicity percentile
+- `(#Lambda_c + #bar{#Lambda}_c) / D^{#pm}` vs multiplicity percentile
+- `(#Lambda_b + #bar{#Lambda}_b) / B^{#pm}` vs multiplicity percentile
 
 Default call:
 
@@ -369,8 +369,8 @@ runHFRatios("12-01-2026", 10, 0.0, -1.0);
 Main outputs:
 
 ```text
-Ratio_Lambdac_over_Dplus_vsMult.png
-Ratio_Lambdab_over_Bplus_vsMult.png
+Ratio_Lambdac_over_Dpm_vsMult.png
+Ratio_Lambdab_over_Bpm_vsMult.png
 ```
 
 ## Recommended usage

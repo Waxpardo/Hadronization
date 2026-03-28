@@ -32,6 +32,12 @@
 // Each subsample ROOT file has the SAME histogram names; they live in
 // different files, so there are no name clashes.
 //
+// Species-resolved histograms are filled using abs(PDG), so these histograms
+// are charge-conjugate combined. For example:
+//   fHistPtBplus   -> B^{#pm}
+//   fHistPtBzero   -> B^{0}/#bar{B}^{0}
+//   fHistPtLambdab -> #Lambda_{b}^{0}/#bar{#Lambda}_{b}^{0}
+//
 // ----------------------------------------------------------------------
 
 #include <vector>
@@ -201,14 +207,14 @@ namespace {
     // beauty mesons
     h->fHistPtBplus = new TH2D(
       "fHistPtBplus",
-      "B^{+}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+      "B^{#pm} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
 
     h->fHistPtBzero = new TH2D(
       "fHistPtBzero",
-      "B^{0}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+      "B^{0}/#bar{B}^{0} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
@@ -230,7 +236,7 @@ namespace {
     // beauty baryons
     h->fHistPtLambdab = new TH2D(
       "fHistPtLambdab",
-      "#Lambda_{b}^{0}: p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
+      "#Lambda_{b}^{0}/#bar{#Lambda}_{b}^{0} (charge-conjugate combined): p_{T} vs multiplicity;p_{T} (GeV/c);Multiplicity",
       nPtBins, ptMin, ptMax,
       nMultBins, multMin, multMax
     );
@@ -436,9 +442,10 @@ namespace {
         }
 
         // --------- species-resolved beauty mesons ---------
-        if (apdg == 521) {           // B+
+        // Filled with abs(PDG), so the species histograms are charge-conjugate combined.
+        if (apdg == 521) {           // B^{#pm}
           hset->fHistPtBplus->Fill(pt, MULTIPLICITY);
-        } else if (apdg == 511) {    // B0
+        } else if (apdg == 511) {    // B^{0}/#bar{B}^{0}
           hset->fHistPtBzero->Fill(pt, MULTIPLICITY);
         } else if (apdg == 531) {    // Bs0
           hset->fHistPtBs0->Fill(pt, MULTIPLICITY);
@@ -447,7 +454,7 @@ namespace {
         }
 
         // --------- species-resolved beauty baryons ---------
-        if (apdg == 5122) {          // Lambda_b^0
+        if (apdg == 5122) {          // #Lambda_{b}^{0}/#bar{#Lambda}_{b}^{0}
           hset->fHistPtLambdab->Fill(pt, MULTIPLICITY);
         } else if (apdg == 5222) {   // Sigma_b^+
           hset->fHistPtSigmabPlus->Fill(pt, MULTIPLICITY);

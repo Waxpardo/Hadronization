@@ -3,8 +3,8 @@
 //
 // Makes ratios vs multiplicity percentile bins using subsample ROOT files:
 //
-//   (1) Lambda_c^+ / D^+   vs mult percentile
-//   (2) Lambda_b^0 / B^+   vs mult percentile
+//   (1) (#Lambda_c + #bar{#Lambda}_c) / D^{#pm}   vs mult percentile
+//   (2) (#Lambda_b + #bar{#Lambda}_b) / B^{#pm}   vs mult percentile
 //
 // For each tune, ratio points are computed per subsample as:
 //   r = (Integral over pT of TH2 in mult-range for Lambda) / same for D (or B)
@@ -57,6 +57,13 @@ void SetStyle() {
 template<class T>
 T* GetObj(TFile* f, const char* name) {
   return f ? dynamic_cast<T*>(f->Get(name)) : nullptr;
+}
+
+TH2* GetCharmLambdaHist(TFile* f)
+{
+  if (!f) return nullptr;
+  if (TH2* h = GetObj<TH2>(f, "fHistPtLambdac")) return h;
+  return GetObj<TH2>(f, "fHistPtLambdacPlus");
 }
 
 // same logic as your spectra macro
@@ -220,7 +227,6 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
 
   const char* MULT_HIST = "fHistMultiplicity";
 
-  const char* HC_LC = "fHistPtLambdacPlus";
   const char* HC_D  = "fHistPtDplus";
 
   const char* HB_LB = "fHistPtLambdab";
@@ -242,11 +248,11 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
       if (!fM || fM->IsZombie() || !fJ || fJ->IsZombie()) { if(fM)fM->Close(); if(fJ)fJ->Close(); continue; }
 
       TH1* hMultM = GetObj<TH1>(fM, MULT_HIST);
-      TH2* hLcM   = GetObj<TH2>(fM, HC_LC);
+      TH2* hLcM   = GetCharmLambdaHist(fM);
       TH2* hDM    = GetObj<TH2>(fM, HC_D);
 
       TH1* hMultJ = GetObj<TH1>(fJ, MULT_HIST);
-      TH2* hLcJ   = GetObj<TH2>(fJ, HC_LC);
+      TH2* hLcJ   = GetCharmLambdaHist(fJ);
       TH2* hDJ    = GetObj<TH2>(fJ, HC_D);
 
       auto yrM = PercentileRange(hMultM, kClasses[ic].pTop, kClasses[ic].pBot);
@@ -273,9 +279,9 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
 
   DrawRatioVsMult(
     yLCM, eLCM, yLCJ, eLCJ,
-    "#Lambda_{c}^{+}/D^{+} vs Multiplicity Percentile",
-    "#Lambda_{c}^{+}/D^{+}",
-    "Ratio_Lambdac_over_Dplus_vsMult.png"
+    "(#Lambda_{c}^{+} + #bar{#Lambda}_{c}^{-})/D^{#pm} vs Multiplicity Percentile",
+    "(#Lambda_{c}^{+} + #bar{#Lambda}_{c}^{-})/D^{#pm}",
+    "Ratio_Lambdac_over_Dpm_vsMult.png"
   );
 
   // ----- Lambda_b / B+ -----
@@ -322,16 +328,16 @@ void Plot_HF_Ratios_vsMultiplicityPercentile_subsamples_WithPrefixes(
 
   DrawRatioVsMult(
     yLBM, eLBM, yLBJ, eLBJ,
-    "#Lambda_{b}^{0}/B^{+} vs Multiplicity Percentile",
-    "#Lambda_{b}^{0}/B^{+}",
-    "Ratio_Lambdab_over_Bplus_vsMult.png"
+    "(#Lambda_{b}^{0} + #bar{#Lambda}_{b}^{0})/B^{#pm} vs Multiplicity Percentile",
+    "(#Lambda_{b}^{0} + #bar{#Lambda}_{b}^{0})/B^{#pm}",
+    "Ratio_Lambdab_over_Bpm_vsMult.png"
   );
 
   std::cout << "Saved:\n"
             << "  " << PlotPathUtils::GetPtMultiplicityPlotsDir()
-            << "/Ratio_Lambdac_over_Dplus_vsMult.png\n"
+            << "/Ratio_Lambdac_over_Dpm_vsMult.png\n"
             << "  " << PlotPathUtils::GetPtMultiplicityPlotsDir()
-            << "/Ratio_Lambdab_over_Bplus_vsMult.png\n";
+            << "/Ratio_Lambdab_over_Bpm_vsMult.png\n";
 }
 
 

@@ -140,25 +140,22 @@ Each unified job typically:
 
 ---
 
-## Important naming note
+## Naming and collisions
 
-When multiple submissions are made for the same tune, collisions can happen if work directories and output files are named only by `JOBID`.
+The current Condor submit files pass `CLUSTERID` into `runCondorJob.sh`, so batch jobs are separated by cluster automatically.
 
-For example, this is **not safe** across multiple submissions:
+Typical Condor-managed paths now look like:
 
 ´´´text
-Jobs/HF/JUNCTIONS/job_0
-RootFiles/HF/JUNCTIONS/hf_JUNCTIONS_job0.root
+Jobs/HF/JUNCTIONS/cluster_<CLUSTERID>/job_<JOBID>/
+RootFiles/HF/JUNCTIONS/hf_JUNCTIONS_cluster<CLUSTERID>_job<JOBID>.root
+Jobs/bbbar/MONASH/cluster_<CLUSTERID>/job_<JOBID>/
+RootFiles/bbbar/MONASH/bbbar_MONASH_cluster<CLUSTERID>_job<JOBID>.root
 ´´´
 
-because another submission can reuse the same `JOBID`.
+This prevents collisions between different Condor submissions for the same workflow and tune.
 
-### Current recommendation
-Before resubmitting the same workflow/tune combination:
-- move or rename the old output files
-- or clean the corresponding `Jobs/...` and `RootFiles/...` directories
-
-If you want multiple overlapping submissions for the same sample family, extend `runCondorJob.sh` to include a submission-specific tag such as `CLUSTERID` in both the work directory and output filename.
+For manual runs without a cluster id, the wrapper still uses the simpler `job_<JOBID>` naming, so clean old manual outputs before reusing the same job id.
 
 ---
 
@@ -169,11 +166,12 @@ If you want multiple overlapping submissions for the same sample family, extend 
 Current legacy argument layout:
 
 ´´´text
-JOBID CHANNEL TUNE NEVT_PER_JOB
+CLUSTERID JOBID CHANNEL TUNE NEVT_PER_JOB
 ´´´
 
 where:
-- `JOBID` = Condor process number or custom job id
+- `CLUSTERID` = Condor cluster id
+- `JOBID` = per-job index
 - `CHANNEL` = `bbbar` or `ccbar`
 - `TUNE` = `MONASH` or `JUNCTIONS`
 - `NEVT_PER_JOB` = events per job
@@ -185,10 +183,11 @@ where:
 Current unified argument layout:
 
 ´´´text
-JOBID TUNE NEVT_PER_JOB
+CLUSTERID JOBID TUNE NEVT_PER_JOB
 ´´´
 
 where:
+- `CLUSTERID` = Condor cluster id
 - `JOBID` = per-job index
 - `TUNE` = `MONASH` or `JUNCTIONS`
 - `NEVT_PER_JOB` = events per job
@@ -211,10 +210,10 @@ Hadronization/RootFiles/ccbar/JUNCTIONS/
 Working directories are typically under:
 
 ´´´text
-Hadronization/Jobs/bbbar/MONASH/
-Hadronization/Jobs/bbbar/JUNCTIONS/
-Hadronization/Jobs/ccbar/MONASH/
-Hadronization/Jobs/ccbar/JUNCTIONS/
+Hadronization/Jobs/bbbar/MONASH/cluster_<CLUSTERID>/job_<JOBID>/
+Hadronization/Jobs/bbbar/JUNCTIONS/cluster_<CLUSTERID>/job_<JOBID>/
+Hadronization/Jobs/ccbar/MONASH/cluster_<CLUSTERID>/job_<JOBID>/
+Hadronization/Jobs/ccbar/JUNCTIONS/cluster_<CLUSTERID>/job_<JOBID>/
 ´´´
 
 ---
@@ -231,14 +230,19 @@ Hadronization/RootFiles/HF/JUNCTIONS/
 Working directories are typically under:
 
 ´´´text
-Hadronization/Jobs/HF/MONASH/
-Hadronization/Jobs/HF/JUNCTIONS/
+Hadronization/Jobs/HF/MONASH/cluster_<CLUSTERID>/job_<JOBID>/
+Hadronization/Jobs/HF/JUNCTIONS/cluster_<CLUSTERID>/job_<JOBID>/
 ´´´
 
 Logs go to:
 
 ´´´text
-Hadronization/logs/
+Hadronization/logs/HF/MONASH/
+Hadronization/logs/HF/JUNCTIONS/
+Hadronization/logs/bbbar/MONASH/
+Hadronization/logs/bbbar/JUNCTIONS/
+Hadronization/logs/ccbar/MONASH/
+Hadronization/logs/ccbar/JUNCTIONS/
 ´´´
 
 ---
@@ -270,7 +274,6 @@ Typical variables in a legacy submit file:
 
 ´´´text
 NEVT_PER_JOB = 1000000
-NJOBS = 100
 CHANNEL = bbbar
 TUNE = MONASH
 ´´´
@@ -278,7 +281,7 @@ TUNE = MONASH
 Typical arguments line:
 
 ´´´text
-arguments = $(JOBID) $(CHANNEL) $(TUNE) $(NEVT_PER_JOB)
+arguments = $(Cluster) $(JOBID) $(CHANNEL) $(TUNE) $(NEVT_PER_JOB)
 ´´´
 
 Typical queue blocks:
@@ -286,19 +289,39 @@ Typical queue blocks:
 ´´´text
 CHANNEL = bbbar
 TUNE = MONASH
-queue $(NJOBS)
+queue JOBID from (
+0
+1
+...
+9
+)
 
 CHANNEL = bbbar
 TUNE = JUNCTIONS
-queue $(NJOBS)
+queue JOBID from (
+0
+1
+...
+9
+)
 
 CHANNEL = ccbar
 TUNE = MONASH
-queue $(NJOBS)
+queue JOBID from (
+0
+1
+...
+9
+)
 
 CHANNEL = ccbar
 TUNE = JUNCTIONS
-queue $(NJOBS)
+queue JOBID from (
+0
+1
+...
+9
+)
 ´´´
 
 ---
@@ -345,16 +368,16 @@ queue JOBID, TUNE from (
 7, MONASH
 8, MONASH
 9, MONASH
-10, JUNCTIONS
-11, JUNCTIONS
-12, JUNCTIONS
-13, JUNCTIONS
-14, JUNCTIONS
-15, JUNCTIONS
-16, JUNCTIONS
-17, JUNCTIONS
-18, JUNCTIONS
-19, JUNCTIONS
+0, JUNCTIONS
+1, JUNCTIONS
+2, JUNCTIONS
+3, JUNCTIONS
+4, JUNCTIONS
+5, JUNCTIONS
+6, JUNCTIONS
+7, JUNCTIONS
+8, JUNCTIONS
+9, JUNCTIONS
 )
 ´´´
 
@@ -366,7 +389,7 @@ queue JOBID, TUNE from (
 1, JUNCTIONS
 2, JUNCTIONS
 ...
-19, JUNCTIONS
+9, JUNCTIONS
 )
 ´´´
 
@@ -531,7 +554,8 @@ condor_history 4174875
 Logs are written under:
 
 ´´´text
-Hadronization/logs/
+Hadronization/logs/HF/<TUNE>/
+Hadronization/logs/<CHANNEL>/<TUNE>/
 ´´´
 
 Typical filenames include:
@@ -543,17 +567,19 @@ Typical filenames include:
 Examples:
 
 ´´´text
-logs/job_4174875_0_MONASH.out
-logs/job_4174875_0_MONASH.err
-logs/job_4174875_10_JUNCTIONS.out
-logs/job_4174875_10_JUNCTIONS.err
+logs/HF/MONASH/job_4174875_0.out
+logs/HF/MONASH/job_4174875_0.err
+logs/bbbar/JUNCTIONS/job_4175667_7.out
+logs/ccbar/JUNCTIONS/job_4175667_7.err
 ´´´
 
 Use:
 
 ´´´bash
-tail -n 50 logs/job_<CLUSTER>_<JOBID>_<TUNE>.out
-tail -n 50 logs/job_<CLUSTER>_<JOBID>_<TUNE>.err
+tail -n 50 logs/HF/<TUNE>/job_<CLUSTER>_<JOBID>.out
+tail -n 50 logs/HF/<TUNE>/job_<CLUSTER>_<JOBID>.err
+tail -n 50 logs/<CHANNEL>/<TUNE>/job_<CLUSTER>_<JOBID>.out
+tail -n 50 logs/<CHANNEL>/<TUNE>/job_<CLUSTER>_<JOBID>.err
 ´´´
 
 Empty `.err` files are usually a good sign.
@@ -693,7 +719,7 @@ Before submitting jobs, check:
 - `SimulationScripts/` contains the required compiled executable(s)
 - the required `.cmnd` files exist
 - `setupEnv.sh` exists in the Hadronization base
-- `logs/` exists
+- workflow-specific `logs/...` directories exist
 - `base_path.txt` points to the correct Hadronization base
 - submit files point to the correct `runCondorJob.sh`
 - work/output directories exist or can be created
@@ -705,7 +731,7 @@ Recommended checks:
 ls -l SimulationScripts/
 ls -l SimulationScripts/pythiasettings_Hard_Low_ccbb_MONASH.cmnd
 ls -l SimulationScripts/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd
-mkdir -p logs
+./update_submit_paths.sh
 ´´´
 
 For unified heavy-flavour production:
