@@ -1,5 +1,26 @@
 
 # Large binary outputs
-*.root
+/RootFiles/**/*.root
 .DS_Store
 .vscode/settings.json
+/logs/*
+
+# Ignore ROOT files by default
+*.root
+
+# But keep analyzed outputs
+!AnalyzedData/
+!AnalyzedData/**/*.root
+
+# Ignore job outputs and logs
+logs/
+compile_hf.log
+Jobs/HF/**/hf_*.root
+
+# Ignore ROOT ACLiC/build artifacts
+*_C.so
+*_C.d
+*_ACLiC_dict_rdict.pcm
+
+# Ignore built executables
+SimulationScripts/heavyflavourcorrelations_status

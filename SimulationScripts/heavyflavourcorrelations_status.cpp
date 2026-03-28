@@ -2,14 +2,10 @@
 //
 // Purpose:
 // - Generate pp events with PYTHIA8 in a single run
-// - Enable both hard charm and hard beauty production
-// - Save final-state charm hadrons, beauty hadrons, and pions (pi+, pi-, pi0) into a ROOT TTree
+// - Produce both hard charm and hard beauty events in the same generation
+// - Load either MONASH or JUNCTIONS settings from a mode argument
+// - Save final-state charm hadrons, beauty hadrons, bc hadrons, and pions into a ROOT TTree
 // - Compute charged multiplicity Nch from prompt charged primaries (e, mu, pi, K, p)
-//
-// Notes:
-// - This is a single PYTHIA generation, not two separate runs.
-// - The same generated event record is scanned for both charm and beauty hadrons.
-// - To work properly, your settings must enable both ccbar and bbbar hard processes.
 //
 // Build example:
 //   g++ -O2 -std=c++17 heavyflavourcorrelations_status.cpp \
@@ -17,7 +13,8 @@
 //       -o heavyflavourcorrelations_status
 //
 // Run:
-//   ./heavyflavourcorrelations_status output.root 123 456
+//   ./heavyflavourcorrelations_status monash output.root 123 456
+//   ./heavyflavourcorrelations_status junctions output.root 123 456
 
 #include <iostream>
 #include <cmath>
@@ -43,26 +40,27 @@ using namespace Pythia8;
 // Helper functions
 // ---------------------------------------------------------
 
-bool IsBeauty(int particlepdg) {
+bool HasQuarkDigit(int particlepdg, int qdigit) {
   int pdg = std::abs(particlepdg);
-  pdg /= 10; // drop last digit
-  if (pdg % 10 == 5) return true;
+  pdg /= 10; // drop last digit (spin/excitation)
+  if (pdg % 10 == qdigit) return true;
   pdg /= 10;
-  if (pdg % 10 == 5) return true;
+  if (pdg % 10 == qdigit) return true;
   pdg /= 10;
-  if (pdg % 10 == 5) return true;
+  if (pdg % 10 == qdigit) return true;
   return false;
 }
 
+bool IsBeauty(int particlepdg) {
+  return HasQuarkDigit(particlepdg, 5);
+}
+
 bool IsCharm(int particlepdg) {
-  int pdg = std::abs(particlepdg);
-  pdg /= 10; // drop last digit
-  if (pdg % 10 == 4) return true;
-  pdg /= 10;
-  if (pdg % 10 == 4) return true;
-  pdg /= 10;
-  if (pdg % 10 == 4) return true;
-  return false;
+  return HasQuarkDigit(particlepdg, 4);
+}
+
+bool IsBcHadron(int particlepdg) {
+  return IsBeauty(particlepdg) && IsCharm(particlepdg);
 }
 
 bool IsPion(int particlepdg) {
@@ -86,28 +84,51 @@ bool IsPromptByStatus(int status) {
   return (status >= 81 && status <= 89);
 }
 
-// Optional per-particle class:
-// 5 = beauty hadron
-// 4 = charm hadron
-// 0 = pion
+// Per-particle class:
+// 5  = beauty hadron only
+// 4  = charm hadron only
+// 45 = bc hadron
+// 0  = pion
 int HFClass(int pdg) {
-  if (IsBeauty(pdg)) return 5;
-  if (IsCharm(pdg))  return 4;
-  if (IsPion(pdg))   return 0;
+  if (IsBcHadron(pdg)) return 45;
+  if (IsBeauty(pdg))   return 5;
+  if (IsCharm(pdg))    return 4;
+  if (IsPion(pdg))     return 0;
   return -1;
+}
+
+string ResolveSettingsFile(const string& mode) {
+  if (mode == "monash") {
+    return "pythiasettings_Hard_Low_ccbb_MONASH.cmnd";
+  }
+  if (mode == "junctions") {
+    return "pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd";
+  }
+  return "";
 }
 
 int main(int argc, char** argv) {
   auto start = std::chrono::high_resolution_clock::now();
 
-  if (argc != 4) {
+  if (argc != 5) {
     std::cout << "Error: wrong number of arguments.\n"
               << "Expected:\n"
-              << "  ./heavyflavourcorrelations_status output.root random_number1 random_number2\n";
+              << "  ./heavyflavourcorrelations_status MODE output.root random_number1 random_number2\n"
+              << "Where MODE is either:\n"
+              << "  monash\n"
+              << "  junctions\n";
     return 1;
   }
 
-  const char* outName = argv[1];
+  const string mode = argv[1];
+  const string settingsFile = ResolveSettingsFile(mode);
+
+  if (settingsFile.empty()) {
+    std::cerr << "Error: invalid MODE = '" << mode << "'. Use 'monash' or 'junctions'.\n";
+    return 1;
+  }
+
+  const char* outName = argv[2];
 
   TFile* output = TFile::Open(outName, "CREATE");
   if (!output || output->IsZombie()) {
@@ -120,12 +141,16 @@ int main(int argc, char** argv) {
   // ---------------------------------------------------------
   // Tree definition
   // ---------------------------------------------------------
-  TTree* tree = new TTree("tree", "combined charm+beauty correlations");
+  std::string treeTitle = "combined charm+beauty correlations (" + mode + ")";
+  TTree* tree = new TTree("tree", treeTitle.c_str());
 
   Int_t MULTIPLICITY = 0;
   Int_t nEvents = 0;
-  Int_t charmness = 0;
-  Int_t beautiness = 0;
+  Int_t PROCESSCODE = 0;
+
+  Int_t charmness = 0;    // charm-only hadrons
+  Int_t beautiness = 0;   // beauty-only hadrons
+  Int_t bcness = 0;       // bc hadrons
 
   std::vector<Int_t>    vID;
   std::vector<Int_t>    vHFCLASS;
@@ -149,8 +174,10 @@ int main(int argc, char** argv) {
   tree->Branch("MOTHER",       &vMother1);
   tree->Branch("MOTHERID",     &vMotherID);
   tree->Branch("MULTIPLICITY", &MULTIPLICITY, "MULTIPLICITY/I");
+  tree->Branch("PROCESSCODE",  &PROCESSCODE,  "PROCESSCODE/I");
   tree->Branch("NCHARM",       &charmness,    "NCHARM/I");
   tree->Branch("NBEAUTY",      &beautiness,   "NBEAUTY/I");
+  tree->Branch("NBC",          &bcness,       "NBC/I");
 
   // ---------------------------------------------------------
   // Histograms
@@ -159,9 +186,11 @@ int main(int argc, char** argv) {
 
   TH1D* hidCharm  = new TH1D("hidCharm",  "PDG Codes for Charm hadrons;PDG;Counts", 12000, -6000, 6000);
   TH1D* hidBeauty = new TH1D("hidBeauty", "PDG Codes for Beauty hadrons;PDG;Counts", 12000, -6000, 6000);
+  TH1D* hidBc     = new TH1D("hidBc",     "PDG Codes for bc hadrons;PDG;Counts",    12000, -6000, 6000);
 
-  TH1D* hCharmPart  = new TH1D("hCharmPart",  "Charm particles per event;N_{charm};Events",   200, -0.5, 200.5);
-  TH1D* hBeautyPart = new TH1D("hBeautyPart", "Beauty particles per event;N_{beauty};Events", 200, -0.5, 200.5);
+  TH1D* hCharmPart  = new TH1D("hCharmPart",  "Charm hadrons per event;N_{charm};Events",   200, -0.5, 200.5);
+  TH1D* hBeautyPart = new TH1D("hBeautyPart", "Beauty hadrons per event;N_{beauty};Events", 200, -0.5, 200.5);
+  TH1D* hBcPart     = new TH1D("hBcPart",     "bc hadrons per event;N_{bc};Events",         50, -0.5, 49.5);
 
   TH1D* hPtTriggerDD   = new TH1D("hPtTriggerDD",   "p_{T} for trigger D^{0};p_{T} (GeV/c);Counts", 50, 0, 10);
   TH1D* hPtAssociateDD = new TH1D("hPtAssociateDD", "p_{T} for associate #bar{D}^{0};p_{T} (GeV/c);Counts", 50, 0, 10);
@@ -178,28 +207,16 @@ int main(int argc, char** argv) {
   const double etamax = 4.0;
 
   // ---------------------------------------------------------
-  // PYTHIA setup: single generation, both charm and beauty enabled
+  // PYTHIA setup
   // ---------------------------------------------------------
   Pythia pythia;
-
-  // Start from one of your existing settings files if you want,
-  // but then explicitly force both charm and beauty hard processes on.
-  //
-  // You can replace this file with a dedicated combined settings file if preferred.
-  pythia.readFile("pythiasettings_Hard_Low_cc.cmnd");
-
-  // IMPORTANT:
-  // Explicitly enable both heavy-flavour production channels in the SAME run.
-  pythia.readString("HardQCD:gg2ccbar = on");
-  pythia.readString("HardQCD:qqbar2ccbar = on");
-  pythia.readString("HardQCD:gg2bbbar = on");
-  pythia.readString("HardQCD:qqbar2bbbar = on");
+  pythia.readFile(settingsFile);
 
   nEvents = pythia.mode("Main:numberOfEvents");
 
   const int processid = getpid();
-  const int seedMod1  = std::stoi(argv[2]);
-  const int seedMod2  = std::stoi(argv[3]);
+  const int seedMod1  = std::stoi(argv[3]);
+  const int seedMod2  = std::stoi(argv[4]);
 
   const int seed = (static_cast<int>(time(nullptr)) + processid + seedMod1 + seedMod2) % 900000000;
   pythia.readString("Random:setSeed = on");
@@ -208,8 +225,12 @@ int main(int argc, char** argv) {
   pythia.init();
 
   std::cout << "Generating " << nEvents
-            << " events in a single PYTHIA run with both charm and beauty enabled, seed "
-            << seed << "...\n";
+            << " events in mode '" << mode
+            << "' using settings file '" << settingsFile
+            << "' with seed " << seed << "...\n";
+
+  // Optional debug:
+  // pythia.particleData.listChanged();
 
   // ---------------------------------------------------------
   // Event loop
@@ -220,8 +241,11 @@ int main(int argc, char** argv) {
     const int nPart = pythia.event.size();
 
     MULTIPLICITY = 0;
-    charmness    = 0;
-    beautiness   = 0;
+    PROCESSCODE  = pythia.info.code();
+
+    charmness   = 0;
+    beautiness  = 0;
+    bcness      = 0;
 
     vID.clear();
     vHFCLASS.clear();
@@ -259,12 +283,12 @@ int main(int argc, char** argv) {
         }
       }
 
-      // Save charm hadrons, beauty hadrons, and pions
-      const bool isC  = IsCharm(id);
-      const bool isB  = IsBeauty(id);
+      const bool isBc = IsBcHadron(id);
+      const bool isB  = IsBeauty(id) && !isBc;
+      const bool isC  = IsCharm(id)  && !isBc;
       const bool isPi = IsPion(id);
 
-      if (!(isC || isB || isPi)) continue;
+      if (!(isC || isB || isBc || isPi)) continue;
       if (pT < pTmin || std::abs(eta) > etamax) continue;
 
       const int m1  = particle.mother1();
@@ -273,10 +297,12 @@ int main(int argc, char** argv) {
       if (isC) {
         hidCharm->Fill(static_cast<double>(id));
         charmness++;
-      }
-      if (isB) {
+      } else if (isB) {
         hidBeauty->Fill(static_cast<double>(id));
         beautiness++;
+      } else if (isBc) {
+        hidBc->Fill(static_cast<double>(id));
+        bcness++;
       }
 
       vID.push_back(id);
@@ -294,6 +320,7 @@ int main(int argc, char** argv) {
     hMULTIPLICITY->Fill(static_cast<double>(MULTIPLICITY));
     hCharmPart->Fill(static_cast<double>(charmness));
     hBeautyPart->Fill(static_cast<double>(beautiness));
+    hBcPart->Fill(static_cast<double>(bcness));
 
     // -----------------------------------------
     // QA: D0 - anti-D0 correlations
@@ -354,8 +381,10 @@ int main(int argc, char** argv) {
   hMULTIPLICITY->Write();
   hidCharm->Write();
   hidBeauty->Write();
+  hidBc->Write();
   hCharmPart->Write();
   hBeautyPart->Write();
+  hBcPart->Write();
 
   hPtTriggerDD->Write();
   hPtAssociateDD->Write();
