@@ -1,4 +1,4 @@
-# Makefile for heavy-quark correlations (ccbar, bbbar)
+# Makefile for heavy-quark correlations (split + unified HF)
 
 CXX      := g++
 
@@ -33,7 +33,8 @@ CXXFLAGS := -O2 -std=c++17 -Wall -Wextra -pedantic $(ROOT_CXXFLAGS) $(PYTHIA_CXX
 LDFLAGS  := $(ROOT_LIBS) $(PYTHIA_LIBS)
 
 all: bbbarcorrelations_status bbbarcorrelations_status_JUNCTIONS \
-     ccbarcorrelations_status ccbarcorrelations_status_JUNCTIONS
+     ccbarcorrelations_status ccbarcorrelations_status_JUNCTIONS \
+     heavyflavourcorrelations_status
 
 bbbarcorrelations_status: bbbarcorrelations_status.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
@@ -47,6 +48,10 @@ ccbarcorrelations_status: ccbarcorrelations_status.cpp
 ccbarcorrelations_status_JUNCTIONS: ccbarcorrelations_status_JUNCTIONS.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
+heavyflavourcorrelations_status: heavyflavourcorrelations_status.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
+
 clean:
 	rm -f bbbarcorrelations_status bbbarcorrelations_status_JUNCTIONS \
-	      ccbarcorrelations_status ccbarcorrelations_status_JUNCTIONS
+	      ccbarcorrelations_status ccbarcorrelations_status_JUNCTIONS \
+	      heavyflavourcorrelations_status

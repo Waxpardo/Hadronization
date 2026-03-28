@@ -26,17 +26,10 @@ From the Hadronization base on the shared filesystem:
 
 ´´´bash
 ./update_submit_paths.sh
-condor_submit submitCondor.sub
+condor_submit submitCondor_10M.sub
 ´´´
 
-For the 100M-per-combo preset:
-
-´´´bash
-./update_submit_paths.sh
-condor_submit submitCondor_100M.sub
-´´´
-
-This submits jobs for combinations such as:
+This submits `10 x 1,000,000` jobs for each of:
 - `bbbar MONASH`
 - `bbbar JUNCTIONS`
 - `ccbar MONASH`
@@ -64,7 +57,7 @@ Example:
 
 ## What gets executed
 
-All submit files call `runCondorJob.sh` from the Hadronization base.
+Both submit files call `runCondorJob.sh` from the Hadronization base.
 
 The wrapper script:
 1. resolves the Hadronization base path
@@ -147,7 +140,7 @@ Each unified job typically:
 
 ---
 
-## Important recommendation: include the Condor cluster ID in job paths and filenames
+## Important naming note
 
 When multiple submissions are made for the same tune, collisions can happen if work directories and output files are named only by `JOBID`.
 
@@ -158,21 +151,14 @@ Jobs/HF/JUNCTIONS/job_0
 RootFiles/HF/JUNCTIONS/hf_JUNCTIONS_job0.root
 ´´´
 
-because another Condor cluster can reuse the same `JOBID`.
+because another submission can reuse the same `JOBID`.
 
-### Recommended safe naming
-Use both `CLUSTERID` and `JOBID` in:
-- the work directory
-- the output ROOT filename
+### Current recommendation
+Before resubmitting the same workflow/tune combination:
+- move or rename the old output files
+- or clean the corresponding `Jobs/...` and `RootFiles/...` directories
 
-Recommended pattern:
-
-´´´text
-Jobs/HF/<TUNE>/cluster_<CLUSTERID>_job_<JOBID>/
-RootFiles/HF/<TUNE>/hf_<TUNE>_cluster<CLUSTERID>_job<JOBID>.root
-´´´
-
-This prevents collisions between different submissions.
+If you want multiple overlapping submissions for the same sample family, extend `runCondorJob.sh` to include a submission-specific tag such as `CLUSTERID` in both the work directory and output filename.
 
 ---
 
@@ -180,7 +166,7 @@ This prevents collisions between different submissions.
 
 ## Legacy split workflow
 
-Typical legacy argument layout:
+Current legacy argument layout:
 
 ´´´text
 JOBID CHANNEL TUNE NEVT_PER_JOB
@@ -196,19 +182,16 @@ where:
 
 ## Unified heavy-flavour workflow
 
-Recommended unified argument layout:
+Current unified argument layout:
 
 ´´´text
-CLUSTERID JOBID TUNE NEVT_PER_JOB
+JOBID TUNE NEVT_PER_JOB
 ´´´
 
 where:
-- `CLUSTERID` = Condor cluster id
-- `JOBID` = per-job index within the cluster
+- `JOBID` = per-job index
 - `TUNE` = `MONASH` or `JUNCTIONS`
 - `NEVT_PER_JOB` = events per job
-
-If the cluster id is not included, collisions between different submissions are much more likely.
 
 ---
 
@@ -422,8 +405,8 @@ In the older workflow, this was done with:
 ´´´
 
 This typically rewrites submit files such as:
-- `submitCondor.sub`
-- `submitCondor_100M.sub`
+- `submitCondor_10M.sub`
+- `submitCondor_hf_10M.sub`
 
 so that:
 
@@ -640,7 +623,7 @@ then jobs can overwrite each other.
 This usually happens when only `JOBID` is used in naming.
 
 ### Fix
-Include `CLUSTERID` in:
+Use a fresh output/work directory namespace for the resubmission, or extend the wrapper to include a submission-specific tag in:
 - `WORKDIR`
 - `OUTBASENAME`
 
@@ -714,7 +697,7 @@ Before submitting jobs, check:
 - `base_path.txt` points to the correct Hadronization base
 - submit files point to the correct `runCondorJob.sh`
 - work/output directories exist or can be created
-- for the unified workflow, naming includes `CLUSTERID` to avoid collisions
+- old outputs from the same sample family will not be overwritten
 
 Recommended checks:
 
@@ -738,14 +721,13 @@ mkdir -p Jobs/HF/MONASH Jobs/HF/JUNCTIONS
 
 ## Legacy split workflow
 Use:
-- `submitCondor.sub`
-- `submitCondor_100M.sub`
+- `submitCondor_10M.sub`
 - split executables
 - outputs under `RootFiles/<CHANNEL>/<TUNE>/`
 
 ## Unified heavy-flavour workflow
 Use:
-- unified submit files such as `submitCondor_hf_10M.sub`
+- `submitCondor_hf_10M.sub`
 - `runCondorJob.sh` in unified mode
 - `heavyflavourcorrelations_status`
 - outputs under `RootFiles/HF/<TUNE>/`

@@ -28,5 +28,5 @@ update_file() {
   echo "Updated: ${file}"
 }
 
-update_file "${SCRIPT_DIR}/submitCondor.sub"
-update_file "${SCRIPT_DIR}/submitCondor_100M.sub"
+update_file "${SCRIPT_DIR}/submitCondor_10M.sub"
+update_file "${SCRIPT_DIR}/submitCondor_hf_10M.sub"
