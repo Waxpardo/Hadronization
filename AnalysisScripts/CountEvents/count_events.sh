@@ -1,6 +1,6 @@
 #!/bin/bash
 # count_events.sh
-# Run the ROOT macro that counts events in all bbbar/ccbar files.
+# Run the ROOT macro that counts events in all combined-HF and split bbbar/ccbar files.
 
 # Resolve Hadronization base from base_path.txt
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -26,9 +26,9 @@ ROOT_STATUS=$?
 
 # Clean up ACLiC-generated files
 rm -f \
-  count_events_bb_cc_C_ACLiC_dict_rdict.pcm \
-  count_events_bb_cc_C.d \
-  count_events_bb_cc_C.so
+  "${SCRIPT_DIR}/count_events_bb_cc_C_ACLiC_dict_rdict.pcm" \
+  "${SCRIPT_DIR}/count_events_bb_cc_C.d" \
+  "${SCRIPT_DIR}/count_events_bb_cc_C.so"
 
 # Propagate ROOT exit status
 exit $ROOT_STATUS

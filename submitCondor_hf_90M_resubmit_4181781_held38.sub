@@ -1,8 +1,8 @@
 universe   = vanilla
 
 # Resubmit held JUNCTIONS jobs from cluster 4181781 unchanged
-executable = /data/alice/ipardoza/Hadronization-main/runCondorJob.sh
-initialdir = /data/alice/ipardoza/Hadronization-main
+executable = /data/alice/ipardoza/Hadronization/runCondorJob.sh
+initialdir = /data/alice/ipardoza/Hadronization
 
 getenv = True
 

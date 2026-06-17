@@ -38,6 +38,27 @@ is_nonnegative_integer() {
   esac
 }
 
+read_condor_job_starts() {
+  local job_ad="${_CONDOR_JOB_AD:-}"
+  local starts=""
+
+  if [ -n "${job_ad}" ] && [ -f "${job_ad}" ]; then
+    starts="$(awk -F '=' '
+      $1 ~ /^[[:space:]]*NumJobStarts[[:space:]]*$/ {
+        gsub(/[[:space:]]/, "", $2);
+        print $2;
+        exit;
+      }
+    ' "${job_ad}")"
+  fi
+
+  if is_nonnegative_integer "${starts}"; then
+    echo "${starts}"
+  else
+    echo "0"
+  fi
+}
+
 CLUSTERID=""
 
 if [ "$#" -eq 3 ]; then
@@ -168,16 +189,19 @@ case "${WORKFLOW}" in
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_ccbb_MONASH.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_ccbb_MONASH.cmnd"
         MODE="monash"
+        WORKFLOW_SEED_OFFSET=101
         ;;
       JUNCTIONS)
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd"
         MODE="junctions"
+        WORKFLOW_SEED_OFFSET=202
         ;;
       CLOSEPACKING)
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd"
         MODE="closepacking"
+        WORKFLOW_SEED_OFFSET=303
         ;;
       *)
         echo "ERROR: Unsupported TUNE='${TUNE}'. Use MONASH, JUNCTIONS, or CLOSEPACKING."
@@ -195,21 +219,25 @@ case "${WORKFLOW}" in
         EXE="${CODEDIR}/bbbarcorrelations_status"
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_bb.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_bb.cmnd"
+        WORKFLOW_SEED_OFFSET=1101
         ;;
       bbbar:JUNCTIONS)
         EXE="${CODEDIR}/bbbarcorrelations_status_JUNCTIONS"
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd"
+        WORKFLOW_SEED_OFFSET=1201
         ;;
       ccbar:MONASH)
         EXE="${CODEDIR}/ccbarcorrelations_status"
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_cc.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_cc.cmnd"
+        WORKFLOW_SEED_OFFSET=2101
         ;;
       ccbar:JUNCTIONS)
         EXE="${CODEDIR}/ccbarcorrelations_status_JUNCTIONS"
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_cc_JUNCTIONS.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_cc_JUNCTIONS.cmnd"
+        WORKFLOW_SEED_OFFSET=2201
         ;;
       *)
         echo "ERROR: Unsupported CHANNEL/TUNE combination '${CHANNEL}/${TUNE}'."
@@ -247,6 +275,12 @@ else
   esac
 fi
 
+FINAL_OUTPUT="${OUTDIR}/${OUTBASENAME}"
+WORK_OUTPUT="${WORKDIR}/${OUTBASENAME}"
+CONDOR_JOB_STARTS="$(read_condor_job_starts)"
+SEED_INPUT1="${CLUSTERID:-0}"
+SEED_INPUT2=$((JOBID * 1000000 + WORKFLOW_SEED_OFFSET * 1000 + CONDOR_JOB_STARTS))
+
 if [ ! -f "${CFG_TEMPLATE}" ]; then
   echo "ERROR: Config template not found: ${CFG_TEMPLATE}"
   exit 1
@@ -258,6 +292,16 @@ if [ ! -x "${EXE}" ]; then
 fi
 
 mkdir -p "${OUTDIR}" "${WORKDIR_BASE}" "${WORKDIR}" "${LOGDIR}"
+
+if [ -f "${FINAL_OUTPUT}" ]; then
+  echo "Final output already exists, treating job as complete: ${FINAL_OUTPUT}"
+  exit 0
+fi
+
+if [ -f "${WORK_OUTPUT}" ]; then
+  echo "Removing stale partial workdir output before retry: ${WORK_OUTPUT}"
+  rm -f "${WORK_OUTPUT}"
+fi
 
 echo ">>> WORKFLOW     = ${WORKFLOW}"
 if [ -n "${CLUSTERID}" ]; then
@@ -273,6 +317,9 @@ echo ">>> BASEDIR      = ${BASEDIR}"
 echo ">>> WORKDIR      = ${WORKDIR}"
 echo ">>> OUTDIR       = ${OUTDIR}"
 echo ">>> LOGDIR       = ${LOGDIR}"
+echo ">>> CONDOR_STARTS = ${CONDOR_JOB_STARTS}"
+echo ">>> SEED_INPUT1  = ${SEED_INPUT1}"
+echo ">>> SEED_INPUT2  = ${SEED_INPUT2}"
 
 # --------------------------------------------------
 # Per-job working directory and per-job .cmnd file
@@ -294,17 +341,14 @@ echo "Using .cmnd file:"
 head -n 12 "${JOB_CMND}" || true
 
 # --------------------------------------------------
-# Deterministic seeds from JOBID
+# Deterministic seed inputs from cluster/job/workflow/attempt
 # --------------------------------------------------
-SEED1=$((10000 + JOBID))
-SEED2=$((20000 + JOBID))
-
 if [ "${WORKFLOW}" = "hf" ]; then
-  echo "Running: ${EXE} ${MODE} ${OUTBASENAME} ${SEED1} ${SEED2}"
-  "${EXE}" "${MODE}" "${OUTBASENAME}" "${SEED1}" "${SEED2}"
+  echo "Running: ${EXE} ${MODE} ${OUTBASENAME} ${SEED_INPUT1} ${SEED_INPUT2}"
+  "${EXE}" "${MODE}" "${OUTBASENAME}" "${SEED_INPUT1}" "${SEED_INPUT2}"
 else
-  echo "Running: ${EXE} ${OUTBASENAME} ${SEED1} ${SEED2}"
-  "${EXE}" "${OUTBASENAME}" "${SEED1}" "${SEED2}"
+  echo "Running: ${EXE} ${OUTBASENAME} ${SEED_INPUT1} ${SEED_INPUT2}"
+  "${EXE}" "${OUTBASENAME}" "${SEED_INPUT1}" "${SEED_INPUT2}"
 fi
 
 if [ ! -f "${WORKDIR}/${OUTBASENAME}" ]; then
@@ -313,6 +357,6 @@ if [ ! -f "${WORKDIR}/${OUTBASENAME}" ]; then
   exit 1
 fi
 
-mv "${WORKDIR}/${OUTBASENAME}" "${OUTDIR}/${OUTBASENAME}"
-echo "Moved: ${OUTDIR}/${OUTBASENAME}"
+mv "${WORK_OUTPUT}" "${FINAL_OUTPUT}"
+echo "Moved: ${FINAL_OUTPUT}"
 echo "Done."
