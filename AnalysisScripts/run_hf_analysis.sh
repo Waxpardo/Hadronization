@@ -69,28 +69,19 @@ fi
 export SETUPENV_QUIET=1
 source "${PROJECT_BASE}/setupEnv.sh"
 
-MONASH_DIR="${PROJECT_BASE}/RootFiles/HF/MONASH"
-JUNCTIONS_DIR="${PROJECT_BASE}/RootFiles/HF/JUNCTIONS"
-CLOSEPACKING_DIR="${PROJECT_BASE}/RootFiles/HF/CLOSEPACKING"
+HF_TUNES=("MONASH" "JUNCTIONS" "CLOSEPACKING")
 
-if [ ! -d "${MONASH_DIR}" ]; then
-  echo "ERROR: Expected combined HF input directory not found: ${MONASH_DIR}"
-  exit 1
-fi
-
-if [ ! -d "${JUNCTIONS_DIR}" ]; then
-  echo "ERROR: Expected combined HF input directory not found: ${JUNCTIONS_DIR}"
-  exit 1
-fi
-
-if [ ! -d "${CLOSEPACKING_DIR}" ]; then
-  echo "ERROR: Expected combined HF input directory not found: ${CLOSEPACKING_DIR}"
-  exit 1
-fi
+for tune in "${HF_TUNES[@]}"; do
+  tune_dir="${PROJECT_BASE}/RootFiles/HF/${tune}"
+  if [ ! -d "${tune_dir}" ]; then
+    echo "ERROR: Expected combined HF input directory not found: ${tune_dir}"
+    exit 1
+  fi
+done
 
 echo "Running combined HF analysis from:"
-echo "  ${MONASH_DIR}"
-echo "  ${JUNCTIONS_DIR}"
-echo "  ${CLOSEPACKING_DIR}"
+for tune in "${HF_TUNES[@]}"; do
+  echo "  ${PROJECT_BASE}/RootFiles/HF/${tune}"
+done
 
 root -l -b -q "AnalysisScripts/hf_mult_pt_analysis_multi.C+(${NSUB}, \"${OUTPUT_TAG}\", \"${CHARGE_MODE}\")"

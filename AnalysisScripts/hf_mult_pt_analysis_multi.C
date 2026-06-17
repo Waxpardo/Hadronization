@@ -1124,23 +1124,15 @@ void hf_mult_pt_analysis_multi(int nSubSamples = 10,
   gSystem->mkdir(beautyDir, true);
   gSystem->mkdir(charmDir, true);
 
-  AnalyzeHFTuneMulti((base + "/RootFiles/HF/MONASH").Data(),
-                     (beautyDir + "/hf_MONASH_sub").Data(),
-                     (charmDir  + "/hf_MONASH_sub").Data(),
-                     nSubSamples,
-                     writeSeparateChargeHists);
+  const std::vector<TString> tuneTags = {"MONASH", "JUNCTIONS", "CLOSEPACKING"};
 
-  AnalyzeHFTuneMulti((base + "/RootFiles/HF/JUNCTIONS").Data(),
-                     (beautyDir + "/hf_JUNCTIONS_sub").Data(),
-                     (charmDir  + "/hf_JUNCTIONS_sub").Data(),
-                     nSubSamples,
-                     writeSeparateChargeHists);
-
-  AnalyzeHFTuneMulti((base + "/RootFiles/HF/CLOSEPACKING").Data(),
-                     (beautyDir + "/hf_CLOSEPACKING_sub").Data(),
-                     (charmDir  + "/hf_CLOSEPACKING_sub").Data(),
-                     nSubSamples,
-                     writeSeparateChargeHists);
+  for (const TString& tuneTag : tuneTags) {
+    AnalyzeHFTuneMulti((base + "/RootFiles/HF/" + tuneTag).Data(),
+                       (beautyDir + "/hf_" + tuneTag + "_sub").Data(),
+                       (charmDir  + "/hf_" + tuneTag + "_sub").Data(),
+                       nSubSamples,
+                       writeSeparateChargeHists);
+  }
 }
 
 // Convenience entry point for the larger 100M campaign.

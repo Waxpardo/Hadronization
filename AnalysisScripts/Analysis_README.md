@@ -27,6 +27,7 @@ The current macro is `hf_mult_pt_analysis_multi.C`. It reads the combined-HF sim
 ```text
 RootFiles/HF/MONASH
 RootFiles/HF/JUNCTIONS
+RootFiles/HF/CLOSEPACKING
 ```
 
 It expects a `tree` with at least `ID`, `PT`, `MULTIPLICITY`, and preferably `HFCLASS`. The intended classification comes from `HFCLASS`, where beauty is `5`, charm is `4`, Bc is `45`, and pions are `0`. The macro can still use PDG information in parts of the logic, but the unified tree format is the correct input format for new productions.
@@ -37,8 +38,10 @@ The macro reads each raw ROOT file once. During that pass it fills beauty and ch
 AnalyzedData/<OUTPUT_TAG>/Beauty/hf_MONASH_sub0.root
 AnalyzedData/<OUTPUT_TAG>/Beauty/hf_MONASH_sub1.root
 AnalyzedData/<OUTPUT_TAG>/Beauty/hf_JUNCTIONS_sub0.root
+AnalyzedData/<OUTPUT_TAG>/Beauty/hf_CLOSEPACKING_sub0.root
 AnalyzedData/<OUTPUT_TAG>/Charm/hf_MONASH_sub0.root
 AnalyzedData/<OUTPUT_TAG>/Charm/hf_JUNCTIONS_sub0.root
+AnalyzedData/<OUTPUT_TAG>/Charm/hf_CLOSEPACKING_sub0.root
 ```
 
 The wrapper call is:
@@ -86,6 +89,13 @@ The split input tree is expected to contain `ID`, `PT`, and `MULTIPLICITY`, with
 
 `status_analysis_bb.C`, `status_analysis_cc.C`, and `status_analysis_qq.C` are older status-code and ancestry inspection macros. They work closer to the angular-correlation studies than to the current pT-versus-multiplicity reduction. The bb and cc versions inspect the split beauty and charm style inputs. The qq version includes broader ancestry tracing and sphericity-related helper logic. These macros are useful when the question is about production origin, mother relationships, status codes, and older correlation objects rather than the reduced `AnalyzedData` files used by the current plotting layer.
 
+The Condor helper `submit_status_analysis.sh` submits `status_analysis_qq.C` over the combined-HF raw files. By default it covers `MONASH`, `JUNCTIONS`, and `CLOSEPACKING`; a single tune can be selected explicitly when only one production needs the status pass.
+
+```bash
+./submit_status_analysis.sh 100 all
+./submit_status_analysis.sh 100 CLOSEPACKING
+```
+
 ## Subsamples
 
 All three analysis macros use round-robin event assignment. With ten subsamples, event zero goes to subsample zero, event one to subsample one, and event ten returns to subsample zero. This keeps event counts nearly equal and makes the split reproducible without depending on file boundaries.
@@ -116,7 +126,7 @@ AnalyzedData/08-04-2026_100M_Separate
 
 ## Count Events Utility
 
-`AnalysisScripts/CountEvents/count_events.sh` runs `count_events_bb_cc.C` from the repository base and then removes the ACLiC artifacts produced by that macro. It is written for the old split bbbar and ccbar layout. If you need the same count for the combined-HF raw files, it should be adapted to inspect `RootFiles/HF/MONASH` and `RootFiles/HF/JUNCTIONS`.
+`AnalysisScripts/CountEvents/count_events.sh` runs `count_events_bb_cc.C` from the repository base and then removes the ACLiC artifacts produced by that macro. It counts the current combined-HF raw files in `RootFiles/HF/MONASH`, `RootFiles/HF/JUNCTIONS`, and `RootFiles/HF/CLOSEPACKING`, and also keeps the old split bbbar and ccbar counts for reference productions.
 
 ```bash
 ./AnalysisScripts/CountEvents/count_events.sh

@@ -1,9 +1,22 @@
 #!/bin/bash
 set -euo pipefail
 
-# =========================================================
-# ARGUMENTS
-# =========================================================
+usage() {
+  cat <<'USAGE'
+Usage:
+  ./run_status_analysis.sh JOBID INPUTFILE OUTPUTDIR SCRIPTSDIR
+USAGE
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [[ "$#" -ne 4 ]]; then
+  usage >&2
+  exit 1
+fi
 
 JOBID="$1"
 INPUTFILE="$2"
@@ -14,7 +27,34 @@ SCRIPTSDIR="$4"
 # ENVIRONMENT SETUP
 # =========================================================
 
-source /user/pveen/Hadronization/setupEnv.sh
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_BASE="${HADRONIZATION_BASE:-}"
+if [[ -z "${PROJECT_BASE}" ]]; then
+  if [[ -f "${SCRIPT_DIR}/base_path.txt" ]]; then
+    PROJECT_BASE="$(cat "${SCRIPT_DIR}/base_path.txt")"
+  else
+    PROJECT_BASE="${SCRIPT_DIR}"
+  fi
+fi
+PROJECT_BASE="${PROJECT_BASE%/}"
+export HADRONIZATION_BASE="${PROJECT_BASE}"
+
+if [[ ! -f "${PROJECT_BASE}/setupEnv.sh" ]]; then
+  echo "ERROR: setupEnv.sh not found at ${PROJECT_BASE}/setupEnv.sh" >&2
+  exit 1
+fi
+
+source "${PROJECT_BASE}/setupEnv.sh"
+
+if [[ ! -f "${INPUTFILE}" ]]; then
+  echo "ERROR: input file not found: ${INPUTFILE}" >&2
+  exit 1
+fi
+
+if [[ ! -f "${SCRIPTSDIR}/status_analysis_qq.C" ]]; then
+  echo "ERROR: status_analysis_qq.C not found in ${SCRIPTSDIR}" >&2
+  exit 1
+fi
 
 # =========================================================
 # BUILD OUTPUT STRUCTURE

@@ -1,6 +1,8 @@
 // count_events_bb_cc.C
 //
-// Count total number of events in all ROOT files for each tune & channel.
+// Count total number of events in all ROOT files for each tune and workflow.
+// The current combined-HF workflow scans MONASH, JUNCTIONS, and CLOSEPACKING.
+// The older split bbbar/ccbar workflow is kept for reference productions.
 // Assumes each file has a TTree named "tree" with one entry per event.
 //
 // Usage from the Hadronization base:
@@ -96,12 +98,18 @@ Long64_t CountEventsInDir(const char* inputDir)
 void count_events_bb_cc()
 {
   TString base = GetBaseDir();
+  Long64_t hfMonash       = CountEventsInDir((base + "/RootFiles/HF/MONASH").Data());
+  Long64_t hfJunctions    = CountEventsInDir((base + "/RootFiles/HF/JUNCTIONS").Data());
+  Long64_t hfClosePacking = CountEventsInDir((base + "/RootFiles/HF/CLOSEPACKING").Data());
   Long64_t bbMonash    = CountEventsInDir((base + "/RootFiles/bbbar/MONASH").Data());
   Long64_t bbJunctions = CountEventsInDir((base + "/RootFiles/bbbar/JUNCTIONS").Data());
   Long64_t ccMonash    = CountEventsInDir((base + "/RootFiles/ccbar/MONASH").Data());
   Long64_t ccJunctions = CountEventsInDir((base + "/RootFiles/ccbar/JUNCTIONS").Data());
 
   std::cout << "================ SUMMARY ================" << std::endl;
+  std::cout << "HF MONASH          total events: " << hfMonash       << std::endl;
+  std::cout << "HF JUNCTIONS       total events: " << hfJunctions    << std::endl;
+  std::cout << "HF CLOSEPACKING    total events: " << hfClosePacking << std::endl;
   std::cout << "bbbar MONASH    total events: " << bbMonash    << std::endl;
   std::cout << "bbbar JUNCTIONS total events: " << bbJunctions << std::endl;
   std::cout << "ccbar MONASH    total events: " << ccMonash    << std::endl;
