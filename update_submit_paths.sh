@@ -32,6 +32,7 @@ update_file "${SCRIPT_DIR}/submitCondor_10M.sub"
 update_file "${SCRIPT_DIR}/submitCondor_hf_10M.sub"
 update_file "${SCRIPT_DIR}/submitCondor_hf_90M.sub"
 update_file "${SCRIPT_DIR}/submitCondor_hf_90M_resubmit_4181781_held38.sub"
+update_file "${SCRIPT_DIR}/submitCondor_hf_100M_exact_all_tunes.sub"
 update_file "${SCRIPT_DIR}/submitCondor_hf_CLOSEPACKING_100M.sub"
 update_file "${SCRIPT_DIR}/submitCondor_hf_CLOSEPACKING_resubmit_4467160_missing_duplicate_seeds.sub"
 

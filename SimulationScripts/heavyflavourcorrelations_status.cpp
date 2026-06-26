@@ -22,6 +22,7 @@
 #include <chrono>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include "Pythia8/Pythia.h"
 
@@ -235,7 +236,7 @@ int main(int argc, char** argv) {
   pythia.init();
 
   std::cout << "Generating " << nEvents
-            << " events in mode '" << mode
+            << " stored tree events in mode '" << mode
             << "' using settings file '" << settingsFile
             << "' with seed " << seed
             << " from inputs " << seedInput1 << ", " << seedInput2 << "...\n";
@@ -246,8 +247,29 @@ int main(int argc, char** argv) {
   // ---------------------------------------------------------
   // Event loop
   // ---------------------------------------------------------
-  for (int iEvent = 0; iEvent < nEvents; ++iEvent) {
-    if (!pythia.next()) continue;
+  const long long targetStoredEvents = nEvents;
+  const long long maxAttempts = std::max(10LL * targetStoredEvents,
+                                         targetStoredEvents + 1000000LL);
+  long long attemptedEvents = 0;
+  long long storedEvents = 0;
+  long long failedPythiaEvents = 0;
+  long long emptySelectedEvents = 0;
+
+  while (storedEvents < targetStoredEvents) {
+    if (attemptedEvents >= maxAttempts) {
+      std::cerr << "ERROR: Could only store " << storedEvents
+                << " events after " << attemptedEvents
+                << " PYTHIA attempts. Target was " << targetStoredEvents
+                << ". failed_pythia=" << failedPythiaEvents
+                << ", empty_selected=" << emptySelectedEvents << std::endl;
+      return 2;
+    }
+
+    ++attemptedEvents;
+    if (!pythia.next()) {
+      ++failedPythiaEvents;
+      continue;
+    }
 
     const int nPart = pythia.event.size();
 
@@ -328,11 +350,6 @@ int main(int argc, char** argv) {
       vMotherID.push_back(static_cast<double>(mID));
     }
 
-    hMULTIPLICITY->Fill(static_cast<double>(MULTIPLICITY));
-    hCharmPart->Fill(static_cast<double>(charmness));
-    hBeautyPart->Fill(static_cast<double>(beautiness));
-    hBcPart->Fill(static_cast<double>(bcness));
-
     // -----------------------------------------
     // QA: D0 - anti-D0 correlations
     // -----------------------------------------
@@ -379,9 +396,26 @@ int main(int argc, char** argv) {
       }
     }
 
-    if (vID.empty()) continue;
+    if (vID.empty()) {
+      ++emptySelectedEvents;
+      continue;
+    }
+
+    hMULTIPLICITY->Fill(static_cast<double>(MULTIPLICITY));
+    hCharmPart->Fill(static_cast<double>(charmness));
+    hBeautyPart->Fill(static_cast<double>(beautiness));
+    hBcPart->Fill(static_cast<double>(bcness));
+
     tree->Fill();
+    ++storedEvents;
   }
+
+  std::cout << "Stored " << storedEvents
+            << " tree events after " << attemptedEvents
+            << " PYTHIA attempts"
+            << " (failed_pythia=" << failedPythiaEvents
+            << ", empty_selected=" << emptySelectedEvents << ")."
+            << std::endl;
 
   // ---------------------------------------------------------
   // Write output
