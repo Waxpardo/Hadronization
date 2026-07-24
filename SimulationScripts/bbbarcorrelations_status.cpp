@@ -20,17 +20,16 @@
 #include <iostream>
 #include <cmath>
 #include <chrono>
-#include <ctime>
 #include <vector>
 #include <string>
-#include <cstdlib>
-#include <unistd.h>   // getpid()
 
 #include "Pythia8/Pythia.h"
 
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
+
+#include "SeedUtils.h"
 
 #define PI 3.14159265358979323846
 
@@ -83,11 +82,20 @@ int main(int argc, char** argv) {
   if (argc != 4) {
     std::cout << "Error: wrong number of arguments.\n"
               << "Expected:\n"
-              << "  ./bbbarcorrelations_status output_name.root random_number1 random_number2\n";
+              << "  ./bbbarcorrelations_status output_name.root seed_input1 seed_input2\n";
     return 1;
   }
 
   const char* outName = argv[1];
+  std::uint64_t seedInput1 = 0;
+  std::uint64_t seedInput2 = 0;
+  try {
+    seedInput1 = ParseUnsignedSeedInput(argv[2], "seed_input1");
+    seedInput2 = ParseUnsignedSeedInput(argv[3], "seed_input2");
+  } catch (const std::exception& ex) {
+    std::cerr << "Error: invalid seed inputs: " << ex.what() << "\n";
+    return 1;
+  }
 
   // Create output ROOT file; "CREATE" fails if the file already exists.
   TFile* output = TFile::Open(outName, "CREATE");
@@ -146,18 +154,14 @@ int main(int argc, char** argv) {
   pythia.readFile("pythiasettings_Hard_Low_bb.cmnd");
   nEvents = pythia.mode("Main:numberOfEvents");
 
-  // Random seed from time, process id, and user-provided modifiers.
-  const int processid = getpid();
-  const int seedMod1  = std::stoi(argv[2]);
-  const int seedMod2  = std::stoi(argv[3]);
-
-  const int seed = (static_cast<int>(time(nullptr)) + processid + seedMod1 + seedMod2) % 900000000;
+  const int seed = DeterministicPythiaSeed(seedInput1, seedInput2);
   pythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = " + std::to_string(seed));
 
   pythia.init();
 
-  std::cout << "Generating " << nEvents << " events with seed " << seed << "...\n";
+  std::cout << "Generating " << nEvents << " events with seed " << seed
+            << " from inputs " << seedInput1 << ", " << seedInput2 << "...\n";
 
   // Event loop.
   for (int iEvent = 0; iEvent < nEvents; ++iEvent) {

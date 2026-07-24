@@ -208,16 +208,19 @@ case "${WORKFLOW}" in
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_ccbb_MONASH.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_ccbb_MONASH.cmnd"
         MODE="monash"
+        WORKFLOW_SEED_OFFSET=101
         ;;
       JUNCTIONS)
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd"
         MODE="junctions"
+        WORKFLOW_SEED_OFFSET=202
         ;;
       CLOSEPACKING)
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd"
         MODE="closepacking"
+        WORKFLOW_SEED_OFFSET=303
         ;;
       *)
         echo "ERROR: Unsupported TUNE='${TUNE}'. Use MONASH, JUNCTIONS, or CLOSEPACKING."
@@ -235,21 +238,25 @@ case "${WORKFLOW}" in
         EXE="${CODEDIR}/bbbarcorrelations_status"
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_bb.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_bb.cmnd"
+        WORKFLOW_SEED_OFFSET=1101
         ;;
       bbbar:JUNCTIONS)
         EXE="${CODEDIR}/bbbarcorrelations_status_JUNCTIONS"
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd"
+        WORKFLOW_SEED_OFFSET=1201
         ;;
       ccbar:MONASH)
         EXE="${CODEDIR}/ccbarcorrelations_status"
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_cc.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_cc.cmnd"
+        WORKFLOW_SEED_OFFSET=2101
         ;;
       ccbar:JUNCTIONS)
         EXE="${CODEDIR}/ccbarcorrelations_status_JUNCTIONS"
         CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_cc_JUNCTIONS.cmnd"
         CFG_BASENAME="pythiasettings_Hard_Low_cc_JUNCTIONS.cmnd"
+        WORKFLOW_SEED_OFFSET=2201
         ;;
       *)
         echo "ERROR: Unsupported CHANNEL/TUNE combination '${CHANNEL}/${TUNE}'."
@@ -287,6 +294,13 @@ else
   esac
 fi
 
+FINAL_OUTPUT="${OUTDIR}/${OUTBASENAME}"
+WORK_OUTPUT="${WORKDIR}/${OUTBASENAME}"
+# Encode independent fields without overlap before the producer hashes them.
+# Workflow offsets are below 10,000 and retry counts are expected below 1,000,000.
+SEED_INPUT1=$((${CLUSTERID:-0} * 10000 + WORKFLOW_SEED_OFFSET))
+SEED_INPUT2=$((JOBID * 1000000 + ATTEMPT))
+
 if [ ! -f "${CFG_TEMPLATE}" ]; then
   echo "ERROR: Config template not found: ${CFG_TEMPLATE}"
   exit 1
@@ -298,6 +312,17 @@ if [ ! -x "${EXE}" ]; then
 fi
 
 mkdir -p "${OUTDIR}" "${WORKDIR_BASE}" "${WORKDIR}" "${LOGDIR}"
+
+if [ -s "${FINAL_OUTPUT}" ]; then
+  echo "Final output already exists, leaving it untouched: ${FINAL_OUTPUT}"
+  exit 0
+fi
+
+if [ -e "${WORK_OUTPUT}" ]; then
+  echo "WARNING: Removing stale workdir output from a previous failed/evicted attempt:"
+  echo "         ${WORK_OUTPUT}"
+  rm -f "${WORK_OUTPUT}"
+fi
 
 echo ">>> WORKFLOW     = ${WORKFLOW}"
 if [ -n "${CLUSTERID}" ]; then
@@ -314,6 +339,8 @@ echo ">>> BASEDIR      = ${BASEDIR}"
 echo ">>> WORKDIR      = ${WORKDIR}"
 echo ">>> OUTDIR       = ${OUTDIR}"
 echo ">>> LOGDIR       = ${LOGDIR}"
+echo ">>> SEED_INPUT1  = ${SEED_INPUT1}"
+echo ">>> SEED_INPUT2  = ${SEED_INPUT2}"
 
 # --------------------------------------------------
 # Per-job working directory and per-job .cmnd file
@@ -331,44 +358,18 @@ else
   echo "Main:numberOfEvents = ${NEVT_PER_JOB}" >> "${JOB_CMND}"
 fi
 
-if [ -s "${OUTDIR}/${OUTBASENAME}" ]; then
-  echo "Final output already exists, leaving it untouched: ${OUTDIR}/${OUTBASENAME}"
-  exit 0
-fi
-
-if [ -e "${WORKDIR}/${OUTBASENAME}" ]; then
-  echo "WARNING: Removing stale workdir output from a previous failed/evicted attempt:"
-  echo "         ${WORKDIR}/${OUTBASENAME}"
-  rm -f "${WORKDIR}/${OUTBASENAME}"
-fi
-
 echo "Using .cmnd file:"
 head -n 12 "${JOB_CMND}" || true
 
 # --------------------------------------------------
-# Seed modifiers from cluster, job id, tune, and retry attempt.
-# The C++ producer also folds in time and process id; these modifiers make the
-# Condor identity and retry count explicit, so reruns do not reuse old seeds.
+# Deterministic seed inputs from cluster/job/workflow/attempt
 # --------------------------------------------------
-CLUSTER_FOR_SEED="${CLUSTERID:-0}"
-TUNE_COMPONENT=0
-case "${TUNE}" in
-  MONASH)       TUNE_COMPONENT=101 ;;
-  JUNCTIONS)   TUNE_COMPONENT=202 ;;
-  CLOSEPACKING) TUNE_COMPONENT=303 ;;
-esac
-
-SEED1=$((10000 + (CLUSTER_FOR_SEED % 100000) * 1000 + JOBID * 10 + ATTEMPT))
-SEED2=$((20000 + TUNE_COMPONENT * 100000 + (CLUSTER_FOR_SEED % 1000) * 10 + ATTEMPT))
-echo ">>> SEED_MOD_1   = ${SEED1}"
-echo ">>> SEED_MOD_2   = ${SEED2}"
-
 if [ "${WORKFLOW}" = "hf" ]; then
-  echo "Running: ${EXE} ${MODE} ${OUTBASENAME} ${SEED1} ${SEED2}"
-  "${EXE}" "${MODE}" "${OUTBASENAME}" "${SEED1}" "${SEED2}"
+  echo "Running: ${EXE} ${MODE} ${OUTBASENAME} ${SEED_INPUT1} ${SEED_INPUT2}"
+  "${EXE}" "${MODE}" "${OUTBASENAME}" "${SEED_INPUT1}" "${SEED_INPUT2}"
 else
-  echo "Running: ${EXE} ${OUTBASENAME} ${SEED1} ${SEED2}"
-  "${EXE}" "${OUTBASENAME}" "${SEED1}" "${SEED2}"
+  echo "Running: ${EXE} ${OUTBASENAME} ${SEED_INPUT1} ${SEED_INPUT2}"
+  "${EXE}" "${OUTBASENAME}" "${SEED_INPUT1}" "${SEED_INPUT2}"
 fi
 
 if [ ! -f "${WORKDIR}/${OUTBASENAME}" ]; then
@@ -377,6 +378,6 @@ if [ ! -f "${WORKDIR}/${OUTBASENAME}" ]; then
   exit 1
 fi
 
-mv "${WORKDIR}/${OUTBASENAME}" "${OUTDIR}/${OUTBASENAME}"
-echo "Moved: ${OUTDIR}/${OUTBASENAME}"
+mv "${WORK_OUTPUT}" "${FINAL_OUTPUT}"
+echo "Moved: ${FINAL_OUTPUT}"
 echo "Done."

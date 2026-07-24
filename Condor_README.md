@@ -54,9 +54,10 @@ The unified HF submit files retry non-zero exits up to five times. This covers
 Stoomboot walltime/draining evictions, which can leave a partial ROOT file in
 the job work directory. On each retry, `runCondorJob.sh` removes only the stale
 workdir output, keeps any already-moved final output untouched, and folds the
-cluster id, job id, tune, and retry counter into the seed modifiers before
-calling the PYTHIA executable. That prevents a retried production job from
-reusing the same seed path as the failed attempt.
+cluster id, job id, tune, and retry counter into deterministic seed inputs
+before calling the PYTHIA executable. The producer hashes those inputs into
+the PYTHIA seed range, preventing a retried production job from reusing the
+same seed path as the failed attempt.
 
 The file `submitCondor_hf_90M_resubmit_4181781_held38.sub` is a preserved resubmission file for held JUNCTIONS jobs from cluster `4181781`. It is not the generic production template; it is useful only when one wants to reproduce or inspect that specific held-job recovery.
 
@@ -99,7 +100,7 @@ RootFiles/bbbar/MONASH/bbbar_MONASH_cluster<CLUSTERID>_job<JOBID>.root
 
 For combined HF jobs, the wrapper selects `heavyflavourcorrelations_status` and chooses `pythiasettings_Hard_Low_ccbb_MONASH.cmnd`, `pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd`, or `pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd` from the tune. For split jobs, it selects one of the four split executables and one of the split settings cards from the channel and tune. It copies the card into the work directory, replaces `Main:numberOfEvents` when that line exists, and appends it when it does not.
 
-The wrapper uses deterministic seed modifiers derived from the job id. It writes the ROOT output in the work directory first. Only after the executable finishes and the expected output file exists does the wrapper move the file into the final `RootFiles` directory. Therefore a running job may have no file in `RootFiles` yet even though its work directory already contains partial job state.
+The wrapper passes deterministic seed inputs derived from the Condor cluster id, job id, workflow/tune, and Condor start count. Cluster and workflow occupy disjoint fields in the first input, while job id and retry attempt occupy disjoint fields in the second. The producer hashes those inputs into the PYTHIA seed range, so simultaneous jobs do not collide through wall-clock or process-id timing. The wrapper writes the ROOT output in the work directory first. Only after the executable finishes and the expected output file exists does the wrapper move the file into the final `RootFiles` directory. Therefore a running job may have no file in `RootFiles` yet even though its work directory already contains partial job state. On a retry, an existing final output is treated as already complete, while a stale work-directory ROOT file is removed before the executable starts.
 
 ## Directory Layout
 

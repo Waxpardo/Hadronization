@@ -20,17 +20,16 @@
 #include <iostream>
 #include <cmath>
 #include <chrono>
-#include <ctime>
 #include <vector>
 #include <string>
-#include <cstdlib>
-#include <unistd.h>   // getpid()
 
 #include "Pythia8/Pythia.h"
 
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
+
+#include "SeedUtils.h"
 
 #define PI 3.14159265358979323846
 
@@ -117,7 +116,7 @@ int main(int argc, char** argv) {
   if (argc != 5) {
     std::cout << "Error: wrong number of arguments.\n"
               << "Expected:\n"
-              << "  ./heavyflavourcorrelations_status MODE output.root random_number1 random_number2\n"
+              << "  ./heavyflavourcorrelations_status MODE output.root seed_input1 seed_input2\n"
               << "Where MODE is either:\n"
               << "  monash\n"
               << "  junctions\n"
@@ -135,6 +134,15 @@ int main(int argc, char** argv) {
   }
 
   const char* outName = argv[2];
+  std::uint64_t seedInput1 = 0;
+  std::uint64_t seedInput2 = 0;
+  try {
+    seedInput1 = ParseUnsignedSeedInput(argv[3], "seed_input1");
+    seedInput2 = ParseUnsignedSeedInput(argv[4], "seed_input2");
+  } catch (const std::exception& ex) {
+    std::cerr << "Error: invalid seed inputs: " << ex.what() << "\n";
+    return 1;
+  }
 
   TFile* output = TFile::Open(outName, "CREATE");
   if (!output || output->IsZombie()) {
@@ -220,11 +228,7 @@ int main(int argc, char** argv) {
 
   nEvents = pythia.mode("Main:numberOfEvents");
 
-  const int processid = getpid();
-  const int seedMod1  = std::stoi(argv[3]);
-  const int seedMod2  = std::stoi(argv[4]);
-
-  const int seed = (static_cast<int>(time(nullptr)) + processid + seedMod1 + seedMod2) % 900000000;
+  const int seed = DeterministicPythiaSeed(seedInput1, seedInput2);
   pythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = " + std::to_string(seed));
 
@@ -233,7 +237,8 @@ int main(int argc, char** argv) {
   std::cout << "Generating " << nEvents
             << " events in mode '" << mode
             << "' using settings file '" << settingsFile
-            << "' with seed " << seed << "...\n";
+            << "' with seed " << seed
+            << " from inputs " << seedInput1 << ", " << seedInput2 << "...\n";
 
   // Optional debug:
   // pythia.particleData.listChanged();
