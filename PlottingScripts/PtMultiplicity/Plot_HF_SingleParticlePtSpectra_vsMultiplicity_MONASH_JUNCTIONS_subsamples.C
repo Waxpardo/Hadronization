@@ -6,7 +6,8 @@
 //   - JUNCTIONS on the right
 //
 // Each tune panel overlays the five multiplicity-percentile spectra:
-//   0-20%, 20-40%, 40-60%, 60-80%, 80-100%
+//   80-100%, 60-80%, 40-60%, 20-40%, 0-20%
+// ordered from lowest to highest multiplicity.
 //
 // The spectra are built from the analyzed ROOT subsamples in AnalyzedData and
 // the uncertainties are computed as mean ± SEM across subsamples, bin by bin.
@@ -110,11 +111,11 @@ struct LoadedSample {
 };
 
 static const std::vector<CDef> kClasses = {
-    {  0, 20, "0_20",   "0-20%"   },
-    { 20, 40, "20_40",  "20-40%"  },
-    { 40, 60, "40_60",  "40-60%"  },
+    { 80,100, "80_100", "80-100%" },
     { 60, 80, "60_80",  "60-80%"  },
-    { 80,100, "80_100", "80-100%" }
+    { 40, 60, "40_60",  "40-60%"  },
+    { 20, 40, "20_40",  "20-40%"  },
+    {  0, 20, "0_20",   "0-20%"   }
 };
 
 static const StyleDef kStyle[5] = {

@@ -15,7 +15,8 @@
 //
 // Each pad corresponds to one hadron species and contains the five
 // multiplicity classes:
-//   0-20%, 20-40%, 40-60%, 60-80%, 80-100%
+//   80-100%, 60-80%, 40-60%, 20-40%, 0-20%
+// ordered from lowest to highest multiplicity.
 //
 // The plotted uncertainties are computed from the spread across subsamples:
 //   one normalized spectrum per subsample -> mean ± SEM bin-by-bin.
@@ -111,11 +112,11 @@ struct FlavorPlotData {
 };
 
 static const std::vector<CDef> kClasses = {
-    {  0, 20, "0_20",   "0-20%"   },
-    { 20, 40, "20_40",  "20-40%"  },
-    { 40, 60, "40_60",  "40-60%"  },
+    { 80,100, "80_100", "80-100%" },
     { 60, 80, "60_80",  "60-80%"  },
-    { 80,100, "80_100", "80-100%" }
+    { 40, 60, "40_60",  "40-60%"  },
+    { 20, 40, "20_40",  "20-40%"  },
+    {  0, 20, "0_20",   "0-20%"   }
 };
 
 static const StyleDef kStyle[5] = {

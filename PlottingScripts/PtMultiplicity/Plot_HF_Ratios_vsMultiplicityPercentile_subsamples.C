@@ -149,11 +149,11 @@ std::pair<int,int> PercentileRange(TH1* hMult, double pTop, double pBot)
 struct CDef { double pTop, pBot; const char* tag; const char* label; };
 
 static const std::vector<CDef> kClasses = {
-  {  0, 20, "0_20",   "0-20%"   },
-  { 20, 40, "20_40",  "20-40%"  },
-  { 40, 60, "40_60",  "40-60%"  },
+  { 80,100, "80_100", "80-100%" },
   { 60, 80, "60_80",  "60-80%"  },
-  { 80,100, "80_100", "80-100%" }
+  { 40, 60, "40_60",  "40-60%"  },
+  { 20, 40, "20_40",  "20-40%"  },
+  {  0, 20, "0_20",   "0-20%"   }
 };
 
 // Tune styles (two curves)

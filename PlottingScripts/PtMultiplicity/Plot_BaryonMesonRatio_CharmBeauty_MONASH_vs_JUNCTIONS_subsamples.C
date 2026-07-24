@@ -31,8 +31,8 @@
 //     TH2D  fHistPtCharmBaryons
 //
 // For each of the 5 multiplicity percentile classes
-//   [0–20], [20–40], [40–60], [60–80], [80–100]%
-// (0–20% = highest multiplicity) it produces one plot with 4 curves:
+//   [80-100], [60-80], [40-60], [20-40], [0-20]%
+// ordered from lowest to highest multiplicity. It produces one plot with 4 curves:
 //
 //   - Beauty baryon/meson, MONASH
 //   - Beauty baryon/meson, JUNCTIONS
@@ -328,11 +328,11 @@ void Plot_BaryonMesonRatio_CharmBeauty_MONASH_vs_JUNCTIONS_subsamples_WithPrefix
     // --- Define 5 multiplicity percentile classes ---
     struct CDef { double pTop,pBot; const char* tag; const char* label; };
     std::vector<CDef> classes = {
-        {  0, 20, "0_20",   "[0-20%]"   },
-        { 20, 40, "20_40",  "[20-40%]"  },
-        { 40, 60, "40_60",  "[40-60%]"  },
+        { 80,100, "80_100", "[80-100%]" },
         { 60, 80, "60_80",  "[60-80%]"  },
-        { 80,100, "80_100", "[80-100%]" }
+        { 40, 60, "40_60",  "[40-60%]"  },
+        { 20, 40, "20_40",  "[20-40%]"  },
+        {  0, 20, "0_20",   "[0-20%]"   }
     };
 
     struct ClassRatios {

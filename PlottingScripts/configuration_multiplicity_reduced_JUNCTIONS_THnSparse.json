@@ -151,9 +151,9 @@
   ],
   "histograms_to_analyse": [
     {
-      "binLabel": "M0_1",
-      "hDPhi": "hDPhiM0_1",
-      "hTrPt": "hTrPtM0_1",
+      "binLabel": "M90_100",
+      "hDPhi": "hDPhiM90_100",
+      "hTrPt": "hTrPtM90_100",
       "triggerPhiMin": -3.14159265,
       "triggerPhiMax": 3.14159265,
       "assocPhiMin": -3.14159265,
@@ -166,160 +166,8 @@
       "triggerPtMax": 20.0,
       "assocPtMin": 0.0,
       "assocPtMax": 100.0,
-      "multiplicityMin": 0.0,
-      "multiplicityMax": 1.0
-    },
-    {
-      "binLabel": "M1_10",
-      "hDPhi": "hDPhiM1_10",
-      "hTrPt": "hTrPtM1_10",
-      "triggerPhiMin": -3.14159265,
-      "triggerPhiMax": 3.14159265,
-      "assocPhiMin": -3.14159265,
-      "assocPhiMax": 3.14159265,
-      "triggerEtaMin": -4.0,
-      "triggerEtaMax": 4.0,
-      "assocEtaMin": -4.0,
-      "assocEtaMax": 4.0,
-      "triggerPtMin": 1.0,
-      "triggerPtMax": 20.0,
-      "assocPtMin": 0.0,
-      "assocPtMax": 100.0,
-      "multiplicityMin": 1.0,
-      "multiplicityMax": 10.0
-    },
-    {
-      "binLabel": "M10_20",
-      "hDPhi": "hDPhiM10_20",
-      "hTrPt": "hTrPtM10_20",
-      "triggerPhiMin": -3.14159265,
-      "triggerPhiMax": 3.14159265,
-      "assocPhiMin": -3.14159265,
-      "assocPhiMax": 3.14159265,
-      "triggerEtaMin": -4.0,
-      "triggerEtaMax": 4.0,
-      "assocEtaMin": -4.0,
-      "assocEtaMax": 4.0,
-      "triggerPtMin": 1.0,
-      "triggerPtMax": 20.0,
-      "assocPtMin": 0.0,
-      "assocPtMax": 100.0,
-      "multiplicityMin": 10.0,
-      "multiplicityMax": 20.0
-    },
-    {
-      "binLabel": "M20_30",
-      "hDPhi": "hDPhiM20_30",
-      "hTrPt": "hTrPtM20_30",
-      "triggerPhiMin": -3.14159265,
-      "triggerPhiMax": 3.14159265,
-      "assocPhiMin": -3.14159265,
-      "assocPhiMax": 3.14159265,
-      "triggerEtaMin": -4.0,
-      "triggerEtaMax": 4.0,
-      "assocEtaMin": -4.0,
-      "assocEtaMax": 4.0,
-      "triggerPtMin": 1.0,
-      "triggerPtMax": 20.0,
-      "assocPtMin": 0.0,
-      "assocPtMax": 100.0,
-      "multiplicityMin": 20.0,
-      "multiplicityMax": 30.0
-    },
-    {
-      "binLabel": "M30_40",
-      "hDPhi": "hDPhiM30_40",
-      "hTrPt": "hTrPtM30_40",
-      "triggerPhiMin": -3.14159265,
-      "triggerPhiMax": 3.14159265,
-      "assocPhiMin": -3.14159265,
-      "assocPhiMax": 3.14159265,
-      "triggerEtaMin": -4.0,
-      "triggerEtaMax": 4.0,
-      "assocEtaMin": -4.0,
-      "assocEtaMax": 4.0,
-      "triggerPtMin": 1.0,
-      "triggerPtMax": 20.0,
-      "assocPtMin": 0.0,
-      "assocPtMax": 100.0,
-      "multiplicityMin": 30.0,
-      "multiplicityMax": 40.0
-    },
-    {
-      "binLabel": "M40_50",
-      "hDPhi": "hDPhiM40_50",
-      "hTrPt": "hTrPtM40_50",
-      "triggerPhiMin": -3.14159265,
-      "triggerPhiMax": 3.14159265,
-      "assocPhiMin": -3.14159265,
-      "assocPhiMax": 3.14159265,
-      "triggerEtaMin": -4.0,
-      "triggerEtaMax": 4.0,
-      "assocEtaMin": -4.0,
-      "assocEtaMax": 4.0,
-      "triggerPtMin": 1.0,
-      "triggerPtMax": 20.0,
-      "assocPtMin": 0.0,
-      "assocPtMax": 100.0,
-      "multiplicityMin": 40.0,
-      "multiplicityMax": 50.0
-    },
-    {
-      "binLabel": "M50_60",
-      "hDPhi": "hDPhiM50_60",
-      "hTrPt": "hTrPtM50_60",
-      "triggerPhiMin": -3.14159265,
-      "triggerPhiMax": 3.14159265,
-      "assocPhiMin": -3.14159265,
-      "assocPhiMax": 3.14159265,
-      "triggerEtaMin": -4.0,
-      "triggerEtaMax": 4.0,
-      "assocEtaMin": -4.0,
-      "assocEtaMax": 4.0,
-      "triggerPtMin": 1.0,
-      "triggerPtMax": 20.0,
-      "assocPtMin": 0.0,
-      "assocPtMax": 100.0,
-      "multiplicityMin": 50.0,
-      "multiplicityMax": 60.0
-    },
-    {
-      "binLabel": "M60_70",
-      "hDPhi": "hDPhiM60_70",
-      "hTrPt": "hTrPtM60_70",
-      "triggerPhiMin": -3.14159265,
-      "triggerPhiMax": 3.14159265,
-      "assocPhiMin": -3.14159265,
-      "assocPhiMax": 3.14159265,
-      "triggerEtaMin": -4.0,
-      "triggerEtaMax": 4.0,
-      "assocEtaMin": -4.0,
-      "assocEtaMax": 4.0,
-      "triggerPtMin": 1.0,
-      "triggerPtMax": 20.0,
-      "assocPtMin": 0.0,
-      "assocPtMax": 100.0,
-      "multiplicityMin": 60.0,
-      "multiplicityMax": 70.0
-    },
-    {
-      "binLabel": "M70_80",
-      "hDPhi": "hDPhiM70_80",
-      "hTrPt": "hTrPtM70_80",
-      "triggerPhiMin": -3.14159265,
-      "triggerPhiMax": 3.14159265,
-      "assocPhiMin": -3.14159265,
-      "assocPhiMax": 3.14159265,
-      "triggerEtaMin": -4.0,
-      "triggerEtaMax": 4.0,
-      "assocEtaMin": -4.0,
-      "assocEtaMax": 4.0,
-      "triggerPtMin": 1.0,
-      "triggerPtMax": 20.0,
-      "assocPtMin": 0.0,
-      "assocPtMax": 100.0,
-      "multiplicityMin": 70.0,
-      "multiplicityMax": 80.0
+      "multiplicityMin": 90.0,
+      "multiplicityMax": 100.0
     },
     {
       "binLabel": "M80_90",
@@ -341,9 +189,9 @@
       "multiplicityMax": 90.0
     },
     {
-      "binLabel": "M90_100",
-      "hDPhi": "hDPhiM90_100",
-      "hTrPt": "hTrPtM90_100",
+      "binLabel": "M70_80",
+      "hDPhi": "hDPhiM70_80",
+      "hTrPt": "hTrPtM70_80",
       "triggerPhiMin": -3.14159265,
       "triggerPhiMax": 3.14159265,
       "assocPhiMin": -3.14159265,
@@ -356,8 +204,160 @@
       "triggerPtMax": 20.0,
       "assocPtMin": 0.0,
       "assocPtMax": 100.0,
-      "multiplicityMin": 90.0,
-      "multiplicityMax": 100.0
+      "multiplicityMin": 70.0,
+      "multiplicityMax": 80.0
+    },
+    {
+      "binLabel": "M60_70",
+      "hDPhi": "hDPhiM60_70",
+      "hTrPt": "hTrPtM60_70",
+      "triggerPhiMin": -3.14159265,
+      "triggerPhiMax": 3.14159265,
+      "assocPhiMin": -3.14159265,
+      "assocPhiMax": 3.14159265,
+      "triggerEtaMin": -4.0,
+      "triggerEtaMax": 4.0,
+      "assocEtaMin": -4.0,
+      "assocEtaMax": 4.0,
+      "triggerPtMin": 1.0,
+      "triggerPtMax": 20.0,
+      "assocPtMin": 0.0,
+      "assocPtMax": 100.0,
+      "multiplicityMin": 60.0,
+      "multiplicityMax": 70.0
+    },
+    {
+      "binLabel": "M50_60",
+      "hDPhi": "hDPhiM50_60",
+      "hTrPt": "hTrPtM50_60",
+      "triggerPhiMin": -3.14159265,
+      "triggerPhiMax": 3.14159265,
+      "assocPhiMin": -3.14159265,
+      "assocPhiMax": 3.14159265,
+      "triggerEtaMin": -4.0,
+      "triggerEtaMax": 4.0,
+      "assocEtaMin": -4.0,
+      "assocEtaMax": 4.0,
+      "triggerPtMin": 1.0,
+      "triggerPtMax": 20.0,
+      "assocPtMin": 0.0,
+      "assocPtMax": 100.0,
+      "multiplicityMin": 50.0,
+      "multiplicityMax": 60.0
+    },
+    {
+      "binLabel": "M40_50",
+      "hDPhi": "hDPhiM40_50",
+      "hTrPt": "hTrPtM40_50",
+      "triggerPhiMin": -3.14159265,
+      "triggerPhiMax": 3.14159265,
+      "assocPhiMin": -3.14159265,
+      "assocPhiMax": 3.14159265,
+      "triggerEtaMin": -4.0,
+      "triggerEtaMax": 4.0,
+      "assocEtaMin": -4.0,
+      "assocEtaMax": 4.0,
+      "triggerPtMin": 1.0,
+      "triggerPtMax": 20.0,
+      "assocPtMin": 0.0,
+      "assocPtMax": 100.0,
+      "multiplicityMin": 40.0,
+      "multiplicityMax": 50.0
+    },
+    {
+      "binLabel": "M30_40",
+      "hDPhi": "hDPhiM30_40",
+      "hTrPt": "hTrPtM30_40",
+      "triggerPhiMin": -3.14159265,
+      "triggerPhiMax": 3.14159265,
+      "assocPhiMin": -3.14159265,
+      "assocPhiMax": 3.14159265,
+      "triggerEtaMin": -4.0,
+      "triggerEtaMax": 4.0,
+      "assocEtaMin": -4.0,
+      "assocEtaMax": 4.0,
+      "triggerPtMin": 1.0,
+      "triggerPtMax": 20.0,
+      "assocPtMin": 0.0,
+      "assocPtMax": 100.0,
+      "multiplicityMin": 30.0,
+      "multiplicityMax": 40.0
+    },
+    {
+      "binLabel": "M20_30",
+      "hDPhi": "hDPhiM20_30",
+      "hTrPt": "hTrPtM20_30",
+      "triggerPhiMin": -3.14159265,
+      "triggerPhiMax": 3.14159265,
+      "assocPhiMin": -3.14159265,
+      "assocPhiMax": 3.14159265,
+      "triggerEtaMin": -4.0,
+      "triggerEtaMax": 4.0,
+      "assocEtaMin": -4.0,
+      "assocEtaMax": 4.0,
+      "triggerPtMin": 1.0,
+      "triggerPtMax": 20.0,
+      "assocPtMin": 0.0,
+      "assocPtMax": 100.0,
+      "multiplicityMin": 20.0,
+      "multiplicityMax": 30.0
+    },
+    {
+      "binLabel": "M10_20",
+      "hDPhi": "hDPhiM10_20",
+      "hTrPt": "hTrPtM10_20",
+      "triggerPhiMin": -3.14159265,
+      "triggerPhiMax": 3.14159265,
+      "assocPhiMin": -3.14159265,
+      "assocPhiMax": 3.14159265,
+      "triggerEtaMin": -4.0,
+      "triggerEtaMax": 4.0,
+      "assocEtaMin": -4.0,
+      "assocEtaMax": 4.0,
+      "triggerPtMin": 1.0,
+      "triggerPtMax": 20.0,
+      "assocPtMin": 0.0,
+      "assocPtMax": 100.0,
+      "multiplicityMin": 10.0,
+      "multiplicityMax": 20.0
+    },
+    {
+      "binLabel": "M1_10",
+      "hDPhi": "hDPhiM1_10",
+      "hTrPt": "hTrPtM1_10",
+      "triggerPhiMin": -3.14159265,
+      "triggerPhiMax": 3.14159265,
+      "assocPhiMin": -3.14159265,
+      "assocPhiMax": 3.14159265,
+      "triggerEtaMin": -4.0,
+      "triggerEtaMax": 4.0,
+      "assocEtaMin": -4.0,
+      "assocEtaMax": 4.0,
+      "triggerPtMin": 1.0,
+      "triggerPtMax": 20.0,
+      "assocPtMin": 0.0,
+      "assocPtMax": 100.0,
+      "multiplicityMin": 1.0,
+      "multiplicityMax": 10.0
+    },
+    {
+      "binLabel": "M0_1",
+      "hDPhi": "hDPhiM0_1",
+      "hTrPt": "hTrPtM0_1",
+      "triggerPhiMin": -3.14159265,
+      "triggerPhiMax": 3.14159265,
+      "assocPhiMin": -3.14159265,
+      "assocPhiMax": 3.14159265,
+      "triggerEtaMin": -4.0,
+      "triggerEtaMax": 4.0,
+      "assocEtaMin": -4.0,
+      "assocEtaMax": 4.0,
+      "triggerPtMin": 1.0,
+      "triggerPtMax": 20.0,
+      "assocPtMin": 0.0,
+      "assocPtMax": 100.0,
+      "multiplicityMin": 0.0,
+      "multiplicityMax": 1.0
     }
   ],
   "canvases_to_be_drawn": [
@@ -401,48 +401,48 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [
@@ -461,47 +461,47 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -547,94 +547,94 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -661,7 +661,7 @@
       "write_path": "PlottingScripts/Plots/THnSparse",
       "write_name": "beauty_balancing_baryon_over_meson_ratio",
       "canvas_title": "beauty balancing baryon/meson ratio",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -738,7 +738,7 @@
       "write_path": "PlottingScripts/Plots/THnSparse",
       "write_name": "beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH",
       "canvas_title": "beauty balancing ratio of baryon/meson ratio",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -823,48 +823,48 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [
@@ -883,47 +883,47 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -969,94 +969,94 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -1082,7 +1082,7 @@
       "write_path": "PlottingScripts/Plots/THnSparse",
       "write_name": "charm_balancing_baryon_over_meson_ratio",
       "canvas_title": "charm balancing baryon/meson ratio",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -1150,7 +1150,7 @@
       "write_path": "PlottingScripts/Plots/THnSparse",
       "write_name": "charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH",
       "canvas_title": "charm balancing ratio of baryon/meson ratio",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -1173,94 +1173,94 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -1310,48 +1310,48 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [
@@ -1362,47 +1362,47 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -1447,48 +1447,48 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [
@@ -1499,47 +1499,47 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -1585,94 +1585,94 @@
       "y_max_legend": -1,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -1717,48 +1717,48 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [
@@ -1769,47 +1769,47 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -1854,48 +1854,48 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [
@@ -1906,47 +1906,47 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -1992,94 +1992,94 @@
       "y_max_legend": -1,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -2105,7 +2105,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -2179,7 +2179,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -2255,7 +2255,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -2315,7 +2315,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -2379,7 +2379,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -2448,7 +2448,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -2516,7 +2516,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -2571,7 +2571,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -2647,94 +2647,94 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -2760,7 +2760,7 @@
       "write_path": "PlottingScripts/Plots/THnSparse",
       "write_name": "beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH",
       "canvas_title": "beauty balancing ratio of baryon/meson ratio",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -2844,94 +2844,94 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -2956,7 +2956,7 @@
       "write_path": "PlottingScripts/Plots/THnSparse",
       "write_name": "charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH",
       "canvas_title": "charm balancing ratio of baryon/meson ratio",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -2979,94 +2979,94 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -3116,48 +3116,48 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [
@@ -3168,47 +3168,47 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -3254,94 +3254,94 @@
       "y_max_legend": -1,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -3386,48 +3386,48 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [
@@ -3438,47 +3438,47 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -3524,94 +3524,94 @@
       "y_max_legend": -1,
       "legend_entries": [
         {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
-        },
-        {
-          "object_name": "hDPhiM1_10",
-          "display_name": "1-10%"
-        },
-        {
-          "object_name": "hDPhiM10_20",
-          "display_name": "10-20%"
-        },
-        {
-          "object_name": "hDPhiM20_30",
-          "display_name": "20-30%"
-        },
-        {
-          "object_name": "hDPhiM30_40",
-          "display_name": "30-40%"
-        },
-        {
-          "object_name": "hDPhiM40_50",
-          "display_name": "40-50%"
-        },
-        {
-          "object_name": "hDPhiM50_60",
-          "display_name": "50-60%"
-        },
-        {
-          "object_name": "hDPhiM60_70",
-          "display_name": "60-70%"
-        },
-        {
-          "object_name": "hDPhiM70_80",
-          "display_name": "70-80%"
+          "object_name": "hDPhiM90_100",
+          "display_name": "90-100%"
         },
         {
           "object_name": "hDPhiM80_90",
           "display_name": "80-90%"
         },
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
+          "object_name": "hDPhiM70_80",
+          "display_name": "70-80%"
+        },
+        {
+          "object_name": "hDPhiM60_70",
+          "display_name": "60-70%"
+        },
+        {
+          "object_name": "hDPhiM50_60",
+          "display_name": "50-60%"
+        },
+        {
+          "object_name": "hDPhiM40_50",
+          "display_name": "40-50%"
+        },
+        {
+          "object_name": "hDPhiM30_40",
+          "display_name": "30-40%"
+        },
+        {
+          "object_name": "hDPhiM20_30",
+          "display_name": "20-30%"
+        },
+        {
+          "object_name": "hDPhiM10_20",
+          "display_name": "10-20%"
+        },
+        {
+          "object_name": "hDPhiM1_10",
+          "display_name": "1-10%"
+        },
+        {
+          "object_name": "hDPhiM0_1",
+          "display_name": "0-1%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM0_1",
+          "dependency_name": "hDPhiM90_100",
           "line_style": 1
-        },
-        {
-          "dependency_name": "hDPhiM1_10",
-          "line_style": 2
-        },
-        {
-          "dependency_name": "hDPhiM10_20",
-          "line_style": 3
-        },
-        {
-          "dependency_name": "hDPhiM20_30",
-          "line_style": 4
-        },
-        {
-          "dependency_name": "hDPhiM30_40",
-          "line_style": 5
-        },
-        {
-          "dependency_name": "hDPhiM40_50",
-          "line_style": 6
-        },
-        {
-          "dependency_name": "hDPhiM50_60",
-          "line_style": 7
-        },
-        {
-          "dependency_name": "hDPhiM60_70",
-          "line_style": 8
-        },
-        {
-          "dependency_name": "hDPhiM70_80",
-          "line_style": 9
         },
         {
           "dependency_name": "hDPhiM80_90",
           "line_style": 10
         },
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM70_80",
+          "line_style": 9
+        },
+        {
+          "dependency_name": "hDPhiM60_70",
+          "line_style": 8
+        },
+        {
+          "dependency_name": "hDPhiM50_60",
+          "line_style": 7
+        },
+        {
+          "dependency_name": "hDPhiM40_50",
+          "line_style": 6
+        },
+        {
+          "dependency_name": "hDPhiM30_40",
+          "line_style": 5
+        },
+        {
+          "dependency_name": "hDPhiM20_30",
+          "line_style": 4
+        },
+        {
+          "dependency_name": "hDPhiM10_20",
+          "line_style": 3
+        },
+        {
+          "dependency_name": "hDPhiM1_10",
+          "line_style": 2
+        },
+        {
+          "dependency_name": "hDPhiM0_1",
           "line_style": 1
         }
       ],
@@ -3636,7 +3636,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -3696,7 +3696,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -3759,7 +3759,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -3814,7 +3814,7 @@
       "write_path": "NONE",
       "write_name": "NONE",
       "canvas_title": "",
-      "x_axis_title": "pT",
+      "x_axis_title": "Multiplicity percentile",
       "y_axis_title": "yield",
       "x_size_canvas": 800,
       "y_size_canvas": 600,
@@ -3887,7 +3887,7 @@
       "histogram_maximum": -1,
       "set_log_y": true,
       "x_min_legend": 0.63,
-      "x_max_legend": 0.90,
+      "x_max_legend": 0.9,
       "y_min_legend": 0.68,
       "y_max_legend": 0.88,
       "legend_entries": [
@@ -4002,7 +4002,7 @@
       "histogram_maximum": -1,
       "set_log_y": true,
       "x_min_legend": 0.63,
-      "x_max_legend": 0.90,
+      "x_max_legend": 0.9,
       "y_min_legend": 0.68,
       "y_max_legend": 0.88,
       "legend_entries": [
@@ -4101,8 +4101,8 @@
       "write": true,
       "write_path": "PlottingScripts/Plots/THnSparse",
       "write_name": "global_balancing_plots_multiplicity",
-      "x_size_canvas": 1000,
-      "y_size_canvas": 950
+      "x_size_canvas": 2200,
+      "y_size_canvas": 2050
     },
     {
       "canvas_name": "global_balancing_baryon_over_meson_ratio",
@@ -4124,8 +4124,8 @@
       "write": true,
       "write_path": "PlottingScripts/Plots/THnSparse",
       "write_name": "global_balancing_baryon_over_meson_ratio_multiplicity",
-      "x_size_canvas": 1000,
-      "y_size_canvas": 950
+      "x_size_canvas": 2200,
+      "y_size_canvas": 2050
     }
   ]
 }

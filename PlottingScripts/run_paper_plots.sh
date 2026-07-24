@@ -19,7 +19,9 @@ Targets:
   smoke                       Quick suite: multiplicity-boundaries + kinematic-spectra + thnsparse-complete-root
   quick                       Alias for smoke
   multiplicity-boundaries     Charged-particle multiplicity plot with percentile boundaries
-  kinematic-spectra           pT, eta, phi, multiplicity, and optional correlation spectra
+  multiplicity-compact        MONASH compact multiplicity-percentile plot
+  multiplicity-spectrum       Shared raw Nch spectrum with tune/MONASH ratio panel and MONASH inset
+  kinematic-spectra           Inclusive raw-tree pT, eta, phi, and multiplicity spectra
   thnsparse                   Paul's full THnSparse plotting config, with subsampling if enabled
   thnsparse-complete-root     Paul's complete-root THnSparse config, without subsampling
   final-multiplicity          FinalAnalysis two-sample multiplicity comparison
@@ -39,21 +41,16 @@ Useful environment overrides:
       default: false
   MULTIPLICITY_STRICT
       default: true
-  KINEMATIC_CONFIG
-      default: THNSPARSE_COMPLETE_ROOT_CONFIG
+  MULTIPLICITY_COMPACT
+      default: false
+  KINEMATIC_RAW_BASE
+      default: RootFiles/HF
   KINEMATIC_OUTPUT_DIR
       default: PlottingScripts/Plots/KinematicSpectra
   KINEMATIC_NORMALIZE
       default: true
-  KINEMATIC_SUBSAMPLE_ERRORS
-      default: true
   KINEMATIC_STRICT
       default: true
-  KINEMATIC_CORRELATIONS
-      default: true
-  KINEMATIC_PHI_POLICY
-      default: strict
-      values: strict, native, legacy-repair
   FINAL_INDEPENDENT_TAG
       default: 12-01-2026
   FINAL_COMBINED_TAG
@@ -102,13 +99,11 @@ MULTIPLICITY_CONFIG="${MULTIPLICITY_CONFIG:-${THNSPARSE_COMPLETE_ROOT_CONFIG}}"
 MULTIPLICITY_OUTPUT_DIR="${MULTIPLICITY_OUTPUT_DIR:-PlottingScripts/Plots/MultiplicityDistribution}"
 MULTIPLICITY_NORMALIZE="$(normalize_bool "${MULTIPLICITY_NORMALIZE:-false}")"
 MULTIPLICITY_STRICT="$(normalize_bool "${MULTIPLICITY_STRICT:-true}")"
-KINEMATIC_CONFIG="${KINEMATIC_CONFIG:-${THNSPARSE_COMPLETE_ROOT_CONFIG}}"
+MULTIPLICITY_COMPACT="$(normalize_bool "${MULTIPLICITY_COMPACT:-false}")"
+KINEMATIC_RAW_BASE="${KINEMATIC_RAW_BASE:-RootFiles/HF}"
 KINEMATIC_OUTPUT_DIR="${KINEMATIC_OUTPUT_DIR:-PlottingScripts/Plots/KinematicSpectra}"
 KINEMATIC_NORMALIZE="$(normalize_bool "${KINEMATIC_NORMALIZE:-true}")"
-KINEMATIC_SUBSAMPLE_ERRORS="$(normalize_bool "${KINEMATIC_SUBSAMPLE_ERRORS:-true}")"
 KINEMATIC_STRICT="$(normalize_bool "${KINEMATIC_STRICT:-true}")"
-KINEMATIC_CORRELATIONS="$(normalize_bool "${KINEMATIC_CORRELATIONS:-true}")"
-KINEMATIC_PHI_POLICY="${KINEMATIC_PHI_POLICY:-strict}"
 FINAL_INDEPENDENT_TAG="${FINAL_INDEPENDENT_TAG:-12-01-2026}"
 FINAL_COMBINED_TAG="${FINAL_COMBINED_TAG:-27-03-2026}"
 FINAL_NSUB="${FINAL_NSUB:-10}"
@@ -135,7 +130,7 @@ for target in "$@"; do
     smoke|quick)
       expanded_targets+=("multiplicity-boundaries" "kinematic-spectra" "thnsparse-complete-root")
       ;;
-    multiplicity-boundaries|kinematic-spectra|thnsparse|thnsparse-complete-root|final-multiplicity|final-yields)
+    multiplicity-boundaries|multiplicity-compact|multiplicity-spectrum|kinematic-spectra|thnsparse|thnsparse-complete-root|final-multiplicity|final-yields)
       expanded_targets+=("${target}")
       ;;
     *)
@@ -202,18 +197,20 @@ ROOTCMDS
 }
 
 run_multiplicity_boundaries() {
+  local compact="${1:-${MULTIPLICITY_COMPACT}}"
   require_file "${MULTIPLICITY_CONFIG}"
 
   echo
   echo "==> Running multiplicity-boundaries"
   echo "    config: ${MULTIPLICITY_CONFIG}"
   echo "    output: ${MULTIPLICITY_OUTPUT_DIR}"
+  echo "    compact MONASH: ${compact}"
 
   root -l -b <<ROOTCMDS
 .L PlottingScripts/Plot_MultiplicityDistribution_PercentileBoundaries.C+
 int __multiplicity_plot_result = 0;
 try {
-  Plot_MultiplicityDistribution_PercentileBoundaries("${MULTIPLICITY_CONFIG}", "${MULTIPLICITY_OUTPUT_DIR}", ${MULTIPLICITY_NORMALIZE}, ${MULTIPLICITY_STRICT});
+  Plot_MultiplicityDistribution_PercentileBoundaries("${MULTIPLICITY_CONFIG}", "${MULTIPLICITY_OUTPUT_DIR}", ${MULTIPLICITY_NORMALIZE}, ${MULTIPLICITY_STRICT}, ${compact});
 } catch (const std::exception& error) {
   std::cerr << "ERROR: " << error.what() << std::endl;
   __multiplicity_plot_result = 1;
@@ -227,26 +224,47 @@ ROOTCMDS
 }
 
 run_kinematic_spectra() {
-  require_file "${KINEMATIC_CONFIG}"
-
   echo
   echo "==> Running kinematic-spectra"
-  echo "    config: ${KINEMATIC_CONFIG}"
+  echo "    raw input: ${KINEMATIC_RAW_BASE}"
   echo "    output: ${KINEMATIC_OUTPUT_DIR}"
 
   root -l -b <<ROOTCMDS
-.L PlottingScripts/Plot_KinematicSpectra_THnSparse.C+
+.L PlottingScripts/Plot_InclusiveKinematicSpectra_Raw.C+
 int __kinematic_plot_result = 0;
 try {
-  Plot_KinematicSpectra_THnSparse("${KINEMATIC_CONFIG}", "${KINEMATIC_OUTPUT_DIR}", ${KINEMATIC_NORMALIZE}, ${KINEMATIC_SUBSAMPLE_ERRORS}, ${KINEMATIC_STRICT}, ${KINEMATIC_CORRELATIONS}, "${KINEMATIC_PHI_POLICY}");
+  Plot_InclusiveKinematicSpectra_Raw("${KINEMATIC_RAW_BASE}", "${KINEMATIC_OUTPUT_DIR}", ${KINEMATIC_NORMALIZE}, ${KINEMATIC_STRICT});
 } catch (const std::exception& error) {
   std::cerr << "ERROR: " << error.what() << std::endl;
   __kinematic_plot_result = 1;
 } catch (...) {
-  std::cerr << "ERROR: unknown exception while running Plot_KinematicSpectra_THnSparse" << std::endl;
+  std::cerr << "ERROR: unknown exception while running Plot_InclusiveKinematicSpectra_Raw" << std::endl;
   __kinematic_plot_result = 1;
 }
 if (__kinematic_plot_result != 0) { gSystem->Exit(__kinematic_plot_result); }
+.q
+ROOTCMDS
+}
+
+run_multiplicity_spectrum() {
+  echo
+  echo "==> Running multiplicity-spectrum"
+  echo "    raw input: ${KINEMATIC_RAW_BASE}"
+  echo "    output: ${KINEMATIC_OUTPUT_DIR}"
+
+  root -l -b <<ROOTCMDS
+.L PlottingScripts/Plot_InclusiveKinematicSpectra_Raw.C+
+int __multiplicity_spectrum_result = 0;
+try {
+  Plot_InclusiveMultiplicitySpectrum_Raw("${KINEMATIC_RAW_BASE}", "${KINEMATIC_OUTPUT_DIR}", ${KINEMATIC_NORMALIZE}, ${KINEMATIC_STRICT});
+} catch (const std::exception& error) {
+  std::cerr << "ERROR: " << error.what() << std::endl;
+  __multiplicity_spectrum_result = 1;
+} catch (...) {
+  std::cerr << "ERROR: unknown exception while running Plot_InclusiveMultiplicitySpectrum_Raw" << std::endl;
+  __multiplicity_spectrum_result = 1;
+}
+if (__multiplicity_spectrum_result != 0) { gSystem->Exit(__multiplicity_spectrum_result); }
 .q
 ROOTCMDS
 }
@@ -286,7 +304,13 @@ echo "Targets: ${expanded_targets[*]}"
 for target in "${expanded_targets[@]}"; do
   case "${target}" in
     multiplicity-boundaries)
-      run_multiplicity_boundaries
+      run_multiplicity_boundaries "${MULTIPLICITY_COMPACT}"
+      ;;
+    multiplicity-compact)
+      run_multiplicity_boundaries true
+      ;;
+    multiplicity-spectrum)
+      run_multiplicity_spectrum
       ;;
     kinematic-spectra)
       run_kinematic_spectra

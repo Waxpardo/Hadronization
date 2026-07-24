@@ -31,6 +31,8 @@ AnalyzedData/<DATE>/Charm/ccbar_JUNCTIONS_sub0.root
 
 For date-based calls, the macros prefer `hf_` files when they exist and otherwise fall back to the split names. The number of subsamples passed to a plotting macro must match the number of files written by the analysis step. If the analysis produced `sub0` through `sub9`, the plotting call should use `nSub = 10`.
 
+Multiplicity-percentile plots use the class order `80-100%`, `60-80%`, `40-60%`, `20-40%`, `0-20%`, so the visible ordering runs from lower to higher charged-particle multiplicity.
+
 The plots are written to:
 
 ```text

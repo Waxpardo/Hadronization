@@ -25,6 +25,8 @@
 #include "TString.h" // TODO: can use this for the legend entry names?
 #include <TLegend.h>
 
+#include "TunePlotStyle.h"
+
 #if __has_include(<nlohmann/json.hpp>)
 #include <nlohmann/json.hpp>
 #elif __has_include("nlohmann/json.hpp")
@@ -404,33 +406,31 @@ TH1D* GetCorrelationHistograms(THnSparseD* hCorrelations, const BinsFromTHnSpars
     // Reset axes
     for (int i = 0; i < hCorrelations->GetNdimensions(); ++i) { hCorrelations->GetAxis(i)->SetRange(); }
 
-        /*
-        hCorrelations->GetAxis(2)->SetRangeUser(
-            cuts.triggerEtaMin,
-            cuts.triggerEtaMax
-        );
+    hCorrelations->GetAxis(2)->SetRangeUser(
+        cuts.triggerEtaMin,
+        cuts.triggerEtaMax
+    );
 
-        hCorrelations->GetAxis(3)->SetRangeUser(
-            cuts.assocEtaMin,
-            cuts.assocEtaMax
-        );
+    hCorrelations->GetAxis(3)->SetRangeUser(
+        cuts.assocEtaMin,
+        cuts.assocEtaMax
+    );
 
-        hCorrelations->GetAxis(4)->SetRangeUser(
-            cuts.triggerPtMin,
-            cuts.triggerPtMax
-        );
+    hCorrelations->GetAxis(4)->SetRangeUser(
+        cuts.triggerPtMin,
+        cuts.triggerPtMax
+    );
 
-        hCorrelations->GetAxis(5)->SetRangeUser(
-            cuts.assocPtMin,
-            cuts.assocPtMax
-        );
-        */
+    hCorrelations->GetAxis(5)->SetRangeUser(
+        cuts.assocPtMin,
+        cuts.assocPtMax
+    );
 
-        std::cout << "--> applying multiplicity cut from " << cuts.multiplicityMin << " to " << cuts.multiplicityMax << std::endl;
+    std::cout << "--> applying multiplicity cut from " << cuts.multiplicityMin << " to " << cuts.multiplicityMax << std::endl;
 
-        hCorrelations->GetAxis(6)->SetRangeUser(
-            cuts.multiplicityMin,
-            cuts.multiplicityMax
+    hCorrelations->GetAxis(6)->SetRangeUser(
+        cuts.multiplicityMin,
+        cuts.multiplicityMax
     );
 
     TH1D* hDPhi = (TH1D*)hCorrelations->Projection(0, "E");
@@ -458,15 +458,30 @@ TH1D* GetTriggerPtHistograms(THnSparseD* hTrKinematics, const BinsFromTHnSparse&
     // Reset axes
     for (int i = 0; i < hTrKinematics->GetNdimensions(); ++i) { hTrKinematics->GetAxis(i)->SetRange(); }
 
-        std::cout << "--> applying multiplicity cut from " << cuts.multiplicityMin << " to " << cuts.multiplicityMax << std::endl;
+    hTrKinematics->GetAxis(0)->SetRangeUser(
+        cuts.triggerPhiMin,
+        cuts.triggerPhiMax
+    );
 
-        hTrKinematics->GetAxis(3)->SetRangeUser(
-            cuts.multiplicityMin,
-            cuts.multiplicityMax
-        );
+    hTrKinematics->GetAxis(1)->SetRangeUser(
+        cuts.triggerEtaMin,
+        cuts.triggerEtaMax
+    );
 
-        TH1D* hTrPt = (TH1D*)hTrKinematics->Projection(2, "E");
-        hTrPt->SetName(Form("hTrPt%s", suffix.Data()));
+    hTrKinematics->GetAxis(2)->SetRangeUser(
+        cuts.triggerPtMin,
+        cuts.triggerPtMax
+    );
+
+    std::cout << "--> applying multiplicity cut from " << cuts.multiplicityMin << " to " << cuts.multiplicityMax << std::endl;
+
+    hTrKinematics->GetAxis(3)->SetRangeUser(
+        cuts.multiplicityMin,
+        cuts.multiplicityMax
+    );
+
+    TH1D* hTrPt = (TH1D*)hTrKinematics->Projection(2, "E");
+    hTrPt->SetName(Form("hTrPt%s", suffix.Data()));
 
     return hTrPt;
 }
@@ -562,6 +577,24 @@ YieldsAndErrors YieldsAndErrorsForGivenTrigger(const std::string& trigger, const
     if (CALCULATE_ERRORS) { yieldsAndErrors.vYieldsRatioErrors = mapYieldsAndErrors.mapYieldsRatioErrors.at(trigger); }
 
     return yieldsAndErrors;
+}
+
+void ApplyTuneVisualStyle(TH1D* hist, const std::string& tune, bool applyTuneLineStyle = false)
+{
+    if (!hist) return;
+    HadronizationPlotStyle::ApplyTuneLineAndMarker(hist, tune, applyTuneLineStyle);
+    hist->SetLineWidth(2);
+    hist->SetMarkerSize(1.0);
+}
+
+std::string DisplayLabelForMultiplicityBin(
+    const BinsFromTHnSparse& bin,
+    const std::map<std::string, std::string>& legendEntriesMap
+) {
+    const auto found = legendEntriesMap.find(bin.hDPhi);
+    if (found != legendEntriesMap.end()) { return found->second; }
+    if (!bin.binLabel.empty()) { return bin.binLabel; }
+    return bin.hDPhi;
 }
 
 
@@ -860,6 +893,9 @@ CONFIGS readConfig(const char* configurations) {
         for (const auto& configColourTUNEPair : configPair["TUNE_colours"]) {
             std::string objectName = configColourTUNEPair["TUNE_name"].get<std::string>();
             Int_t optionName = configColourTUNEPair["colour"].get<Int_t>();
+            if (HadronizationPlotStyle::IsKnownTune(objectName)) {
+                optionName = HadronizationPlotStyle::TuneColor(objectName);
+            }
             colourTUNEMap[objectName] = optionName;
             // TODO: verbose
             // std::cout << "Inserted: " << objectName << " -> " << optionName << std::endl;
@@ -1045,8 +1081,16 @@ Double_t calculateOneYield(bool VERBOSE, TH1D *hDPhiOS, TH1D *hTrPtOS, TH1D *hDP
         std::cout << "hDPhiOS Integral: " << hDPhiOS->Integral() 
                   << ", hDPhiSS Integral: " << hDPhiSS->Integral() << std::endl;
     }
-	hDPhiOS->Scale(1/hTrPtOS->Integral());
-	hDPhiSS->Scale(1/hTrPtSS->Integral());
+    const Double_t nTriggersOS = hTrPtOS ? hTrPtOS->Integral() : 0.0;
+    const Double_t nTriggersSS = hTrPtSS ? hTrPtSS->Integral() : 0.0;
+    if (nTriggersOS <= 0.0 || nTriggersSS <= 0.0) {
+        std::cerr << "WARNING: zero trigger normalisation while calculating yield"
+                  << " (OS triggers=" << nTriggersOS
+                  << ", SS triggers=" << nTriggersSS << ")" << std::endl;
+        return std::numeric_limits<Double_t>::quiet_NaN();
+    }
+	hDPhiOS->Scale(1.0 / nTriggersOS);
+	hDPhiSS->Scale(1.0 / nTriggersSS);
     if (VERBOSE) {
         std::cout << "hDPhiOS Integral: " << hDPhiOS->Integral() 
                   << ", hDPhiSS Integral: " << hDPhiSS->Integral() << std::endl;
@@ -1054,7 +1098,9 @@ Double_t calculateOneYield(bool VERBOSE, TH1D *hDPhiOS, TH1D *hTrPtOS, TH1D *hDP
     TH1D *hCorr = (TH1D*)hDPhiOS->Clone();
     hCorr->Add(hDPhiSS, -1.);
 
-    return hCorr->Integral();
+    const Double_t yield = hCorr->Integral();
+    delete hCorr;
+    return yield;
 } // calculateOneYield()
 
 
@@ -1269,7 +1315,7 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             TCanvas *c_correlations = new TCanvas (Form("%s c_correlations %s minus %s for [%f, %f]", TUNE.c_str(), fileNamesOSandSS.OS.c_str(), fileNamesOSandSS.SS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), Form("%s c_correlations %s minus %s for [%f, %f]", TUNE.c_str(), fileNamesOSandSS.OS.c_str(), fileNamesOSandSS.SS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), 800, 600);
                             c_correlations->cd();
                             hDPhiOS->SetTitle(Form("%s c_correlations %s minus %s for [%f, %f]", TUNE.c_str(), fileNamesOSandSS.OS.c_str(), fileNamesOSandSS.SS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax));
-                            hDPhiOS->Draw();
+                            hDPhiOS->Draw("PE");
                         }
 
                         // Hard-coded: we only want to show correlations for B+B- and D+D-
@@ -1320,8 +1366,8 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                                 leg->SetFillStyle(0);
                                 leg->AddEntry((TObject*)0,
                                 Form("%.1f #leq N_{ch} percentile #leq %.1f", binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), "");
-                                leg->AddEntry(hDPhiOS,"OS","l");
-                                leg->AddEntry(hDPhiSS,"SS","l");
+                                leg->AddEntry(hDPhiOS,"OS","lep");
+                                leg->AddEntry(hDPhiSS,"SS","lep");
                                 leg->Draw();
 
                                 c_correlations_OS_SS->cd();
@@ -1623,6 +1669,7 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
                 else {
                     vHists[i][k]->SetBinError(1+j, 1e-10);
                 }
+                ApplyTuneVisualStyle(vHists[i][k], TUNE);
                 cYields->cd();
                 vHists[i][k]->Draw("same PE");
                 if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
@@ -1633,6 +1680,7 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
                 if (colourTUNEMap.find(TUNE) != colourTUNEMap.end()) {
                     Int_t colour = colourTUNEMap[TUNE];
                     vHists[i][k]->SetLineColor(colour);
+                    vHists[i][k]->SetMarkerColor(colour);
                     if (VERBOSE) { std::cout << "Found colour: " << colour << std::endl; }
                 } else {
                     if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
@@ -1652,7 +1700,7 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
                     if (legendEntriesMap.find(binFromTHnSparse.hDPhi) != legendEntriesMap.end()) {
                         std::string displayName = legendEntriesMap[binFromTHnSparse.hDPhi];
                         if (VERBOSE) { std::cout << "Found displayName: " << displayName << std::endl; }
-                        legend->AddEntry(vHists[i][k], displayName.c_str(), "l");
+                        legend->AddEntry(vHists[i][k], displayName.c_str(), "lep");
                     } else {
                         if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
                     }
@@ -1825,8 +1873,8 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
             else {
                 vHists[k]->SetBinError(1+j, 1e-10);
             }
+            ApplyTuneVisualStyle(vHists[k], vTUNES[indexNominatorTUNE]);
             cYields->cd();
-            vHists[k]->SetLineColor(kBlack);
             vHists[k]->Draw("same PE");
             if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
                 cMiniPad->cd();
@@ -1846,7 +1894,7 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
                 if (legendEntriesMap.find(binFromTHnSparse.hDPhi) != legendEntriesMap.end()) {
                     std::string displayName = legendEntriesMap[binFromTHnSparse.hDPhi];
                     if (VERBOSE) { std::cout << "Found displayName: " << displayName << std::endl; }
-                    legend->AddEntry(vHists[k], displayName.c_str(), "l");
+                    legend->AddEntry(vHists[k], displayName.c_str(), "lep");
                 } else {
                     if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
                 }
@@ -2026,6 +2074,7 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                 else {
                     vHists[i][j]->SetBinError(1+k, 1e-10);
                 }
+                ApplyTuneVisualStyle(vHists[i][j], TUNE);
                 cYields->cd();
                 vHists[i][j]->Draw("same PE");
                 if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
@@ -2033,11 +2082,15 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                     vHists[i][j]->Draw("same PE");
                 }
 
-                hYieldsTemplate->GetXaxis()->SetBinLabel(1+k, (binFromTHnSparse.hDPhi).c_str());
+                hYieldsTemplate->GetXaxis()->SetBinLabel(
+                    1+k,
+                    DisplayLabelForMultiplicityBin(binFromTHnSparse, legendEntriesMap).c_str()
+                );
 
                 if (colourTUNEMap.find(TUNE) != colourTUNEMap.end()) {
                     Int_t colour = colourTUNEMap[TUNE];
                     vHists[i][j]->SetLineColor(colour);
+                    vHists[i][j]->SetMarkerColor(colour);
                     if (VERBOSE) { std::cout << "Found colour: " << colour << std::endl; }
                 } else {
                     if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
@@ -2057,7 +2110,7 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                     if (legendEntriesMap.find(associateName) != legendEntriesMap.end()) {
                         std::string displayName = legendEntriesMap[associateName];
                         if (VERBOSE) { std::cout << "Found displayName: " << displayName << std::endl; }
-                        legend->AddEntry(vHists[i][j], displayName.c_str(), "l");
+                        legend->AddEntry(vHists[i][j], displayName.c_str(), "lep");
                     } else {
                         if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
                     }
@@ -2211,18 +2264,21 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
             // std::cout << "plotting histogram " << hDPhiAndhTrPtNames.hDPhi << " with trigger pT histogram " << hDPhiAndhTrPtNames.hTrPt << std::endl;
 
             vHists[j] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%s", FLAVOUR, j, k, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%s", FLAVOUR, j, k, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
-            vHists[j]->SetBinContent(1+k, (vYieldsAndErrors.vYields[indexNominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexNominatorTUNE][0][k])
-                                           / (vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k]));
+            const Double_t numeratorBaryonMesonRatio = safeRatio(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k],
+                                                                 vYieldsAndErrors.vYields[indexNominatorTUNE][0][k]);
+            const Double_t denominatorBaryonMesonRatio = safeRatio(vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k],
+                                                                   vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k]);
+            const Double_t tuneDoubleRatio = safeRatio(numeratorBaryonMesonRatio, denominatorBaryonMesonRatio);
+            vHists[j]->SetBinContent(1+k, std::isfinite(tuneDoubleRatio) ? tuneDoubleRatio : 0.0);
             if (CALCULATE_ERRORS) { 
-                // Several options for error calculation/propagation
-                // Ratio calculated seperately:
-                // TODO: add this in yield calculation
-                // TODO: also check if this is without bugs (features?) now..
-                // vHists[j]->SetBinError(1+k, vYieldsAndErrors.vYieldsRatioErrors[i][j][k]);
-                vHists[j]->SetBinError(1+k, propagateRatioError(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k], 
-                                                                vYieldsAndErrors.vYields[indexNominatorTUNE][0][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k],
+                // The baryon/meson ratio uncertainty is estimated within each tune
+                // from the subsamples, preserving correlations between the two
+                // species.  The tune-to-tune double ratio then treats the two
+                // independently generated tune samples as uncorrelated.
+                vHists[j]->SetBinError(1+k, propagateRatioError(numeratorBaryonMesonRatio,
+                                                                denominatorBaryonMesonRatio,
                                                                 vYieldsAndErrors.vYieldsRatioErrors[indexNominatorTUNE][j][k],
-                                                                vYieldsAndErrors.vYieldsRatioErrors[indexDenominatorTUNE][0][k]));
+                                                                vYieldsAndErrors.vYieldsRatioErrors[indexDenominatorTUNE][j][k]));
                 // Naive error propagation (assuming no correlation):
                 /*
                 vHists[j]->SetBinError(1+k, propagateRatioError(vYieldsAndErrors.vYields[i][j][k], 
@@ -2236,15 +2292,18 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
             else {
                 vHists[j]->SetBinError(1+k, 1e-10);
             }
+            ApplyTuneVisualStyle(vHists[j], vTUNES[indexNominatorTUNE]);
             cYields->cd();
-            vHists[j]->SetLineColor(kBlack);
             vHists[j]->Draw("same PE");
             if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
                 cMiniPad->cd();
                 vHists[j]->Draw("same PE");
             }
 
-            hYieldsTemplate->GetXaxis()->SetBinLabel(1+k, (binFromTHnSparse.hDPhi).c_str());
+            hYieldsTemplate->GetXaxis()->SetBinLabel(
+                1+k,
+                DisplayLabelForMultiplicityBin(binFromTHnSparse, legendEntriesMap).c_str()
+            );
 
             if (lineStyleBaryonMap.find(associateName) != lineStyleBaryonMap.end()) {
                     Int_t lineStyle = lineStyleBaryonMap[associateName];
@@ -2269,7 +2328,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                 std::string displayName = legendEntriesMap[associateName];
                 // TODO: verbose
                 // std::cout << "Found displayName: " << displayName << std::endl;
-                legend->AddEntry(vHists[j], displayName.c_str(), "l");
+                legend->AddEntry(vHists[j], displayName.c_str(), "lep");
             } else {
                 // TODO: verbose
                 // std::cout << "objectName not found in the map!" << std::endl;

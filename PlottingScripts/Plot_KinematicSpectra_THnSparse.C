@@ -40,6 +40,9 @@
 #include "TStyle.h"
 #include "TSystem.h"
 
+#include "HistogramErrorUtils.h"
+#include "TunePlotStyle.h"
+
 #if __has_include(<nlohmann/json.hpp>)
 #include <nlohmann/json.hpp>
 #elif __has_include("nlohmann/json.hpp")
@@ -734,9 +737,7 @@ TH1D* HandleSingleParticlePhiHistogram(TH1D* hist,
 void NormalizeShape(TH1D* hist)
 {
     if (!hist) return;
-    hist->Sumw2();
-    const double integral = hist->Integral(1, hist->GetNbinsX());
-    if (integral > 0.0) hist->Scale(1.0 / integral);
+    PlotErrorUtils::NormalizeToUnitShape(hist);
 }
 
 void ApplyBinWidthNormalization(TH1D* hist)
@@ -960,18 +961,17 @@ SampleRequest FirstAvailableSharedSample(const PlotConfig& config,
 
 Color_t TuneColor(const std::string& tune)
 {
-    if (tune == "MONASH") return kBlack;
-    if (tune == "JUNCTIONS") return kBlue + 1;
-    if (tune == "CLOSEPACKING") return kMagenta + 1;
-    return kGray + 2;
+    return HadronizationPlotStyle::TuneColor(tune);
 }
 
 int TuneMarker(const std::string& tune)
 {
-    if (tune == "MONASH") return 20;
-    if (tune == "JUNCTIONS") return 21;
-    if (tune == "CLOSEPACKING") return 22;
-    return 24;
+    return HadronizationPlotStyle::TuneMarker(tune);
+}
+
+int TuneLineStyle(const std::string& tune)
+{
+    return HadronizationPlotStyle::TuneLineStyle(tune);
 }
 
 void StyleHistogram(TH1D* hist,
@@ -985,6 +985,7 @@ void StyleHistogram(TH1D* hist,
     hist->SetLineColor(TuneColor(tune));
     hist->SetMarkerColor(TuneColor(tune));
     hist->SetMarkerStyle(TuneMarker(tune));
+    hist->SetLineStyle(TuneLineStyle(tune));
     hist->SetLineWidth(2);
     hist->SetMarkerSize(0.9);
     hist->GetXaxis()->SetTitle(spectrum.xTitle.c_str());
@@ -1111,7 +1112,7 @@ void DrawTuneOverlay(const PlotConfig& config,
             hist->SetMinimum(minY);
             hist->SetMaximum(std::max(upper, minY * 10.0));
             hist->Draw(first ? "E1 HIST" : "E1 HIST SAME");
-            legend->AddEntry(hist, item.tune.c_str(), "l");
+            legend->AddEntry(hist, item.tune.c_str(), "lp");
             first = false;
         }
         legend->Draw();

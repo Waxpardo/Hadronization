@@ -8,7 +8,8 @@
 // For each tune (MONASH and JUNCTIONS) separately, you get ONE plot per species,
 // each plot containing 5 multiplicity classes as colored line curves:
 //
-//   [0-20], [20-40], [40-60], [60-80], [80-100]%   (0-20% = highest multiplicity)
+//   [80-100], [60-80], [40-60], [20-40], [0-20]%
+// ordered from lowest to highest multiplicity.
 //
 // The spectra are built using file-level subsamples:
 //   - For each subsample and mult class: TH2 -> ProjectionX in mult Y-range
@@ -286,21 +287,21 @@ double AutoXMax(const std::vector<TH1D*>& curves, double marginFrac = 0.05)
 struct CDef { double pTop, pBot; const char* tag; const char* label; };
 
 static const std::vector<CDef> kClasses = {
-    {  0, 20, "0_20",   "0-20%"   },
-    { 20, 40, "20_40",  "20-40%"  },
-    { 40, 60, "40_60",  "40-60%"  },
+    { 80,100, "80_100", "80-100%" },
     { 60, 80, "60_80",  "60-80%"  },
-    { 80,100, "80_100", "80-100%" }
+    { 40, 60, "40_60",  "40-60%"  },
+    { 20, 40, "20_40",  "20-40%"  },
+    {  0, 20, "0_20",   "0-20%"   }
 };
 
 // Color convention to match your example (keep consistent across all plots)
 struct StyleDef { int color; int lstyle; int lwidth; };
 static const StyleDef kStyle[5] = {
-    { kOrange+7, 1, 3 }, // 0-20
-    { kViolet+1, 1, 3 }, // 20-40
+    { kOrange+7, 1, 3 }, // 80-100
+    { kViolet+1, 1, 3 }, // 60-80
     { kGreen+2,  1, 3 }, // 40-60
-    { kRed+1,    1, 3 }, // 60-80
-    { kBlue+1,   1, 3 }  // 80-100
+    { kRed+1,    1, 3 }, // 20-40
+    { kBlue+1,   1, 3 }  // 0-20
 };
 
 // Draw one tune/species plot (5 curves) and save png
