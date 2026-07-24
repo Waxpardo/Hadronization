@@ -1,0 +1,84 @@
+universe   = vanilla
+
+# Targeted recovery for failed or duplicate-seed jobs from Close Packing cluster 4467160.
+executable = /data/alice/ipardoza/Hadronization-main/runCondorJob.sh
+initialdir = /data/alice/ipardoza/Hadronization-main
+
+getenv = True
+
+request_cpus   = 1
+request_memory = 4GB
+request_disk   = 10GB
+
++JobCategory = "long"
++UseOS       = "el9"
+
+TUNE = CLOSEPACKING
+NEVT_PER_JOB = 1000000
+
+log    = logs/HF/$(TUNE)/job_$(Cluster)_$(JOBID).log
+output = logs/HF/$(TUNE)/job_$(Cluster)_$(JOBID).out
+error  = logs/HF/$(TUNE)/job_$(Cluster)_$(JOBID).err
+
+should_transfer_files = NO
+
+# Retry normal non-zero exits. Wall-time holds are released twice; runCondorJob.sh
+# folds NumJobStarts into the seed inputs and removes stale partial workdir files.
+max_retries = 2
+retry_until = (ExitCode == 0)
+periodic_release = (HoldReasonCode == 26) && (NumJobStarts < 3)
+
+arguments = $(Cluster) $(JOBID) $(TUNE) $(NEVT_PER_JOB)
+
+queue JOBID from (
+0
+2
+4
+5
+6
+7
+8
+9
+16
+17
+19
+21
+22
+24
+25
+29
+31
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+45
+46
+47
+48
+49
+51
+52
+54
+56
+64
+65
+70
+72
+75
+78
+83
+86
+88
+89
+91
+92
+94
+98
+)

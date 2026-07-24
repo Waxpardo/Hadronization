@@ -25,8 +25,8 @@
 #include "TH1D.h"
 #include "TH1I.h"
 #include "TTree.h"
-// include for mac compilation (getpid)
-#include <unistd.h>
+
+#include "SeedUtils.h"
 
 #define PI 3.14159265
 using namespace std;
@@ -79,9 +79,19 @@ int main(int argc, char **argv)
 	if (argc != 4)
 	{
 		cout << "Error in the number of arguments provided" << endl;
-		cout << "Expected input: ./bbbarcorrelations_status output_name random_number1 random_number2" << endl;
+		cout << "Expected input: ./qqbarcorrelations_status output_name seed_input1 seed_input2" << endl;
 		cout << "Terminating program" << endl;
 		return 0;
+	}
+
+	std::uint64_t seedInput1 = 0;
+	std::uint64_t seedInput2 = 0;
+	try {
+		seedInput1 = ParseUnsignedSeedInput(argv[2], "seed_input1");
+		seedInput2 = ParseUnsignedSeedInput(argv[3], "seed_input2");
+	} catch (const std::exception& ex) {
+		cerr << "Error: invalid seed inputs: " << ex.what() << endl;
+		return 1;
 	}
 
 	// Create output file
@@ -170,17 +180,15 @@ int main(int argc, char **argv)
 	pythia.readFile("pythiasettings_Hard_Low_qq.cmnd");
 	nEvents = pythia.mode("Main:numberOfEvents");
 
-	// Create a random seed so that the outcome will be truly random
-	Int_t proccessid = getpid();
-	int seedMod1 = std::stoi(argv[2]);
-	int seedMod2 = std::stoi(argv[3]);
-	string seedstr = "Random:seed = " + std::to_string((time(0) + proccessid + seedMod1 + seedMod2) % 900000000);
+	const int seed = DeterministicPythiaSeed(seedInput1, seedInput2);
+	string seedstr = "Random:seed = " + std::to_string(seed);
 	pythia.readString("Random:setSeed = on");
 	pythia.readString(seedstr);
 
 	// Initializing simulation
 	pythia.init();
-	cout << "Generating " << nEvents << " events!" << endl;
+	cout << "Generating " << nEvents << " events with seed " << seed
+	     << " from inputs " << seedInput1 << ", " << seedInput2 << "!" << endl;
 
 	// Event loop
 	for (int iEvent = 0; iEvent < nEvents; iEvent++)

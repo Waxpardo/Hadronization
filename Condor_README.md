@@ -91,7 +91,7 @@ RootFiles/bbbar/MONASH/bbbar_MONASH_cluster<CLUSTERID>_job<JOBID>.root
 
 For combined HF jobs, the wrapper selects `heavyflavourcorrelations_status` and chooses `pythiasettings_Hard_Low_ccbb_MONASH.cmnd`, `pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd`, or `pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd` from the tune. For split jobs, it selects one of the four split executables and one of the split settings cards from the channel and tune. It copies the card into the work directory, replaces `Main:numberOfEvents` when that line exists, and appends it when it does not.
 
-The wrapper uses deterministic seed modifiers derived from the job id. It writes the ROOT output in the work directory first. Only after the executable finishes and the expected output file exists does the wrapper move the file into the final `RootFiles` directory. Therefore a running job may have no file in `RootFiles` yet even though its work directory already contains partial job state.
+The wrapper passes deterministic seed inputs derived from the Condor cluster id, job id, workflow/tune, and Condor start count. The producer hashes those inputs into the PYTHIA seed range, so simultaneous jobs do not collide through wall-clock or process-id timing. The wrapper writes the ROOT output in the work directory first. Only after the executable finishes and the expected output file exists does the wrapper move the file into the final `RootFiles` directory. Therefore a running job may have no file in `RootFiles` yet even though its work directory already contains partial job state. On a retry, an existing final output is treated as already complete, while a stale work-directory ROOT file is removed before the executable starts.
 
 ## Directory Layout
 
