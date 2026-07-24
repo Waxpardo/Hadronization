@@ -421,7 +421,7 @@ void StyleHistogram(TH1D* h, Color_t color, Style_t lineStyle)
   h->SetLineWidth(3);
   h->SetLineStyle(lineStyle);
   h->SetMarkerStyle(20);
-  h->SetMarkerSize(0.0);
+  h->SetMarkerSize(0.8);
 }
 
 void SaveCanvas(TCanvas* canvas, const TString& outBase)
@@ -469,14 +469,14 @@ void DrawMultiplicityComparison(const TString& dateA,
   hA->GetXaxis()->SetTitleOffset(1.05);
   hA->GetYaxis()->SetTitleOffset(1.25);
   hA->GetYaxis()->SetRangeUser(yMin, yMax);
-  hA->Draw("hist");
-  hB->Draw("hist same");
+  hA->Draw("E1 HIST");
+  hB->Draw("E1 HIST SAME");
 
   TLegend* legend = new TLegend(0.52, 0.70, 0.88, 0.84);
   legend->SetFillStyle(0);
   legend->SetTextSize(0.032);
-  legend->AddEntry(hA, sampleLabelA.Data(), "l");
-  legend->AddEntry(hB, sampleLabelB.Data(), "l");
+  legend->AddEntry(hA, sampleLabelA.Data(), "lep");
+  legend->AddEntry(hB, sampleLabelB.Data(), "lep");
   legend->Draw();
 
   TLatex latex;

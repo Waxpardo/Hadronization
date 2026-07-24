@@ -4,7 +4,7 @@
 void c_correlations_OS_SS DplusDminus.root for [70.000000, 80.000000]_MACRO()
 {
 //=========Macro generated from canvas: c_correlations_OS_SS DplusDminus.root for [70.000000, 80.000000]/c_correlations_OS_SS DplusDminus.root for [70.000000, 80.000000]
-//=========  (Wed Jul 15 14:29:30 2026) by ROOT version 6.30/01
+//=========  (Thu Jul 16 01:00:37 2026) by ROOT version 6.30/01
    TCanvas *c_correlations_OS_SS DplusDminus.root for [70.000000, 80.000000] = new TCanvas("c_correlations_OS_SS DplusDminus.root for [70.000000, 80.000000]", "c_correlations_OS_SS DplusDminus.root for [70.000000, 80.000000]",0,0,800,600);
    c_correlations_OS_SS->Range(0,0,1,1);
    c_correlations_OS_SS->SetFillColor(0);
@@ -1162,24 +1162,24 @@ void c_correlations_OS_SS DplusDminus.root for [70.000000, 80.000000]_MACRO()
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hDPhi","OS","l");
+   entry=leg->AddEntry("hDPhi","OS","lep");
 
    ci = TColor::GetColor("#0000ff");
    entry->SetLineColor(ci);
    entry->SetLineStyle(1);
    entry->SetLineWidth(1);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(1);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hDPhi","SS","l");
+   entry=leg->AddEntry("hDPhi","SS","lep");
 
    ci = TColor::GetColor("#0000ff");
    entry->SetLineColor(ci);
    entry->SetLineStyle(2);
    entry->SetLineWidth(1);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(1);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
    leg->Draw();

@@ -4101,8 +4101,8 @@
       "write": true,
       "write_path": "PlottingScripts/Plots/THnSparse",
       "write_name": "global_balancing_plots_multiplicity",
-      "x_size_canvas": 1000,
-      "y_size_canvas": 950
+      "x_size_canvas": 2200,
+      "y_size_canvas": 2050
     },
     {
       "canvas_name": "global_balancing_baryon_over_meson_ratio",
@@ -4124,8 +4124,8 @@
       "write": true,
       "write_path": "PlottingScripts/Plots/THnSparse",
       "write_name": "global_balancing_baryon_over_meson_ratio_multiplicity",
-      "x_size_canvas": 1000,
-      "y_size_canvas": 950
+      "x_size_canvas": 2200,
+      "y_size_canvas": 2050
     }
   ]
 }

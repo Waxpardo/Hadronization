@@ -4,7 +4,7 @@
 void global_balancing_plots_multiplicity_MACRO()
 {
 //=========Macro generated from canvas: global_balancing_plots/global_balancing_plots
-//=========  (Wed Jul 15 14:34:20 2026) by ROOT version 6.30/01
+//=========  (Wed Jul 15 22:32:51 2026) by ROOT version 6.30/01
    TCanvas *global_balancing_plots = new TCanvas("global_balancing_plots", "global_balancing_plots",0,0,1000,950);
    global_balancing_plots->Range(0,0,1,1);
    global_balancing_plots->SetFillColor(0);
@@ -54,7 +54,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->SetBinContent(1,0.07941868);
    hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->SetBinError(1,0.0008843924);
    hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->SetEntries(1);
-   hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->SetLineColor(ci);
+   hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING__112->GetXaxis()->SetTitleFont(42);
@@ -69,8 +76,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->SetBinContent(1,0.07801556);
    hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->SetBinError(1,0.0002374273);
    hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->SetEntries(1);
-   hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->SetLineColor(ci);
    hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->SetLineStyle(2);
+   hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING__113->GetXaxis()->SetTitleFont(42);
@@ -85,8 +99,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->SetBinContent(1,0.08267929);
    hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->SetBinError(1,0.0004409664);
    hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->SetEntries(1);
-   hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->SetLineColor(ci);
    hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->SetLineStyle(3);
+   hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING__114->GetXaxis()->SetTitleFont(42);
@@ -101,8 +122,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->SetBinContent(1,0.08564956);
    hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->SetBinError(1,0.0004521401);
    hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->SetEntries(1);
-   hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->SetLineColor(ci);
    hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->SetLineStyle(4);
+   hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING__115->GetXaxis()->SetTitleFont(42);
@@ -117,8 +145,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->SetBinContent(1,0.09225949);
    hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->SetBinError(1,0.0005106971);
    hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->SetEntries(1);
-   hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->SetLineColor(ci);
    hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->SetLineStyle(5);
+   hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING__116->GetXaxis()->SetTitleFont(42);
@@ -133,8 +168,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->SetBinContent(1,0.09524143);
    hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->SetBinError(1,0.0005511355);
    hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->SetEntries(1);
-   hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->SetLineColor(ci);
    hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->SetLineStyle(6);
+   hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING__117->GetXaxis()->SetTitleFont(42);
@@ -149,8 +191,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->SetBinContent(1,0.09829722);
    hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->SetBinError(1,0.0007618896);
    hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->SetEntries(1);
-   hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->SetLineColor(ci);
    hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->SetLineStyle(7);
+   hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING__118->GetXaxis()->SetTitleFont(42);
@@ -165,8 +214,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->SetBinContent(1,0.1022005);
    hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->SetBinError(1,0.0006829427);
    hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->SetEntries(1);
-   hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->SetLineColor(ci);
    hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->SetLineStyle(8);
+   hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING__119->GetXaxis()->SetTitleFont(42);
@@ -181,8 +237,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->SetBinContent(1,0.1022005);
    hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->SetBinError(1,0.0006829427);
    hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->SetEntries(1);
-   hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->SetLineColor(ci);
    hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->SetLineStyle(9);
+   hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING__120->GetXaxis()->SetTitleFont(42);
@@ -197,8 +260,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->SetBinContent(1,0.1022005);
    hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->SetBinError(1,0.0006829427);
    hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->SetEntries(1);
-   hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->SetLineColor(ci);
    hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->SetLineStyle(10);
+   hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING__121->GetXaxis()->SetTitleFont(42);
@@ -213,7 +283,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->SetBinContent(1,0.1024401);
    hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->SetBinError(1,0.002160481);
    hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->SetEntries(1);
-   hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->SetLineColor(ci);
+   hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING__122->GetXaxis()->SetTitleFont(42);
@@ -228,7 +305,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->SetBinContent(2,0.0002251361);
    hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->SetBinError(2,3.124616e-05);
    hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->SetEntries(1);
-   hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->SetLineColor(ci);
+   hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_0_mini_beauty_balancing_CLOSEPACKING__123->GetXaxis()->SetTitleFont(42);
@@ -243,8 +327,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->SetBinContent(2,0.0001967761);
    hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->SetBinError(2,1.699622e-05);
    hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->SetEntries(1);
-   hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->SetLineColor(ci);
    hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->SetLineStyle(2);
+   hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_1_mini_beauty_balancing_CLOSEPACKING__124->GetXaxis()->SetTitleFont(42);
@@ -259,8 +350,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->SetBinContent(2,0.0001396918);
    hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->SetBinError(2,1.550281e-05);
    hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->SetEntries(1);
-   hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->SetLineColor(ci);
    hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->SetLineStyle(3);
+   hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_2_mini_beauty_balancing_CLOSEPACKING__125->GetXaxis()->SetTitleFont(42);
@@ -275,8 +373,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->SetBinContent(2,9.500783e-05);
    hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->SetBinError(2,1.788256e-05);
    hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->SetEntries(1);
-   hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->SetLineColor(ci);
    hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->SetLineStyle(4);
+   hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_3_mini_beauty_balancing_CLOSEPACKING__126->GetXaxis()->SetTitleFont(42);
@@ -291,8 +396,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->SetBinContent(2,7.103988e-05);
    hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->SetBinError(2,2.35291e-05);
    hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->SetEntries(1);
-   hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->SetLineColor(ci);
    hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->SetLineStyle(5);
+   hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_4_mini_beauty_balancing_CLOSEPACKING__127->GetXaxis()->SetTitleFont(42);
@@ -307,8 +419,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->SetBinContent(2,7.190882e-05);
    hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->SetBinError(2,1.776109e-05);
    hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->SetEntries(1);
-   hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->SetLineColor(ci);
    hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->SetLineStyle(6);
+   hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_5_mini_beauty_balancing_CLOSEPACKING__128->GetXaxis()->SetTitleFont(42);
@@ -323,8 +442,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->SetBinContent(2,7.279928e-05);
    hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->SetBinError(2,2.420519e-05);
    hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->SetEntries(1);
-   hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->SetLineColor(ci);
    hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->SetLineStyle(7);
+   hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_6_mini_beauty_balancing_CLOSEPACKING__129->GetXaxis()->SetTitleFont(42);
@@ -339,8 +465,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->SetBinContent(2,6.507512e-05);
    hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->SetBinError(2,2.430512e-05);
    hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->SetEntries(1);
-   hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->SetLineColor(ci);
    hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->SetLineStyle(8);
+   hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_7_mini_beauty_balancing_CLOSEPACKING__130->GetXaxis()->SetTitleFont(42);
@@ -355,8 +488,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->SetBinContent(2,6.507512e-05);
    hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->SetBinError(2,2.430512e-05);
    hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->SetEntries(1);
-   hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->SetLineColor(ci);
    hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->SetLineStyle(9);
+   hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_8_mini_beauty_balancing_CLOSEPACKING__131->GetXaxis()->SetTitleFont(42);
@@ -371,8 +511,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->SetBinContent(2,6.507512e-05);
    hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->SetBinError(2,2.430512e-05);
    hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->SetEntries(1);
-   hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->SetLineColor(ci);
    hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->SetLineStyle(10);
+   hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_9_mini_beauty_balancing_CLOSEPACKING__132->GetXaxis()->SetTitleFont(42);
@@ -387,7 +534,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->SetBinContent(2,8.371003e-05);
    hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->SetBinError(2,5.541715e-05);
    hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->SetEntries(1);
-   hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->SetLineColor(ci);
+   hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_10_mini_beauty_balancing_CLOSEPACKING__133->GetXaxis()->SetTitleFont(42);
@@ -402,7 +556,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->SetBinContent(3,0.01713363);
    hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->SetBinError(3,0.0003195647);
    hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->SetEntries(1);
-   hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->SetLineColor(ci);
+   hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_0_mini_beauty_balancing_CLOSEPACKING__134->GetXaxis()->SetTitleFont(42);
@@ -417,8 +578,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->SetBinContent(3,0.01795582);
    hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->SetBinError(3,0.0001684836);
    hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->SetEntries(1);
-   hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->SetLineColor(ci);
    hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->SetLineStyle(2);
+   hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_1_mini_beauty_balancing_CLOSEPACKING__135->GetXaxis()->SetTitleFont(42);
@@ -433,8 +601,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->SetBinContent(3,0.0184866);
    hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->SetBinError(3,0.0002035061);
    hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->SetEntries(1);
-   hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->SetLineColor(ci);
    hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->SetLineStyle(3);
+   hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_2_mini_beauty_balancing_CLOSEPACKING__136->GetXaxis()->SetTitleFont(42);
@@ -449,8 +624,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->SetBinContent(3,0.01940781);
    hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->SetBinError(3,0.000342);
    hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->SetEntries(1);
-   hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->SetLineColor(ci);
    hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->SetLineStyle(4);
+   hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_3_mini_beauty_balancing_CLOSEPACKING__137->GetXaxis()->SetTitleFont(42);
@@ -465,8 +647,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->SetBinContent(3,0.01951466);
    hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->SetBinError(3,0.0002563126);
    hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->SetEntries(1);
-   hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->SetLineColor(ci);
    hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->SetLineStyle(5);
+   hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_4_mini_beauty_balancing_CLOSEPACKING__138->GetXaxis()->SetTitleFont(42);
@@ -481,8 +670,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->SetBinContent(3,0.02102973);
    hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->SetBinError(3,0.0002996669);
    hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->SetEntries(1);
-   hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->SetLineColor(ci);
    hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->SetLineStyle(6);
+   hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_5_mini_beauty_balancing_CLOSEPACKING__139->GetXaxis()->SetTitleFont(42);
@@ -497,8 +693,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->SetBinContent(3,0.02258234);
    hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->SetBinError(3,0.0005544821);
    hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->SetEntries(1);
-   hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->SetLineColor(ci);
    hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->SetLineStyle(7);
+   hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_6_mini_beauty_balancing_CLOSEPACKING__140->GetXaxis()->SetTitleFont(42);
@@ -513,8 +716,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->SetBinContent(3,0.02285066);
    hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->SetBinError(3,0.000433536);
    hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->SetEntries(1);
-   hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->SetLineColor(ci);
    hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->SetLineStyle(8);
+   hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_7_mini_beauty_balancing_CLOSEPACKING__141->GetXaxis()->SetTitleFont(42);
@@ -529,8 +739,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->SetBinContent(3,0.02285066);
    hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->SetBinError(3,0.000433536);
    hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->SetEntries(1);
-   hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->SetLineColor(ci);
    hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->SetLineStyle(9);
+   hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_8_mini_beauty_balancing_CLOSEPACKING__142->GetXaxis()->SetTitleFont(42);
@@ -545,8 +762,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->SetBinContent(3,0.02285066);
    hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->SetBinError(3,0.000433536);
    hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->SetEntries(1);
-   hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->SetLineColor(ci);
    hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->SetLineStyle(10);
+   hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_9_mini_beauty_balancing_CLOSEPACKING__143->GetXaxis()->SetTitleFont(42);
@@ -561,7 +785,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->SetBinContent(3,0.02440147);
    hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->SetBinError(3,0.000518811);
    hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->SetEntries(1);
-   hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->SetLineColor(ci);
+   hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_10_mini_beauty_balancing_CLOSEPACKING__144->GetXaxis()->SetTitleFont(42);
@@ -576,7 +807,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->SetBinContent(4,0.07851038);
    hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->SetBinError(4,0.0004641066);
    hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->SetEntries(1);
-   hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->SetLineColor(ci);
+   hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_0_mini_beauty_balancing_CLOSEPACKING__145->GetXaxis()->SetTitleFont(42);
@@ -591,8 +829,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->SetBinContent(4,0.07573665);
    hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->SetBinError(4,0.0002106279);
    hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->SetEntries(1);
-   hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->SetLineColor(ci);
    hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->SetLineStyle(2);
+   hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_1_mini_beauty_balancing_CLOSEPACKING__146->GetXaxis()->SetTitleFont(42);
@@ -607,8 +852,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->SetBinContent(4,0.08096968);
    hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->SetBinError(4,0.0003327375);
    hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->SetEntries(1);
-   hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->SetLineColor(ci);
    hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->SetLineStyle(3);
+   hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_2_mini_beauty_balancing_CLOSEPACKING__147->GetXaxis()->SetTitleFont(42);
@@ -623,8 +875,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->SetBinContent(4,0.08494355);
    hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->SetBinError(4,0.0004962338);
    hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->SetEntries(1);
-   hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->SetLineColor(ci);
    hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->SetLineStyle(4);
+   hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_3_mini_beauty_balancing_CLOSEPACKING__148->GetXaxis()->SetTitleFont(42);
@@ -639,8 +898,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->SetBinContent(4,0.09046929);
    hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->SetBinError(4,0.0008001937);
    hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->SetEntries(1);
-   hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->SetLineColor(ci);
    hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->SetLineStyle(5);
+   hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_4_mini_beauty_balancing_CLOSEPACKING__149->GetXaxis()->SetTitleFont(42);
@@ -655,8 +921,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->SetBinContent(4,0.09393809);
    hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->SetBinError(4,0.0003369071);
    hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->SetEntries(1);
-   hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->SetLineColor(ci);
    hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->SetLineStyle(6);
+   hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_5_mini_beauty_balancing_CLOSEPACKING__150->GetXaxis()->SetTitleFont(42);
@@ -671,8 +944,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->SetBinContent(4,0.09749279);
    hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->SetBinError(4,0.000822976);
    hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->SetEntries(1);
-   hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->SetLineColor(ci);
    hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->SetLineStyle(7);
+   hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_6_mini_beauty_balancing_CLOSEPACKING__151->GetXaxis()->SetTitleFont(42);
@@ -687,8 +967,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->SetBinContent(4,0.1010895);
    hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->SetBinError(4,0.001251561);
    hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->SetEntries(1);
-   hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->SetLineColor(ci);
    hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->SetLineStyle(8);
+   hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_7_mini_beauty_balancing_CLOSEPACKING__152->GetXaxis()->SetTitleFont(42);
@@ -703,8 +990,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->SetBinContent(4,0.1010895);
    hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->SetBinError(4,0.001251561);
    hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->SetEntries(1);
-   hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->SetLineColor(ci);
    hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->SetLineStyle(9);
+   hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_8_mini_beauty_balancing_CLOSEPACKING__153->GetXaxis()->SetTitleFont(42);
@@ -719,8 +1013,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->SetBinContent(4,0.1010895);
    hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->SetBinError(4,0.001251561);
    hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->SetEntries(1);
-   hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->SetLineColor(ci);
    hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->SetLineStyle(10);
+   hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_9_mini_beauty_balancing_CLOSEPACKING__154->GetXaxis()->SetTitleFont(42);
@@ -735,7 +1036,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->SetBinContent(4,0.1014147);
    hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->SetBinError(4,0.001815189);
    hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->SetEntries(1);
-   hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->SetLineColor(ci);
+   hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_10_mini_beauty_balancing_CLOSEPACKING__155->GetXaxis()->SetTitleFont(42);
@@ -750,7 +1058,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->SetBinContent(5,0.04144056);
    hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->SetBinError(5,0.0002202563);
    hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->SetEntries(1);
-   hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->SetLineColor(ci);
+   hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_0_mini_beauty_balancing_CLOSEPACKING__156->GetXaxis()->SetTitleFont(42);
@@ -765,8 +1080,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->SetBinContent(5,0.03756455);
    hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->SetBinError(5,0.0002357117);
    hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->SetEntries(1);
-   hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->SetLineColor(ci);
    hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->SetLineStyle(2);
+   hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_1_mini_beauty_balancing_CLOSEPACKING__157->GetXaxis()->SetTitleFont(42);
@@ -781,8 +1103,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->SetBinContent(5,0.03179816);
    hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->SetBinError(5,0.0003927383);
    hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->SetEntries(1);
-   hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->SetLineColor(ci);
    hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->SetLineStyle(3);
+   hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_2_mini_beauty_balancing_CLOSEPACKING__158->GetXaxis()->SetTitleFont(42);
@@ -797,8 +1126,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->SetBinContent(5,0.02930173);
    hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->SetBinError(5,0.000211543);
    hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->SetEntries(1);
-   hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->SetLineColor(ci);
    hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->SetLineStyle(4);
+   hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_3_mini_beauty_balancing_CLOSEPACKING__159->GetXaxis()->SetTitleFont(42);
@@ -813,8 +1149,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->SetBinContent(5,0.02539676);
    hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->SetBinError(5,0.000304509);
    hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->SetEntries(1);
-   hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->SetLineColor(ci);
    hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->SetLineStyle(5);
+   hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_4_mini_beauty_balancing_CLOSEPACKING__160->GetXaxis()->SetTitleFont(42);
@@ -829,8 +1172,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->SetBinContent(5,0.02393485);
    hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->SetBinError(5,0.0002959147);
    hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->SetEntries(1);
-   hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->SetLineColor(ci);
    hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->SetLineStyle(6);
+   hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_5_mini_beauty_balancing_CLOSEPACKING__161->GetXaxis()->SetTitleFont(42);
@@ -845,8 +1195,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->SetBinContent(5,0.02243674);
    hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->SetBinError(5,0.0004154444);
    hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->SetEntries(1);
-   hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->SetLineColor(ci);
    hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->SetLineStyle(7);
+   hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_6_mini_beauty_balancing_CLOSEPACKING__162->GetXaxis()->SetTitleFont(42);
@@ -861,8 +1218,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->SetBinContent(5,0.02044288);
    hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->SetBinError(5,0.0002657112);
    hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->SetEntries(1);
-   hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->SetLineColor(ci);
    hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->SetLineStyle(8);
+   hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_7_mini_beauty_balancing_CLOSEPACKING__163->GetXaxis()->SetTitleFont(42);
@@ -877,8 +1241,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->SetBinContent(5,0.02044288);
    hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->SetBinError(5,0.0002657112);
    hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->SetEntries(1);
-   hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->SetLineColor(ci);
    hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->SetLineStyle(9);
+   hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_8_mini_beauty_balancing_CLOSEPACKING__164->GetXaxis()->SetTitleFont(42);
@@ -893,8 +1264,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->SetBinContent(5,0.02044288);
    hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->SetBinError(5,0.0002657112);
    hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->SetEntries(1);
-   hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->SetLineColor(ci);
    hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->SetLineStyle(10);
+   hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_9_mini_beauty_balancing_CLOSEPACKING__165->GetXaxis()->SetTitleFont(42);
@@ -909,7 +1287,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->SetBinContent(5,0.01967186);
    hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->SetBinError(5,0.0004891341);
    hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->SetEntries(1);
-   hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->SetLineColor(ci);
+   hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_10_mini_beauty_balancing_CLOSEPACKING__166->GetXaxis()->SetTitleFont(42);
@@ -927,92 +1312,136 @@ void global_balancing_plots_multiplicity_MACRO()
    leg->SetLineWidth(1);
    leg->SetFillColor(0);
    leg->SetFillStyle(1001);
-   TLegendEntry *entry=leg->AddEntry("hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING","0-1%","l");
-   entry->SetLineColor(6);
+   TLegendEntry *entry=leg->AddEntry("hYields_BEAUTY_2_0_0_mini_beauty_balancing_CLOSEPACKING","0-1%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING","1-10%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_BEAUTY_2_0_1_mini_beauty_balancing_CLOSEPACKING","1-10%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(2);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING","10-20%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_BEAUTY_2_0_2_mini_beauty_balancing_CLOSEPACKING","10-20%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(3);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING","20-30%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_BEAUTY_2_0_3_mini_beauty_balancing_CLOSEPACKING","20-30%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(4);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING","30-40%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_BEAUTY_2_0_4_mini_beauty_balancing_CLOSEPACKING","30-40%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(5);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING","40-50%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_BEAUTY_2_0_5_mini_beauty_balancing_CLOSEPACKING","40-50%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(6);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING","50-60%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_BEAUTY_2_0_6_mini_beauty_balancing_CLOSEPACKING","50-60%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(7);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING","60-70%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_BEAUTY_2_0_7_mini_beauty_balancing_CLOSEPACKING","60-70%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(8);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING","70-80%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_BEAUTY_2_0_8_mini_beauty_balancing_CLOSEPACKING","70-80%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(9);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING","80-90%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_BEAUTY_2_0_9_mini_beauty_balancing_CLOSEPACKING","80-90%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(10);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING","90-100%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_BEAUTY_2_0_10_mini_beauty_balancing_CLOSEPACKING","90-100%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
    leg->Draw();
@@ -1059,7 +1488,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->SetBinContent(1,0.08202858);
    hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->SetBinError(1,0.0008975451);
    hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->SetEntries(1);
-   hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->SetLineColor(ci);
+   hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS__168->GetXaxis()->SetTitleFont(42);
@@ -1074,8 +1510,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->SetBinContent(1,0.07914677);
    hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->SetBinError(1,0.0002992768);
    hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->SetEntries(1);
-   hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->SetLineColor(ci);
    hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->SetLineStyle(2);
+   hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS__169->GetXaxis()->SetTitleFont(42);
@@ -1090,8 +1533,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->SetBinContent(1,0.08379824);
    hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->SetBinError(1,0.0003043884);
    hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->SetEntries(1);
-   hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->SetLineColor(ci);
    hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->SetLineStyle(3);
+   hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS__170->GetXaxis()->SetTitleFont(42);
@@ -1106,8 +1556,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->SetBinContent(1,0.08903434);
    hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->SetBinError(1,0.0003446627);
    hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->SetEntries(1);
-   hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->SetLineColor(ci);
    hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->SetLineStyle(4);
+   hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS__171->GetXaxis()->SetTitleFont(42);
@@ -1122,8 +1579,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->SetBinContent(1,0.09176641);
    hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->SetBinError(1,0.0002889855);
    hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->SetEntries(1);
-   hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->SetLineColor(ci);
    hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->SetLineStyle(5);
+   hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS__172->GetXaxis()->SetTitleFont(42);
@@ -1138,8 +1602,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->SetBinContent(1,0.09628493);
    hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->SetBinError(1,0.0004958993);
    hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->SetEntries(1);
-   hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->SetLineColor(ci);
    hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->SetLineStyle(6);
+   hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS__173->GetXaxis()->SetTitleFont(42);
@@ -1154,8 +1625,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->SetBinContent(1,0.09915924);
    hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->SetBinError(1,0.0008097531);
    hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->SetEntries(1);
-   hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->SetLineColor(ci);
    hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->SetLineStyle(7);
+   hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS__174->GetXaxis()->SetTitleFont(42);
@@ -1170,8 +1648,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->SetBinContent(1,0.09995289);
    hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->SetBinError(1,0.0006179377);
    hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->SetEntries(1);
-   hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->SetLineColor(ci);
    hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->SetLineStyle(8);
+   hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS__175->GetXaxis()->SetTitleFont(42);
@@ -1186,8 +1671,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->SetBinContent(1,0.1010049);
    hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->SetBinError(1,0.0006427429);
    hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->SetEntries(1);
-   hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->SetLineColor(ci);
    hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->SetLineStyle(9);
+   hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS__176->GetXaxis()->SetTitleFont(42);
@@ -1202,8 +1694,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->SetBinContent(1,0.1010049);
    hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->SetBinError(1,0.0006427429);
    hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->SetEntries(1);
-   hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->SetLineColor(ci);
    hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->SetLineStyle(10);
+   hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS__177->GetXaxis()->SetTitleFont(42);
@@ -1218,7 +1717,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->SetBinContent(1,0.1003568);
    hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->SetBinError(1,0.00168594);
    hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->SetEntries(1);
-   hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->SetLineColor(ci);
+   hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS__178->GetXaxis()->SetTitleFont(42);
@@ -1233,7 +1739,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->SetBinContent(2,0.0003217201);
    hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->SetBinError(2,5.774562e-05);
    hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->SetEntries(1);
-   hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->SetLineColor(ci);
+   hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_0_mini_beauty_balancing_JUNCTIONS__179->GetXaxis()->SetTitleFont(42);
@@ -1248,8 +1761,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->SetBinContent(2,0.0002287237);
    hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->SetBinError(2,1.415116e-05);
    hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->SetEntries(1);
-   hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->SetLineColor(ci);
    hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->SetLineStyle(2);
+   hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_1_mini_beauty_balancing_JUNCTIONS__180->GetXaxis()->SetTitleFont(42);
@@ -1264,8 +1784,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->SetBinContent(2,0.0001375126);
    hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->SetBinError(2,1.236632e-05);
    hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->SetEntries(1);
-   hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->SetLineColor(ci);
    hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->SetLineStyle(3);
+   hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_2_mini_beauty_balancing_JUNCTIONS__181->GetXaxis()->SetTitleFont(42);
@@ -1280,8 +1807,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->SetBinContent(2,9.251615e-05);
    hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->SetBinError(2,1.608119e-05);
    hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->SetEntries(1);
-   hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->SetLineColor(ci);
    hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->SetLineStyle(4);
+   hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_3_mini_beauty_balancing_JUNCTIONS__182->GetXaxis()->SetTitleFont(42);
@@ -1296,8 +1830,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->SetBinContent(2,7.844719e-05);
    hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->SetBinError(2,1.797171e-05);
    hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->SetEntries(1);
-   hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->SetLineColor(ci);
    hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->SetLineStyle(5);
+   hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_4_mini_beauty_balancing_JUNCTIONS__183->GetXaxis()->SetTitleFont(42);
@@ -1312,8 +1853,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->SetBinContent(2,9.396325e-05);
    hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->SetBinError(2,2.341228e-05);
    hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->SetEntries(1);
-   hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->SetLineColor(ci);
    hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->SetLineStyle(6);
+   hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_5_mini_beauty_balancing_JUNCTIONS__184->GetXaxis()->SetTitleFont(42);
@@ -1328,8 +1876,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->SetBinContent(2,0.0001112542);
    hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->SetBinError(2,3.97594e-05);
    hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->SetEntries(1);
-   hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->SetLineColor(ci);
    hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->SetLineStyle(7);
+   hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_6_mini_beauty_balancing_JUNCTIONS__185->GetXaxis()->SetTitleFont(42);
@@ -1344,8 +1899,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->SetBinContent(2,0.0001177675);
    hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->SetBinError(2,3.326151e-05);
    hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->SetEntries(1);
-   hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->SetLineColor(ci);
    hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->SetLineStyle(8);
+   hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_7_mini_beauty_balancing_JUNCTIONS__186->GetXaxis()->SetTitleFont(42);
@@ -1360,8 +1922,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->SetBinContent(2,0.0001264009);
    hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->SetBinError(2,3.438475e-05);
    hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->SetEntries(1);
-   hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->SetLineColor(ci);
    hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->SetLineStyle(9);
+   hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_8_mini_beauty_balancing_JUNCTIONS__187->GetXaxis()->SetTitleFont(42);
@@ -1376,8 +1945,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->SetBinContent(2,0.0001264009);
    hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->SetBinError(2,3.438475e-05);
    hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->SetEntries(1);
-   hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->SetLineColor(ci);
    hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->SetLineStyle(10);
+   hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_9_mini_beauty_balancing_JUNCTIONS__188->GetXaxis()->SetTitleFont(42);
@@ -1390,7 +1966,14 @@ void global_balancing_plots_multiplicity_MACRO()
    
    TH1D *hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189 = new TH1D("hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189","hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS",5,0,5);
    hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189->SetEntries(1);
-   hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189->SetLineColor(ci);
+   hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_10_mini_beauty_balancing_JUNCTIONS__189->GetXaxis()->SetTitleFont(42);
@@ -1405,7 +1988,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->SetBinContent(3,0.01601228);
    hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->SetBinError(3,0.0003093362);
    hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->SetEntries(1);
-   hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->SetLineColor(ci);
+   hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_0_mini_beauty_balancing_JUNCTIONS__190->GetXaxis()->SetTitleFont(42);
@@ -1420,8 +2010,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->SetBinContent(3,0.01539551);
    hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->SetBinError(3,0.0001401426);
    hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->SetEntries(1);
-   hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->SetLineColor(ci);
    hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->SetLineStyle(2);
+   hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_1_mini_beauty_balancing_JUNCTIONS__191->GetXaxis()->SetTitleFont(42);
@@ -1436,8 +2033,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->SetBinContent(3,0.0162874);
    hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->SetBinError(3,0.0001675266);
    hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->SetEntries(1);
-   hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->SetLineColor(ci);
    hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->SetLineStyle(3);
+   hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_2_mini_beauty_balancing_JUNCTIONS__192->GetXaxis()->SetTitleFont(42);
@@ -1452,8 +2056,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->SetBinContent(3,0.01693757);
    hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->SetBinError(3,0.0002993291);
    hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->SetEntries(1);
-   hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->SetLineColor(ci);
    hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->SetLineStyle(4);
+   hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_3_mini_beauty_balancing_JUNCTIONS__193->GetXaxis()->SetTitleFont(42);
@@ -1468,8 +2079,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->SetBinContent(3,0.0180055);
    hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->SetBinError(3,0.0002647195);
    hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->SetEntries(1);
-   hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->SetLineColor(ci);
    hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->SetLineStyle(5);
+   hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_4_mini_beauty_balancing_JUNCTIONS__194->GetXaxis()->SetTitleFont(42);
@@ -1484,8 +2102,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->SetBinContent(3,0.0193486);
    hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->SetBinError(3,0.0003049792);
    hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->SetEntries(1);
-   hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->SetLineColor(ci);
    hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->SetLineStyle(6);
+   hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_5_mini_beauty_balancing_JUNCTIONS__195->GetXaxis()->SetTitleFont(42);
@@ -1500,8 +2125,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->SetBinContent(3,0.01992244);
    hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->SetBinError(3,0.0003339702);
    hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->SetEntries(1);
-   hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->SetLineColor(ci);
    hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->SetLineStyle(7);
+   hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_6_mini_beauty_balancing_JUNCTIONS__196->GetXaxis()->SetTitleFont(42);
@@ -1516,8 +2148,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->SetBinContent(3,0.02098073);
    hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->SetBinError(3,0.0003570297);
    hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->SetEntries(1);
-   hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->SetLineColor(ci);
    hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->SetLineStyle(8);
+   hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_7_mini_beauty_balancing_JUNCTIONS__197->GetXaxis()->SetTitleFont(42);
@@ -1532,8 +2171,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->SetBinContent(3,0.0223835);
    hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->SetBinError(3,0.0008295597);
    hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->SetEntries(1);
-   hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->SetLineColor(ci);
    hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->SetLineStyle(9);
+   hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_8_mini_beauty_balancing_JUNCTIONS__198->GetXaxis()->SetTitleFont(42);
@@ -1548,8 +2194,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->SetBinContent(3,0.0223835);
    hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->SetBinError(3,0.0008295597);
    hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->SetEntries(1);
-   hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->SetLineColor(ci);
    hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->SetLineStyle(10);
+   hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_9_mini_beauty_balancing_JUNCTIONS__199->GetXaxis()->SetTitleFont(42);
@@ -1564,7 +2217,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->SetBinContent(3,0.02125382);
    hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->SetBinError(3,0.0007882944);
    hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->SetEntries(1);
-   hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->SetLineColor(ci);
+   hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_10_mini_beauty_balancing_JUNCTIONS__200->GetXaxis()->SetTitleFont(42);
@@ -1579,7 +2239,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->SetBinContent(4,0.07772892);
    hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->SetBinError(4,0.0005959043);
    hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->SetEntries(1);
-   hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->SetLineColor(ci);
+   hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_0_mini_beauty_balancing_JUNCTIONS__201->GetXaxis()->SetTitleFont(42);
@@ -1594,8 +2261,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->SetBinContent(4,0.07750392);
    hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->SetBinError(4,0.0002036423);
    hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->SetEntries(1);
-   hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->SetLineColor(ci);
    hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->SetLineStyle(2);
+   hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_1_mini_beauty_balancing_JUNCTIONS__202->GetXaxis()->SetTitleFont(42);
@@ -1610,8 +2284,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->SetBinContent(4,0.08293051);
    hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->SetBinError(4,0.0002964412);
    hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->SetEntries(1);
-   hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->SetLineColor(ci);
    hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->SetLineStyle(3);
+   hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_2_mini_beauty_balancing_JUNCTIONS__203->GetXaxis()->SetTitleFont(42);
@@ -1626,8 +2307,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->SetBinContent(4,0.08743844);
    hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->SetBinError(4,0.0007029365);
    hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->SetEntries(1);
-   hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->SetLineColor(ci);
    hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->SetLineStyle(4);
+   hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_3_mini_beauty_balancing_JUNCTIONS__204->GetXaxis()->SetTitleFont(42);
@@ -1642,8 +2330,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->SetBinContent(4,0.09141713);
    hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->SetBinError(4,0.0003910843);
    hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->SetEntries(1);
-   hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->SetLineColor(ci);
    hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->SetLineStyle(5);
+   hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_4_mini_beauty_balancing_JUNCTIONS__205->GetXaxis()->SetTitleFont(42);
@@ -1658,8 +2353,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->SetBinContent(4,0.09647285);
    hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->SetBinError(4,0.0005990432);
    hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->SetEntries(1);
-   hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->SetLineColor(ci);
    hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->SetLineStyle(6);
+   hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_5_mini_beauty_balancing_JUNCTIONS__206->GetXaxis()->SetTitleFont(42);
@@ -1674,8 +2376,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->SetBinContent(4,0.09914334);
    hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->SetBinError(4,0.0008168711);
    hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->SetEntries(1);
-   hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->SetLineColor(ci);
    hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->SetLineStyle(7);
+   hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_6_mini_beauty_balancing_JUNCTIONS__207->GetXaxis()->SetTitleFont(42);
@@ -1690,8 +2399,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->SetBinContent(4,0.1011396);
    hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->SetBinError(4,0.0006128009);
    hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->SetEntries(1);
-   hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->SetLineColor(ci);
    hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->SetLineStyle(8);
+   hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_7_mini_beauty_balancing_JUNCTIONS__208->GetXaxis()->SetTitleFont(42);
@@ -1706,8 +2422,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->SetBinContent(4,0.1037857);
    hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->SetBinError(4,0.000634506);
    hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->SetEntries(1);
-   hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->SetLineColor(ci);
    hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->SetLineStyle(9);
+   hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_8_mini_beauty_balancing_JUNCTIONS__209->GetXaxis()->SetTitleFont(42);
@@ -1722,8 +2445,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->SetBinContent(4,0.1037857);
    hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->SetBinError(4,0.000634506);
    hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->SetEntries(1);
-   hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->SetLineColor(ci);
    hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->SetLineStyle(10);
+   hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_9_mini_beauty_balancing_JUNCTIONS__210->GetXaxis()->SetTitleFont(42);
@@ -1738,7 +2468,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->SetBinContent(4,0.1037207);
    hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->SetBinError(4,0.002401543);
    hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->SetEntries(1);
-   hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->SetLineColor(ci);
+   hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_10_mini_beauty_balancing_JUNCTIONS__211->GetXaxis()->SetTitleFont(42);
@@ -1753,7 +2490,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->SetBinContent(5,0.04461856);
    hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->SetBinError(5,0.0007936169);
    hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->SetEntries(1);
-   hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->SetLineColor(ci);
+   hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_0_mini_beauty_balancing_JUNCTIONS__212->GetXaxis()->SetTitleFont(42);
@@ -1768,8 +2512,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->SetBinContent(5,0.04075669);
    hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->SetBinError(5,0.0002654534);
    hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->SetEntries(1);
-   hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->SetLineColor(ci);
    hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->SetLineStyle(2);
+   hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_1_mini_beauty_balancing_JUNCTIONS__213->GetXaxis()->SetTitleFont(42);
@@ -1784,8 +2535,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->SetBinContent(5,0.03518929);
    hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->SetBinError(5,0.0001903448);
    hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->SetEntries(1);
-   hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->SetLineColor(ci);
    hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->SetLineStyle(3);
+   hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_2_mini_beauty_balancing_JUNCTIONS__214->GetXaxis()->SetTitleFont(42);
@@ -1800,8 +2558,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->SetBinContent(5,0.03097156);
    hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->SetBinError(5,0.0005279782);
    hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->SetEntries(1);
-   hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->SetLineColor(ci);
    hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->SetLineStyle(4);
+   hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_3_mini_beauty_balancing_JUNCTIONS__215->GetXaxis()->SetTitleFont(42);
@@ -1816,8 +2581,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->SetBinContent(5,0.02881253);
    hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->SetBinError(5,0.0003706632);
    hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->SetEntries(1);
-   hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->SetLineColor(ci);
    hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->SetLineStyle(5);
+   hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_4_mini_beauty_balancing_JUNCTIONS__216->GetXaxis()->SetTitleFont(42);
@@ -1832,8 +2604,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->SetBinContent(5,0.02629014);
    hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->SetBinError(5,0.000270571);
    hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->SetEntries(1);
-   hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->SetLineColor(ci);
    hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->SetLineStyle(6);
+   hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_5_mini_beauty_balancing_JUNCTIONS__217->GetXaxis()->SetTitleFont(42);
@@ -1848,8 +2627,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->SetBinContent(5,0.02446002);
    hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->SetBinError(5,0.0005019051);
    hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->SetEntries(1);
-   hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->SetLineColor(ci);
    hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->SetLineStyle(7);
+   hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_6_mini_beauty_balancing_JUNCTIONS__218->GetXaxis()->SetTitleFont(42);
@@ -1864,8 +2650,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->SetBinContent(5,0.02306431);
    hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->SetBinError(5,0.0003344119);
    hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->SetEntries(1);
-   hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->SetLineColor(ci);
    hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->SetLineStyle(8);
+   hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_7_mini_beauty_balancing_JUNCTIONS__219->GetXaxis()->SetTitleFont(42);
@@ -1880,8 +2673,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->SetBinContent(5,0.02121429);
    hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->SetBinError(5,0.0005742262);
    hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->SetEntries(1);
-   hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->SetLineColor(ci);
    hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->SetLineStyle(9);
+   hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_8_mini_beauty_balancing_JUNCTIONS__220->GetXaxis()->SetTitleFont(42);
@@ -1896,8 +2696,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->SetBinContent(5,0.02121429);
    hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->SetBinError(5,0.0005742262);
    hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->SetEntries(1);
-   hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->SetLineColor(ci);
    hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->SetLineStyle(10);
+   hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_9_mini_beauty_balancing_JUNCTIONS__221->GetXaxis()->SetTitleFont(42);
@@ -1912,7 +2719,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->SetBinContent(5,0.02089704);
    hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->SetBinError(5,0.001136803);
    hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->SetEntries(1);
-   hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->SetLineColor(ci);
+   hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_10_mini_beauty_balancing_JUNCTIONS__222->GetXaxis()->SetTitleFont(42);
@@ -1930,91 +2744,135 @@ void global_balancing_plots_multiplicity_MACRO()
    leg->SetLineWidth(1);
    leg->SetFillColor(0);
    leg->SetFillStyle(1001);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS","0-1%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_0_mini_beauty_balancing_JUNCTIONS","0-1%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS","1-10%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_1_mini_beauty_balancing_JUNCTIONS","1-10%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(2);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS","10-20%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_2_mini_beauty_balancing_JUNCTIONS","10-20%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(3);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS","20-30%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_3_mini_beauty_balancing_JUNCTIONS","20-30%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(4);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS","30-40%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_4_mini_beauty_balancing_JUNCTIONS","30-40%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(5);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS","40-50%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_5_mini_beauty_balancing_JUNCTIONS","40-50%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(6);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS","50-60%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_6_mini_beauty_balancing_JUNCTIONS","50-60%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(7);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS","60-70%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_7_mini_beauty_balancing_JUNCTIONS","60-70%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(8);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS","70-80%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_8_mini_beauty_balancing_JUNCTIONS","70-80%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(9);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS","80-90%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_9_mini_beauty_balancing_JUNCTIONS","80-90%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(10);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS","90-100%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_1_0_10_mini_beauty_balancing_JUNCTIONS","90-100%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
@@ -2067,7 +2925,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH__224->SetBinContent(1,0.1210016);
    hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH__224->SetBinError(1,0.0008776974);
    hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH__224->SetEntries(1);
-   hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH__224->SetLineColor(2);
+   hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH__224->SetLineWidth(2);
+   hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH__224->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH__224->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH__224->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH__224->GetXaxis()->SetTitleFont(42);
@@ -2082,8 +2941,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH__225->SetBinContent(1,0.1152791);
    hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH__225->SetBinError(1,0.0003622607);
    hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH__225->SetEntries(1);
-   hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH__225->SetLineColor(2);
    hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH__225->SetLineStyle(2);
+   hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH__225->SetLineWidth(2);
+   hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH__225->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH__225->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH__225->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH__225->GetXaxis()->SetTitleFont(42);
@@ -2098,8 +2958,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH__226->SetBinContent(1,0.1130191);
    hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH__226->SetBinError(1,0.0004529631);
    hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH__226->SetEntries(1);
-   hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH__226->SetLineColor(2);
    hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH__226->SetLineStyle(3);
+   hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH__226->SetLineWidth(2);
+   hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH__226->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH__226->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH__226->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH__226->GetXaxis()->SetTitleFont(42);
@@ -2114,8 +2975,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH__227->SetBinContent(1,0.1112031);
    hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH__227->SetBinError(1,0.0004002487);
    hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH__227->SetEntries(1);
-   hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH__227->SetLineColor(2);
    hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH__227->SetLineStyle(4);
+   hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH__227->SetLineWidth(2);
+   hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH__227->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH__227->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH__227->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH__227->GetXaxis()->SetTitleFont(42);
@@ -2130,8 +2992,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH__228->SetBinContent(1,0.1113163);
    hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH__228->SetBinError(1,0.000393679);
    hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH__228->SetEntries(1);
-   hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH__228->SetLineColor(2);
    hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH__228->SetLineStyle(5);
+   hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH__228->SetLineWidth(2);
+   hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH__228->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH__228->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH__228->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH__228->GetXaxis()->SetTitleFont(42);
@@ -2146,8 +3009,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH__229->SetBinContent(1,0.1110559);
    hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH__229->SetBinError(1,0.0007457405);
    hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH__229->SetEntries(1);
-   hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH__229->SetLineColor(2);
    hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH__229->SetLineStyle(6);
+   hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH__229->SetLineWidth(2);
+   hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH__229->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH__229->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH__229->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH__229->GetXaxis()->SetTitleFont(42);
@@ -2162,8 +3026,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH__230->SetBinContent(1,0.1110559);
    hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH__230->SetBinError(1,0.0007457405);
    hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH__230->SetEntries(1);
-   hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH__230->SetLineColor(2);
    hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH__230->SetLineStyle(7);
+   hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH__230->SetLineWidth(2);
+   hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH__230->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH__230->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH__230->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH__230->GetXaxis()->SetTitleFont(42);
@@ -2178,8 +3043,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH__231->SetBinContent(1,0.1089957);
    hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH__231->SetBinError(1,0.001000551);
    hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH__231->SetEntries(1);
-   hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH__231->SetLineColor(2);
    hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH__231->SetLineStyle(8);
+   hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH__231->SetLineWidth(2);
+   hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH__231->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH__231->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH__231->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH__231->GetXaxis()->SetTitleFont(42);
@@ -2194,8 +3060,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH__232->SetBinContent(1,0.1089957);
    hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH__232->SetBinError(1,0.001000551);
    hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH__232->SetEntries(1);
-   hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH__232->SetLineColor(2);
    hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH__232->SetLineStyle(9);
+   hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH__232->SetLineWidth(2);
+   hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH__232->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH__232->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH__232->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH__232->GetXaxis()->SetTitleFont(42);
@@ -2210,8 +3077,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH__233->SetBinContent(1,0.1089957);
    hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH__233->SetBinError(1,0.001000551);
    hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH__233->SetEntries(1);
-   hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH__233->SetLineColor(2);
    hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH__233->SetLineStyle(10);
+   hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH__233->SetLineWidth(2);
+   hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH__233->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH__233->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH__233->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH__233->GetXaxis()->SetTitleFont(42);
@@ -2226,7 +3094,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH__234->SetBinContent(1,0.103358);
    hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH__234->SetBinError(1,0.002310613);
    hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH__234->SetEntries(1);
-   hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH__234->SetLineColor(2);
+   hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH__234->SetLineWidth(2);
+   hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH__234->SetMarkerStyle(20);
    hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH__234->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH__234->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH__234->GetXaxis()->SetTitleFont(42);
@@ -2241,7 +3110,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_0_mini_beauty_balancing_MONASH__235->SetBinContent(2,0.0002769943);
    hYields_BEAUTY_0_1_0_mini_beauty_balancing_MONASH__235->SetBinError(2,2.619004e-05);
    hYields_BEAUTY_0_1_0_mini_beauty_balancing_MONASH__235->SetEntries(1);
-   hYields_BEAUTY_0_1_0_mini_beauty_balancing_MONASH__235->SetLineColor(2);
+   hYields_BEAUTY_0_1_0_mini_beauty_balancing_MONASH__235->SetLineWidth(2);
+   hYields_BEAUTY_0_1_0_mini_beauty_balancing_MONASH__235->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_0_mini_beauty_balancing_MONASH__235->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_0_mini_beauty_balancing_MONASH__235->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_0_mini_beauty_balancing_MONASH__235->GetXaxis()->SetTitleFont(42);
@@ -2256,8 +3126,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_1_mini_beauty_balancing_MONASH__236->SetBinContent(2,0.0003214005);
    hYields_BEAUTY_0_1_1_mini_beauty_balancing_MONASH__236->SetBinError(2,1.385636e-05);
    hYields_BEAUTY_0_1_1_mini_beauty_balancing_MONASH__236->SetEntries(1);
-   hYields_BEAUTY_0_1_1_mini_beauty_balancing_MONASH__236->SetLineColor(2);
    hYields_BEAUTY_0_1_1_mini_beauty_balancing_MONASH__236->SetLineStyle(2);
+   hYields_BEAUTY_0_1_1_mini_beauty_balancing_MONASH__236->SetLineWidth(2);
+   hYields_BEAUTY_0_1_1_mini_beauty_balancing_MONASH__236->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_1_mini_beauty_balancing_MONASH__236->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_1_mini_beauty_balancing_MONASH__236->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_1_mini_beauty_balancing_MONASH__236->GetXaxis()->SetTitleFont(42);
@@ -2272,8 +3143,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_2_mini_beauty_balancing_MONASH__237->SetBinContent(2,0.0002405845);
    hYields_BEAUTY_0_1_2_mini_beauty_balancing_MONASH__237->SetBinError(2,2.341716e-05);
    hYields_BEAUTY_0_1_2_mini_beauty_balancing_MONASH__237->SetEntries(1);
-   hYields_BEAUTY_0_1_2_mini_beauty_balancing_MONASH__237->SetLineColor(2);
    hYields_BEAUTY_0_1_2_mini_beauty_balancing_MONASH__237->SetLineStyle(3);
+   hYields_BEAUTY_0_1_2_mini_beauty_balancing_MONASH__237->SetLineWidth(2);
+   hYields_BEAUTY_0_1_2_mini_beauty_balancing_MONASH__237->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_2_mini_beauty_balancing_MONASH__237->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_2_mini_beauty_balancing_MONASH__237->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_2_mini_beauty_balancing_MONASH__237->GetXaxis()->SetTitleFont(42);
@@ -2288,8 +3160,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_3_mini_beauty_balancing_MONASH__238->SetBinContent(2,0.0002196243);
    hYields_BEAUTY_0_1_3_mini_beauty_balancing_MONASH__238->SetBinError(2,2.794182e-05);
    hYields_BEAUTY_0_1_3_mini_beauty_balancing_MONASH__238->SetEntries(1);
-   hYields_BEAUTY_0_1_3_mini_beauty_balancing_MONASH__238->SetLineColor(2);
    hYields_BEAUTY_0_1_3_mini_beauty_balancing_MONASH__238->SetLineStyle(4);
+   hYields_BEAUTY_0_1_3_mini_beauty_balancing_MONASH__238->SetLineWidth(2);
+   hYields_BEAUTY_0_1_3_mini_beauty_balancing_MONASH__238->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_3_mini_beauty_balancing_MONASH__238->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_3_mini_beauty_balancing_MONASH__238->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_3_mini_beauty_balancing_MONASH__238->GetXaxis()->SetTitleFont(42);
@@ -2304,8 +3177,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_4_mini_beauty_balancing_MONASH__239->SetBinContent(2,0.0002370392);
    hYields_BEAUTY_0_1_4_mini_beauty_balancing_MONASH__239->SetBinError(2,3.85415e-05);
    hYields_BEAUTY_0_1_4_mini_beauty_balancing_MONASH__239->SetEntries(1);
-   hYields_BEAUTY_0_1_4_mini_beauty_balancing_MONASH__239->SetLineColor(2);
    hYields_BEAUTY_0_1_4_mini_beauty_balancing_MONASH__239->SetLineStyle(5);
+   hYields_BEAUTY_0_1_4_mini_beauty_balancing_MONASH__239->SetLineWidth(2);
+   hYields_BEAUTY_0_1_4_mini_beauty_balancing_MONASH__239->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_4_mini_beauty_balancing_MONASH__239->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_4_mini_beauty_balancing_MONASH__239->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_4_mini_beauty_balancing_MONASH__239->GetXaxis()->SetTitleFont(42);
@@ -2320,8 +3194,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_5_mini_beauty_balancing_MONASH__240->SetBinContent(2,0.0001134712);
    hYields_BEAUTY_0_1_5_mini_beauty_balancing_MONASH__240->SetBinError(2,1.499182e-05);
    hYields_BEAUTY_0_1_5_mini_beauty_balancing_MONASH__240->SetEntries(1);
-   hYields_BEAUTY_0_1_5_mini_beauty_balancing_MONASH__240->SetLineColor(2);
    hYields_BEAUTY_0_1_5_mini_beauty_balancing_MONASH__240->SetLineStyle(6);
+   hYields_BEAUTY_0_1_5_mini_beauty_balancing_MONASH__240->SetLineWidth(2);
+   hYields_BEAUTY_0_1_5_mini_beauty_balancing_MONASH__240->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_5_mini_beauty_balancing_MONASH__240->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_5_mini_beauty_balancing_MONASH__240->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_5_mini_beauty_balancing_MONASH__240->GetXaxis()->SetTitleFont(42);
@@ -2336,8 +3211,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_6_mini_beauty_balancing_MONASH__241->SetBinContent(2,0.0001134712);
    hYields_BEAUTY_0_1_6_mini_beauty_balancing_MONASH__241->SetBinError(2,1.499182e-05);
    hYields_BEAUTY_0_1_6_mini_beauty_balancing_MONASH__241->SetEntries(1);
-   hYields_BEAUTY_0_1_6_mini_beauty_balancing_MONASH__241->SetLineColor(2);
    hYields_BEAUTY_0_1_6_mini_beauty_balancing_MONASH__241->SetLineStyle(7);
+   hYields_BEAUTY_0_1_6_mini_beauty_balancing_MONASH__241->SetLineWidth(2);
+   hYields_BEAUTY_0_1_6_mini_beauty_balancing_MONASH__241->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_6_mini_beauty_balancing_MONASH__241->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_6_mini_beauty_balancing_MONASH__241->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_6_mini_beauty_balancing_MONASH__241->GetXaxis()->SetTitleFont(42);
@@ -2352,8 +3228,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_7_mini_beauty_balancing_MONASH__242->SetBinContent(2,9.430267e-05);
    hYields_BEAUTY_0_1_7_mini_beauty_balancing_MONASH__242->SetBinError(2,2.417784e-05);
    hYields_BEAUTY_0_1_7_mini_beauty_balancing_MONASH__242->SetEntries(1);
-   hYields_BEAUTY_0_1_7_mini_beauty_balancing_MONASH__242->SetLineColor(2);
    hYields_BEAUTY_0_1_7_mini_beauty_balancing_MONASH__242->SetLineStyle(8);
+   hYields_BEAUTY_0_1_7_mini_beauty_balancing_MONASH__242->SetLineWidth(2);
+   hYields_BEAUTY_0_1_7_mini_beauty_balancing_MONASH__242->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_7_mini_beauty_balancing_MONASH__242->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_7_mini_beauty_balancing_MONASH__242->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_7_mini_beauty_balancing_MONASH__242->GetXaxis()->SetTitleFont(42);
@@ -2368,8 +3245,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_8_mini_beauty_balancing_MONASH__243->SetBinContent(2,9.430267e-05);
    hYields_BEAUTY_0_1_8_mini_beauty_balancing_MONASH__243->SetBinError(2,2.417784e-05);
    hYields_BEAUTY_0_1_8_mini_beauty_balancing_MONASH__243->SetEntries(1);
-   hYields_BEAUTY_0_1_8_mini_beauty_balancing_MONASH__243->SetLineColor(2);
    hYields_BEAUTY_0_1_8_mini_beauty_balancing_MONASH__243->SetLineStyle(9);
+   hYields_BEAUTY_0_1_8_mini_beauty_balancing_MONASH__243->SetLineWidth(2);
+   hYields_BEAUTY_0_1_8_mini_beauty_balancing_MONASH__243->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_8_mini_beauty_balancing_MONASH__243->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_8_mini_beauty_balancing_MONASH__243->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_8_mini_beauty_balancing_MONASH__243->GetXaxis()->SetTitleFont(42);
@@ -2384,8 +3262,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_9_mini_beauty_balancing_MONASH__244->SetBinContent(2,9.430267e-05);
    hYields_BEAUTY_0_1_9_mini_beauty_balancing_MONASH__244->SetBinError(2,2.417784e-05);
    hYields_BEAUTY_0_1_9_mini_beauty_balancing_MONASH__244->SetEntries(1);
-   hYields_BEAUTY_0_1_9_mini_beauty_balancing_MONASH__244->SetLineColor(2);
    hYields_BEAUTY_0_1_9_mini_beauty_balancing_MONASH__244->SetLineStyle(10);
+   hYields_BEAUTY_0_1_9_mini_beauty_balancing_MONASH__244->SetLineWidth(2);
+   hYields_BEAUTY_0_1_9_mini_beauty_balancing_MONASH__244->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_9_mini_beauty_balancing_MONASH__244->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_9_mini_beauty_balancing_MONASH__244->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_9_mini_beauty_balancing_MONASH__244->GetXaxis()->SetTitleFont(42);
@@ -2400,7 +3279,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_10_mini_beauty_balancing_MONASH__245->SetBinContent(2,0.0001298196);
    hYields_BEAUTY_0_1_10_mini_beauty_balancing_MONASH__245->SetBinError(2,6.647711e-05);
    hYields_BEAUTY_0_1_10_mini_beauty_balancing_MONASH__245->SetEntries(1);
-   hYields_BEAUTY_0_1_10_mini_beauty_balancing_MONASH__245->SetLineColor(2);
+   hYields_BEAUTY_0_1_10_mini_beauty_balancing_MONASH__245->SetLineWidth(2);
+   hYields_BEAUTY_0_1_10_mini_beauty_balancing_MONASH__245->SetMarkerStyle(20);
    hYields_BEAUTY_0_1_10_mini_beauty_balancing_MONASH__245->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_10_mini_beauty_balancing_MONASH__245->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_10_mini_beauty_balancing_MONASH__245->GetXaxis()->SetTitleFont(42);
@@ -2415,7 +3295,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_0_mini_beauty_balancing_MONASH__246->SetBinContent(3,0.02625593);
    hYields_BEAUTY_0_2_0_mini_beauty_balancing_MONASH__246->SetBinError(3,0.0002647591);
    hYields_BEAUTY_0_2_0_mini_beauty_balancing_MONASH__246->SetEntries(1);
-   hYields_BEAUTY_0_2_0_mini_beauty_balancing_MONASH__246->SetLineColor(2);
+   hYields_BEAUTY_0_2_0_mini_beauty_balancing_MONASH__246->SetLineWidth(2);
+   hYields_BEAUTY_0_2_0_mini_beauty_balancing_MONASH__246->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_0_mini_beauty_balancing_MONASH__246->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_0_mini_beauty_balancing_MONASH__246->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_0_mini_beauty_balancing_MONASH__246->GetXaxis()->SetTitleFont(42);
@@ -2430,8 +3311,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_1_mini_beauty_balancing_MONASH__247->SetBinContent(3,0.02569882);
    hYields_BEAUTY_0_2_1_mini_beauty_balancing_MONASH__247->SetBinError(3,9.338871e-05);
    hYields_BEAUTY_0_2_1_mini_beauty_balancing_MONASH__247->SetEntries(1);
-   hYields_BEAUTY_0_2_1_mini_beauty_balancing_MONASH__247->SetLineColor(2);
    hYields_BEAUTY_0_2_1_mini_beauty_balancing_MONASH__247->SetLineStyle(2);
+   hYields_BEAUTY_0_2_1_mini_beauty_balancing_MONASH__247->SetLineWidth(2);
+   hYields_BEAUTY_0_2_1_mini_beauty_balancing_MONASH__247->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_1_mini_beauty_balancing_MONASH__247->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_1_mini_beauty_balancing_MONASH__247->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_1_mini_beauty_balancing_MONASH__247->GetXaxis()->SetTitleFont(42);
@@ -2446,8 +3328,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_2_mini_beauty_balancing_MONASH__248->SetBinContent(3,0.02520724);
    hYields_BEAUTY_0_2_2_mini_beauty_balancing_MONASH__248->SetBinError(3,0.0002478301);
    hYields_BEAUTY_0_2_2_mini_beauty_balancing_MONASH__248->SetEntries(1);
-   hYields_BEAUTY_0_2_2_mini_beauty_balancing_MONASH__248->SetLineColor(2);
    hYields_BEAUTY_0_2_2_mini_beauty_balancing_MONASH__248->SetLineStyle(3);
+   hYields_BEAUTY_0_2_2_mini_beauty_balancing_MONASH__248->SetLineWidth(2);
+   hYields_BEAUTY_0_2_2_mini_beauty_balancing_MONASH__248->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_2_mini_beauty_balancing_MONASH__248->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_2_mini_beauty_balancing_MONASH__248->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_2_mini_beauty_balancing_MONASH__248->GetXaxis()->SetTitleFont(42);
@@ -2462,8 +3345,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_3_mini_beauty_balancing_MONASH__249->SetBinContent(3,0.02528709);
    hYields_BEAUTY_0_2_3_mini_beauty_balancing_MONASH__249->SetBinError(3,0.0001769648);
    hYields_BEAUTY_0_2_3_mini_beauty_balancing_MONASH__249->SetEntries(1);
-   hYields_BEAUTY_0_2_3_mini_beauty_balancing_MONASH__249->SetLineColor(2);
    hYields_BEAUTY_0_2_3_mini_beauty_balancing_MONASH__249->SetLineStyle(4);
+   hYields_BEAUTY_0_2_3_mini_beauty_balancing_MONASH__249->SetLineWidth(2);
+   hYields_BEAUTY_0_2_3_mini_beauty_balancing_MONASH__249->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_3_mini_beauty_balancing_MONASH__249->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_3_mini_beauty_balancing_MONASH__249->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_3_mini_beauty_balancing_MONASH__249->GetXaxis()->SetTitleFont(42);
@@ -2478,8 +3362,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_4_mini_beauty_balancing_MONASH__250->SetBinContent(3,0.02526838);
    hYields_BEAUTY_0_2_4_mini_beauty_balancing_MONASH__250->SetBinError(3,0.000256159);
    hYields_BEAUTY_0_2_4_mini_beauty_balancing_MONASH__250->SetEntries(1);
-   hYields_BEAUTY_0_2_4_mini_beauty_balancing_MONASH__250->SetLineColor(2);
    hYields_BEAUTY_0_2_4_mini_beauty_balancing_MONASH__250->SetLineStyle(5);
+   hYields_BEAUTY_0_2_4_mini_beauty_balancing_MONASH__250->SetLineWidth(2);
+   hYields_BEAUTY_0_2_4_mini_beauty_balancing_MONASH__250->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_4_mini_beauty_balancing_MONASH__250->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_4_mini_beauty_balancing_MONASH__250->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_4_mini_beauty_balancing_MONASH__250->GetXaxis()->SetTitleFont(42);
@@ -2494,8 +3379,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_5_mini_beauty_balancing_MONASH__251->SetBinContent(3,0.02494205);
    hYields_BEAUTY_0_2_5_mini_beauty_balancing_MONASH__251->SetBinError(3,0.0002130903);
    hYields_BEAUTY_0_2_5_mini_beauty_balancing_MONASH__251->SetEntries(1);
-   hYields_BEAUTY_0_2_5_mini_beauty_balancing_MONASH__251->SetLineColor(2);
    hYields_BEAUTY_0_2_5_mini_beauty_balancing_MONASH__251->SetLineStyle(6);
+   hYields_BEAUTY_0_2_5_mini_beauty_balancing_MONASH__251->SetLineWidth(2);
+   hYields_BEAUTY_0_2_5_mini_beauty_balancing_MONASH__251->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_5_mini_beauty_balancing_MONASH__251->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_5_mini_beauty_balancing_MONASH__251->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_5_mini_beauty_balancing_MONASH__251->GetXaxis()->SetTitleFont(42);
@@ -2510,8 +3396,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_6_mini_beauty_balancing_MONASH__252->SetBinContent(3,0.02494205);
    hYields_BEAUTY_0_2_6_mini_beauty_balancing_MONASH__252->SetBinError(3,0.0002130903);
    hYields_BEAUTY_0_2_6_mini_beauty_balancing_MONASH__252->SetEntries(1);
-   hYields_BEAUTY_0_2_6_mini_beauty_balancing_MONASH__252->SetLineColor(2);
    hYields_BEAUTY_0_2_6_mini_beauty_balancing_MONASH__252->SetLineStyle(7);
+   hYields_BEAUTY_0_2_6_mini_beauty_balancing_MONASH__252->SetLineWidth(2);
+   hYields_BEAUTY_0_2_6_mini_beauty_balancing_MONASH__252->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_6_mini_beauty_balancing_MONASH__252->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_6_mini_beauty_balancing_MONASH__252->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_6_mini_beauty_balancing_MONASH__252->GetXaxis()->SetTitleFont(42);
@@ -2526,8 +3413,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_7_mini_beauty_balancing_MONASH__253->SetBinContent(3,0.02427931);
    hYields_BEAUTY_0_2_7_mini_beauty_balancing_MONASH__253->SetBinError(3,0.0002278309);
    hYields_BEAUTY_0_2_7_mini_beauty_balancing_MONASH__253->SetEntries(1);
-   hYields_BEAUTY_0_2_7_mini_beauty_balancing_MONASH__253->SetLineColor(2);
    hYields_BEAUTY_0_2_7_mini_beauty_balancing_MONASH__253->SetLineStyle(8);
+   hYields_BEAUTY_0_2_7_mini_beauty_balancing_MONASH__253->SetLineWidth(2);
+   hYields_BEAUTY_0_2_7_mini_beauty_balancing_MONASH__253->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_7_mini_beauty_balancing_MONASH__253->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_7_mini_beauty_balancing_MONASH__253->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_7_mini_beauty_balancing_MONASH__253->GetXaxis()->SetTitleFont(42);
@@ -2542,8 +3430,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_8_mini_beauty_balancing_MONASH__254->SetBinContent(3,0.02427931);
    hYields_BEAUTY_0_2_8_mini_beauty_balancing_MONASH__254->SetBinError(3,0.0002278309);
    hYields_BEAUTY_0_2_8_mini_beauty_balancing_MONASH__254->SetEntries(1);
-   hYields_BEAUTY_0_2_8_mini_beauty_balancing_MONASH__254->SetLineColor(2);
    hYields_BEAUTY_0_2_8_mini_beauty_balancing_MONASH__254->SetLineStyle(9);
+   hYields_BEAUTY_0_2_8_mini_beauty_balancing_MONASH__254->SetLineWidth(2);
+   hYields_BEAUTY_0_2_8_mini_beauty_balancing_MONASH__254->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_8_mini_beauty_balancing_MONASH__254->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_8_mini_beauty_balancing_MONASH__254->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_8_mini_beauty_balancing_MONASH__254->GetXaxis()->SetTitleFont(42);
@@ -2558,8 +3447,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_9_mini_beauty_balancing_MONASH__255->SetBinContent(3,0.02427931);
    hYields_BEAUTY_0_2_9_mini_beauty_balancing_MONASH__255->SetBinError(3,0.0002278309);
    hYields_BEAUTY_0_2_9_mini_beauty_balancing_MONASH__255->SetEntries(1);
-   hYields_BEAUTY_0_2_9_mini_beauty_balancing_MONASH__255->SetLineColor(2);
    hYields_BEAUTY_0_2_9_mini_beauty_balancing_MONASH__255->SetLineStyle(10);
+   hYields_BEAUTY_0_2_9_mini_beauty_balancing_MONASH__255->SetLineWidth(2);
+   hYields_BEAUTY_0_2_9_mini_beauty_balancing_MONASH__255->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_9_mini_beauty_balancing_MONASH__255->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_9_mini_beauty_balancing_MONASH__255->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_9_mini_beauty_balancing_MONASH__255->GetXaxis()->SetTitleFont(42);
@@ -2574,7 +3464,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_10_mini_beauty_balancing_MONASH__256->SetBinContent(3,0.02315115);
    hYields_BEAUTY_0_2_10_mini_beauty_balancing_MONASH__256->SetBinError(3,0.00084365);
    hYields_BEAUTY_0_2_10_mini_beauty_balancing_MONASH__256->SetEntries(1);
-   hYields_BEAUTY_0_2_10_mini_beauty_balancing_MONASH__256->SetLineColor(2);
+   hYields_BEAUTY_0_2_10_mini_beauty_balancing_MONASH__256->SetLineWidth(2);
+   hYields_BEAUTY_0_2_10_mini_beauty_balancing_MONASH__256->SetMarkerStyle(20);
    hYields_BEAUTY_0_2_10_mini_beauty_balancing_MONASH__256->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_10_mini_beauty_balancing_MONASH__256->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_10_mini_beauty_balancing_MONASH__256->GetXaxis()->SetTitleFont(42);
@@ -2589,7 +3480,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_0_mini_beauty_balancing_MONASH__257->SetBinContent(4,0.1167316);
    hYields_BEAUTY_0_3_0_mini_beauty_balancing_MONASH__257->SetBinError(4,0.0006470829);
    hYields_BEAUTY_0_3_0_mini_beauty_balancing_MONASH__257->SetEntries(1);
-   hYields_BEAUTY_0_3_0_mini_beauty_balancing_MONASH__257->SetLineColor(2);
+   hYields_BEAUTY_0_3_0_mini_beauty_balancing_MONASH__257->SetLineWidth(2);
+   hYields_BEAUTY_0_3_0_mini_beauty_balancing_MONASH__257->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_0_mini_beauty_balancing_MONASH__257->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_0_mini_beauty_balancing_MONASH__257->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_0_mini_beauty_balancing_MONASH__257->GetXaxis()->SetTitleFont(42);
@@ -2604,8 +3496,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_1_mini_beauty_balancing_MONASH__258->SetBinContent(4,0.1133695);
    hYields_BEAUTY_0_3_1_mini_beauty_balancing_MONASH__258->SetBinError(4,0.0002569718);
    hYields_BEAUTY_0_3_1_mini_beauty_balancing_MONASH__258->SetEntries(1);
-   hYields_BEAUTY_0_3_1_mini_beauty_balancing_MONASH__258->SetLineColor(2);
    hYields_BEAUTY_0_3_1_mini_beauty_balancing_MONASH__258->SetLineStyle(2);
+   hYields_BEAUTY_0_3_1_mini_beauty_balancing_MONASH__258->SetLineWidth(2);
+   hYields_BEAUTY_0_3_1_mini_beauty_balancing_MONASH__258->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_1_mini_beauty_balancing_MONASH__258->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_1_mini_beauty_balancing_MONASH__258->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_1_mini_beauty_balancing_MONASH__258->GetXaxis()->SetTitleFont(42);
@@ -2620,8 +3513,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_2_mini_beauty_balancing_MONASH__259->SetBinContent(4,0.1121364);
    hYields_BEAUTY_0_3_2_mini_beauty_balancing_MONASH__259->SetBinError(4,0.0003449865);
    hYields_BEAUTY_0_3_2_mini_beauty_balancing_MONASH__259->SetEntries(1);
-   hYields_BEAUTY_0_3_2_mini_beauty_balancing_MONASH__259->SetLineColor(2);
    hYields_BEAUTY_0_3_2_mini_beauty_balancing_MONASH__259->SetLineStyle(3);
+   hYields_BEAUTY_0_3_2_mini_beauty_balancing_MONASH__259->SetLineWidth(2);
+   hYields_BEAUTY_0_3_2_mini_beauty_balancing_MONASH__259->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_2_mini_beauty_balancing_MONASH__259->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_2_mini_beauty_balancing_MONASH__259->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_2_mini_beauty_balancing_MONASH__259->GetXaxis()->SetTitleFont(42);
@@ -2636,8 +3530,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_3_mini_beauty_balancing_MONASH__260->SetBinContent(4,0.1115793);
    hYields_BEAUTY_0_3_3_mini_beauty_balancing_MONASH__260->SetBinError(4,0.0003841999);
    hYields_BEAUTY_0_3_3_mini_beauty_balancing_MONASH__260->SetEntries(1);
-   hYields_BEAUTY_0_3_3_mini_beauty_balancing_MONASH__260->SetLineColor(2);
    hYields_BEAUTY_0_3_3_mini_beauty_balancing_MONASH__260->SetLineStyle(4);
+   hYields_BEAUTY_0_3_3_mini_beauty_balancing_MONASH__260->SetLineWidth(2);
+   hYields_BEAUTY_0_3_3_mini_beauty_balancing_MONASH__260->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_3_mini_beauty_balancing_MONASH__260->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_3_mini_beauty_balancing_MONASH__260->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_3_mini_beauty_balancing_MONASH__260->GetXaxis()->SetTitleFont(42);
@@ -2652,8 +3547,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_4_mini_beauty_balancing_MONASH__261->SetBinContent(4,0.1109765);
    hYields_BEAUTY_0_3_4_mini_beauty_balancing_MONASH__261->SetBinError(4,0.0009608394);
    hYields_BEAUTY_0_3_4_mini_beauty_balancing_MONASH__261->SetEntries(1);
-   hYields_BEAUTY_0_3_4_mini_beauty_balancing_MONASH__261->SetLineColor(2);
    hYields_BEAUTY_0_3_4_mini_beauty_balancing_MONASH__261->SetLineStyle(5);
+   hYields_BEAUTY_0_3_4_mini_beauty_balancing_MONASH__261->SetLineWidth(2);
+   hYields_BEAUTY_0_3_4_mini_beauty_balancing_MONASH__261->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_4_mini_beauty_balancing_MONASH__261->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_4_mini_beauty_balancing_MONASH__261->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_4_mini_beauty_balancing_MONASH__261->GetXaxis()->SetTitleFont(42);
@@ -2668,8 +3564,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_5_mini_beauty_balancing_MONASH__262->SetBinContent(4,0.1109154);
    hYields_BEAUTY_0_3_5_mini_beauty_balancing_MONASH__262->SetBinError(4,0.0006114275);
    hYields_BEAUTY_0_3_5_mini_beauty_balancing_MONASH__262->SetEntries(1);
-   hYields_BEAUTY_0_3_5_mini_beauty_balancing_MONASH__262->SetLineColor(2);
    hYields_BEAUTY_0_3_5_mini_beauty_balancing_MONASH__262->SetLineStyle(6);
+   hYields_BEAUTY_0_3_5_mini_beauty_balancing_MONASH__262->SetLineWidth(2);
+   hYields_BEAUTY_0_3_5_mini_beauty_balancing_MONASH__262->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_5_mini_beauty_balancing_MONASH__262->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_5_mini_beauty_balancing_MONASH__262->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_5_mini_beauty_balancing_MONASH__262->GetXaxis()->SetTitleFont(42);
@@ -2684,8 +3581,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_6_mini_beauty_balancing_MONASH__263->SetBinContent(4,0.1109154);
    hYields_BEAUTY_0_3_6_mini_beauty_balancing_MONASH__263->SetBinError(4,0.0006114275);
    hYields_BEAUTY_0_3_6_mini_beauty_balancing_MONASH__263->SetEntries(1);
-   hYields_BEAUTY_0_3_6_mini_beauty_balancing_MONASH__263->SetLineColor(2);
    hYields_BEAUTY_0_3_6_mini_beauty_balancing_MONASH__263->SetLineStyle(7);
+   hYields_BEAUTY_0_3_6_mini_beauty_balancing_MONASH__263->SetLineWidth(2);
+   hYields_BEAUTY_0_3_6_mini_beauty_balancing_MONASH__263->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_6_mini_beauty_balancing_MONASH__263->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_6_mini_beauty_balancing_MONASH__263->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_6_mini_beauty_balancing_MONASH__263->GetXaxis()->SetTitleFont(42);
@@ -2700,8 +3598,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_7_mini_beauty_balancing_MONASH__264->SetBinContent(4,0.1101383);
    hYields_BEAUTY_0_3_7_mini_beauty_balancing_MONASH__264->SetBinError(4,0.0006172897);
    hYields_BEAUTY_0_3_7_mini_beauty_balancing_MONASH__264->SetEntries(1);
-   hYields_BEAUTY_0_3_7_mini_beauty_balancing_MONASH__264->SetLineColor(2);
    hYields_BEAUTY_0_3_7_mini_beauty_balancing_MONASH__264->SetLineStyle(8);
+   hYields_BEAUTY_0_3_7_mini_beauty_balancing_MONASH__264->SetLineWidth(2);
+   hYields_BEAUTY_0_3_7_mini_beauty_balancing_MONASH__264->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_7_mini_beauty_balancing_MONASH__264->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_7_mini_beauty_balancing_MONASH__264->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_7_mini_beauty_balancing_MONASH__264->GetXaxis()->SetTitleFont(42);
@@ -2716,8 +3615,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_8_mini_beauty_balancing_MONASH__265->SetBinContent(4,0.1101383);
    hYields_BEAUTY_0_3_8_mini_beauty_balancing_MONASH__265->SetBinError(4,0.0006172897);
    hYields_BEAUTY_0_3_8_mini_beauty_balancing_MONASH__265->SetEntries(1);
-   hYields_BEAUTY_0_3_8_mini_beauty_balancing_MONASH__265->SetLineColor(2);
    hYields_BEAUTY_0_3_8_mini_beauty_balancing_MONASH__265->SetLineStyle(9);
+   hYields_BEAUTY_0_3_8_mini_beauty_balancing_MONASH__265->SetLineWidth(2);
+   hYields_BEAUTY_0_3_8_mini_beauty_balancing_MONASH__265->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_8_mini_beauty_balancing_MONASH__265->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_8_mini_beauty_balancing_MONASH__265->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_8_mini_beauty_balancing_MONASH__265->GetXaxis()->SetTitleFont(42);
@@ -2732,8 +3632,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_9_mini_beauty_balancing_MONASH__266->SetBinContent(4,0.1101383);
    hYields_BEAUTY_0_3_9_mini_beauty_balancing_MONASH__266->SetBinError(4,0.0006172897);
    hYields_BEAUTY_0_3_9_mini_beauty_balancing_MONASH__266->SetEntries(1);
-   hYields_BEAUTY_0_3_9_mini_beauty_balancing_MONASH__266->SetLineColor(2);
    hYields_BEAUTY_0_3_9_mini_beauty_balancing_MONASH__266->SetLineStyle(10);
+   hYields_BEAUTY_0_3_9_mini_beauty_balancing_MONASH__266->SetLineWidth(2);
+   hYields_BEAUTY_0_3_9_mini_beauty_balancing_MONASH__266->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_9_mini_beauty_balancing_MONASH__266->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_9_mini_beauty_balancing_MONASH__266->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_9_mini_beauty_balancing_MONASH__266->GetXaxis()->SetTitleFont(42);
@@ -2748,7 +3649,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_10_mini_beauty_balancing_MONASH__267->SetBinContent(4,0.1062357);
    hYields_BEAUTY_0_3_10_mini_beauty_balancing_MONASH__267->SetBinError(4,0.002373641);
    hYields_BEAUTY_0_3_10_mini_beauty_balancing_MONASH__267->SetEntries(1);
-   hYields_BEAUTY_0_3_10_mini_beauty_balancing_MONASH__267->SetLineColor(2);
+   hYields_BEAUTY_0_3_10_mini_beauty_balancing_MONASH__267->SetLineWidth(2);
+   hYields_BEAUTY_0_3_10_mini_beauty_balancing_MONASH__267->SetMarkerStyle(20);
    hYields_BEAUTY_0_3_10_mini_beauty_balancing_MONASH__267->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_10_mini_beauty_balancing_MONASH__267->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_10_mini_beauty_balancing_MONASH__267->GetXaxis()->SetTitleFont(42);
@@ -2763,7 +3665,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_0_mini_beauty_balancing_MONASH__268->SetBinContent(5,0.01989677);
    hYields_BEAUTY_0_4_0_mini_beauty_balancing_MONASH__268->SetBinError(5,0.0005003761);
    hYields_BEAUTY_0_4_0_mini_beauty_balancing_MONASH__268->SetEntries(1);
-   hYields_BEAUTY_0_4_0_mini_beauty_balancing_MONASH__268->SetLineColor(2);
+   hYields_BEAUTY_0_4_0_mini_beauty_balancing_MONASH__268->SetLineWidth(2);
+   hYields_BEAUTY_0_4_0_mini_beauty_balancing_MONASH__268->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_0_mini_beauty_balancing_MONASH__268->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_0_mini_beauty_balancing_MONASH__268->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_0_mini_beauty_balancing_MONASH__268->GetXaxis()->SetTitleFont(42);
@@ -2778,8 +3681,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_1_mini_beauty_balancing_MONASH__269->SetBinContent(5,0.01922559);
    hYields_BEAUTY_0_4_1_mini_beauty_balancing_MONASH__269->SetBinError(5,0.0001316935);
    hYields_BEAUTY_0_4_1_mini_beauty_balancing_MONASH__269->SetEntries(1);
-   hYields_BEAUTY_0_4_1_mini_beauty_balancing_MONASH__269->SetLineColor(2);
    hYields_BEAUTY_0_4_1_mini_beauty_balancing_MONASH__269->SetLineStyle(2);
+   hYields_BEAUTY_0_4_1_mini_beauty_balancing_MONASH__269->SetLineWidth(2);
+   hYields_BEAUTY_0_4_1_mini_beauty_balancing_MONASH__269->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_1_mini_beauty_balancing_MONASH__269->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_1_mini_beauty_balancing_MONASH__269->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_1_mini_beauty_balancing_MONASH__269->GetXaxis()->SetTitleFont(42);
@@ -2794,8 +3698,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_2_mini_beauty_balancing_MONASH__270->SetBinContent(5,0.01876559);
    hYields_BEAUTY_0_4_2_mini_beauty_balancing_MONASH__270->SetBinError(5,0.0001750556);
    hYields_BEAUTY_0_4_2_mini_beauty_balancing_MONASH__270->SetEntries(1);
-   hYields_BEAUTY_0_4_2_mini_beauty_balancing_MONASH__270->SetLineColor(2);
    hYields_BEAUTY_0_4_2_mini_beauty_balancing_MONASH__270->SetLineStyle(3);
+   hYields_BEAUTY_0_4_2_mini_beauty_balancing_MONASH__270->SetLineWidth(2);
+   hYields_BEAUTY_0_4_2_mini_beauty_balancing_MONASH__270->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_2_mini_beauty_balancing_MONASH__270->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_2_mini_beauty_balancing_MONASH__270->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_2_mini_beauty_balancing_MONASH__270->GetXaxis()->SetTitleFont(42);
@@ -2810,8 +3715,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_3_mini_beauty_balancing_MONASH__271->SetBinContent(5,0.01866807);
    hYields_BEAUTY_0_4_3_mini_beauty_balancing_MONASH__271->SetBinError(5,0.0001899072);
    hYields_BEAUTY_0_4_3_mini_beauty_balancing_MONASH__271->SetEntries(1);
-   hYields_BEAUTY_0_4_3_mini_beauty_balancing_MONASH__271->SetLineColor(2);
    hYields_BEAUTY_0_4_3_mini_beauty_balancing_MONASH__271->SetLineStyle(4);
+   hYields_BEAUTY_0_4_3_mini_beauty_balancing_MONASH__271->SetLineWidth(2);
+   hYields_BEAUTY_0_4_3_mini_beauty_balancing_MONASH__271->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_3_mini_beauty_balancing_MONASH__271->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_3_mini_beauty_balancing_MONASH__271->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_3_mini_beauty_balancing_MONASH__271->GetXaxis()->SetTitleFont(42);
@@ -2826,8 +3732,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_4_mini_beauty_balancing_MONASH__272->SetBinContent(5,0.01862602);
    hYields_BEAUTY_0_4_4_mini_beauty_balancing_MONASH__272->SetBinError(5,0.0001710089);
    hYields_BEAUTY_0_4_4_mini_beauty_balancing_MONASH__272->SetEntries(1);
-   hYields_BEAUTY_0_4_4_mini_beauty_balancing_MONASH__272->SetLineColor(2);
    hYields_BEAUTY_0_4_4_mini_beauty_balancing_MONASH__272->SetLineStyle(5);
+   hYields_BEAUTY_0_4_4_mini_beauty_balancing_MONASH__272->SetLineWidth(2);
+   hYields_BEAUTY_0_4_4_mini_beauty_balancing_MONASH__272->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_4_mini_beauty_balancing_MONASH__272->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_4_mini_beauty_balancing_MONASH__272->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_4_mini_beauty_balancing_MONASH__272->GetXaxis()->SetTitleFont(42);
@@ -2842,8 +3749,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_5_mini_beauty_balancing_MONASH__273->SetBinContent(5,0.01911179);
    hYields_BEAUTY_0_4_5_mini_beauty_balancing_MONASH__273->SetBinError(5,0.0003595918);
    hYields_BEAUTY_0_4_5_mini_beauty_balancing_MONASH__273->SetEntries(1);
-   hYields_BEAUTY_0_4_5_mini_beauty_balancing_MONASH__273->SetLineColor(2);
    hYields_BEAUTY_0_4_5_mini_beauty_balancing_MONASH__273->SetLineStyle(6);
+   hYields_BEAUTY_0_4_5_mini_beauty_balancing_MONASH__273->SetLineWidth(2);
+   hYields_BEAUTY_0_4_5_mini_beauty_balancing_MONASH__273->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_5_mini_beauty_balancing_MONASH__273->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_5_mini_beauty_balancing_MONASH__273->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_5_mini_beauty_balancing_MONASH__273->GetXaxis()->SetTitleFont(42);
@@ -2858,8 +3766,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_6_mini_beauty_balancing_MONASH__274->SetBinContent(5,0.01911179);
    hYields_BEAUTY_0_4_6_mini_beauty_balancing_MONASH__274->SetBinError(5,0.0003595918);
    hYields_BEAUTY_0_4_6_mini_beauty_balancing_MONASH__274->SetEntries(1);
-   hYields_BEAUTY_0_4_6_mini_beauty_balancing_MONASH__274->SetLineColor(2);
    hYields_BEAUTY_0_4_6_mini_beauty_balancing_MONASH__274->SetLineStyle(7);
+   hYields_BEAUTY_0_4_6_mini_beauty_balancing_MONASH__274->SetLineWidth(2);
+   hYields_BEAUTY_0_4_6_mini_beauty_balancing_MONASH__274->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_6_mini_beauty_balancing_MONASH__274->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_6_mini_beauty_balancing_MONASH__274->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_6_mini_beauty_balancing_MONASH__274->GetXaxis()->SetTitleFont(42);
@@ -2874,8 +3783,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_7_mini_beauty_balancing_MONASH__275->SetBinContent(5,0.01848332);
    hYields_BEAUTY_0_4_7_mini_beauty_balancing_MONASH__275->SetBinError(5,0.0004719797);
    hYields_BEAUTY_0_4_7_mini_beauty_balancing_MONASH__275->SetEntries(1);
-   hYields_BEAUTY_0_4_7_mini_beauty_balancing_MONASH__275->SetLineColor(2);
    hYields_BEAUTY_0_4_7_mini_beauty_balancing_MONASH__275->SetLineStyle(8);
+   hYields_BEAUTY_0_4_7_mini_beauty_balancing_MONASH__275->SetLineWidth(2);
+   hYields_BEAUTY_0_4_7_mini_beauty_balancing_MONASH__275->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_7_mini_beauty_balancing_MONASH__275->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_7_mini_beauty_balancing_MONASH__275->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_7_mini_beauty_balancing_MONASH__275->GetXaxis()->SetTitleFont(42);
@@ -2890,8 +3800,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_8_mini_beauty_balancing_MONASH__276->SetBinContent(5,0.01848332);
    hYields_BEAUTY_0_4_8_mini_beauty_balancing_MONASH__276->SetBinError(5,0.0004719797);
    hYields_BEAUTY_0_4_8_mini_beauty_balancing_MONASH__276->SetEntries(1);
-   hYields_BEAUTY_0_4_8_mini_beauty_balancing_MONASH__276->SetLineColor(2);
    hYields_BEAUTY_0_4_8_mini_beauty_balancing_MONASH__276->SetLineStyle(9);
+   hYields_BEAUTY_0_4_8_mini_beauty_balancing_MONASH__276->SetLineWidth(2);
+   hYields_BEAUTY_0_4_8_mini_beauty_balancing_MONASH__276->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_8_mini_beauty_balancing_MONASH__276->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_8_mini_beauty_balancing_MONASH__276->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_8_mini_beauty_balancing_MONASH__276->GetXaxis()->SetTitleFont(42);
@@ -2906,8 +3817,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_9_mini_beauty_balancing_MONASH__277->SetBinContent(5,0.01848332);
    hYields_BEAUTY_0_4_9_mini_beauty_balancing_MONASH__277->SetBinError(5,0.0004719797);
    hYields_BEAUTY_0_4_9_mini_beauty_balancing_MONASH__277->SetEntries(1);
-   hYields_BEAUTY_0_4_9_mini_beauty_balancing_MONASH__277->SetLineColor(2);
    hYields_BEAUTY_0_4_9_mini_beauty_balancing_MONASH__277->SetLineStyle(10);
+   hYields_BEAUTY_0_4_9_mini_beauty_balancing_MONASH__277->SetLineWidth(2);
+   hYields_BEAUTY_0_4_9_mini_beauty_balancing_MONASH__277->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_9_mini_beauty_balancing_MONASH__277->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_9_mini_beauty_balancing_MONASH__277->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_9_mini_beauty_balancing_MONASH__277->GetXaxis()->SetTitleFont(42);
@@ -2922,7 +3834,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_10_mini_beauty_balancing_MONASH__278->SetBinContent(5,0.01834783);
    hYields_BEAUTY_0_4_10_mini_beauty_balancing_MONASH__278->SetBinError(5,0.0008111813);
    hYields_BEAUTY_0_4_10_mini_beauty_balancing_MONASH__278->SetEntries(1);
-   hYields_BEAUTY_0_4_10_mini_beauty_balancing_MONASH__278->SetLineColor(2);
+   hYields_BEAUTY_0_4_10_mini_beauty_balancing_MONASH__278->SetLineWidth(2);
+   hYields_BEAUTY_0_4_10_mini_beauty_balancing_MONASH__278->SetMarkerStyle(20);
    hYields_BEAUTY_0_4_10_mini_beauty_balancing_MONASH__278->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_10_mini_beauty_balancing_MONASH__278->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_10_mini_beauty_balancing_MONASH__278->GetXaxis()->SetTitleFont(42);
@@ -2940,92 +3853,92 @@ void global_balancing_plots_multiplicity_MACRO()
    leg->SetLineWidth(1);
    leg->SetFillColor(0);
    leg->SetFillStyle(1001);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH","0-1%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_0_mini_beauty_balancing_MONASH","0-1%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH","1-10%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_1_mini_beauty_balancing_MONASH","1-10%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(2);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH","10-20%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_2_mini_beauty_balancing_MONASH","10-20%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(3);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH","20-30%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_3_mini_beauty_balancing_MONASH","20-30%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(4);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH","30-40%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_4_mini_beauty_balancing_MONASH","30-40%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(5);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH","40-50%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_5_mini_beauty_balancing_MONASH","40-50%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(6);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH","50-60%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_6_mini_beauty_balancing_MONASH","50-60%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(7);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH","60-70%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_7_mini_beauty_balancing_MONASH","60-70%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(8);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH","70-80%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_8_mini_beauty_balancing_MONASH","70-80%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(9);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH","80-90%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_9_mini_beauty_balancing_MONASH","80-90%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(10);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH","90-100%","l");
-   entry->SetLineColor(2);
+   entry=leg->AddEntry("hYields_BEAUTY_0_0_10_mini_beauty_balancing_MONASH","90-100%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
    leg->Draw();
@@ -3077,6 +3990,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__280->SetBinContent(1,0.6563439);
    hYields_BEAUTY_0_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__280->SetBinError(1,0.008722741);
    hYields_BEAUTY_0_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__280->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__280->SetLineColor(ci);
+   hYields_BEAUTY_0_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__280->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__280->SetMarkerColor(ci);
+   hYields_BEAUTY_0_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__280->SetMarkerStyle(22);
    hYields_BEAUTY_0_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__280->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__280->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__280->GetXaxis()->SetTitleFont(42);
@@ -3091,7 +4012,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->SetBinContent(1,0.6767537);
    hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->SetBinError(1,0.002960514);
    hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->SetLineColor(ci);
    hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->SetLineStyle(2);
+   hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->SetMarkerColor(ci);
+   hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->SetMarkerStyle(22);
    hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__281->GetXaxis()->SetTitleFont(42);
@@ -3106,7 +4035,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->SetBinContent(1,0.7315516);
    hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->SetBinError(1,0.004880529);
    hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->SetLineColor(ci);
    hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->SetLineStyle(3);
+   hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->SetMarkerColor(ci);
+   hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->SetMarkerStyle(22);
    hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__282->GetXaxis()->SetTitleFont(42);
@@ -3121,7 +4058,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->SetBinContent(1,0.7702083);
    hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->SetBinError(1,0.004921023);
    hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->SetLineColor(ci);
    hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->SetLineStyle(4);
+   hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->SetMarkerColor(ci);
+   hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->SetMarkerStyle(22);
    hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__283->GetXaxis()->SetTitleFont(42);
@@ -3136,7 +4081,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->SetBinContent(1,0.8288053);
    hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->SetBinError(1,0.005444217);
    hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->SetLineColor(ci);
    hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->SetLineStyle(5);
+   hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->SetMarkerColor(ci);
+   hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->SetMarkerStyle(22);
    hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__284->GetXaxis()->SetTitleFont(42);
@@ -3151,7 +4104,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->SetBinContent(1,0.8575992);
    hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->SetBinError(1,0.007602093);
    hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->SetLineColor(ci);
    hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->SetLineStyle(6);
+   hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->SetMarkerColor(ci);
+   hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->SetMarkerStyle(22);
    hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__285->GetXaxis()->SetTitleFont(42);
@@ -3166,7 +4127,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->SetBinContent(1,0.885115);
    hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->SetBinError(1,0.009076955);
    hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->SetLineColor(ci);
    hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->SetLineStyle(7);
+   hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->SetMarkerColor(ci);
+   hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->SetMarkerStyle(22);
    hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__286->GetXaxis()->SetTitleFont(42);
@@ -3181,7 +4150,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->SetBinContent(1,0.9376555);
    hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->SetBinError(1,0.01064648);
    hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->SetLineColor(ci);
    hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->SetLineStyle(8);
+   hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->SetMarkerColor(ci);
+   hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->SetMarkerStyle(22);
    hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__287->GetXaxis()->SetTitleFont(42);
@@ -3196,7 +4173,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->SetBinContent(1,0.9376555);
    hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->SetBinError(1,0.01064648);
    hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->SetLineColor(ci);
    hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->SetLineStyle(9);
+   hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->SetMarkerColor(ci);
+   hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->SetMarkerStyle(22);
    hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__288->GetXaxis()->SetTitleFont(42);
@@ -3211,7 +4196,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->SetBinContent(1,0.9376555);
    hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->SetBinError(1,0.01064648);
    hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->SetLineColor(ci);
    hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->SetLineStyle(10);
+   hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->SetMarkerColor(ci);
+   hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->SetMarkerStyle(22);
    hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__289->GetXaxis()->SetTitleFont(42);
@@ -3226,6 +4219,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__290->SetBinContent(1,0.9911197);
    hYields_BEAUTY_0_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__290->SetBinError(1,0.03046079);
    hYields_BEAUTY_0_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__290->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__290->SetLineColor(ci);
+   hYields_BEAUTY_0_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__290->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_0_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__290->SetMarkerColor(ci);
+   hYields_BEAUTY_0_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__290->SetMarkerStyle(22);
    hYields_BEAUTY_0_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__290->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__290->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__290->GetXaxis()->SetTitleFont(42);
@@ -3240,6 +4241,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__291->SetBinContent(2,0.8127824);
    hYields_BEAUTY_1_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__291->SetBinError(2,0.1364941);
    hYields_BEAUTY_1_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__291->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__291->SetLineColor(ci);
+   hYields_BEAUTY_1_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__291->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__291->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__291->SetMarkerStyle(22);
    hYields_BEAUTY_1_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__291->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__291->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__291->GetXaxis()->SetTitleFont(42);
@@ -3254,7 +4263,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->SetBinContent(2,0.6122457);
    hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->SetBinError(2,0.05910327);
    hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->SetLineColor(ci);
    hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->SetLineStyle(2);
+   hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->SetMarkerStyle(22);
    hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__292->GetXaxis()->SetTitleFont(42);
@@ -3269,7 +4286,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->SetBinContent(2,0.5806352);
    hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->SetBinError(2,0.08571059);
    hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->SetLineColor(ci);
    hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->SetLineStyle(3);
+   hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->SetMarkerStyle(22);
    hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__293->GetXaxis()->SetTitleFont(42);
@@ -3284,7 +4309,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->SetBinContent(2,0.4325925);
    hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->SetBinError(2,0.0982793);
    hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->SetLineColor(ci);
    hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->SetLineStyle(4);
+   hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->SetMarkerStyle(22);
    hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__294->GetXaxis()->SetTitleFont(42);
@@ -3299,7 +4332,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->SetBinContent(2,0.2996967);
    hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->SetBinError(2,0.1105784);
    hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->SetLineColor(ci);
    hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->SetLineStyle(5);
+   hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->SetMarkerStyle(22);
    hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__295->GetXaxis()->SetTitleFont(42);
@@ -3314,7 +4355,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->SetBinContent(2,0.6337187);
    hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->SetBinError(2,0.1775115);
    hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->SetLineColor(ci);
    hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->SetLineStyle(6);
+   hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->SetMarkerColor(ci);
+   hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->SetMarkerStyle(22);
    hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__296->GetXaxis()->SetTitleFont(42);
@@ -3329,7 +4378,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->SetBinContent(2,0.6415662);
    hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->SetBinError(2,0.2295397);
    hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->SetLineColor(ci);
    hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->SetLineStyle(7);
+   hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->SetMarkerColor(ci);
+   hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->SetMarkerStyle(22);
    hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__297->GetXaxis()->SetTitleFont(42);
@@ -3344,7 +4401,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->SetBinContent(2,0.6900665);
    hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->SetBinError(2,0.3126167);
    hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->SetLineColor(ci);
    hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->SetLineStyle(8);
+   hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->SetMarkerColor(ci);
+   hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->SetMarkerStyle(22);
    hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__298->GetXaxis()->SetTitleFont(42);
@@ -3359,7 +4424,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->SetBinContent(2,0.6900665);
    hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->SetBinError(2,0.3126167);
    hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->SetLineColor(ci);
    hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->SetLineStyle(9);
+   hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->SetMarkerColor(ci);
+   hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->SetMarkerStyle(22);
    hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__299->GetXaxis()->SetTitleFont(42);
@@ -3374,7 +4447,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->SetBinContent(2,0.6900665);
    hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->SetBinError(2,0.3126167);
    hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->SetLineColor(ci);
    hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->SetLineStyle(10);
+   hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->SetMarkerColor(ci);
+   hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->SetMarkerStyle(22);
    hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__300->GetXaxis()->SetTitleFont(42);
@@ -3389,6 +4470,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__301->SetBinContent(2,0.6448183);
    hYields_BEAUTY_1_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__301->SetBinError(2,0.5396789);
    hYields_BEAUTY_1_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__301->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__301->SetLineColor(ci);
+   hYields_BEAUTY_1_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__301->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_1_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__301->SetMarkerColor(ci);
+   hYields_BEAUTY_1_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__301->SetMarkerStyle(22);
    hYields_BEAUTY_1_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__301->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__301->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__301->GetXaxis()->SetTitleFont(42);
@@ -3403,6 +4492,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__302->SetBinContent(3,0.6525622);
    hYields_BEAUTY_2_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__302->SetBinError(3,0.01383608);
    hYields_BEAUTY_2_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__302->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__302->SetLineColor(ci);
+   hYields_BEAUTY_2_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__302->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__302->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__302->SetMarkerStyle(22);
    hYields_BEAUTY_2_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__302->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__302->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__302->GetXaxis()->SetTitleFont(42);
@@ -3417,7 +4514,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->SetBinContent(3,0.698702);
    hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->SetBinError(3,0.007030582);
    hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->SetLineColor(ci);
    hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->SetLineStyle(2);
+   hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->SetMarkerStyle(22);
    hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__303->GetXaxis()->SetTitleFont(42);
@@ -3432,7 +4537,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->SetBinContent(3,0.7333845);
    hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->SetBinError(3,0.01082445);
    hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->SetLineColor(ci);
    hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->SetLineStyle(3);
+   hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->SetMarkerStyle(22);
    hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__304->GetXaxis()->SetTitleFont(42);
@@ -3447,7 +4560,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->SetBinContent(3,0.7674986);
    hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->SetBinError(3,0.01455219);
    hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->SetLineColor(ci);
    hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->SetLineStyle(4);
+   hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->SetMarkerStyle(22);
    hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__305->GetXaxis()->SetTitleFont(42);
@@ -3462,7 +4583,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->SetBinContent(3,0.7722954);
    hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->SetBinError(3,0.01281361);
    hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->SetLineColor(ci);
    hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->SetLineStyle(5);
+   hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->SetMarkerStyle(22);
    hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__306->GetXaxis()->SetTitleFont(42);
@@ -3477,7 +4606,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->SetBinContent(3,0.8431438);
    hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->SetBinError(3,0.01400846);
    hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->SetLineColor(ci);
    hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->SetLineStyle(6);
+   hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->SetMarkerColor(ci);
+   hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->SetMarkerStyle(22);
    hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__307->GetXaxis()->SetTitleFont(42);
@@ -3492,7 +4629,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->SetBinContent(3,0.9053922);
    hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->SetBinError(3,0.02353809);
    hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->SetLineColor(ci);
    hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->SetLineStyle(7);
+   hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->SetMarkerColor(ci);
+   hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->SetMarkerStyle(22);
    hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__308->GetXaxis()->SetTitleFont(42);
@@ -3507,7 +4652,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->SetBinContent(3,0.9411578);
    hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->SetBinError(3,0.01992085);
    hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->SetLineColor(ci);
    hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->SetLineStyle(8);
+   hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->SetMarkerColor(ci);
+   hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->SetMarkerStyle(22);
    hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__309->GetXaxis()->SetTitleFont(42);
@@ -3522,7 +4675,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->SetBinContent(3,0.9411578);
    hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->SetBinError(3,0.01992085);
    hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->SetLineColor(ci);
    hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->SetLineStyle(9);
+   hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->SetMarkerColor(ci);
+   hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->SetMarkerStyle(22);
    hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__310->GetXaxis()->SetTitleFont(42);
@@ -3537,7 +4698,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->SetBinContent(3,0.9411578);
    hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->SetBinError(3,0.01992085);
    hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->SetLineColor(ci);
    hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->SetLineStyle(10);
+   hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->SetMarkerColor(ci);
+   hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->SetMarkerStyle(22);
    hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__311->GetXaxis()->SetTitleFont(42);
@@ -3552,6 +4721,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__312->SetBinContent(3,1.054007);
    hYields_BEAUTY_2_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__312->SetBinError(3,0.0444685);
    hYields_BEAUTY_2_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__312->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__312->SetLineColor(ci);
+   hYields_BEAUTY_2_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__312->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_2_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__312->SetMarkerColor(ci);
+   hYields_BEAUTY_2_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__312->SetMarkerStyle(22);
    hYields_BEAUTY_2_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__312->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__312->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__312->GetXaxis()->SetTitleFont(42);
@@ -3566,6 +4743,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__313->SetBinContent(4,0.6725716);
    hYields_BEAUTY_3_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__313->SetBinError(4,0.005450457);
    hYields_BEAUTY_3_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__313->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__313->SetLineColor(ci);
+   hYields_BEAUTY_3_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__313->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__313->SetMarkerColor(ci);
+   hYields_BEAUTY_3_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__313->SetMarkerStyle(22);
    hYields_BEAUTY_3_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__313->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__313->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__313->GetXaxis()->SetTitleFont(42);
@@ -3580,7 +4765,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->SetBinContent(4,0.6680514);
    hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->SetBinError(4,0.002396815);
    hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->SetLineColor(ci);
    hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->SetLineStyle(2);
+   hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->SetMarkerColor(ci);
+   hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->SetMarkerStyle(22);
    hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__314->GetXaxis()->SetTitleFont(42);
@@ -3595,7 +4788,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->SetBinContent(4,0.7220639);
    hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->SetBinError(4,0.003706659);
    hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->SetLineColor(ci);
    hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->SetLineStyle(3);
+   hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->SetMarkerColor(ci);
+   hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->SetMarkerStyle(22);
    hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__315->GetXaxis()->SetTitleFont(42);
@@ -3610,7 +4811,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->SetBinContent(4,0.7612845);
    hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->SetBinError(4,0.005162404);
    hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->SetLineColor(ci);
    hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->SetLineStyle(4);
+   hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->SetMarkerColor(ci);
+   hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->SetMarkerStyle(22);
    hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__316->GetXaxis()->SetTitleFont(42);
@@ -3625,7 +4834,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->SetBinContent(4,0.8152113);
    hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->SetBinError(4,0.01009001);
    hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->SetLineColor(ci);
    hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->SetLineStyle(5);
+   hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->SetMarkerColor(ci);
+   hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->SetMarkerStyle(22);
    hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__317->GetXaxis()->SetTitleFont(42);
@@ -3640,7 +4857,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->SetBinContent(4,0.8469347);
    hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->SetBinError(4,0.005569917);
    hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->SetLineColor(ci);
    hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->SetLineStyle(6);
+   hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->SetMarkerColor(ci);
+   hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->SetMarkerStyle(22);
    hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__318->GetXaxis()->SetTitleFont(42);
@@ -3655,7 +4880,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->SetBinContent(4,0.8789835);
    hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->SetBinError(4,0.008861862);
    hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->SetLineColor(ci);
    hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->SetLineStyle(7);
+   hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->SetMarkerColor(ci);
+   hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->SetMarkerStyle(22);
    hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__319->GetXaxis()->SetTitleFont(42);
@@ -3670,7 +4903,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->SetBinContent(4,0.9178422);
    hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->SetBinError(4,0.01247369);
    hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->SetLineColor(ci);
    hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->SetLineStyle(8);
+   hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->SetMarkerColor(ci);
+   hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->SetMarkerStyle(22);
    hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__320->GetXaxis()->SetTitleFont(42);
@@ -3685,7 +4926,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->SetBinContent(4,0.9178422);
    hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->SetBinError(4,0.01247369);
    hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->SetLineColor(ci);
    hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->SetLineStyle(9);
+   hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->SetMarkerColor(ci);
+   hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->SetMarkerStyle(22);
    hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__321->GetXaxis()->SetTitleFont(42);
@@ -3700,7 +4949,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->SetBinContent(4,0.9178422);
    hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->SetBinError(4,0.01247369);
    hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->SetLineColor(ci);
    hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->SetLineStyle(10);
+   hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->SetMarkerColor(ci);
+   hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->SetMarkerStyle(22);
    hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__322->GetXaxis()->SetTitleFont(42);
@@ -3715,6 +4972,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__323->SetBinContent(4,0.9546201);
    hYields_BEAUTY_3_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__323->SetBinError(4,0.02732915);
    hYields_BEAUTY_3_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__323->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__323->SetLineColor(ci);
+   hYields_BEAUTY_3_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__323->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_3_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__323->SetMarkerColor(ci);
+   hYields_BEAUTY_3_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__323->SetMarkerStyle(22);
    hYields_BEAUTY_3_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__323->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__323->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__323->GetXaxis()->SetTitleFont(42);
@@ -3729,6 +4994,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__324->SetBinContent(5,2.082778);
    hYields_BEAUTY_4_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__324->SetBinError(5,0.05353597);
    hYields_BEAUTY_4_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__324->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__324->SetLineColor(ci);
+   hYields_BEAUTY_4_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__324->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__324->SetMarkerColor(ci);
+   hYields_BEAUTY_4_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__324->SetMarkerStyle(22);
    hYields_BEAUTY_4_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__324->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__324->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_0_mini_beauty_balancing_CLOSEPACKING_over_MONASH__324->GetXaxis()->SetTitleFont(42);
@@ -3743,7 +5016,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->SetBinContent(5,1.953883);
    hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->SetBinError(5,0.0181506);
    hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->SetLineColor(ci);
    hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->SetLineStyle(2);
+   hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->SetMarkerColor(ci);
+   hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->SetMarkerStyle(22);
    hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_1_mini_beauty_balancing_CLOSEPACKING_over_MONASH__325->GetXaxis()->SetTitleFont(42);
@@ -3758,7 +5039,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->SetBinContent(5,1.694493);
    hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->SetBinError(5,0.02622735);
    hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->SetLineColor(ci);
    hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->SetLineStyle(3);
+   hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->SetMarkerColor(ci);
+   hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->SetMarkerStyle(22);
    hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_2_mini_beauty_balancing_CLOSEPACKING_over_MONASH__326->GetXaxis()->SetTitleFont(42);
@@ -3773,7 +5062,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->SetBinContent(5,1.569618);
    hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->SetBinError(5,0.01957983);
    hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->SetLineColor(ci);
    hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->SetLineStyle(4);
+   hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->SetMarkerColor(ci);
+   hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->SetMarkerStyle(22);
    hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_3_mini_beauty_balancing_CLOSEPACKING_over_MONASH__327->GetXaxis()->SetTitleFont(42);
@@ -3788,7 +5085,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->SetBinContent(5,1.36351);
    hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->SetBinError(5,0.02059108);
    hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->SetLineColor(ci);
    hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->SetLineStyle(5);
+   hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->SetMarkerColor(ci);
+   hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->SetMarkerStyle(22);
    hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_4_mini_beauty_balancing_CLOSEPACKING_over_MONASH__328->GetXaxis()->SetTitleFont(42);
@@ -3803,7 +5108,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->SetBinContent(5,1.25236);
    hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->SetBinError(5,0.02819517);
    hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->SetLineColor(ci);
    hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->SetLineStyle(6);
+   hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->SetMarkerColor(ci);
+   hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->SetMarkerStyle(22);
    hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_5_mini_beauty_balancing_CLOSEPACKING_over_MONASH__329->GetXaxis()->SetTitleFont(42);
@@ -3818,7 +5131,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->SetBinContent(5,1.173974);
    hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->SetBinError(5,0.03099074);
    hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->SetLineColor(ci);
    hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->SetLineStyle(7);
+   hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->SetMarkerColor(ci);
+   hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->SetMarkerStyle(22);
    hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_6_mini_beauty_balancing_CLOSEPACKING_over_MONASH__330->GetXaxis()->SetTitleFont(42);
@@ -3833,7 +5154,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->SetBinContent(5,1.106018);
    hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->SetBinError(5,0.03169083);
    hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->SetLineColor(ci);
    hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->SetLineStyle(8);
+   hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->SetMarkerColor(ci);
+   hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->SetMarkerStyle(22);
    hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_7_mini_beauty_balancing_CLOSEPACKING_over_MONASH__331->GetXaxis()->SetTitleFont(42);
@@ -3848,7 +5177,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->SetBinContent(5,1.106018);
    hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->SetBinError(5,0.03169083);
    hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->SetLineColor(ci);
    hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->SetLineStyle(9);
+   hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->SetMarkerColor(ci);
+   hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->SetMarkerStyle(22);
    hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_8_mini_beauty_balancing_CLOSEPACKING_over_MONASH__332->GetXaxis()->SetTitleFont(42);
@@ -3863,7 +5200,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->SetBinContent(5,1.106018);
    hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->SetBinError(5,0.03169083);
    hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->SetLineColor(ci);
    hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->SetLineStyle(10);
+   hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->SetMarkerColor(ci);
+   hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->SetMarkerStyle(22);
    hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_9_mini_beauty_balancing_CLOSEPACKING_over_MONASH__333->GetXaxis()->SetTitleFont(42);
@@ -3878,6 +5223,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__334->SetBinContent(5,1.072163);
    hYields_BEAUTY_4_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__334->SetBinError(5,0.05438402);
    hYields_BEAUTY_4_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__334->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__334->SetLineColor(ci);
+   hYields_BEAUTY_4_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__334->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_BEAUTY_4_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__334->SetMarkerColor(ci);
+   hYields_BEAUTY_4_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__334->SetMarkerStyle(22);
    hYields_BEAUTY_4_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__334->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__334->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_10_mini_beauty_balancing_CLOSEPACKING_over_MONASH__334->GetXaxis()->SetTitleFont(42);
@@ -3935,6 +5288,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__336->SetBinContent(1,0.677913);
    hYields_BEAUTY_0_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__336->SetBinError(1,0.008899503);
    hYields_BEAUTY_0_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__336->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__336->SetLineColor(ci);
+   hYields_BEAUTY_0_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__336->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__336->SetMarkerColor(ci);
+   hYields_BEAUTY_0_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__336->SetMarkerStyle(21);
    hYields_BEAUTY_0_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__336->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__336->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__336->GetXaxis()->SetTitleFont(42);
@@ -3949,7 +5310,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->SetBinContent(1,0.6865664);
    hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->SetBinError(1,0.003375592);
    hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->SetLineColor(ci);
    hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->SetLineStyle(2);
+   hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->SetMarkerColor(ci);
+   hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->SetMarkerStyle(21);
    hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__337->GetXaxis()->SetTitleFont(42);
@@ -3964,7 +5333,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->SetBinContent(1,0.7414521);
    hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->SetBinError(1,0.004010504);
    hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->SetLineColor(ci);
    hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->SetLineStyle(3);
+   hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->SetMarkerColor(ci);
+   hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->SetMarkerStyle(21);
    hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__338->GetXaxis()->SetTitleFont(42);
@@ -3979,7 +5356,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->SetBinContent(1,0.8006462);
    hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->SetBinError(1,0.004232098);
    hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->SetLineColor(ci);
    hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->SetLineStyle(4);
+   hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->SetMarkerColor(ci);
+   hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->SetMarkerStyle(21);
    hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__339->GetXaxis()->SetTitleFont(42);
@@ -3994,7 +5379,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->SetBinContent(1,0.8243756);
    hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->SetBinError(1,0.003903791);
    hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->SetLineColor(ci);
    hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->SetLineStyle(5);
+   hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->SetMarkerColor(ci);
+   hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->SetMarkerStyle(21);
    hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__340->GetXaxis()->SetTitleFont(42);
@@ -4009,7 +5402,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->SetBinContent(1,0.8669953);
    hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->SetBinError(1,0.007337116);
    hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->SetLineColor(ci);
    hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->SetLineStyle(6);
+   hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->SetMarkerColor(ci);
+   hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->SetMarkerStyle(21);
    hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__341->GetXaxis()->SetTitleFont(42);
@@ -4024,7 +5425,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->SetBinContent(1,0.892877);
    hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->SetBinError(1,0.009439948);
    hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->SetLineColor(ci);
    hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->SetLineStyle(7);
+   hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->SetMarkerColor(ci);
+   hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->SetMarkerStyle(21);
    hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__342->GetXaxis()->SetTitleFont(42);
@@ -4039,7 +5448,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->SetBinContent(1,0.9170348);
    hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->SetBinError(1,0.01014922);
    hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->SetLineColor(ci);
    hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->SetLineStyle(8);
+   hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->SetMarkerColor(ci);
+   hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->SetMarkerStyle(21);
    hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__343->GetXaxis()->SetTitleFont(42);
@@ -4054,7 +5471,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->SetBinContent(1,0.9266865);
    hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->SetBinError(1,0.01035077);
    hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->SetLineColor(ci);
    hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->SetLineStyle(9);
+   hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->SetMarkerColor(ci);
+   hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->SetMarkerStyle(21);
    hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__344->GetXaxis()->SetTitleFont(42);
@@ -4069,7 +5494,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->SetBinContent(1,0.9266865);
    hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->SetBinError(1,0.01035077);
    hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->SetLineColor(ci);
    hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->SetLineStyle(10);
+   hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->SetMarkerColor(ci);
+   hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->SetMarkerStyle(21);
    hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__345->GetXaxis()->SetTitleFont(42);
@@ -4084,6 +5517,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_0_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__346->SetBinContent(1,0.9709629);
    hYields_BEAUTY_0_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__346->SetBinError(1,0.02715205);
    hYields_BEAUTY_0_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__346->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__346->SetLineColor(ci);
+   hYields_BEAUTY_0_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__346->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_0_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__346->SetMarkerColor(ci);
+   hYields_BEAUTY_0_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__346->SetMarkerStyle(21);
    hYields_BEAUTY_0_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__346->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_0_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__346->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_0_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__346->GetXaxis()->SetTitleFont(42);
@@ -4098,6 +5539,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__347->SetBinContent(2,1.161469);
    hYields_BEAUTY_1_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__347->SetBinError(2,0.2356282);
    hYields_BEAUTY_1_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__347->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__347->SetLineColor(ci);
+   hYields_BEAUTY_1_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__347->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__347->SetMarkerColor(ci);
+   hYields_BEAUTY_1_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__347->SetMarkerStyle(21);
    hYields_BEAUTY_1_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__347->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__347->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__347->GetXaxis()->SetTitleFont(42);
@@ -4112,7 +5561,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->SetBinContent(2,0.7116472);
    hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->SetBinError(2,0.05366496);
    hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->SetLineColor(ci);
    hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->SetLineStyle(2);
+   hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->SetMarkerColor(ci);
+   hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->SetMarkerStyle(21);
    hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__348->GetXaxis()->SetTitleFont(42);
@@ -4127,7 +5584,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->SetBinContent(2,0.5715769);
    hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->SetBinError(2,0.07574452);
    hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->SetLineColor(ci);
    hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->SetLineStyle(3);
+   hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->SetMarkerColor(ci);
+   hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->SetMarkerStyle(21);
    hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__349->GetXaxis()->SetTitleFont(42);
@@ -4142,7 +5607,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->SetBinContent(2,0.4212473);
    hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->SetBinError(2,0.09073931);
    hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->SetLineColor(ci);
    hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->SetLineStyle(4);
+   hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->SetMarkerColor(ci);
+   hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->SetMarkerStyle(21);
    hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__350->GetXaxis()->SetTitleFont(42);
@@ -4157,7 +5630,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->SetBinContent(2,0.330946);
    hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->SetBinError(2,0.09297224);
    hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->SetLineColor(ci);
    hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->SetLineStyle(5);
+   hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->SetMarkerColor(ci);
+   hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->SetMarkerStyle(21);
    hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__351->GetXaxis()->SetTitleFont(42);
@@ -4172,7 +5653,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->SetBinContent(2,0.8280802);
    hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->SetBinError(2,0.23354);
    hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->SetLineColor(ci);
    hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->SetLineStyle(6);
+   hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->SetMarkerColor(ci);
+   hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->SetMarkerStyle(21);
    hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__352->GetXaxis()->SetTitleFont(42);
@@ -4187,7 +5676,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->SetBinContent(2,0.9804617);
    hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->SetBinError(2,0.3735704);
    hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->SetLineColor(ci);
    hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->SetLineStyle(7);
+   hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->SetMarkerColor(ci);
+   hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->SetMarkerStyle(21);
    hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__353->GetXaxis()->SetTitleFont(42);
@@ -4202,7 +5699,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->SetBinContent(2,1.248825);
    hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->SetBinError(2,0.4763613);
    hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->SetLineColor(ci);
    hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->SetLineStyle(8);
+   hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->SetMarkerColor(ci);
+   hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->SetMarkerStyle(21);
    hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__354->GetXaxis()->SetTitleFont(42);
@@ -4217,7 +5722,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->SetBinContent(2,1.340375);
    hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->SetBinError(2,0.5010447);
    hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->SetLineColor(ci);
    hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->SetLineStyle(9);
+   hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->SetMarkerColor(ci);
+   hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->SetMarkerStyle(21);
    hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__355->GetXaxis()->SetTitleFont(42);
@@ -4232,7 +5745,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->SetBinContent(2,1.340375);
    hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->SetBinError(2,0.5010447);
    hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->SetLineColor(ci);
    hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->SetLineStyle(10);
+   hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->SetMarkerColor(ci);
+   hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->SetMarkerStyle(21);
    hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__356->GetXaxis()->SetTitleFont(42);
@@ -4245,6 +5766,14 @@ void global_balancing_plots_multiplicity_MACRO()
    
    TH1D *hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__357 = new TH1D("hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__357","hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH",5,0,5);
    hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__357->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__357->SetLineColor(ci);
+   hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__357->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__357->SetMarkerColor(ci);
+   hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__357->SetMarkerStyle(21);
    hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__357->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__357->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_1_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__357->GetXaxis()->SetTitleFont(42);
@@ -4259,6 +5788,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__358->SetBinContent(3,0.6098537);
    hYields_BEAUTY_2_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__358->SetBinError(3,0.01328998);
    hYields_BEAUTY_2_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__358->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__358->SetLineColor(ci);
+   hYields_BEAUTY_2_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__358->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__358->SetMarkerColor(ci);
+   hYields_BEAUTY_2_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__358->SetMarkerStyle(21);
    hYields_BEAUTY_2_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__358->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__358->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__358->GetXaxis()->SetTitleFont(42);
@@ -4273,7 +5810,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->SetBinContent(3,0.5990746);
    hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->SetBinError(3,0.005871761);
    hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->SetLineColor(ci);
    hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->SetLineStyle(2);
+   hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->SetMarkerColor(ci);
+   hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->SetMarkerStyle(21);
    hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__359->GetXaxis()->SetTitleFont(42);
@@ -4288,7 +5833,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->SetBinContent(3,0.6461399);
    hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->SetBinError(3,0.009193758);
    hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->SetLineColor(ci);
    hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->SetLineStyle(3);
+   hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->SetMarkerColor(ci);
+   hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->SetMarkerStyle(21);
    hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__360->GetXaxis()->SetTitleFont(42);
@@ -4303,7 +5856,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->SetBinContent(3,0.6698111);
    hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->SetBinError(3,0.01273156);
    hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->SetLineColor(ci);
    hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->SetLineStyle(4);
+   hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->SetMarkerColor(ci);
+   hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->SetMarkerStyle(21);
    hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__361->GetXaxis()->SetTitleFont(42);
@@ -4318,7 +5879,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->SetBinContent(3,0.7125703);
    hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->SetBinError(3,0.01272537);
    hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->SetLineColor(ci);
    hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->SetLineStyle(5);
+   hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->SetMarkerColor(ci);
+   hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->SetMarkerStyle(21);
    hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__362->GetXaxis()->SetTitleFont(42);
@@ -4333,7 +5902,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->SetBinContent(3,0.7757422);
    hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->SetBinError(3,0.01390812);
    hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->SetLineColor(ci);
    hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->SetLineStyle(6);
+   hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->SetMarkerColor(ci);
+   hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->SetMarkerStyle(21);
    hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__363->GetXaxis()->SetTitleFont(42);
@@ -4348,7 +5925,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->SetBinContent(3,0.7987491);
    hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->SetBinError(3,0.01502849);
    hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->SetLineColor(ci);
    hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->SetLineStyle(7);
+   hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->SetMarkerColor(ci);
+   hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->SetMarkerStyle(21);
    hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__364->GetXaxis()->SetTitleFont(42);
@@ -4363,7 +5948,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->SetBinContent(3,0.8641403);
    hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->SetBinError(3,0.01679267);
    hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->SetLineColor(ci);
    hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->SetLineStyle(8);
+   hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->SetMarkerColor(ci);
+   hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->SetMarkerStyle(21);
    hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__365->GetXaxis()->SetTitleFont(42);
@@ -4378,7 +5971,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->SetBinContent(3,0.9219167);
    hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->SetBinError(3,0.03524554);
    hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->SetLineColor(ci);
    hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->SetLineStyle(9);
+   hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->SetMarkerColor(ci);
+   hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->SetMarkerStyle(21);
    hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__366->GetXaxis()->SetTitleFont(42);
@@ -4393,7 +5994,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->SetBinContent(3,0.9219167);
    hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->SetBinError(3,0.03524554);
    hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->SetLineColor(ci);
    hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->SetLineStyle(10);
+   hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->SetMarkerColor(ci);
+   hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->SetMarkerStyle(21);
    hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__367->GetXaxis()->SetTitleFont(42);
@@ -4408,6 +6017,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_2_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__368->SetBinContent(3,0.918046);
    hYields_BEAUTY_2_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__368->SetBinError(3,0.04773465);
    hYields_BEAUTY_2_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__368->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__368->SetLineColor(ci);
+   hYields_BEAUTY_2_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__368->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_2_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__368->SetMarkerColor(ci);
+   hYields_BEAUTY_2_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__368->SetMarkerStyle(21);
    hYields_BEAUTY_2_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__368->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_2_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__368->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_2_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__368->GetXaxis()->SetTitleFont(42);
@@ -4422,6 +6039,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__369->SetBinContent(4,0.6658772);
    hYields_BEAUTY_3_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__369->SetBinError(4,0.006299597);
    hYields_BEAUTY_3_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__369->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__369->SetLineColor(ci);
+   hYields_BEAUTY_3_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__369->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__369->SetMarkerColor(ci);
+   hYields_BEAUTY_3_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__369->SetMarkerStyle(21);
    hYields_BEAUTY_3_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__369->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__369->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__369->GetXaxis()->SetTitleFont(42);
@@ -4436,7 +6061,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->SetBinContent(4,0.68364);
    hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->SetBinError(4,0.002372302);
    hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->SetLineColor(ci);
    hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->SetLineStyle(2);
+   hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->SetMarkerColor(ci);
+   hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->SetMarkerStyle(21);
    hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__370->GetXaxis()->SetTitleFont(42);
@@ -4451,7 +6084,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->SetBinContent(4,0.7395501);
    hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->SetBinError(4,0.003487852);
    hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->SetLineColor(ci);
    hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->SetLineStyle(3);
+   hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->SetMarkerColor(ci);
+   hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->SetMarkerStyle(21);
    hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__371->GetXaxis()->SetTitleFont(42);
@@ -4466,7 +6107,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->SetBinContent(4,0.7836443);
    hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->SetBinError(4,0.006853427);
    hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->SetLineColor(ci);
    hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->SetLineStyle(4);
+   hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->SetMarkerColor(ci);
+   hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->SetMarkerStyle(21);
    hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__372->GetXaxis()->SetTitleFont(42);
@@ -4481,7 +6130,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->SetBinContent(4,0.8237522);
    hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->SetBinError(4,0.00795521);
    hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->SetLineColor(ci);
    hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->SetLineStyle(5);
+   hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->SetMarkerColor(ci);
+   hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->SetMarkerStyle(21);
    hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__373->GetXaxis()->SetTitleFont(42);
@@ -4496,7 +6153,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->SetBinContent(4,0.8697878);
    hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->SetBinError(4,0.007222149);
    hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->SetLineColor(ci);
    hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->SetLineStyle(6);
+   hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->SetMarkerColor(ci);
+   hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->SetMarkerStyle(21);
    hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__374->GetXaxis()->SetTitleFont(42);
@@ -4511,7 +6176,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->SetBinContent(4,0.8938646);
    hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->SetBinError(4,0.008861182);
    hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->SetLineColor(ci);
    hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->SetLineStyle(7);
+   hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->SetMarkerColor(ci);
+   hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->SetMarkerStyle(21);
    hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__375->GetXaxis()->SetTitleFont(42);
@@ -4526,7 +6199,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->SetBinContent(4,0.9182969);
    hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->SetBinError(4,0.00757934);
    hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->SetLineColor(ci);
    hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->SetLineStyle(8);
+   hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->SetMarkerColor(ci);
+   hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->SetMarkerStyle(21);
    hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__376->GetXaxis()->SetTitleFont(42);
@@ -4541,7 +6222,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->SetBinContent(4,0.942322);
    hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->SetBinError(4,0.007815522);
    hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->SetLineColor(ci);
    hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->SetLineStyle(9);
+   hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->SetMarkerColor(ci);
+   hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->SetMarkerStyle(21);
    hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__377->GetXaxis()->SetTitleFont(42);
@@ -4556,7 +6245,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->SetBinContent(4,0.942322);
    hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->SetBinError(4,0.007815522);
    hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->SetLineColor(ci);
    hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->SetLineStyle(10);
+   hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->SetMarkerColor(ci);
+   hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->SetMarkerStyle(21);
    hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__378->GetXaxis()->SetTitleFont(42);
@@ -4571,6 +6268,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_3_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__379->SetBinContent(4,0.9763265);
    hYields_BEAUTY_3_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__379->SetBinError(4,0.03141469);
    hYields_BEAUTY_3_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__379->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__379->SetLineColor(ci);
+   hYields_BEAUTY_3_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__379->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_3_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__379->SetMarkerColor(ci);
+   hYields_BEAUTY_3_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__379->SetMarkerStyle(21);
    hYields_BEAUTY_3_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__379->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_3_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__379->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_3_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__379->GetXaxis()->SetTitleFont(42);
@@ -4585,6 +6290,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__380->SetBinContent(5,2.242503);
    hYields_BEAUTY_4_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__380->SetBinError(5,0.0690756);
    hYields_BEAUTY_4_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__380->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__380->SetLineColor(ci);
+   hYields_BEAUTY_4_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__380->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__380->SetMarkerColor(ci);
+   hYields_BEAUTY_4_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__380->SetMarkerStyle(21);
    hYields_BEAUTY_4_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__380->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__380->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_0_mini_beauty_balancing_JUNCTIONS_over_MONASH__380->GetXaxis()->SetTitleFont(42);
@@ -4599,7 +6312,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->SetBinContent(5,2.119919);
    hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->SetBinError(5,0.02003766);
    hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->SetLineColor(ci);
    hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->SetLineStyle(2);
+   hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->SetMarkerColor(ci);
+   hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->SetMarkerStyle(21);
    hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_1_mini_beauty_balancing_JUNCTIONS_over_MONASH__381->GetXaxis()->SetTitleFont(42);
@@ -4614,7 +6335,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->SetBinContent(5,1.875203);
    hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->SetBinError(5,0.02022099);
    hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->SetLineColor(ci);
    hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->SetLineStyle(3);
+   hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->SetMarkerColor(ci);
+   hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->SetMarkerStyle(21);
    hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_2_mini_beauty_balancing_JUNCTIONS_over_MONASH__382->GetXaxis()->SetTitleFont(42);
@@ -4629,7 +6358,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->SetBinContent(5,1.659066);
    hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->SetBinError(5,0.03293543);
    hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->SetLineColor(ci);
    hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->SetLineStyle(4);
+   hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->SetMarkerColor(ci);
+   hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->SetMarkerStyle(21);
    hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_3_mini_beauty_balancing_JUNCTIONS_over_MONASH__383->GetXaxis()->SetTitleFont(42);
@@ -4644,7 +6381,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->SetBinContent(5,1.546897);
    hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->SetBinError(5,0.02444849);
    hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->SetLineColor(ci);
    hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->SetLineStyle(5);
+   hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->SetMarkerColor(ci);
+   hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->SetMarkerStyle(21);
    hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_4_mini_beauty_balancing_JUNCTIONS_over_MONASH__384->GetXaxis()->SetTitleFont(42);
@@ -4659,7 +6404,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->SetBinContent(5,1.375598);
    hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->SetBinError(5,0.02950106);
    hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->SetLineColor(ci);
    hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->SetLineStyle(6);
+   hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->SetMarkerColor(ci);
+   hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->SetMarkerStyle(21);
    hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_5_mini_beauty_balancing_JUNCTIONS_over_MONASH__385->GetXaxis()->SetTitleFont(42);
@@ -4674,7 +6427,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->SetBinContent(5,1.279839);
    hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->SetBinError(5,0.03563053);
    hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->SetLineColor(ci);
    hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->SetLineStyle(7);
+   hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->SetMarkerColor(ci);
+   hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->SetMarkerStyle(21);
    hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_6_mini_beauty_balancing_JUNCTIONS_over_MONASH__386->GetXaxis()->SetTitleFont(42);
@@ -4689,7 +6450,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->SetBinContent(5,1.247844);
    hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->SetBinError(5,0.03664251);
    hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->SetLineColor(ci);
    hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->SetLineStyle(8);
+   hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->SetMarkerColor(ci);
+   hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->SetMarkerStyle(21);
    hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_7_mini_beauty_balancing_JUNCTIONS_over_MONASH__387->GetXaxis()->SetTitleFont(42);
@@ -4704,7 +6473,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->SetBinContent(5,1.147753);
    hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->SetBinError(5,0.04271013);
    hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->SetLineColor(ci);
    hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->SetLineStyle(9);
+   hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->SetMarkerColor(ci);
+   hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->SetMarkerStyle(21);
    hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_8_mini_beauty_balancing_JUNCTIONS_over_MONASH__388->GetXaxis()->SetTitleFont(42);
@@ -4719,7 +6496,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->SetBinContent(5,1.147753);
    hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->SetBinError(5,0.04271013);
    hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->SetLineColor(ci);
    hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->SetLineStyle(10);
+   hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->SetMarkerColor(ci);
+   hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->SetMarkerStyle(21);
    hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_9_mini_beauty_balancing_JUNCTIONS_over_MONASH__389->GetXaxis()->SetTitleFont(42);
@@ -4734,6 +6519,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_BEAUTY_4_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__390->SetBinContent(5,1.138938);
    hYields_BEAUTY_4_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__390->SetBinError(5,0.07983965);
    hYields_BEAUTY_4_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__390->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__390->SetLineColor(ci);
+   hYields_BEAUTY_4_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__390->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_BEAUTY_4_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__390->SetMarkerColor(ci);
+   hYields_BEAUTY_4_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__390->SetMarkerStyle(21);
    hYields_BEAUTY_4_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__390->GetXaxis()->SetLabelFont(42);
    hYields_BEAUTY_4_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__390->GetXaxis()->SetTitleOffset(1);
    hYields_BEAUTY_4_10_mini_beauty_balancing_JUNCTIONS_over_MONASH__390->GetXaxis()->SetTitleFont(42);
@@ -4786,7 +6579,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->SetBinContent(1,0.2018736);
    hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->SetBinError(1,0.001209584);
    hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->SetEntries(1);
-   hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->SetLineColor(ci);
+   hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->SetMarkerColor(ci);
+   hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->SetMarkerStyle(22);
    hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING__392->GetXaxis()->SetTitleFont(42);
@@ -4801,8 +6601,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->SetBinContent(1,0.1810672);
    hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->SetBinError(1,0.0003625407);
    hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->SetEntries(1);
-   hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->SetLineColor(ci);
    hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->SetLineStyle(2);
+   hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->SetMarkerColor(ci);
+   hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->SetMarkerStyle(22);
    hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING__393->GetXaxis()->SetTitleFont(42);
@@ -4817,8 +6624,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->SetBinContent(1,0.1610086);
    hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->SetBinError(1,0.0003542363);
    hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->SetEntries(1);
-   hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->SetLineColor(ci);
    hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->SetLineStyle(3);
+   hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->SetMarkerColor(ci);
+   hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->SetMarkerStyle(22);
    hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING__394->GetXaxis()->SetTitleFont(42);
@@ -4833,8 +6647,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->SetBinContent(1,0.1518786);
    hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->SetBinError(1,0.0002778575);
    hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->SetEntries(1);
-   hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->SetLineColor(ci);
    hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->SetLineStyle(4);
+   hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->SetMarkerColor(ci);
+   hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->SetMarkerStyle(22);
    hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING__395->GetXaxis()->SetTitleFont(42);
@@ -4849,8 +6670,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->SetBinContent(1,0.1425686);
    hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->SetBinError(1,0.0003363228);
    hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->SetEntries(1);
-   hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->SetLineColor(ci);
    hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->SetLineStyle(5);
+   hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->SetMarkerColor(ci);
+   hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->SetMarkerStyle(22);
    hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING__396->GetXaxis()->SetTitleFont(42);
@@ -4865,8 +6693,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->SetBinContent(1,0.1393238);
    hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->SetBinError(1,0.0002514405);
    hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->SetEntries(1);
-   hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->SetLineColor(ci);
    hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->SetLineStyle(6);
+   hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->SetMarkerColor(ci);
+   hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->SetMarkerStyle(22);
    hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING__397->GetXaxis()->SetTitleFont(42);
@@ -4881,8 +6716,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->SetBinContent(1,0.1371505);
    hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->SetBinError(1,0.0002998201);
    hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->SetEntries(1);
-   hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->SetLineColor(ci);
    hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->SetLineStyle(7);
+   hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->SetMarkerColor(ci);
+   hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->SetMarkerStyle(22);
    hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING__398->GetXaxis()->SetTitleFont(42);
@@ -4897,8 +6739,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->SetBinContent(1,0.1319467);
    hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->SetBinError(1,0.0001882852);
    hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->SetEntries(1);
-   hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->SetLineColor(ci);
    hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->SetLineStyle(8);
+   hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->SetMarkerColor(ci);
+   hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->SetMarkerStyle(22);
    hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING__399->GetXaxis()->SetTitleFont(42);
@@ -4913,8 +6762,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->SetBinContent(1,0.1319467);
    hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->SetBinError(1,0.0001882852);
    hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->SetEntries(1);
-   hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->SetLineColor(ci);
    hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->SetLineStyle(9);
+   hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->SetMarkerColor(ci);
+   hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->SetMarkerStyle(22);
    hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING__400->GetXaxis()->SetTitleFont(42);
@@ -4929,8 +6785,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->SetBinContent(1,0.1319467);
    hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->SetBinError(1,0.0001882852);
    hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->SetEntries(1);
-   hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->SetLineColor(ci);
    hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->SetLineStyle(10);
+   hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->SetMarkerColor(ci);
+   hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->SetMarkerStyle(22);
    hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING__401->GetXaxis()->SetTitleFont(42);
@@ -4945,7 +6808,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->SetBinContent(1,0.127112);
    hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->SetBinError(1,0.0003142943);
    hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->SetEntries(1);
-   hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->SetLineColor(ci);
+   hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->SetMarkerColor(ci);
+   hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->SetMarkerStyle(22);
    hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING__402->GetXaxis()->SetTitleFont(42);
@@ -4960,7 +6830,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->SetBinContent(2,0.1519011);
    hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->SetBinError(2,0.001323287);
    hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->SetEntries(1);
-   hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->SetLineColor(ci);
+   hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->SetMarkerColor(ci);
+   hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->SetMarkerStyle(22);
    hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_0_mini_charm_balancing_CLOSEPACKING__403->GetXaxis()->SetTitleFont(42);
@@ -4975,8 +6852,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->SetBinContent(2,0.1520284);
    hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->SetBinError(2,0.0004445936);
    hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->SetEntries(1);
-   hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->SetLineColor(ci);
    hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->SetLineStyle(2);
+   hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->SetMarkerColor(ci);
+   hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->SetMarkerStyle(22);
    hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_1_mini_charm_balancing_CLOSEPACKING__404->GetXaxis()->SetTitleFont(42);
@@ -4991,8 +6875,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->SetBinContent(2,0.1507787);
    hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->SetBinError(2,0.000208996);
    hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->SetEntries(1);
-   hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->SetLineColor(ci);
    hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->SetLineStyle(3);
+   hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->SetMarkerColor(ci);
+   hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->SetMarkerStyle(22);
    hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_2_mini_charm_balancing_CLOSEPACKING__405->GetXaxis()->SetTitleFont(42);
@@ -5007,8 +6898,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->SetBinContent(2,0.1468304);
    hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->SetBinError(2,0.0002111376);
    hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->SetEntries(1);
-   hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->SetLineColor(ci);
    hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->SetLineStyle(4);
+   hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->SetMarkerColor(ci);
+   hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->SetMarkerStyle(22);
    hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_3_mini_charm_balancing_CLOSEPACKING__406->GetXaxis()->SetTitleFont(42);
@@ -5023,8 +6921,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->SetBinContent(2,0.1392901);
    hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->SetBinError(2,0.0002971662);
    hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->SetEntries(1);
-   hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->SetLineColor(ci);
    hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->SetLineStyle(5);
+   hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->SetMarkerColor(ci);
+   hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->SetMarkerStyle(22);
    hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_4_mini_charm_balancing_CLOSEPACKING__407->GetXaxis()->SetTitleFont(42);
@@ -5039,8 +6944,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->SetBinContent(2,0.1370369);
    hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->SetBinError(2,8.098327e-05);
    hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->SetEntries(1);
-   hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->SetLineColor(ci);
    hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->SetLineStyle(6);
+   hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->SetMarkerColor(ci);
+   hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->SetMarkerStyle(22);
    hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_5_mini_charm_balancing_CLOSEPACKING__408->GetXaxis()->SetTitleFont(42);
@@ -5055,8 +6967,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->SetBinContent(2,0.1355277);
    hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->SetBinError(2,0.0002318955);
    hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->SetEntries(1);
-   hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->SetLineColor(ci);
    hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->SetLineStyle(7);
+   hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->SetMarkerColor(ci);
+   hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->SetMarkerStyle(22);
    hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_6_mini_charm_balancing_CLOSEPACKING__409->GetXaxis()->SetTitleFont(42);
@@ -5071,8 +6990,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->SetBinContent(2,0.129699);
    hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->SetBinError(2,0.0001789888);
    hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->SetEntries(1);
-   hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->SetLineColor(ci);
    hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->SetLineStyle(8);
+   hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->SetMarkerColor(ci);
+   hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->SetMarkerStyle(22);
    hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_7_mini_charm_balancing_CLOSEPACKING__410->GetXaxis()->SetTitleFont(42);
@@ -5087,8 +7013,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->SetBinContent(2,0.129699);
    hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->SetBinError(2,0.0001789888);
    hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->SetEntries(1);
-   hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->SetLineColor(ci);
    hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->SetLineStyle(9);
+   hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->SetMarkerColor(ci);
+   hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->SetMarkerStyle(22);
    hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_8_mini_charm_balancing_CLOSEPACKING__411->GetXaxis()->SetTitleFont(42);
@@ -5103,8 +7036,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->SetBinContent(2,0.129699);
    hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->SetBinError(2,0.0001789888);
    hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->SetEntries(1);
-   hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->SetLineColor(ci);
    hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->SetLineStyle(10);
+   hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->SetMarkerColor(ci);
+   hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->SetMarkerStyle(22);
    hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_9_mini_charm_balancing_CLOSEPACKING__412->GetXaxis()->SetTitleFont(42);
@@ -5119,7 +7059,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->SetBinContent(2,0.1204132);
    hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->SetBinError(2,0.0003136946);
    hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->SetEntries(1);
-   hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->SetLineColor(ci);
+   hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->SetMarkerColor(ci);
+   hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->SetMarkerStyle(22);
    hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_10_mini_charm_balancing_CLOSEPACKING__413->GetXaxis()->SetTitleFont(42);
@@ -5134,7 +7081,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->SetBinContent(3,0.02718944);
    hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->SetBinError(3,0.0007918484);
    hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->SetEntries(1);
-   hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->SetLineColor(ci);
+   hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->SetMarkerColor(ci);
+   hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->SetMarkerStyle(22);
    hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_0_mini_charm_balancing_CLOSEPACKING__414->GetXaxis()->SetTitleFont(42);
@@ -5149,8 +7103,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->SetBinContent(3,0.02487922);
    hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->SetBinError(3,0.0001774243);
    hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->SetEntries(1);
-   hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->SetLineColor(ci);
    hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->SetLineStyle(2);
+   hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->SetMarkerColor(ci);
+   hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->SetMarkerStyle(22);
    hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_1_mini_charm_balancing_CLOSEPACKING__415->GetXaxis()->SetTitleFont(42);
@@ -5165,8 +7126,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->SetBinContent(3,0.02171819);
    hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->SetBinError(3,0.0001570542);
    hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->SetEntries(1);
-   hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->SetLineColor(ci);
    hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->SetLineStyle(3);
+   hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->SetMarkerColor(ci);
+   hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->SetMarkerStyle(22);
    hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_2_mini_charm_balancing_CLOSEPACKING__416->GetXaxis()->SetTitleFont(42);
@@ -5181,8 +7149,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->SetBinContent(3,0.01983338);
    hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->SetBinError(3,0.0001455841);
    hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->SetEntries(1);
-   hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->SetLineColor(ci);
    hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->SetLineStyle(4);
+   hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->SetMarkerColor(ci);
+   hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->SetMarkerStyle(22);
    hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_3_mini_charm_balancing_CLOSEPACKING__417->GetXaxis()->SetTitleFont(42);
@@ -5197,8 +7172,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->SetBinContent(3,0.01727749);
    hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->SetBinError(3,9.726185e-05);
    hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->SetEntries(1);
-   hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->SetLineColor(ci);
    hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->SetLineStyle(5);
+   hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->SetMarkerColor(ci);
+   hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->SetMarkerStyle(22);
    hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_4_mini_charm_balancing_CLOSEPACKING__418->GetXaxis()->SetTitleFont(42);
@@ -5213,8 +7195,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->SetBinContent(3,0.0159394);
    hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->SetBinError(3,8.522477e-05);
    hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->SetEntries(1);
-   hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->SetLineColor(ci);
    hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->SetLineStyle(6);
+   hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->SetMarkerColor(ci);
+   hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->SetMarkerStyle(22);
    hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_5_mini_charm_balancing_CLOSEPACKING__419->GetXaxis()->SetTitleFont(42);
@@ -5229,8 +7218,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->SetBinContent(3,0.01504318);
    hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->SetBinError(3,9.702354e-05);
    hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->SetEntries(1);
-   hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->SetLineColor(ci);
    hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->SetLineStyle(7);
+   hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->SetMarkerColor(ci);
+   hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->SetMarkerStyle(22);
    hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_6_mini_charm_balancing_CLOSEPACKING__420->GetXaxis()->SetTitleFont(42);
@@ -5245,8 +7241,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->SetBinContent(3,0.0129993);
    hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->SetBinError(3,6.7332e-05);
    hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->SetEntries(1);
-   hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->SetLineColor(ci);
    hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->SetLineStyle(8);
+   hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->SetMarkerColor(ci);
+   hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->SetMarkerStyle(22);
    hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_7_mini_charm_balancing_CLOSEPACKING__421->GetXaxis()->SetTitleFont(42);
@@ -5261,8 +7264,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->SetBinContent(3,0.0129993);
    hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->SetBinError(3,6.7332e-05);
    hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->SetEntries(1);
-   hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->SetLineColor(ci);
    hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->SetLineStyle(9);
+   hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->SetMarkerColor(ci);
+   hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->SetMarkerStyle(22);
    hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_8_mini_charm_balancing_CLOSEPACKING__422->GetXaxis()->SetTitleFont(42);
@@ -5277,8 +7287,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->SetBinContent(3,0.0129993);
    hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->SetBinError(3,6.7332e-05);
    hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->SetEntries(1);
-   hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->SetLineColor(ci);
    hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->SetLineStyle(10);
+   hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->SetMarkerColor(ci);
+   hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->SetMarkerStyle(22);
    hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_9_mini_charm_balancing_CLOSEPACKING__423->GetXaxis()->SetTitleFont(42);
@@ -5293,7 +7310,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->SetBinContent(3,0.01182831);
    hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->SetBinError(3,0.0001028648);
    hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->SetEntries(1);
-   hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->SetLineColor(ci);
+   hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->SetMarkerColor(ci);
+   hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->SetMarkerStyle(22);
    hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_10_mini_charm_balancing_CLOSEPACKING__424->GetXaxis()->SetTitleFont(42);
@@ -5311,92 +7335,136 @@ void global_balancing_plots_multiplicity_MACRO()
    leg->SetLineWidth(1);
    leg->SetFillColor(0);
    leg->SetFillStyle(1001);
-   entry=leg->AddEntry("hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING","0-1%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_0_mini_charm_balancing_CLOSEPACKING","0-1%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING","1-10%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_1_mini_charm_balancing_CLOSEPACKING","1-10%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(2);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING","10-20%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_2_mini_charm_balancing_CLOSEPACKING","10-20%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(3);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING","20-30%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_3_mini_charm_balancing_CLOSEPACKING","20-30%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(4);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING","30-40%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_4_mini_charm_balancing_CLOSEPACKING","30-40%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(5);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING","40-50%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_5_mini_charm_balancing_CLOSEPACKING","40-50%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(6);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING","50-60%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_6_mini_charm_balancing_CLOSEPACKING","50-60%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(7);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING","60-70%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_7_mini_charm_balancing_CLOSEPACKING","60-70%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(8);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING","70-80%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_8_mini_charm_balancing_CLOSEPACKING","70-80%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(9);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING","80-90%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_9_mini_charm_balancing_CLOSEPACKING","80-90%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(10);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING","90-100%","l");
-   entry->SetLineColor(6);
+   entry=leg->AddEntry("hYields_CHARM_2_0_10_mini_charm_balancing_CLOSEPACKING","90-100%","lep");
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   entry->SetMarkerColor(ci);
+   entry->SetMarkerStyle(22);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
    leg->Draw();
@@ -5443,7 +7511,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->SetBinContent(1,0.2053488);
    hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->SetBinError(1,0.0009597083);
    hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->SetEntries(1);
-   hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->SetLineColor(ci);
+   hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->SetMarkerColor(ci);
+   hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->SetMarkerStyle(21);
    hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS__426->GetXaxis()->SetTitleFont(42);
@@ -5458,8 +7533,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->SetBinContent(1,0.1811731);
    hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->SetBinError(1,0.0003281371);
    hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->SetEntries(1);
-   hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->SetLineColor(ci);
    hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->SetLineStyle(2);
+   hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->SetMarkerColor(ci);
+   hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->SetMarkerStyle(21);
    hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS__427->GetXaxis()->SetTitleFont(42);
@@ -5474,8 +7556,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->SetBinContent(1,0.1598062);
    hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->SetBinError(1,0.0002491835);
    hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->SetEntries(1);
-   hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->SetLineColor(ci);
    hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->SetLineStyle(3);
+   hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->SetMarkerColor(ci);
+   hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->SetMarkerStyle(21);
    hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS__428->GetXaxis()->SetTitleFont(42);
@@ -5490,8 +7579,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->SetBinContent(1,0.1481558);
    hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->SetBinError(1,0.0002290783);
    hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->SetEntries(1);
-   hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->SetLineColor(ci);
    hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->SetLineStyle(4);
+   hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->SetMarkerColor(ci);
+   hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->SetMarkerStyle(21);
    hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS__429->GetXaxis()->SetTitleFont(42);
@@ -5506,8 +7602,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->SetBinContent(1,0.1411379);
    hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->SetBinError(1,0.0001283714);
    hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->SetEntries(1);
-   hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->SetLineColor(ci);
    hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->SetLineStyle(5);
+   hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->SetMarkerColor(ci);
+   hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->SetMarkerStyle(21);
    hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS__430->GetXaxis()->SetTitleFont(42);
@@ -5522,8 +7625,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->SetBinContent(1,0.1346073);
    hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->SetBinError(1,0.0001002446);
    hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->SetEntries(1);
-   hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->SetLineColor(ci);
    hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->SetLineStyle(6);
+   hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->SetMarkerColor(ci);
+   hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->SetMarkerStyle(21);
    hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS__431->GetXaxis()->SetTitleFont(42);
@@ -5538,8 +7648,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->SetBinContent(1,0.1321891);
    hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->SetBinError(1,0.0001798853);
    hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->SetEntries(1);
-   hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->SetLineColor(ci);
    hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->SetLineStyle(7);
+   hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->SetMarkerColor(ci);
+   hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->SetMarkerStyle(21);
    hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS__432->GetXaxis()->SetTitleFont(42);
@@ -5554,8 +7671,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->SetBinContent(1,0.1291587);
    hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->SetBinError(1,0.0001341668);
    hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->SetEntries(1);
-   hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->SetLineColor(ci);
    hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->SetLineStyle(8);
+   hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->SetMarkerColor(ci);
+   hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->SetMarkerStyle(21);
    hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS__433->GetXaxis()->SetTitleFont(42);
@@ -5570,8 +7694,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->SetBinContent(1,0.1265773);
    hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->SetBinError(1,0.0001894667);
    hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->SetEntries(1);
-   hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->SetLineColor(ci);
    hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->SetLineStyle(9);
+   hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->SetMarkerColor(ci);
+   hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->SetMarkerStyle(21);
    hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS__434->GetXaxis()->SetTitleFont(42);
@@ -5586,8 +7717,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->SetBinContent(1,0.1265773);
    hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->SetBinError(1,0.0001894667);
    hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->SetEntries(1);
-   hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->SetLineColor(ci);
    hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->SetLineStyle(10);
+   hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->SetMarkerColor(ci);
+   hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->SetMarkerStyle(21);
    hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS__435->GetXaxis()->SetTitleFont(42);
@@ -5602,7 +7740,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->SetBinContent(1,0.123424);
    hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->SetBinError(1,0.0003687006);
    hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->SetEntries(1);
-   hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->SetLineColor(ci);
+   hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->SetMarkerColor(ci);
+   hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->SetMarkerStyle(21);
    hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS__436->GetXaxis()->SetTitleFont(42);
@@ -5617,7 +7762,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->SetBinContent(2,0.1494212);
    hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->SetBinError(2,0.001300918);
    hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->SetEntries(1);
-   hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->SetLineColor(ci);
+   hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->SetMarkerColor(ci);
+   hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->SetMarkerStyle(21);
    hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_0_mini_charm_balancing_JUNCTIONS__437->GetXaxis()->SetTitleFont(42);
@@ -5632,8 +7784,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->SetBinContent(2,0.1519379);
    hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->SetBinError(2,0.0003431982);
    hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->SetEntries(1);
-   hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->SetLineColor(ci);
    hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->SetLineStyle(2);
+   hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->SetMarkerColor(ci);
+   hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->SetMarkerStyle(21);
    hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_1_mini_charm_balancing_JUNCTIONS__438->GetXaxis()->SetTitleFont(42);
@@ -5648,8 +7807,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->SetBinContent(2,0.1484858);
    hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->SetBinError(2,0.0001857285);
    hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->SetEntries(1);
-   hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->SetLineColor(ci);
    hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->SetLineStyle(3);
+   hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->SetMarkerColor(ci);
+   hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->SetMarkerStyle(21);
    hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_2_mini_charm_balancing_JUNCTIONS__439->GetXaxis()->SetTitleFont(42);
@@ -5664,8 +7830,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->SetBinContent(2,0.1420188);
    hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->SetBinError(2,0.000338852);
    hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->SetEntries(1);
-   hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->SetLineColor(ci);
    hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->SetLineStyle(4);
+   hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->SetMarkerColor(ci);
+   hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->SetMarkerStyle(21);
    hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_3_mini_charm_balancing_JUNCTIONS__440->GetXaxis()->SetTitleFont(42);
@@ -5680,8 +7853,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->SetBinContent(2,0.1371071);
    hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->SetBinError(2,0.000219255);
    hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->SetEntries(1);
-   hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->SetLineColor(ci);
    hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->SetLineStyle(5);
+   hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->SetMarkerColor(ci);
+   hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->SetMarkerStyle(21);
    hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_4_mini_charm_balancing_JUNCTIONS__441->GetXaxis()->SetTitleFont(42);
@@ -5696,8 +7876,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->SetBinContent(2,0.1325375);
    hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->SetBinError(2,0.0001634729);
    hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->SetEntries(1);
-   hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->SetLineColor(ci);
    hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->SetLineStyle(6);
+   hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->SetMarkerColor(ci);
+   hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->SetMarkerStyle(21);
    hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_5_mini_charm_balancing_JUNCTIONS__442->GetXaxis()->SetTitleFont(42);
@@ -5712,8 +7899,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->SetBinContent(2,0.1308792);
    hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->SetBinError(2,0.0001674788);
    hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->SetEntries(1);
-   hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->SetLineColor(ci);
    hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->SetLineStyle(7);
+   hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->SetMarkerColor(ci);
+   hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->SetMarkerStyle(21);
    hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_6_mini_charm_balancing_JUNCTIONS__443->GetXaxis()->SetTitleFont(42);
@@ -5728,8 +7922,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->SetBinContent(2,0.1277115);
    hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->SetBinError(2,0.0001442231);
    hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->SetEntries(1);
-   hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->SetLineColor(ci);
    hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->SetLineStyle(8);
+   hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->SetMarkerColor(ci);
+   hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->SetMarkerStyle(21);
    hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_7_mini_charm_balancing_JUNCTIONS__444->GetXaxis()->SetTitleFont(42);
@@ -5744,8 +7945,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->SetBinContent(2,0.1250131);
    hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->SetBinError(2,0.0002146837);
    hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->SetEntries(1);
-   hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->SetLineColor(ci);
    hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->SetLineStyle(9);
+   hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->SetMarkerColor(ci);
+   hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->SetMarkerStyle(21);
    hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_8_mini_charm_balancing_JUNCTIONS__445->GetXaxis()->SetTitleFont(42);
@@ -5760,8 +7968,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->SetBinContent(2,0.1250131);
    hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->SetBinError(2,0.0002146837);
    hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->SetEntries(1);
-   hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->SetLineColor(ci);
    hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->SetLineStyle(10);
+   hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->SetMarkerColor(ci);
+   hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->SetMarkerStyle(21);
    hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_9_mini_charm_balancing_JUNCTIONS__446->GetXaxis()->SetTitleFont(42);
@@ -5776,7 +7991,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->SetBinContent(2,0.1163594);
    hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->SetBinError(2,0.0003479792);
    hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->SetEntries(1);
-   hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->SetLineColor(ci);
+   hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->SetMarkerColor(ci);
+   hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->SetMarkerStyle(21);
    hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_10_mini_charm_balancing_JUNCTIONS__447->GetXaxis()->SetTitleFont(42);
@@ -5791,7 +8013,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->SetBinContent(3,0.03122249);
    hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->SetBinError(3,0.0005241503);
    hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->SetEntries(1);
-   hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->SetLineColor(ci);
+   hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->SetMarkerColor(ci);
+   hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->SetMarkerStyle(21);
    hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_0_mini_charm_balancing_JUNCTIONS__448->GetXaxis()->SetTitleFont(42);
@@ -5806,8 +8035,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->SetBinContent(3,0.02867929);
    hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->SetBinError(3,0.0001609249);
    hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->SetEntries(1);
-   hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->SetLineColor(ci);
    hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->SetLineStyle(2);
+   hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->SetMarkerColor(ci);
+   hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->SetMarkerStyle(21);
    hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_1_mini_charm_balancing_JUNCTIONS__449->GetXaxis()->SetTitleFont(42);
@@ -5822,8 +8058,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->SetBinContent(3,0.02474784);
    hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->SetBinError(3,9.584542e-05);
    hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->SetEntries(1);
-   hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->SetLineColor(ci);
    hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->SetLineStyle(3);
+   hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->SetMarkerColor(ci);
+   hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->SetMarkerStyle(21);
    hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_2_mini_charm_balancing_JUNCTIONS__450->GetXaxis()->SetTitleFont(42);
@@ -5838,8 +8081,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->SetBinContent(3,0.02205226);
    hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->SetBinError(3,8.663711e-05);
    hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->SetEntries(1);
-   hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->SetLineColor(ci);
    hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->SetLineStyle(4);
+   hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->SetMarkerColor(ci);
+   hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->SetMarkerStyle(21);
    hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_3_mini_charm_balancing_JUNCTIONS__451->GetXaxis()->SetTitleFont(42);
@@ -5854,8 +8104,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->SetBinContent(3,0.0199409);
    hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->SetBinError(3,0.0001048266);
    hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->SetEntries(1);
-   hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->SetLineColor(ci);
    hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->SetLineStyle(5);
+   hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->SetMarkerColor(ci);
+   hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->SetMarkerStyle(21);
    hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_4_mini_charm_balancing_JUNCTIONS__452->GetXaxis()->SetTitleFont(42);
@@ -5870,8 +8127,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->SetBinContent(3,0.01746761);
    hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->SetBinError(3,7.617229e-05);
    hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->SetEntries(1);
-   hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->SetLineColor(ci);
    hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->SetLineStyle(6);
+   hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->SetMarkerColor(ci);
+   hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->SetMarkerStyle(21);
    hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_5_mini_charm_balancing_JUNCTIONS__453->GetXaxis()->SetTitleFont(42);
@@ -5886,8 +8150,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->SetBinContent(3,0.01641249);
    hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->SetBinError(3,7.76461e-05);
    hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->SetEntries(1);
-   hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->SetLineColor(ci);
    hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->SetLineStyle(7);
+   hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->SetMarkerColor(ci);
+   hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->SetMarkerStyle(21);
    hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_6_mini_charm_balancing_JUNCTIONS__454->GetXaxis()->SetTitleFont(42);
@@ -5902,8 +8173,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->SetBinContent(3,0.01528062);
    hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->SetBinError(3,4.47768e-05);
    hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->SetEntries(1);
-   hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->SetLineColor(ci);
    hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->SetLineStyle(8);
+   hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->SetMarkerColor(ci);
+   hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->SetMarkerStyle(21);
    hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_7_mini_charm_balancing_JUNCTIONS__455->GetXaxis()->SetTitleFont(42);
@@ -5918,8 +8196,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->SetBinContent(3,0.01431646);
    hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->SetBinError(3,5.522984e-05);
    hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->SetEntries(1);
-   hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->SetLineColor(ci);
    hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->SetLineStyle(9);
+   hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->SetMarkerColor(ci);
+   hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->SetMarkerStyle(21);
    hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_8_mini_charm_balancing_JUNCTIONS__456->GetXaxis()->SetTitleFont(42);
@@ -5934,8 +8219,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->SetBinContent(3,0.01431646);
    hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->SetBinError(3,5.522984e-05);
    hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->SetEntries(1);
-   hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->SetLineColor(ci);
    hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->SetLineStyle(10);
+   hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->SetMarkerColor(ci);
+   hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->SetMarkerStyle(21);
    hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_9_mini_charm_balancing_JUNCTIONS__457->GetXaxis()->SetTitleFont(42);
@@ -5950,7 +8242,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->SetBinContent(3,0.0131145);
    hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->SetBinError(3,0.0001443256);
    hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->SetEntries(1);
-   hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->SetLineColor(ci);
+   hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->SetMarkerColor(ci);
+   hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->SetMarkerStyle(21);
    hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_10_mini_charm_balancing_JUNCTIONS__458->GetXaxis()->SetTitleFont(42);
@@ -5968,91 +8267,135 @@ void global_balancing_plots_multiplicity_MACRO()
    leg->SetLineWidth(1);
    leg->SetFillColor(0);
    leg->SetFillStyle(1001);
-   entry=leg->AddEntry("hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS","0-1%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_0_mini_charm_balancing_JUNCTIONS","0-1%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS","1-10%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_1_mini_charm_balancing_JUNCTIONS","1-10%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(2);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS","10-20%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_2_mini_charm_balancing_JUNCTIONS","10-20%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(3);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS","20-30%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_3_mini_charm_balancing_JUNCTIONS","20-30%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(4);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS","30-40%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_4_mini_charm_balancing_JUNCTIONS","30-40%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(5);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS","40-50%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_5_mini_charm_balancing_JUNCTIONS","40-50%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(6);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS","50-60%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_6_mini_charm_balancing_JUNCTIONS","50-60%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(7);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS","60-70%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_7_mini_charm_balancing_JUNCTIONS","60-70%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(8);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS","70-80%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_8_mini_charm_balancing_JUNCTIONS","70-80%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(9);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS","80-90%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_9_mini_charm_balancing_JUNCTIONS","80-90%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(10);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS","90-100%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_1_0_10_mini_charm_balancing_JUNCTIONS","90-100%","lep");
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetLineColor(ci);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
-   entry->SetMarkerColor(1);
+   entry->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   entry->SetMarkerColor(ci);
    entry->SetMarkerStyle(21);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
@@ -6103,7 +8446,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_0_mini_charm_balancing_MONASH__460->SetBinContent(1,0.2586502);
    hYields_CHARM_0_0_0_mini_charm_balancing_MONASH__460->SetBinError(1,0.0008341747);
    hYields_CHARM_0_0_0_mini_charm_balancing_MONASH__460->SetEntries(1);
-   hYields_CHARM_0_0_0_mini_charm_balancing_MONASH__460->SetLineColor(4);
+   hYields_CHARM_0_0_0_mini_charm_balancing_MONASH__460->SetLineWidth(2);
+   hYields_CHARM_0_0_0_mini_charm_balancing_MONASH__460->SetMarkerStyle(20);
    hYields_CHARM_0_0_0_mini_charm_balancing_MONASH__460->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_0_mini_charm_balancing_MONASH__460->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_0_mini_charm_balancing_MONASH__460->GetXaxis()->SetTitleFont(42);
@@ -6118,8 +8462,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_1_mini_charm_balancing_MONASH__461->SetBinContent(1,0.225451);
    hYields_CHARM_0_0_1_mini_charm_balancing_MONASH__461->SetBinError(1,0.0003498644);
    hYields_CHARM_0_0_1_mini_charm_balancing_MONASH__461->SetEntries(1);
-   hYields_CHARM_0_0_1_mini_charm_balancing_MONASH__461->SetLineColor(4);
    hYields_CHARM_0_0_1_mini_charm_balancing_MONASH__461->SetLineStyle(2);
+   hYields_CHARM_0_0_1_mini_charm_balancing_MONASH__461->SetLineWidth(2);
+   hYields_CHARM_0_0_1_mini_charm_balancing_MONASH__461->SetMarkerStyle(20);
    hYields_CHARM_0_0_1_mini_charm_balancing_MONASH__461->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_1_mini_charm_balancing_MONASH__461->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_1_mini_charm_balancing_MONASH__461->GetXaxis()->SetTitleFont(42);
@@ -6134,8 +8479,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_2_mini_charm_balancing_MONASH__462->SetBinContent(1,0.1996718);
    hYields_CHARM_0_0_2_mini_charm_balancing_MONASH__462->SetBinError(1,0.0002154022);
    hYields_CHARM_0_0_2_mini_charm_balancing_MONASH__462->SetEntries(1);
-   hYields_CHARM_0_0_2_mini_charm_balancing_MONASH__462->SetLineColor(4);
    hYields_CHARM_0_0_2_mini_charm_balancing_MONASH__462->SetLineStyle(3);
+   hYields_CHARM_0_0_2_mini_charm_balancing_MONASH__462->SetLineWidth(2);
+   hYields_CHARM_0_0_2_mini_charm_balancing_MONASH__462->SetMarkerStyle(20);
    hYields_CHARM_0_0_2_mini_charm_balancing_MONASH__462->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_2_mini_charm_balancing_MONASH__462->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_2_mini_charm_balancing_MONASH__462->GetXaxis()->SetTitleFont(42);
@@ -6150,8 +8496,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_3_mini_charm_balancing_MONASH__463->SetBinContent(1,0.1743267);
    hYields_CHARM_0_0_3_mini_charm_balancing_MONASH__463->SetBinError(1,0.0002599427);
    hYields_CHARM_0_0_3_mini_charm_balancing_MONASH__463->SetEntries(1);
-   hYields_CHARM_0_0_3_mini_charm_balancing_MONASH__463->SetLineColor(4);
    hYields_CHARM_0_0_3_mini_charm_balancing_MONASH__463->SetLineStyle(4);
+   hYields_CHARM_0_0_3_mini_charm_balancing_MONASH__463->SetLineWidth(2);
+   hYields_CHARM_0_0_3_mini_charm_balancing_MONASH__463->SetMarkerStyle(20);
    hYields_CHARM_0_0_3_mini_charm_balancing_MONASH__463->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_3_mini_charm_balancing_MONASH__463->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_3_mini_charm_balancing_MONASH__463->GetXaxis()->SetTitleFont(42);
@@ -6166,8 +8513,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_4_mini_charm_balancing_MONASH__464->SetBinContent(1,0.1691611);
    hYields_CHARM_0_0_4_mini_charm_balancing_MONASH__464->SetBinError(1,0.0003246344);
    hYields_CHARM_0_0_4_mini_charm_balancing_MONASH__464->SetEntries(1);
-   hYields_CHARM_0_0_4_mini_charm_balancing_MONASH__464->SetLineColor(4);
    hYields_CHARM_0_0_4_mini_charm_balancing_MONASH__464->SetLineStyle(5);
+   hYields_CHARM_0_0_4_mini_charm_balancing_MONASH__464->SetLineWidth(2);
+   hYields_CHARM_0_0_4_mini_charm_balancing_MONASH__464->SetMarkerStyle(20);
    hYields_CHARM_0_0_4_mini_charm_balancing_MONASH__464->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_4_mini_charm_balancing_MONASH__464->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_4_mini_charm_balancing_MONASH__464->GetXaxis()->SetTitleFont(42);
@@ -6182,8 +8530,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_5_mini_charm_balancing_MONASH__465->SetBinContent(1,0.1543239);
    hYields_CHARM_0_0_5_mini_charm_balancing_MONASH__465->SetBinError(1,0.0001941088);
    hYields_CHARM_0_0_5_mini_charm_balancing_MONASH__465->SetEntries(1);
-   hYields_CHARM_0_0_5_mini_charm_balancing_MONASH__465->SetLineColor(4);
    hYields_CHARM_0_0_5_mini_charm_balancing_MONASH__465->SetLineStyle(6);
+   hYields_CHARM_0_0_5_mini_charm_balancing_MONASH__465->SetLineWidth(2);
+   hYields_CHARM_0_0_5_mini_charm_balancing_MONASH__465->SetMarkerStyle(20);
    hYields_CHARM_0_0_5_mini_charm_balancing_MONASH__465->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_5_mini_charm_balancing_MONASH__465->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_5_mini_charm_balancing_MONASH__465->GetXaxis()->SetTitleFont(42);
@@ -6198,8 +8547,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_6_mini_charm_balancing_MONASH__466->SetBinContent(1,0.1543239);
    hYields_CHARM_0_0_6_mini_charm_balancing_MONASH__466->SetBinError(1,0.0001941088);
    hYields_CHARM_0_0_6_mini_charm_balancing_MONASH__466->SetEntries(1);
-   hYields_CHARM_0_0_6_mini_charm_balancing_MONASH__466->SetLineColor(4);
    hYields_CHARM_0_0_6_mini_charm_balancing_MONASH__466->SetLineStyle(7);
+   hYields_CHARM_0_0_6_mini_charm_balancing_MONASH__466->SetLineWidth(2);
+   hYields_CHARM_0_0_6_mini_charm_balancing_MONASH__466->SetMarkerStyle(20);
    hYields_CHARM_0_0_6_mini_charm_balancing_MONASH__466->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_6_mini_charm_balancing_MONASH__466->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_6_mini_charm_balancing_MONASH__466->GetXaxis()->SetTitleFont(42);
@@ -6214,8 +8564,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_7_mini_charm_balancing_MONASH__467->SetBinContent(1,0.1393895);
    hYields_CHARM_0_0_7_mini_charm_balancing_MONASH__467->SetBinError(1,0.0002434024);
    hYields_CHARM_0_0_7_mini_charm_balancing_MONASH__467->SetEntries(1);
-   hYields_CHARM_0_0_7_mini_charm_balancing_MONASH__467->SetLineColor(4);
    hYields_CHARM_0_0_7_mini_charm_balancing_MONASH__467->SetLineStyle(8);
+   hYields_CHARM_0_0_7_mini_charm_balancing_MONASH__467->SetLineWidth(2);
+   hYields_CHARM_0_0_7_mini_charm_balancing_MONASH__467->SetMarkerStyle(20);
    hYields_CHARM_0_0_7_mini_charm_balancing_MONASH__467->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_7_mini_charm_balancing_MONASH__467->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_7_mini_charm_balancing_MONASH__467->GetXaxis()->SetTitleFont(42);
@@ -6230,8 +8581,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_8_mini_charm_balancing_MONASH__468->SetBinContent(1,0.1393895);
    hYields_CHARM_0_0_8_mini_charm_balancing_MONASH__468->SetBinError(1,0.0002434024);
    hYields_CHARM_0_0_8_mini_charm_balancing_MONASH__468->SetEntries(1);
-   hYields_CHARM_0_0_8_mini_charm_balancing_MONASH__468->SetLineColor(4);
    hYields_CHARM_0_0_8_mini_charm_balancing_MONASH__468->SetLineStyle(9);
+   hYields_CHARM_0_0_8_mini_charm_balancing_MONASH__468->SetLineWidth(2);
+   hYields_CHARM_0_0_8_mini_charm_balancing_MONASH__468->SetMarkerStyle(20);
    hYields_CHARM_0_0_8_mini_charm_balancing_MONASH__468->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_8_mini_charm_balancing_MONASH__468->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_8_mini_charm_balancing_MONASH__468->GetXaxis()->SetTitleFont(42);
@@ -6246,8 +8598,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_9_mini_charm_balancing_MONASH__469->SetBinContent(1,0.1393895);
    hYields_CHARM_0_0_9_mini_charm_balancing_MONASH__469->SetBinError(1,0.0002434024);
    hYields_CHARM_0_0_9_mini_charm_balancing_MONASH__469->SetEntries(1);
-   hYields_CHARM_0_0_9_mini_charm_balancing_MONASH__469->SetLineColor(4);
    hYields_CHARM_0_0_9_mini_charm_balancing_MONASH__469->SetLineStyle(10);
+   hYields_CHARM_0_0_9_mini_charm_balancing_MONASH__469->SetLineWidth(2);
+   hYields_CHARM_0_0_9_mini_charm_balancing_MONASH__469->SetMarkerStyle(20);
    hYields_CHARM_0_0_9_mini_charm_balancing_MONASH__469->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_9_mini_charm_balancing_MONASH__469->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_9_mini_charm_balancing_MONASH__469->GetXaxis()->SetTitleFont(42);
@@ -6262,7 +8615,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_10_mini_charm_balancing_MONASH__470->SetBinContent(1,0.1300995);
    hYields_CHARM_0_0_10_mini_charm_balancing_MONASH__470->SetBinError(1,0.0001901282);
    hYields_CHARM_0_0_10_mini_charm_balancing_MONASH__470->SetEntries(1);
-   hYields_CHARM_0_0_10_mini_charm_balancing_MONASH__470->SetLineColor(4);
+   hYields_CHARM_0_0_10_mini_charm_balancing_MONASH__470->SetLineWidth(2);
+   hYields_CHARM_0_0_10_mini_charm_balancing_MONASH__470->SetMarkerStyle(20);
    hYields_CHARM_0_0_10_mini_charm_balancing_MONASH__470->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_10_mini_charm_balancing_MONASH__470->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_10_mini_charm_balancing_MONASH__470->GetXaxis()->SetTitleFont(42);
@@ -6277,7 +8631,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_0_mini_charm_balancing_MONASH__471->SetBinContent(2,0.1914884);
    hYields_CHARM_0_1_0_mini_charm_balancing_MONASH__471->SetBinError(2,0.001271207);
    hYields_CHARM_0_1_0_mini_charm_balancing_MONASH__471->SetEntries(1);
-   hYields_CHARM_0_1_0_mini_charm_balancing_MONASH__471->SetLineColor(4);
+   hYields_CHARM_0_1_0_mini_charm_balancing_MONASH__471->SetLineWidth(2);
+   hYields_CHARM_0_1_0_mini_charm_balancing_MONASH__471->SetMarkerStyle(20);
    hYields_CHARM_0_1_0_mini_charm_balancing_MONASH__471->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_0_mini_charm_balancing_MONASH__471->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_0_mini_charm_balancing_MONASH__471->GetXaxis()->SetTitleFont(42);
@@ -6292,8 +8647,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_1_mini_charm_balancing_MONASH__472->SetBinContent(2,0.1888201);
    hYields_CHARM_0_1_1_mini_charm_balancing_MONASH__472->SetBinError(2,0.0002731156);
    hYields_CHARM_0_1_1_mini_charm_balancing_MONASH__472->SetEntries(1);
-   hYields_CHARM_0_1_1_mini_charm_balancing_MONASH__472->SetLineColor(4);
    hYields_CHARM_0_1_1_mini_charm_balancing_MONASH__472->SetLineStyle(2);
+   hYields_CHARM_0_1_1_mini_charm_balancing_MONASH__472->SetLineWidth(2);
+   hYields_CHARM_0_1_1_mini_charm_balancing_MONASH__472->SetMarkerStyle(20);
    hYields_CHARM_0_1_1_mini_charm_balancing_MONASH__472->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_1_mini_charm_balancing_MONASH__472->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_1_mini_charm_balancing_MONASH__472->GetXaxis()->SetTitleFont(42);
@@ -6308,8 +8664,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_2_mini_charm_balancing_MONASH__473->SetBinContent(2,0.183857);
    hYields_CHARM_0_1_2_mini_charm_balancing_MONASH__473->SetBinError(2,0.0003618617);
    hYields_CHARM_0_1_2_mini_charm_balancing_MONASH__473->SetEntries(1);
-   hYields_CHARM_0_1_2_mini_charm_balancing_MONASH__473->SetLineColor(4);
    hYields_CHARM_0_1_2_mini_charm_balancing_MONASH__473->SetLineStyle(3);
+   hYields_CHARM_0_1_2_mini_charm_balancing_MONASH__473->SetLineWidth(2);
+   hYields_CHARM_0_1_2_mini_charm_balancing_MONASH__473->SetMarkerStyle(20);
    hYields_CHARM_0_1_2_mini_charm_balancing_MONASH__473->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_2_mini_charm_balancing_MONASH__473->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_2_mini_charm_balancing_MONASH__473->GetXaxis()->SetTitleFont(42);
@@ -6324,8 +8681,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_3_mini_charm_balancing_MONASH__474->SetBinContent(2,0.1685912);
    hYields_CHARM_0_1_3_mini_charm_balancing_MONASH__474->SetBinError(2,0.0002518395);
    hYields_CHARM_0_1_3_mini_charm_balancing_MONASH__474->SetEntries(1);
-   hYields_CHARM_0_1_3_mini_charm_balancing_MONASH__474->SetLineColor(4);
    hYields_CHARM_0_1_3_mini_charm_balancing_MONASH__474->SetLineStyle(4);
+   hYields_CHARM_0_1_3_mini_charm_balancing_MONASH__474->SetLineWidth(2);
+   hYields_CHARM_0_1_3_mini_charm_balancing_MONASH__474->SetMarkerStyle(20);
    hYields_CHARM_0_1_3_mini_charm_balancing_MONASH__474->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_3_mini_charm_balancing_MONASH__474->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_3_mini_charm_balancing_MONASH__474->GetXaxis()->SetTitleFont(42);
@@ -6340,8 +8698,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_4_mini_charm_balancing_MONASH__475->SetBinContent(2,0.1649914);
    hYields_CHARM_0_1_4_mini_charm_balancing_MONASH__475->SetBinError(2,0.0002989243);
    hYields_CHARM_0_1_4_mini_charm_balancing_MONASH__475->SetEntries(1);
-   hYields_CHARM_0_1_4_mini_charm_balancing_MONASH__475->SetLineColor(4);
    hYields_CHARM_0_1_4_mini_charm_balancing_MONASH__475->SetLineStyle(5);
+   hYields_CHARM_0_1_4_mini_charm_balancing_MONASH__475->SetLineWidth(2);
+   hYields_CHARM_0_1_4_mini_charm_balancing_MONASH__475->SetMarkerStyle(20);
    hYields_CHARM_0_1_4_mini_charm_balancing_MONASH__475->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_4_mini_charm_balancing_MONASH__475->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_4_mini_charm_balancing_MONASH__475->GetXaxis()->SetTitleFont(42);
@@ -6356,8 +8715,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_5_mini_charm_balancing_MONASH__476->SetBinContent(2,0.1530107);
    hYields_CHARM_0_1_5_mini_charm_balancing_MONASH__476->SetBinError(2,0.0002802121);
    hYields_CHARM_0_1_5_mini_charm_balancing_MONASH__476->SetEntries(1);
-   hYields_CHARM_0_1_5_mini_charm_balancing_MONASH__476->SetLineColor(4);
    hYields_CHARM_0_1_5_mini_charm_balancing_MONASH__476->SetLineStyle(6);
+   hYields_CHARM_0_1_5_mini_charm_balancing_MONASH__476->SetLineWidth(2);
+   hYields_CHARM_0_1_5_mini_charm_balancing_MONASH__476->SetMarkerStyle(20);
    hYields_CHARM_0_1_5_mini_charm_balancing_MONASH__476->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_5_mini_charm_balancing_MONASH__476->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_5_mini_charm_balancing_MONASH__476->GetXaxis()->SetTitleFont(42);
@@ -6372,8 +8732,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_6_mini_charm_balancing_MONASH__477->SetBinContent(2,0.1530107);
    hYields_CHARM_0_1_6_mini_charm_balancing_MONASH__477->SetBinError(2,0.0002802121);
    hYields_CHARM_0_1_6_mini_charm_balancing_MONASH__477->SetEntries(1);
-   hYields_CHARM_0_1_6_mini_charm_balancing_MONASH__477->SetLineColor(4);
    hYields_CHARM_0_1_6_mini_charm_balancing_MONASH__477->SetLineStyle(7);
+   hYields_CHARM_0_1_6_mini_charm_balancing_MONASH__477->SetLineWidth(2);
+   hYields_CHARM_0_1_6_mini_charm_balancing_MONASH__477->SetMarkerStyle(20);
    hYields_CHARM_0_1_6_mini_charm_balancing_MONASH__477->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_6_mini_charm_balancing_MONASH__477->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_6_mini_charm_balancing_MONASH__477->GetXaxis()->SetTitleFont(42);
@@ -6388,8 +8749,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_7_mini_charm_balancing_MONASH__478->SetBinContent(2,0.1366197);
    hYields_CHARM_0_1_7_mini_charm_balancing_MONASH__478->SetBinError(2,0.0001276187);
    hYields_CHARM_0_1_7_mini_charm_balancing_MONASH__478->SetEntries(1);
-   hYields_CHARM_0_1_7_mini_charm_balancing_MONASH__478->SetLineColor(4);
    hYields_CHARM_0_1_7_mini_charm_balancing_MONASH__478->SetLineStyle(8);
+   hYields_CHARM_0_1_7_mini_charm_balancing_MONASH__478->SetLineWidth(2);
+   hYields_CHARM_0_1_7_mini_charm_balancing_MONASH__478->SetMarkerStyle(20);
    hYields_CHARM_0_1_7_mini_charm_balancing_MONASH__478->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_7_mini_charm_balancing_MONASH__478->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_7_mini_charm_balancing_MONASH__478->GetXaxis()->SetTitleFont(42);
@@ -6404,8 +8766,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_8_mini_charm_balancing_MONASH__479->SetBinContent(2,0.1366197);
    hYields_CHARM_0_1_8_mini_charm_balancing_MONASH__479->SetBinError(2,0.0001276187);
    hYields_CHARM_0_1_8_mini_charm_balancing_MONASH__479->SetEntries(1);
-   hYields_CHARM_0_1_8_mini_charm_balancing_MONASH__479->SetLineColor(4);
    hYields_CHARM_0_1_8_mini_charm_balancing_MONASH__479->SetLineStyle(9);
+   hYields_CHARM_0_1_8_mini_charm_balancing_MONASH__479->SetLineWidth(2);
+   hYields_CHARM_0_1_8_mini_charm_balancing_MONASH__479->SetMarkerStyle(20);
    hYields_CHARM_0_1_8_mini_charm_balancing_MONASH__479->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_8_mini_charm_balancing_MONASH__479->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_8_mini_charm_balancing_MONASH__479->GetXaxis()->SetTitleFont(42);
@@ -6420,8 +8783,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_9_mini_charm_balancing_MONASH__480->SetBinContent(2,0.1366197);
    hYields_CHARM_0_1_9_mini_charm_balancing_MONASH__480->SetBinError(2,0.0001276187);
    hYields_CHARM_0_1_9_mini_charm_balancing_MONASH__480->SetEntries(1);
-   hYields_CHARM_0_1_9_mini_charm_balancing_MONASH__480->SetLineColor(4);
    hYields_CHARM_0_1_9_mini_charm_balancing_MONASH__480->SetLineStyle(10);
+   hYields_CHARM_0_1_9_mini_charm_balancing_MONASH__480->SetLineWidth(2);
+   hYields_CHARM_0_1_9_mini_charm_balancing_MONASH__480->SetMarkerStyle(20);
    hYields_CHARM_0_1_9_mini_charm_balancing_MONASH__480->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_9_mini_charm_balancing_MONASH__480->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_9_mini_charm_balancing_MONASH__480->GetXaxis()->SetTitleFont(42);
@@ -6436,7 +8800,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_10_mini_charm_balancing_MONASH__481->SetBinContent(2,0.1225575);
    hYields_CHARM_0_1_10_mini_charm_balancing_MONASH__481->SetBinError(2,0.0004041432);
    hYields_CHARM_0_1_10_mini_charm_balancing_MONASH__481->SetEntries(1);
-   hYields_CHARM_0_1_10_mini_charm_balancing_MONASH__481->SetLineColor(4);
+   hYields_CHARM_0_1_10_mini_charm_balancing_MONASH__481->SetLineWidth(2);
+   hYields_CHARM_0_1_10_mini_charm_balancing_MONASH__481->SetMarkerStyle(20);
    hYields_CHARM_0_1_10_mini_charm_balancing_MONASH__481->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_10_mini_charm_balancing_MONASH__481->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_10_mini_charm_balancing_MONASH__481->GetXaxis()->SetTitleFont(42);
@@ -6451,7 +8816,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_0_mini_charm_balancing_MONASH__482->SetBinContent(3,0.01822375);
    hYields_CHARM_0_2_0_mini_charm_balancing_MONASH__482->SetBinError(3,0.0004166984);
    hYields_CHARM_0_2_0_mini_charm_balancing_MONASH__482->SetEntries(1);
-   hYields_CHARM_0_2_0_mini_charm_balancing_MONASH__482->SetLineColor(4);
+   hYields_CHARM_0_2_0_mini_charm_balancing_MONASH__482->SetLineWidth(2);
+   hYields_CHARM_0_2_0_mini_charm_balancing_MONASH__482->SetMarkerStyle(20);
    hYields_CHARM_0_2_0_mini_charm_balancing_MONASH__482->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_0_mini_charm_balancing_MONASH__482->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_0_mini_charm_balancing_MONASH__482->GetXaxis()->SetTitleFont(42);
@@ -6466,8 +8832,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_1_mini_charm_balancing_MONASH__483->SetBinContent(3,0.01845535);
    hYields_CHARM_0_2_1_mini_charm_balancing_MONASH__483->SetBinError(3,0.000135496);
    hYields_CHARM_0_2_1_mini_charm_balancing_MONASH__483->SetEntries(1);
-   hYields_CHARM_0_2_1_mini_charm_balancing_MONASH__483->SetLineColor(4);
    hYields_CHARM_0_2_1_mini_charm_balancing_MONASH__483->SetLineStyle(2);
+   hYields_CHARM_0_2_1_mini_charm_balancing_MONASH__483->SetLineWidth(2);
+   hYields_CHARM_0_2_1_mini_charm_balancing_MONASH__483->SetMarkerStyle(20);
    hYields_CHARM_0_2_1_mini_charm_balancing_MONASH__483->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_1_mini_charm_balancing_MONASH__483->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_1_mini_charm_balancing_MONASH__483->GetXaxis()->SetTitleFont(42);
@@ -6482,8 +8849,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_2_mini_charm_balancing_MONASH__484->SetBinContent(3,0.01808872);
    hYields_CHARM_0_2_2_mini_charm_balancing_MONASH__484->SetBinError(3,0.0001691493);
    hYields_CHARM_0_2_2_mini_charm_balancing_MONASH__484->SetEntries(1);
-   hYields_CHARM_0_2_2_mini_charm_balancing_MONASH__484->SetLineColor(4);
    hYields_CHARM_0_2_2_mini_charm_balancing_MONASH__484->SetLineStyle(3);
+   hYields_CHARM_0_2_2_mini_charm_balancing_MONASH__484->SetLineWidth(2);
+   hYields_CHARM_0_2_2_mini_charm_balancing_MONASH__484->SetMarkerStyle(20);
    hYields_CHARM_0_2_2_mini_charm_balancing_MONASH__484->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_2_mini_charm_balancing_MONASH__484->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_2_mini_charm_balancing_MONASH__484->GetXaxis()->SetTitleFont(42);
@@ -6498,8 +8866,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_3_mini_charm_balancing_MONASH__485->SetBinContent(3,0.01683392);
    hYields_CHARM_0_2_3_mini_charm_balancing_MONASH__485->SetBinError(3,8.906384e-05);
    hYields_CHARM_0_2_3_mini_charm_balancing_MONASH__485->SetEntries(1);
-   hYields_CHARM_0_2_3_mini_charm_balancing_MONASH__485->SetLineColor(4);
    hYields_CHARM_0_2_3_mini_charm_balancing_MONASH__485->SetLineStyle(4);
+   hYields_CHARM_0_2_3_mini_charm_balancing_MONASH__485->SetLineWidth(2);
+   hYields_CHARM_0_2_3_mini_charm_balancing_MONASH__485->SetMarkerStyle(20);
    hYields_CHARM_0_2_3_mini_charm_balancing_MONASH__485->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_3_mini_charm_balancing_MONASH__485->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_3_mini_charm_balancing_MONASH__485->GetXaxis()->SetTitleFont(42);
@@ -6514,8 +8883,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_4_mini_charm_balancing_MONASH__486->SetBinContent(3,0.01647465);
    hYields_CHARM_0_2_4_mini_charm_balancing_MONASH__486->SetBinError(3,0.0001165126);
    hYields_CHARM_0_2_4_mini_charm_balancing_MONASH__486->SetEntries(1);
-   hYields_CHARM_0_2_4_mini_charm_balancing_MONASH__486->SetLineColor(4);
    hYields_CHARM_0_2_4_mini_charm_balancing_MONASH__486->SetLineStyle(5);
+   hYields_CHARM_0_2_4_mini_charm_balancing_MONASH__486->SetLineWidth(2);
+   hYields_CHARM_0_2_4_mini_charm_balancing_MONASH__486->SetMarkerStyle(20);
    hYields_CHARM_0_2_4_mini_charm_balancing_MONASH__486->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_4_mini_charm_balancing_MONASH__486->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_4_mini_charm_balancing_MONASH__486->GetXaxis()->SetTitleFont(42);
@@ -6530,8 +8900,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_5_mini_charm_balancing_MONASH__487->SetBinContent(3,0.01532322);
    hYields_CHARM_0_2_5_mini_charm_balancing_MONASH__487->SetBinError(3,9.070377e-05);
    hYields_CHARM_0_2_5_mini_charm_balancing_MONASH__487->SetEntries(1);
-   hYields_CHARM_0_2_5_mini_charm_balancing_MONASH__487->SetLineColor(4);
    hYields_CHARM_0_2_5_mini_charm_balancing_MONASH__487->SetLineStyle(6);
+   hYields_CHARM_0_2_5_mini_charm_balancing_MONASH__487->SetLineWidth(2);
+   hYields_CHARM_0_2_5_mini_charm_balancing_MONASH__487->SetMarkerStyle(20);
    hYields_CHARM_0_2_5_mini_charm_balancing_MONASH__487->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_5_mini_charm_balancing_MONASH__487->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_5_mini_charm_balancing_MONASH__487->GetXaxis()->SetTitleFont(42);
@@ -6546,8 +8917,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_6_mini_charm_balancing_MONASH__488->SetBinContent(3,0.01532322);
    hYields_CHARM_0_2_6_mini_charm_balancing_MONASH__488->SetBinError(3,9.070377e-05);
    hYields_CHARM_0_2_6_mini_charm_balancing_MONASH__488->SetEntries(1);
-   hYields_CHARM_0_2_6_mini_charm_balancing_MONASH__488->SetLineColor(4);
    hYields_CHARM_0_2_6_mini_charm_balancing_MONASH__488->SetLineStyle(7);
+   hYields_CHARM_0_2_6_mini_charm_balancing_MONASH__488->SetLineWidth(2);
+   hYields_CHARM_0_2_6_mini_charm_balancing_MONASH__488->SetMarkerStyle(20);
    hYields_CHARM_0_2_6_mini_charm_balancing_MONASH__488->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_6_mini_charm_balancing_MONASH__488->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_6_mini_charm_balancing_MONASH__488->GetXaxis()->SetTitleFont(42);
@@ -6562,8 +8934,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_7_mini_charm_balancing_MONASH__489->SetBinContent(3,0.01426926);
    hYields_CHARM_0_2_7_mini_charm_balancing_MONASH__489->SetBinError(3,8.020636e-05);
    hYields_CHARM_0_2_7_mini_charm_balancing_MONASH__489->SetEntries(1);
-   hYields_CHARM_0_2_7_mini_charm_balancing_MONASH__489->SetLineColor(4);
    hYields_CHARM_0_2_7_mini_charm_balancing_MONASH__489->SetLineStyle(8);
+   hYields_CHARM_0_2_7_mini_charm_balancing_MONASH__489->SetLineWidth(2);
+   hYields_CHARM_0_2_7_mini_charm_balancing_MONASH__489->SetMarkerStyle(20);
    hYields_CHARM_0_2_7_mini_charm_balancing_MONASH__489->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_7_mini_charm_balancing_MONASH__489->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_7_mini_charm_balancing_MONASH__489->GetXaxis()->SetTitleFont(42);
@@ -6578,8 +8951,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_8_mini_charm_balancing_MONASH__490->SetBinContent(3,0.01426926);
    hYields_CHARM_0_2_8_mini_charm_balancing_MONASH__490->SetBinError(3,8.020636e-05);
    hYields_CHARM_0_2_8_mini_charm_balancing_MONASH__490->SetEntries(1);
-   hYields_CHARM_0_2_8_mini_charm_balancing_MONASH__490->SetLineColor(4);
    hYields_CHARM_0_2_8_mini_charm_balancing_MONASH__490->SetLineStyle(9);
+   hYields_CHARM_0_2_8_mini_charm_balancing_MONASH__490->SetLineWidth(2);
+   hYields_CHARM_0_2_8_mini_charm_balancing_MONASH__490->SetMarkerStyle(20);
    hYields_CHARM_0_2_8_mini_charm_balancing_MONASH__490->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_8_mini_charm_balancing_MONASH__490->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_8_mini_charm_balancing_MONASH__490->GetXaxis()->SetTitleFont(42);
@@ -6594,8 +8968,9 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_9_mini_charm_balancing_MONASH__491->SetBinContent(3,0.01426926);
    hYields_CHARM_0_2_9_mini_charm_balancing_MONASH__491->SetBinError(3,8.020636e-05);
    hYields_CHARM_0_2_9_mini_charm_balancing_MONASH__491->SetEntries(1);
-   hYields_CHARM_0_2_9_mini_charm_balancing_MONASH__491->SetLineColor(4);
    hYields_CHARM_0_2_9_mini_charm_balancing_MONASH__491->SetLineStyle(10);
+   hYields_CHARM_0_2_9_mini_charm_balancing_MONASH__491->SetLineWidth(2);
+   hYields_CHARM_0_2_9_mini_charm_balancing_MONASH__491->SetMarkerStyle(20);
    hYields_CHARM_0_2_9_mini_charm_balancing_MONASH__491->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_9_mini_charm_balancing_MONASH__491->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_9_mini_charm_balancing_MONASH__491->GetXaxis()->SetTitleFont(42);
@@ -6610,7 +8985,8 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_10_mini_charm_balancing_MONASH__492->SetBinContent(3,0.01358157);
    hYields_CHARM_0_2_10_mini_charm_balancing_MONASH__492->SetBinError(3,9.583323e-05);
    hYields_CHARM_0_2_10_mini_charm_balancing_MONASH__492->SetEntries(1);
-   hYields_CHARM_0_2_10_mini_charm_balancing_MONASH__492->SetLineColor(4);
+   hYields_CHARM_0_2_10_mini_charm_balancing_MONASH__492->SetLineWidth(2);
+   hYields_CHARM_0_2_10_mini_charm_balancing_MONASH__492->SetMarkerStyle(20);
    hYields_CHARM_0_2_10_mini_charm_balancing_MONASH__492->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_10_mini_charm_balancing_MONASH__492->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_10_mini_charm_balancing_MONASH__492->GetXaxis()->SetTitleFont(42);
@@ -6628,92 +9004,92 @@ void global_balancing_plots_multiplicity_MACRO()
    leg->SetLineWidth(1);
    leg->SetFillColor(0);
    leg->SetFillStyle(1001);
-   entry=leg->AddEntry("hYields_CHARM_0_0_0_mini_charm_balancing_MONASH","0-1%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_0_mini_charm_balancing_MONASH","0-1%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_0_0_1_mini_charm_balancing_MONASH","1-10%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_1_mini_charm_balancing_MONASH","1-10%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(2);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_0_0_2_mini_charm_balancing_MONASH","10-20%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_2_mini_charm_balancing_MONASH","10-20%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(3);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_0_0_3_mini_charm_balancing_MONASH","20-30%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_3_mini_charm_balancing_MONASH","20-30%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(4);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_0_0_4_mini_charm_balancing_MONASH","30-40%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_4_mini_charm_balancing_MONASH","30-40%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(5);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_0_0_5_mini_charm_balancing_MONASH","40-50%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_5_mini_charm_balancing_MONASH","40-50%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(6);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_0_0_6_mini_charm_balancing_MONASH","50-60%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_6_mini_charm_balancing_MONASH","50-60%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(7);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_0_0_7_mini_charm_balancing_MONASH","60-70%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_7_mini_charm_balancing_MONASH","60-70%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(8);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_0_0_8_mini_charm_balancing_MONASH","70-80%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_8_mini_charm_balancing_MONASH","70-80%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(9);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_0_0_9_mini_charm_balancing_MONASH","80-90%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_9_mini_charm_balancing_MONASH","80-90%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(10);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
-   entry=leg->AddEntry("hYields_CHARM_0_0_10_mini_charm_balancing_MONASH","90-100%","l");
-   entry->SetLineColor(4);
+   entry=leg->AddEntry("hYields_CHARM_0_0_10_mini_charm_balancing_MONASH","90-100%","lep");
+   entry->SetLineColor(1);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
    leg->Draw();
@@ -6764,6 +9140,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__494->SetBinContent(1,0.7804891);
    hYields_CHARM_0_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__494->SetBinError(1,0.005310933);
    hYields_CHARM_0_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__494->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__494->SetLineColor(ci);
+   hYields_CHARM_0_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__494->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__494->SetMarkerColor(ci);
+   hYields_CHARM_0_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__494->SetMarkerStyle(22);
    hYields_CHARM_0_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__494->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__494->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__494->GetXaxis()->SetTitleFont(42);
@@ -6778,7 +9162,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->SetBinContent(1,0.8031333);
    hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->SetBinError(1,0.002034512);
    hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->SetLineColor(ci);
    hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->SetLineStyle(2);
+   hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->SetMarkerColor(ci);
+   hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->SetMarkerStyle(22);
    hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__495->GetXaxis()->SetTitleFont(42);
@@ -6793,7 +9185,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->SetBinContent(1,0.8063663);
    hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->SetBinError(1,0.001975884);
    hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->SetLineColor(ci);
    hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->SetLineStyle(3);
+   hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->SetMarkerColor(ci);
+   hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->SetMarkerStyle(22);
    hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__496->GetXaxis()->SetTitleFont(42);
@@ -6808,7 +9208,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->SetBinContent(1,0.8712298);
    hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->SetBinError(1,0.002056252);
    hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->SetLineColor(ci);
    hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->SetLineStyle(4);
+   hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->SetMarkerColor(ci);
+   hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->SetMarkerStyle(22);
    hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__497->GetXaxis()->SetTitleFont(42);
@@ -6823,7 +9231,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->SetBinContent(1,0.8427982);
    hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->SetBinError(1,0.002562977);
    hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->SetLineColor(ci);
    hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->SetLineStyle(5);
+   hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->SetMarkerColor(ci);
+   hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->SetMarkerStyle(22);
    hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__498->GetXaxis()->SetTitleFont(42);
@@ -6838,7 +9254,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->SetBinContent(1,0.902801);
    hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->SetBinError(1,0.001985974);
    hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->SetLineColor(ci);
    hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->SetLineStyle(6);
+   hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->SetMarkerColor(ci);
+   hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->SetMarkerStyle(22);
    hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__499->GetXaxis()->SetTitleFont(42);
@@ -6853,7 +9277,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->SetBinContent(1,0.8887181);
    hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->SetBinError(1,0.00224143);
    hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->SetLineColor(ci);
    hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->SetLineStyle(7);
+   hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->SetMarkerColor(ci);
+   hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->SetMarkerStyle(22);
    hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__500->GetXaxis()->SetTitleFont(42);
@@ -6868,7 +9300,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->SetBinContent(1,0.9466039);
    hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->SetBinError(1,0.00213469);
    hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->SetLineColor(ci);
    hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->SetLineStyle(8);
+   hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->SetMarkerColor(ci);
+   hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->SetMarkerStyle(22);
    hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__501->GetXaxis()->SetTitleFont(42);
@@ -6883,7 +9323,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->SetBinContent(1,0.9466039);
    hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->SetBinError(1,0.00213469);
    hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->SetLineColor(ci);
    hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->SetLineStyle(9);
+   hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->SetMarkerColor(ci);
+   hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->SetMarkerStyle(22);
    hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__502->GetXaxis()->SetTitleFont(42);
@@ -6898,7 +9346,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->SetBinContent(1,0.9466039);
    hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->SetBinError(1,0.00213469);
    hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->SetLineColor(ci);
    hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->SetLineStyle(10);
+   hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->SetMarkerColor(ci);
+   hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->SetMarkerStyle(22);
    hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__503->GetXaxis()->SetTitleFont(42);
@@ -6913,6 +9369,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__504->SetBinContent(1,0.9770366);
    hYields_CHARM_0_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__504->SetBinError(1,0.002806213);
    hYields_CHARM_0_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__504->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__504->SetLineColor(ci);
+   hYields_CHARM_0_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__504->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_0_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__504->SetMarkerColor(ci);
+   hYields_CHARM_0_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__504->SetMarkerStyle(22);
    hYields_CHARM_0_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__504->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__504->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__504->GetXaxis()->SetTitleFont(42);
@@ -6927,6 +9391,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__505->SetBinContent(2,0.7932654);
    hYields_CHARM_1_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__505->SetBinError(2,0.008688365);
    hYields_CHARM_1_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__505->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__505->SetLineColor(ci);
+   hYields_CHARM_1_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__505->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__505->SetMarkerColor(ci);
+   hYields_CHARM_1_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__505->SetMarkerStyle(22);
    hYields_CHARM_1_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__505->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__505->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__505->GetXaxis()->SetTitleFont(42);
@@ -6941,7 +9413,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->SetBinContent(2,0.8051494);
    hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->SetBinError(2,0.002626854);
    hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->SetLineColor(ci);
    hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->SetLineStyle(2);
+   hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->SetMarkerColor(ci);
+   hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->SetMarkerStyle(22);
    hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__506->GetXaxis()->SetTitleFont(42);
@@ -6956,7 +9436,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->SetBinContent(2,0.8200866);
    hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->SetBinError(2,0.001974177);
    hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->SetLineColor(ci);
    hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->SetLineStyle(3);
+   hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->SetMarkerColor(ci);
+   hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->SetMarkerStyle(22);
    hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__507->GetXaxis()->SetTitleFont(42);
@@ -6971,7 +9459,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->SetBinContent(2,0.8709259);
    hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->SetBinError(2,0.001805813);
    hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->SetLineColor(ci);
    hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->SetLineStyle(4);
+   hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->SetMarkerColor(ci);
+   hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->SetMarkerStyle(22);
    hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__508->GetXaxis()->SetTitleFont(42);
@@ -6986,7 +9482,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->SetBinContent(2,0.8442269);
    hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->SetBinError(2,0.002362931);
    hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->SetLineColor(ci);
    hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->SetLineStyle(5);
+   hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->SetMarkerColor(ci);
+   hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->SetMarkerStyle(22);
    hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__509->GetXaxis()->SetTitleFont(42);
@@ -7001,7 +9505,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->SetBinContent(2,0.8956032);
    hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->SetBinError(2,0.001723421);
    hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->SetLineColor(ci);
    hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->SetLineStyle(6);
+   hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->SetMarkerColor(ci);
+   hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->SetMarkerStyle(22);
    hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__510->GetXaxis()->SetTitleFont(42);
@@ -7016,7 +9528,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->SetBinContent(2,0.8857398);
    hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->SetBinError(2,0.002219916);
    hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->SetLineColor(ci);
    hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->SetLineStyle(7);
+   hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->SetMarkerColor(ci);
+   hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->SetMarkerStyle(22);
    hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__511->GetXaxis()->SetTitleFont(42);
@@ -7031,7 +9551,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->SetBinContent(2,0.9493435);
    hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->SetBinError(2,0.001582035);
    hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->SetLineColor(ci);
    hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->SetLineStyle(8);
+   hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->SetMarkerColor(ci);
+   hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->SetMarkerStyle(22);
    hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__512->GetXaxis()->SetTitleFont(42);
@@ -7046,7 +9574,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->SetBinContent(2,0.9493435);
    hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->SetBinError(2,0.001582035);
    hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->SetLineColor(ci);
    hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->SetLineStyle(9);
+   hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->SetMarkerColor(ci);
+   hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->SetMarkerStyle(22);
    hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__513->GetXaxis()->SetTitleFont(42);
@@ -7061,7 +9597,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->SetBinContent(2,0.9493435);
    hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->SetBinError(2,0.001582035);
    hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->SetLineColor(ci);
    hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->SetLineStyle(10);
+   hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->SetMarkerColor(ci);
+   hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->SetMarkerStyle(22);
    hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__514->GetXaxis()->SetTitleFont(42);
@@ -7076,6 +9620,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__515->SetBinContent(2,0.9825043);
    hYields_CHARM_1_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__515->SetBinError(2,0.004128956);
    hYields_CHARM_1_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__515->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__515->SetLineColor(ci);
+   hYields_CHARM_1_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__515->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_1_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__515->SetMarkerColor(ci);
+   hYields_CHARM_1_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__515->SetMarkerStyle(22);
    hYields_CHARM_1_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__515->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__515->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__515->GetXaxis()->SetTitleFont(42);
@@ -7090,6 +9642,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__516->SetBinContent(3,1.491978);
    hYields_CHARM_2_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__516->SetBinError(3,0.05524373);
    hYields_CHARM_2_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__516->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__516->SetLineColor(ci);
+   hYields_CHARM_2_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__516->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__516->SetMarkerColor(ci);
+   hYields_CHARM_2_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__516->SetMarkerStyle(22);
    hYields_CHARM_2_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__516->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__516->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_mini_charm_balancing_CLOSEPACKING_over_MONASH__516->GetXaxis()->SetTitleFont(42);
@@ -7104,7 +9664,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->SetBinContent(3,1.348076);
    hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->SetBinError(3,0.01379785);
    hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->SetLineColor(ci);
    hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->SetLineStyle(2);
+   hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->SetMarkerColor(ci);
+   hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->SetMarkerStyle(22);
    hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_mini_charm_balancing_CLOSEPACKING_over_MONASH__517->GetXaxis()->SetTitleFont(42);
@@ -7119,7 +9687,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->SetBinContent(3,1.200649);
    hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->SetBinError(3,0.01419291);
    hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->SetLineColor(ci);
    hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->SetLineStyle(3);
+   hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->SetMarkerColor(ci);
+   hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->SetMarkerStyle(22);
    hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_mini_charm_balancing_CLOSEPACKING_over_MONASH__518->GetXaxis()->SetTitleFont(42);
@@ -7134,7 +9710,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->SetBinContent(3,1.178179);
    hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->SetBinError(3,0.01066058);
    hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->SetLineColor(ci);
    hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->SetLineStyle(4);
+   hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->SetMarkerColor(ci);
+   hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->SetMarkerStyle(22);
    hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_3_mini_charm_balancing_CLOSEPACKING_over_MONASH__519->GetXaxis()->SetTitleFont(42);
@@ -7149,7 +9733,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->SetBinContent(3,1.048732);
    hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->SetBinError(3,0.009479668);
    hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->SetLineColor(ci);
    hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->SetLineStyle(5);
+   hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->SetMarkerColor(ci);
+   hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->SetMarkerStyle(22);
    hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_4_mini_charm_balancing_CLOSEPACKING_over_MONASH__520->GetXaxis()->SetTitleFont(42);
@@ -7164,7 +9756,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->SetBinContent(3,1.040212);
    hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->SetBinError(3,0.00829742);
    hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->SetLineColor(ci);
    hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->SetLineStyle(6);
+   hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->SetMarkerColor(ci);
+   hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->SetMarkerStyle(22);
    hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_5_mini_charm_balancing_CLOSEPACKING_over_MONASH__521->GetXaxis()->SetTitleFont(42);
@@ -7179,7 +9779,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->SetBinContent(3,0.9817243);
    hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->SetBinError(3,0.008594272);
    hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->SetLineColor(ci);
    hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->SetLineStyle(7);
+   hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->SetMarkerColor(ci);
+   hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->SetMarkerStyle(22);
    hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_6_mini_charm_balancing_CLOSEPACKING_over_MONASH__522->GetXaxis()->SetTitleFont(42);
@@ -7194,7 +9802,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->SetBinContent(3,0.9110006);
    hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->SetBinError(3,0.006963266);
    hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->SetLineColor(ci);
    hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->SetLineStyle(8);
+   hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->SetMarkerColor(ci);
+   hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->SetMarkerStyle(22);
    hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_7_mini_charm_balancing_CLOSEPACKING_over_MONASH__523->GetXaxis()->SetTitleFont(42);
@@ -7209,7 +9825,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->SetBinContent(3,0.9110006);
    hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->SetBinError(3,0.006963266);
    hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->SetLineColor(ci);
    hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->SetLineStyle(9);
+   hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->SetMarkerColor(ci);
+   hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->SetMarkerStyle(22);
    hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_8_mini_charm_balancing_CLOSEPACKING_over_MONASH__524->GetXaxis()->SetTitleFont(42);
@@ -7224,7 +9848,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->SetBinContent(3,0.9110006);
    hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->SetBinError(3,0.006963266);
    hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->SetLineColor(ci);
    hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->SetLineStyle(10);
+   hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->SetMarkerColor(ci);
+   hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->SetMarkerStyle(22);
    hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_9_mini_charm_balancing_CLOSEPACKING_over_MONASH__525->GetXaxis()->SetTitleFont(42);
@@ -7239,6 +9871,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__526->SetBinContent(3,0.8709089);
    hYields_CHARM_2_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__526->SetBinError(3,0.009753314);
    hYields_CHARM_2_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__526->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__526->SetLineColor(ci);
+   hYields_CHARM_2_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__526->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYields_CHARM_2_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__526->SetMarkerColor(ci);
+   hYields_CHARM_2_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__526->SetMarkerStyle(22);
    hYields_CHARM_2_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__526->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__526->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_10_mini_charm_balancing_CLOSEPACKING_over_MONASH__526->GetXaxis()->SetTitleFont(42);
@@ -7295,6 +9935,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_0_mini_charm_balancing_JUNCTIONS_over_MONASH__528->SetBinContent(1,0.7939248);
    hYields_CHARM_0_0_mini_charm_balancing_JUNCTIONS_over_MONASH__528->SetBinError(1,0.004508166);
    hYields_CHARM_0_0_mini_charm_balancing_JUNCTIONS_over_MONASH__528->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_0_mini_charm_balancing_JUNCTIONS_over_MONASH__528->SetLineColor(ci);
+   hYields_CHARM_0_0_mini_charm_balancing_JUNCTIONS_over_MONASH__528->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_0_mini_charm_balancing_JUNCTIONS_over_MONASH__528->SetMarkerColor(ci);
+   hYields_CHARM_0_0_mini_charm_balancing_JUNCTIONS_over_MONASH__528->SetMarkerStyle(21);
    hYields_CHARM_0_0_mini_charm_balancing_JUNCTIONS_over_MONASH__528->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_0_mini_charm_balancing_JUNCTIONS_over_MONASH__528->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_0_mini_charm_balancing_JUNCTIONS_over_MONASH__528->GetXaxis()->SetTitleFont(42);
@@ -7309,7 +9957,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->SetBinContent(1,0.8036031);
    hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->SetBinError(1,0.001916654);
    hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->SetLineColor(ci);
    hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->SetLineStyle(2);
+   hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->SetMarkerColor(ci);
+   hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->SetMarkerStyle(21);
    hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_1_mini_charm_balancing_JUNCTIONS_over_MONASH__529->GetXaxis()->SetTitleFont(42);
@@ -7324,7 +9980,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->SetBinContent(1,0.8003445);
    hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->SetBinError(1,0.001517521);
    hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->SetLineColor(ci);
    hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->SetLineStyle(3);
+   hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->SetMarkerColor(ci);
+   hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->SetMarkerStyle(21);
    hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_2_mini_charm_balancing_JUNCTIONS_over_MONASH__530->GetXaxis()->SetTitleFont(42);
@@ -7339,7 +10003,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->SetBinContent(1,0.8498744);
    hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->SetBinError(1,0.001825585);
    hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->SetLineColor(ci);
    hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->SetLineStyle(4);
+   hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->SetMarkerColor(ci);
+   hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->SetMarkerStyle(21);
    hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_3_mini_charm_balancing_JUNCTIONS_over_MONASH__531->GetXaxis()->SetTitleFont(42);
@@ -7354,7 +10026,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->SetBinContent(1,0.8343404);
    hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->SetBinError(1,0.0017719);
    hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->SetLineColor(ci);
    hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->SetLineStyle(5);
+   hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->SetMarkerColor(ci);
+   hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->SetMarkerStyle(21);
    hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_4_mini_charm_balancing_JUNCTIONS_over_MONASH__532->GetXaxis()->SetTitleFont(42);
@@ -7369,7 +10049,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->SetBinContent(1,0.8722389);
    hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->SetBinError(1,0.001274983);
    hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->SetLineColor(ci);
    hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->SetLineStyle(6);
+   hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->SetMarkerColor(ci);
+   hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->SetMarkerStyle(21);
    hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_5_mini_charm_balancing_JUNCTIONS_over_MONASH__533->GetXaxis()->SetTitleFont(42);
@@ -7384,7 +10072,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->SetBinContent(1,0.856569);
    hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->SetBinError(1,0.001587287);
    hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->SetLineColor(ci);
    hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->SetLineStyle(7);
+   hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->SetMarkerColor(ci);
+   hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->SetMarkerStyle(21);
    hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_6_mini_charm_balancing_JUNCTIONS_over_MONASH__534->GetXaxis()->SetTitleFont(42);
@@ -7399,7 +10095,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->SetBinContent(1,0.9266026);
    hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->SetBinError(1,0.001882686);
    hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->SetLineColor(ci);
    hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->SetLineStyle(8);
+   hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->SetMarkerColor(ci);
+   hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->SetMarkerStyle(21);
    hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_7_mini_charm_balancing_JUNCTIONS_over_MONASH__535->GetXaxis()->SetTitleFont(42);
@@ -7414,7 +10118,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->SetBinContent(1,0.9080835);
    hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->SetBinError(1,0.002088546);
    hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->SetLineColor(ci);
    hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->SetLineStyle(9);
+   hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->SetMarkerColor(ci);
+   hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->SetMarkerStyle(21);
    hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_8_mini_charm_balancing_JUNCTIONS_over_MONASH__536->GetXaxis()->SetTitleFont(42);
@@ -7429,7 +10141,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->SetBinContent(1,0.9080835);
    hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->SetBinError(1,0.002088546);
    hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->SetLineColor(ci);
    hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->SetLineStyle(10);
+   hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->SetMarkerColor(ci);
+   hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->SetMarkerStyle(21);
    hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_9_mini_charm_balancing_JUNCTIONS_over_MONASH__537->GetXaxis()->SetTitleFont(42);
@@ -7444,6 +10164,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_0_10_mini_charm_balancing_JUNCTIONS_over_MONASH__538->SetBinContent(1,0.9486893);
    hYields_CHARM_0_10_mini_charm_balancing_JUNCTIONS_over_MONASH__538->SetBinError(1,0.00315494);
    hYields_CHARM_0_10_mini_charm_balancing_JUNCTIONS_over_MONASH__538->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_10_mini_charm_balancing_JUNCTIONS_over_MONASH__538->SetLineColor(ci);
+   hYields_CHARM_0_10_mini_charm_balancing_JUNCTIONS_over_MONASH__538->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_0_10_mini_charm_balancing_JUNCTIONS_over_MONASH__538->SetMarkerColor(ci);
+   hYields_CHARM_0_10_mini_charm_balancing_JUNCTIONS_over_MONASH__538->SetMarkerStyle(21);
    hYields_CHARM_0_10_mini_charm_balancing_JUNCTIONS_over_MONASH__538->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_0_10_mini_charm_balancing_JUNCTIONS_over_MONASH__538->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_0_10_mini_charm_balancing_JUNCTIONS_over_MONASH__538->GetXaxis()->SetTitleFont(42);
@@ -7458,6 +10186,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_0_mini_charm_balancing_JUNCTIONS_over_MONASH__539->SetBinContent(2,0.7803147);
    hYields_CHARM_1_0_mini_charm_balancing_JUNCTIONS_over_MONASH__539->SetBinError(2,0.00854334);
    hYields_CHARM_1_0_mini_charm_balancing_JUNCTIONS_over_MONASH__539->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_mini_charm_balancing_JUNCTIONS_over_MONASH__539->SetLineColor(ci);
+   hYields_CHARM_1_0_mini_charm_balancing_JUNCTIONS_over_MONASH__539->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_0_mini_charm_balancing_JUNCTIONS_over_MONASH__539->SetMarkerColor(ci);
+   hYields_CHARM_1_0_mini_charm_balancing_JUNCTIONS_over_MONASH__539->SetMarkerStyle(21);
    hYields_CHARM_1_0_mini_charm_balancing_JUNCTIONS_over_MONASH__539->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_0_mini_charm_balancing_JUNCTIONS_over_MONASH__539->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_0_mini_charm_balancing_JUNCTIONS_over_MONASH__539->GetXaxis()->SetTitleFont(42);
@@ -7472,7 +10208,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->SetBinContent(2,0.8046702);
    hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->SetBinError(2,0.002158312);
    hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->SetLineColor(ci);
    hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->SetLineStyle(2);
+   hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->SetMarkerColor(ci);
+   hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->SetMarkerStyle(21);
    hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_1_mini_charm_balancing_JUNCTIONS_over_MONASH__540->GetXaxis()->SetTitleFont(42);
@@ -7487,7 +10231,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->SetBinContent(2,0.8076155);
    hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->SetBinError(2,0.00188336);
    hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->SetLineColor(ci);
    hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->SetLineStyle(3);
+   hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->SetMarkerColor(ci);
+   hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->SetMarkerStyle(21);
    hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_2_mini_charm_balancing_JUNCTIONS_over_MONASH__541->GetXaxis()->SetTitleFont(42);
@@ -7502,7 +10254,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->SetBinContent(2,0.8423854);
    hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->SetBinError(2,0.002371316);
    hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->SetLineColor(ci);
    hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->SetLineStyle(4);
+   hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->SetMarkerColor(ci);
+   hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->SetMarkerStyle(21);
    hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_3_mini_charm_balancing_JUNCTIONS_over_MONASH__542->GetXaxis()->SetTitleFont(42);
@@ -7517,7 +10277,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->SetBinContent(2,0.8309957);
    hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->SetBinError(2,0.002008149);
    hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->SetLineColor(ci);
    hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->SetLineStyle(5);
+   hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->SetMarkerColor(ci);
+   hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->SetMarkerStyle(21);
    hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_4_mini_charm_balancing_JUNCTIONS_over_MONASH__543->GetXaxis()->SetTitleFont(42);
@@ -7532,7 +10300,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->SetBinContent(2,0.866198);
    hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->SetBinError(2,0.001912522);
    hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->SetLineColor(ci);
    hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->SetLineStyle(6);
+   hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->SetMarkerColor(ci);
+   hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->SetMarkerStyle(21);
    hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_5_mini_charm_balancing_JUNCTIONS_over_MONASH__544->GetXaxis()->SetTitleFont(42);
@@ -7547,7 +10323,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->SetBinContent(2,0.8553598);
    hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->SetBinError(2,0.001910966);
    hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->SetLineColor(ci);
    hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->SetLineStyle(7);
+   hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->SetMarkerColor(ci);
+   hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->SetMarkerStyle(21);
    hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_6_mini_charm_balancing_JUNCTIONS_over_MONASH__545->GetXaxis()->SetTitleFont(42);
@@ -7562,7 +10346,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->SetBinContent(2,0.9347954);
    hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->SetBinError(2,0.001369999);
    hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->SetLineColor(ci);
    hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->SetLineStyle(8);
+   hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->SetMarkerColor(ci);
+   hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->SetMarkerStyle(21);
    hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_7_mini_charm_balancing_JUNCTIONS_over_MONASH__546->GetXaxis()->SetTitleFont(42);
@@ -7577,7 +10369,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->SetBinContent(2,0.9150446);
    hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->SetBinError(2,0.001788826);
    hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->SetLineColor(ci);
    hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->SetLineStyle(9);
+   hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->SetMarkerColor(ci);
+   hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->SetMarkerStyle(21);
    hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_8_mini_charm_balancing_JUNCTIONS_over_MONASH__547->GetXaxis()->SetTitleFont(42);
@@ -7592,7 +10392,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->SetBinContent(2,0.9150446);
    hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->SetBinError(2,0.001788826);
    hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->SetLineColor(ci);
    hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->SetLineStyle(10);
+   hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->SetMarkerColor(ci);
+   hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->SetMarkerStyle(21);
    hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_9_mini_charm_balancing_JUNCTIONS_over_MONASH__548->GetXaxis()->SetTitleFont(42);
@@ -7607,6 +10415,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_1_10_mini_charm_balancing_JUNCTIONS_over_MONASH__549->SetBinContent(2,0.949427);
    hYields_CHARM_1_10_mini_charm_balancing_JUNCTIONS_over_MONASH__549->SetBinError(2,0.004226546);
    hYields_CHARM_1_10_mini_charm_balancing_JUNCTIONS_over_MONASH__549->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_10_mini_charm_balancing_JUNCTIONS_over_MONASH__549->SetLineColor(ci);
+   hYields_CHARM_1_10_mini_charm_balancing_JUNCTIONS_over_MONASH__549->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_1_10_mini_charm_balancing_JUNCTIONS_over_MONASH__549->SetMarkerColor(ci);
+   hYields_CHARM_1_10_mini_charm_balancing_JUNCTIONS_over_MONASH__549->SetMarkerStyle(21);
    hYields_CHARM_1_10_mini_charm_balancing_JUNCTIONS_over_MONASH__549->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_1_10_mini_charm_balancing_JUNCTIONS_over_MONASH__549->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_1_10_mini_charm_balancing_JUNCTIONS_over_MONASH__549->GetXaxis()->SetTitleFont(42);
@@ -7621,6 +10437,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_0_mini_charm_balancing_JUNCTIONS_over_MONASH__550->SetBinContent(3,1.713286);
    hYields_CHARM_2_0_mini_charm_balancing_JUNCTIONS_over_MONASH__550->SetBinError(3,0.04860005);
    hYields_CHARM_2_0_mini_charm_balancing_JUNCTIONS_over_MONASH__550->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_0_mini_charm_balancing_JUNCTIONS_over_MONASH__550->SetLineColor(ci);
+   hYields_CHARM_2_0_mini_charm_balancing_JUNCTIONS_over_MONASH__550->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_0_mini_charm_balancing_JUNCTIONS_over_MONASH__550->SetMarkerColor(ci);
+   hYields_CHARM_2_0_mini_charm_balancing_JUNCTIONS_over_MONASH__550->SetMarkerStyle(21);
    hYields_CHARM_2_0_mini_charm_balancing_JUNCTIONS_over_MONASH__550->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_0_mini_charm_balancing_JUNCTIONS_over_MONASH__550->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_0_mini_charm_balancing_JUNCTIONS_over_MONASH__550->GetXaxis()->SetTitleFont(42);
@@ -7635,7 +10459,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->SetBinContent(3,1.553983);
    hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->SetBinError(3,0.01435966);
    hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->SetLineColor(ci);
    hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->SetLineStyle(2);
+   hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->SetMarkerColor(ci);
+   hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->SetMarkerStyle(21);
    hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_1_mini_charm_balancing_JUNCTIONS_over_MONASH__551->GetXaxis()->SetTitleFont(42);
@@ -7650,7 +10482,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->SetBinContent(3,1.368137);
    hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->SetBinError(3,0.01384742);
    hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->SetLineColor(ci);
    hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->SetLineStyle(3);
+   hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->SetMarkerColor(ci);
+   hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->SetMarkerStyle(21);
    hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_2_mini_charm_balancing_JUNCTIONS_over_MONASH__552->GetXaxis()->SetTitleFont(42);
@@ -7665,7 +10505,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->SetBinContent(3,1.309989);
    hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->SetBinError(3,0.00863269);
    hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->SetLineColor(ci);
    hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->SetLineStyle(4);
+   hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->SetMarkerColor(ci);
+   hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->SetMarkerStyle(21);
    hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_3_mini_charm_balancing_JUNCTIONS_over_MONASH__553->GetXaxis()->SetTitleFont(42);
@@ -7680,7 +10528,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->SetBinContent(3,1.210399);
    hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->SetBinError(3,0.01066602);
    hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->SetLineColor(ci);
    hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->SetLineStyle(5);
+   hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->SetMarkerColor(ci);
+   hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->SetMarkerStyle(21);
    hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_4_mini_charm_balancing_JUNCTIONS_over_MONASH__554->GetXaxis()->SetTitleFont(42);
@@ -7695,7 +10551,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->SetBinContent(3,1.139944);
    hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->SetBinError(3,0.008381124);
    hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->SetLineColor(ci);
    hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->SetLineStyle(6);
+   hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->SetMarkerColor(ci);
+   hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->SetMarkerStyle(21);
    hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_5_mini_charm_balancing_JUNCTIONS_over_MONASH__555->GetXaxis()->SetTitleFont(42);
@@ -7710,7 +10574,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->SetBinContent(3,1.071086);
    hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->SetBinError(3,0.008116291);
    hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->SetLineColor(ci);
    hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->SetLineStyle(7);
+   hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->SetMarkerColor(ci);
+   hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->SetMarkerStyle(21);
    hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_6_mini_charm_balancing_JUNCTIONS_over_MONASH__556->GetXaxis()->SetTitleFont(42);
@@ -7725,7 +10597,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->SetBinContent(3,1.070877);
    hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->SetBinError(3,0.006788161);
    hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->SetLineColor(ci);
    hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->SetLineStyle(8);
+   hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->SetMarkerColor(ci);
+   hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->SetMarkerStyle(21);
    hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_7_mini_charm_balancing_JUNCTIONS_over_MONASH__557->GetXaxis()->SetTitleFont(42);
@@ -7740,7 +10620,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->SetBinContent(3,1.003308);
    hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->SetBinError(3,0.006839974);
    hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->SetLineColor(ci);
    hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->SetLineStyle(9);
+   hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->SetMarkerColor(ci);
+   hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->SetMarkerStyle(21);
    hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_8_mini_charm_balancing_JUNCTIONS_over_MONASH__558->GetXaxis()->SetTitleFont(42);
@@ -7755,7 +10643,15 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->SetBinContent(3,1.003308);
    hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->SetBinError(3,0.006839974);
    hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->SetLineColor(ci);
    hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->SetLineStyle(10);
+   hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->SetMarkerColor(ci);
+   hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->SetMarkerStyle(21);
    hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_9_mini_charm_balancing_JUNCTIONS_over_MONASH__559->GetXaxis()->SetTitleFont(42);
@@ -7770,6 +10666,14 @@ void global_balancing_plots_multiplicity_MACRO()
    hYields_CHARM_2_10_mini_charm_balancing_JUNCTIONS_over_MONASH__560->SetBinContent(3,0.9656097);
    hYields_CHARM_2_10_mini_charm_balancing_JUNCTIONS_over_MONASH__560->SetBinError(3,0.01262328);
    hYields_CHARM_2_10_mini_charm_balancing_JUNCTIONS_over_MONASH__560->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_10_mini_charm_balancing_JUNCTIONS_over_MONASH__560->SetLineColor(ci);
+   hYields_CHARM_2_10_mini_charm_balancing_JUNCTIONS_over_MONASH__560->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYields_CHARM_2_10_mini_charm_balancing_JUNCTIONS_over_MONASH__560->SetMarkerColor(ci);
+   hYields_CHARM_2_10_mini_charm_balancing_JUNCTIONS_over_MONASH__560->SetMarkerStyle(21);
    hYields_CHARM_2_10_mini_charm_balancing_JUNCTIONS_over_MONASH__560->GetXaxis()->SetLabelFont(42);
    hYields_CHARM_2_10_mini_charm_balancing_JUNCTIONS_over_MONASH__560->GetXaxis()->SetTitleOffset(1);
    hYields_CHARM_2_10_mini_charm_balancing_JUNCTIONS_over_MONASH__560->GetXaxis()->SetTitleFont(42);

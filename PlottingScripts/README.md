@@ -1,6 +1,6 @@
 # Plotting Scripts
 
-This directory contains the plotting layer for the hadronization analysis. The current paper workflow is centered on Paul's THnSparse plotting macro and treats `MONASH`, `JUNCTIONS`, and `CLOSEPACKING` as equal tunes.
+This directory contains the plotting layer for the hadronization analysis. The current paper workflow combines Paul's THnSparse plotting macro for the pair-correlation analysis with a raw-tree inclusive macro for single-particle kinematic spectra, and treats `MONASH`, `JUNCTIONS`, and `CLOSEPACKING` as equal tunes.
 
 ## Paper THnSparse Inputs
 
@@ -83,51 +83,47 @@ Targets:
 - `thnsparse-complete-root`: Paul's THnSparse plots without subsampling.
 - `thnsparse`: Paul's full THnSparse plots with subsampling if enabled in the config.
 - `multiplicity-boundaries`: charged-particle multiplicity distribution with percentile boundary lines.
-- `kinematic-spectra`: pT, eta, phi, multiplicity, and optional delta-phi/delta-eta spectra from the THnSparse pair files.
+- `multiplicity-compact`: MONASH-only compact multiplicity-percentile plot.
+- `multiplicity-spectrum`: shared raw `N_{ch}` spectrum with `JUNCTIONS/MONASH` and `CLOSEPACKING/MONASH` ratio panel plus a MONASH percentile-boundary inset.
+- `kinematic-spectra`: inclusive raw-tree pT, eta, phi, and multiplicity spectra.
 - `all` / `paper`: multiplicity boundaries, kinematic spectra, plus the full THnSparse config.
 
 The runner resolves the repository root from `HADRONIZATION_BASE` or from its own location, sources `setupEnv.sh` when present, and runs ROOT in batch mode.
 
-The kinematic spectra target uses the complete-root config by default:
+The kinematic spectra target reads the generated raw HF files by default:
 
 ```bash
 ./PlottingScripts/run_paper_plots.sh kinematic-spectra
+./PlottingScripts/run_paper_plots.sh multiplicity-spectrum
+./PlottingScripts/run_paper_plots.sh multiplicity-compact
 ```
 
 Useful overrides:
 
 ```bash
-KINEMATIC_CONFIG=PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json \
+KINEMATIC_RAW_BASE=RootFiles/HF \
 KINEMATIC_OUTPUT_DIR=PlottingScripts/Plots/KinematicSpectraFull \
 ./PlottingScripts/run_paper_plots.sh kinematic-spectra
 ```
 
-The default kinematic output is shape-normalized. Set `KINEMATIC_NORMALIZE=false` to draw bin-width-normalized counts. Set `KINEMATIC_CORRELATIONS=false` to skip the optional `Delta phi` and `Delta eta` spectra.
+The default kinematic output is shape-normalized. Set `KINEMATIC_NORMALIZE=false` to draw bin-width-normalized counts. Set `KINEMATIC_STRICT=false` to skip missing tunes instead of treating them as errors.
 
-For final plots, single-particle absolute `phi` spectra are strict by default: `hTrKinematics` and `hAsKinematics` must have axis 0 booked as `[-pi, pi]`. Correlation `Delta phi` spectra keep Paul's shifted `[-pi/2, 3pi/2]` convention. Old complete-root files with absolute `phi` booked as `[-pi/2, 3pi/2]` can only be drawn for diagnostics:
+The paper kinematic spectra are inclusive single-particle spectra. They are filled directly from the generated raw tree with exact PDG-ID matching and no trigger/associate pair conditioning. The raw producer already applied its final-state particle acceptance (`pT >= 0.15 GeV/c`, `|eta| <= 4`); the plotting macro adds no extra kinematic cuts. Absolute `phi` is wrapped to `[-pi, pi)`.
 
-```bash
-KINEMATIC_PHI_POLICY=native ./PlottingScripts/run_paper_plots.sh kinematic-spectra
-KINEMATIC_PHI_POLICY=legacy-repair ./PlottingScripts/run_paper_plots.sh kinematic-spectra
-```
-
-Do not use `legacy-repair` plots as final absolute-phi QA, because the missing `[-pi, -pi/2]` interval is reconstructed from underflow.
+`Plot_KinematicSpectra_THnSparse.C` is kept for diagnostic trigger/associate and correlation checks, but those spectra are pair-conditioned by construction and are not the final inclusive single-particle kinematic spectra.
 
 Kinematic spectra are written into subdirectories by plot family:
 
 ```text
 PlottingScripts/Plots/KinematicSpectra/Multiplicity
-PlottingScripts/Plots/KinematicSpectra/Trigger/pT
-PlottingScripts/Plots/KinematicSpectra/Trigger/eta
-PlottingScripts/Plots/KinematicSpectra/Trigger/phi
-PlottingScripts/Plots/KinematicSpectra/Associate/pT
-PlottingScripts/Plots/KinematicSpectra/Associate/eta
-PlottingScripts/Plots/KinematicSpectra/Associate/phi
-PlottingScripts/Plots/KinematicSpectra/Correlation/deltaPhi
-PlottingScripts/Plots/KinematicSpectra/Correlation/deltaEta
+PlottingScripts/Plots/KinematicSpectra/Inclusive/pT
+PlottingScripts/Plots/KinematicSpectra/Inclusive/eta
+PlottingScripts/Plots/KinematicSpectra/Inclusive/phi
 ```
 
-Event-level spectra that are independent of the selected heavy-flavour pair are intentionally drawn once. In particular, `summed MULTIPLICITY` comes from the same HF event sample for charm and beauty, so the paper macro writes one shared multiplicity plot per tune rather than duplicate charm and beauty versions. Trigger spectra are still split by charm/beauty because the trigger particle differs (`D+` versus `B+`), while associate spectra are split by pair file.
+Event-level spectra that are independent of the selected heavy-flavour species are intentionally drawn once. In particular, charged multiplicity comes from the same HF event sample for charm and beauty, so the paper macro writes one shared multiplicity plot per tune rather than duplicate charm and beauty versions. The shared multiplicity spectrum is limited to `N_{ch} <= 170` and includes a lower ratio panel for `JUNCTIONS/MONASH` and `CLOSEPACKING/MONASH`. Its main panel also carries a compact MONASH percentile-boundary inset and a short energy/acceptance annotation below the legend.
+
+Across the current production plots, `N_{ch}` means prompt charged primary `e^{+-}`, `mu^{+-}`, `pi^{+-}`, `K^{+-}`, and `p`/anti-`p` with PYTHIA status `81-89`, `pT >= 0.15 GeV/c`, and `|eta| <= 4` in pp at `sqrt(s)=14 TeV`. Multiplicity percentile labels are interpreted from low to high activity as `90-100% -> ... -> 0-1%`.
 
 ## THnSparse Configs
 
@@ -184,12 +180,24 @@ Kinematic spectra:
 
 ```bash
 root -l -b <<'ROOT'
-.L PlottingScripts/Plot_KinematicSpectra_THnSparse.C+
-Plot_KinematicSpectra_THnSparse("PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json",
-                                "PlottingScripts/Plots/KinematicSpectra",
-                                true, true, true, true, "strict")
+.L PlottingScripts/Plot_InclusiveKinematicSpectra_Raw.C+
+Plot_InclusiveKinematicSpectra_Raw("RootFiles/HF",
+                                   "PlottingScripts/Plots/KinematicSpectra",
+                                   true, true)
 .q
 ROOT
+```
+
+Raw multiplicity spectrum only:
+
+```bash
+./PlottingScripts/run_paper_plots.sh multiplicity-spectrum
+```
+
+Compact MONASH percentile-boundary plot:
+
+```bash
+./PlottingScripts/run_paper_plots.sh multiplicity-compact
 ```
 
 ## Outputs

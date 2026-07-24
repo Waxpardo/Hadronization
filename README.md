@@ -147,9 +147,9 @@ The paper plotting entry point is:
 ./PlottingScripts/run_paper_plots.sh
 ```
 
-`smoke` runs the multiplicity-boundary plot and the complete-root THnSparse config without subsampling. The default `all` target runs the multiplicity-boundary plot and the full THnSparse config.
+`smoke` runs the multiplicity-boundary plot, inclusive raw kinematic spectra, and the complete-root THnSparse config without subsampling. The default `all` target runs the multiplicity-boundary plot, inclusive raw kinematic spectra, and the full THnSparse config. Use `./PlottingScripts/run_paper_plots.sh multiplicity-spectrum` to regenerate only the shared raw `N_{ch}` spectrum with the tune/MONASH ratio panel, MONASH percentile-boundary inset, and short energy/acceptance annotation below the legend. Use `./PlottingScripts/run_paper_plots.sh multiplicity-compact` for the standalone compact MONASH percentile-boundary figure.
 
-Kinematic spectra use strict final phi handling by default: absolute single-particle `phi` must be stored as `[-pi, pi]`, while correlation `Delta phi` remains in Paul's `[-pi/2, 3pi/2]` convention. Use `KINEMATIC_PHI_POLICY=native` or `KINEMATIC_PHI_POLICY=legacy-repair` only for diagnostics with old complete-root files.
+Paper kinematic spectra are inclusive single-particle spectra drawn directly from `RootFiles/HF`, not from trigger/associate-conditioned THnSparse pair outputs. Exact PDG-ID matching is used, the raw producer acceptance is preserved, and absolute `phi` is displayed in `[-pi, pi)`. Correlation `Delta phi` plots in Paul's THnSparse macro keep the shifted `[-pi/2, 3pi/2]` convention. The charged multiplicity definition used for these figures is prompt charged primary `e`, `mu`, `pi`, `K`, and `p` species, including antiparticles, with PYTHIA status `81-89`, `pT >= 0.15 GeV/c`, `|eta| <= 4`, in pp at `sqrt(s)=14 TeV`; activity classes are read from low to high multiplicity as `90-100% -> ... -> 0-1%`.
 
 The current pT and multiplicity plots are made from `AnalyzedData`, not from `RootFiles`. If no date is passed, the plotting helpers search for the latest dated folder under `AnalyzedData`. In ordinary use, we pass the date explicitly so that no older production is selected by accident.
 

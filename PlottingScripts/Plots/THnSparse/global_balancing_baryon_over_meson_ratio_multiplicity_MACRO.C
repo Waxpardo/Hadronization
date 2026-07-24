@@ -4,7 +4,7 @@
 void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
 {
 //=========Macro generated from canvas: global_balancing_baryon_over_meson_ratio/global_balancing_baryon_over_meson_ratio
-//=========  (Wed Jul 15 14:34:21 2026) by ROOT version 6.30/01
+//=========  (Wed Jul 15 22:32:51 2026) by ROOT version 6.30/01
    TCanvas *global_balancing_baryon_over_meson_ratio = new TCanvas("global_balancing_baryon_over_meson_ratio", "global_balancing_baryon_over_meson_ratio",0,0,1000,950);
    global_balancing_baryon_over_meson_ratio->Range(0,0,1,1);
    global_balancing_baryon_over_meson_ratio->SetFillColor(0);
@@ -64,6 +64,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__562->SetBinContent(1,0.1644339);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__562->SetBinError(1,0.004331716);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__562->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__562->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__562->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__562->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__562->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__562->GetXaxis()->SetTitleFont(42);
@@ -78,6 +80,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__563->SetBinContent(2,0.1667743);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__563->SetBinError(2,0.0009065018);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__563->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__563->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__563->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__563->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__563->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__563->GetXaxis()->SetTitleFont(42);
@@ -92,6 +96,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__564->SetBinContent(3,0.1660391);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__564->SetBinError(3,0.00137313);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__564->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__564->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__564->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__564->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__564->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__564->GetXaxis()->SetTitleFont(42);
@@ -106,6 +112,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__565->SetBinContent(4,0.1678736);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__565->SetBinError(4,0.002125965);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__565->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__565->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__565->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__565->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__565->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__565->GetXaxis()->SetTitleFont(42);
@@ -120,6 +128,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__566->SetBinContent(5,0.1673252);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__566->SetBinError(5,0.001783487);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__566->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__566->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__566->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__566->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__566->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__566->GetXaxis()->SetTitleFont(42);
@@ -134,6 +144,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__567->SetBinContent(6,0.1720917);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__567->SetBinError(6,0.003415843);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__567->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__567->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__567->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__567->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__567->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__567->GetXaxis()->SetTitleFont(42);
@@ -148,6 +160,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__568->SetBinContent(7,0.1720917);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__568->SetBinError(7,0.003415843);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__568->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__568->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__568->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__568->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__568->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__568->GetXaxis()->SetTitleFont(42);
@@ -162,6 +176,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__569->SetBinContent(8,0.1695784);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__569->SetBinError(8,0.004445836);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__569->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__569->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__569->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__569->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__569->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__569->GetXaxis()->SetTitleFont(42);
@@ -176,6 +192,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__570->SetBinContent(9,0.1695784);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__570->SetBinError(9,0.004445836);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__570->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__570->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__570->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__570->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__570->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__570->GetXaxis()->SetTitleFont(42);
@@ -190,6 +208,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__571->SetBinContent(10,0.1695784);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__571->SetBinError(10,0.004445836);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__571->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__571->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__571->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__571->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__571->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__571->GetXaxis()->SetTitleFont(42);
@@ -204,6 +224,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__572->SetBinContent(11,0.1775173);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__572->SetBinError(11,0.009558149);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__572->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__572->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__572->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__572->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__572->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__572->GetXaxis()->SetTitleFont(42);
@@ -218,7 +240,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->SetBinContent(1,0.5439392);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->SetBinError(1,0.009926365);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__573->GetXaxis()->SetTitleFont(42);
@@ -233,7 +262,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->SetBinContent(2,0.5149508);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->SetBinError(2,0.004064008);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__574->GetXaxis()->SetTitleFont(42);
@@ -248,7 +284,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->SetBinContent(3,0.4199288);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->SetBinError(3,0.002262207);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__575->GetXaxis()->SetTitleFont(42);
@@ -263,7 +306,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->SetBinContent(4,0.3478608);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->SetBinError(4,0.005963828);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__576->GetXaxis()->SetTitleFont(42);
@@ -278,7 +328,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->SetBinContent(5,0.3139769);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->SetBinError(5,0.004166102);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__577->GetXaxis()->SetTitleFont(42);
@@ -293,7 +350,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->SetBinContent(6,0.2730452);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->SetBinError(6,0.003376244);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__578->GetXaxis()->SetTitleFont(42);
@@ -308,7 +372,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->SetBinContent(7,0.2466741);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->SetBinError(7,0.005245472);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__579->GetXaxis()->SetTitleFont(42);
@@ -323,7 +394,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->SetBinContent(8,0.2307518);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->SetBinError(8,0.003065304);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__580->GetXaxis()->SetTitleFont(42);
@@ -338,7 +416,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->SetBinContent(9,0.2100323);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->SetBinError(9,0.00511088);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__581->GetXaxis()->SetTitleFont(42);
@@ -353,7 +438,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->SetBinContent(10,0.2100323);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->SetBinError(10,0.00511088);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__582->GetXaxis()->SetTitleFont(42);
@@ -368,7 +460,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->SetBinContent(11,0.2082275);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->SetBinError(11,0.01056883);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__583->GetXaxis()->SetTitleFont(42);
@@ -383,7 +482,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->SetBinContent(1,0.5217986);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->SetBinError(1,0.006340444);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__584->GetXaxis()->SetTitleFont(42);
@@ -398,7 +504,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->SetBinContent(2,0.4815007);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->SetBinError(2,0.003654365);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__585->GetXaxis()->SetTitleFont(42);
@@ -413,7 +526,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->SetBinContent(3,0.3845964);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->SetBinError(3,0.00574202);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__586->GetXaxis()->SetTitleFont(42);
@@ -428,7 +548,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->SetBinContent(4,0.3421118);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->SetBinError(4,0.003110826);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__587->GetXaxis()->SetTitleFont(42);
@@ -443,7 +570,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->SetBinContent(5,0.2752753);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->SetBinError(5,0.003239062);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__588->GetXaxis()->SetTitleFont(42);
@@ -458,7 +592,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->SetBinContent(6,0.2513071);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->SetBinError(6,0.00312533);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__589->GetXaxis()->SetTitleFont(42);
@@ -473,7 +614,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->SetBinContent(7,0.228254);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->SetBinError(7,0.004398626);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__590->GetXaxis()->SetTitleFont(42);
@@ -488,7 +636,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->SetBinContent(8,0.2000273);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->SetBinError(8,0.002853808);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__591->GetXaxis()->SetTitleFont(42);
@@ -503,7 +658,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->SetBinContent(9,0.2000273);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->SetBinError(9,0.002853808);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__592->GetXaxis()->SetTitleFont(42);
@@ -518,7 +680,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->SetBinContent(10,0.2000273);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->SetBinError(10,0.002853808);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__593->GetXaxis()->SetTitleFont(42);
@@ -533,7 +702,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->SetBinContent(11,0.1920327);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->SetBinError(11,0.006288927);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only__594->GetXaxis()->SetTitleFont(42);
@@ -551,12 +727,12 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    leg->SetLineWidth(1);
    leg->SetFillColor(0);
    leg->SetFillStyle(1001);
-   TLegendEntry *entry=leg->AddEntry("hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only","B+ Lambda_b","l");
+   TLegendEntry *entry=leg->AddEntry("hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_only","B+ Lambda_b","lep");
    entry->SetLineColor(1);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
    leg->Draw();
@@ -613,6 +789,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__596->SetBinContent(1,3.30795);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__596->SetBinError(1,0.01464253);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__596->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__596->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__596->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__596->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__596->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__596->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__596->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__596->GetXaxis()->SetTitleFont(42);
@@ -627,6 +811,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__597->SetBinContent(2,3.087711);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__597->SetBinError(2,0.005919323);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__597->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__597->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__597->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__597->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__597->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__597->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__597->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__597->GetXaxis()->SetTitleFont(42);
@@ -641,6 +833,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__598->SetBinContent(3,2.529095);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__598->SetBinError(3,0.003051049);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__598->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__598->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__598->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__598->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__598->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__598->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__598->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__598->GetXaxis()->SetTitleFont(42);
@@ -655,6 +855,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__599->SetBinContent(4,2.072159);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__599->SetBinError(4,0.007448769);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__599->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__599->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__599->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__599->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__599->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__599->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__599->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__599->GetXaxis()->SetTitleFont(42);
@@ -669,6 +877,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__600->SetBinContent(5,1.876447);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__600->SetBinError(5,0.005053645);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__600->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__600->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__600->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__600->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__600->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__600->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__600->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__600->GetXaxis()->SetTitleFont(42);
@@ -683,6 +899,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__601->SetBinContent(6,1.586626);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__601->SetBinError(6,0.003894189);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__601->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__601->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__601->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__601->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__601->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__601->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__601->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__601->GetXaxis()->SetTitleFont(42);
@@ -697,6 +921,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__602->SetBinContent(7,1.433388);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__602->SetBinError(7,0.005874798);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__602->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__602->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__602->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__602->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__602->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__602->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__602->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__602->GetXaxis()->SetTitleFont(42);
@@ -711,6 +943,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__603->SetBinContent(8,1.360738);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__603->SetBinError(8,0.003342626);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__603->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__603->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__603->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__603->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__603->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__603->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__603->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__603->GetXaxis()->SetTitleFont(42);
@@ -725,6 +965,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__604->SetBinContent(9,1.238556);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__604->SetBinError(9,0.00551522);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__604->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__604->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__604->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__604->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__604->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__604->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__604->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__604->GetXaxis()->SetTitleFont(42);
@@ -739,6 +987,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__605->SetBinContent(10,1.238556);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__605->SetBinError(10,0.00551522);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__605->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__605->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__605->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__605->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__605->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__605->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__605->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__605->GetXaxis()->SetTitleFont(42);
@@ -753,6 +1009,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__606->SetBinContent(11,1.172999);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__606->SetBinError(11,0.01088489);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__606->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__606->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__606->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__606->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__606->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__606->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__606->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__606->GetXaxis()->SetTitleFont(42);
@@ -815,6 +1079,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__608->SetBinContent(1,3.173303);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__608->SetBinError(1,0.009660247);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__608->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__608->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__608->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__608->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__608->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__608->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__608->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__608->GetXaxis()->SetTitleFont(42);
@@ -829,6 +1101,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__609->SetBinContent(2,2.88714);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__609->SetBinError(2,0.005399846);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__609->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__609->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__609->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__609->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__609->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__609->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__609->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__609->GetXaxis()->SetTitleFont(42);
@@ -843,6 +1123,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__610->SetBinContent(3,2.3163);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__610->SetBinError(3,0.007849098);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__610->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__610->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__610->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__610->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__610->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__610->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__610->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__610->GetXaxis()->SetTitleFont(42);
@@ -857,6 +1145,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__611->SetBinContent(4,2.037913);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__611->SetBinError(4,0.004038942);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__611->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__611->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__611->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__611->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__611->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__611->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__611->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__611->GetXaxis()->SetTitleFont(42);
@@ -871,6 +1167,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__612->SetBinContent(5,1.645151);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__612->SetBinError(5,0.00390811);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__612->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__612->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__612->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__612->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__612->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__612->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__612->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__612->GetXaxis()->SetTitleFont(42);
@@ -885,6 +1189,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__613->SetBinContent(6,1.46031);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__613->SetBinError(6,0.003644278);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__613->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__613->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__613->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__613->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__613->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__613->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__613->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__613->GetXaxis()->SetTitleFont(42);
@@ -899,6 +1211,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__614->SetBinContent(7,1.326351);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__614->SetBinError(7,0.004969553);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__614->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__614->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__614->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__614->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__614->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__614->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__614->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__614->GetXaxis()->SetTitleFont(42);
@@ -913,6 +1233,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__615->SetBinContent(8,1.179557);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__615->SetBinError(8,0.003043557);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__615->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__615->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__615->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__615->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__615->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__615->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__615->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__615->GetXaxis()->SetTitleFont(42);
@@ -927,6 +1255,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__616->SetBinContent(9,1.179557);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__616->SetBinError(9,0.003043557);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__616->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__616->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__616->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__616->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__616->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__616->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__616->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__616->GetXaxis()->SetTitleFont(42);
@@ -941,6 +1277,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__617->SetBinContent(10,1.179557);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__617->SetBinError(10,0.003043557);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__617->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__617->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__617->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__617->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__617->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__617->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__617->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__617->GetXaxis()->SetTitleFont(42);
@@ -955,6 +1299,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__618->SetBinContent(11,1.081769);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__618->SetBinError(11,0.006345276);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__618->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__618->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__618->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__618->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__618->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__618->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__618->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__618->GetXaxis()->SetTitleFont(42);
@@ -1018,6 +1370,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__620->SetBinContent(1,0.1644339);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__620->SetBinError(1,0.004331716);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__620->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__620->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__620->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__620->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__620->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__620->GetXaxis()->SetTitleFont(42);
@@ -1032,6 +1386,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__621->SetBinContent(2,0.1667743);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__621->SetBinError(2,0.0009065018);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__621->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__621->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__621->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__621->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__621->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__621->GetXaxis()->SetTitleFont(42);
@@ -1046,6 +1402,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__622->SetBinContent(3,0.1660391);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__622->SetBinError(3,0.00137313);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__622->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__622->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__622->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__622->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__622->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__622->GetXaxis()->SetTitleFont(42);
@@ -1060,6 +1418,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__623->SetBinContent(4,0.1678736);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__623->SetBinError(4,0.002125965);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__623->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__623->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__623->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__623->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__623->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__623->GetXaxis()->SetTitleFont(42);
@@ -1074,6 +1434,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__624->SetBinContent(5,0.1673252);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__624->SetBinError(5,0.001783487);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__624->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__624->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__624->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__624->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__624->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__624->GetXaxis()->SetTitleFont(42);
@@ -1088,6 +1450,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__625->SetBinContent(6,0.1720917);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__625->SetBinError(6,0.003415843);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__625->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__625->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__625->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__625->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__625->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__625->GetXaxis()->SetTitleFont(42);
@@ -1102,6 +1466,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__626->SetBinContent(7,0.1720917);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__626->SetBinError(7,0.003415843);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__626->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__626->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__626->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__626->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__626->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__626->GetXaxis()->SetTitleFont(42);
@@ -1116,6 +1482,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__627->SetBinContent(8,0.1695784);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__627->SetBinError(8,0.004445836);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__627->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__627->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__627->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__627->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__627->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__627->GetXaxis()->SetTitleFont(42);
@@ -1130,6 +1498,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__628->SetBinContent(9,0.1695784);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__628->SetBinError(9,0.004445836);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__628->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__628->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__628->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__628->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__628->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__628->GetXaxis()->SetTitleFont(42);
@@ -1144,6 +1514,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__629->SetBinContent(10,0.1695784);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__629->SetBinError(10,0.004445836);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__629->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__629->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__629->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__629->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__629->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__629->GetXaxis()->SetTitleFont(42);
@@ -1158,6 +1530,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__630->SetBinContent(11,0.1775173);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__630->SetBinError(11,0.009558149);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__630->SetEntries(1);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__630->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__630->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__630->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__630->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_0_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__630->GetXaxis()->SetTitleFont(42);
@@ -1172,7 +1546,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->SetBinContent(1,0.5439392);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->SetBinError(1,0.009926365);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__631->GetXaxis()->SetTitleFont(42);
@@ -1187,7 +1568,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->SetBinContent(2,0.5149508);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->SetBinError(2,0.004064008);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__632->GetXaxis()->SetTitleFont(42);
@@ -1202,7 +1590,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->SetBinContent(3,0.4199288);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->SetBinError(3,0.002262207);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__633->GetXaxis()->SetTitleFont(42);
@@ -1217,7 +1612,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->SetBinContent(4,0.3478608);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->SetBinError(4,0.005963828);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__634->GetXaxis()->SetTitleFont(42);
@@ -1232,7 +1634,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->SetBinContent(5,0.3139769);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->SetBinError(5,0.004166102);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__635->GetXaxis()->SetTitleFont(42);
@@ -1247,7 +1656,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->SetBinContent(6,0.2730452);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->SetBinError(6,0.003376244);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__636->GetXaxis()->SetTitleFont(42);
@@ -1262,7 +1678,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->SetBinContent(7,0.2466741);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->SetBinError(7,0.005245472);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__637->GetXaxis()->SetTitleFont(42);
@@ -1277,7 +1700,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->SetBinContent(8,0.2307518);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->SetBinError(8,0.003065304);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__638->GetXaxis()->SetTitleFont(42);
@@ -1292,7 +1722,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->SetBinContent(9,0.2100323);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->SetBinError(9,0.00511088);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__639->GetXaxis()->SetTitleFont(42);
@@ -1307,7 +1744,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->SetBinContent(10,0.2100323);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->SetBinError(10,0.00511088);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__640->GetXaxis()->SetTitleFont(42);
@@ -1322,7 +1766,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->SetBinContent(11,0.2082275);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->SetBinError(11,0.01056883);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->SetLineColor(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_1_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__641->GetXaxis()->SetTitleFont(42);
@@ -1337,7 +1788,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->SetBinContent(1,0.5217986);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->SetBinError(1,0.006340444);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__642->GetXaxis()->SetTitleFont(42);
@@ -1352,7 +1810,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->SetBinContent(2,0.4815007);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->SetBinError(2,0.003654365);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_1_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__643->GetXaxis()->SetTitleFont(42);
@@ -1367,7 +1832,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->SetBinContent(3,0.3845964);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->SetBinError(3,0.00574202);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_2_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__644->GetXaxis()->SetTitleFont(42);
@@ -1382,7 +1854,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->SetBinContent(4,0.3421118);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->SetBinError(4,0.003110826);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_3_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__645->GetXaxis()->SetTitleFont(42);
@@ -1397,7 +1876,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->SetBinContent(5,0.2752753);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->SetBinError(5,0.003239062);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_4_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__646->GetXaxis()->SetTitleFont(42);
@@ -1412,7 +1898,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->SetBinContent(6,0.2513071);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->SetBinError(6,0.00312533);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_5_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__647->GetXaxis()->SetTitleFont(42);
@@ -1427,7 +1920,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->SetBinContent(7,0.228254);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->SetBinError(7,0.004398626);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_6_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__648->GetXaxis()->SetTitleFont(42);
@@ -1442,7 +1942,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->SetBinContent(8,0.2000273);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->SetBinError(8,0.002853808);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_7_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__649->GetXaxis()->SetTitleFont(42);
@@ -1457,7 +1964,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->SetBinContent(9,0.2000273);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->SetBinError(9,0.002853808);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_8_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__650->GetXaxis()->SetTitleFont(42);
@@ -1472,7 +1986,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->SetBinContent(10,0.2000273);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->SetBinError(10,0.002853808);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_9_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__651->GetXaxis()->SetTitleFont(42);
@@ -1487,7 +2008,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->SetBinContent(11,0.1920327);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->SetBinError(11,0.006288927);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->SetEntries(1);
-   hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_2_4_10_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma__652->GetXaxis()->SetTitleFont(42);
@@ -1505,12 +2033,12 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    leg->SetLineWidth(1);
    leg->SetFillColor(0);
    leg->SetFillStyle(1001);
-   entry=leg->AddEntry("hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma","B+ Lambda_b","l");
+   entry=leg->AddEntry("hYieldsBaryonMesonRatio_BEAUTY_0_4_0_mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma","B+ Lambda_b","lep");
    entry->SetLineColor(1);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
    leg->Draw();
@@ -1568,6 +2096,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__654->SetBinContent(1,3.30795);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__654->SetBinError(1,0.01464253);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__654->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__654->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__654->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__654->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__654->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__654->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__654->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__654->GetXaxis()->SetTitleFont(42);
@@ -1582,6 +2118,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__655->SetBinContent(2,3.087711);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__655->SetBinError(2,0.005919323);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__655->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__655->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__655->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__655->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__655->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__655->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__655->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__655->GetXaxis()->SetTitleFont(42);
@@ -1596,6 +2140,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__656->SetBinContent(3,2.529095);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__656->SetBinError(3,0.003051049);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__656->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__656->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__656->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__656->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__656->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__656->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__656->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__656->GetXaxis()->SetTitleFont(42);
@@ -1610,6 +2162,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__657->SetBinContent(4,2.072159);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__657->SetBinError(4,0.007448769);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__657->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__657->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__657->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__657->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__657->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__657->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__657->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__657->GetXaxis()->SetTitleFont(42);
@@ -1624,6 +2184,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__658->SetBinContent(5,1.876447);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__658->SetBinError(5,0.005053645);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__658->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__658->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__658->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__658->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__658->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__658->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__658->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__658->GetXaxis()->SetTitleFont(42);
@@ -1638,6 +2206,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__659->SetBinContent(6,1.586626);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__659->SetBinError(6,0.003894189);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__659->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__659->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__659->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__659->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__659->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__659->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__659->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__659->GetXaxis()->SetTitleFont(42);
@@ -1652,6 +2228,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__660->SetBinContent(7,1.433388);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__660->SetBinError(7,0.005874798);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__660->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__660->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__660->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__660->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__660->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__660->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__660->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__660->GetXaxis()->SetTitleFont(42);
@@ -1666,6 +2250,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__661->SetBinContent(8,1.360738);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__661->SetBinError(8,0.003342626);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__661->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__661->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__661->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__661->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__661->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__661->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__661->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__661->GetXaxis()->SetTitleFont(42);
@@ -1680,6 +2272,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__662->SetBinContent(9,1.238556);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__662->SetBinError(9,0.00551522);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__662->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__662->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__662->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__662->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__662->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__662->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__662->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__662->GetXaxis()->SetTitleFont(42);
@@ -1694,6 +2294,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__663->SetBinContent(10,1.238556);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__663->SetBinError(10,0.00551522);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__663->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__663->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__663->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__663->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__663->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__663->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__663->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__663->GetXaxis()->SetTitleFont(42);
@@ -1708,6 +2316,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__664->SetBinContent(11,1.172999);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__664->SetBinError(11,0.01088489);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__664->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__664->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__664->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__664->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__664->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__664->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__664->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__664->GetXaxis()->SetTitleFont(42);
@@ -1771,6 +2387,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__666->SetBinContent(1,3.173303);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__666->SetBinError(1,0.009660247);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__666->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__666->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__666->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__666->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__666->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__666->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__666->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_0_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__666->GetXaxis()->SetTitleFont(42);
@@ -1785,6 +2409,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__667->SetBinContent(2,2.88714);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__667->SetBinError(2,0.005399846);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__667->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__667->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__667->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__667->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__667->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__667->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__667->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_1_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__667->GetXaxis()->SetTitleFont(42);
@@ -1799,6 +2431,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__668->SetBinContent(3,2.3163);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__668->SetBinError(3,0.007849098);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__668->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__668->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__668->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__668->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__668->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__668->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__668->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_2_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__668->GetXaxis()->SetTitleFont(42);
@@ -1813,6 +2453,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__669->SetBinContent(4,2.037913);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__669->SetBinError(4,0.004038942);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__669->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__669->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__669->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__669->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__669->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__669->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__669->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_3_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__669->GetXaxis()->SetTitleFont(42);
@@ -1827,6 +2475,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__670->SetBinContent(5,1.645151);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__670->SetBinError(5,0.00390811);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__670->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__670->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__670->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__670->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__670->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__670->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__670->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_4_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__670->GetXaxis()->SetTitleFont(42);
@@ -1841,6 +2497,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__671->SetBinContent(6,1.46031);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__671->SetBinError(6,0.003644278);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__671->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__671->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__671->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__671->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__671->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__671->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__671->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_5_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__671->GetXaxis()->SetTitleFont(42);
@@ -1855,6 +2519,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__672->SetBinContent(7,1.326351);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__672->SetBinError(7,0.004969553);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__672->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__672->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__672->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__672->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__672->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__672->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__672->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_6_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__672->GetXaxis()->SetTitleFont(42);
@@ -1869,6 +2541,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__673->SetBinContent(8,1.179557);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__673->SetBinError(8,0.003043557);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__673->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__673->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__673->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__673->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__673->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__673->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__673->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_7_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__673->GetXaxis()->SetTitleFont(42);
@@ -1883,6 +2563,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__674->SetBinContent(9,1.179557);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__674->SetBinError(9,0.003043557);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__674->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__674->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__674->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__674->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__674->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__674->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__674->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_8_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__674->GetXaxis()->SetTitleFont(42);
@@ -1897,6 +2585,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__675->SetBinContent(10,1.179557);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__675->SetBinError(10,0.003043557);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__675->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__675->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__675->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__675->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__675->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__675->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__675->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_9_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__675->GetXaxis()->SetTitleFont(42);
@@ -1911,6 +2607,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__676->SetBinContent(11,1.081769);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__676->SetBinError(11,0.006345276);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__676->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__676->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__676->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__676->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__676->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__676->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__676->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_BEAUTY_4_10_mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__676->GetXaxis()->SetTitleFont(42);
@@ -1974,6 +2678,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__678->SetBinContent(1,0.07045712);
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__678->SetBinError(1,0.001687299);
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__678->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__678->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__678->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__678->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__678->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__678->GetXaxis()->SetTitleFont(42);
@@ -1988,6 +2694,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__679->SetBinContent(2,0.08185968);
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__679->SetBinError(2,0.0006662256);
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__679->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__679->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__679->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__679->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__679->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__679->GetXaxis()->SetTitleFont(42);
@@ -2002,6 +2710,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__680->SetBinContent(3,0.09059224);
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__680->SetBinError(3,0.0008275708);
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__680->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__680->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__680->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__680->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__680->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__680->GetXaxis()->SetTitleFont(42);
@@ -2016,6 +2726,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__681->SetBinContent(4,0.09656537);
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__681->SetBinError(4,0.0006178729);
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__681->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__681->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__681->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__681->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__681->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__681->GetXaxis()->SetTitleFont(42);
@@ -2030,6 +2742,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__682->SetBinContent(5,0.09739032);
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__682->SetBinError(5,0.0008309424);
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__682->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__682->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__682->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__682->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__682->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__682->GetXaxis()->SetTitleFont(42);
@@ -2044,6 +2758,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__683->SetBinContent(6,0.09929261);
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__683->SetBinError(6,0.0005916921);
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__683->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__683->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__683->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__683->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__683->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__683->GetXaxis()->SetTitleFont(42);
@@ -2058,6 +2774,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__684->SetBinContent(7,0.09929261);
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__684->SetBinError(7,0.0005916921);
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__684->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__684->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__684->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__684->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__684->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__684->GetXaxis()->SetTitleFont(42);
@@ -2072,6 +2790,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__685->SetBinContent(8,0.1023697);
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__685->SetBinError(8,0.0006595823);
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__685->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__685->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__685->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__685->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__685->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__685->GetXaxis()->SetTitleFont(42);
@@ -2086,6 +2806,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__686->SetBinContent(9,0.1023697);
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__686->SetBinError(9,0.0006595823);
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__686->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__686->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__686->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__686->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__686->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__686->GetXaxis()->SetTitleFont(42);
@@ -2100,6 +2822,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__687->SetBinContent(10,0.1023697);
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__687->SetBinError(10,0.0006595823);
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__687->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__687->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__687->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__687->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__687->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__687->GetXaxis()->SetTitleFont(42);
@@ -2114,6 +2838,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__688->SetBinContent(11,0.1043937);
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__688->SetBinError(11,0.0007563521);
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__688->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__688->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__688->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__688->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__688->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__688->GetXaxis()->SetTitleFont(42);
@@ -2128,7 +2854,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->SetBinContent(1,0.1520461);
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->SetBinError(1,0.002422905);
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__689->GetXaxis()->SetTitleFont(42);
@@ -2143,7 +2876,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->SetBinContent(2,0.1582977);
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->SetBinError(2,0.001055809);
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__690->GetXaxis()->SetTitleFont(42);
@@ -2158,7 +2898,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->SetBinContent(3,0.1548616);
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->SetBinError(3,0.0006907816);
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__691->GetXaxis()->SetTitleFont(42);
@@ -2173,7 +2920,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->SetBinContent(4,0.148845);
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->SetBinError(4,0.0005730057);
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__692->GetXaxis()->SetTitleFont(42);
@@ -2188,7 +2942,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->SetBinContent(5,0.1412867);
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->SetBinError(5,0.0007786011);
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__693->GetXaxis()->SetTitleFont(42);
@@ -2203,7 +2964,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->SetBinContent(6,0.1297672);
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->SetBinError(6,0.0005869506);
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__694->GetXaxis()->SetTitleFont(42);
@@ -2218,7 +2986,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->SetBinContent(7,0.1241592);
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->SetBinError(7,0.0005804277);
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__695->GetXaxis()->SetTitleFont(42);
@@ -2233,7 +3008,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->SetBinContent(8,0.1183089);
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->SetBinError(8,0.0003419894);
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__696->GetXaxis()->SetTitleFont(42);
@@ -2248,7 +3030,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->SetBinContent(9,0.1131044);
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->SetBinError(9,0.0004571708);
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__697->GetXaxis()->SetTitleFont(42);
@@ -2263,7 +3052,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->SetBinContent(10,0.1131044);
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->SetBinError(10,0.0004571708);
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__698->GetXaxis()->SetTitleFont(42);
@@ -2278,7 +3074,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->SetBinContent(11,0.1062556);
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->SetBinError(11,0.001353328);
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__699->GetXaxis()->SetTitleFont(42);
@@ -2293,7 +3096,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->SetBinContent(1,0.1346854);
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->SetBinError(1,0.00427522);
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__700->GetXaxis()->SetTitleFont(42);
@@ -2308,7 +3118,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->SetBinContent(2,0.1374032);
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->SetBinError(2,0.001067791);
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__701->GetXaxis()->SetTitleFont(42);
@@ -2323,7 +3140,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->SetBinContent(3,0.1348884);
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->SetBinError(3,0.001104501);
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__702->GetXaxis()->SetTitleFont(42);
@@ -2338,7 +3162,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->SetBinContent(4,0.1305871);
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->SetBinError(4,0.001029443);
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__703->GetXaxis()->SetTitleFont(42);
@@ -2353,7 +3184,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->SetBinContent(5,0.1211872);
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->SetBinError(5,0.0005996765);
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__704->GetXaxis()->SetTitleFont(42);
@@ -2368,7 +3206,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->SetBinContent(6,0.1144055);
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->SetBinError(6,0.0005682251);
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__705->GetXaxis()->SetTitleFont(42);
@@ -2383,7 +3228,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->SetBinContent(7,0.1096838);
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->SetBinError(7,0.0007414673);
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__706->GetXaxis()->SetTitleFont(42);
@@ -2398,7 +3250,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->SetBinContent(8,0.09851936);
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->SetBinError(8,0.000623443);
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__707->GetXaxis()->SetTitleFont(42);
@@ -2413,7 +3272,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->SetBinContent(9,0.09851936);
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->SetBinError(9,0.000623443);
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__708->GetXaxis()->SetTitleFont(42);
@@ -2428,7 +3294,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->SetBinContent(10,0.09851936);
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->SetBinError(10,0.000623443);
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__709->GetXaxis()->SetTitleFont(42);
@@ -2443,7 +3316,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->SetBinContent(11,0.09305426);
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->SetBinError(11,0.0009688262);
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_only__710->GetXaxis()->SetTitleFont(42);
@@ -2461,12 +3341,12 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    leg->SetLineWidth(1);
    leg->SetFillColor(0);
    leg->SetFillStyle(1001);
-   entry=leg->AddEntry("hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only","D+ Lambda_c(+)-bar","l");
+   entry=leg->AddEntry("hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_only","D+ Lambda_c(+)-bar","lep");
    entry->SetLineColor(1);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
    leg->Draw();
@@ -2524,6 +3404,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__712->SetBinContent(1,2.157995);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__712->SetBinError(1,0.003051806);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__712->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__712->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__712->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__712->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__712->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__712->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__712->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__712->GetXaxis()->SetTitleFont(42);
@@ -2538,6 +3426,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__713->SetBinContent(2,1.933769);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__713->SetBinError(2,0.001313844);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__713->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__713->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__713->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__713->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__713->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__713->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__713->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__713->GetXaxis()->SetTitleFont(42);
@@ -2552,6 +3448,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__714->SetBinContent(3,1.709435);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__714->SetBinError(3,0.0008631054);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__714->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__714->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__714->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__714->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__714->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__714->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__714->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__714->GetXaxis()->SetTitleFont(42);
@@ -2566,6 +3470,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__715->SetBinContent(4,1.541391);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__715->SetBinError(4,0.000674224);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__715->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__715->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__715->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__715->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__715->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__715->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__715->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__715->GetXaxis()->SetTitleFont(42);
@@ -2580,6 +3492,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__716->SetBinContent(5,1.450726);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__716->SetBinError(5,0.0009331935);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__716->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__716->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__716->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__716->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__716->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__716->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__716->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__716->GetXaxis()->SetTitleFont(42);
@@ -2594,6 +3514,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__717->SetBinContent(6,1.306917);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__717->SetBinError(6,0.0006729241);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__717->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__717->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__717->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__717->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__717->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__717->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__717->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__717->GetXaxis()->SetTitleFont(42);
@@ -2608,6 +3536,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__718->SetBinContent(7,1.250438);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__718->SetBinError(7,0.0006776194);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__718->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__718->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__718->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__718->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__718->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__718->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__718->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__718->GetXaxis()->SetTitleFont(42);
@@ -2622,6 +3558,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__719->SetBinContent(8,1.155702);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__719->SetBinError(8,0.0003690788);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__719->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__719->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__719->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__719->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__719->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__719->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__719->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__719->GetXaxis()->SetTitleFont(42);
@@ -2636,6 +3580,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__720->SetBinContent(9,1.104863);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__720->SetBinError(9,0.0005034458);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__720->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__720->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__720->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__720->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__720->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__720->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__720->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__720->GetXaxis()->SetTitleFont(42);
@@ -2650,6 +3602,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__721->SetBinContent(10,1.104863);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__721->SetBinError(10,0.0005034458);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__721->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__721->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__721->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__721->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__721->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__721->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__721->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__721->GetXaxis()->SetTitleFont(42);
@@ -2664,6 +3624,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__722->SetBinContent(11,1.017836);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__722->SetBinError(11,0.001426523);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__722->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__722->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__722->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__722->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__722->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__722->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__722->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only__722->GetXaxis()->SetTitleFont(42);
@@ -2727,6 +3695,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__724->SetBinContent(1,1.911594);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__724->SetBinError(1,0.005477617);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__724->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__724->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__724->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__724->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__724->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__724->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__724->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__724->GetXaxis()->SetTitleFont(42);
@@ -2741,6 +3717,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__725->SetBinContent(2,1.678521);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__725->SetBinError(2,0.001329532);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__725->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__725->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__725->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__725->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__725->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__725->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__725->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__725->GetXaxis()->SetTitleFont(42);
@@ -2755,6 +3739,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__726->SetBinContent(3,1.488962);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__726->SetBinError(3,0.001369726);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__726->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__726->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__726->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__726->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__726->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__726->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__726->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__726->GetXaxis()->SetTitleFont(42);
@@ -2769,6 +3761,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__727->SetBinContent(4,1.352318);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__727->SetBinError(4,0.001181597);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__727->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__727->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__727->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__727->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__727->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__727->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__727->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__727->GetXaxis()->SetTitleFont(42);
@@ -2783,6 +3783,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__728->SetBinContent(5,1.244345);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__728->SetBinError(5,0.0007115303);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__728->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__728->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__728->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__728->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__728->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__728->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__728->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__728->GetXaxis()->SetTitleFont(42);
@@ -2797,6 +3805,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__729->SetBinContent(6,1.152205);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__729->SetBinError(6,0.0006294024);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__729->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__729->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__729->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__729->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__729->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__729->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__729->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__729->GetXaxis()->SetTitleFont(42);
@@ -2811,6 +3827,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__730->SetBinContent(7,1.104652);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__730->SetBinError(7,0.000834311);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__730->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__730->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__730->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__730->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__730->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__730->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__730->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__730->GetXaxis()->SetTitleFont(42);
@@ -2825,6 +3849,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__731->SetBinContent(8,0.9623883);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__731->SetBinError(8,0.0006586102);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__731->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__731->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__731->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__731->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__731->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__731->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__731->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__731->GetXaxis()->SetTitleFont(42);
@@ -2839,6 +3871,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__732->SetBinContent(9,0.9623883);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__732->SetBinError(9,0.0006586102);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__732->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__732->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__732->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__732->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__732->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__732->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__732->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__732->GetXaxis()->SetTitleFont(42);
@@ -2853,6 +3893,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__733->SetBinContent(10,0.9623883);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__733->SetBinError(10,0.0006586102);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__733->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__733->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__733->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__733->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__733->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__733->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__733->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__733->GetXaxis()->SetTitleFont(42);
@@ -2867,6 +3915,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__734->SetBinContent(11,0.891378);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__734->SetBinError(11,0.0009915966);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__734->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__734->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__734->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__734->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__734->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__734->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__734->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only__734->GetXaxis()->SetTitleFont(42);
@@ -2931,6 +3987,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__736->SetBinContent(1,0.07045712);
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__736->SetBinError(1,0.001687299);
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__736->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__736->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__736->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__736->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__736->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__736->GetXaxis()->SetTitleFont(42);
@@ -2945,6 +4003,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__737->SetBinContent(2,0.08185968);
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__737->SetBinError(2,0.0006662256);
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__737->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__737->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__737->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__737->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__737->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__737->GetXaxis()->SetTitleFont(42);
@@ -2959,6 +4019,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__738->SetBinContent(3,0.09059224);
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__738->SetBinError(3,0.0008275708);
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__738->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__738->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__738->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__738->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__738->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__738->GetXaxis()->SetTitleFont(42);
@@ -2973,6 +4035,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__739->SetBinContent(4,0.09656537);
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__739->SetBinError(4,0.0006178729);
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__739->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__739->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__739->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__739->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__739->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__739->GetXaxis()->SetTitleFont(42);
@@ -2987,6 +4051,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__740->SetBinContent(5,0.09739032);
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__740->SetBinError(5,0.0008309424);
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__740->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__740->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__740->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__740->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__740->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__740->GetXaxis()->SetTitleFont(42);
@@ -3001,6 +4067,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__741->SetBinContent(6,0.09929261);
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__741->SetBinError(6,0.0005916921);
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__741->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__741->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__741->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__741->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__741->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__741->GetXaxis()->SetTitleFont(42);
@@ -3015,6 +4083,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__742->SetBinContent(7,0.09929261);
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__742->SetBinError(7,0.0005916921);
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__742->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__742->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__742->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__742->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__742->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__742->GetXaxis()->SetTitleFont(42);
@@ -3029,6 +4099,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__743->SetBinContent(8,0.1023697);
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__743->SetBinError(8,0.0006595823);
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__743->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__743->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__743->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__743->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__743->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__743->GetXaxis()->SetTitleFont(42);
@@ -3043,6 +4115,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__744->SetBinContent(9,0.1023697);
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__744->SetBinError(9,0.0006595823);
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__744->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__744->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__744->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__744->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__744->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__744->GetXaxis()->SetTitleFont(42);
@@ -3057,6 +4131,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__745->SetBinContent(10,0.1023697);
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__745->SetBinError(10,0.0006595823);
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__745->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__745->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__745->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__745->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__745->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__745->GetXaxis()->SetTitleFont(42);
@@ -3071,6 +4147,8 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__746->SetBinContent(11,0.1043937);
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__746->SetBinError(11,0.0007563521);
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__746->SetEntries(1);
+   hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__746->SetLineWidth(2);
+   hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__746->SetMarkerStyle(20);
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__746->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__746->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_0_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__746->GetXaxis()->SetTitleFont(42);
@@ -3085,7 +4163,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->SetBinContent(1,0.1520461);
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->SetBinError(1,0.002422905);
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__747->GetXaxis()->SetTitleFont(42);
@@ -3100,7 +4185,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->SetBinContent(2,0.1582977);
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->SetBinError(2,0.001055809);
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__748->GetXaxis()->SetTitleFont(42);
@@ -3115,7 +4207,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->SetBinContent(3,0.1548616);
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->SetBinError(3,0.0006907816);
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__749->GetXaxis()->SetTitleFont(42);
@@ -3130,7 +4229,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->SetBinContent(4,0.148845);
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->SetBinError(4,0.0005730057);
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__750->GetXaxis()->SetTitleFont(42);
@@ -3145,7 +4251,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->SetBinContent(5,0.1412867);
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->SetBinError(5,0.0007786011);
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__751->GetXaxis()->SetTitleFont(42);
@@ -3160,7 +4273,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->SetBinContent(6,0.1297672);
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->SetBinError(6,0.0005869506);
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__752->GetXaxis()->SetTitleFont(42);
@@ -3175,7 +4295,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->SetBinContent(7,0.1241592);
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->SetBinError(7,0.0005804277);
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__753->GetXaxis()->SetTitleFont(42);
@@ -3190,7 +4317,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->SetBinContent(8,0.1183089);
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->SetBinError(8,0.0003419894);
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__754->GetXaxis()->SetTitleFont(42);
@@ -3205,7 +4339,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->SetBinContent(9,0.1131044);
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->SetBinError(9,0.0004571708);
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__755->GetXaxis()->SetTitleFont(42);
@@ -3220,7 +4361,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->SetBinContent(10,0.1131044);
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->SetBinError(10,0.0004571708);
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__756->GetXaxis()->SetTitleFont(42);
@@ -3235,7 +4383,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->SetBinContent(11,0.1062556);
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->SetBinError(11,0.001353328);
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->SetLineColor(4);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_1_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__757->GetXaxis()->SetTitleFont(42);
@@ -3250,7 +4405,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->SetBinContent(1,0.1346854);
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->SetBinError(1,0.00427522);
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__758->GetXaxis()->SetTitleFont(42);
@@ -3265,7 +4427,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->SetBinContent(2,0.1374032);
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->SetBinError(2,0.001067791);
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_1_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__759->GetXaxis()->SetTitleFont(42);
@@ -3280,7 +4449,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->SetBinContent(3,0.1348884);
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->SetBinError(3,0.001104501);
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_2_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__760->GetXaxis()->SetTitleFont(42);
@@ -3295,7 +4471,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->SetBinContent(4,0.1305871);
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->SetBinError(4,0.001029443);
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_3_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__761->GetXaxis()->SetTitleFont(42);
@@ -3310,7 +4493,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->SetBinContent(5,0.1211872);
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->SetBinError(5,0.0005996765);
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_4_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__762->GetXaxis()->SetTitleFont(42);
@@ -3325,7 +4515,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->SetBinContent(6,0.1144055);
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->SetBinError(6,0.0005682251);
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_5_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__763->GetXaxis()->SetTitleFont(42);
@@ -3340,7 +4537,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->SetBinContent(7,0.1096838);
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->SetBinError(7,0.0007414673);
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_6_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__764->GetXaxis()->SetTitleFont(42);
@@ -3355,7 +4559,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->SetBinContent(8,0.09851936);
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->SetBinError(8,0.000623443);
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_7_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__765->GetXaxis()->SetTitleFont(42);
@@ -3370,7 +4581,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->SetBinContent(9,0.09851936);
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->SetBinError(9,0.000623443);
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_8_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__766->GetXaxis()->SetTitleFont(42);
@@ -3385,7 +4603,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->SetBinContent(10,0.09851936);
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->SetBinError(10,0.000623443);
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_9_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__767->GetXaxis()->SetTitleFont(42);
@@ -3400,7 +4625,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->SetBinContent(11,0.09305426);
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->SetBinError(11,0.0009688262);
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->SetEntries(1);
-   hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->SetLineColor(6);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_10_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma__768->GetXaxis()->SetTitleFont(42);
@@ -3418,12 +4650,12 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    leg->SetLineWidth(1);
    leg->SetFillColor(0);
    leg->SetFillStyle(1001);
-   entry=leg->AddEntry("hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma","D+ Lambda_c(+)-bar","l");
+   entry=leg->AddEntry("hYieldsBaryonMesonRatio_CHARM_0_2_0_mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma","D+ Lambda_c(+)-bar","lep");
    entry->SetLineColor(1);
    entry->SetLineStyle(1);
-   entry->SetLineWidth(1);
+   entry->SetLineWidth(2);
    entry->SetMarkerColor(1);
-   entry->SetMarkerStyle(21);
+   entry->SetMarkerStyle(20);
    entry->SetMarkerSize(1);
    entry->SetTextFont(42);
    leg->Draw();
@@ -3482,6 +4714,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__770->SetBinContent(1,2.157995);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__770->SetBinError(1,0.003051806);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__770->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__770->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__770->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__770->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__770->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__770->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__770->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__770->GetXaxis()->SetTitleFont(42);
@@ -3496,6 +4736,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__771->SetBinContent(2,1.933769);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__771->SetBinError(2,0.001313844);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__771->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__771->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__771->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__771->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__771->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__771->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__771->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__771->GetXaxis()->SetTitleFont(42);
@@ -3510,6 +4758,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__772->SetBinContent(3,1.709435);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__772->SetBinError(3,0.0008631054);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__772->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__772->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__772->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__772->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__772->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__772->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__772->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__772->GetXaxis()->SetTitleFont(42);
@@ -3524,6 +4780,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__773->SetBinContent(4,1.541391);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__773->SetBinError(4,0.000674224);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__773->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__773->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__773->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__773->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__773->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__773->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__773->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__773->GetXaxis()->SetTitleFont(42);
@@ -3538,6 +4802,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__774->SetBinContent(5,1.450726);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__774->SetBinError(5,0.0009331935);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__774->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__774->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__774->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__774->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__774->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__774->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__774->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__774->GetXaxis()->SetTitleFont(42);
@@ -3552,6 +4824,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__775->SetBinContent(6,1.306917);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__775->SetBinError(6,0.0006729241);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__775->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__775->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__775->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__775->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__775->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__775->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__775->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__775->GetXaxis()->SetTitleFont(42);
@@ -3566,6 +4846,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__776->SetBinContent(7,1.250438);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__776->SetBinError(7,0.0006776194);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__776->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__776->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__776->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__776->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__776->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__776->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__776->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__776->GetXaxis()->SetTitleFont(42);
@@ -3580,6 +4868,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__777->SetBinContent(8,1.155702);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__777->SetBinError(8,0.0003690788);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__777->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__777->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__777->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__777->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__777->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__777->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__777->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__777->GetXaxis()->SetTitleFont(42);
@@ -3594,6 +4890,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__778->SetBinContent(9,1.104863);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__778->SetBinError(9,0.0005034458);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__778->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__778->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__778->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__778->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__778->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__778->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__778->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__778->GetXaxis()->SetTitleFont(42);
@@ -3608,6 +4912,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__779->SetBinContent(10,1.104863);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__779->SetBinError(10,0.0005034458);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__779->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__779->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__779->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__779->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__779->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__779->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__779->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__779->GetXaxis()->SetTitleFont(42);
@@ -3622,6 +4934,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__780->SetBinContent(11,1.017836);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__780->SetBinError(11,0.001426523);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__780->SetEntries(1);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__780->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__780->SetLineWidth(2);
+
+   ci = TColor::GetColor("#0000cc");
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__780->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__780->SetMarkerStyle(21);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__780->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__780->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_sigma__780->GetXaxis()->SetTitleFont(42);
@@ -3686,6 +5006,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__782->SetBinContent(1,1.911594);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__782->SetBinError(1,0.005477617);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__782->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__782->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__782->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__782->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__782->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__782->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__782->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_0_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__782->GetXaxis()->SetTitleFont(42);
@@ -3700,6 +5028,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__783->SetBinContent(2,1.678521);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__783->SetBinError(2,0.001329532);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__783->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__783->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__783->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__783->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__783->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__783->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__783->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_1_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__783->GetXaxis()->SetTitleFont(42);
@@ -3714,6 +5050,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__784->SetBinContent(3,1.488962);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__784->SetBinError(3,0.001369726);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__784->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__784->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__784->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__784->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__784->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__784->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__784->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_2_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__784->GetXaxis()->SetTitleFont(42);
@@ -3728,6 +5072,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__785->SetBinContent(4,1.352318);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__785->SetBinError(4,0.001181597);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__785->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__785->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__785->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__785->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__785->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__785->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__785->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_3_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__785->GetXaxis()->SetTitleFont(42);
@@ -3742,6 +5094,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__786->SetBinContent(5,1.244345);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__786->SetBinError(5,0.0007115303);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__786->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__786->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__786->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__786->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__786->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__786->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__786->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_4_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__786->GetXaxis()->SetTitleFont(42);
@@ -3756,6 +5116,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__787->SetBinContent(6,1.152205);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__787->SetBinError(6,0.0006294024);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__787->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__787->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__787->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__787->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__787->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__787->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__787->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_5_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__787->GetXaxis()->SetTitleFont(42);
@@ -3770,6 +5138,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__788->SetBinContent(7,1.104652);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__788->SetBinError(7,0.000834311);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__788->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__788->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__788->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__788->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__788->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__788->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__788->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_6_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__788->GetXaxis()->SetTitleFont(42);
@@ -3784,6 +5160,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__789->SetBinContent(8,0.9623883);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__789->SetBinError(8,0.0006586102);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__789->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__789->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__789->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__789->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__789->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__789->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__789->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_7_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__789->GetXaxis()->SetTitleFont(42);
@@ -3798,6 +5182,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__790->SetBinContent(9,0.9623883);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__790->SetBinError(9,0.0006586102);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__790->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__790->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__790->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__790->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__790->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__790->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__790->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_8_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__790->GetXaxis()->SetTitleFont(42);
@@ -3812,6 +5204,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__791->SetBinContent(10,0.9623883);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__791->SetBinError(10,0.0006586102);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__791->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__791->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__791->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__791->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__791->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__791->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__791->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_9_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__791->GetXaxis()->SetTitleFont(42);
@@ -3826,6 +5226,14 @@ void global_balancing_baryon_over_meson_ratio_multiplicity_MACRO()
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__792->SetBinContent(11,0.891378);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__792->SetBinError(11,0.0009915966);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__792->SetEntries(1);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__792->SetLineColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__792->SetLineWidth(2);
+
+   ci = TColor::GetColor("#cc00cc");
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__792->SetMarkerColor(ci);
+   hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__792->SetMarkerStyle(22);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__792->GetXaxis()->SetLabelFont(42);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__792->GetXaxis()->SetTitleOffset(1);
    hYieldsBaryonMesonRatio_CHARM_2_10_mini_charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_sigma__792->GetXaxis()->SetTitleFont(42);

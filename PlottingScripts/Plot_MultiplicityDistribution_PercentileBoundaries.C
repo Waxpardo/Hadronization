@@ -27,15 +27,19 @@
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TGraph.h"
+#include "TGraphErrors.h"
 #include "TH1D.h"
 #include "TH1F.h"
 #include "TLatex.h"
+#include "TLegend.h"
 #include "TLine.h"
 #include "TObject.h"
 #include "TPad.h"
 #include "TString.h"
 #include "TStyle.h"
 #include "TSystem.h"
+
+#include "TunePlotStyle.h"
 
 #if __has_include(<nlohmann/json.hpp>)
 #include <nlohmann/json.hpp>
@@ -48,6 +52,8 @@
 using json = nlohmann::json;
 
 namespace MultiplicityPercentilePlot {
+
+constexpr double kMultiplicityXMax = 170.0;
 
 struct PercentileClass {
     double minPercentile;
@@ -374,10 +380,17 @@ TH1D* LoadSharedMultiplicityHistogram(const PlotConfig& config,
 
 Color_t TuneColor(const std::string& tune)
 {
-    if (tune == "MONASH") return kBlack;
-    if (tune == "JUNCTIONS") return kBlue + 1;
-    if (tune == "CLOSEPACKING") return kMagenta + 1;
-    return kGray + 2;
+    return HadronizationPlotStyle::TuneColor(tune);
+}
+
+const char* MultiplicityYAxisTitle(bool normalize)
+{
+    return normalize ? "Probability P(N_{ch})" : "Counts";
+}
+
+const char* MultiplicityXAxisTitle()
+{
+    return "Multiplicity N_{ch}";
 }
 
 double PositiveMinimum(TH1D* hist)
@@ -406,34 +419,44 @@ void StyleHistogram(TH1D* hist, const std::string& tune, bool normalize)
     hist->SetTitle("");
     hist->SetLineColor(TuneColor(tune));
     hist->SetMarkerColor(TuneColor(tune));
+    hist->SetMarkerStyle(HadronizationPlotStyle::TuneMarker(tune));
+    hist->SetLineStyle(HadronizationPlotStyle::TuneLineStyle(tune));
     hist->SetLineWidth(2);
-    hist->GetXaxis()->SetTitle("Charged-particle multiplicity N_{ch}");
-    hist->GetYaxis()->SetTitle(normalize ? "Normalized events" : "Counts");
+    hist->GetXaxis()->SetTitle(MultiplicityXAxisTitle());
+    hist->GetYaxis()->SetTitle(MultiplicityYAxisTitle(normalize));
     hist->GetXaxis()->SetTitleOffset(1.1);
     hist->GetYaxis()->SetTitleOffset(1.25);
 }
 
-TGraph* BuildMultiplicityGraph(TH1D* hist,
-                               const std::string& tune,
-                               double xMin,
-                               double xMax)
+TGraphErrors* BuildMultiplicityGraph(TH1D* hist,
+                                     const std::string& tune,
+                                     double xMin,
+                                     double xMax)
 {
     std::vector<double> xValues;
     std::vector<double> yValues;
+    std::vector<double> xErrors;
+    std::vector<double> yErrors;
     for (int iBin = 1; iBin <= hist->GetNbinsX(); ++iBin) {
         const double x = hist->GetBinCenter(iBin);
         const double y = hist->GetBinContent(iBin);
         if (x < xMin || x > xMax || y <= 0.0) continue;
         xValues.push_back(x);
         yValues.push_back(y);
+        xErrors.push_back(0.0);
+        yErrors.push_back(hist->GetBinError(iBin));
     }
 
-    TGraph* graph = new TGraph(static_cast<int>(xValues.size()),
-                               xValues.data(),
-                               yValues.data());
+    TGraphErrors* graph = new TGraphErrors(static_cast<int>(xValues.size()),
+                                           xValues.data(),
+                                           yValues.data(),
+                                           xErrors.data(),
+                                           yErrors.data());
     graph->SetName(Form("gMultiplicity_%s", tune.c_str()));
     graph->SetLineColor(TuneColor(tune));
     graph->SetMarkerColor(TuneColor(tune));
+    graph->SetMarkerStyle(HadronizationPlotStyle::TuneMarker(tune));
+    graph->SetLineStyle(HadronizationPlotStyle::TuneLineStyle(tune));
     graph->SetLineWidth(2);
     return graph;
 }
@@ -509,7 +532,7 @@ void DrawFlavorCanvas(const PlotConfig& config,
         gPad->SetLogy();
         gPad->SetTicks(1, 1);
         gPad->SetTopMargin(0.08);
-        gPad->SetBottomMargin(0.12);
+        gPad->SetBottomMargin(0.14);
         gPad->SetLeftMargin(iTune == 0 ? 0.14 : 0.08);
         gPad->SetRightMargin(0.03);
 
@@ -520,26 +543,26 @@ void DrawFlavorCanvas(const PlotConfig& config,
         }
 
         const double xMin = 1.0;
-        const double xMax = std::max(UpperX(hist), 10.0);
+        const double xMax = kMultiplicityXMax;
         const double yMin = std::max(PositiveMinimum(hist) * 0.45, normalize ? 1.0e-10 : 0.45);
         const double yMax = std::max(hist->GetMaximum() * 3.0, yMin * 10.0);
 
         TH1F* frame = gPad->DrawFrame(xMin, yMin, xMax, yMax);
         frame->SetTitle("");
-        frame->GetXaxis()->SetTitle("Charged-particle multiplicity N_{ch}");
-        frame->GetYaxis()->SetTitle(normalize ? "Normalized events" : "Counts");
-        frame->GetXaxis()->SetTitleOffset(1.1);
+        frame->GetXaxis()->SetTitle(MultiplicityXAxisTitle());
+        frame->GetYaxis()->SetTitle(MultiplicityYAxisTitle(normalize));
+        frame->GetXaxis()->SetTitleOffset(1.0);
         frame->GetYaxis()->SetTitleOffset(1.25);
 
-        TGraph* graph = BuildMultiplicityGraph(hist, tune, xMin, xMax);
+        TGraphErrors* graph = BuildMultiplicityGraph(hist, tune, xMin, xMax);
         keepAlive.push_back(hist);
         keepAlive.push_back(graph);
-        graph->Draw("L same");
+        graph->Draw("LE1 same");
 
         const std::map<double, double> thresholds =
             CalculateThresholds(hist, config.percentileClasses);
         DrawClassDecorations(config.percentileClasses, thresholds, xMin, xMax, yMin, yMax);
-        graph->Draw("L same");
+        graph->Draw("LE1 same");
         gPad->RedrawAxis();
 
         TLatex title;
@@ -547,6 +570,7 @@ void DrawFlavorCanvas(const PlotConfig& config,
         title.SetTextAlign(22);
         title.SetTextSize(0.045);
         title.DrawLatex(0.50, 0.955, Form("%s %s", flavor, tune.c_str()));
+
     }
 
     if (gSystem->mkdir(config.outputDir.c_str(), true) != 0 &&
@@ -587,7 +611,7 @@ void DrawSharedCanvas(const PlotConfig& config,
         gPad->SetLogy();
         gPad->SetTicks(1, 1);
         gPad->SetTopMargin(0.08);
-        gPad->SetBottomMargin(0.12);
+        gPad->SetBottomMargin(0.14);
         gPad->SetLeftMargin(iTune == 0 ? 0.14 : 0.08);
         gPad->SetRightMargin(0.03);
 
@@ -598,26 +622,26 @@ void DrawSharedCanvas(const PlotConfig& config,
         }
 
         const double xMin = 1.0;
-        const double xMax = std::max(UpperX(hist), 10.0);
+        const double xMax = kMultiplicityXMax;
         const double yMin = std::max(PositiveMinimum(hist) * 0.45, normalize ? 1.0e-10 : 0.45);
         const double yMax = std::max(hist->GetMaximum() * 3.0, yMin * 10.0);
 
         TH1F* frame = gPad->DrawFrame(xMin, yMin, xMax, yMax);
         frame->SetTitle("");
-        frame->GetXaxis()->SetTitle("Charged-particle multiplicity N_{ch}");
-        frame->GetYaxis()->SetTitle(normalize ? "Normalized events" : "Counts");
-        frame->GetXaxis()->SetTitleOffset(1.1);
+        frame->GetXaxis()->SetTitle(MultiplicityXAxisTitle());
+        frame->GetYaxis()->SetTitle(MultiplicityYAxisTitle(normalize));
+        frame->GetXaxis()->SetTitleOffset(1.0);
         frame->GetYaxis()->SetTitleOffset(1.25);
 
-        TGraph* graph = BuildMultiplicityGraph(hist, tune, xMin, xMax);
+        TGraphErrors* graph = BuildMultiplicityGraph(hist, tune, xMin, xMax);
         keepAlive.push_back(hist);
         keepAlive.push_back(graph);
-        graph->Draw("L same");
+        graph->Draw("LE1 same");
 
         const std::map<double, double> thresholds =
             CalculateThresholds(hist, config.percentileClasses);
         DrawClassDecorations(config.percentileClasses, thresholds, xMin, xMax, yMin, yMax);
-        graph->Draw("L same");
+        graph->Draw("LE1 same");
         gPad->RedrawAxis();
 
         TLatex title;
@@ -625,6 +649,7 @@ void DrawSharedCanvas(const PlotConfig& config,
         title.SetTextAlign(22);
         title.SetTextSize(0.045);
         title.DrawLatex(0.50, 0.955, tune.c_str());
+
     }
 
     if (gSystem->mkdir(config.outputDir.c_str(), true) != 0 &&
@@ -645,6 +670,83 @@ void DrawSharedCanvas(const PlotConfig& config,
     for (TObject* object : keepAlive) delete object;
 }
 
+void DrawCompactMonashCanvas(const PlotConfig& config,
+                             bool normalize,
+                             bool strictInputs)
+{
+    const std::string tune = "MONASH";
+    TCanvas* canvas = new TCanvas("cMultiplicityPercentiles_MONASH_compact",
+                                  "MONASH compact multiplicity percentile boundaries",
+                                  820, 660);
+    TH1D* hist = nullptr;
+    TGraphErrors* graph = nullptr;
+
+    canvas->SetLogx();
+    canvas->SetLogy();
+    canvas->SetTicks(1, 1);
+    canvas->SetTopMargin(0.08);
+    canvas->SetBottomMargin(0.16);
+    canvas->SetLeftMargin(0.14);
+    canvas->SetRightMargin(0.04);
+
+    hist = LoadSharedMultiplicityHistogram(config, tune, normalize, strictInputs);
+    if (!hist) {
+        DrawMissingInputMessage("SHARED", tune);
+    } else {
+        const double xMin = 1.0;
+        const double xMax = kMultiplicityXMax;
+        const double yMin = std::max(PositiveMinimum(hist) * 0.45, normalize ? 1.0e-10 : 0.45);
+        const double yMax = std::max(hist->GetMaximum() * 3.0, yMin * 10.0);
+
+        TH1F* frame = gPad->DrawFrame(xMin, yMin, xMax, yMax);
+        frame->SetTitle("");
+        frame->GetXaxis()->SetTitle(MultiplicityXAxisTitle());
+        frame->GetYaxis()->SetTitle(MultiplicityYAxisTitle(normalize));
+        frame->GetXaxis()->SetTitleOffset(1.0);
+        frame->GetYaxis()->SetTitleOffset(1.20);
+
+        graph = BuildMultiplicityGraph(hist, tune, xMin, xMax);
+        graph->Draw("LE1 same");
+
+        const std::map<double, double> thresholds =
+            CalculateThresholds(hist, config.percentileClasses);
+        DrawClassDecorations(config.percentileClasses, thresholds, xMin, xMax, yMin, yMax);
+        graph->Draw("LE1 same");
+
+        TLegend* legend = new TLegend(0.64, 0.78, 0.91, 0.88);
+        legend->SetBorderSize(0);
+        legend->SetFillStyle(0);
+        legend->SetTextSize(0.036);
+        legend->AddEntry(graph, "MONASH example", "lp");
+        legend->Draw();
+
+        TLatex title;
+        title.SetNDC();
+        title.SetTextAlign(13);
+        title.SetTextSize(0.040);
+        title.DrawLatex(0.14, 0.955, "MONASH percentile boundaries");
+        gPad->RedrawAxis();
+    }
+
+    if (gSystem->mkdir(config.outputDir.c_str(), true) != 0 &&
+        gSystem->AccessPathName(config.outputDir.c_str())) {
+        throw std::runtime_error("Could not create output directory: " + config.outputDir);
+    }
+
+    const std::string suffix = normalize ? "normalized" : "counts";
+    const std::string outBase =
+        JoinPath({config.outputDir,
+                  std::string("MultiplicityDistributionPercentileBoundaries_MONASH_compact_") +
+                      suffix});
+
+    canvas->SaveAs((outBase + ".png").c_str());
+    canvas->SaveAs((outBase + ".pdf").c_str());
+    canvas->SaveAs((outBase + ".C").c_str());
+    delete canvas;
+    delete hist;
+    delete graph;
+}
+
 void SetPlotStyle()
 {
     gStyle->SetOptStat(0);
@@ -660,7 +762,8 @@ void Plot_MultiplicityDistribution_PercentileBoundaries(
         "PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json",
     const char* outputDir = "PlottingScripts/Plots/MultiplicityDistribution",
     bool normalize = false,
-    bool strictInputs = false)
+    bool strictInputs = false,
+    bool compactMonashOnly = false)
 {
     using namespace MultiplicityPercentilePlot;
 
@@ -671,7 +774,11 @@ void Plot_MultiplicityDistribution_PercentileBoundaries(
     std::cout << "Using analyzed data dir: " << config.baseDir << std::endl;
     std::cout << "Writing multiplicity plots to: " << config.outputDir << std::endl;
 
-    DrawSharedCanvas(config, normalize, strictInputs);
+    if (compactMonashOnly) {
+        DrawCompactMonashCanvas(config, normalize, strictInputs);
+    } else {
+        DrawSharedCanvas(config, normalize, strictInputs);
+    }
 }
 
 void Plot_MultiplicityDistribution_PercentileBoundaries_ByFlavor(
