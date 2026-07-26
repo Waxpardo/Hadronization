@@ -121,7 +121,7 @@ struct canvasConfigs {
     std::string FLAVOUR; // just one allowed, but could implement with a new function
     std::string TriggerToUse; // which trigger to use in the yield plots?
     std::vector<std::string> vBinsToIgnore; // which bins should be ignored in drawing (only relevant for baryon/meson ratio plots)
-    Int_t indexNominatorTUNE; // used for TUNE ratio plots, e.g. MONASH/JUNCTIONS to study enhancement explicitly
+    std::vector<Int_t> vIndexNominatorTUNES; // used for TUNE ratio plots, e.g. MONASH/JUNCTIONS to study enhancement explicitly
     Int_t indexDenominatorTUNE;
     std::vector<std::string> vBaryonNames; // baryons to be drawn (only for baryon/meson ratio plots!!!)
     bool useHardCodedSettings; // use hard-coded settings for this canvas (to be defined in function call)
@@ -814,14 +814,15 @@ CONFIGS readConfig(const char* configurations) {
             vBinsToIgnore.push_back(binToIgnore);
         }
         pair.vBinsToIgnore = vBinsToIgnore;
-        std::string nominatorTuneName = configPair["nominator_TUNE"].get<std::string>();
-        pair.indexNominatorTUNE = -1;
-        if (nominatorTuneName != "NONE") {
-            pair.indexNominatorTUNE = findTuneIndex(vTUNES, nominatorTuneName);
-            if (pair.indexNominatorTUNE != -1) {
-                std::cout << "Index of " << nominatorTuneName << " is: " << pair.indexNominatorTUNE << std::endl;
-            } else {
-                std::cout << nominatorTuneName << " ERROR: TUNE not found in vTUNES." << std::endl; //TODO: this error is not always an error...
+        pair.vIndexNominatorTUNES.clear();
+        if (configPair.contains("nominator_TUNES")) {
+            for (const auto& tune : configPair["nominator_TUNES"]) {
+                std::string tuneName = tune.get<std::string>();
+                Int_t tuneIndex = findTuneIndex(vTUNES, tuneName);
+                if (tuneIndex != -1) {
+                    pair.vIndexNominatorTUNES.push_back(tuneIndex);
+                    std::cout << "Index of " << tuneName << " is: " << tuneIndex << std::endl;
+                } else { std::cout << tuneName << " ERROR: TUNE not found in vTUNES." << std::endl; }
             }
         }
         std::string denominatorTuneName = configPair["denominator_TUNE"].get<std::string>();
@@ -1734,7 +1735,7 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
 
 
 TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOUR, YieldsAndErrorsMap mapYieldsAndErrors,
-                                  Int_t indexNominatorTUNE, Int_t indexDenominatorTUNE) {
+                                  std::vector<Int_t> vIndexNominatorTUNES, Int_t indexDenominatorTUNE) {
 
 
     std::cout << "*** Drawing balancing plots with TUNE ratios for " << FLAVOUR;
@@ -1752,18 +1753,19 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
     std::vector<HistogramAndTriggerPtHistogramNames> vHistogramAndTriggerPtHistogramNames = configs_from_json.vHistogramAndTriggerPtHistogramNames;
     std::vector<BinsFromTHnSparse> vBinsFromTHnSparse = configs_from_json.vBinsFromTHnSparse;
 
-    std::cout << " and TUNE = " << vTUNES[indexNominatorTUNE] << "/" << vTUNES[indexDenominatorTUNE] << " ***" << std::endl;
+    for (const auto& indexNominatorTUNE : vIndexNominatorTUNES) { std::cout << " and TUNE = " << vTUNES[indexNominatorTUNE] << "/" << vTUNES[indexDenominatorTUNE] << " ***" << std::endl; }
+    // Int_t indexNominatorTUNE = vIndexNominatorTUNES[0];
 
     // Function that transforms the map storing trigger and vYieldsAndErrors into just vYieldsAndErrors
     auto vYieldsAndErrors = YieldsAndErrorsForGivenTrigger(canvasConfigs.TriggerToUse, mapYieldsAndErrors, CALCULATE_ERRORS);
 
     Int_t nAssociates = vTriggerAssociateOSandSS.size();
-    // Int_t nDependencies = vHistogramAndTriggerPtHistogramNames.size();
     Int_t nDependencies = vBinsFromTHnSparse.size();
+    Int_t nTUNES = vIndexNominatorTUNES.size(); // nominator TUNES to be used in the TUNE ratios
 
     // Values will be drawn from a 2D vector of TH1D with number of ASSOCIATES bins
     // This way the TUNE and DEPENDENCY can be looped over, while the data points will be the ASSOCIATES
-    TH1D *vHists[nDependencies];
+    TH1D *vHists[nDependencies][nTUNES];
     if (VERBOSE) {
         std::cout << "number of associates: " << nAssociates << std::endl;
         std::cout << std::endl;
@@ -1866,48 +1868,66 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
             auto it = legendEntriesMap.find(dependencyMap[k]);
             if (it == legendEntriesMap.end()) { continue; }
 
-            vHists[k] = new TH1D(Form("hYields_%s_%i_%i_%s", FLAVOUR, j, k, (canvasConfigs.canvasName).c_str()), Form("hYields_%s_%i_%i_%s", FLAVOUR, j, k, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
-            vHists[k]->SetBinContent(1+j, vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k]);
-            if (CALCULATE_ERRORS) { 
-                // TODO: implement ratio error in yield code
-                // vHists[k]->SetBinError(1+j, vYieldsAndErrors.vYieldsErrors[i][j][k]);
-                vHists[k]->SetBinError(1+j, propagateRatioError(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k], 
-                                                                vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k],
-                                                                vYieldsAndErrors.vYieldsErrors[indexNominatorTUNE][j][k],
-                                                                vYieldsAndErrors.vYieldsErrors[indexDenominatorTUNE][j][k]));
-            }
-            else {
-                vHists[k]->SetBinError(1+j, 1e-10);
-            }
-            cYields->cd();
-            vHists[k]->SetLineColor(kBlack);
-            vHists[k]->Draw("same PE");
-            if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
-                cMiniPad->cd();
-                vHists[k]->Draw("same PE");
-            }
 
-            if (lineStyleDependencyMap.find(binFromTHnSparse.hDPhi) != lineStyleDependencyMap.end()) {
-                Int_t lineStyle = lineStyleDependencyMap[binFromTHnSparse.hDPhi];
-                vHists[k]->SetLineStyle(lineStyle);
-                if (VERBOSE) { std::cout << "Found lineStyle: " << lineStyle << std::endl; }
-            } else {
-                if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
-            }
+            for (Int_t iTUNE=0; iTUNE < nTUNES; iTUNE++) {
 
-            // Draw legend
-            if (legend != nullptr && alreadyInLegend.find(binFromTHnSparse.hDPhi) == alreadyInLegend.end()) {
-                if (legendEntriesMap.find(binFromTHnSparse.hDPhi) != legendEntriesMap.end()) {
-                    std::string displayName = legendEntriesMap[binFromTHnSparse.hDPhi];
-                    if (VERBOSE) { std::cout << "Found displayName: " << displayName << std::endl; }
-                    legend->AddEntry(vHists[k], displayName.c_str(), "l");
+
+                Int_t indexNominatorTUNE = vIndexNominatorTUNES[iTUNE];
+                if (VERBOSE) { std::cout << "starting loop over nominator TUNE: " << indexNominatorTUNE << std::endl; }
+
+
+                vHists[k][iTUNE] = new TH1D(Form("hYields_%s_%i_%i_%i_%s", FLAVOUR, j, k, iTUNE, (canvasConfigs.canvasName).c_str()), Form("hYields_%s_%i_%i_%i_%s", FLAVOUR, j, k, iTUNE, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
+                vHists[k][iTUNE]->SetBinContent(1+j, vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k]);
+                if (CALCULATE_ERRORS) { 
+                    // TODO: implement ratio error in yield code
+                    // vHists[k]->SetBinError(1+j, vYieldsAndErrors.vYieldsErrors[i][j][k]);
+                    vHists[k][iTUNE]->SetBinError(1+j, propagateRatioError(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k], 
+                                                                    vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k],
+                                                                    vYieldsAndErrors.vYieldsErrors[indexNominatorTUNE][j][k],
+                                                                    vYieldsAndErrors.vYieldsErrors[indexDenominatorTUNE][j][k]));
+                }
+                else {
+                    vHists[k][iTUNE]->SetBinError(1+j, 1e-10);
+                }
+                cYields->cd();
+                
+                // TODO: THIS IS HARDCODED
+                Int_t colour;
+                if (indexNominatorTUNE == 0) { colour = 4; }
+                else if (indexNominatorTUNE == 1) { colour = 2; }
+                else if (indexNominatorTUNE == 2) { colour = 6; }
+                vHists[k][iTUNE]->SetLineColor(colour);
+
+                vHists[k][iTUNE]->Draw("same PE");
+                if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
+                    cMiniPad->cd();
+                    vHists[k][iTUNE]->Draw("same PE");
+                }
+
+                if (lineStyleDependencyMap.find(binFromTHnSparse.hDPhi) != lineStyleDependencyMap.end()) {
+                    Int_t lineStyle = lineStyleDependencyMap[binFromTHnSparse.hDPhi];
+                    vHists[k][iTUNE]->SetLineStyle(lineStyle);
+                    if (VERBOSE) { std::cout << "Found lineStyle: " << lineStyle << std::endl; }
                 } else {
                     if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
                 }
-                alreadyInLegend.insert(binFromTHnSparse.hDPhi);
-            }
 
-            if (VERBOSE) { std::cout << std::endl; }
+                // Draw legend
+                if (legend != nullptr && alreadyInLegend.find(binFromTHnSparse.hDPhi) == alreadyInLegend.end()) {
+                    if (legendEntriesMap.find(binFromTHnSparse.hDPhi) != legendEntriesMap.end()) {
+                        std::string displayName = legendEntriesMap[binFromTHnSparse.hDPhi];
+                        if (VERBOSE) { std::cout << "Found displayName: " << displayName << std::endl; }
+                        legend->AddEntry(vHists[k][iTUNE], displayName.c_str(), "l");
+                    } else {
+                        if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
+                    }
+                    alreadyInLegend.insert(binFromTHnSparse.hDPhi);
+                }
+
+                if (VERBOSE) { std::cout << std::endl; }
+
+
+            } // loop over NOMINATOR TUNES
 
 
         } // Loop over DEPENDENCIES
@@ -2175,7 +2195,7 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
 
 
 TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOUR, YieldsAndErrorsMap mapYieldsAndErrors,
-                                                  Int_t indexNominatorTUNE, Int_t indexDenominatorTUNE) {
+                                                  std::vector<Int_t> vIndexNominatorTUNES, Int_t indexDenominatorTUNE) {
 
 
     std::cout << "*** Drawing balancing baryon/meson ratio plots with TUNE ratios for " << FLAVOUR << " ***" << std::endl;
@@ -2194,7 +2214,8 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
     std::vector<BinsFromTHnSparse> vBinsFromTHnSparse = configs_from_json.vBinsFromTHnSparse;
     std::vector<std::string> vBinsToIgnore = canvasConfigs.vBinsToIgnore;
 
-    std::cout << " and TUNE = " << vTUNES[indexNominatorTUNE] << "/" << vTUNES[indexDenominatorTUNE] << " ***" << std::endl;
+    for (const auto& indexNominatorTUNE : vIndexNominatorTUNES) { std::cout << " and TUNE = " << vTUNES[indexNominatorTUNE] << "/" << vTUNES[indexDenominatorTUNE] << " ***" << std::endl; }
+    // Int_t indexNominatorTUNE = vIndexNominatorTUNES[0];
 
     // Function that transforms the map storing trigger and vYieldsAndErrors into just vYieldsAndErrors
     auto vYieldsAndErrors = YieldsAndErrorsForGivenTrigger(canvasConfigs.TriggerToUse, mapYieldsAndErrors, CALCULATE_ERRORS);
@@ -2205,6 +2226,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
     // and subtract the template size
     if (vBinsToIgnore[0] != "NONE" && vBinsToIgnore[0] != "" && vBinsToIgnore[0] != "NULL") { nDependencies = vBinsFromTHnSparse.size() - vBinsToIgnore.size(); }
     else {nDependencies = vBinsFromTHnSparse.size(); }
+    Int_t nTUNES = vIndexNominatorTUNES.size(); // nominator TUNES to be used in the TUNE ratios
 
     // We construct a map object that links the bin integer (integer k of vYields[i][j][k]) with the corresponding bin name
     // This way we can compute all yields in the beginning, but only draw the ones we are interested in
@@ -2214,7 +2236,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
 
     // Values will be drawn from a 2D vector of TH1D with number of DEPENDENCIES bins
     // This way the TUNE and ASSOCIATE can be looped over, while the data points will be the DEPENDENCIES
-    TH1D *vHists[nAssociates];
+    TH1D *vHists[nAssociates][nTUNES];
     // TODO: verbose
     // std::cout << "number of dependencies: " << nDependencies << std::endl;
 
@@ -2305,66 +2327,85 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                 continue;
             }
 
-            vHists[j] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%s", FLAVOUR, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%s", FLAVOUR, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
-            vHists[j]->SetBinContent(1+k-skippedBins, (vYieldsAndErrors.vYields[indexNominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexNominatorTUNE][0][k])
-                                           / (vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k]));
-            if (CALCULATE_ERRORS) { 
-                // Several options for error calculation/propagation
-                // Ratio calculated seperately:
-                // TODO: add this in yield calculation
-                // TODO: also check if this is without bugs (features?) now..
-                // vHists[j]->SetBinError(1+k, vYieldsAndErrors.vYieldsRatioErrors[i][j][k]);
-                vHists[j]->SetBinError(1+k-skippedBins, propagateRatioError(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k], 
-                                                                vYieldsAndErrors.vYields[indexNominatorTUNE][0][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k],
-                                                                vYieldsAndErrors.vYieldsRatioErrors[indexNominatorTUNE][j][k],
-                                                                vYieldsAndErrors.vYieldsRatioErrors[indexDenominatorTUNE][0][k]));
-                // Naive error propagation (assuming no correlation):
-                /*
-                vHists[j]->SetBinError(1+k, propagateRatioError(vYieldsAndErrors.vYields[i][j][k], 
-                                                                    vYieldsAndErrors.vYields[i][0][k],
-                                                                    vYieldsAndErrors.vYieldsErrors[i][j][k],
-                                                                    vYieldsAndErrors.vYieldsErrors[i][0][k]));
-                */
-                // Placeholder; same error as single yield:
-                // vHists[j]->SetBinError(1+k, vYieldsAndErrors.vYieldsErrors[i][j][k]);
-            }
-            else {
-                vHists[j]->SetBinError(1+k-skippedBins, 1e-10);
-            }
-            cYields->cd();
-            vHists[j]->SetLineColor(kBlack);
-            vHists[j]->Draw("same PE");
-            if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
-                cMiniPad->cd();
-                vHists[j]->Draw("same PE");
-            }
 
-            hYieldsTemplate->GetXaxis()->SetBinLabel(1+k-skippedBins, (binFromTHnSparse.hDPhi).c_str());
+            for (Int_t iTUNE=0; iTUNE < nTUNES; iTUNE++) {
 
-            if (lineStyleBaryonMap.find(associateName) != lineStyleBaryonMap.end()) {
-                    Int_t lineStyle = lineStyleBaryonMap[associateName];
-                    vHists[j]->SetLineStyle(lineStyle);
-                    // TODO: verbose
-                    // std::cout << "Found lineStyle: " << lineStyle << std::endl;
-                } else {
-                    // TODO: verbose
-                    // std::cout << "objectName not found in the map!" << std::endl;
+
+                Int_t indexNominatorTUNE = vIndexNominatorTUNES[iTUNE];
+                if (VERBOSE) { std::cout << "starting loop over nominator TUNE: " << indexNominatorTUNE << std::endl; }
+
+
+                vHists[j][iTUNE] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, j, k-skippedBins, iTUNE, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, j, k-skippedBins, iTUNE, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
+                vHists[j][iTUNE]->SetBinContent(1+k-skippedBins, (vYieldsAndErrors.vYields[indexNominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexNominatorTUNE][0][k])
+                                            / (vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k]));
+                if (CALCULATE_ERRORS) { 
+                    // Several options for error calculation/propagation
+                    // Ratio calculated seperately:
+                    // TODO: add this in yield calculation
+                    // TODO: also check if this is without bugs (features?) now..
+                    // vHists[j][iTUNE]->SetBinError(1+k, vYieldsAndErrors.vYieldsRatioErrors[i][j][k]);
+                    vHists[j][iTUNE]->SetBinError(1+k-skippedBins, propagateRatioError(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k], 
+                                                                    vYieldsAndErrors.vYields[indexNominatorTUNE][0][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k],
+                                                                    vYieldsAndErrors.vYieldsRatioErrors[indexNominatorTUNE][j][k],
+                                                                    vYieldsAndErrors.vYieldsRatioErrors[indexDenominatorTUNE][0][k]));
+                    // Naive error propagation (assuming no correlation):
+                    /*
+                    vHists[j][iTUNE]->SetBinError(1+k, propagateRatioError(vYieldsAndErrors.vYields[i][j][k], 
+                                                                        vYieldsAndErrors.vYields[i][0][k],
+                                                                        vYieldsAndErrors.vYieldsErrors[i][j][k],
+                                                                        vYieldsAndErrors.vYieldsErrors[i][0][k]));
+                    */
+                    // Placeholder; same error as single yield:
+                    // vHists[j][iTUNE]->SetBinError(1+k, vYieldsAndErrors.vYieldsErrors[i][j][k]);
+                }
+                else {
+                    vHists[j][iTUNE]->SetBinError(1+k-skippedBins, 1e-10);
+                }
+                cYields->cd();
+
+                // TODO: THIS IS HARDCODED
+                Int_t colour;
+                if (indexNominatorTUNE == 0) { colour = 4; }
+                else if (indexNominatorTUNE == 1) { colour = 2; }
+                else if (indexNominatorTUNE == 2) { colour = 6; }
+                vHists[j][iTUNE]->SetLineColor(colour);
+
+                vHists[j][iTUNE]->Draw("same PE");
+                if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
+                    cMiniPad->cd();
+                    vHists[j][iTUNE]->Draw("same PE");
                 }
 
-            // TODO: verbose
-            // std::cout << std::endl;
+                hYieldsTemplate->GetXaxis()->SetBinLabel(1+k-skippedBins, (binFromTHnSparse.hDPhi).c_str());
+
+                if (lineStyleBaryonMap.find(associateName) != lineStyleBaryonMap.end()) {
+                        Int_t lineStyle = lineStyleBaryonMap[associateName];
+                        vHists[j][iTUNE]->SetLineStyle(lineStyle);
+                        // TODO: verbose
+                        // std::cout << "Found lineStyle: " << lineStyle << std::endl;
+                    } else {
+                        // TODO: verbose
+                        // std::cout << "objectName not found in the map!" << std::endl;
+                    }
+
+                // TODO: verbose
+                // std::cout << std::endl;
+
+
+            } // Loop over NOMINATOR TUNES
 
 
         } // Loop over DEPENDENCIES
 
 
         // Draw legend
+        // TODO: add nominator TUNE in vHists[j]
         if (legend != nullptr && alreadyInLegend.find(associateName) == alreadyInLegend.end()) {
             if (legendEntriesMap.find(associateName) != legendEntriesMap.end()) {
                 std::string displayName = legendEntriesMap[associateName];
                 // TODO: verbose
                 // std::cout << "Found displayName: " << displayName << std::endl;
-                legend->AddEntry(vHists[j], displayName.c_str(), "l");
+                legend->AddEntry(vHists[j][0], displayName.c_str(), "l");
             } else {
                 // TODO: verbose
                 // std::cout << "objectName not found in the map!" << std::endl;
@@ -2427,7 +2468,7 @@ int improvedPlotting_THnSparse(const char* configuration) {
         std::vector<std::string> vCanvasTUNES = canvasConfigs.vCanvasTUNES;
         std::string FLAVOUR = canvasConfigs.FLAVOUR;
         std::string TriggerToUse = canvasConfigs.TriggerToUse;
-        Int_t indexNominatorTUNE = canvasConfigs.indexNominatorTUNE;
+        std::vector<Int_t> vIndexNominatorTUNES = canvasConfigs.vIndexNominatorTUNES;
         Int_t indexDenominatorTUNE = canvasConfigs.indexDenominatorTUNE;
         // TODO: alternatively, just don't define vYieldsBeauty above, 
         // it's a bit redundant now..
@@ -2440,7 +2481,7 @@ int improvedPlotting_THnSparse(const char* configuration) {
             cMiniCanvasMap[canvasName] = cMiniPad;
         }
         if (strcmp(drawFunctionToUse.c_str(), "drawBalancingPlotsTUNERatios") == 0) { 
-            TPad *cMiniPad = drawBalancingPlotsTUNERatios(configs_from_json,FLAVOUR.c_str(), mapYields, indexNominatorTUNE, indexDenominatorTUNE);
+            TPad *cMiniPad = drawBalancingPlotsTUNERatios(configs_from_json,FLAVOUR.c_str(), mapYields, vIndexNominatorTUNES, indexDenominatorTUNE);
             cMiniCanvasMap[canvasName] = cMiniPad; 
         }
         if (strcmp(drawFunctionToUse.c_str(), "drawBalancingBaryonMesonRatioPlots") == 0) { 
@@ -2448,7 +2489,7 @@ int improvedPlotting_THnSparse(const char* configuration) {
             cMiniCanvasMap[canvasName] = cMiniPad; 
         }
         if (strcmp(drawFunctionToUse.c_str(), "drawBalancingBaryonMesonRatioPlotsTUNERatios") == 0) { 
-            TPad *cMiniPad = drawBalancingBaryonMesonRatioPlotsTUNERatios(configs_from_json,FLAVOUR.c_str(), mapYields, indexNominatorTUNE, indexDenominatorTUNE); 
+            TPad *cMiniPad = drawBalancingBaryonMesonRatioPlotsTUNERatios(configs_from_json,FLAVOUR.c_str(), mapYields, vIndexNominatorTUNES, indexDenominatorTUNE); 
             cMiniCanvasMap[canvasName] = cMiniPad;
         }
     } // Loop over canvas settings
