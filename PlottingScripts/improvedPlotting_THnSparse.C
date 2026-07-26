@@ -120,6 +120,7 @@ struct canvasConfigs {
     std::vector<std::string> vCanvasTUNES; // tune to be drawn on given canvas
     std::string FLAVOUR; // just one allowed, but could implement with a new function
     std::string TriggerToUse; // which trigger to use in the yield plots?
+    std::vector<std::string> vBinsToIgnore; // which bins should be ignored in drawing (only relevant for baryon/meson ratio plots)
     Int_t indexNominatorTUNE; // used for TUNE ratio plots, e.g. MONASH/JUNCTIONS to study enhancement explicitly
     Int_t indexDenominatorTUNE;
     std::vector<std::string> vBaryonNames; // baryons to be drawn (only for baryon/meson ratio plots!!!)
@@ -589,6 +590,25 @@ void createCustomLegendEntry_BeautyJUNCTIONS(TLegend *legend, std::string displa
 */
 
 
+// Function that creates a map storing both the dependency object (the 'bin' we want to draw)
+// and the integer of the vYields vector that contains this bin (the third one)
+// This allows to calculate all the multiplicity bins, but draw only a selection of them
+std::map<std::size_t, std::string> CreateDependencyMap(const YieldsAndErrors& yields, const std::vector<BinsFromTHnSparse>& bins) {
+
+    std::map<std::size_t, std::string> dependencyMap;
+
+    std::size_t nDependencies = 0;
+    if (!yields.vYields.empty() && !yields.vYields[0].empty())
+        nDependencies = yields.vYields[0][0].size();
+    if (bins.size() != nDependencies)
+        throw std::runtime_error("Number of BinsFromTHnSparse objects does not match k dimension.");
+
+    for (std::size_t k = 0; k < nDependencies; ++k) { dependencyMap[k] = bins[k].hDPhi; }
+
+    return dependencyMap;
+}
+
+
 // Function that creates mini pads in case you do not want to use TCanvas->Divide()
 // TODO: apply this function everywhere where required...
 TPad* createMiniPad(const char* name,
@@ -788,7 +808,12 @@ CONFIGS readConfig(const char* configurations) {
         }
         pair.vCanvasTUNES = vCanvasTUNES;
         pair.FLAVOUR = configPair["FLAVOUR"].get<std::string>();
-        pair.TriggerToUse = configPair["TriggerToUse"].get<std::string>(); // must be identical to trigger name from 'histograms to draw' section! TODO: do something about that..
+        pair.TriggerToUse = configPair["TriggerToUse"].get<std::string>(); // must be identical to trigger name from 'histograms to draw' section! TODO: do something about that.. TODO: make naming consistent (with _)
+        std::vector<std::string> vBinsToIgnore;
+        for (const auto& binToIgnore : configPair["bins_to_ignore"]) {
+            vBinsToIgnore.push_back(binToIgnore);
+        }
+        pair.vBinsToIgnore = vBinsToIgnore;
         std::string nominatorTuneName = configPair["nominator_TUNE"].get<std::string>();
         pair.indexNominatorTUNE = -1;
         if (nominatorTuneName != "NONE") {
@@ -796,7 +821,7 @@ CONFIGS readConfig(const char* configurations) {
             if (pair.indexNominatorTUNE != -1) {
                 std::cout << "Index of " << nominatorTuneName << " is: " << pair.indexNominatorTUNE << std::endl;
             } else {
-                std::cout << nominatorTuneName << " ERROR: TUNE not found in vTUNES." << std::endl;
+                std::cout << nominatorTuneName << " ERROR: TUNE not found in vTUNES." << std::endl; //TODO: this error is not always an error...
             }
         }
         std::string denominatorTuneName = configPair["denominator_TUNE"].get<std::string>();
@@ -1265,12 +1290,14 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     // to customise what should be drawn and how already in the json
                     // TODO: this needs to be automised and configurable in the json as well
                     if (DRAW_CORRELATION_PLOTS) {
+                        /*
                         if (VERBOSE) {
                             TCanvas *c_correlations = new TCanvas (Form("%s c_correlations %s minus %s for [%f, %f]", TUNE.c_str(), fileNamesOSandSS.OS.c_str(), fileNamesOSandSS.SS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), Form("%s c_correlations %s minus %s for [%f, %f]", TUNE.c_str(), fileNamesOSandSS.OS.c_str(), fileNamesOSandSS.SS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), 800, 600);
                             c_correlations->cd();
                             hDPhiOS->SetTitle(Form("%s c_correlations %s minus %s for [%f, %f]", TUNE.c_str(), fileNamesOSandSS.OS.c_str(), fileNamesOSandSS.SS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax));
                             hDPhiOS->Draw();
                         }
+                        */
 
                         // Hard-coded: we only want to show correlations for B+B- and D+D-
                         // TODO: put an option in the configuration.json to give a list of desired correlations to draw
@@ -1517,6 +1544,12 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
         std::cout << std::endl;
     }
 
+    // We construct a map object that links the bin integer (integer k of vYields[i][j][k]) with the corresponding bin name
+    // This way we can compute all yields in the beginning, but only draw the ones we are interested in
+    // The bins that we want to draw are the ones we declare in the legend entries block of the json
+    // usage example: dependencyMap[k] == "hDPhiM90_100"
+    auto dependencyMap = CreateDependencyMap(vYieldsAndErrors, vBinsFromTHnSparse);
+
     // Define a template for this plot to set titles, stats, etc.
     TH1D *hYieldsTemplate = new TH1D(Form("hYieldsTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), Form("hYieldsTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
     hYieldsTemplate->SetTitle(canvasConfigs.canvasTitle.c_str());
@@ -1612,8 +1645,16 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
                 BinsFromTHnSparse binFromTHnSparse = vBinsFromTHnSparse[k];
                 if (VERBOSE) {
                     std::cout << "plotting histogram " << binFromTHnSparse.hDPhi << " with trigger pT histogram " << binFromTHnSparse.hTrPt << std::endl;
+                    std::cout << "dependency map " << dependencyMap[k] << std::endl;
                     std::cout << std::endl;
                 }
+
+                // Check if this bin should be drawn or not
+                // use binFromTHnSparse.hDPhi
+                // TODO: allow also to use binLabel
+                // TODO: make this verbose
+                auto it = legendEntriesMap.find(dependencyMap[k]);
+                if (it == legendEntriesMap.end()) { continue; }
 
                 vHists[i][k] = new TH1D(Form("hYields_%s_%i_%i_%i_%s", FLAVOUR, i, j, k, (canvasConfigs.canvasName).c_str()), Form("hYields_%s_%i_%i_%i_%s", FLAVOUR, i, j, k, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
                 vHists[i][k]->SetBinContent(1+j, vYieldsAndErrors.vYields[i][j][k]);
@@ -1728,6 +1769,12 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
         std::cout << std::endl;
     }
 
+    // We construct a map object that links the bin integer (integer k of vYields[i][j][k]) with the corresponding bin name
+    // This way we can compute all yields in the beginning, but only draw the ones we are interested in
+    // The bins that we want to draw are the ones we declare in the legend entries block of the json
+    // usage example: dependencyMap[k] == "hDPhiM90_100"
+    auto dependencyMap = CreateDependencyMap(vYieldsAndErrors, vBinsFromTHnSparse);
+
     // Define a template for this plot to set titles, stats, etc.
     TH1D *hYieldsTemplate = new TH1D(Form("hYieldsTUNERatiosTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), Form("hYieldsTUNERatiosTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
     hYieldsTemplate->SetTitle(canvasConfigs.canvasTitle.c_str());
@@ -1811,6 +1858,13 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
                 std::cout << "plotting histogram " << binFromTHnSparse.hDPhi << " with trigger pT histogram " << binFromTHnSparse.hTrPt << std::endl;
                 std::cout << std::endl;
             }
+
+            // Check if this bin should be drawn or not
+            // use binFromTHnSparse.hDPhi
+            // TODO: allow also to use binLabel
+            // TODO: make this verbose
+            auto it = legendEntriesMap.find(dependencyMap[k]);
+            if (it == legendEntriesMap.end()) { continue; }
 
             vHists[k] = new TH1D(Form("hYields_%s_%i_%i_%s", FLAVOUR, j, k, (canvasConfigs.canvasName).c_str()), Form("hYields_%s_%i_%i_%s", FLAVOUR, j, k, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
             vHists[k]->SetBinContent(1+j, vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k]);
@@ -1900,14 +1954,24 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
     if (strcmp(FLAVOUR, "CHARM") ==  0) { vTriggerAssociateOSandSS = configs_from_json.charmConfigs.at(canvasConfigs.TriggerToUse); }
     std::vector<HistogramAndTriggerPtHistogramNames> vHistogramAndTriggerPtHistogramNames = configs_from_json.vHistogramAndTriggerPtHistogramNames;
     std::vector<BinsFromTHnSparse> vBinsFromTHnSparse = configs_from_json.vBinsFromTHnSparse;
+    std::vector<std::string> vBinsToIgnore = canvasConfigs.vBinsToIgnore;
 
     // Function that transforms the map storing trigger and vYieldsAndErrors into just vYieldsAndErrors
     auto vYieldsAndErrors = YieldsAndErrorsForGivenTrigger(canvasConfigs.TriggerToUse, mapYieldsAndErrors, CALCULATE_ERRORS);
 
     Int_t nTUNES = vTUNES.size();
     Int_t nAssociates = vTriggerAssociateOSandSS.size();
-    // Int_t nDependencies = vHistogramAndTriggerPtHistogramNames.size();
-    Int_t nDependencies = vBinsFromTHnSparse.size();
+    Int_t nDependencies;
+    // We could have calculated more bins than we want to draw here, in that case, take the (non-empty) vector vBinsToIgnore
+    // and subtract the template size
+    if (vBinsToIgnore[0] != "NONE" && vBinsToIgnore[0] != "" && vBinsToIgnore[0] != "NULL") { nDependencies = vBinsFromTHnSparse.size() - vBinsToIgnore.size(); }
+    else {nDependencies = vBinsFromTHnSparse.size(); }
+
+    // We construct a map object that links the bin integer (integer k of vYields[i][j][k]) with the corresponding bin name
+    // This way we can compute all yields in the beginning, but only draw the ones we are interested in
+    // The bins that we want to draw are the ones we declare in the legend entries block of the json
+    // usage example: dependencyMap[k] == "hDPhiM90_100"
+    auto dependencyMap = CreateDependencyMap(vYieldsAndErrors, vBinsFromTHnSparse);
 
     // Values will be drawn from a 2D vector of TH1D with number of DEPENDENCIES bins
     // This way the TUNE and ASSOCIATE can be looped over, while the data points will be the DEPENDENCIES
@@ -1996,23 +2060,35 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                 std::cout << "starting loop over OS file: " << fileNamesOSandSS.OS << " and SS file: " << fileNamesOSandSS.SS << std::endl;
                 std::cout << std::endl;
             }
+            Int_t skippedBins = 0; // for the k-loop over skipped dependencies
+
 
             // Loop over DEPENDENCIES
-            for (Int_t k=0; k<nDependencies; k++) {
+            for (Int_t k=0; k<nDependencies+skippedBins; k++) {
 
 
+                std::cout << "k = " << k << std::endl;
                 // HistogramAndTriggerPtHistogramNames hDPhiAndhTrPtNames = vHistogramAndTriggerPtHistogramNames[k];
                 BinsFromTHnSparse binFromTHnSparse = vBinsFromTHnSparse[k];
                 if (VERBOSE) { 
                     std::cout << "plotting histogram " << binFromTHnSparse.hDPhi << " with trigger pT histogram " << binFromTHnSparse.hTrPt << std::endl;
                     std::cout << std::endl;
                 }
-                vHists[i][j] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, i, j, k, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, i, j, k, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
-                vHists[i][j]->SetBinContent(1+k, vYieldsAndErrors.vYields[i][j][k] / vYieldsAndErrors.vYields[i][0][k]);
+
+                // Skip bins if desired from config
+                if (isInVector(binFromTHnSparse.hDPhi, vBinsToIgnore)) { 
+                    std::cout << "do not draw bin " << binFromTHnSparse.hDPhi << " >>> skipping this bin" << std::endl;
+                    skippedBins++;
+                    continue;
+                }
+                std::cout << "skipped bins = " << skippedBins << std::endl;
+                
+                vHists[i][j] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, i, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, i, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
+                vHists[i][j]->SetBinContent(1+k-skippedBins, vYieldsAndErrors.vYields[i][j][k] / vYieldsAndErrors.vYields[i][0][k]);
                 if (CALCULATE_ERRORS) { 
                     // Several options for error calculation/propagation
                     // Ratio calculated seperately:
-                    vHists[i][j]->SetBinError(1+k, vYieldsAndErrors.vYieldsRatioErrors[i][j][k]);
+                    vHists[i][j]->SetBinError(1+k-skippedBins, vYieldsAndErrors.vYieldsRatioErrors[i][j][k]);
                     // Naive error propagation (assuming no correlation):
                     /*
                     vHists[i][j]->SetBinError(1+k, propagateRatioError(vYieldsAndErrors.vYields[i][j][k], 
@@ -2024,7 +2100,7 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                     // vHists[i][j]->SetBinError(1+k, vYieldsAndErrors.vYieldsErrors[i][j][k]);
                 }
                 else {
-                    vHists[i][j]->SetBinError(1+k, 1e-10);
+                    vHists[i][j]->SetBinError(1+k-skippedBins, 1e-10);
                 }
                 cYields->cd();
                 vHists[i][j]->Draw("same PE");
@@ -2033,7 +2109,7 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                     vHists[i][j]->Draw("same PE");
                 }
 
-                hYieldsTemplate->GetXaxis()->SetBinLabel(1+k, (binFromTHnSparse.hDPhi).c_str());
+                hYieldsTemplate->GetXaxis()->SetBinLabel(1+k-skippedBins, (binFromTHnSparse.hDPhi).c_str());
 
                 if (colourTUNEMap.find(TUNE) != colourTUNEMap.end()) {
                     Int_t colour = colourTUNEMap[TUNE];
@@ -2116,6 +2192,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
     if (strcmp(FLAVOUR, "CHARM") ==  0) { vTriggerAssociateOSandSS = configs_from_json.charmConfigs.at(canvasConfigs.TriggerToUse); }
     std::vector<HistogramAndTriggerPtHistogramNames> vHistogramAndTriggerPtHistogramNames = configs_from_json.vHistogramAndTriggerPtHistogramNames;
     std::vector<BinsFromTHnSparse> vBinsFromTHnSparse = configs_from_json.vBinsFromTHnSparse;
+    std::vector<std::string> vBinsToIgnore = canvasConfigs.vBinsToIgnore;
 
     std::cout << " and TUNE = " << vTUNES[indexNominatorTUNE] << "/" << vTUNES[indexDenominatorTUNE] << " ***" << std::endl;
 
@@ -2123,8 +2200,17 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
     auto vYieldsAndErrors = YieldsAndErrorsForGivenTrigger(canvasConfigs.TriggerToUse, mapYieldsAndErrors, CALCULATE_ERRORS);
 
     Int_t nAssociates = vTriggerAssociateOSandSS.size();
-    // Int_t nDependencies = vHistogramAndTriggerPtHistogramNames.size();
-    Int_t nDependencies = vBinsFromTHnSparse.size();
+    Int_t nDependencies;
+    // We could have calculated more bins than we want to draw here, in that case, take the (non-empty) vector vBinsToIgnore
+    // and subtract the template size
+    if (vBinsToIgnore[0] != "NONE" && vBinsToIgnore[0] != "" && vBinsToIgnore[0] != "NULL") { nDependencies = vBinsFromTHnSparse.size() - vBinsToIgnore.size(); }
+    else {nDependencies = vBinsFromTHnSparse.size(); }
+
+    // We construct a map object that links the bin integer (integer k of vYields[i][j][k]) with the corresponding bin name
+    // This way we can compute all yields in the beginning, but only draw the ones we are interested in
+    // The bins that we want to draw are the ones we declare in the legend entries block of the json
+    // usage example: dependencyMap[k] == "hDPhiM90_100"
+    auto dependencyMap = CreateDependencyMap(vYieldsAndErrors, vBinsFromTHnSparse);
 
     // Values will be drawn from a 2D vector of TH1D with number of DEPENDENCIES bins
     // This way the TUNE and ASSOCIATE can be looped over, while the data points will be the DEPENDENCIES
@@ -2196,13 +2282,15 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
         TriggerAssociateOSandSS fileNamesOSandSS = vTriggerAssociateOSandSS[j];
         std::string associateName = fileNamesOSandSS.associateOS;
         if (!plotBaryon(associateName, canvasConfigs.vBaryonNames)) {continue; }
-        // TODO: verbose
-        // std::cout << "starting loop over associate: " << associateName << std::endl;
-        // std::cout << "starting loop over OS file: " << fileNamesOSandSS.OS << " and SS file: " << fileNamesOSandSS.SS << std::endl;
-        // std::cout << std::endl;
+        if (VERBOSE) {
+            // std::cout << "starting loop over associate: " << associateName << std::endl;
+            // std::cout << "starting loop over OS file: " << fileNamesOSandSS.OS << " and SS file: " << fileNamesOSandSS.SS << std::endl;
+            // std::cout << std::endl;
+        }
+        Int_t skippedBins = 0; // for the k-loop over skipped dependencies
 
         // Loop over DEPENDENCIES
-        for (Int_t k=0; k<nDependencies; k++) {
+        for (Int_t k=0; k<nDependencies+skippedBins; k++) {
 
 
             // HistogramAndTriggerPtHistogramNames hDPhiAndhTrPtNames = vHistogramAndTriggerPtHistogramNames[k];
@@ -2210,8 +2298,15 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
             // TODO: verbose
             // std::cout << "plotting histogram " << hDPhiAndhTrPtNames.hDPhi << " with trigger pT histogram " << hDPhiAndhTrPtNames.hTrPt << std::endl;
 
-            vHists[j] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%s", FLAVOUR, j, k, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%s", FLAVOUR, j, k, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
-            vHists[j]->SetBinContent(1+k, (vYieldsAndErrors.vYields[indexNominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexNominatorTUNE][0][k])
+            // Skip bins if desired from config
+            if (isInVector(binFromTHnSparse.hDPhi, vBinsToIgnore)) { 
+                std::cout << "do not draw bin " << binFromTHnSparse.hDPhi << " >>> skipping this bin" << std::endl;
+                skippedBins++;
+                continue;
+            }
+
+            vHists[j] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%s", FLAVOUR, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%s", FLAVOUR, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
+            vHists[j]->SetBinContent(1+k-skippedBins, (vYieldsAndErrors.vYields[indexNominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexNominatorTUNE][0][k])
                                            / (vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k]));
             if (CALCULATE_ERRORS) { 
                 // Several options for error calculation/propagation
@@ -2219,7 +2314,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                 // TODO: add this in yield calculation
                 // TODO: also check if this is without bugs (features?) now..
                 // vHists[j]->SetBinError(1+k, vYieldsAndErrors.vYieldsRatioErrors[i][j][k]);
-                vHists[j]->SetBinError(1+k, propagateRatioError(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k], 
+                vHists[j]->SetBinError(1+k-skippedBins, propagateRatioError(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k], 
                                                                 vYieldsAndErrors.vYields[indexNominatorTUNE][0][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k],
                                                                 vYieldsAndErrors.vYieldsRatioErrors[indexNominatorTUNE][j][k],
                                                                 vYieldsAndErrors.vYieldsRatioErrors[indexDenominatorTUNE][0][k]));
@@ -2234,7 +2329,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                 // vHists[j]->SetBinError(1+k, vYieldsAndErrors.vYieldsErrors[i][j][k]);
             }
             else {
-                vHists[j]->SetBinError(1+k, 1e-10);
+                vHists[j]->SetBinError(1+k-skippedBins, 1e-10);
             }
             cYields->cd();
             vHists[j]->SetLineColor(kBlack);
@@ -2244,7 +2339,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                 vHists[j]->Draw("same PE");
             }
 
-            hYieldsTemplate->GetXaxis()->SetBinLabel(1+k, (binFromTHnSparse.hDPhi).c_str());
+            hYieldsTemplate->GetXaxis()->SetBinLabel(1+k-skippedBins, (binFromTHnSparse.hDPhi).c_str());
 
             if (lineStyleBaryonMap.find(associateName) != lineStyleBaryonMap.end()) {
                     Int_t lineStyle = lineStyleBaryonMap[associateName];
