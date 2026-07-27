@@ -1593,6 +1593,7 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
     if (canvasConfigs.xMinLegend != -1 && canvasConfigs.xMaxLegend != -1 && canvasConfigs.yMinLegend != -1 && canvasConfigs.yMaxLegend != -1) {
         std::cout << "- Creating legend at positions x1(" << canvasConfigs.xMinLegend << "," << canvasConfigs.yMinLegend << ") and x2(" << canvasConfigs.xMaxLegend << "," << canvasConfigs.yMaxLegend << ")" << std::endl;
         legend = new TLegend(canvasConfigs.xMinLegend, canvasConfigs.yMinLegend, canvasConfigs.xMaxLegend, canvasConfigs.yMaxLegend);
+        legend->SetBorderSize(0);
     } else { std::cout << "- NOTE: Not drawing legend for this plot" << std::endl; }
 
     // Guarantee the legend entries are only drawn once
@@ -1819,6 +1820,7 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
     if (canvasConfigs.xMinLegend != -1 && canvasConfigs.xMaxLegend != -1 && canvasConfigs.yMinLegend != -1 && canvasConfigs.yMaxLegend != -1) {
         std::cout << "- Creating legend at positions x1(" << canvasConfigs.xMinLegend << "," << canvasConfigs.yMinLegend << ") and x2(" << canvasConfigs.xMaxLegend << "," << canvasConfigs.yMaxLegend << ")" << std::endl;
         legend = new TLegend(canvasConfigs.xMinLegend, canvasConfigs.yMinLegend, canvasConfigs.xMaxLegend, canvasConfigs.yMaxLegend);
+        legend->SetBorderSize(0);
     } else { std::cout << "- NOTE: Not drawing legend for this plot" << std::endl; }
 
     // Guarantee the legend entries are only drawn once
@@ -2043,6 +2045,7 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
     if (canvasConfigs.xMinLegend != -1 && canvasConfigs.xMaxLegend != -1 && canvasConfigs.yMinLegend != -1 && canvasConfigs.yMaxLegend != -1) {
         std::cout << "- Creating legend at positions x1(" << canvasConfigs.xMinLegend << "," << canvasConfigs.yMinLegend << ") and x2(" << canvasConfigs.xMaxLegend << "," << canvasConfigs.yMaxLegend << ")" << std::endl;
         legend = new TLegend(canvasConfigs.xMinLegend, canvasConfigs.yMinLegend, canvasConfigs.xMaxLegend, canvasConfigs.yMaxLegend);
+        legend->SetBorderSize(0);
     } else { std::cout << "- NOTE: Not drawing legend for this plot" << std::endl; }
 
     // Guarantee the legend entries are only drawn once
@@ -2153,7 +2156,7 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                     if (legendEntriesMap.find(associateName) != legendEntriesMap.end()) {
                         std::string displayName = legendEntriesMap[associateName];
                         if (VERBOSE) { std::cout << "Found displayName: " << displayName << std::endl; }
-                        legend->AddEntry(vHists[i][j], displayName.c_str(), "l");
+                        legend->AddEntry(vHists[i][j], displayName.c_str(), "t");
                     } else {
                         if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
                     }
@@ -2282,6 +2285,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
     if (canvasConfigs.xMinLegend != -1 && canvasConfigs.xMaxLegend != -1 && canvasConfigs.yMinLegend != -1 && canvasConfigs.yMaxLegend != -1) {
         std::cout << "- Creating legend at positions x1(" << canvasConfigs.xMinLegend << "," << canvasConfigs.yMinLegend << ") and x2(" << canvasConfigs.xMaxLegend << "," << canvasConfigs.yMaxLegend << ")" << std::endl;
         legend = new TLegend(canvasConfigs.xMinLegend, canvasConfigs.yMinLegend, canvasConfigs.xMaxLegend, canvasConfigs.yMaxLegend);
+        legend->SetBorderSize(0);
     } else { std::cout << "- NOTE: Not drawing legend for this plot" << std::endl; }
 
     // Guarantee the legend entries are only drawn once
