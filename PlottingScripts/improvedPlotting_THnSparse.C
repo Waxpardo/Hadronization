@@ -2282,7 +2282,7 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                     if (legendEntriesMap.find(associateName) != legendEntriesMap.end()) {
                         std::string displayName = legendEntriesMap[associateName];
                         if (VERBOSE) { std::cout << "Found displayName: " << displayName << std::endl; }
-                        legend->AddEntry(vHists[i][j], displayName.c_str(), "lep");
+                        legend->AddEntry(vHists[i][j], displayName.c_str(), "t");
                     } else {
                         if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
                     }
@@ -2463,21 +2463,32 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
 
                 Int_t indexNominatorTUNE = vIndexNominatorTUNES[iTUNE];
                 if (VERBOSE) { std::cout << "starting loop over nominator TUNE: " << indexNominatorTUNE << std::endl; }
-
-
+                
                 vHists[j][iTUNE] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, j, k-skippedBins, iTUNE, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, j, k-skippedBins, iTUNE, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
+                /*
                 vHists[j][iTUNE]->SetBinContent(1+k-skippedBins, (vYieldsAndErrors.vYields[indexNominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexNominatorTUNE][0][k])
                                             / (vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k]));
+                */
+                
+                const Double_t numeratorBaryonMesonRatio = safeRatio(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k], vYieldsAndErrors.vYields[indexNominatorTUNE][0][k]);
+                const Double_t denominatorBaryonMesonRatio = safeRatio(vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k], vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k]);
+                const Double_t tuneDoubleRatio = safeRatio(numeratorBaryonMesonRatio, denominatorBaryonMesonRatio);
+                vHists[j][iTUNE]->SetBinContent(1+k-skippedBins, std::isfinite(tuneDoubleRatio) ? tuneDoubleRatio : 0.0);
+
                 if (CALCULATE_ERRORS) { 
-                    // Several options for error calculation/propagation
-                    // Ratio calculated seperately:
-                    // TODO: add this in yield calculation
-                    // TODO: also check if this is without bugs (features?) now..
                     // vHists[j][iTUNE]->SetBinError(1+k, vYieldsAndErrors.vYieldsRatioErrors[i][j][k]);
+                    // The baryon/meson ratio uncertainty is estimated within each tune
+                    // from the subsamples, preserving correlations between the two
+                    // species.  The tune-to-tune double ratio then treats the two
+                    // independently generated tune samples as uncorrelated.
+                    vHists[j][iTUNE]->SetBinError(1+k-skippedBins, propagateRatioError(numeratorBaryonMesonRatio, denominatorBaryonMesonRatio, vYieldsAndErrors.vYieldsRatioErrors[indexNominatorTUNE][j][k], vYieldsAndErrors.vYieldsRatioErrors[indexDenominatorTUNE][j][k]));
+
+                    /*
                     vHists[j][iTUNE]->SetBinError(1+k-skippedBins, propagateRatioError(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k], 
                                                                     vYieldsAndErrors.vYields[indexNominatorTUNE][0][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k],
                                                                     vYieldsAndErrors.vYieldsRatioErrors[indexNominatorTUNE][j][k],
                                                                     vYieldsAndErrors.vYieldsRatioErrors[indexDenominatorTUNE][0][k]));
+                    */
                     // Naive error propagation (assuming no correlation):
                     /*
                     vHists[j][iTUNE]->SetBinError(1+k, propagateRatioError(vYieldsAndErrors.vYields[i][j][k], 
@@ -2491,14 +2502,17 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                 else {
                     vHists[j][iTUNE]->SetBinError(1+k-skippedBins, 1e-10);
                 }
+    
                 cYields->cd();
 
                 // TODO: THIS IS HARDCODED
-                Int_t colour;
-                if (indexNominatorTUNE == 0) { colour = 4; }
-                else if (indexNominatorTUNE == 1) { colour = 2; }
-                else if (indexNominatorTUNE == 2) { colour = 6; }
-                vHists[j][iTUNE]->SetLineColor(colour);
+                // Int_t colour;
+                std::string TUNE;
+                if (indexNominatorTUNE == 0) { TUNE = "MONASH"; }
+                else if (indexNominatorTUNE == 1) { TUNE = "JUNCTIONS"; }
+                else if (indexNominatorTUNE == 2) { TUNE = "CLOSEPACKING"; }
+                ApplyTuneVisualStyle(vHists[j][iTUNE], TUNE);
+                // vHists[j][iTUNE]->SetLineColor(colour);
 
                 vHists[j][iTUNE]->Draw("same PE");
                 if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
@@ -2506,7 +2520,8 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                     vHists[j][iTUNE]->Draw("same PE");
                 }
 
-                hYieldsTemplate->GetXaxis()->SetBinLabel(1+k-skippedBins, (binFromTHnSparse.hDPhi).c_str());
+                hYieldsTemplate->GetXaxis()->SetBinLabel(1+k-skippedBins, DisplayLabelForMultiplicityBin(binFromTHnSparse, legendEntriesMap).c_str());
+                // hYieldsTemplate->GetXaxis()->SetBinLabel(1+k-skippedBins, (binFromTHnSparse.hDPhi).c_str());
 
                 if (lineStyleBaryonMap.find(associateName) != lineStyleBaryonMap.end()) {
                         Int_t lineStyle = lineStyleBaryonMap[associateName];
@@ -2535,7 +2550,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                 std::string displayName = legendEntriesMap[associateName];
                 // TODO: verbose
                 // std::cout << "Found displayName: " << displayName << std::endl;
-                legend->AddEntry(vHists[j], displayName.c_str(), "lep");
+                legend->AddEntry(vHists[j][0], displayName.c_str(), "lep");
             } else {
                 // TODO: verbose
                 // std::cout << "objectName not found in the map!" << std::endl;
