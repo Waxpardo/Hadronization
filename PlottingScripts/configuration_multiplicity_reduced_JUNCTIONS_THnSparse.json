@@ -1,10 +1,10 @@
 {
-  "VERBOSE": false,
+  "VERBOSE": true,
   "calculate_errors": false,
   "bb_bar_complete_root_dir_sub_samples": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
   "cc_bar_complete_root_dir_sub_samples": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
   "nSubSamples": 10,
-  "draw_correlation_plots": false,
+  "draw_correlation_plots": true,
   "base_dir": "/Users/pv280546/alice/Hadronization/AnalyzedData",
   "PYTHIA_TUNES": [
     "MONASH",
@@ -423,12 +423,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -439,7 +435,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -491,12 +487,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -507,7 +499,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -561,12 +553,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -577,7 +565,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -622,29 +610,25 @@
       "bottom_margin_mini_pad": 0.2,
       "left_margin_mini_pad": 0.05,
       "right_margin_mini_pad": 0.001,
-      "y_min_axis": 0.1,
-      "y_max_axis": 1000.0,
+      "y_min_axis": 0.0,
+      "y_max_axis": 2.0,
       "histogram_minimum": -1,
       "histogram_maximum": -1,
-      "set_log_y": true,
+      "set_log_y": false,
       "x_min_legend": -1,
       "x_max_legend": -1,
       "y_min_legend": -1,
       "y_max_legend": -1,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -698,12 +682,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -714,7 +694,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -766,12 +746,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -782,7 +758,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -836,12 +812,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -852,7 +824,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -908,18 +880,14 @@
       "y_max_legend": -1,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -973,12 +941,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -989,7 +953,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -1043,12 +1007,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -1059,7 +1019,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -1113,12 +1073,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -1129,7 +1085,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -1175,29 +1131,25 @@
       "bottom_margin_mini_pad": 0.2,
       "left_margin_mini_pad": 0,
       "right_margin_mini_pad": 0.05,
-      "y_min_axis": 0.1,
-      "y_max_axis": 1000.0,
+      "y_min_axis": 0.0,
+      "y_max_axis": 2.0,
       "histogram_minimum": -1,
       "histogram_maximum": -1,
-      "set_log_y": true,
+      "set_log_y": false,
       "x_min_legend": -1,
       "x_max_legend": -1,
       "y_min_legend": -1,
       "y_max_legend": -1,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -1251,12 +1203,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -1267,7 +1215,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -1321,12 +1269,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -1337,7 +1281,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -1391,12 +1335,8 @@
       "y_max_legend": 0.88,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [
@@ -1407,7 +1347,7 @@
       ],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -1464,18 +1404,14 @@
       "y_max_legend": -1,
       "legend_entries": [
         {
-          "object_name": "hDPhiM90_100",
-          "display_name": "90-100%"
-        },
-        {
-          "object_name": "hDPhiM0_1",
-          "display_name": "0-1%"
+          "object_name": "hDPhiM00_100",
+          "display_name": "0-100%"
         }
       ],
       "TUNE_colours": [],
       "dependency_line_styles": [
         {
-          "dependency_name": "hDPhiM90_100",
+          "dependency_name": "hDPhiM00_100",
           "line_style": 1
         },
         {
@@ -1782,7 +1718,7 @@
       ],
       "write": true,
       "write_path": "PlottingScripts/Plots/THnSparse",
-      "write_name": "global_balancing_plots_multiplicity_beauty",
+      "write_name": "global_balancing_plots_integrated_beauty",
       "x_size_canvas": 2200,
       "y_size_canvas": 2050
     },
@@ -1801,7 +1737,7 @@
       ],
       "write": true,
       "write_path": "PlottingScripts/Plots/THnSparse",
-      "write_name": "global_balancing_plots_multiplicity_charm",
+      "write_name": "global_balancing_plots_integrated_charm",
       "x_size_canvas": 2200,
       "y_size_canvas": 2050
     },

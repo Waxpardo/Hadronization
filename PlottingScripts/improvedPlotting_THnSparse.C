@@ -1091,7 +1091,7 @@ Double_t calculateOneYield(bool VERBOSE, TH1D *hDPhiOS, TH1D *hTrPtOS, TH1D *hDP
 // The output is a 3D vector with the structure
 // v[TUNE][ASSOCIATE][DEPENDENCY]
 // TODO: change the .size() to variables nTUNES, etc. Like in the plotting function below
-YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* FLAVOUR) {
+YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* FLAVOUR, TCanvas* cAngularCorrelations) {
 
     std::cout << "*** Calculating yields for " << FLAVOUR << " ***" << std::endl;
 
@@ -1127,6 +1127,29 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
     std::map<std::string, std::vector<std::vector<std::vector<Double_t>>>> mapYieldsRatioErrors;
 
     // TODO: make vTUNES.size into nTUNES, like in the plotting functions
+
+    TPad *pCharmMeson; TPad *pCharmBaryon; TPad *pCharmMesonSub; TPad *pCharmBaryonSub;
+    TPad *pBeautyMeson; TPad *pBeautyBaryon; TPad *pBeautyMesonSub; TPad *pBeautyBaryonSub;
+    if (DRAW_CORRELATION_PLOTS) {
+        if (strcmp(FLAVOUR, "CHARM") == 0) {
+            cAngularCorrelations->cd();
+            pCharmMeson      = createMiniPad("pCharmMeson",     0.00,0.50,0.50,1.00);
+            pCharmBaryon     = createMiniPad("pCharmBaryon",    0.50,0.50,1.00,1.00);
+            pCharmMesonSub   = createMiniPad("pCharmMesonSub",  0.00,0.00,0.50,0.50);
+            pCharmBaryonSub  = createMiniPad("pCharmBaryonSub", 0.50,0.00,1.00,0.50);
+            pCharmMeson->cd(); gPad->SetLogy();
+            pCharmBaryon->cd(); gPad->SetLogy();
+        }
+        if (strcmp(FLAVOUR, "BEAUTY") == 0) {
+            cAngularCorrelations->cd();
+            pBeautyMeson      = createMiniPad("pBeautyMeson",     0.00,0.50,0.50,1.00);
+            pBeautyBaryon     = createMiniPad("pBeautyBaryon",    0.50,0.50,1.00,1.00);
+            pBeautyMesonSub   = createMiniPad("pBeautyMesonSub",  0.00,0.00,0.50,0.50);
+            pBeautyBaryonSub  = createMiniPad("pBeautyBaryonSub", 0.50,0.00,1.00,0.50);
+            pBeautyMeson->cd(); gPad->SetLogy();
+            pBeautyBaryon->cd(); gPad->SetLogy();
+        }
+    }
 
     // Loop over TRIGGERS
     // Output is put back in a map with structure {trigger, {vYields}}
@@ -1258,10 +1281,10 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     // Apply cuts to THnSparses
                     // Retreive the TH1 hDPhiOS/SS and hTrPtOS/SS objects as before
                     // Maybe add one element 'binLabel' to the BinsFromTHnSparse struct?
-                    TH1D *hDPhiOS = GetCorrelationHistograms(hCorrelationsOS, cuts);
-                    TH1D *hDPhiSS = GetCorrelationHistograms(hCorrelationsSS, cuts);
-                    TH1D *hTrPtOS = GetTriggerPtHistograms(hTrKinematicsOS, cuts);
-                    TH1D *hTrPtSS = GetTriggerPtHistograms(hTrKinematicsSS, cuts);
+                    TH1D *hDPhiOS = GetCorrelationHistograms(hCorrelationsOS, cuts, "OS");
+                    TH1D *hDPhiSS = GetCorrelationHistograms(hCorrelationsSS, cuts, "SS");
+                    TH1D *hTrPtOS = GetTriggerPtHistograms(hTrKinematicsOS, cuts, "OS");
+                    TH1D *hTrPtSS = GetTriggerPtHistograms(hTrKinematicsSS, cuts, "SS");
 
                     if (VERBOSE) {
                         std::cout << "hDPhiOS->GetEntries() = " << hDPhiOS->GetEntries() << std::endl;
@@ -1290,21 +1313,71 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     // This part is hard-coded for now, but could get its own configuration section in the json
                     // to customise what should be drawn and how already in the json
                     // TODO: this needs to be automised and configurable in the json as well
-                    if (DRAW_CORRELATION_PLOTS) {
-                        /*
-                        if (VERBOSE) {
-                            TCanvas *c_correlations = new TCanvas (Form("%s c_correlations %s minus %s for [%f, %f]", TUNE.c_str(), fileNamesOSandSS.OS.c_str(), fileNamesOSandSS.SS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), Form("%s c_correlations %s minus %s for [%f, %f]", TUNE.c_str(), fileNamesOSandSS.OS.c_str(), fileNamesOSandSS.SS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), 800, 600);
-                            c_correlations->cd();
-                            hDPhiOS->SetTitle(Form("%s c_correlations %s minus %s for [%f, %f]", TUNE.c_str(), fileNamesOSandSS.OS.c_str(), fileNamesOSandSS.SS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax));
-                            hDPhiOS->Draw();
-                        }
-                        */
+                    // TODO: make the plots also for different multiplicity bins
+                    if (DRAW_CORRELATION_PLOTS && k==0) { // assumed k=0 is the integrated multiplicity bin (TODO: change that)
 
                         // Hard-coded: we only want to show correlations for B+B- and D+D-
                         // TODO: put an option in the configuration.json to give a list of desired correlations to draw
                         if (TUNE == "MONASH" &&
                            (strcmp(fileNamesOSandSS.OS.c_str(), "BplusBminus.root") == 0 ||
-                            strcmp(fileNamesOSandSS.OS.c_str(), "DplusDminus.root") == 0)) {
+                            strcmp(fileNamesOSandSS.OS.c_str(), "LbbarBminus.root") == 0 ||
+                            strcmp(fileNamesOSandSS.OS.c_str(), "DplusDminus.root") == 0 ||
+                            strcmp(fileNamesOSandSS.OS.c_str(), "LambdacplusDminus.root") == 0
+                            )) {
+                                TH1D *hSub = (TH1D*)hDPhiOS->Clone(Form("%s_sub",fileNamesOSandSS.OS.c_str()));
+                                hSub->Add(hDPhiSS,-1);
+                                TPad *padOSSS = nullptr;
+                                TPad *padSub  = nullptr;
+                                TString title;
+
+                                if (fileNamesOSandSS.OS == "DplusDminus.root") {
+                                    padOSSS = pCharmMeson;
+                                    padSub  = pCharmMesonSub;
+                                    title = "D^{+} trigger";
+                                }
+                                else if (fileNamesOSandSS.OS == "LambdacplusDminus.root") {
+                                    padOSSS = pCharmBaryon;
+                                    padSub  = pCharmBaryonSub;
+                                    title = "#Lambda_{c}^{+} trigger";
+                                }
+                                else if (fileNamesOSandSS.OS == "BplusBminus.root") {
+                                    padOSSS = pBeautyMeson;
+                                    padSub  = pBeautyMesonSub;
+                                    title = "B^{+} trigger";
+                                }
+                                else if (fileNamesOSandSS.OS == "LbbarBminus.root") {
+                                    padOSSS = pBeautyBaryon;
+                                    padSub  = pBeautyBaryonSub;
+                                    title = "#bar#Lambda_{b}^{0} trigger";
+                                }
+
+                                if (padOSSS) {
+                                    cAngularCorrelations->cd();
+                                    padOSSS->cd();
+                                    hDPhiOS->SetLineColor(kBlack);
+                                    hDPhiSS->SetLineColor(kRed);
+                                    hDPhiSS->SetLineStyle(2);
+                                    hDPhiOS->SetTitle(title);
+                                    hDPhiOS->GetYaxis()->SetRangeUser(1e-6, 1e-2);
+                                    hDPhiOS->SetStats(0);
+                                    hDPhiSS->SetStats(0);
+                                    hDPhiOS->Draw("hist");
+                                    hDPhiSS->Draw("hist same");
+
+                                    auto leg = new TLegend(0.60,0.75,0.88,0.88);
+                                    leg->SetBorderSize(0);
+                                    leg->SetFillStyle(0);
+                                    leg->AddEntry(hDPhiOS,"OS","l");
+                                    leg->AddEntry(hDPhiSS,"SS","l");
+                                    leg->Draw();
+
+                                    padSub->cd();
+                                    hSub->SetLineColor(kBlue);
+                                    hSub->SetTitle("");
+                                    hSub->Draw("hist");
+                                }
+
+                                /*
                                 TCanvas *c_correlations_OS_SS = new TCanvas(Form("c_correlations_OS_SS %s for [%f, %f]", fileNamesOSandSS.OS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), Form("c_correlations_OS_SS %s for [%f, %f]", fileNamesOSandSS.OS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), 800, 600);
                                 TPad *cMiniPadOS = createMiniPad("cMiniPadOS", 0.00, 0.00, 0.50, 1.00);
                                 TPad *cMiniPadOSSS = createMiniPad("cMiniPadSS", 0.50, 0.00, 1.00, 1.00);
@@ -1353,8 +1426,8 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                                 leg->Draw();
 
                                 c_correlations_OS_SS->cd();
-                                const std::string correlationPlotDir = ResolvePathFromBase("PlottingScripts/Plots/THnSparse/Correlations", FindHadronizationBase());
                                 writeCanvasToFiles(VERBOSE, c_correlations_OS_SS, correlationPlotDir, Form("c_correlations_OS_SS %s for [%f, %f]", fileNamesOSandSS.OS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax));
+                                */
                         }
                     }
 
@@ -1493,6 +1566,10 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
 
     } // Loop over TRIGGERS
 
+    if (DRAW_CORRELATION_PLOTS) {
+        const std::string correlationPlotDir = ResolvePathFromBase("PlottingScripts/Plots/THnSparse/Correlations", FindHadronizationBase());
+        writeCanvasToFiles(VERBOSE, cAngularCorrelations, correlationPlotDir, Form("%sCorrelations_MONASH", FLAVOUR));
+    }
 
     // TODO: make the names better
     // legacy, toremove
@@ -2104,7 +2181,6 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                     skippedBins++;
                     continue;
                 }
-                std::cout << "skipped bins = " << skippedBins << std::endl;
                 
                 vHists[i][j] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, i, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, i, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
                 vHists[i][j]->SetBinContent(1+k-skippedBins, vYieldsAndErrors.vYields[i][j][k] / vYieldsAndErrors.vYields[i][0][k]);
@@ -2450,13 +2526,22 @@ int improvedPlotting_THnSparse(const char* configuration) {
     CONFIGS configs_from_json = readConfig(configuration);
     bool VERBOSE = configs_from_json.VERBOSE;
 
+    // Prepare the Delta Phi plots
+    // TODO: this is still hardcoded
+    // TODO: also this can be repeated in the loops
+    TCanvas *cCharm; TCanvas *cBeauty;
+    if (configs_from_json.DRAW_CORRELATION_PLOTS) {
+        cCharm = new TCanvas("cCharmCorrelations","Charm correlations",1000,800);
+        cBeauty = new TCanvas("cBeautyCorrelations","Beauty correlations",1000,800);
+    }
+
     // Calculate the 3D yield vector
     // TODO: define this below in loop
     YieldsAndErrorsMap mapYields; // used in loop over canvas settings
     YieldsAndErrorsMap mapYieldsBeauty;
     YieldsAndErrorsMap mapYieldsCharm;
-    mapYieldsBeauty = calculateYieldsVector(configs_from_json,"BEAUTY");
-    mapYieldsCharm =  calculateYieldsVector(configs_from_json,"CHARM");
+    mapYieldsBeauty = calculateYieldsVector(configs_from_json, "BEAUTY", cBeauty);
+    mapYieldsCharm =  calculateYieldsVector(configs_from_json, "CHARM", cCharm);
 
     // Draw the balancing plots using the 3D yield vector and configurations given
     std::vector<canvasConfigs> vCanvasConfigs = configs_from_json.vCanvasConfigs;
