@@ -26,7 +26,7 @@ The top level of `PlottingScripts` contains the paper THnSparse plotting path. `
 
 ## Environment
 
-The repository expects ROOT and PYTHIA 8 from the ALICE CVMFS environment. We now use `setupEnv.sh` as the shared entry point. It resolves `HADRONIZATION_BASE` from the environment first, then from `base_path.txt`, and otherwise from the repository location. It then loads `VO_ALICE@ROOT::v6-30-01-alice5-2` and `VO_ALICE@pythia::v8315-alice1-23`.
+The repository expects ROOT and PYTHIA 8 from the ALICE CVMFS environment. We use `setupEnv.sh` as the shared entry point. It preserves a valid `HADRONIZATION_BASE` override first, then falls back to `base_path.txt` and finally to the checkout location. On Nikhef it loads `VO_ALICE@ROOT::v6-30-01-alice5-2` and `VO_ALICE@pythia::v8315-alice1-23`; non-interactive shells that cannot initialise `alienv` fall back to the equivalent EL9 ROOT package and runtime libraries directly from CVMFS.
 
 ```bash
 source ./setupEnv.sh
@@ -143,11 +143,21 @@ AnalyzedData/SUBSAMPLES_<tag>/combined_root_subSamples_CLOSEPACKING
 The paper plotting entry point is:
 
 ```bash
+./PlottingScripts/run_paper_plots.sh validate-inputs
+./PlottingScripts/run_paper_plots.sh audit-subsamples
 ./PlottingScripts/run_paper_plots.sh smoke
-./PlottingScripts/run_paper_plots.sh
+./PlottingScripts/run_paper_plots.sh all
 ```
 
-`smoke` runs the multiplicity-boundary plot, inclusive raw kinematic spectra, and the complete-root THnSparse config without subsampling. The default `all` target runs the multiplicity-boundary plot, inclusive raw kinematic spectra, and the full THnSparse config. Use `./PlottingScripts/run_paper_plots.sh multiplicity-spectrum` to regenerate only the shared raw `N_{ch}` spectrum with the tune/MONASH ratio panel, MONASH percentile-boundary inset, and short energy/acceptance annotation below the legend. Use `./PlottingScripts/run_paper_plots.sh multiplicity-compact` for the standalone compact MONASH percentile-boundary figure.
+The full config is `PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json`. The reduced/smoke config is `PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json`; “complete root” refers to the central-value source, not to a no-error mode. Both use central values from `AnalyzedData/complete_root_21_06_2026_<TUNE>` and sample-standard-error uncertainties from the same ten disjoint subsamples under `AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_<TUNE>`. The smoke config reduces the trigger/canvas selection and, for the current production, validates only the universally covered `1-10%` activity class.
+
+For each plotted observable, the uncertainty is the sample standard deviation of the ten subsample results divided by `sqrt(10)`. Baryon/meson ratios are formed inside each subsample before computing the SEM, retaining within-tune correlations. Tune ratios combine independently generated tune uncertainties in quadrature. Central and subsample paths, ROOT-object types, job-manifest disjointness, and representative final-pair central-versus-subsample-union consistency can be checked with the `validate-inputs` target; its machine-readable report is written under `PlottingScripts/validation/`.
+
+The current real production does **not** have ten finite trigger normalizations for every configured observable. The exhaustive `audit-subsamples` run records 610 incomplete yield/ratio coverage cases (540 beauty and 70 charm) in `PlottingScripts/validation/final_thnsparse_subsample_coverage.json`. The reduced smoke config therefore validates only the universally supported `1-10%` class. The full config remains strict and intentionally fails instead of publishing partial, zero, or placeholder uncertainties. A larger or differently partitioned beauty production is required before the full THnSparse paper figures can be regenerated and promoted.
+
+The default `all` target runs the multiplicity-boundary plot, inclusive raw kinematic spectra, and the full THnSparse config. Use `./PlottingScripts/run_paper_plots.sh multiplicity-spectrum` to regenerate only the shared raw `N_{ch}` spectrum with the tune/MONASH ratio panel, MONASH percentile-boundary inset, and short energy/acceptance annotation below the legend. Use `./PlottingScripts/run_paper_plots.sh multiplicity-compact` for the standalone compact MONASH percentile-boundary figure.
+
+The canonical tune style is defined only in `PlottingScripts/TunePlotStyle.h`: MONASH is black/marker 20/solid, JUNCTIONS is blue+1/marker 21/dashed, and CLOSEPACKING is magenta+1/marker 22/line style 7. Tune-ratio curves inherit the numerator tune style.
 
 Paper kinematic spectra are inclusive single-particle spectra drawn directly from `RootFiles/HF`, not from trigger/associate-conditioned THnSparse pair outputs. Exact PDG-ID matching is used, the raw producer acceptance is preserved, and absolute `phi` is displayed in `[-pi, pi)`. Correlation `Delta phi` plots in Paul's THnSparse macro keep the shifted `[-pi/2, 3pi/2]` convention. The charged multiplicity definition used for these figures is prompt charged primary `e`, `mu`, `pi`, `K`, and `p` species, including antiparticles, with PYTHIA status `81-89`, `pT >= 0.15 GeV/c`, `|eta| <= 4`, in pp at `sqrt(s)=14 TeV`; activity classes are read from low to high multiplicity as `90-100% -> ... -> 0-1%`.
 

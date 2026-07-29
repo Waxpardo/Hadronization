@@ -1,0 +1,80 @@
+Tracked generated plot artifacts removed from version control: 78
+
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [0.000000, 1.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [0.000000, 1.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [0.000000, 1.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [1.000000, 10.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [1.000000, 10.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [1.000000, 10.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [10.000000, 20.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [10.000000, 20.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [10.000000, 20.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [20.000000, 30.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [20.000000, 30.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [20.000000, 30.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [30.000000, 40.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [30.000000, 40.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [30.000000, 40.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [40.000000, 50.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [40.000000, 50.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [40.000000, 50.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [50.000000, 60.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [50.000000, 60.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [50.000000, 60.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [60.000000, 70.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [60.000000, 70.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [60.000000, 70.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [70.000000, 80.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [70.000000, 80.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [70.000000, 80.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [80.000000, 90.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [80.000000, 90.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [80.000000, 90.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [90.000000, 100.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [90.000000, 100.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS BplusBminus.root for [90.000000, 100.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [0.000000, 1.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [0.000000, 1.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [0.000000, 1.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [1.000000, 10.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [1.000000, 10.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [1.000000, 10.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [10.000000, 20.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [10.000000, 20.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [10.000000, 20.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [20.000000, 30.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [20.000000, 30.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [20.000000, 30.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [30.000000, 40.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [30.000000, 40.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [30.000000, 40.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [40.000000, 50.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [40.000000, 50.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [40.000000, 50.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [50.000000, 60.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [50.000000, 60.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [50.000000, 60.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [60.000000, 70.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [60.000000, 70.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [60.000000, 70.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [70.000000, 80.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [70.000000, 80.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [70.000000, 80.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [80.000000, 90.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [80.000000, 90.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [80.000000, 90.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [90.000000, 100.000000]_MACRO.C
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [90.000000, 100.000000]_PDF.pdf
+PlottingScripts/Plots/THnSparse/Correlations/c_correlations_OS_SS DplusDminus.root for [90.000000, 100.000000]_PNG.png
+PlottingScripts/Plots/THnSparse/global_balancing_baryon_over_meson_ratio_multiplicity_MACRO.C
+PlottingScripts/Plots/THnSparse/global_balancing_baryon_over_meson_ratio_multiplicity_PDF.pdf
+PlottingScripts/Plots/THnSparse/global_balancing_baryon_over_meson_ratio_multiplicity_PNG.png
+PlottingScripts/Plots/THnSparse/global_balancing_plots_multiplicity_MACRO.C
+PlottingScripts/Plots/THnSparse/global_balancing_plots_multiplicity_PDF.pdf
+PlottingScripts/Plots/THnSparse/global_balancing_plots_multiplicity_PNG.png
+PlottingScripts/Plots/THnSparseCompleteRoot/global_balancing_baryon_over_meson_ratio_multiplicity_MACRO.C
+PlottingScripts/Plots/THnSparseCompleteRoot/global_balancing_baryon_over_meson_ratio_multiplicity_PDF.pdf
+PlottingScripts/Plots/THnSparseCompleteRoot/global_balancing_baryon_over_meson_ratio_multiplicity_PNG.png
+PlottingScripts/Plots/THnSparseCompleteRoot/global_balancing_plots_multiplicity_MACRO.C
+PlottingScripts/Plots/THnSparseCompleteRoot/global_balancing_plots_multiplicity_PDF.pdf
+PlottingScripts/Plots/THnSparseCompleteRoot/global_balancing_plots_multiplicity_PNG.png

@@ -3,6 +3,7 @@
 /RootFiles/**/*.root
 .DS_Store
 .vscode/
+__pycache__/
 /logs/*
 
 # Ignore ROOT files by default
@@ -42,6 +43,12 @@ Jobs/HF/**/hf_*.root
 PlottingScripts/Plots/
 PlottingScripts/**/Plots/
 Balancing_and_Sampling/**/Plots/
+
+# Machine-generated validation reports can contain host-local provenance paths.
+# Keep the validators and human-readable handoff in Git; retain JSON/log output
+# in the internal checkout that produced it.
+/PlottingScripts/validation/*.json
+/PlottingScripts/validation/*.log
 
 # Ignore built executables
 SimulationScripts/heavyflavourcorrelations_status
