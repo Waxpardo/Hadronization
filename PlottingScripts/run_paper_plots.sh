@@ -16,14 +16,16 @@ Usage:
 Targets:
   all                         Current paper suite: multiplicity-boundaries + kinematic-spectra + thnsparse
   paper                       Alias for all
-  smoke                       Quick suite: multiplicity-boundaries + kinematic-spectra + thnsparse-complete-root
+  smoke                       Reduced-scope suite; THnSparse checks the production-supported 1-10% class with N=10
   quick                       Alias for smoke
   multiplicity-boundaries     Charged-particle multiplicity plot with percentile boundaries
   multiplicity-compact        MONASH compact multiplicity-percentile plot
   multiplicity-spectrum       Shared raw Nch spectrum with tune/MONASH ratio panel and MONASH inset
   kinematic-spectra           Inclusive raw-tree pT, eta, phi, and multiplicity spectra
-  thnsparse                   Paul's full THnSparse plotting config, with subsampling if enabled
-  thnsparse-complete-root     Paul's complete-root THnSparse config, without subsampling
+  thnsparse                   Full paper THnSparse config with ten-subsample errors
+  thnsparse-complete-root     Reduced THnSparse selection with the same central/error provenance
+  audit-subsamples            Scan every full-config observable and report all incomplete N=10 coverage
+  validate-inputs             Validate central/subsample ROOT objects, manifests, and union consistency
   final-multiplicity          FinalAnalysis two-sample multiplicity comparison
   final-yields                FinalAnalysis selected-particle yield comparison
   list                        Print this target list without running ROOT
@@ -130,7 +132,7 @@ for target in "$@"; do
     smoke|quick)
       expanded_targets+=("multiplicity-boundaries" "kinematic-spectra" "thnsparse-complete-root")
       ;;
-    multiplicity-boundaries|multiplicity-compact|multiplicity-spectrum|kinematic-spectra|thnsparse|thnsparse-complete-root|final-multiplicity|final-yields)
+    multiplicity-boundaries|multiplicity-compact|multiplicity-spectrum|kinematic-spectra|thnsparse|thnsparse-complete-root|audit-subsamples|validate-inputs|final-multiplicity|final-yields)
       expanded_targets+=("${target}")
       ;;
     *)
@@ -190,10 +192,43 @@ run_thnsparse() {
 
   root -l -b <<ROOTCMDS
 .L PlottingScripts/improvedPlotting_THnSparse.C+
-int __paper_plot_result = improvedPlotting_THnSparse("${config}");
+int __paper_plot_result = 0;
+try {
+  __paper_plot_result = improvedPlotting_THnSparse("${config}");
+} catch (const std::exception& error) {
+  std::cerr << "ERROR: " << error.what() << std::endl;
+  __paper_plot_result = 1;
+} catch (...) {
+  std::cerr << "ERROR: unknown exception while running improvedPlotting_THnSparse" << std::endl;
+  __paper_plot_result = 1;
+}
 if (__paper_plot_result != 0) { gSystem->Exit(__paper_plot_result); }
 .q
 ROOTCMDS
+}
+
+run_subsample_coverage_audit() {
+  require_file "${THNSPARSE_CONFIG}"
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "ERROR: audit-subsamples requires jq." >&2
+    return 1
+  fi
+
+  local audit_config
+  audit_config="$(mktemp "${TMPDIR:-/tmp}/hadronization-thnsparse-audit.XXXXXX.json")"
+  jq \
+    '.subsample_coverage_audit = true
+     | .subsample_error_bins_to_exclude = []
+     | .draw_correlation_plots = false' \
+    "${THNSPARSE_CONFIG}" > "${audit_config}"
+
+  local status=0
+  set +e
+  run_thnsparse "${audit_config}" "full THnSparse subsample-coverage audit"
+  status=$?
+  set -e
+  rm -f -- "${audit_config}"
+  return "${status}"
 }
 
 run_multiplicity_boundaries() {
@@ -320,6 +355,12 @@ for target in "${expanded_targets[@]}"; do
       ;;
     thnsparse-complete-root)
       run_thnsparse "${THNSPARSE_COMPLETE_ROOT_CONFIG}" "thnsparse-complete-root"
+      ;;
+    audit-subsamples)
+      run_subsample_coverage_audit
+      ;;
+    validate-inputs)
+      "${project_base}/PlottingScripts/validate_thnsparse_inputs.sh"
       ;;
     final-multiplicity)
       run_final_multiplicity
