@@ -68,6 +68,15 @@ explicitly scanned for `fatal error`, `Error in <ACLiC>`, undefined
 references, segmentation faults, and cling JIT failures. This scan was added
 after ROOT returned status zero for an earlier ACLiC header failure.
 
+Repository accountability is recorded in `REPOSITORY_FILE_CATALOG.md`, which
+is generated and checked by `tools/generate_file_catalog.py`. At this report
+revision it contains exactly one row for each of 673 tracked paths:
+32 authoritative, 52 support, 456 generated, and 133 legacy. Every
+authoritative row names a validation path, and the mechanical coverage check
+passes. The protected untracked paper tree and stale raw-v2 campaign material
+are called out separately rather than silently included in the canonical
+pipeline.
+
 ## Gate B
 
 Result: **in progress and not yet passed**.
