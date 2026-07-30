@@ -4,18 +4,8 @@
   "bb_bar_complete_root_dir_sub_samples": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
   "cc_bar_complete_root_dir_sub_samples": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
   "nSubSamples": 10,
-  "subsample_error_bins_to_exclude": [
-    "hDPhiM90_100",
-    "hDPhiM80_90",
-    "hDPhiM70_80",
-    "hDPhiM60_70",
-    "hDPhiM50_60",
-    "hDPhiM40_50",
-    "hDPhiM30_40",
-    "hDPhiM20_30",
-    "hDPhiM10_20",
-    "hDPhiM0_1"
-  ],
+  "same_sign_pair_factor": 1.0,
+  "subsample_error_bins_to_exclude": [],
   "draw_correlation_plots": false,
   "base_dir": "AnalyzedData",
   "PYTHIA_TUNES": [

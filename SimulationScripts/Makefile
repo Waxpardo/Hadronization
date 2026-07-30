@@ -29,7 +29,8 @@ endif
 
 endif
 
-CXXFLAGS := -O2 -std=c++17 -Wall -Wextra -pedantic $(ROOT_CXXFLAGS) $(PYTHIA_CXXFLAGS)
+CXXFLAGS := -O2 -std=c++17 -Wall -Wextra -Wpedantic -Wconversion -Wshadow \
+            $(ROOT_CXXFLAGS) $(PYTHIA_CXXFLAGS)
 LDFLAGS  := $(ROOT_LIBS) $(PYTHIA_LIBS)
 
 all: bbbarcorrelations_status bbbarcorrelations_status_JUNCTIONS \
@@ -48,7 +49,9 @@ ccbarcorrelations_status: ccbarcorrelations_status.cpp
 ccbarcorrelations_status_JUNCTIONS: ccbarcorrelations_status_JUNCTIONS.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
-heavyflavourcorrelations_status: heavyflavourcorrelations_status.cpp
+heavyflavourcorrelations_status: heavyflavourcorrelations_status.cpp \
+                                HeavyFlavourUtils.h \
+                                GeneratedHeavyFlavourRegistry.h
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:

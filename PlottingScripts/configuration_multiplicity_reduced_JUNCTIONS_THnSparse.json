@@ -4,6 +4,7 @@
   "bb_bar_complete_root_dir_sub_samples": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
   "cc_bar_complete_root_dir_sub_samples": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
   "nSubSamples": 10,
+  "same_sign_pair_factor": 1.0,
   "subsample_error_bins_to_exclude": [],
   "draw_correlation_plots": true,
   "base_dir": "AnalyzedData",

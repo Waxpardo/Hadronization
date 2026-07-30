@@ -1,382 +1,208 @@
 #!/bin/bash
 set -euo pipefail
 
-# Usage:
-#   runCondorJob.sh JOBID TUNE NEVT_PER_JOB
-#   runCondorJob.sh CLUSTERID JOBID TUNE NEVT_PER_JOB
-#   runCondorJob.sh CLUSTERID JOBID TUNE NEVT_PER_JOB ATTEMPT
-#   runCondorJob.sh JOBID CHANNEL TUNE NEVT_PER_JOB
-#   runCondorJob.sh CLUSTERID JOBID CHANNEL TUNE NEVT_PER_JOB
-#   runCondorJob.sh CLUSTERID JOBID CHANNEL TUNE NEVT_PER_JOB ATTEMPT
+# Canonical campaign mode:
+#   runCondorJob.sh --campaign CAMPAIGN CAMPAIGN_ORDINAL TUNE LOGICAL_ID \
+#       ROLE ATTEMPT SEED NEVT [CLUSTER_ID] [PROCESS_ID]
 #
-#   CLUSTERID    : Condor cluster id (optional for manual runs)
-#   JOBID        : integer
-#   CHANNEL      : bbbar | ccbar
-#   TUNE         : MONASH | JUNCTIONS | CLOSEPACKING (HF only)
-#   NEVT_PER_JOB : integer
-#   ATTEMPT      : retry/start counter, optional
+# All older argument forms are delegated to the explicitly labelled legacy
+# wrapper so completed productions remain reproducible.
 
-usage() {
-  echo "Usage:"
-  echo "  $0 JOBID TUNE NEVT_PER_JOB"
-  echo "  $0 CLUSTERID JOBID TUNE NEVT_PER_JOB"
-  echo "  $0 CLUSTERID JOBID TUNE NEVT_PER_JOB ATTEMPT"
-  echo "    Unified heavy-flavour workflow"
-  echo "    TUNE = MONASH | JUNCTIONS | CLOSEPACKING"
-  echo
-  echo "  $0 JOBID CHANNEL TUNE NEVT_PER_JOB"
-  echo "  $0 CLUSTERID JOBID CHANNEL TUNE NEVT_PER_JOB"
-  echo "  $0 CLUSTERID JOBID CHANNEL TUNE NEVT_PER_JOB ATTEMPT"
-  echo "    Split independent workflow"
-  echo "    CHANNEL = bbbar | ccbar"
-  echo "    TUNE    = MONASH | JUNCTIONS"
+if [[ "${1:-}" != "--campaign" ]]; then
+  script_dir="$(cd "$(dirname "$0")" && pwd)"
+  exec "${script_dir}/runCondorJob_legacy.sh" "$@"
+fi
+shift
+
+if [[ "$#" -lt 8 || "$#" -gt 10 ]]; then
+  echo "Usage: $0 --campaign CAMPAIGN CAMPAIGN_ORDINAL TUNE LOGICAL_ID ROLE ATTEMPT SEED NEVT [CLUSTER_ID] [PROCESS_ID]" >&2
+  exit 2
+fi
+
+campaign="$1"
+campaign_ordinal="$2"
+tune="$3"
+logical_id="$4"
+role="$5"
+attempt="$6"
+seed="$7"
+requested_successes="$8"
+cluster_id="${9:-${CLUSTERID:-manual}}"
+process_id="${10:-${PROCESSID:-manual}}"
+
+is_uint() {
+  [[ "${1:-}" =~ ^[0-9]+$ ]]
 }
 
-is_nonnegative_integer() {
-  case "${1:-}" in
-    ''|*[!0-9]*)
-      return 1
-      ;;
-    *)
-      return 0
-      ;;
-  esac
-}
-
-CLUSTERID=""
-ATTEMPT="0"
-
-if [ "$#" -eq 3 ]; then
-  WORKFLOW="hf"
-  JOBID="$1"
-  TUNE="$2"
-  NEVT_PER_JOB="$3"
-elif [ "$#" -eq 4 ]; then
-  if [ "$2" = "bbbar" ] || [ "$2" = "ccbar" ]; then
-    WORKFLOW="split"
-    JOBID="$1"
-    CHANNEL="$2"
-    TUNE="$3"
-    NEVT_PER_JOB="$4"
-  else
-    WORKFLOW="hf"
-    CLUSTERID="$1"
-    JOBID="$2"
-    TUNE="$3"
-    NEVT_PER_JOB="$4"
+for value_name in campaign_ordinal logical_id attempt seed requested_successes; do
+  value="${!value_name}"
+  if ! is_uint "${value}"; then
+    echo "ERROR: ${value_name} must be a non-negative integer, got '${value}'" >&2
+    exit 2
   fi
-elif [ "$#" -eq 5 ]; then
-  CLUSTERID="$1"
-  JOBID="$2"
-  if [ "$3" = "bbbar" ] || [ "$3" = "ccbar" ]; then
-    WORKFLOW="split"
-    CHANNEL="$3"
-    TUNE="$4"
-    NEVT_PER_JOB="$5"
-  else
-    WORKFLOW="hf"
-    TUNE="$3"
-    NEVT_PER_JOB="$4"
-    ATTEMPT="$5"
-  fi
-elif [ "$#" -eq 6 ]; then
-  WORKFLOW="split"
-  CLUSTERID="$1"
-  JOBID="$2"
-  CHANNEL="$3"
-  TUNE="$4"
-  NEVT_PER_JOB="$5"
-  ATTEMPT="$6"
-else
-  usage
-  exit 1
+done
+if (( seed < 1 || seed > 900000000 )); then
+  echo "ERROR: seed outside verified PYTHIA domain [1,900000000]" >&2
+  exit 2
 fi
-
-if [ -n "${CLUSTERID}" ] && ! is_nonnegative_integer "${CLUSTERID}"; then
-  echo "ERROR: CLUSTERID must be a non-negative integer."
-  exit 1
+if [[ "${role}" != "primary" && "${role}" != "reserve" && "${role}" != "pilot" ]]; then
+  echo "ERROR: role must be primary, reserve, or pilot" >&2
+  exit 2
 fi
-
-if ! is_nonnegative_integer "${JOBID}"; then
-  echo "ERROR: JOBID must be a non-negative integer."
-  exit 1
-fi
-
-if ! is_nonnegative_integer "${ATTEMPT}"; then
-  echo "ERROR: ATTEMPT must be a non-negative integer."
-  exit 1
-fi
-
-# HTCondor exposes the live job ClassAd inside the job sandbox. When jobs are
-# retried by max_retries, NumJobStarts increments even though the command-line
-# arguments stay unchanged. Folding it into the seed modifiers makes retry
-# attempts statistically independent.
-if [ -n "${_CONDOR_JOB_AD:-}" ] && [ -r "${_CONDOR_JOB_AD}" ]; then
-  JOB_AD_ATTEMPT="$(awk -F'= ' '/^NumJobStarts = / {gsub(/"/, "", $2); print $2; exit}' "${_CONDOR_JOB_AD}" 2>/dev/null || true)"
-  if is_nonnegative_integer "${JOB_AD_ATTEMPT:-}" && [ "${JOB_AD_ATTEMPT}" -gt "${ATTEMPT}" ]; then
-    ATTEMPT="${JOB_AD_ATTEMPT}"
-  fi
-fi
-
-# --------------------------------------------------
-# Base directory resolution
-# Priority:
-# 1) script directory (most reliable for Condor jobs)
-# 2) base_path.txt next to this script
-# 3) HADRONIZATION_BASE from the environment
-# 4) fallback fixed path
-# --------------------------------------------------
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-FALLBACK_BASEDIR="/data/alice/ipardoza/Hadronization"
-BASE_FILE="${SCRIPT_DIR}/base_path.txt"
-
-is_valid_hadronization_base() {
-  local candidate="${1:-}"
-  [ -n "${candidate}" ] || return 1
-  candidate="${candidate%/}"
-  [ -d "${candidate}/SimulationScripts" ] || return 1
-  [ -f "${candidate}/setupEnv.sh" ] || return 1
-  return 0
-}
-
-if is_valid_hadronization_base "${SCRIPT_DIR}"; then
-  RESOLVED_BASEDIR="${SCRIPT_DIR}"
-elif [ -f "${BASE_FILE}" ]; then
-  BASEDIR_FROM_FILE="$(cat "${BASE_FILE}")"
-  if is_valid_hadronization_base "${BASEDIR_FROM_FILE}"; then
-    RESOLVED_BASEDIR="${BASEDIR_FROM_FILE}"
-  elif is_valid_hadronization_base "${HADRONIZATION_BASE:-}"; then
-    RESOLVED_BASEDIR="${HADRONIZATION_BASE}"
-  else
-    RESOLVED_BASEDIR="${FALLBACK_BASEDIR}"
-  fi
-elif is_valid_hadronization_base "${HADRONIZATION_BASE:-}"; then
-  RESOLVED_BASEDIR="${HADRONIZATION_BASE}"
-else
-  RESOLVED_BASEDIR="${FALLBACK_BASEDIR}"
-fi
-
-RESOLVED_BASEDIR="${RESOLVED_BASEDIR%/}"
-if [ -z "${RESOLVED_BASEDIR}" ]; then
-  RESOLVED_BASEDIR="${FALLBACK_BASEDIR}"
-fi
-
-export HADRONIZATION_BASE="${RESOLVED_BASEDIR}"
-BASEDIR="${HADRONIZATION_BASE}"
-CODEDIR="${BASEDIR}/SimulationScripts"
-
-# --------------------------------------------------
-# Checks
-# --------------------------------------------------
-if [ ! -d "${CODEDIR}" ]; then
-  echo "ERROR: SimulationScripts directory not found at ${CODEDIR}"
-  exit 1
-fi
-
-if [ ! -f "${BASEDIR}/setupEnv.sh" ]; then
-  echo "ERROR: setupEnv.sh not found at ${BASEDIR}/setupEnv.sh"
-  exit 1
-fi
-
-# --------------------------------------------------
-# Environment
-# --------------------------------------------------
-cd "${BASEDIR}"
-export SETUPENV_QUIET=1
-source "${BASEDIR}/setupEnv.sh"
-
-# External environment scripts may reuse generic variable names such as
-# BASEDIR, so re-anchor all project paths from HADRONIZATION_BASE after setup.
-BASEDIR="${HADRONIZATION_BASE%/}"
-CODEDIR="${BASEDIR}/SimulationScripts"
-
-# --------------------------------------------------
-# Workflow-dependent config
-# --------------------------------------------------
-case "${WORKFLOW}" in
-  hf)
-    EXE="${CODEDIR}/heavyflavourcorrelations_status"
-    HF_OUTPUT_ROOT="${HADRONIZATION_HF_OUTPUT_ROOT:-${BASEDIR}/RootFiles/HF}"
-    HF_WORK_ROOT="${HADRONIZATION_HF_WORK_ROOT:-${BASEDIR}/Jobs/HF}"
-    HF_LOG_ROOT="${HADRONIZATION_HF_LOG_ROOT:-${BASEDIR}/logs/HF}"
-    OUTDIR="${HF_OUTPUT_ROOT%/}/${TUNE}"
-    WORKDIR_BASE="${HF_WORK_ROOT%/}/${TUNE}"
-    LOGDIR="${HF_LOG_ROOT%/}/${TUNE}"
-
-    case "${TUNE}" in
-      MONASH)
-        CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_ccbb_MONASH.cmnd"
-        CFG_BASENAME="pythiasettings_Hard_Low_ccbb_MONASH.cmnd"
-        MODE="monash"
-        ;;
-      JUNCTIONS)
-        CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd"
-        CFG_BASENAME="pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd"
-        MODE="junctions"
-        ;;
-      CLOSEPACKING)
-        CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd"
-        CFG_BASENAME="pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd"
-        MODE="closepacking"
-        ;;
-      *)
-        echo "ERROR: Unsupported TUNE='${TUNE}'. Use MONASH, JUNCTIONS, or CLOSEPACKING."
-        exit 1
-        ;;
-    esac
+case "${tune}" in
+  MONASH)
+    mode="monash"
+    card_name="pythiasettings_Hard_Low_ccbb_MONASH.cmnd"
     ;;
-  split)
-    OUTDIR="${BASEDIR}/RootFiles/${CHANNEL}/${TUNE}"
-    WORKDIR_BASE="${BASEDIR}/Jobs/${CHANNEL}/${TUNE}"
-    LOGDIR="${BASEDIR}/logs/${CHANNEL}/${TUNE}"
-
-    case "${CHANNEL}:${TUNE}" in
-      bbbar:MONASH)
-        EXE="${CODEDIR}/bbbarcorrelations_status"
-        CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_bb.cmnd"
-        CFG_BASENAME="pythiasettings_Hard_Low_bb.cmnd"
-        ;;
-      bbbar:JUNCTIONS)
-        EXE="${CODEDIR}/bbbarcorrelations_status_JUNCTIONS"
-        CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd"
-        CFG_BASENAME="pythiasettings_Hard_Low_bb_JUNCTIONS.cmnd"
-        ;;
-      ccbar:MONASH)
-        EXE="${CODEDIR}/ccbarcorrelations_status"
-        CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_cc.cmnd"
-        CFG_BASENAME="pythiasettings_Hard_Low_cc.cmnd"
-        ;;
-      ccbar:JUNCTIONS)
-        EXE="${CODEDIR}/ccbarcorrelations_status_JUNCTIONS"
-        CFG_TEMPLATE="${CODEDIR}/pythiasettings_Hard_Low_cc_JUNCTIONS.cmnd"
-        CFG_BASENAME="pythiasettings_Hard_Low_cc_JUNCTIONS.cmnd"
-        ;;
-      *)
-        echo "ERROR: Unsupported CHANNEL/TUNE combination '${CHANNEL}/${TUNE}'."
-        echo "       CHANNEL = bbbar | ccbar"
-        echo "       TUNE    = MONASH | JUNCTIONS"
-        exit 1
-        ;;
-    esac
+  JUNCTIONS)
+    mode="junctions"
+    card_name="pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd"
+    ;;
+  CLOSEPACKING)
+    mode="closepacking"
+    card_name="pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd"
     ;;
   *)
-    echo "ERROR: Unsupported workflow '${WORKFLOW}'."
-    exit 1
+    echo "ERROR: unsupported tune '${tune}'" >&2
+    exit 2
     ;;
 esac
 
-if [ -n "${CLUSTERID}" ]; then
-  WORKDIR="${WORKDIR_BASE}/cluster_${CLUSTERID}/job_${JOBID}"
-  case "${WORKFLOW}" in
-    hf)
-      OUTBASENAME="hf_${TUNE}_cluster${CLUSTERID}_job${JOBID}.root"
-      ;;
-    split)
-      OUTBASENAME="${CHANNEL}_${TUNE}_cluster${CLUSTERID}_job${JOBID}.root"
+script_dir="$(cd "$(dirname "$0")" && pwd)"
+project_base="${HADRONIZATION_BASE:-${script_dir}}"
+project_base="${project_base%/}"
+export HADRONIZATION_BASE="${project_base}"
+campaign_manifest_dir="${HADRONIZATION_CAMPAIGN_DIR:-${project_base}/campaigns/${campaign}}"
+if [[ -d "${campaign_manifest_dir}" ]]; then
+  python3 "${project_base}/tools/campaign_manifest.py" authorize \
+    "${campaign_manifest_dir}" "${campaign}" "${tune}" "${logical_id}" \
+    "${role}" "${attempt}" "${seed}" "${requested_successes}"
+elif [[ "${role}" != "pilot" ]]; then
+  echo "ERROR: canonical/reserve production requires a campaign manifest: ${campaign_manifest_dir}" >&2
+  exit 3
+else
+  echo "WARNING: unmanifested development pilot ${campaign}" >&2
+fi
+if [[ ! -f "${project_base}/setupEnv.sh" ]]; then
+  echo "ERROR: setupEnv.sh not found under ${project_base}" >&2
+  exit 3
+fi
+source "${project_base}/setupEnv.sh"
+
+producer="${project_base}/SimulationScripts/heavyflavourcorrelations_status"
+card="${project_base}/SimulationScripts/${card_name}"
+validator="${project_base}/Validation/validate_raw_output.sh"
+for required in "${producer}" "${card}" "${validator}"; do
+  if [[ ! -e "${required}" ]]; then
+    echo "ERROR: required campaign component missing: ${required}" >&2
+    exit 3
+  fi
+done
+
+campaign_root="${HADRONIZATION_PRODUCTION_ROOT:-${project_base}/Production}/${campaign}"
+raw_dir="${campaign_root}/raw/${tune}"
+partial_dir="${campaign_root}/partial/${tune}"
+work_dir="${campaign_root}/work/${tune}/job_$(printf '%03d' "${logical_id}")/attempt_$(printf '%03d' "${attempt}")"
+quarantine_dir="${campaign_root}/quarantine/${tune}"
+metadata_dir="${campaign_root}/attempt_metadata/${tune}"
+mkdir -p "${raw_dir}" "${partial_dir}" "${work_dir}" "${quarantine_dir}" "${metadata_dir}"
+
+stable_output="${raw_dir}/hf_${tune}_job$(printf '%03d' "${logical_id}").root"
+attempt_stem="hf_${tune}_job$(printf '%03d' "${logical_id}")_attempt$(printf '%03d' "${attempt}")_${cluster_id}_${process_id}"
+partial_output="${partial_dir}/${attempt_stem}.partial.root"
+sidecar="${metadata_dir}/${attempt_stem}.json"
+
+if [[ -e "${partial_output}" ]]; then
+  echo "ERROR: unique partial path already exists: ${partial_output}" >&2
+  exit 4
+fi
+
+if [[ -s "${stable_output}" ]]; then
+  if "${validator}" "${stable_output}" "${campaign}" "${tune}" "${logical_id}" "${requested_successes}"; then
+    echo "VALIDATED_EXISTING_OUTPUT ${stable_output}"
+    exit 0
+  fi
+  quarantine_target="${quarantine_dir}/$(basename "${stable_output}").invalid.$(date -u +%Y%m%dT%H%M%SZ)"
+  echo "ERROR: nonempty stable output failed validation; refusing to overwrite." >&2
+  echo "       Move it to quarantine after review: ${quarantine_target}" >&2
+  exit 4
+fi
+
+job_card="${work_dir}/${card_name}"
+cp "${card}" "${job_card}"
+if grep -q '^Main:numberOfEvents' "${job_card}"; then
+  sed -i "s/^Main:numberOfEvents.*/Main:numberOfEvents = ${requested_successes}/" "${job_card}"
+else
+  printf '\nMain:numberOfEvents = %s\n' "${requested_successes}" >> "${job_card}"
+fi
+
+if [[ -n "${HADRONIZATION_PTHAT_MIN_OVERRIDE:-}" ]]; then
+  if [[ "${role}" != "pilot" ]]; then
+    echo "ERROR: pTHat override is restricted to declared pilot jobs" >&2
+    exit 3
+  fi
+  case "${HADRONIZATION_PTHAT_MIN_OVERRIDE}" in
+    0.5|1.0|2.0) ;;
+    *)
+      echo "ERROR: pilot pTHat override must be 0.5, 1.0, or 2.0" >&2
+      exit 3
       ;;
   esac
+  sed -i \
+    "s/^PhaseSpace:pTHatMin.*/PhaseSpace:pTHatMin = ${HADRONIZATION_PTHAT_MIN_OVERRIDE}/" \
+    "${job_card}"
+fi
+
+export HADRONIZATION_CONFIG_SHA256
+HADRONIZATION_CONFIG_SHA256="$(sha256sum "${job_card}" | awk '{print $1}')"
+export HADRONIZATION_EXECUTABLE_SHA256
+HADRONIZATION_EXECUTABLE_SHA256="$(sha256sum "${producer}" | awk '{print $1}')"
+export HADRONIZATION_REPOSITORY_COMMIT
+HADRONIZATION_REPOSITORY_COMMIT="$(git -C "${project_base}" rev-parse HEAD 2>/dev/null || printf UNRECORDED)"
+export HADRONIZATION_REPOSITORY_DIRTY
+if [[ -n "$(git -C "${project_base}" status --porcelain --untracked-files=no 2>/dev/null)" ]]; then
+  HADRONIZATION_REPOSITORY_DIRTY=true
 else
-  WORKDIR="${WORKDIR_BASE}/job_${JOBID}"
-  case "${WORKFLOW}" in
-    hf)
-      OUTBASENAME="hf_${TUNE}_job${JOBID}.root"
-      ;;
-    split)
-      OUTBASENAME="${CHANNEL}_${TUNE}_job${JOBID}.root"
-      ;;
-  esac
+  HADRONIZATION_REPOSITORY_DIRTY=false
 fi
+export CLUSTERID="${cluster_id}"
+export PROCESSID="${process_id}"
 
-if [ ! -f "${CFG_TEMPLATE}" ]; then
-  echo "ERROR: Config template not found: ${CFG_TEMPLATE}"
-  exit 1
+start_utc="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+start_epoch="$(date +%s)"
+status=0
+(
+  cd "${work_dir}"
+  "${producer}" "${mode}" "${partial_output}" "${seed}" "${campaign}" \
+    "${campaign_ordinal}" "${logical_id}" "${role}" "${attempt}"
+) || status=$?
+end_epoch="$(date +%s)"
+end_utc="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+partial_sha=""
+partial_bytes=0
+if [[ -f "${partial_output}" ]]; then
+  partial_sha="$(sha256sum "${partial_output}" | awk '{print $1}')"
+  partial_bytes="$(stat -c %s "${partial_output}")"
 fi
+printf '{\n  "campaign": "%s",\n  "tune": "%s",\n  "logical_id": %s,\n  "role": "%s",\n  "attempt": %s,\n  "seed": %s,\n  "requested_successes": %s,\n  "cluster_id": "%s",\n  "process_id": "%s",\n  "start_utc": "%s",\n  "end_utc": "%s",\n  "elapsed_seconds": %s,\n  "producer_exit": %s,\n  "partial_path": "%s",\n  "partial_bytes": %s,\n  "partial_sha256": "%s"\n}\n' \
+  "${campaign}" "${tune}" "${logical_id}" "${role}" "${attempt}" "${seed}" \
+  "${requested_successes}" "${cluster_id}" "${process_id}" "${start_utc}" \
+  "${end_utc}" "$((end_epoch - start_epoch))" "${status}" "${partial_output}" \
+  "${partial_bytes}" "${partial_sha}" > "${sidecar}"
 
-if [ ! -x "${EXE}" ]; then
-  echo "ERROR: Executable not found or not executable: ${EXE}"
-  exit 1
+if (( status != 0 )); then
+  echo "ERROR: producer exited ${status}; partial is not promoted: ${partial_output}" >&2
+  exit "${status}"
 fi
-
-mkdir -p "${OUTDIR}" "${WORKDIR_BASE}" "${WORKDIR}" "${LOGDIR}"
-
-echo ">>> WORKFLOW     = ${WORKFLOW}"
-if [ -n "${CLUSTERID}" ]; then
-  echo ">>> CLUSTERID    = ${CLUSTERID}"
+if ! "${validator}" "${partial_output}" "${campaign}" "${tune}" "${logical_id}" "${requested_successes}" "${attempt}" "${seed}"; then
+  echo "ERROR: validation failed; partial is not promoted: ${partial_output}" >&2
+  exit 6
 fi
-echo ">>> JOBID        = ${JOBID}"
-echo ">>> ATTEMPT      = ${ATTEMPT}"
-if [ "${WORKFLOW}" = "split" ]; then
-  echo ">>> CHANNEL      = ${CHANNEL}"
+if [[ -e "${stable_output}" ]]; then
+  echo "ERROR: stable output appeared during validation; refusing to overwrite" >&2
+  exit 7
 fi
-echo ">>> TUNE         = ${TUNE}"
-echo ">>> NEVT_PER_JOB = ${NEVT_PER_JOB}"
-echo ">>> BASEDIR      = ${BASEDIR}"
-echo ">>> WORKDIR      = ${WORKDIR}"
-echo ">>> OUTDIR       = ${OUTDIR}"
-echo ">>> LOGDIR       = ${LOGDIR}"
-
-# --------------------------------------------------
-# Per-job working directory and per-job .cmnd file
-# The executable reads the .cmnd by bare filename, so we run in WORKDIR.
-# --------------------------------------------------
-cd "${WORKDIR}"
-
-JOB_CMND="${WORKDIR}/${CFG_BASENAME}"
-
-if grep -q "^Main:numberOfEvents" "${CFG_TEMPLATE}"; then
-  sed "s/^Main:numberOfEvents.*/Main:numberOfEvents = ${NEVT_PER_JOB}/" \
-    "${CFG_TEMPLATE}" > "${JOB_CMND}"
-else
-  cp "${CFG_TEMPLATE}" "${JOB_CMND}"
-  echo "Main:numberOfEvents = ${NEVT_PER_JOB}" >> "${JOB_CMND}"
-fi
-
-if [ -s "${OUTDIR}/${OUTBASENAME}" ]; then
-  echo "Final output already exists, leaving it untouched: ${OUTDIR}/${OUTBASENAME}"
-  exit 0
-fi
-
-if [ -e "${WORKDIR}/${OUTBASENAME}" ]; then
-  echo "WARNING: Removing stale workdir output from a previous failed/evicted attempt:"
-  echo "         ${WORKDIR}/${OUTBASENAME}"
-  rm -f "${WORKDIR}/${OUTBASENAME}"
-fi
-
-echo "Using .cmnd file:"
-head -n 12 "${JOB_CMND}" || true
-
-# --------------------------------------------------
-# Seed modifiers from cluster, job id, tune, and retry attempt.
-# The C++ producer also folds in time and process id; these modifiers make the
-# Condor identity and retry count explicit, so reruns do not reuse old seeds.
-# --------------------------------------------------
-CLUSTER_FOR_SEED="${CLUSTERID:-0}"
-TUNE_COMPONENT=0
-case "${TUNE}" in
-  MONASH)       TUNE_COMPONENT=101 ;;
-  JUNCTIONS)   TUNE_COMPONENT=202 ;;
-  CLOSEPACKING) TUNE_COMPONENT=303 ;;
-esac
-
-SEED1=$((10000 + (CLUSTER_FOR_SEED % 100000) * 1000 + JOBID * 10 + ATTEMPT))
-SEED2=$((20000 + TUNE_COMPONENT * 100000 + (CLUSTER_FOR_SEED % 1000) * 10 + ATTEMPT))
-echo ">>> SEED_MOD_1   = ${SEED1}"
-echo ">>> SEED_MOD_2   = ${SEED2}"
-
-if [ "${WORKFLOW}" = "hf" ]; then
-  echo "Running: ${EXE} ${MODE} ${OUTBASENAME} ${SEED1} ${SEED2}"
-  "${EXE}" "${MODE}" "${OUTBASENAME}" "${SEED1}" "${SEED2}"
-else
-  echo "Running: ${EXE} ${OUTBASENAME} ${SEED1} ${SEED2}"
-  "${EXE}" "${OUTBASENAME}" "${SEED1}" "${SEED2}"
-fi
-
-if [ ! -f "${WORKDIR}/${OUTBASENAME}" ]; then
-  echo "ERROR: Expected output file not found: ${WORKDIR}/${OUTBASENAME}"
-  ls -l "${WORKDIR}"
-  exit 1
-fi
-
-mv "${WORKDIR}/${OUTBASENAME}" "${OUTDIR}/${OUTBASENAME}"
-echo "Moved: ${OUTDIR}/${OUTBASENAME}"
-echo "Done."
+mv "${partial_output}" "${stable_output}"
+sha256sum "${stable_output}" > "${stable_output}.sha256"
+echo "PROMOTED ${stable_output}"

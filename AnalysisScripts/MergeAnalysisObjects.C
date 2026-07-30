@@ -15,6 +15,8 @@
 #include "TKey.h"
 #include "TList.h"
 #include "TObject.h"
+#include "TObjString.h"
+#include "TParameter.h"
 #include "TSystem.h"
 
 namespace {
@@ -70,6 +72,59 @@ bool AddObject(TObject* target,
         return true;
     }
 
+    if (auto* targetString = dynamic_cast<TObjString*>(target)) {
+        auto* sourceString = dynamic_cast<TObjString*>(source);
+        if (!sourceString ||
+            targetString->GetString() != sourceString->GetString()) {
+            std::cerr << "ERROR: invariant string object '" << objectName
+                      << "' differs in " << sourcePath << std::endl;
+            return false;
+        }
+        return true;
+    }
+
+    const bool additive =
+        objectName == "input_events" ||
+        objectName == "input_sum_weights" ||
+        objectName == "trigger_count" ||
+        objectName == "trigger_sum_weights" ||
+        objectName == "pair_count" ||
+        objectName == "pair_sum_weights";
+    if (auto* targetLong = dynamic_cast<TParameter<Long64_t>*>(target)) {
+        auto* sourceLong = dynamic_cast<TParameter<Long64_t>*>(source);
+        if (!sourceLong) return false;
+        if (additive) {
+            targetLong->SetVal(targetLong->GetVal() + sourceLong->GetVal());
+        } else if (targetLong->GetVal() != sourceLong->GetVal()) {
+            std::cerr << "ERROR: invariant integer parameter '" << objectName
+                      << "' differs in " << sourcePath << std::endl;
+            return false;
+        }
+        return true;
+    }
+    if (auto* targetInt = dynamic_cast<TParameter<int>*>(target)) {
+        auto* sourceInt = dynamic_cast<TParameter<int>*>(source);
+        if (!sourceInt || targetInt->GetVal() != sourceInt->GetVal()) {
+            std::cerr << "ERROR: invariant integer parameter '" << objectName
+                      << "' differs in " << sourcePath << std::endl;
+            return false;
+        }
+        return true;
+    }
+    if (auto* targetDouble = dynamic_cast<TParameter<double>*>(target)) {
+        auto* sourceDouble = dynamic_cast<TParameter<double>*>(source);
+        if (!sourceDouble) return false;
+        if (additive) {
+            targetDouble->SetVal(targetDouble->GetVal() +
+                                 sourceDouble->GetVal());
+        } else if (targetDouble->GetVal() != sourceDouble->GetVal()) {
+            std::cerr << "ERROR: invariant floating parameter '" << objectName
+                      << "' differs in " << sourcePath << std::endl;
+            return false;
+        }
+        return true;
+    }
+
     std::cerr << "ERROR: unsupported object type for '" << objectName
               << "': " << target->ClassName() << std::endl;
     return false;
@@ -79,7 +134,8 @@ bool AddObject(TObject* target,
 
 int MergeAnalysisObjects(const char* inputListPath,
                          const char* outputPath,
-                         bool verbose = true)
+                         bool verbose = true,
+                         const char* manifestSha256 = "")
 {
     TH1::AddDirectory(kFALSE);
 
@@ -109,7 +165,8 @@ int MergeAnalysisObjects(const char* inputListPath,
             return 3;
         }
 
-        TObject* clone = object->Clone(object->GetName());
+        const std::string keyName = key->GetName();
+        TObject* clone = object->Clone(keyName.c_str());
         if (!clone) {
             std::cerr << "ERROR: could not clone object: "
                       << object->GetName() << std::endl;
@@ -120,7 +177,7 @@ int MergeAnalysisObjects(const char* inputListPath,
             hist->SetDirectory(nullptr);
         }
 
-        objectNames.emplace_back(object->GetName());
+        objectNames.emplace_back(keyName);
         mergedObjects.emplace_back(clone);
     }
 
@@ -174,9 +231,13 @@ int MergeAnalysisObjects(const char* inputListPath,
     }
 
     outputFile->cd();
-    for (const auto& object : mergedObjects) {
-        object->Write(object->GetName(), TObject::kOverwrite);
+    for (std::size_t index = 0; index < mergedObjects.size(); ++index) {
+        mergedObjects[index]->Write(objectNames[index].c_str(),
+                                    TObject::kOverwrite);
     }
+    TParameter<Long64_t>("merge_input_file_count",
+                         static_cast<Long64_t>(inputPaths.size())).Write();
+    TObjString(manifestSha256).Write("merge_input_manifest_sha256");
     outputFile->Close();
 
     if (verbose) {

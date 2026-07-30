@@ -194,6 +194,7 @@ struct CONFIGS {
     bool VERBOSE;
     bool CALCULATE_ERRORS;
     int nSubSamples;
+    Double_t SAME_SIGN_PAIR_FACTOR;
     bool DRAW_CORRELATION_PLOTS;
     bool SUBSAMPLE_COVERAGE_AUDIT;
     std::string base_dir;
@@ -552,6 +553,33 @@ double GetMultiplicityThreshold(
     return hMult->GetBinCenter(hMult->GetNbinsX());
 }
 
+std::pair<double, double> GetDiscreteMultiplicityRange(
+    const std::map<double, double>& thresholds,
+    double lowActivityPercentile,
+    double highActivityPercentile
+) {
+    if (!(lowActivityPercentile >= 0.0 &&
+          highActivityPercentile <= 100.0 &&
+          lowActivityPercentile < highActivityPercentile)) {
+        throw std::runtime_error("invalid multiplicity-percentile interval");
+    }
+    // Percentile intervals are processed from low to high activity. An
+    // integer Nch value exactly on a quantile boundary belongs to the
+    // lower-activity interval; the adjacent higher-activity interval starts
+    // at the next integer. This makes every class disjoint and deterministic.
+    double minimum = thresholds.at(highActivityPercentile);
+    if (highActivityPercentile < 100.0) minimum += 1.0;
+    const double maximum = thresholds.at(lowActivityPercentile);
+    if (minimum > maximum) {
+        std::ostringstream message;
+        message << "empty discrete multiplicity class for percentiles ["
+                << lowActivityPercentile << "," << highActivityPercentile
+                << "]: Nch=[" << minimum << "," << maximum << "]";
+        throw std::runtime_error(message.str());
+    }
+    return {minimum, maximum};
+}
+
 
 // Function to find the index of a tune name
 int findTuneIndex(const std::vector<std::string>& vTUNES, const std::string& tuneName) {
@@ -728,6 +756,13 @@ CONFIGS readConfig(const char* configurations) {
     std::string bbBarDir_sub_samples = ResolvePathFromBase(config["bb_bar_complete_root_dir_sub_samples"], hadronizationBase);
     std::string ccBarDir_sub_samples = ResolvePathFromBase(config["cc_bar_complete_root_dir_sub_samples"], hadronizationBase);
     int nSubSamples = config["nSubSamples"].get<int>();
+    const Double_t SAME_SIGN_PAIR_FACTOR =
+        config.value("same_sign_pair_factor", 0.5);
+    if (!std::isfinite(SAME_SIGN_PAIR_FACTOR) ||
+        SAME_SIGN_PAIR_FACTOR <= 0.0) {
+        throw std::runtime_error(
+            "same_sign_pair_factor must be finite and positive");
+    }
     bool DRAW_CORRELATION_PLOTS = config["draw_correlation_plots"].get<bool>();
     bool SUBSAMPLE_COVERAGE_AUDIT =
         config.value("subsample_coverage_audit", false);
@@ -1025,6 +1060,7 @@ CONFIGS readConfig(const char* configurations) {
     configs_from_json.VERBOSE = VERBOSE;
     configs_from_json.CALCULATE_ERRORS = CALCULATE_ERRORS;
     configs_from_json.nSubSamples = nSubSamples;
+    configs_from_json.SAME_SIGN_PAIR_FACTOR = SAME_SIGN_PAIR_FACTOR;
     configs_from_json.DRAW_CORRELATION_PLOTS = DRAW_CORRELATION_PLOTS;
     configs_from_json.SUBSAMPLE_COVERAGE_AUDIT = SUBSAMPLE_COVERAGE_AUDIT;
     configs_from_json.base_dir = base_dir;
@@ -1047,6 +1083,8 @@ CONFIGS readConfig(const char* configurations) {
     std::cout << "VERBOSE = " << VERBOSE << std::endl;
     std::cout << "- CALCULATE_ERRORS = " << CALCULATE_ERRORS << std::endl;
     std::cout << "- nSubSamples = " << nSubSamples << std::endl;
+    std::cout << "- SAME_SIGN_PAIR_FACTOR = "
+              << SAME_SIGN_PAIR_FACTOR << std::endl;
     std::cout << "- DRAW_CORRELATION_PLOTS = " << DRAW_CORRELATION_PLOTS << std::endl;
     std::cout << "- SUBSAMPLE_COVERAGE_AUDIT = "
               << SUBSAMPLE_COVERAGE_AUDIT << std::endl;
@@ -1238,6 +1276,8 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
     bool SUBSAMPLE_COVERAGE_AUDIT =
         configs_from_json.SUBSAMPLE_COVERAGE_AUDIT;
     int nSubSamples = configs_from_json.nSubSamples;
+    const Double_t SAME_SIGN_PAIR_FACTOR =
+        configs_from_json.SAME_SIGN_PAIR_FACTOR;
     bool DRAW_CORRELATION_PLOTS = configs_from_json.DRAW_CORRELATION_PLOTS;
     std::string base_dir = configs_from_json.base_dir;
     std::vector<std::string> vTUNES = configs_from_json.vTUNES;
@@ -1394,6 +1434,11 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
 
                     BinsFromTHnSparse binFromTHnSparse = vBinsFromTHnSparse[k];
                     if (VERBOSE) {
+                        const auto displayedMultiplicityRange =
+                            GetDiscreteMultiplicityRange(
+                                percentileToMultiplicity,
+                                binFromTHnSparse.multiplicityMin,
+                                binFromTHnSparse.multiplicityMax);
                         std::cout
                             << "Analysing bin " << k
                             << " | TrPhi=[" << binFromTHnSparse.triggerPhiMin
@@ -1410,8 +1455,8 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             << ", " << binFromTHnSparse.assocPtMax << "]"
                             << " | Mult%=[" << binFromTHnSparse.multiplicityMin
                             << ", " << binFromTHnSparse.multiplicityMax << "]"
-                            << " | Mult=[" << percentileToMultiplicity[binFromTHnSparse.multiplicityMax]
-                            << ", "<< percentileToMultiplicity[binFromTHnSparse.multiplicityMin] << "]"
+                            << " | Mult=[" << displayedMultiplicityRange.first
+                            << ", " << displayedMultiplicityRange.second << "]"
                         << std::endl;
                         std::cout << std::endl;
                     }
@@ -1425,8 +1470,13 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     // Definition of multiplicity is 'reversed' w.r.t. json
                     // The way below it cuts on [lower_multiplicity, higher_multiplicity]
                     // Which is what we want
-                    cuts.multiplicityMin = percentileToMultiplicity[binFromTHnSparse.multiplicityMax];
-                    cuts.multiplicityMax = percentileToMultiplicity[binFromTHnSparse.multiplicityMin];
+                    const auto multiplicityRange =
+                        GetDiscreteMultiplicityRange(
+                            percentileToMultiplicity,
+                            binFromTHnSparse.multiplicityMin,
+                            binFromTHnSparse.multiplicityMax);
+                    cuts.multiplicityMin = multiplicityRange.first;
+                    cuts.multiplicityMax = multiplicityRange.second;
 
                     // Retreive the histograms from the correlations THnSparse (Δφ, Δη, TrPt, AsPt, multiplicity)
                     // THnSparseD *hAsKinematics = (THnSparseD*)OStree->Get("hAsKinematics");
@@ -1446,7 +1496,7 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     // Prevent double-counting
                     if (strcmp((fileNamesOSandSS.trigger).c_str(), 
                             (fileNamesOSandSS.associateSS).c_str()) == 0) { 
-                        hDPhiSS->Scale(0.5); } 
+                        hDPhiSS->Scale(SAME_SIGN_PAIR_FACTOR); }
 
 
                     // Calculate yield value and assign to appropriate place in vector
@@ -1638,7 +1688,8 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             // Apply the same same-sign double-counting correction used for the central yield.
                             if (strcmp((fileNamesOSandSS.trigger).c_str(),
                                        (fileNamesOSandSS.associateSS).c_str()) == 0) {
-                                hDPhiSS_subSamples->Scale(0.5);
+                                hDPhiSS_subSamples->Scale(
+                                    SAME_SIGN_PAIR_FACTOR);
                             }
 
                             // TODO: when subsampling ok, remove this part
