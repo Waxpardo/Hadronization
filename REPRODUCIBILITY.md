@@ -55,6 +55,14 @@ pythia8-config --version
 where `alienv` cannot initialise Tcl, it pins the same ROOT 6.30/01 and PYTHIA
 8.315 CVMFS installations and the GCC 14.2 runtime required by PYTHIA.  The
 producer links only the ROOT Tree, Hist, RIO, and Core components it uses.
+The fallback also exports the PYTHIA include directory through
+`ROOT_INCLUDE_PATH` so ACLiC validation macros compile in the same
+non-interactive shell. Because ROOT was built with GCC 12 while PYTHIA 8.315
+was built with GCC 14, ROOT may print a standard-library version warning when
+a macro loads both. The newer runtime is ABI-backward-compatible for the
+symbols used here; nevertheless the complete compile log must be scanned for
+`fatal error`, `Error in <ACLiC>`, unresolved symbols, and segmentation faults,
+because ROOT can return zero after an ACLiC failure.
 
 The Condor commands must run on a Stoomboot submit host.  The shared
 `/data/alice/ipardoza` filesystem is visible to both the login and worker

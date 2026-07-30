@@ -83,6 +83,7 @@ if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then
     export PYTHIA8="${pythia_package}"
     export PATH="${pythia_gcc_package}/bin:${pythia_package}/bin:${PATH}"
     export LD_LIBRARY_PATH="${pythia_gcc_package}/lib64:${pythia_package}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export ROOT_INCLUDE_PATH="${pythia_package}/include${ROOT_INCLUDE_PATH:+:${ROOT_INCLUDE_PATH}}"
   fi
 else
   echo "WARNING: CVMFS not available — ROOT and PYTHIA not loaded via alienv."
