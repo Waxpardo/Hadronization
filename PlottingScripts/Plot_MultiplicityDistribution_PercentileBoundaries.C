@@ -40,6 +40,8 @@
 #include "TSystem.h"
 
 #include "HistogramErrorUtils.h"
+#include "MultiplicityBoundaryUtils.h"
+#include "PairInputSelectionUtils.h"
 #include "TunePlotStyle.h"
 
 #if __has_include(<nlohmann/json.hpp>)
@@ -70,8 +72,15 @@ struct PlotConfig {
     std::string beautyFileName;
     std::string charmFileName;
     std::string outputDir;
+    std::string configurationPath;
+    std::string configurationSha256;
+    std::string boundaryReceiptPath;
+    json boundaryReceipt;
     std::vector<std::string> tunes;
     std::vector<PercentileClass> percentileClasses;
+    HadronizationPairInput::SelectionContract pairInputSelectionContract;
+    std::string pairCombinatoricsMode;
+    double sameSignPairFactor = 0.0;
 };
 
 std::string JoinPath(const std::vector<std::string>& pieces)
@@ -248,10 +257,27 @@ PlotConfig ReadConfig(const char* configuration, const char* outputDir)
     }
 
     json config = json::parse(input);
+    configOut.configurationPath = configPath;
+    configOut.configurationSha256 =
+        Hadronization::Sha256FileHex(configPath);
     configOut.baseDir =
         ResolvePathFromBase(config["base_dir"].get<std::string>(), configOut.hadronizationBase);
+    if (const char* selectedBase =
+            std::getenv("HADRONIZATION_ANALYZED_DATA_BASE")) {
+        if (*selectedBase) {
+            configOut.baseDir =
+                ResolvePathFromBase(selectedBase, configOut.hadronizationBase);
+        }
+    }
     configOut.beautyCompleteRootDir = config["bb_bar_complete_root_dir"].get<std::string>();
     configOut.charmCompleteRootDir = config["cc_bar_complete_root_dir"].get<std::string>();
+    if (const char* selectedTag =
+            std::getenv("HADRONIZATION_COMPLETE_ROOT_TAG")) {
+        if (*selectedTag) {
+            configOut.beautyCompleteRootDir = selectedTag;
+            configOut.charmCompleteRootDir = selectedTag;
+        }
+    }
     configOut.beautyFileName =
         FirstOSFileName(config, "beauty_correlations_to_analyse", "BplusBminus.root");
     configOut.charmFileName =
@@ -262,29 +288,58 @@ PlotConfig ReadConfig(const char* configuration, const char* outputDir)
         configOut.tunes.push_back(tune.get<std::string>());
     }
     configOut.percentileClasses = ReadPercentileClasses(config);
+    configOut.pairInputSelectionContract =
+        HadronizationPairInput::ParseSelectionContract(
+            config.at("pair_input_selection_contract"));
+    configOut.pairCombinatoricsMode =
+        config.at("pair_combinatorics_mode").get<std::string>();
+    configOut.sameSignPairFactor =
+        config.at("same_sign_pair_factor").get<double>();
+
+    std::set<std::string> receiptDirectories;
+    for (const auto& canvas :
+         config.at("global_canvases_to_be_drawn")) {
+        if (canvas.at("write").get<bool>()) {
+            const std::string writePath =
+                ResolvePathFromBase(
+                    canvas.at("write_path").get<std::string>(),
+                    configOut.hadronizationBase);
+            if (!writePath.empty() && writePath != "NONE") {
+                receiptDirectories.insert(writePath);
+            }
+        }
+    }
+    if (receiptDirectories.size() != 1U) {
+        throw std::runtime_error(
+            "Exactly one global-canvas output directory is required to "
+            "resolve the frozen multiplicity-boundary receipt");
+    }
+    configOut.boundaryReceiptPath =
+        JoinPath({*receiptDirectories.begin(),
+                  "multiplicity_boundary_receipt_v1.json"});
+    if (PathExists(configOut.boundaryReceiptPath)) {
+        std::ifstream receiptInput(configOut.boundaryReceiptPath);
+        if (!receiptInput.is_open()) {
+            throw std::runtime_error(
+                "Could not open multiplicity-boundary receipt: " +
+                configOut.boundaryReceiptPath);
+        }
+        configOut.boundaryReceipt = json::parse(receiptInput);
+    }
 
     return configOut;
 }
 
-double CalculateMultiplicityThreshold(TH1D* hMult, double percentile)
+int CalculateMultiplicityThreshold(const TH1D* hMult, double percentile)
 {
-    if (!hMult) throw std::runtime_error("Cannot calculate multiplicity threshold: null histogram");
-
-    const double totalIntegral = hMult->Integral();
-    if (totalIntegral <= 0.0) return hMult->GetBinCenter(1);
-
-    const double target = ((100.0 - percentile) / 100.0) * totalIntegral;
-    double runningIntegral = 0.0;
-    for (int iBin = 1; iBin <= hMult->GetNbinsX(); ++iBin) {
-        runningIntegral += hMult->GetBinContent(iBin);
-        if (runningIntegral >= target) return hMult->GetBinCenter(iBin);
-    }
-
-    return hMult->GetBinCenter(hMult->GetNbinsX());
+    return HadronizationMultiplicity::ThresholdForPercentile(
+        hMult, percentile,
+        "standalone multiplicity-boundary plot");
 }
 
-std::map<double, double> CalculateThresholds(TH1D* hMult,
-                                             const std::vector<PercentileClass>& classes)
+std::map<double, int> CalculateThresholds(
+    const TH1D* hMult,
+    const std::vector<PercentileClass>& classes)
 {
     std::set<double> percentiles;
     for (const auto& entry : classes) {
@@ -292,11 +347,122 @@ std::map<double, double> CalculateThresholds(TH1D* hMult,
         percentiles.insert(entry.maxPercentile);
     }
 
-    std::map<double, double> thresholds;
+    std::map<double, int> thresholds;
     for (double percentile : percentiles) {
         thresholds[percentile] = CalculateMultiplicityThreshold(hMult, percentile);
     }
     return thresholds;
+}
+
+void VerifyBoundaryReceiptForHistogram(
+    const PlotConfig& config,
+    const std::string& tune,
+    const TH1D* histogram,
+    bool strictInputs)
+{
+    if (config.boundaryReceipt.empty()) {
+        if (strictInputs) {
+            throw std::runtime_error(
+                "Missing frozen multiplicity-boundary receipt: " +
+                config.boundaryReceiptPath +
+                ". Run the matching thnsparse target successfully first.");
+        }
+        std::cerr
+            << "WARNING: diagnostic-only boundary drawing without frozen "
+            << "receipt " << config.boundaryReceiptPath << std::endl;
+        return;
+    }
+    const json& receipt = config.boundaryReceipt;
+    if (receipt.value("schema", std::string()) !=
+            HadronizationMultiplicity::kBoundaryReceiptSchema ||
+        receipt.value("schema_version", 0) != 1 ||
+        receipt.value("algorithm", std::string()) !=
+            HadronizationMultiplicity::kBoundaryAlgorithm ||
+        receipt.value("completion_status", std::string()) != "PASS" ||
+        receipt.value("configuration_sha256", std::string()) !=
+            config.configurationSha256) {
+        throw std::runtime_error(
+            "Multiplicity-boundary receipt schema/configuration mismatch: " +
+            config.boundaryReceiptPath);
+    }
+    json payload = receipt;
+    const std::string claimedPayloadSha =
+        payload.value("payload_sha256", std::string());
+    payload.erase("payload_sha256");
+    if (claimedPayloadSha.size() != 64U ||
+        Hadronization::Sha256Hex(payload.dump()) !=
+            claimedPayloadSha) {
+        throw std::runtime_error(
+            "Multiplicity-boundary receipt payload SHA-256 mismatch: " +
+            config.boundaryReceiptPath);
+    }
+    if (!receipt.contains("tunes") ||
+        !receipt.at("tunes").contains(tune)) {
+        throw std::runtime_error(
+            "Multiplicity-boundary receipt has no tune " + tune);
+    }
+    const json& tuneReceipt = receipt.at("tunes").at(tune);
+    const auto identity =
+        HadronizationMultiplicity::CaptureHistogramIdentity(
+            histogram, "standalone boundary receipt check for " + tune);
+    if (tuneReceipt.value(
+            "histogram_identity_sha256", std::string()) !=
+        HadronizationMultiplicity::HistogramIdentitySha256(identity)) {
+        throw std::runtime_error(
+            "Multiplicity histogram identity differs from frozen receipt "
+            "for tune " + tune);
+    }
+
+    const std::string centralReferencePath =
+        tuneReceipt.value("central_reference_path", std::string());
+    const std::string centralReferenceSha =
+        tuneReceipt.value(
+            "central_source_file_sha256", std::string());
+    if (centralReferencePath.empty() ||
+        centralReferenceSha.size() != 64U ||
+        Hadronization::Sha256FileHex(centralReferencePath) !=
+            centralReferenceSha) {
+        throw std::runtime_error(
+            "Frozen central multiplicity source file/hash is unavailable "
+            "or changed for tune " + tune);
+    }
+
+    std::map<double, int> storedThresholds;
+    for (const auto& threshold : tuneReceipt.at("thresholds")) {
+        storedThresholds.emplace(
+            threshold.at("percentile").get<double>(),
+            threshold.at("nch_threshold").get<int>());
+    }
+    const auto recomputed =
+        CalculateThresholds(
+            histogram,
+            config.percentileClasses);
+    if (recomputed != storedThresholds) {
+        throw std::runtime_error(
+            "Recomputed multiplicity thresholds differ from frozen receipt "
+            "for tune " + tune);
+    }
+    std::vector<std::pair<double, double>> configuredClasses;
+    for (const auto& activityClass : config.percentileClasses) {
+        configuredClasses.push_back({
+            activityClass.minPercentile,
+            activityClass.maxPercentile});
+    }
+    HadronizationMultiplicity::RequireDiscretePartitionCoverage(
+        configuredClasses, storedThresholds);
+    const json& partition = tuneReceipt.at("partition");
+    if (partition.value("coverage", std::string()) != "PASS" ||
+        partition.value("disjointness", std::string()) != "PASS") {
+        throw std::runtime_error(
+            "Multiplicity-boundary receipt does not certify a complete, "
+            "disjoint partition for tune " + tune);
+    }
+    std::cout
+        << "MULTIPLICITY_BOUNDARY_RECEIPT_CONSUMED"
+        << " tune=" << tune
+        << " path=" << config.boundaryReceiptPath
+        << " payload_sha256=" << claimedPayloadSha
+        << " status=PASS" << std::endl;
 }
 
 TH1D* LoadMultiplicityHistogram(const PlotConfig& config,
@@ -329,6 +495,14 @@ TH1D* LoadMultiplicityHistogram(const PlotConfig& config,
         return nullptr;
     }
 
+    const auto projectionMode =
+        HadronizationPairInput::ValidateSelectionMetadata(
+        *file, config.pairInputSelectionContract, completeRootDir, filePath);
+    HadronizationPairInput::ValidateConfiguredCombinatorics(
+        projectionMode, config.pairCombinatoricsMode,
+        config.sameSignPairFactor, config.pairInputSelectionContract,
+        filePath);
+
     TH1D* source = dynamic_cast<TH1D*>(file->Get("summed MULTIPLICITY"));
     if (!source) {
         file->Close();
@@ -339,6 +513,8 @@ TH1D* LoadMultiplicityHistogram(const PlotConfig& config,
         std::cerr << "WARNING: missing 'summed MULTIPLICITY' in " << filePath << std::endl;
         return nullptr;
     }
+    VerifyBoundaryReceiptForHistogram(
+        config, tune, source, strictInputs);
 
     TH1D* hist = dynamic_cast<TH1D*>(source->Clone(Form("hMultiplicity_%s_%s",
                                                        flavor, tune.c_str())));
@@ -464,7 +640,7 @@ TGraphErrors* BuildMultiplicityGraph(TH1D* hist,
 }
 
 void DrawClassDecorations(const std::vector<PercentileClass>& classes,
-                          const std::map<double, double>& thresholds,
+                          const std::map<double, int>& thresholds,
                           double xMin,
                           double xMax,
                           double yMin,
@@ -477,7 +653,10 @@ void DrawClassDecorations(const std::vector<PercentileClass>& classes,
         const double percentile = item.first;
         if (percentile <= 0.0 || percentile >= 100.0) continue;
 
-        const double x = item.second;
+        // Adjacent inclusive integer classes meet between Nch bins. Drawing
+        // at threshold+0.5 displays the same tie rule used by the analysis:
+        // the threshold integer stays in the lower-activity class.
+        const double x = static_cast<double>(item.second) + 0.5;
         if (x <= xMin || x >= xMax) continue;
         TLine* line = new TLine(x, yMin, x, yMax);
         line->SetLineColor(kGray + 2);
@@ -493,8 +672,19 @@ void DrawClassDecorations(const std::vector<PercentileClass>& classes,
     latex.SetTextFont(42);
 
     for (const auto& entry : classes) {
-        const double left = std::max(xMin, thresholds.at(entry.maxPercentile));
-        const double right = std::min(xMax, thresholds.at(entry.minPercentile));
+        if (entry.minPercentile == 0.0 &&
+            entry.maxPercentile == 100.0 &&
+            classes.size() > 1U) {
+            continue;
+        }
+        const auto range =
+            HadronizationMultiplicity::DiscreteClassRange(
+                thresholds, entry.minPercentile,
+                entry.maxPercentile);
+        const double left =
+            std::max(xMin, static_cast<double>(range.first) - 0.5);
+        const double right =
+            std::min(xMax, static_cast<double>(range.second) + 0.5);
         if (right <= xMin || left >= xMax || right <= left) continue;
 
         const double x = std::sqrt(left * right);
@@ -561,7 +751,7 @@ void DrawFlavorCanvas(const PlotConfig& config,
         keepAlive.push_back(graph);
         graph->Draw("LE1 same");
 
-        const std::map<double, double> thresholds =
+        const std::map<double, int> thresholds =
             CalculateThresholds(hist, config.percentileClasses);
         DrawClassDecorations(config.percentileClasses, thresholds, xMin, xMax, yMin, yMax);
         graph->Draw("LE1 same");
@@ -640,7 +830,7 @@ void DrawSharedCanvas(const PlotConfig& config,
         keepAlive.push_back(graph);
         graph->Draw("LE1 same");
 
-        const std::map<double, double> thresholds =
+        const std::map<double, int> thresholds =
             CalculateThresholds(hist, config.percentileClasses);
         DrawClassDecorations(config.percentileClasses, thresholds, xMin, xMax, yMin, yMax);
         graph->Draw("LE1 same");
@@ -710,7 +900,7 @@ void DrawCompactMonashCanvas(const PlotConfig& config,
         graph = BuildMultiplicityGraph(hist, tune, xMin, xMax);
         graph->Draw("LE1 same");
 
-        const std::map<double, double> thresholds =
+        const std::map<double, int> thresholds =
             CalculateThresholds(hist, config.percentileClasses);
         DrawClassDecorations(config.percentileClasses, thresholds, xMin, xMax, yMin, yMax);
         graph->Draw("LE1 same");
@@ -764,7 +954,7 @@ void Plot_MultiplicityDistribution_PercentileBoundaries(
         "PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json",
     const char* outputDir = "PlottingScripts/Plots/MultiplicityDistribution",
     bool normalize = false,
-    bool strictInputs = false,
+    bool strictInputs = true,
     bool compactMonashOnly = false)
 {
     using namespace MultiplicityPercentilePlot;
@@ -774,6 +964,8 @@ void Plot_MultiplicityDistribution_PercentileBoundaries(
 
     std::cout << "Using Hadronization base: " << config.hadronizationBase << std::endl;
     std::cout << "Using analyzed data dir: " << config.baseDir << std::endl;
+    std::cout << "Using complete-root tag: "
+              << config.beautyCompleteRootDir << std::endl;
     std::cout << "Writing multiplicity plots to: " << config.outputDir << std::endl;
 
     if (compactMonashOnly) {
@@ -788,7 +980,7 @@ void Plot_MultiplicityDistribution_PercentileBoundaries_ByFlavor(
         "PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json",
     const char* outputDir = "PlottingScripts/Plots/MultiplicityDistribution",
     bool normalize = false,
-    bool strictInputs = false)
+    bool strictInputs = true)
 {
     using namespace MultiplicityPercentilePlot;
 
@@ -797,8 +989,132 @@ void Plot_MultiplicityDistribution_PercentileBoundaries_ByFlavor(
 
     std::cout << "Using Hadronization base: " << config.hadronizationBase << std::endl;
     std::cout << "Using analyzed data dir: " << config.baseDir << std::endl;
+    std::cout << "Using beauty/charm complete-root tags: "
+              << config.beautyCompleteRootDir << " / "
+              << config.charmCompleteRootDir << std::endl;
     std::cout << "Writing by-flavor multiplicity debug plots to: " << config.outputDir << std::endl;
 
     DrawFlavorCanvas(config, "BEAUTY", normalize, strictInputs);
     DrawFlavorCanvas(config, "CHARM", normalize, strictInputs);
+}
+
+int TestMultiplicityDatasetSelectorOverrides(
+    const char* configuration,
+    const char* analyzedDataBase,
+    const char* completeRootTag)
+{
+    using namespace MultiplicityPercentilePlot;
+
+    const char* oldBasePointer =
+        std::getenv("HADRONIZATION_ANALYZED_DATA_BASE");
+    const char* oldTagPointer =
+        std::getenv("HADRONIZATION_COMPLETE_ROOT_TAG");
+    const bool hadBase = oldBasePointer != nullptr;
+    const bool hadTag = oldTagPointer != nullptr;
+    const std::string oldBase = oldBasePointer ? oldBasePointer : "";
+    const std::string oldTag = oldTagPointer ? oldTagPointer : "";
+    auto restore = [&]() {
+        if (hadBase) {
+            gSystem->Setenv(
+                "HADRONIZATION_ANALYZED_DATA_BASE", oldBase.c_str());
+        } else {
+            gSystem->Unsetenv("HADRONIZATION_ANALYZED_DATA_BASE");
+        }
+        if (hadTag) {
+            gSystem->Setenv(
+                "HADRONIZATION_COMPLETE_ROOT_TAG", oldTag.c_str());
+        } else {
+            gSystem->Unsetenv("HADRONIZATION_COMPLETE_ROOT_TAG");
+        }
+    };
+
+    int errors = 0;
+    try {
+        gSystem->Setenv(
+            "HADRONIZATION_ANALYZED_DATA_BASE", analyzedDataBase);
+        gSystem->Setenv(
+            "HADRONIZATION_COMPLETE_ROOT_TAG", completeRootTag);
+        const PlotConfig config = ReadConfig(
+            configuration, "PlottingScripts/Plots/MultiplicityDistribution");
+        const std::string expectedBase = ResolvePathFromBase(
+            analyzedDataBase, config.hadronizationBase);
+        if (config.baseDir != expectedBase ||
+            config.beautyCompleteRootDir != completeRootTag ||
+            config.charmCompleteRootDir != completeRootTag) {
+            ++errors;
+        }
+        bool v2PolicyEnforced = false;
+        try {
+            const auto mode =
+                HadronizationPairInput::DetermineProjectionMode(
+                    HadronizationPairInput::
+                        kRequiredV2MetadataObjectCount,
+                    config.pairInputSelectionContract,
+                    completeRootTag, "synthetic-v2.root");
+            v2PolicyEnforced =
+                HadronizationPairInput::AllowsV2(
+                    config.pairInputSelectionContract) &&
+                mode ==
+                    HadronizationPairInput::ProjectionMode::kMetadataV2;
+            if (v2PolicyEnforced) {
+                HadronizationPairInput::ValidateConfiguredCombinatorics(
+                    mode, config.pairCombinatoricsMode,
+                    config.sameSignPairFactor,
+                    config.pairInputSelectionContract,
+                    "synthetic-v2.root");
+            }
+        } catch (const std::exception&) {
+            v2PolicyEnforced =
+                !HadronizationPairInput::AllowsV2(
+                    config.pairInputSelectionContract);
+        }
+        bool legacyPolicyEnforced = false;
+        try {
+            const auto mode =
+                HadronizationPairInput::DetermineProjectionMode(
+                    0, config.pairInputSelectionContract,
+                    config.pairInputSelectionContract
+                        .legacyMetadataFreeCompleteRootTag,
+                    "synthetic-legacy.root");
+            legacyPolicyEnforced =
+                HadronizationPairInput::AllowsLegacy(
+                    config.pairInputSelectionContract) &&
+                mode ==
+                    HadronizationPairInput::ProjectionMode::
+                        kTaggedLegacyRecutsV1;
+        } catch (const std::exception&) {
+            legacyPolicyEnforced =
+                !HadronizationPairInput::AllowsLegacy(
+                    config.pairInputSelectionContract);
+        }
+        bool wrongTagRejected = false;
+        try {
+            (void)HadronizationPairInput::DetermineProjectionMode(
+                0, config.pairInputSelectionContract, completeRootTag,
+                "synthetic-untagged.root");
+        } catch (const std::exception&) {
+            wrongTagRejected = true;
+        }
+        bool partialRejected = false;
+        try {
+            (void)HadronizationPairInput::DetermineProjectionMode(
+                5, config.pairInputSelectionContract, completeRootTag,
+                "synthetic-partial.root");
+        } catch (const std::exception&) {
+            partialRejected = true;
+        }
+        if (!v2PolicyEnforced || !legacyPolicyEnforced ||
+            !wrongTagRejected || !partialRejected) {
+            ++errors;
+        }
+    } catch (const std::exception& error) {
+        std::cerr << "MULTIPLICITY_DATASET_SELECTOR_TEST_ERROR "
+                  << error.what() << std::endl;
+        ++errors;
+    }
+    restore();
+    std::cout << "MULTIPLICITY_DATASET_SELECTOR_TEST errors=" << errors
+              << " contract_policy_enforced=true"
+              << std::endl;
+    return errors;
 }

@@ -1,4 +1,4 @@
-// improvedPlotting.C
+// improvedPlotting_THnSparse.C
 // Paul Veen (paul.veen@cern.ch)
 
 // C headers
@@ -10,11 +10,13 @@
 #include <cmath>
 #include <cstring>
 #include <cstdlib>
+#include <filesystem>
 #include <map>
 #include <set>
 #include <stdexcept>
 #include <sstream>
 #include <limits>
+#include <memory>
 #include <vector>
 
 #if defined(__GLIBC__)
@@ -25,11 +27,17 @@
 #include "TFile.h"
 #include "TH1D.h"
 #include "THnSparse.h"
+#include "TObjString.h"
+#include "TParameter.h"
 #include "TSystem.h"
 #include "TCanvas.h"
 #include "TString.h" // TODO: can use this for the legend entry names?
 #include <TLegend.h>
 
+#include "../AnalysisScripts/GeneratedPairRegistry.h"
+#include "../AnalysisScripts/AssociateOriginCategoryContract.h"
+#include "../SimulationScripts/Sha256.h"
+#include "MultiplicityBoundaryUtils.h"
 #include "TunePlotStyle.h"
 
 #if __has_include(<nlohmann/json.hpp>)
@@ -53,10 +61,6 @@ using json = nlohmann::json;
 // TODO: add many more error statements and checks. 
 // It needs to be clear for the user what went wrong when something went wrong (in particular related to the configuration.json)
 
-// TODO: add new junctions simulations
-
-// TODO: add close-packing simulations
-
 // TODO: add many more plots and options to draw them (e.g. delta phi, delta phi delta eta, angular correlations, multiplciity spectra, kinematics, etc.) and add them to PDF
 
 // TODO: display_name is used now.. maybe better to use the binLabel everywhere?
@@ -69,11 +73,54 @@ struct TriggerAssociateOSandSS {
     std::string associateSS;
     std::string OS;
     std::string SS;
+    Int_t triggerPdg = 0;
+    Int_t associateOSPdg = 0;
+    Int_t associateSSPdg = 0;
+    Int_t referenceMesonPdg = 0;
+    bool legacyRegistryFilenames = false;
 };
 
 struct HistogramAndTriggerPtHistogramNames {
     std::string hDPhi;
     std::string hTrPt;
+};
+
+enum class PairSelectionProjectionMode {
+    kUpstreamSelectedV2,
+    kLegacyPlotRecutsV1
+};
+
+const char* PairSelectionProjectionModeName(
+    PairSelectionProjectionMode mode
+) {
+    switch (mode) {
+        case PairSelectionProjectionMode::kUpstreamSelectedV2:
+            return "upstream_selected_v2";
+        case PairSelectionProjectionMode::kLegacyPlotRecutsV1:
+            return "tagged_legacy_recuts_v1";
+    }
+    return "unknown_pair_selection_mode";
+}
+
+bool IsLegacyPairSelectionMode(PairSelectionProjectionMode mode) {
+    return mode != PairSelectionProjectionMode::kUpstreamSelectedV2;
+}
+
+struct PairInputSelectionContract {
+    std::string mode;
+    std::string legacyMetadataFreeCompleteRootTag;
+    std::string histogramPtEtaFieldSemantics;
+    std::string analysisSchema;
+    std::string analysisImplementation;
+    std::string analysisVersion;
+    std::string analysisProfile;
+    std::string selectorVersion;
+    std::string pairCombinatoricsMode;
+    Double_t triggerPtMinExclusive;
+    Double_t associatePtMinExclusive;
+    Double_t etaAbsMaxInclusive;
+    Double_t sameSignPairFactor;
+    std::string ptUpperSelection;
 };
 
 
@@ -103,6 +150,8 @@ struct YieldsAndErrors {
     std::vector<std::vector<std::vector<Double_t>>> vYields;
     std::vector<std::vector<std::vector<Double_t>>> vYieldsErrors;
     std::vector<std::vector<std::vector<Double_t>>> vYieldsRatioErrors;
+    std::size_t referenceAssociateIndex = 0;
+    Int_t referenceMesonPdg = 0;
 };
 
 
@@ -110,6 +159,8 @@ struct YieldsAndErrorsMap {
     std::map<std::string, std::vector<std::vector<std::vector<Double_t>>>> mapYields;
     std::map<std::string, std::vector<std::vector<std::vector<Double_t>>>> mapYieldsErrors;
     std::map<std::string, std::vector<std::vector<std::vector<Double_t>>>> mapYieldsRatioErrors;
+    std::map<std::string, std::size_t> mapReferenceAssociateIndex;
+    std::map<std::string, Int_t> mapReferenceMesonPdg;
     Int_t subsampleCoverageFailures = 0;
 };
 
@@ -195,11 +246,17 @@ struct CONFIGS {
     bool VERBOSE;
     bool CALCULATE_ERRORS;
     int nSubSamples;
+    std::string PAIR_COMBINATORICS_MODE;
     Double_t SAME_SIGN_PAIR_FACTOR;
+    PairInputSelectionContract PAIR_INPUT_SELECTION_CONTRACT;
     bool DRAW_CORRELATION_PLOTS;
     bool SUBSAMPLE_COVERAGE_AUDIT;
     std::string base_dir;
     std::vector<std::string> vSubsampleErrorBinsToExclude;
+    std::string configurationPath;
+    std::string configurationSha256;
+    std::string multiplicityBoundaryReceiptPath;
+    json multiplicityBoundaryReceipt;
 
     // MONASH, JUNCTIONS, else...
     std::vector<std::string> vTUNES;
@@ -215,6 +272,8 @@ struct CONFIGS {
     std::vector<TriggerAssociateOSandSS> vCharmTriggerAssociateOSandSS;
     std::map<std::string, std::vector<TriggerAssociateOSandSS>> beautyConfigs;
     std::map<std::string, std::vector<TriggerAssociateOSandSS>> charmConfigs;
+    std::map<std::string, std::map<double, double>>
+        multiplicityPercentileThresholdsByTune;
 
     // Which bins will be plotted?
     std::vector<HistogramAndTriggerPtHistogramNames> vHistogramAndTriggerPtHistogramNames; // legacy
@@ -404,6 +463,544 @@ TObjectType* GetObjectOrThrow(TFile* file, const char* objectName, const std::st
     return object;
 }
 
+const Hadronization::PairDefinition& PairDefinitionForConfiguredFile(
+    const std::string& fileName,
+    const std::string& sector,
+    const std::string& heavySign,
+    const std::string& context
+) {
+    const Hadronization::PairDefinition* match = nullptr;
+    for (const auto& definition : Hadronization::kPairDefinitions) {
+        if (definition.filename != fileName ||
+            definition.sector != sector ||
+            definition.heavySign != heavySign) {
+            continue;
+        }
+        if (match) {
+            throw std::runtime_error(
+                "Pair registry contains a duplicate " + heavySign +
+                " definition for configured file '" + fileName +
+                "' in " + context);
+        }
+        match = &definition;
+    }
+    if (!match) {
+        throw std::runtime_error(
+            "No exact " + sector + "/" + heavySign +
+            " pair-registry definition for configured file '" + fileName +
+            "' in " + context);
+    }
+    return *match;
+}
+
+TriggerAssociateOSandSS ResolveConfiguredPairFromRegistry(
+    const std::string& sector,
+    const std::string& groupTrigger,
+    const std::string& configuredTrigger,
+    const std::string& associateOS,
+    const std::string& associateSS,
+    const std::string& osFile,
+    const std::string& ssFile
+) {
+    const std::string context =
+        sector + " trigger group '" + groupTrigger + "'";
+    if (configuredTrigger != groupTrigger) {
+        throw std::runtime_error(
+            "Configured pair trigger '" + configuredTrigger +
+            "' differs from its group trigger '" + groupTrigger +
+            "' in " + context);
+    }
+    const auto& osDefinition = PairDefinitionForConfiguredFile(
+        osFile, sector, "OS", context);
+    const auto& ssDefinition = PairDefinitionForConfiguredFile(
+        ssFile, sector, "SS", context);
+    if (osDefinition.triggerPdg != ssDefinition.triggerPdg) {
+        throw std::runtime_error(
+            "Configured OS/SS files have different trigger PDGs in " +
+            context + ": " + osFile + " / " + ssFile);
+    }
+    if (osDefinition.associatePdg != -ssDefinition.associatePdg) {
+        throw std::runtime_error(
+            "Configured OS/SS files are not the signed associate pair in " +
+            context + ": " + osFile + " / " + ssFile);
+    }
+    if (osDefinition.referenceMesonPdg !=
+        ssDefinition.referenceMesonPdg) {
+        throw std::runtime_error(
+            "Configured OS/SS files disagree on reference_meson_pdg in " +
+            context + ": " + osFile + " / " + ssFile);
+    }
+
+    TriggerAssociateOSandSS configured;
+    configured.trigger = configuredTrigger;
+    configured.associateOS = associateOS;
+    configured.associateSS = associateSS;
+    configured.OS = osFile;
+    configured.SS = ssFile;
+    configured.triggerPdg = osDefinition.triggerPdg;
+    configured.associateOSPdg = osDefinition.associatePdg;
+    configured.associateSSPdg = ssDefinition.associatePdg;
+    configured.referenceMesonPdg = osDefinition.referenceMesonPdg;
+    configured.legacyRegistryFilenames =
+        osDefinition.legacyFilename && ssDefinition.legacyFilename;
+    return configured;
+}
+
+struct ReferenceAssociateSelection {
+    std::size_t index;
+    Int_t pdg;
+};
+
+ReferenceAssociateSelection ResolveReferenceAssociateSelection(
+    const std::vector<TriggerAssociateOSandSS>& configurations,
+    const std::string& context
+) {
+    if (configurations.empty()) {
+        throw std::runtime_error(
+            "Cannot resolve reference meson from an empty trigger group: " +
+            context);
+    }
+    const Int_t triggerPdg = configurations.front().triggerPdg;
+    const Int_t referencePdg =
+        configurations.front().referenceMesonPdg;
+    if (triggerPdg == 0 || referencePdg == 0) {
+        throw std::runtime_error(
+            "Unresolved pair-registry PDG identity in " + context);
+    }
+
+    std::set<std::string> osFiles;
+    std::set<std::string> ssFiles;
+    std::set<Int_t> osAssociates;
+    std::vector<std::size_t> matches;
+    for (std::size_t index = 0; index < configurations.size(); ++index) {
+        const auto& configured = configurations[index];
+        if (configured.triggerPdg != triggerPdg ||
+            configured.referenceMesonPdg != referencePdg) {
+            throw std::runtime_error(
+                "Configured associates disagree on trigger/reference PDG in " +
+                context);
+        }
+        if (!osFiles.insert(configured.OS).second ||
+            !ssFiles.insert(configured.SS).second ||
+            !osAssociates.insert(configured.associateOSPdg).second) {
+            throw std::runtime_error(
+                "Duplicate configured pair identity in " + context);
+        }
+        if (configured.associateOSPdg == referencePdg) {
+            matches.push_back(index);
+        }
+    }
+    if (matches.size() != 1) {
+        throw std::runtime_error(
+            Form("Expected exactly one configured signed reference meson "
+                 "PDG %d in %s, found %zu",
+                 referencePdg, context.c_str(), matches.size()));
+    }
+    return {matches.front(), referencePdg};
+}
+
+std::vector<Int_t> ReferenceFirstAssociateOrder(
+    std::size_t numberOfAssociates,
+    std::size_t referenceIndex
+) {
+    if (referenceIndex >= numberOfAssociates) {
+        throw std::runtime_error(
+            "Reference-associate index is outside configured associate range");
+    }
+    std::vector<Int_t> order;
+    order.reserve(numberOfAssociates);
+    order.push_back(static_cast<Int_t>(referenceIndex));
+    for (std::size_t index = 0; index < numberOfAssociates; ++index) {
+        if (index != referenceIndex) {
+            order.push_back(static_cast<Int_t>(index));
+        }
+    }
+    return order;
+}
+
+using MultiplicityHistogramIdentity =
+    HadronizationMultiplicity::HistogramIdentity;
+
+MultiplicityHistogramIdentity CaptureMultiplicityHistogramIdentity(
+    TH1D* histogram,
+    const std::string& context
+) {
+    return HadronizationMultiplicity::CaptureHistogramIdentity(
+        histogram, context);
+}
+
+void RequireIdenticalMultiplicityHistogram(
+    const MultiplicityHistogramIdentity& expected,
+    const MultiplicityHistogramIdentity& observed,
+    const std::string& expectedContext,
+    const std::string& observedContext
+) {
+    HadronizationMultiplicity::RequireIdenticalHistogram(
+        expected, observed, expectedContext, observedContext);
+}
+
+bool PairSelectionContractAllowsV2(
+    const PairInputSelectionContract& contract
+) {
+    return contract.mode == "v2_metadata_or_tagged_legacy_recuts_v1" ||
+           contract.mode == "v2_metadata_only_v1";
+}
+
+bool PairSelectionContractAllowsLegacy(
+    const PairInputSelectionContract& contract
+) {
+    return contract.mode == "v2_metadata_or_tagged_legacy_recuts_v1" ||
+           contract.mode == "tagged_legacy_recuts_only_v1";
+}
+
+std::string ReadSelectionMetadataString(
+    TFile* file,
+    const char* objectName,
+    const std::string& filePath
+) {
+    TObjString* object = dynamic_cast<TObjString*>(file->Get(objectName));
+    if (!object) {
+        throw std::runtime_error(
+            "Missing or wrong-type selection metadata '" +
+            std::string(objectName) + "' in " + filePath);
+    }
+    return object->GetString().Data();
+}
+
+Double_t ReadSelectionMetadataDouble(
+    TFile* file,
+    const char* objectName,
+    const std::string& filePath
+) {
+    TParameter<double>* object =
+        dynamic_cast<TParameter<double>*>(file->Get(objectName));
+    if (!object || !std::isfinite(object->GetVal())) {
+        throw std::runtime_error(
+            "Missing, wrong-type, or non-finite selection metadata '" +
+            std::string(objectName) + "' in " + filePath);
+    }
+    return object->GetVal();
+}
+
+void RequireSelectionMetadataString(
+    TFile* file,
+    const char* objectName,
+    const std::string& expected,
+    const std::string& filePath
+) {
+    const std::string actual =
+        ReadSelectionMetadataString(file, objectName, filePath);
+    if (actual != expected) {
+        throw std::runtime_error(
+            "Selection metadata mismatch for '" + std::string(objectName) +
+            "' in " + filePath + ": expected '" + expected +
+            "', got '" + actual + "'");
+    }
+}
+
+void RequireSelectionMetadataDouble(
+    TFile* file,
+    const char* objectName,
+    Double_t expected,
+    const std::string& filePath
+) {
+    const Double_t actual =
+        ReadSelectionMetadataDouble(file, objectName, filePath);
+    const Double_t scale =
+        std::max({1.0, std::abs(expected), std::abs(actual)});
+    if (std::abs(actual - expected) > 1e-12 * scale) {
+        throw std::runtime_error(
+            Form("Selection metadata mismatch for '%s' in %s: "
+                 "expected %.17g, got %.17g",
+                 objectName, filePath.c_str(), expected, actual));
+    }
+}
+
+Int_t ReadPairIdentityMetadataInt(
+    TFile* file,
+    const char* objectName,
+    const std::string& filePath
+) {
+    TParameter<int>* object =
+        dynamic_cast<TParameter<int>*>(file->Get(objectName));
+    if (!object) {
+        throw std::runtime_error(
+            "Missing or wrong-type pair-identity metadata '" +
+            std::string(objectName) + "' in " + filePath);
+    }
+    return object->GetVal();
+}
+
+void RequirePairIdentityMetadataInt(
+    TFile* file,
+    const char* objectName,
+    Int_t expected,
+    const std::string& filePath
+) {
+    const Int_t actual =
+        ReadPairIdentityMetadataInt(file, objectName, filePath);
+    if (actual != expected) {
+        throw std::runtime_error(
+            Form("Pair-identity metadata mismatch for '%s' in %s: "
+                 "expected %d, got %d",
+                 objectName, filePath.c_str(), expected, actual));
+    }
+}
+
+void ValidateConfiguredPairFileIdentity(
+    TFile* file,
+    PairSelectionProjectionMode selectionMode,
+    const PairInputSelectionContract& contract,
+    const std::string& activeCompleteRootTag,
+    const TriggerAssociateOSandSS& configured,
+    bool isOS,
+    const std::string& sector,
+    const std::string& filePath
+) {
+    if (!file) {
+        throw std::runtime_error(
+            "Cannot validate pair identity in null file: " + filePath);
+    }
+    const std::array<const char*, 6> identityObjects = {
+        "pair_registry_sha256",
+        "heavy_sector",
+        "heavy_sign",
+        "trigger_pdg",
+        "associate_pdg",
+        "reference_meson_pdg"
+    };
+    std::size_t present = 0;
+    for (const char* objectName : identityObjects) {
+        if (file->GetListOfKeys() &&
+            file->GetListOfKeys()->FindObject(objectName)) {
+            ++present;
+        }
+    }
+
+    if (IsLegacyPairSelectionMode(selectionMode)) {
+        if (!PairSelectionContractAllowsLegacy(contract) ||
+            activeCompleteRootTag !=
+                contract.legacyMetadataFreeCompleteRootTag ||
+            !configured.legacyRegistryFilenames) {
+            throw std::runtime_error(
+                "Pair-identity metadata-free fallback is forbidden outside "
+                "the exact tagged legacy registry mapping: " + filePath);
+        }
+        if (present != 0) {
+            throw std::runtime_error(
+                Form("Tagged legacy pair file must be identity-metadata-free; "
+                     "found %zu/%zu identity objects in %s",
+                     present, identityObjects.size(), filePath.c_str()));
+        }
+        return;
+    }
+
+    if (present != identityObjects.size()) {
+        throw std::runtime_error(
+            Form("Canonical pair file has incomplete signed identity "
+                 "metadata: found %zu/%zu objects in %s",
+                 present, identityObjects.size(), filePath.c_str()));
+    }
+    RequireSelectionMetadataString(
+        file, "pair_registry_sha256",
+        std::string(Hadronization::kPairRegistrySha256), filePath);
+    RequireSelectionMetadataString(
+        file, "heavy_sector", sector, filePath);
+    RequireSelectionMetadataString(
+        file, "heavy_sign", isOS ? "OS" : "SS", filePath);
+    RequirePairIdentityMetadataInt(
+        file, "trigger_pdg", configured.triggerPdg, filePath);
+    RequirePairIdentityMetadataInt(
+        file, "associate_pdg",
+        isOS ? configured.associateOSPdg : configured.associateSSPdg,
+        filePath);
+    RequirePairIdentityMetadataInt(
+        file, "reference_meson_pdg",
+        configured.referenceMesonPdg, filePath);
+}
+
+PairSelectionProjectionMode ValidatePairInputSelectionContract(
+    TFile* file,
+    const PairInputSelectionContract& contract,
+    const std::string& activeCompleteRootTag,
+    const std::string& filePath
+) {
+    if (!file) {
+        throw std::runtime_error(
+            "Cannot validate pair selection metadata in null file: " +
+            filePath);
+    }
+
+    const std::array<const char*, 12> requiredV2Objects = {
+        "analysis_schema",
+        "analysis_implementation",
+        "analysis_version",
+        "analysis_profile",
+        "associate_origin_category_schema",
+        "associate_origin_category_labels",
+        "selector_version",
+        "pair_combinatorics_mode",
+        "trigger_pt_min_exclusive",
+        "associate_pt_min_exclusive",
+        "eta_abs_max_inclusive",
+        "same_sign_pair_factor"
+    };
+    std::size_t presentV2Objects = 0;
+    for (const char* objectName : requiredV2Objects) {
+        if (file->GetListOfKeys() &&
+            file->GetListOfKeys()->FindObject(objectName)) {
+            ++presentV2Objects;
+        }
+    }
+
+    if (presentV2Objects == 0) {
+        if (!PairSelectionContractAllowsLegacy(contract)) {
+            throw std::runtime_error(
+                "Metadata-free pair file is forbidden by selection contract "
+                "mode '" + contract.mode + "': " + filePath);
+        }
+        if (activeCompleteRootTag !=
+            contract.legacyMetadataFreeCompleteRootTag) {
+            throw std::runtime_error(
+                "Metadata-free pair file is allowed only for the explicitly "
+                "tagged legacy input '" +
+                contract.legacyMetadataFreeCompleteRootTag +
+                "', but active complete-root tag is '" +
+                activeCompleteRootTag + "': " + filePath);
+        }
+        return PairSelectionProjectionMode::kLegacyPlotRecutsV1;
+    }
+
+    if (presentV2Objects != requiredV2Objects.size()) {
+        throw std::runtime_error(
+            Form("Partial v2 pair-selection metadata in %s: found %zu/%zu "
+                 "required objects; refusing legacy fallback",
+                 filePath.c_str(), presentV2Objects,
+                 requiredV2Objects.size()));
+    }
+    if (!PairSelectionContractAllowsV2(contract)) {
+        throw std::runtime_error(
+            "V2 pair metadata is forbidden by selection contract mode '" +
+            contract.mode + "': " + filePath);
+    }
+
+    RequireSelectionMetadataString(
+        file, "analysis_schema", contract.analysisSchema, filePath);
+    RequireSelectionMetadataString(
+        file, "analysis_implementation", contract.analysisImplementation,
+        filePath);
+    RequireSelectionMetadataString(
+        file, "analysis_version", contract.analysisVersion, filePath);
+    RequireSelectionMetadataString(
+        file, "analysis_profile", contract.analysisProfile, filePath);
+    RequireSelectionMetadataString(
+        file, "associate_origin_category_schema",
+        std::string(Hadronization::kAssociateOriginCategorySchema),
+        filePath);
+    RequireSelectionMetadataString(
+        file, "associate_origin_category_labels",
+        std::string(Hadronization::kAssociateOriginCategoryLabels),
+        filePath);
+    RequireSelectionMetadataString(
+        file, "selector_version", contract.selectorVersion, filePath);
+    RequireSelectionMetadataString(
+        file, "pair_combinatorics_mode",
+        contract.pairCombinatoricsMode, filePath);
+    RequireSelectionMetadataDouble(
+        file, "trigger_pt_min_exclusive",
+        contract.triggerPtMinExclusive, filePath);
+    RequireSelectionMetadataDouble(
+        file, "associate_pt_min_exclusive",
+        contract.associatePtMinExclusive, filePath);
+    RequireSelectionMetadataDouble(
+        file, "eta_abs_max_inclusive",
+        contract.etaAbsMaxInclusive, filePath);
+    RequireSelectionMetadataDouble(
+        file, "same_sign_pair_factor",
+        contract.sameSignPairFactor, filePath);
+
+    // The exact v2 schema above declares no upper-pT selection. Reject
+    // unversioned attempts to introduce one rather than silently applying a
+    // second, incompatible selection in the plotting layer.
+    const std::array<const char*, 8> forbiddenUpperPtObjects = {
+        "trigger_pt_max",
+        "trigger_pt_max_inclusive",
+        "trigger_pt_max_exclusive",
+        "associate_pt_max",
+        "associate_pt_max_inclusive",
+        "associate_pt_max_exclusive",
+        "trigger_pt_upper_selection",
+        "associate_pt_upper_selection"
+    };
+    for (const char* objectName : forbiddenUpperPtObjects) {
+        if (file->GetListOfKeys() &&
+            file->GetListOfKeys()->FindObject(objectName)) {
+            throw std::runtime_error(
+                "Unexpected upper-pT selection metadata '" +
+                std::string(objectName) + "' in v2 pair file " + filePath);
+        }
+    }
+    if (contract.ptUpperSelection != "none") {
+        throw std::runtime_error(
+            "V2 pair-selection contract must declare pt_upper_selection="
+            "'none'");
+    }
+
+    return PairSelectionProjectionMode::kUpstreamSelectedV2;
+}
+
+void RequireMatchingPairSelectionModes(
+    PairSelectionProjectionMode first,
+    PairSelectionProjectionMode second,
+    const std::string& context
+) {
+    if (first != second) {
+        throw std::runtime_error(
+            "Mixed pair-selection modes in " + context + ": " +
+            PairSelectionProjectionModeName(first) + " versus " +
+            PairSelectionProjectionModeName(second));
+    }
+}
+
+void ValidatePairCombinatoricsForSelectionMode(
+    PairSelectionProjectionMode selectionMode,
+    const std::string& configuredMode,
+    Double_t configuredSameSignFactor,
+    const PairInputSelectionContract& contract,
+    const std::string& filePath
+) {
+    const bool factorIsOne =
+        std::isfinite(configuredSameSignFactor) &&
+        std::abs(configuredSameSignFactor - 1.0) <= 1e-12;
+    const bool factorIsHalf =
+        std::isfinite(configuredSameSignFactor) &&
+        std::abs(configuredSameSignFactor - 0.5) <= 1e-12;
+    if (selectionMode ==
+        PairSelectionProjectionMode::kUpstreamSelectedV2) {
+        if (configuredMode != "ordered_conditional_v1" ||
+            !factorIsOne ||
+            contract.pairCombinatoricsMode !=
+                "ordered_conditional_v1" ||
+            std::abs(contract.sameSignPairFactor - 1.0) > 1e-12) {
+            throw std::runtime_error(
+                "Canonical v2 pair input requires "
+                "pair_combinatorics_mode=ordered_conditional_v1 and "
+                "same_sign_pair_factor=1.0: " + filePath);
+        }
+        return;
+    }
+    if (configuredMode != "legacy_identical_ss_half_v1" ||
+        !factorIsHalf ||
+        !PairSelectionContractAllowsLegacy(contract)) {
+        throw std::runtime_error(
+            "Tagged metadata-free legacy input requires the "
+            "explicit diagnostic mode "
+            "pair_combinatorics_mode=legacy_identical_ss_half_v1 and "
+            "same_sign_pair_factor=0.5; refusing silent reinterpretation "
+            "under the canonical ordered convention: " + filePath);
+    }
+}
+
 void CloseAndDeleteInputFile(TFile*& file) {
     if (!file) { return; }
     // TFile::Close() does not necessarily destroy objects materialised by
@@ -426,24 +1023,44 @@ void DeleteInputObject(TFile* file, TObjectType*& object) {
 
 // Derive the histograms (delta phi and trigger pt) from the THnSparse, including user-defined cuts
 // Pay attention that the OS and SS histograms need to have the same amount of bins!
-void ValidateProjectionCuts(const BinsFromTHnSparse& cuts) {
-    const std::array<Double_t, 12> values = {
+void ValidateProjectionCuts(
+    const BinsFromTHnSparse& cuts,
+    PairSelectionProjectionMode selectionMode
+) {
+    const std::array<Double_t, 6> alwaysActiveValues = {
         cuts.triggerPhiMin, cuts.triggerPhiMax,
         cuts.assocPhiMin, cuts.assocPhiMax,
+        cuts.multiplicityMin, cuts.multiplicityMax
+    };
+    if (!std::all_of(alwaysActiveValues.begin(), alwaysActiveValues.end(),
+                     [](Double_t value) { return std::isfinite(value); })) {
+        throw std::runtime_error("non-finite active projection cut");
+    }
+    if (cuts.multiplicityMin > cuts.multiplicityMax) {
+        throw std::runtime_error("inverted multiplicity projection cut");
+    }
+
+    const std::array<Double_t, 8> legacyKinematicValues = {
         cuts.triggerEtaMin, cuts.triggerEtaMax,
         cuts.assocEtaMin, cuts.assocEtaMax,
         cuts.triggerPtMin, cuts.triggerPtMax,
         cuts.assocPtMin, cuts.assocPtMax
     };
-    if (!std::all_of(values.begin(), values.end(),
-                     [](Double_t value) { return std::isfinite(value); })) {
-        throw std::runtime_error("non-finite kinematic projection cut");
-    }
-    if (cuts.triggerEtaMin > cuts.triggerEtaMax ||
-        cuts.assocEtaMin > cuts.assocEtaMax ||
-        cuts.triggerPtMin > cuts.triggerPtMax ||
-        cuts.assocPtMin > cuts.assocPtMax) {
-        throw std::runtime_error("inverted kinematic projection cut");
+    if (IsLegacyPairSelectionMode(selectionMode)) {
+        if (!std::all_of(
+                legacyKinematicValues.begin(),
+                legacyKinematicValues.end(),
+                [](Double_t value) { return std::isfinite(value); })) {
+            throw std::runtime_error(
+                "non-finite legacy pT/eta projection cut");
+        }
+        if (cuts.triggerEtaMin > cuts.triggerEtaMax ||
+            cuts.assocEtaMin > cuts.assocEtaMax ||
+            cuts.triggerPtMin > cuts.triggerPtMax ||
+            cuts.assocPtMin > cuts.assocPtMax) {
+            throw std::runtime_error(
+                "inverted legacy pT/eta projection cut");
+        }
     }
     // Paul-compatible pair objects retain delta-phi but not the two
     // individual azimuths. The checked-in paper configs use the full
@@ -461,7 +1078,11 @@ void ValidateProjectionCuts(const BinsFromTHnSparse& cuts) {
 }
 
 
-TH1D* GetCorrelationHistograms(THnSparseD* hCorrelations, const BinsFromTHnSparse& cuts, const TString& suffix = ""
+TH1D* GetCorrelationHistograms(
+    THnSparseD* hCorrelations,
+    const BinsFromTHnSparse& cuts,
+    PairSelectionProjectionMode selectionMode,
+    const TString& suffix = ""
 ) {
     // THnSparse hCorrelations: (careful: the 'trigger' and 'associate' refer to the pairs)
         // 0 = DeltaPhi
@@ -475,14 +1096,15 @@ TH1D* GetCorrelationHistograms(THnSparseD* hCorrelations, const BinsFromTHnSpars
     if (!hCorrelations) {
         throw std::runtime_error("Cannot project correlations: hCorrelations is null");
     }
-    ValidateProjectionCuts(cuts);
+    ValidateProjectionCuts(cuts, selectionMode);
 
     // Reset axes
     for (int i = 0; i < hCorrelations->GetNdimensions(); ++i) { hCorrelations->GetAxis(i)->SetRange(); }
 
-        // These cuts must match the trigger-normalisation projection below.
-        // Leaving them inactive biases the conditional yield whenever the
-        // configured trigger range is narrower than the upstream pair object.
+    if (selectionMode ==
+        PairSelectionProjectionMode::kLegacyPlotRecutsV1) {
+        // Match Paul's stable-main legacy projection: apply the configured
+        // trigger and associate pT/eta cuts to the correlation numerator.
         hCorrelations->GetAxis(2)->SetRangeUser(
             cuts.triggerEtaMin,
             cuts.triggerEtaMax
@@ -502,12 +1124,17 @@ TH1D* GetCorrelationHistograms(THnSparseD* hCorrelations, const BinsFromTHnSpars
             cuts.assocPtMin,
             cuts.assocPtMax
         );
+    }
 
-        std::cout << "--> applying multiplicity cut from " << cuts.multiplicityMin << " to " << cuts.multiplicityMax << std::endl;
+    std::cout << "--> pair selection mode "
+              << PairSelectionProjectionModeName(selectionMode)
+              << "; applying multiplicity cut from "
+              << cuts.multiplicityMin << " to "
+              << cuts.multiplicityMax << std::endl;
 
-        hCorrelations->GetAxis(6)->SetRangeUser(
-            cuts.multiplicityMin,
-            cuts.multiplicityMax
+    hCorrelations->GetAxis(6)->SetRangeUser(
+        cuts.multiplicityMin,
+        cuts.multiplicityMax
     );
 
     TH1D* hDPhi = (TH1D*)hCorrelations->Projection(0, "E");
@@ -521,7 +1148,11 @@ TH1D* GetCorrelationHistograms(THnSparseD* hCorrelations, const BinsFromTHnSpars
 // Derive the trigger pt histogram from the trigger kinematics THnSparse, including user-defined cuts
 // This histogram is then used for normalisation of the hDPhi histogram
 // Pay attention that the OS and SS histograms need to have the same amount of bins!
-TH1D* GetTriggerPtHistograms(THnSparseD* hTrKinematics, const BinsFromTHnSparse& cuts, const TString& suffix = ""
+TH1D* GetTriggerPtHistograms(
+    THnSparseD* hTrKinematics,
+    const BinsFromTHnSparse& cuts,
+    PairSelectionProjectionMode selectionMode,
+    const TString& suffix = ""
 ) {
     // THnSparse hCorrelations: (careful: the 'trigger' and 'associate' refer to the pairs)
         // 0 = phi
@@ -532,27 +1163,34 @@ TH1D* GetTriggerPtHistograms(THnSparseD* hTrKinematics, const BinsFromTHnSparse&
     if (!hTrKinematics) {
         throw std::runtime_error("Cannot project trigger pT: hTrKinematics is null");
     }
-    ValidateProjectionCuts(cuts);
+    ValidateProjectionCuts(cuts, selectionMode);
 
     // Reset axes
     for (int i = 0; i < hTrKinematics->GetNdimensions(); ++i) { hTrKinematics->GetAxis(i)->SetRange(); }
 
-    hTrKinematics->GetAxis(0)->SetRangeUser(
-        cuts.triggerPhiMin,
-        cuts.triggerPhiMax
-    );
+    if (selectionMode ==
+        PairSelectionProjectionMode::kLegacyPlotRecutsV1) {
+        hTrKinematics->GetAxis(0)->SetRangeUser(
+            cuts.triggerPhiMin,
+            cuts.triggerPhiMax
+        );
 
-    hTrKinematics->GetAxis(1)->SetRangeUser(
-        cuts.triggerEtaMin,
-        cuts.triggerEtaMax
-    );
+        hTrKinematics->GetAxis(1)->SetRangeUser(
+            cuts.triggerEtaMin,
+            cuts.triggerEtaMax
+        );
 
-    hTrKinematics->GetAxis(2)->SetRangeUser(
-        cuts.triggerPtMin,
-        cuts.triggerPtMax
-    );
+        hTrKinematics->GetAxis(2)->SetRangeUser(
+            cuts.triggerPtMin,
+            cuts.triggerPtMax
+        );
+    }
 
-    std::cout << "--> applying multiplicity cut from " << cuts.multiplicityMin << " to " << cuts.multiplicityMax << std::endl;
+    std::cout << "--> pair selection mode "
+              << PairSelectionProjectionModeName(selectionMode)
+              << "; applying multiplicity cut from "
+              << cuts.multiplicityMin << " to "
+              << cuts.multiplicityMax << std::endl;
 
     hTrKinematics->GetAxis(3)->SetRangeUser(
         cuts.multiplicityMin,
@@ -572,24 +1210,9 @@ double GetMultiplicityThreshold(
     TH1D* hMult,
     double percentile
 ) {
-    const double totalIntegral = hMult->Integral();
-
-    double runningIntegral = 0.0;
-
-    const double targetFraction =
-        (100.0 - percentile) / 100.0;
-
-    for (int ibin = 1; ibin <= hMult->GetNbinsX(); ++ibin)
-    {
-        runningIntegral += hMult->GetBinContent(ibin);
-
-        if (runningIntegral >= targetFraction * totalIntegral)
-        {
-            return hMult->GetBinCenter(ibin);
-        }
-    }
-
-    return hMult->GetBinCenter(hMult->GetNbinsX());
+    return static_cast<double>(
+        HadronizationMultiplicity::ThresholdForPercentile(
+            hMult, percentile, "multiplicity-threshold calculation"));
 }
 
 std::pair<double, double> GetDiscreteMultiplicityRange(
@@ -597,26 +1220,22 @@ std::pair<double, double> GetDiscreteMultiplicityRange(
     double lowActivityPercentile,
     double highActivityPercentile
 ) {
-    if (!(lowActivityPercentile >= 0.0 &&
-          highActivityPercentile <= 100.0 &&
-          lowActivityPercentile < highActivityPercentile)) {
-        throw std::runtime_error("invalid multiplicity-percentile interval");
+    std::map<double, int> integerThresholds;
+    for (const auto& [percentile, threshold] : thresholds) {
+        const double rounded = std::round(threshold);
+        if (!std::isfinite(threshold) ||
+            std::abs(threshold - rounded) > 1e-9) {
+            throw std::runtime_error(
+                "frozen multiplicity threshold is not an integer Nch");
+        }
+        integerThresholds[percentile] = static_cast<int>(rounded);
     }
-    // Percentile intervals are processed from low to high activity. An
-    // integer Nch value exactly on a quantile boundary belongs to the
-    // lower-activity interval; the adjacent higher-activity interval starts
-    // at the next integer. This makes every class disjoint and deterministic.
-    double minimum = thresholds.at(highActivityPercentile);
-    if (highActivityPercentile < 100.0) minimum += 1.0;
-    const double maximum = thresholds.at(lowActivityPercentile);
-    if (minimum > maximum) {
-        std::ostringstream message;
-        message << "empty discrete multiplicity class for percentiles ["
-                << lowActivityPercentile << "," << highActivityPercentile
-                << "]: Nch=[" << minimum << "," << maximum << "]";
-        throw std::runtime_error(message.str());
-    }
-    return {minimum, maximum};
+    const auto range = HadronizationMultiplicity::DiscreteClassRange(
+        integerThresholds, lowActivityPercentile,
+        highActivityPercentile);
+    return {
+        static_cast<double>(range.first),
+        static_cast<double>(range.second)};
 }
 
 
@@ -649,6 +1268,109 @@ void writeCanvasToFiles(bool VERBOSE, TCanvas *canvas, std::string writePath, st
     if (VERBOSE) {
         std::cout << "- Files written sucesfully (...?)" << std::endl;
     }
+}
+
+void WriteMultiplicityBoundaryReceipt(const CONFIGS& configs) {
+    if (configs.multiplicityBoundaryReceiptPath.empty() ||
+        !configs.multiplicityBoundaryReceipt.is_object() ||
+        !configs.multiplicityBoundaryReceipt.contains("tunes")) {
+        throw std::runtime_error(
+            "Multiplicity-boundary receipt was not frozen");
+    }
+    const std::string outputDirectory =
+        ParentPath(configs.multiplicityBoundaryReceiptPath);
+    if (outputDirectory.empty() ||
+        (gSystem->mkdir(outputDirectory.c_str(), true) != 0 &&
+         gSystem->AccessPathName(outputDirectory.c_str()))) {
+        throw std::runtime_error(
+            "Could not create multiplicity-boundary receipt directory: " +
+            outputDirectory);
+    }
+
+    json receipt = configs.multiplicityBoundaryReceipt;
+    receipt["completion_status"] = "PASS";
+    receipt["plotter_source_sha256"] =
+        Hadronization::Sha256FileHex(
+            JoinPath({FindHadronizationBase(),
+                      "PlottingScripts",
+                      "improvedPlotting_THnSparse.C"}));
+    receipt["boundary_utility_sha256"] =
+        Hadronization::Sha256FileHex(
+            JoinPath({FindHadronizationBase(),
+                      "PlottingScripts",
+                      "MultiplicityBoundaryUtils.h"}));
+    const std::string canonicalPayload = receipt.dump();
+    receipt["payload_sha256"] =
+        Hadronization::Sha256Hex(canonicalPayload);
+    const std::string serializedReceipt = receipt.dump(2) + "\n";
+
+    const std::filesystem::path finalPath(
+        configs.multiplicityBoundaryReceiptPath);
+    if (std::filesystem::exists(finalPath) ||
+        std::filesystem::is_symlink(finalPath)) {
+        if (std::filesystem::is_symlink(finalPath) ||
+            !std::filesystem::is_regular_file(finalPath)) {
+            throw std::runtime_error(
+                "Existing multiplicity-boundary receipt is not a regular "
+                "file: " + configs.multiplicityBoundaryReceiptPath);
+        }
+        std::ifstream existing(configs.multiplicityBoundaryReceiptPath);
+        const std::string existingBytes(
+            (std::istreambuf_iterator<char>(existing)),
+            std::istreambuf_iterator<char>());
+        if (!existing.good() && !existing.eof()) {
+            throw std::runtime_error(
+                "Could not read existing multiplicity-boundary receipt: " +
+                configs.multiplicityBoundaryReceiptPath);
+        }
+        if (existingBytes != serializedReceipt) {
+            throw std::runtime_error(
+                "Existing multiplicity-boundary receipt differs; refusing "
+                "to overwrite a frozen publication definition: " +
+                configs.multiplicityBoundaryReceiptPath);
+        }
+        std::cout
+            << "MULTIPLICITY_BOUNDARY_RECEIPT"
+            << " path=" << configs.multiplicityBoundaryReceiptPath
+            << " payload_sha256="
+            << receipt.at("payload_sha256").get<std::string>()
+            << " tune_count=" << receipt.at("tunes").size()
+            << " status=REUSED_IDENTICAL" << std::endl;
+        return;
+    }
+
+    const std::string temporaryPath =
+        configs.multiplicityBoundaryReceiptPath +
+        Form(".tmp.%d", gSystem->GetPid());
+    {
+        std::ofstream output(temporaryPath);
+        if (!output.is_open()) {
+            throw std::runtime_error(
+                "Could not open temporary multiplicity-boundary receipt: " +
+                temporaryPath);
+        }
+        output << serializedReceipt;
+        output.flush();
+        if (!output.good()) {
+            throw std::runtime_error(
+                "Could not write complete multiplicity-boundary receipt: " +
+                temporaryPath);
+        }
+    }
+    if (gSystem->Rename(
+            temporaryPath.c_str(),
+            configs.multiplicityBoundaryReceiptPath.c_str()) != 0) {
+        throw std::runtime_error(
+            "Could not atomically publish multiplicity-boundary receipt: " +
+            configs.multiplicityBoundaryReceiptPath);
+    }
+    std::cout
+        << "MULTIPLICITY_BOUNDARY_RECEIPT"
+        << " path=" << configs.multiplicityBoundaryReceiptPath
+        << " payload_sha256="
+        << receipt.at("payload_sha256").get<std::string>()
+        << " tune_count=" << receipt.at("tunes").size()
+        << " status=PASS" << std::endl;
 }
 
 
@@ -703,6 +1425,10 @@ YieldsAndErrors YieldsAndErrorsForGivenTrigger(const std::string& trigger, const
     yieldsAndErrors.vYields = mapYieldsAndErrors.mapYields.at(trigger);
     if (CALCULATE_ERRORS) { yieldsAndErrors.vYieldsErrors = mapYieldsAndErrors.mapYieldsErrors.at(trigger); }
     if (CALCULATE_ERRORS) { yieldsAndErrors.vYieldsRatioErrors = mapYieldsAndErrors.mapYieldsRatioErrors.at(trigger); }
+    yieldsAndErrors.referenceAssociateIndex =
+        mapYieldsAndErrors.mapReferenceAssociateIndex.at(trigger);
+    yieldsAndErrors.referenceMesonPdg =
+        mapYieldsAndErrors.mapReferenceMesonPdg.at(trigger);
 
     return yieldsAndErrors;
 }
@@ -789,6 +1515,529 @@ TPad* createMiniPad(const char* name,
     return pad;
 }
 
+void RequireExactJsonKeys(
+    const json& object,
+    const std::set<std::string>& expected,
+    const std::string& context
+) {
+    if (!object.is_object()) {
+        throw std::runtime_error(context + " must be a JSON object");
+    }
+    std::set<std::string> actual;
+    for (auto iterator = object.begin(); iterator != object.end(); ++iterator) {
+        actual.insert(iterator.key());
+    }
+    if (actual != expected) {
+        std::ostringstream message;
+        message << context << " has an unsupported or missing field set";
+        for (const auto& key : expected) {
+            if (!actual.count(key)) message << "\n  missing: " << key;
+        }
+        for (const auto& key : actual) {
+            if (!expected.count(key)) message << "\n  unsupported: " << key;
+        }
+        throw std::runtime_error(message.str());
+    }
+}
+
+PairInputSelectionContract ParsePairInputSelectionContract(
+    const json& object
+) {
+    const std::set<std::string> expectedKeys = {
+        "mode",
+        "legacy_metadata_free_complete_root_tag",
+        "histogram_pt_eta_fields",
+        "v2_analysis_schema",
+        "v2_analysis_implementation",
+        "v2_analysis_version",
+        "v2_analysis_profile",
+        "v2_selector_version",
+        "v2_pair_combinatorics_mode",
+        "v2_trigger_pt_min_exclusive",
+        "v2_associate_pt_min_exclusive",
+        "v2_eta_abs_max_inclusive",
+        "v2_same_sign_pair_factor",
+        "v2_pt_upper_selection"
+    };
+    RequireExactJsonKeys(
+        object, expectedKeys, "pair_input_selection_contract");
+
+    PairInputSelectionContract contract;
+    contract.mode = object.at("mode").get<std::string>();
+    contract.legacyMetadataFreeCompleteRootTag =
+        object.at("legacy_metadata_free_complete_root_tag")
+            .get<std::string>();
+    contract.histogramPtEtaFieldSemantics =
+        object.at("histogram_pt_eta_fields").get<std::string>();
+    contract.analysisSchema =
+        object.at("v2_analysis_schema").get<std::string>();
+    contract.analysisImplementation =
+        object.at("v2_analysis_implementation").get<std::string>();
+    contract.analysisVersion =
+        object.at("v2_analysis_version").get<std::string>();
+    contract.analysisProfile =
+        object.at("v2_analysis_profile").get<std::string>();
+    contract.selectorVersion =
+        object.at("v2_selector_version").get<std::string>();
+    contract.pairCombinatoricsMode =
+        object.at("v2_pair_combinatorics_mode").get<std::string>();
+    contract.triggerPtMinExclusive =
+        object.at("v2_trigger_pt_min_exclusive").get<Double_t>();
+    contract.associatePtMinExclusive =
+        object.at("v2_associate_pt_min_exclusive").get<Double_t>();
+    contract.etaAbsMaxInclusive =
+        object.at("v2_eta_abs_max_inclusive").get<Double_t>();
+    contract.sameSignPairFactor =
+        object.at("v2_same_sign_pair_factor").get<Double_t>();
+    contract.ptUpperSelection =
+        object.at("v2_pt_upper_selection").get<std::string>();
+
+    if (!PairSelectionContractAllowsV2(contract) &&
+        !PairSelectionContractAllowsLegacy(contract)) {
+        throw std::runtime_error(
+            "Unsupported pair_input_selection_contract mode: " +
+            contract.mode);
+    }
+    if (PairSelectionContractAllowsLegacy(contract) &&
+        contract.legacyMetadataFreeCompleteRootTag.empty()) {
+        throw std::runtime_error(
+            "Legacy pair-selection mode requires an explicit metadata-free "
+            "complete-root tag");
+    }
+    if (contract.histogramPtEtaFieldSemantics !=
+        "legacy_recuts_only_v1") {
+        throw std::runtime_error(
+            "histogram_pt_eta_fields must be "
+            "'legacy_recuts_only_v1'; v2 inputs are already selected "
+            "upstream");
+    }
+
+    // These values are the only central v2 selection understood by this
+    // plotting implementation. A different definition requires a new
+    // versioned code path, not a silent JSON edit.
+    const bool supportedV2 =
+        contract.analysisSchema ==
+            "paul_pair_objects_primary_ground_v2" &&
+        contract.analysisImplementation ==
+            "one_pass_primary_ground_pair_analysis_v2" &&
+        contract.analysisVersion ==
+            "status_analysis_THnSparse_qq_v2" &&
+        contract.analysisProfile ==
+            "central_primary_ground_v1" &&
+        contract.selectorVersion ==
+            "hard_trigger_primary_ground__primary_ground_associate_v1" &&
+        contract.pairCombinatoricsMode ==
+            "ordered_conditional_v1" &&
+        std::abs(contract.triggerPtMinExclusive - 1.0) <= 1e-12 &&
+        std::abs(contract.associatePtMinExclusive - 0.15) <= 1e-12 &&
+        std::abs(contract.etaAbsMaxInclusive - 4.0) <= 1e-12 &&
+        std::abs(contract.sameSignPairFactor - 1.0) <= 1e-12 &&
+        contract.ptUpperSelection == "none";
+    if (!supportedV2) {
+        throw std::runtime_error(
+            "Unsupported central v2 pair-selection definition");
+    }
+
+    return contract;
+}
+
+std::map<std::string, std::map<double, double>>
+FreezeAndValidateMultiplicityDefinitions(
+    const std::string& baseDir,
+    const std::vector<std::string>& tunes,
+    const std::string& beautyCompleteRootTag,
+    const std::string& charmCompleteRootTag,
+    const std::string& beautySubsampleBase,
+    const std::string& charmSubsampleBase,
+    Int_t nSubSamples,
+    bool calculateErrors,
+    const std::map<std::string, std::vector<TriggerAssociateOSandSS>>&
+        beautyConfigs,
+    const std::map<std::string, std::vector<TriggerAssociateOSandSS>>&
+        charmConfigs,
+    const std::vector<BinsFromTHnSparse>& bins,
+    json* receiptOut = nullptr,
+    const std::string& configurationPath = "",
+    const std::string& configurationSha256 = ""
+) {
+    if (tunes.empty() || (beautyConfigs.empty() && charmConfigs.empty())) {
+        throw std::runtime_error(
+            "Cannot freeze multiplicity definitions without tunes and "
+            "configured pair inputs");
+    }
+    if (calculateErrors && nSubSamples <= 0) {
+        throw std::runtime_error(
+            "Cannot validate block multiplicity definitions with a "
+            "non-positive block count");
+    }
+    if (receiptOut) {
+        const bool validConfigurationSha =
+            configurationSha256.size() == 64U &&
+            std::all_of(
+                configurationSha256.begin(),
+                configurationSha256.end(),
+                [](unsigned char character) {
+                    return (character >= '0' && character <= '9') ||
+                           (character >= 'a' && character <= 'f');
+                });
+        if (configurationPath.empty() || !validConfigurationSha) {
+            throw std::runtime_error(
+                "Multiplicity-boundary receipt requires the exact "
+                "configuration path and lowercase SHA-256");
+        }
+    }
+    std::set<double> requestedPercentiles;
+    for (const auto& bin : bins) {
+        requestedPercentiles.insert(bin.multiplicityMin);
+        requestedPercentiles.insert(bin.multiplicityMax);
+    }
+    if (requestedPercentiles.empty()) {
+        throw std::runtime_error(
+            "Cannot freeze multiplicity definitions without requested "
+            "percentiles");
+    }
+    std::set<std::pair<double, double>> uniqueConfiguredClasses;
+    for (const auto& bin : bins) {
+        uniqueConfiguredClasses.insert(
+            {bin.multiplicityMin, bin.multiplicityMax});
+    }
+    const std::vector<std::pair<double, double>> configuredClasses(
+        uniqueConfiguredClasses.begin(), uniqueConfiguredClasses.end());
+    const auto orderedPartition =
+        HadronizationMultiplicity::ValidateAndOrderPartition(
+            configuredClasses);
+
+    json receipt = {
+        {"schema", HadronizationMultiplicity::kBoundaryReceiptSchema},
+        {"schema_version", 1},
+        {"algorithm", HadronizationMultiplicity::kBoundaryAlgorithm},
+        {"configuration_path", configurationPath},
+        {"configuration_sha256", configurationSha256},
+        {"policy", {
+            {"normalization", "sum_of_regular_bins"},
+            {"underflow", "must_be_exactly_zero_and_is_excluded"},
+            {"overflow", "must_be_exactly_zero_and_is_excluded"},
+            {"threshold_rule",
+             "first_ascending_integer_nch_bin_with_inclusive_cumulative_"
+             "weight_ge_(100-percentile)/100"},
+            {"tie_rule",
+             "boundary_integer_belongs_to_lower_activity_class;_adjacent_"
+             "higher_activity_class_starts_at_boundary_plus_one"},
+            {"class_bounds", "inclusive_integer_nch"},
+            {"integrated_0_100_observable",
+             "excluded_from_mutually_exclusive_partition"}
+        }},
+        {"tunes", json::object()}
+    };
+
+    std::map<std::string, std::map<double, double>> thresholdsByTune;
+    for (const auto& tune : tunes) {
+        bool haveCentralIdentity = false;
+        MultiplicityHistogramIdentity centralIdentity;
+        std::string centralIdentityPath;
+        std::string centralSourceFileSha256;
+        std::string centralMergeManifestSha256;
+        std::string centralPairRegistrySha256;
+        std::size_t centralFilesValidated = 0;
+        std::size_t blockFilesValidated = 0;
+        std::set<std::string> visitedCentral;
+        json blockReceipts = json::array();
+
+        const auto validateCentralPath =
+            [&](const std::string& path) {
+                if (!visitedCentral.insert(path).second) return;
+                std::unique_ptr<TFile> file(OpenRootFileOrThrow(path));
+                TH1D* histogram = GetObjectOrThrow<TH1D>(
+                    file.get(), "summed MULTIPLICITY", path);
+                const MultiplicityHistogramIdentity observed =
+                    CaptureMultiplicityHistogramIdentity(histogram, path);
+                if (!haveCentralIdentity) {
+                    centralIdentity = observed;
+                    centralIdentityPath = path;
+                    centralSourceFileSha256 =
+                        Hadronization::Sha256FileHex(path);
+                    if (TObjString* mergeManifest =
+                            dynamic_cast<TObjString*>(
+                                file->Get(
+                                    "merge_input_manifest_sha256"))) {
+                        centralMergeManifestSha256 =
+                            mergeManifest->GetString().Data();
+                    }
+                    if (TObjString* pairRegistry =
+                            dynamic_cast<TObjString*>(
+                                file->Get("pair_registry_sha256"))) {
+                        centralPairRegistrySha256 =
+                            pairRegistry->GetString().Data();
+                    }
+                    haveCentralIdentity = true;
+                    for (const double percentile : requestedPercentiles) {
+                        thresholdsByTune[tune][percentile] =
+                            static_cast<double>(
+                                HadronizationMultiplicity::
+                                    ThresholdForPercentile(
+                                        centralIdentity, percentile,
+                                        path));
+                    }
+                } else {
+                    RequireIdenticalMultiplicityHistogram(
+                        centralIdentity, observed,
+                        centralIdentityPath, path);
+                }
+                ++centralFilesValidated;
+            };
+
+        const auto visitCentralConfig =
+            [&](const std::map<
+                    std::string,
+                    std::vector<TriggerAssociateOSandSS>>& configurations,
+                const std::string& completeRootTag) {
+                for (const auto& [trigger, pairs] : configurations) {
+                    (void)trigger;
+                    for (const auto& pair : pairs) {
+                        validateCentralPath(ResolveCompleteRootFile(
+                            baseDir, tune, completeRootTag, pair.OS));
+                        validateCentralPath(ResolveCompleteRootFile(
+                            baseDir, tune, completeRootTag, pair.SS));
+                    }
+                }
+            };
+        visitCentralConfig(beautyConfigs, beautyCompleteRootTag);
+        visitCentralConfig(charmConfigs, charmCompleteRootTag);
+        if (!haveCentralIdentity) {
+            throw std::runtime_error(
+                "No central summed MULTIPLICITY input was validated for " +
+                tune);
+        }
+
+        if (calculateErrors) {
+            for (Int_t block = 1; block <= nSubSamples; ++block) {
+                bool haveBlockIdentity = false;
+                MultiplicityHistogramIdentity blockIdentity;
+                std::string blockIdentityPath;
+                std::set<std::string> visitedBlock;
+                const std::size_t blockFilesBefore =
+                    blockFilesValidated;
+                const auto validateBlockPath =
+                    [&](const std::string& path) {
+                        if (!visitedBlock.insert(path).second) return;
+                        std::unique_ptr<TFile> file(
+                            OpenRootFileOrThrow(path));
+                        TH1D* histogram = GetObjectOrThrow<TH1D>(
+                            file.get(), "summed MULTIPLICITY", path);
+                        const MultiplicityHistogramIdentity observed =
+                            CaptureMultiplicityHistogramIdentity(
+                                histogram, path);
+                        if (!haveBlockIdentity) {
+                            blockIdentity = observed;
+                            blockIdentityPath = path;
+                            haveBlockIdentity = true;
+                        } else {
+                            RequireIdenticalMultiplicityHistogram(
+                                blockIdentity, observed,
+                                blockIdentityPath, path);
+                        }
+                        ++blockFilesValidated;
+                    };
+                const auto visitBlockConfig =
+                    [&](const std::map<
+                            std::string,
+                            std::vector<TriggerAssociateOSandSS>>&
+                            configurations,
+                        const std::string& subsampleBase) {
+                        for (const auto& [trigger, pairs] :
+                             configurations) {
+                            (void)trigger;
+                            for (const auto& pair : pairs) {
+                                validateBlockPath(ResolveSubSampleRootFile(
+                                    subsampleBase, tune, block, pair.OS));
+                                validateBlockPath(ResolveSubSampleRootFile(
+                                    subsampleBase, tune, block, pair.SS));
+                            }
+                        }
+                    };
+                visitBlockConfig(beautyConfigs, beautySubsampleBase);
+                visitBlockConfig(charmConfigs, charmSubsampleBase);
+                if (!haveBlockIdentity) {
+                    throw std::runtime_error(
+                        Form("No block-%d summed MULTIPLICITY input was "
+                             "validated for %s",
+                             block, tune.c_str()));
+                }
+                blockReceipts.push_back({
+                    {"block", block},
+                    {"reference_path", blockIdentityPath},
+                    {"histogram_identity_sha256",
+                     HadronizationMultiplicity::
+                         HistogramIdentitySha256(blockIdentity)},
+                    {"files_validated",
+                     blockFilesValidated - blockFilesBefore},
+                    {"exact_comparisons",
+                     blockFilesValidated - blockFilesBefore - 1U}
+                });
+            }
+        }
+
+        const auto requireOptionalSha256 =
+            [&](const std::string& value, const char* field) {
+                if (value.empty()) return;
+                const bool valid =
+                    value.size() == 64U &&
+                    std::all_of(
+                        value.begin(), value.end(),
+                        [](unsigned char character) {
+                            return
+                                (character >= '0' && character <= '9') ||
+                                (character >= 'a' && character <= 'f');
+                        });
+                if (!valid) {
+                    throw std::runtime_error(
+                        "Invalid " + std::string(field) +
+                        " in multiplicity source " +
+                        centralIdentityPath);
+                }
+            };
+        requireOptionalSha256(
+            centralMergeManifestSha256,
+            "merge_input_manifest_sha256");
+        requireOptionalSha256(
+            centralPairRegistrySha256, "pair_registry_sha256");
+
+        std::map<double, int> integerThresholds;
+        for (const auto& [percentile, threshold] :
+             thresholdsByTune.at(tune)) {
+            const double rounded = std::round(threshold);
+            if (!std::isfinite(threshold) ||
+                std::abs(threshold - rounded) > 1e-9) {
+                throw std::runtime_error(
+                    "Frozen multiplicity threshold is not an integer Nch "
+                    "for tune " + tune);
+            }
+            integerThresholds[percentile] =
+                static_cast<int>(rounded);
+        }
+        HadronizationMultiplicity::RequireDiscretePartitionCoverage(
+            configuredClasses, integerThresholds);
+
+        json thresholdRecords = json::array();
+        for (const auto& [percentile, threshold] :
+             integerThresholds) {
+            thresholdRecords.push_back({
+                {"percentile", percentile},
+                {"nch_threshold", threshold},
+                {"target_low_activity_fraction",
+                 (100.0 - percentile) / 100.0},
+                {"achieved_exclusive_fraction_before_threshold",
+                 HadronizationMultiplicity::
+                     CumulativeFractionBefore(
+                         centralIdentity, threshold,
+                         centralIdentityPath)},
+                {"achieved_inclusive_fraction_through_threshold",
+                 HadronizationMultiplicity::
+                     CumulativeFractionThrough(
+                         centralIdentity, threshold,
+                         centralIdentityPath)}
+            });
+        }
+
+        json classRecords = json::array();
+        double achievedPartitionFraction = 0.0;
+        for (const auto& interval : orderedPartition) {
+            const auto range =
+                HadronizationMultiplicity::DiscreteClassRange(
+                    integerThresholds, interval.first,
+                    interval.second);
+            const double achievedFraction =
+                HadronizationMultiplicity::InclusiveWeight(
+                    centralIdentity, range.first, range.second,
+                    centralIdentityPath) /
+                centralIdentity.integral;
+            achievedPartitionFraction += achievedFraction;
+            classRecords.push_back({
+                {"percentile_min", interval.first},
+                {"percentile_max", interval.second},
+                {"nch_min_inclusive", range.first},
+                {"nch_max_inclusive", range.second},
+                {"target_fraction",
+                 (interval.second - interval.first) / 100.0},
+                {"achieved_weighted_fraction",
+                 achievedFraction}
+            });
+        }
+        if (!std::isfinite(achievedPartitionFraction) ||
+            std::abs(achievedPartitionFraction - 1.0) > 1e-12) {
+            throw std::runtime_error(
+                "Frozen multiplicity classes do not exhaust the regular-bin "
+                "weight for tune " + tune);
+        }
+
+        json mergeManifestValue = nullptr;
+        if (!centralMergeManifestSha256.empty()) {
+            mergeManifestValue = centralMergeManifestSha256;
+        }
+        json pairRegistryValue = nullptr;
+        if (!centralPairRegistrySha256.empty()) {
+            pairRegistryValue = centralPairRegistrySha256;
+        }
+        receipt["tunes"][tune] = {
+            {"central_reference_path", centralIdentityPath},
+            {"central_source_file_sha256",
+             centralSourceFileSha256},
+            {"central_merge_input_manifest_sha256",
+             mergeManifestValue},
+            {"pair_registry_sha256", pairRegistryValue},
+            {"histogram_identity_sha256",
+             HadronizationMultiplicity::
+                 HistogramIdentitySha256(centralIdentity)},
+            {"histogram_name", "summed MULTIPLICITY"},
+            {"regular_bin_integral", centralIdentity.integral},
+            {"underflow", centralIdentity.contents.front()},
+            {"overflow", centralIdentity.contents.back()},
+            {"central_files_validated", centralFilesValidated},
+            {"central_exact_comparisons",
+             centralFilesValidated - 1U},
+            {"block_files_validated", blockFilesValidated},
+            {"blocks", blockReceipts},
+            {"thresholds", thresholdRecords},
+            {"classes", classRecords},
+            {"partition", {
+                {"nch_min_inclusive",
+                 integerThresholds.at(100.0)},
+                {"nch_max_inclusive",
+                 integerThresholds.at(0.0)},
+                {"coverage", "PASS"},
+                {"disjointness", "PASS"},
+                {"achieved_weighted_fraction",
+                 achievedPartitionFraction}
+            }}
+        };
+
+        std::cout
+            << "MULTIPLICITY_IDENTITY"
+            << " tune=" << tune
+            << " central_reference=" << centralIdentityPath
+            << " central_files=" << centralFilesValidated
+            << " block_files=" << blockFilesValidated
+            << " integral=" << centralIdentity.integral
+            << " percentile_count="
+            << thresholdsByTune.at(tune).size()
+            << " status=PASS"
+            << std::endl;
+        for (const auto& [percentile, threshold] :
+             thresholdsByTune.at(tune)) {
+            std::cout << "MULTIPLICITY_BOUNDARY"
+                      << " tune=" << tune
+                      << " percentile=" << percentile
+                      << " nch=" << threshold
+                      << " central_reference=" << centralIdentityPath
+                      << std::endl;
+        }
+    }
+    if (receiptOut) {
+        *receiptOut = std::move(receipt);
+    }
+    return thresholdsByTune;
+}
+
 
 CONFIGS readConfig(const char* configurations) {
 
@@ -808,11 +2057,16 @@ CONFIGS readConfig(const char* configurations) {
     // Parse the JSON file
     json config;
     configFile >> config;
+    const std::string configurationSha256 =
+        Hadronization::Sha256FileHex(configurationPath);
 
     // Extract values from the JSON
     // Generic options
     bool VERBOSE = config["VERBOSE"].get<bool>();
     bool CALCULATE_ERRORS = config["calculate_errors"].get<bool>();
+    const PairInputSelectionContract PAIR_INPUT_SELECTION_CONTRACT =
+        ParsePairInputSelectionContract(
+            config.at("pair_input_selection_contract"));
     std::string bbBarDir_sub_samples = ResolvePathFromBase(config["bb_bar_complete_root_dir_sub_samples"], hadronizationBase);
     std::string ccBarDir_sub_samples = ResolvePathFromBase(config["cc_bar_complete_root_dir_sub_samples"], hadronizationBase);
     if (const char* selectedSubsamples =
@@ -822,12 +2076,48 @@ CONFIGS readConfig(const char* configurations) {
         ccBarDir_sub_samples = bbBarDir_sub_samples;
     }
     int nSubSamples = config["nSubSamples"].get<int>();
+    const std::string PAIR_COMBINATORICS_MODE =
+        config.at("pair_combinatorics_mode").get<std::string>();
     const Double_t SAME_SIGN_PAIR_FACTOR =
-        config.value("same_sign_pair_factor", 0.5);
+        config.at("same_sign_pair_factor").get<Double_t>();
     if (!std::isfinite(SAME_SIGN_PAIR_FACTOR) ||
         SAME_SIGN_PAIR_FACTOR <= 0.0) {
         throw std::runtime_error(
             "same_sign_pair_factor must be finite and positive");
+    }
+    if (PAIR_COMBINATORICS_MODE == "ordered_conditional_v1") {
+        if (std::abs(SAME_SIGN_PAIR_FACTOR - 1.0) > 1e-12) {
+            throw std::runtime_error(
+                "ordered_conditional_v1 requires same_sign_pair_factor = 1.0");
+        }
+        if (!PairSelectionContractAllowsV2(
+                PAIR_INPUT_SELECTION_CONTRACT) ||
+            PAIR_INPUT_SELECTION_CONTRACT.pairCombinatoricsMode !=
+                "ordered_conditional_v1" ||
+            std::abs(
+                PAIR_INPUT_SELECTION_CONTRACT.sameSignPairFactor - 1.0) >
+                1e-12) {
+            throw std::runtime_error(
+                "Canonical ordered pair combinatorics require the exact "
+                "v2 ordered_conditional_v1 metadata assertion");
+        }
+    } else if (PAIR_COMBINATORICS_MODE ==
+               "legacy_identical_ss_half_v1") {
+        if (std::abs(SAME_SIGN_PAIR_FACTOR - 0.5) > 1e-12) {
+            throw std::runtime_error(
+                "legacy_identical_ss_half_v1 requires "
+                "same_sign_pair_factor = 0.5");
+        }
+        if (!PairSelectionContractAllowsLegacy(
+                PAIR_INPUT_SELECTION_CONTRACT)) {
+            throw std::runtime_error(
+                "Legacy half-weight pair combinatorics require the explicit "
+                "tagged legacy-recutter selection contract");
+        }
+    } else {
+        throw std::runtime_error(
+            "Unsupported pair_combinatorics_mode: " +
+            PAIR_COMBINATORICS_MODE);
     }
     bool DRAW_CORRELATION_PLOTS = config["draw_correlation_plots"].get<bool>();
     bool SUBSAMPLE_COVERAGE_AUDIT =
@@ -894,18 +2184,31 @@ CONFIGS readConfig(const char* configurations) {
    // Which correlations need to be analysed?
     std::map<std::string, std::vector<TriggerAssociateOSandSS>> beautyConfigs;
     for (const auto& triggerEntry : config["beauty_correlations_to_analyse"]) {
-        auto& configs = beautyConfigs[triggerEntry["trigger"].get<std::string>()];
+        const std::string groupTrigger =
+            triggerEntry["trigger"].get<std::string>();
+        if (beautyConfigs.count(groupTrigger)) {
+            throw std::runtime_error(
+                "Duplicate beauty trigger group in configuration: " +
+                groupTrigger);
+        }
+        auto& configs = beautyConfigs[groupTrigger];
         // Fill the map with the configs for the specific trigger
         for (const auto& cfg : triggerEntry["configs"]) {
-            configs.push_back({
+            configs.push_back(ResolveConfiguredPairFromRegistry(
+                "beauty", groupTrigger,
                 cfg["trigger"].get<std::string>(),
                 cfg["associateOS"].get<std::string>(),
                 cfg["associateSS"].get<std::string>(),
                 cfg["OS"].get<std::string>(),
-                cfg["SS"].get<std::string>()
-            });
+                cfg["SS"].get<std::string>()));
             std::cout << "OS File: " << cfg["OS"] << ", SS File: " << cfg["SS"] << std::endl;
         }
+        const auto reference = ResolveReferenceAssociateSelection(
+            configs, "beauty trigger group '" + groupTrigger + "'");
+        std::cout << "Reference meson for " << groupTrigger
+                  << ": PDG=" << reference.pdg
+                  << ", configured associate index=" << reference.index
+                  << std::endl;
     }
 
     // toremove
@@ -928,18 +2231,31 @@ CONFIGS readConfig(const char* configurations) {
 
    std::map<std::string, std::vector<TriggerAssociateOSandSS>> charmConfigs;
     for (const auto& triggerEntry : config["charm_correlations_to_analyse"]) {
-        auto& configs = charmConfigs[triggerEntry["trigger"].get<std::string>()];
+        const std::string groupTrigger =
+            triggerEntry["trigger"].get<std::string>();
+        if (charmConfigs.count(groupTrigger)) {
+            throw std::runtime_error(
+                "Duplicate charm trigger group in configuration: " +
+                groupTrigger);
+        }
+        auto& configs = charmConfigs[groupTrigger];
         // Fill the map with the configs for the specific trigger
         for (const auto& cfg : triggerEntry["configs"]) {
-            configs.push_back({
+            configs.push_back(ResolveConfiguredPairFromRegistry(
+                "charm", groupTrigger,
                 cfg["trigger"].get<std::string>(),
                 cfg["associateOS"].get<std::string>(),
                 cfg["associateSS"].get<std::string>(),
                 cfg["OS"].get<std::string>(),
-                cfg["SS"].get<std::string>()
-            });
+                cfg["SS"].get<std::string>()));
             std::cout << "OS File: " << cfg["OS"] << ", SS File: " << cfg["SS"] << std::endl;
         }
+        const auto reference = ResolveReferenceAssociateSelection(
+            configs, "charm trigger group '" + groupTrigger + "'");
+        std::cout << "Reference meson for " << groupTrigger
+                  << ": PDG=" << reference.pdg
+                  << ", configured associate index=" << reference.index
+                  << std::endl;
     }
 
     // Which histograms need to be analysed?
@@ -966,6 +2282,16 @@ CONFIGS readConfig(const char* configurations) {
         pair.assocPtMax = configPair["assocPtMax"].get<Double_t>();
         pair.multiplicityMin = configPair["multiplicityMin"].get<Double_t>();
         pair.multiplicityMax = configPair["multiplicityMax"].get<Double_t>();
+        ValidateProjectionCuts(
+            pair,
+            PairSelectionProjectionMode::kLegacyPlotRecutsV1);
+        if (!(pair.multiplicityMin >= 0.0 &&
+              pair.multiplicityMax <= 100.0 &&
+              pair.multiplicityMin < pair.multiplicityMax)) {
+            throw std::runtime_error(
+                "histograms_to_analyse contains an invalid multiplicity "
+                "percentile interval");
+        }
         vBinsFromTHnSparse.push_back(pair);
     }
     for (const auto& pair : vBinsFromTHnSparse) {
@@ -1129,17 +2455,49 @@ CONFIGS readConfig(const char* configurations) {
         pair.ySizeCanvas = configPair["y_size_canvas"].get<Double_t>();
         vGlobalCanvasConfigs.push_back(pair);
     }
+    std::set<std::string> boundaryReceiptDirectories;
+    for (const auto& globalCanvas : vGlobalCanvasConfigs) {
+        if (globalCanvas.write &&
+            !globalCanvas.writePath.empty() &&
+            globalCanvas.writePath != "NONE") {
+            boundaryReceiptDirectories.insert(
+                globalCanvas.writePath);
+        }
+    }
+    if ((!SUBSAMPLE_COVERAGE_AUDIT &&
+         boundaryReceiptDirectories.size() != 1U) ||
+        (SUBSAMPLE_COVERAGE_AUDIT &&
+         boundaryReceiptDirectories.size() > 1U)) {
+        throw std::runtime_error(
+            SUBSAMPLE_COVERAGE_AUDIT
+                ? "Audit-only mode permits zero or one, but not multiple, "
+                  "multiplicity-boundary receipt directories"
+                : "Exactly one global-canvas output directory is required "
+                  "to store the multiplicity-boundary receipt");
+    }
+    const std::string multiplicityBoundaryReceiptPath =
+        boundaryReceiptDirectories.empty()
+            ? std::string()
+            : JoinPath({*boundaryReceiptDirectories.begin(),
+                        "multiplicity_boundary_receipt_v1.json"});
 
     // TODO: make a function that prints content of a vector
     CONFIGS configs_from_json;
     configs_from_json.VERBOSE = VERBOSE;
     configs_from_json.CALCULATE_ERRORS = CALCULATE_ERRORS;
     configs_from_json.nSubSamples = nSubSamples;
+    configs_from_json.PAIR_COMBINATORICS_MODE = PAIR_COMBINATORICS_MODE;
     configs_from_json.SAME_SIGN_PAIR_FACTOR = SAME_SIGN_PAIR_FACTOR;
+    configs_from_json.PAIR_INPUT_SELECTION_CONTRACT =
+        PAIR_INPUT_SELECTION_CONTRACT;
     configs_from_json.DRAW_CORRELATION_PLOTS = DRAW_CORRELATION_PLOTS;
     configs_from_json.SUBSAMPLE_COVERAGE_AUDIT = SUBSAMPLE_COVERAGE_AUDIT;
     configs_from_json.base_dir = base_dir;
     configs_from_json.vSubsampleErrorBinsToExclude = vSubsampleErrorBinsToExclude;
+    configs_from_json.configurationPath = configurationPath;
+    configs_from_json.configurationSha256 = configurationSha256;
+    configs_from_json.multiplicityBoundaryReceiptPath =
+        multiplicityBoundaryReceiptPath;
     configs_from_json.vTUNES = vTUNES;
     configs_from_json.bbBarDir = bbBarDir;
     configs_from_json.ccBarDir = ccBarDir;
@@ -1149,6 +2507,14 @@ CONFIGS readConfig(const char* configurations) {
     configs_from_json.vCharmTriggerAssociateOSandSS = vCharmTriggerAssociateOSandSS; // toremove
     configs_from_json.beautyConfigs = beautyConfigs;
     configs_from_json.charmConfigs = charmConfigs;
+    configs_from_json.multiplicityPercentileThresholdsByTune =
+        FreezeAndValidateMultiplicityDefinitions(
+            base_dir, vTUNES, bbBarDir, ccBarDir,
+            bbBarDir_sub_samples, ccBarDir_sub_samples,
+            nSubSamples, CALCULATE_ERRORS,
+            beautyConfigs, charmConfigs, vBinsFromTHnSparse,
+            &configs_from_json.multiplicityBoundaryReceipt,
+            configurationPath, configurationSha256);
     // configs_from_json.vHistogramAndTriggerPtHistogramNames = vHistogramAndTriggerPtHistogramNames;
     configs_from_json.vBinsFromTHnSparse = vBinsFromTHnSparse;
     configs_from_json.vCanvasConfigs = vCanvasConfigs;
@@ -1158,12 +2524,20 @@ CONFIGS readConfig(const char* configurations) {
     std::cout << "VERBOSE = " << VERBOSE << std::endl;
     std::cout << "- CALCULATE_ERRORS = " << CALCULATE_ERRORS << std::endl;
     std::cout << "- nSubSamples = " << nSubSamples << std::endl;
+    std::cout << "- PAIR_COMBINATORICS_MODE = "
+              << PAIR_COMBINATORICS_MODE << std::endl;
     std::cout << "- SAME_SIGN_PAIR_FACTOR = "
               << SAME_SIGN_PAIR_FACTOR << std::endl;
+    std::cout << "- PAIR_INPUT_SELECTION_CONTRACT = "
+              << PAIR_INPUT_SELECTION_CONTRACT.mode << std::endl;
     std::cout << "- DRAW_CORRELATION_PLOTS = " << DRAW_CORRELATION_PLOTS << std::endl;
     std::cout << "- SUBSAMPLE_COVERAGE_AUDIT = "
               << SUBSAMPLE_COVERAGE_AUDIT << std::endl;
     std::cout << "- base_dir = " << base_dir << std::endl;
+    std::cout << "- configuration_sha256 = "
+              << configurationSha256 << std::endl;
+    std::cout << "- multiplicity_boundary_receipt = "
+              << multiplicityBoundaryReceiptPath << std::endl;
     std::cout << "- vTUNES.size() = " << vTUNES.size() << std::endl;
     std::cout << "- bbBarDir = " << bbBarDir << std::endl;
     std::cout << "- ccBarDir = " << ccBarDir << std::endl;
@@ -1206,12 +2580,20 @@ CONFIGS readConfig(const char* configurations) {
 Double_t propagateRatioError(Double_t valueA, Double_t valueB, Double_t errorA, Double_t errorB) {
     if (!std::isfinite(valueA) || !std::isfinite(valueB) ||
         !std::isfinite(errorA) || !std::isfinite(errorB) ||
-        valueA == 0.0 || valueB == 0.0) {
+        errorA < 0.0 || errorB < 0.0 || valueB == 0.0) {
         return std::numeric_limits<Double_t>::quiet_NaN();
     }
 
-    Double_t relativeUncertainty = pow((errorA / valueA), 2) + pow((errorB / valueB), 2);
-    return (std::abs(valueA / valueB) * sqrt(relativeUncertainty));
+    // Absolute derivative propagation remains defined for A == 0:
+    // sigma^2(A/B) = (sigma_A/B)^2 + (A sigma_B/B^2)^2.
+    const Double_t derivativeAContribution = errorA / valueB;
+    const Double_t derivativeBContribution =
+        (valueA / valueB) * (errorB / valueB);
+    const Double_t propagated = std::hypot(
+        derivativeAContribution, derivativeBContribution);
+    return std::isfinite(propagated)
+        ? propagated
+        : std::numeric_limits<Double_t>::quiet_NaN();
 } // propagateRatioError()
 
 
@@ -1229,6 +2611,9 @@ void SetPlotPointOrThrow(
     Double_t value,
     Double_t error,
     Bool_t requirePositiveError,
+    Bool_t logarithmicY,
+    Double_t configuredYMinimum,
+    Double_t configuredYMaximum,
     const std::string& context
 ) {
     if (!histogram) {
@@ -1242,6 +2627,41 @@ void SetPlotPointOrThrow(
     }
     if (requirePositiveError && error == 0.0) {
         throw std::runtime_error("Zero uncertainty for a final plotted observable: " + context);
+    }
+    if (logarithmicY && value <= 0.0) {
+        throw std::runtime_error(
+            "Non-positive value cannot be represented on the configured "
+            "logarithmic y axis: " + context);
+    }
+    if (!std::isfinite(configuredYMinimum) ||
+        !std::isfinite(configuredYMaximum) ||
+        configuredYMinimum >= configuredYMaximum) {
+        throw std::runtime_error(
+            "Invalid configured y-axis range for plotted point: " + context);
+    }
+    const Double_t lowerEnvelope = value - error;
+    const Double_t upperEnvelope = value + error;
+    if (!std::isfinite(lowerEnvelope) || !std::isfinite(upperEnvelope)) {
+        throw std::runtime_error(
+            "Non-finite uncertainty envelope for plotted point: " + context);
+    }
+    if (logarithmicY && lowerEnvelope <= 0.0) {
+        throw std::runtime_error(
+            "Uncertainty envelope reaches a non-positive value on the "
+            "configured logarithmic y axis: " + context);
+    }
+    const Double_t rangeTolerance =
+        1e-12 * std::max(
+            {1.0, std::abs(configuredYMinimum),
+             std::abs(configuredYMaximum), std::abs(lowerEnvelope),
+             std::abs(upperEnvelope)});
+    if (lowerEnvelope < configuredYMinimum - rangeTolerance ||
+        upperEnvelope > configuredYMaximum + rangeTolerance) {
+        throw std::runtime_error(
+            Form("Plotted uncertainty envelope [%.17g, %.17g] is clipped by "
+                 "configured y-axis [%.17g, %.17g]: %s",
+                 lowerEnvelope, upperEnvelope, configuredYMinimum,
+                 configuredYMaximum, context.c_str()));
     }
     histogram->SetBinContent(bin, value);
     histogram->SetBinError(bin, error);
@@ -1289,6 +2709,65 @@ SubsampleStatistics calculateSubsampleStatistics(const std::vector<Double_t>& va
     }
 
     return stats;
+}
+
+struct SubsampleTechnicalCoverage {
+    bool isReference = false;
+    bool yieldNonDegenerate = false;
+    bool ratioNonDegenerate = false;
+    bool yieldSemValid = false;
+    bool ratioSemValid = false;
+    bool yieldComplete = false;
+    bool ratioComplete = false;
+    bool complete = false;
+};
+
+SubsampleTechnicalCoverage EvaluateSubsampleTechnicalCoverage(
+    Double_t centralYield,
+    Double_t centralReferenceYield,
+    Double_t centralRatio,
+    const SubsampleStatistics& yieldStats,
+    const SubsampleStatistics& ratioStats,
+    Int_t expectedSubsamples,
+    bool isReference,
+    bool requirePositiveFinalError
+) {
+    SubsampleTechnicalCoverage coverage;
+    coverage.isReference = isReference;
+    coverage.yieldNonDegenerate =
+        std::isfinite(yieldStats.stdDev) && yieldStats.stdDev > 0.0;
+    coverage.ratioNonDegenerate =
+        !isReference && std::isfinite(ratioStats.stdDev) &&
+        ratioStats.stdDev > 0.0;
+    coverage.yieldSemValid =
+        std::isfinite(yieldStats.stdError) &&
+        yieldStats.stdError >= 0.0 &&
+        (!(requirePositiveFinalError ||
+           coverage.yieldNonDegenerate) ||
+         yieldStats.stdError > 0.0);
+    coverage.ratioSemValid =
+        isReference ||
+        (std::isfinite(ratioStats.stdError) &&
+         ratioStats.stdError >= 0.0 &&
+         (!(requirePositiveFinalError ||
+            coverage.ratioNonDegenerate) ||
+          ratioStats.stdError > 0.0));
+    coverage.yieldComplete =
+        expectedSubsamples > 0 &&
+        std::isfinite(centralYield) &&
+        yieldStats.nValues == expectedSubsamples &&
+        coverage.yieldSemValid;
+    coverage.ratioComplete =
+        isReference ||
+        (expectedSubsamples > 0 &&
+         std::isfinite(centralReferenceYield) &&
+         centralReferenceYield != 0.0 &&
+         std::isfinite(centralRatio) &&
+         ratioStats.nValues == expectedSubsamples &&
+         coverage.ratioSemValid);
+    coverage.complete =
+        coverage.yieldComplete && coverage.ratioComplete;
+    return coverage;
 }
 
 bool IsIntegratedMultiplicityBin(const BinsFromTHnSparse& bin) {
@@ -1410,12 +2889,28 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
     int nSubSamples = configs_from_json.nSubSamples;
     const Double_t SAME_SIGN_PAIR_FACTOR =
         configs_from_json.SAME_SIGN_PAIR_FACTOR;
+    const std::string PAIR_COMBINATORICS_MODE =
+        configs_from_json.PAIR_COMBINATORICS_MODE;
+    const PairInputSelectionContract PAIR_INPUT_SELECTION_CONTRACT =
+        configs_from_json.PAIR_INPUT_SELECTION_CONTRACT;
     bool DRAW_CORRELATION_PLOTS = configs_from_json.DRAW_CORRELATION_PLOTS;
     std::string base_dir = configs_from_json.base_dir;
     std::vector<std::string> vTUNES = configs_from_json.vTUNES;
     std::string complete_root_dir;
-    if (strcmp(FLAVOUR, "BEAUTY") == 0) { complete_root_dir = configs_from_json.bbBarDir; }
-    if (strcmp(FLAVOUR, "CHARM")  == 0) { complete_root_dir = configs_from_json.ccBarDir; }
+    std::string heavySector;
+    if (strcmp(FLAVOUR, "BEAUTY") == 0) {
+        complete_root_dir = configs_from_json.bbBarDir;
+        heavySector = "beauty";
+    }
+    if (strcmp(FLAVOUR, "CHARM")  == 0) {
+        complete_root_dir = configs_from_json.ccBarDir;
+        heavySector = "charm";
+    }
+    if (heavySector.empty()) {
+        throw std::runtime_error(
+            "Unsupported flavour in calculateYieldsVector: " +
+            std::string(FLAVOUR ? FLAVOUR : "<null>"));
+    }
     std::string complete_root_dir_sub_samples;
     if (strcmp(FLAVOUR, "BEAUTY") == 0) { complete_root_dir_sub_samples = configs_from_json.bbBarDir_subSamples; }
     if (strcmp(FLAVOUR, "CHARM")  == 0) { complete_root_dir_sub_samples = configs_from_json.ccBarDir_subSamples; }
@@ -1438,6 +2933,32 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
     std::map<std::string, std::vector<std::vector<std::vector<Double_t>>>> mapYields;
     std::map<std::string, std::vector<std::vector<std::vector<Double_t>>>> mapYieldsErrors;
     std::map<std::string, std::vector<std::vector<std::vector<Double_t>>>> mapYieldsRatioErrors;
+    bool observedPairSelectionMode = false;
+    PairSelectionProjectionMode commonPairSelectionMode =
+        PairSelectionProjectionMode::kLegacyPlotRecutsV1;
+    const auto observePairSelectionMode =
+        [&](PairSelectionProjectionMode mode, const std::string& path) {
+            if (!observedPairSelectionMode) {
+                commonPairSelectionMode = mode;
+                observedPairSelectionMode = true;
+                std::cout
+                    << "PAIR_INPUT_SELECTION mode="
+                    << PairSelectionProjectionModeName(mode)
+                    << " first_file=" << path << std::endl;
+                std::cout
+                    << "PAIR_COMBINATORICS"
+                    << " selection_mode="
+                    << PairSelectionProjectionModeName(mode)
+                    << " configured_mode=" << PAIR_COMBINATORICS_MODE
+                    << " same_sign_factor=" << SAME_SIGN_PAIR_FACTOR
+                    << " first_file=" << path
+                    << " status=PASS" << std::endl;
+                return;
+            }
+            RequireMatchingPairSelectionModes(
+                commonPairSelectionMode, mode,
+                "one plotting invocation (file " + path + ")");
+        };
 
     // TODO: make vTUNES.size into nTUNES, like in the plotting functions
 
@@ -1482,6 +3003,24 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
         // I need to make sure things are propagated with Inaki's improvements to the subsampling
         // (based on older code)
         const Int_t nAssociates = static_cast<Int_t>(vTriggerAssociateOSandSS.size());
+        const ReferenceAssociateSelection referenceSelection =
+            ResolveReferenceAssociateSelection(
+                vTriggerAssociateOSandSS,
+                std::string(FLAVOUR) + " trigger '" + trigger + "'");
+        const std::vector<Int_t> associateProcessingOrder =
+            ReferenceFirstAssociateOrder(
+                vTriggerAssociateOSandSS.size(),
+                referenceSelection.index);
+        std::cout
+            << "REFERENCE_ASSOCIATE"
+            << " flavour=" << FLAVOUR
+            << " trigger=" << trigger
+            << " pdg=" << referenceSelection.pdg
+            << " index=" << referenceSelection.index
+            << " os_file="
+            << vTriggerAssociateOSandSS[referenceSelection.index].OS
+            << " source=generated_pair_registry"
+            << std::endl;
         std::vector<std::vector<std::vector<Double_t>>> vYields;
         std::vector<std::vector<std::vector<Double_t>>> vYieldsErrors;
         std::vector<std::vector<std::vector<Double_t>>> vYieldsRatioErrors;
@@ -1506,8 +3045,23 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
             std::cout << std::endl;
 
 
-            // Loop over ASSOCIATES
-            for (Int_t j=0; j<nAssociates; j++) {
+            const auto thresholdsForTune =
+                configs_from_json.multiplicityPercentileThresholdsByTune.find(
+                    TUNE);
+            if (thresholdsForTune ==
+                configs_from_json
+                    .multiplicityPercentileThresholdsByTune.end()) {
+                throw std::runtime_error(
+                    "Missing frozen multiplicity definition for tune " +
+                    TUNE);
+            }
+            const std::map<double, double>& percentileToMultiplicity =
+                thresholdsForTune->second;
+
+            // Process the metadata-selected reference first so every block
+            // ratio has its matching denominator, while retaining the
+            // configured associate order in all stored/drawn vectors.
+            for (const Int_t j : associateProcessingOrder) {
 
 
                 TriggerAssociateOSandSS fileNamesOSandSS = vTriggerAssociateOSandSS[j];
@@ -1516,31 +3070,43 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                 const std::string ssFilePath = ResolveCompleteRootFile(base_dir, TUNE, complete_root_dir, fileNamesOSandSS.SS);
                 TFile *OStree = OpenRootFileOrThrow(osFilePath);
                 TFile *SStree = OpenRootFileOrThrow(ssFilePath);
+                const PairSelectionProjectionMode osSelectionMode =
+                    ValidatePairInputSelectionContract(
+                        OStree, PAIR_INPUT_SELECTION_CONTRACT,
+                        complete_root_dir, osFilePath);
+                const PairSelectionProjectionMode ssSelectionMode =
+                    ValidatePairInputSelectionContract(
+                        SStree, PAIR_INPUT_SELECTION_CONTRACT,
+                        complete_root_dir, ssFilePath);
+                RequireMatchingPairSelectionModes(
+                    osSelectionMode, ssSelectionMode,
+                    "central OS/SS pair " + osFilePath + " / " +
+                    ssFilePath);
+                ValidatePairCombinatoricsForSelectionMode(
+                    osSelectionMode, PAIR_COMBINATORICS_MODE,
+                    SAME_SIGN_PAIR_FACTOR,
+                    PAIR_INPUT_SELECTION_CONTRACT, osFilePath);
+                ValidatePairCombinatoricsForSelectionMode(
+                    ssSelectionMode, PAIR_COMBINATORICS_MODE,
+                    SAME_SIGN_PAIR_FACTOR,
+                    PAIR_INPUT_SELECTION_CONTRACT, ssFilePath);
+                ValidateConfiguredPairFileIdentity(
+                    OStree, osSelectionMode,
+                    PAIR_INPUT_SELECTION_CONTRACT,
+                    complete_root_dir, fileNamesOSandSS, true,
+                    heavySector, osFilePath);
+                ValidateConfiguredPairFileIdentity(
+                    SStree, ssSelectionMode,
+                    PAIR_INPUT_SELECTION_CONTRACT,
+                    complete_root_dir, fileNamesOSandSS, false,
+                    heavySector, ssFilePath);
+                observePairSelectionMode(osSelectionMode, osFilePath);
+                observePairSelectionMode(ssSelectionMode, ssFilePath);
                 std::cout << std::endl;
 
-                // This is where we calculate the multiplicity
-                TH1D *hSummedMultiplicity = GetObjectOrThrow<TH1D>(OStree, "summed MULTIPLICITY", osFilePath);
-                Double_t fullIntegral = 0;
-                fullIntegral = hSummedMultiplicity->Integral();
-                std::set<double> requestedPercentiles;
-                std::map<double,double> percentileToMultiplicity;
-
-                for (const auto& bin : vBinsFromTHnSparse)
-                {
-                    requestedPercentiles.insert(bin.multiplicityMin);
-                    requestedPercentiles.insert(bin.multiplicityMax);
-                }
-
-                for (double percentile : requestedPercentiles)
-                {
-                    percentileToMultiplicity[percentile] =
-                        GetMultiplicityThreshold(
-                            hSummedMultiplicity,
-                            percentile
-                        );
-                }
-
-                // Debug
+                // The percentile thresholds were derived once from the
+                // tune-level central multiplicity identity and validated
+                // against every configured central and block pair file.
                 if (VERBOSE) {
                     for (const auto& [percentile, mult] : percentileToMultiplicity) {
                         std::cout
@@ -1550,8 +3116,6 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                         << std::endl;
                     }
                 }
-
-                DeleteInputObject(OStree, hSummedMultiplicity);
                 THnSparseD *hCorrelationsOS =
                     GetObjectOrThrow<THnSparseD>(OStree, "hCorrelations", osFilePath);
                 THnSparseD *hCorrelationsSS =
@@ -1623,10 +3187,14 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     // Apply cuts to THnSparses
                     // Retreive the TH1 hDPhiOS/SS and hTrPtOS/SS objects as before
                     // Maybe add one element 'binLabel' to the BinsFromTHnSparse struct?
-                    TH1D *hDPhiOS = GetCorrelationHistograms(hCorrelationsOS, cuts, "OS");
-                    TH1D *hDPhiSS = GetCorrelationHistograms(hCorrelationsSS, cuts, "SS");
-                    TH1D *hTrPtOS = GetTriggerPtHistograms(hTrKinematicsOS, cuts, "OS");
-                    TH1D *hTrPtSS = GetTriggerPtHistograms(hTrKinematicsSS, cuts, "SS");
+                    TH1D *hDPhiOS = GetCorrelationHistograms(
+                        hCorrelationsOS, cuts, osSelectionMode, "OS");
+                    TH1D *hDPhiSS = GetCorrelationHistograms(
+                        hCorrelationsSS, cuts, ssSelectionMode, "SS");
+                    TH1D *hTrPtOS = GetTriggerPtHistograms(
+                        hTrKinematicsOS, cuts, osSelectionMode, "OS");
+                    TH1D *hTrPtSS = GetTriggerPtHistograms(
+                        hTrKinematicsSS, cuts, ssSelectionMode, "SS");
                     const Double_t centralTriggerCount = hTrPtOS->Integral();
 
                     if (VERBOSE) {
@@ -1717,6 +3285,62 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             const std::string ssSubSamplePath = ResolveSubSampleRootFile(complete_root_dir_sub_samples, TUNE, l, fileNamesOSandSS.SS);
                             TFile *OStree_subSamples = OpenRootFileOrThrow(osSubSamplePath);
                             TFile *SStree_subSamples = OpenRootFileOrThrow(ssSubSamplePath);
+                            const PairSelectionProjectionMode
+                                osSubsampleSelectionMode =
+                                    ValidatePairInputSelectionContract(
+                                        OStree_subSamples,
+                                        PAIR_INPUT_SELECTION_CONTRACT,
+                                        complete_root_dir,
+                                        osSubSamplePath);
+                            const PairSelectionProjectionMode
+                                ssSubsampleSelectionMode =
+                                    ValidatePairInputSelectionContract(
+                                        SStree_subSamples,
+                                        PAIR_INPUT_SELECTION_CONTRACT,
+                                        complete_root_dir,
+                                        ssSubSamplePath);
+                            RequireMatchingPairSelectionModes(
+                                osSubsampleSelectionMode,
+                                ssSubsampleSelectionMode,
+                                "subsample OS/SS pair " +
+                                    osSubSamplePath + " / " +
+                                    ssSubSamplePath);
+                            RequireMatchingPairSelectionModes(
+                                osSelectionMode,
+                                osSubsampleSelectionMode,
+                                "central/subsample pair " +
+                                    osFilePath + " / " +
+                                    osSubSamplePath);
+                            ValidatePairCombinatoricsForSelectionMode(
+                                osSubsampleSelectionMode,
+                                PAIR_COMBINATORICS_MODE,
+                                SAME_SIGN_PAIR_FACTOR,
+                                PAIR_INPUT_SELECTION_CONTRACT,
+                                osSubSamplePath);
+                            ValidatePairCombinatoricsForSelectionMode(
+                                ssSubsampleSelectionMode,
+                                PAIR_COMBINATORICS_MODE,
+                                SAME_SIGN_PAIR_FACTOR,
+                                PAIR_INPUT_SELECTION_CONTRACT,
+                                ssSubSamplePath);
+                            ValidateConfiguredPairFileIdentity(
+                                OStree_subSamples,
+                                osSubsampleSelectionMode,
+                                PAIR_INPUT_SELECTION_CONTRACT,
+                                complete_root_dir, fileNamesOSandSS, true,
+                                heavySector, osSubSamplePath);
+                            ValidateConfiguredPairFileIdentity(
+                                SStree_subSamples,
+                                ssSubsampleSelectionMode,
+                                PAIR_INPUT_SELECTION_CONTRACT,
+                                complete_root_dir, fileNamesOSandSS, false,
+                                heavySector, ssSubSamplePath);
+                            observePairSelectionMode(
+                                osSubsampleSelectionMode,
+                                osSubSamplePath);
+                            observePairSelectionMode(
+                                ssSubsampleSelectionMode,
+                                ssSubSamplePath);
 
                             // Retreive the histograms from the correlations THnSparse (Δφ, Δη, TrPt, AsPt, multiplicity)
                             // THnSparseD *hAsKinematics = (THnSparseD*)OStree->Get("hAsKinematics");
@@ -1728,10 +3352,22 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             // Apply cuts to THnSparses
                             // Retreive the TH1 hDPhiOS/SS and hTrPtOS/SS objects as before
                             // Maybe add one element 'binLabel' to the BinsFromTHnSparse struct?
-                            TH1D *hDPhiOS_subSamples = GetCorrelationHistograms(hCorrelationsOS_subSamples, cuts);
-                            TH1D *hDPhiSS_subSamples = GetCorrelationHistograms(hCorrelationsSS_subSamples, cuts);
-                            TH1D *hTrPtOS_subSamples = GetTriggerPtHistograms(hTrKinematicsOS_subSamples, cuts);
-                            TH1D *hTrPtSS_subSamples = GetTriggerPtHistograms(hTrKinematicsSS_subSamples, cuts);
+                            TH1D *hDPhiOS_subSamples =
+                                GetCorrelationHistograms(
+                                    hCorrelationsOS_subSamples, cuts,
+                                    osSubsampleSelectionMode);
+                            TH1D *hDPhiSS_subSamples =
+                                GetCorrelationHistograms(
+                                    hCorrelationsSS_subSamples, cuts,
+                                    ssSubsampleSelectionMode);
+                            TH1D *hTrPtOS_subSamples =
+                                GetTriggerPtHistograms(
+                                    hTrKinematicsOS_subSamples, cuts,
+                                    osSubsampleSelectionMode);
+                            TH1D *hTrPtSS_subSamples =
+                                GetTriggerPtHistograms(
+                                    hTrKinematicsSS_subSamples, cuts,
+                                    ssSubsampleSelectionMode);
                             subTriggerCounts.push_back(
                                 hTrPtOS_subSamples->Integral());
 
@@ -1774,7 +3410,14 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             }
 
                             subYieldValues.push_back(subYield);
-                            subRatioValues.push_back(safeRatio(vSubYields[i][j][k][l - 1], vSubYields[i][0][k][l - 1]));
+                            if (static_cast<std::size_t>(j) !=
+                                referenceSelection.index) {
+                                subRatioValues.push_back(safeRatio(
+                                    vSubYields[i][j][k][l - 1],
+                                    vSubYields[i]
+                                              [referenceSelection.index][k]
+                                              [l - 1]));
+                            }
 
                             // Free memory
                             delete hDPhiOS_subSamples;
@@ -1792,82 +3435,162 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                         } // Loop over SUBSAMPLES
 
 
-                        const SubsampleStatistics yieldStats = calculateSubsampleStatistics(subYieldValues);
-                        const SubsampleStatistics yieldRatioStats = calculateSubsampleStatistics(subRatioValues);
-                        const bool yieldCoverageComplete =
-                            yieldStats.nValues == nSubSamples;
-                        const bool ratioCoverageComplete =
-                            j == 0 || yieldRatioStats.nValues == nSubSamples;
-                        if (!yieldCoverageComplete) {
-                            const std::string message =
-                                Form("Expected %d finite yield subsamples for %s/%s (%s, %s), got %d",
-                                     nSubSamples, FLAVOUR, TUNE.c_str(),
-                                     fileNamesOSandSS.OS.c_str(),
-                                     binFromTHnSparse.hDPhi.c_str(),
-                                     yieldStats.nValues);
-                            if (!SUBSAMPLE_COVERAGE_AUDIT) {
-                                throw std::runtime_error(message);
-                            }
-                            ++mapYieldsAndErrors.subsampleCoverageFailures;
-                            std::cout << "SUBSAMPLE_COVERAGE_FAILURE kind=yield "
-                                      << message << std::endl;
+                        const bool isReference =
+                            static_cast<std::size_t>(j) ==
+                            referenceSelection.index;
+                        const SubsampleStatistics yieldStats =
+                            calculateSubsampleStatistics(subYieldValues);
+                        const SubsampleStatistics yieldRatioStats =
+                            calculateSubsampleStatistics(subRatioValues);
+                        const Double_t referenceYield =
+                            vYields[i][referenceSelection.index][k];
+                        const Double_t centralRatio = isReference
+                            ? std::numeric_limits<Double_t>::quiet_NaN()
+                            : safeRatio(yield, referenceYield);
+                        const bool requirePositiveFinalError =
+                            requiredByCanvas || drawThisCorrelation;
+                        const SubsampleTechnicalCoverage technicalCoverage =
+                            EvaluateSubsampleTechnicalCoverage(
+                                yield, referenceYield, centralRatio,
+                                yieldStats, yieldRatioStats,
+                                nSubSamples, isReference,
+                                requirePositiveFinalError);
+                        // Copy the structured-binding element before capture:
+                        // capturing it directly is a C++20 extension, while
+                        // the supported ROOT/ACLiC toolchain is C++17.
+                        const std::string triggerName = trigger;
+                        const auto recordCoverageFailure =
+                            [&](const char* kind,
+                                const std::string& message) {
+                                ++mapYieldsAndErrors
+                                      .subsampleCoverageFailures;
+                                std::cout
+                                    << "SUBSAMPLE_COVERAGE_FAILURE"
+                                    << " kind=" << kind
+                                    << " flavour=" << FLAVOUR
+                                    << " trigger=" << triggerName
+                                    << " tune=" << TUNE
+                                    << " pair="
+                                    << fileNamesOSandSS.OS
+                                    << " bin="
+                                    << binFromTHnSparse.hDPhi
+                                    << " message=" << message
+                                    << std::endl;
+                                if (!SUBSAMPLE_COVERAGE_AUDIT) {
+                                    throw std::runtime_error(message);
+                                }
+                            };
+                        if (!technicalCoverage.yieldComplete) {
+                            recordCoverageFailure(
+                                "yield",
+                                Form("yield technical coverage incomplete: "
+                                     "central=%.17g n=%d/%d stdDev=%.17g "
+                                     "stdError=%.17g positive_required=%s",
+                                     yield, yieldStats.nValues, nSubSamples,
+                                     yieldStats.stdDev,
+                                     yieldStats.stdError,
+                                     (requirePositiveFinalError ||
+                                              technicalCoverage
+                                                  .yieldNonDegenerate
+                                          ? "true"
+                                          : "false")));
                         }
-                        if (!ratioCoverageComplete) {
-                            const std::string message =
-                                Form("Expected %d finite baryon/meson subsample ratios for %s/%s (%s, %s), got %d",
-                                     nSubSamples, FLAVOUR, TUNE.c_str(),
-                                     fileNamesOSandSS.OS.c_str(),
-                                     binFromTHnSparse.hDPhi.c_str(),
-                                     yieldRatioStats.nValues);
-                            if (!SUBSAMPLE_COVERAGE_AUDIT) {
-                                throw std::runtime_error(message);
-                            }
-                            ++mapYieldsAndErrors.subsampleCoverageFailures;
-                            std::cout << "SUBSAMPLE_COVERAGE_FAILURE kind=ratio "
-                                      << message << std::endl;
+                        if (!technicalCoverage.ratioComplete) {
+                            recordCoverageFailure(
+                                "ratio",
+                                Form("ratio technical coverage incomplete: "
+                                     "central=%.17g reference=%.17g "
+                                     "n=%d/%d stdDev=%.17g "
+                                     "stdError=%.17g positive_required=%s",
+                                     centralRatio, referenceYield,
+                                     yieldRatioStats.nValues,
+                                     nSubSamples,
+                                     yieldRatioStats.stdDev,
+                                     yieldRatioStats.stdError,
+                                     (requirePositiveFinalError ||
+                                              technicalCoverage
+                                                  .ratioNonDegenerate
+                                          ? "true"
+                                          : "false")));
                         }
                         const Double_t unavailableError =
                             std::numeric_limits<Double_t>::quiet_NaN();
-                        Double_t yieldError = yieldCoverageComplete
+                        Double_t yieldError =
+                            technicalCoverage.yieldComplete
                             ? yieldStats.stdError : unavailableError;
-                        Double_t yieldRatioError = ratioCoverageComplete
-                            ? yieldRatioStats.stdError : unavailableError;
+                        Double_t yieldRatioError =
+                            !isReference &&
+                                    technicalCoverage.ratioComplete
+                                ? yieldRatioStats.stdError
+                                : unavailableError;
                         std::ostringstream blockTriggerCounts;
                         for (std::size_t block = 0;
                              block < subTriggerCounts.size(); ++block) {
                             if (block != 0) blockTriggerCounts << ",";
                             blockTriggerCounts << subTriggerCounts[block];
                         }
-                        const Double_t referenceYield =
-                            vYields[i][0][k];
                         std::cout
                             << "UNCERTAINTY_MATRIX"
                             << " flavour=" << FLAVOUR
                             << " trigger=" << trigger
                             << " tune=" << TUNE
                             << " associate=" << fileNamesOSandSS.associateOS
+                            << " associate_pdg="
+                            << fileNamesOSandSS.associateOSPdg
+                            << " reference_pdg="
+                            << referenceSelection.pdg
+                            << " reference_index="
+                            << referenceSelection.index
+                            << " is_reference="
+                            << (static_cast<std::size_t>(j) ==
+                                        referenceSelection.index
+                                    ? "true"
+                                    : "false")
                             << " bin=" << binFromTHnSparse.hDPhi
                             << " central_triggers=" << centralTriggerCount
                             << " block_triggers=" << blockTriggerCounts.str()
                             << " finite_yields=" << yieldStats.nValues
                             << " finite_ratios="
-                            << (j == 0 ? nSubSamples
-                                       : yieldRatioStats.nValues)
+                            << (isReference
+                                    ? "NA"
+                                    : std::to_string(
+                                          yieldRatioStats.nValues))
                             << " central_yield=" << yield
                             << " yield_sem=" << yieldError
                             << " reference_yield=" << referenceYield
-                            << " ratio_sem=" << yieldRatioError
+                            << " ratio_sem="
+                            << (isReference
+                                    ? "NA"
+                                    : Form("%.17g", yieldRatioError))
+                            << " yield_degenerate="
+                            << (!technicalCoverage.yieldNonDegenerate
+                                    ? "true"
+                                    : "false")
+                            << " ratio_degenerate="
+                            << (isReference
+                                    ? "NA"
+                                    : (technicalCoverage.ratioNonDegenerate
+                                           ? "false"
+                                           : "true"))
+                            << " yield_status="
+                            << (technicalCoverage.yieldComplete
+                                    ? "PASS"
+                                    : "FAIL")
+                            << " ratio_status="
+                            << (isReference
+                                    ? "NOT_APPLICABLE"
+                                    : (technicalCoverage.ratioComplete
+                                           ? "PASS"
+                                           : "FAIL"))
                             << " denominator_status="
-                            << (std::isfinite(referenceYield) &&
-                                        referenceYield != 0.0
-                                    ? "valid"
-                                    : "invalid")
+                            << (isReference
+                                    ? "NOT_APPLICABLE"
+                                    : (std::isfinite(referenceYield) &&
+                                               referenceYield != 0.0
+                                           ? "valid"
+                                           : "invalid"))
                             << " status="
-                            << (yieldCoverageComplete &&
-                                        ratioCoverageComplete &&
-                                        std::isfinite(yieldError) &&
-                                        (j == 0 ||
-                                         std::isfinite(yieldRatioError))
+                            << (technicalCoverage.complete
                                     ? "PASS"
                                     : "FAIL")
                             << std::endl;
@@ -1876,10 +3599,18 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                                       << " mean=" << yieldStats.mean
                                       << " stdDev=" << yieldStats.stdDev
                                       << " stdError=" << yieldStats.stdError << std::endl;
-                            std::cout << "subsample ratio stats n=" << yieldRatioStats.nValues
-                                      << " mean=" << yieldRatioStats.mean
-                                      << " stdDev=" << yieldRatioStats.stdDev
-                                      << " stdError=" << yieldRatioStats.stdError << std::endl;
+                            if (isReference) {
+                                std::cout
+                                    << "subsample ratio stats"
+                                    << " status=NOT_APPLICABLE"
+                                    << " reason=structural_reference_self_ratio"
+                                    << std::endl;
+                            } else {
+                                std::cout << "subsample ratio stats n=" << yieldRatioStats.nValues
+                                          << " mean=" << yieldRatioStats.mean
+                                          << " stdDev=" << yieldRatioStats.stdDev
+                                          << " stdError=" << yieldRatioStats.stdError << std::endl;
+                            }
                             std::cout << std::endl;
                         }
                         if (static_cast<std::size_t>(i) >= vYieldsErrors.size()) { vYieldsErrors.resize(i + 1); }
@@ -1895,7 +3626,13 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                         if (static_cast<std::size_t>(k) >= vYieldsRatioErrors[i][j].size()) { vYieldsRatioErrors[i][j].resize(k + 1); }
                         vYieldsRatioErrors[i][j][k] = yieldRatioError; 
                         if (VERBOSE) {
-                            std::cout << "vYieldsRatioErrors[" << i << "][" << j << "][" << k << "] = " << vYieldsRatioErrors[i][j][k] << std::endl;
+                            std::cout << "vYieldsRatioErrors[" << i << "][" << j << "][" << k << "] = ";
+                            if (isReference) {
+                                std::cout << "NOT_APPLICABLE";
+                            } else {
+                                std::cout << vYieldsRatioErrors[i][j][k];
+                            }
+                            std::cout << std::endl;
                             std::cout << std::endl;
                         }
 
@@ -2033,6 +3770,10 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
         mapYields[trigger] = std::move(vYields);
         mapYieldsErrors[trigger] = std::move(vYieldsErrors);
         mapYieldsRatioErrors[trigger] = std::move(vYieldsRatioErrors);
+        mapYieldsAndErrors.mapReferenceAssociateIndex[trigger] =
+            referenceSelection.index;
+        mapYieldsAndErrors.mapReferenceMesonPdg[trigger] =
+            referenceSelection.pdg;
 
         // Retreive the vYields for this trigger
         mapYieldsAndErrors.mapYields = mapYields;
@@ -2093,7 +3834,8 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
 
     // Values will be drawn from a 2D vector of TH1D with number of ASSOCIATES bins
     // This way the TUNE and DEPENDENCY can be looped over, while the data points will be the ASSOCIATES
-    TH1D *vHists[nTUNES][nDependencies];
+    std::vector<std::vector<TH1D*>> vHists(
+        nTUNES, std::vector<TH1D*>(nDependencies, nullptr));
     if (VERBOSE) {
         std::cout << "number of associates: " << nAssociates << std::endl;
         std::cout << std::endl;
@@ -2224,6 +3966,8 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
                 const Double_t yieldError = CALCULATE_ERRORS ? vYieldsAndErrors.vYieldsErrors[i][j][k] : 0.0;
                 SetPlotPointOrThrow(
                     vHists[i][k], 1+j, yield, yieldError, CALCULATE_ERRORS,
+                    canvasConfigs.setLogy,
+                    canvasConfigs.yMinAxis, canvasConfigs.yMaxAxis,
                     Form("%s yield, tune=%s, associate=%s, bin=%s",
                          FLAVOUR, TUNE.c_str(), associateName.c_str(), binFromTHnSparse.hDPhi.c_str()));
                 ApplyTuneVisualStyle(vHists[i][k], TUNE, true);
@@ -2322,7 +4066,8 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
 
     // Values will be drawn from a 2D vector of TH1D with number of ASSOCIATES bins
     // This way the TUNE and DEPENDENCY can be looped over, while the data points will be the ASSOCIATES
-    TH1D *vHists[nDependencies][nTUNES];
+    std::vector<std::vector<TH1D*>> vHists(
+        nDependencies, std::vector<TH1D*>(nTUNES, nullptr));
     if (VERBOSE) {
         std::cout << "number of associates: " << nAssociates << std::endl;
         std::cout << std::endl;
@@ -2453,6 +4198,8 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
                     : 0.0;
                 SetPlotPointOrThrow(
                     vHists[k][iTUNE], 1+j, tuneRatio, tuneRatioError, CALCULATE_ERRORS,
+                    canvasConfigs.setLogy,
+                    canvasConfigs.yMinAxis, canvasConfigs.yMaxAxis,
                     Form("%s tune ratio %s/%s, associate=%s, bin=%s",
                          FLAVOUR, vTUNES[indexNominatorTUNE].c_str(),
                          vTUNES[indexDenominatorTUNE].c_str(), associateName.c_str(),
@@ -2548,6 +4295,19 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
 
     Int_t nTUNES = vTUNES.size();
     Int_t nAssociates = vTriggerAssociateOSandSS.size();
+    const ReferenceAssociateSelection drawingReference =
+        ResolveReferenceAssociateSelection(
+            vTriggerAssociateOSandSS,
+            std::string(FLAVOUR) + " baryon/meson canvas trigger '" +
+                canvasConfigs.TriggerToUse + "'");
+    if (drawingReference.index !=
+            vYieldsAndErrors.referenceAssociateIndex ||
+        drawingReference.pdg != vYieldsAndErrors.referenceMesonPdg) {
+        throw std::runtime_error(
+            "Baryon/meson drawing reference differs from the reference used "
+            "for block uncertainties");
+    }
+    const std::size_t referenceIndex = drawingReference.index;
     Int_t nDependencies;
     // We could have calculated more bins than we want to draw here, in that case, take the (non-empty) vector vBinsToIgnore
     // and subtract the template size
@@ -2562,7 +4322,8 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
 
     // Values will be drawn from a 2D vector of TH1D with number of DEPENDENCIES bins
     // This way the TUNE and ASSOCIATE can be looped over, while the data points will be the DEPENDENCIES
-    TH1D *vHists[nTUNES][nAssociates];
+    std::vector<std::vector<TH1D*>> vHists(
+        nTUNES, std::vector<TH1D*>(nAssociates, nullptr));
     if (VERBOSE) { 
         std::cout << "number of dependencies: " << nDependencies << std::endl;
         std::cout << std::endl; 
@@ -2671,12 +4432,16 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                 
                 vHists[i][j] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, i, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, i, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
                 const Double_t baryonMesonRatio =
-                    safeRatio(vYieldsAndErrors.vYields[i][j][k], vYieldsAndErrors.vYields[i][0][k]);
+                    safeRatio(
+                        vYieldsAndErrors.vYields[i][j][k],
+                        vYieldsAndErrors.vYields[i][referenceIndex][k]);
                 const Double_t baryonMesonRatioError =
                     CALCULATE_ERRORS ? vYieldsAndErrors.vYieldsRatioErrors[i][j][k] : 0.0;
                 SetPlotPointOrThrow(
                     vHists[i][j], 1+k-skippedBins, baryonMesonRatio,
                     baryonMesonRatioError, CALCULATE_ERRORS,
+                    canvasConfigs.setLogy,
+                    canvasConfigs.yMinAxis, canvasConfigs.yMaxAxis,
                     Form("%s baryon/meson ratio, tune=%s, associate=%s, bin=%s",
                          FLAVOUR, TUNE.c_str(), associateName.c_str(),
                          binFromTHnSparse.hDPhi.c_str()));
@@ -2774,6 +4539,20 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
     auto vYieldsAndErrors = YieldsAndErrorsForGivenTrigger(canvasConfigs.TriggerToUse, mapYieldsAndErrors, CALCULATE_ERRORS);
 
     Int_t nAssociates = vTriggerAssociateOSandSS.size();
+    const ReferenceAssociateSelection drawingReference =
+        ResolveReferenceAssociateSelection(
+            vTriggerAssociateOSandSS,
+            std::string(FLAVOUR) +
+                " baryon/meson tune-ratio canvas trigger '" +
+                canvasConfigs.TriggerToUse + "'");
+    if (drawingReference.index !=
+            vYieldsAndErrors.referenceAssociateIndex ||
+        drawingReference.pdg != vYieldsAndErrors.referenceMesonPdg) {
+        throw std::runtime_error(
+            "Baryon/meson tune-ratio reference differs from the reference "
+            "used for block uncertainties");
+    }
+    const std::size_t referenceIndex = drawingReference.index;
     Int_t nDependencies;
     // We could have calculated more bins than we want to draw here, in that case, take the (non-empty) vector vBinsToIgnore
     // and subtract the template size
@@ -2789,7 +4568,8 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
 
     // Values will be drawn from a 2D vector of TH1D with number of DEPENDENCIES bins
     // This way the TUNE and ASSOCIATE can be looped over, while the data points will be the DEPENDENCIES
-    TH1D *vHists[nAssociates][nTUNES];
+    std::vector<std::vector<TH1D*>> vHists(
+        nAssociates, std::vector<TH1D*>(nTUNES, nullptr));
     // TODO: verbose
     // std::cout << "number of dependencies: " << nDependencies << std::endl;
 
@@ -2888,13 +4668,14 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                 if (VERBOSE) { std::cout << "starting loop over nominator TUNE: " << indexNominatorTUNE << std::endl; }
                 
                 vHists[j][iTUNE] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, j, k-skippedBins, iTUNE, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, j, k-skippedBins, iTUNE, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
-                /*
-                vHists[j][iTUNE]->SetBinContent(1+k-skippedBins, (vYieldsAndErrors.vYields[indexNominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexNominatorTUNE][0][k])
-                                            / (vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k] / vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k]));
-                */
-                
-                const Double_t numeratorBaryonMesonRatio = safeRatio(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k], vYieldsAndErrors.vYields[indexNominatorTUNE][0][k]);
-                const Double_t denominatorBaryonMesonRatio = safeRatio(vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k], vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k]);
+                const Double_t numeratorBaryonMesonRatio = safeRatio(
+                    vYieldsAndErrors.vYields[indexNominatorTUNE][j][k],
+                    vYieldsAndErrors.vYields[indexNominatorTUNE]
+                                             [referenceIndex][k]);
+                const Double_t denominatorBaryonMesonRatio = safeRatio(
+                    vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k],
+                    vYieldsAndErrors.vYields[indexDenominatorTUNE]
+                                             [referenceIndex][k]);
                 const Double_t tuneDoubleRatio = safeRatio(numeratorBaryonMesonRatio, denominatorBaryonMesonRatio);
                 const Double_t tuneDoubleRatioError = CALCULATE_ERRORS
                     ? propagateRatioError(
@@ -2905,6 +4686,8 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                 SetPlotPointOrThrow(
                     vHists[j][iTUNE], 1+k-skippedBins, tuneDoubleRatio,
                     tuneDoubleRatioError, CALCULATE_ERRORS,
+                    canvasConfigs.setLogy,
+                    canvasConfigs.yMinAxis, canvasConfigs.yMaxAxis,
                     Form("%s baryon/meson tune double ratio %s/%s, associate=%s, bin=%s",
                          FLAVOUR, vTUNES[indexNominatorTUNE].c_str(),
                          vTUNES[indexDenominatorTUNE].c_str(), associateName.c_str(),
@@ -2984,8 +4767,25 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
 } // drawBalancingBaryonMesonRatioPlotsTUNERatios()
 
 
+int freezeMultiplicityBoundaries_THnSparse(const char* configuration) {
+    try {
+        CONFIGS configs_from_json = readConfig(configuration);
+        WriteMultiplicityBoundaryReceipt(configs_from_json);
+        std::cout
+            << "MULTIPLICITY_BOUNDARY_FREEZE status=PASS configuration="
+            << configuration << std::endl;
+        return 0;
+    } catch (const std::exception& error) {
+        std::cerr
+            << "MULTIPLICITY_BOUNDARY_FREEZE status=FAIL error="
+            << error.what() << std::endl;
+        return 1;
+    }
+}
+
+
 // Run macro with 
-// >> root 'improvedPlotting.C("configuration_multiplicity.json")'
+// >> root 'improvedPlotting_THnSparse.C("configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json")'
 int improvedPlotting_THnSparse(const char* configuration) {
 
     // Read configurations defined by user in configuration.json
@@ -3078,8 +4878,11 @@ int improvedPlotting_THnSparse(const char* configuration) {
             // TODO: maybe add in global canvas settings an option to add a (custom) legend?
             const auto miniCanvasIt = cMiniCanvasMap.find(cMiniCanvas);
             if (miniCanvasIt == cMiniCanvasMap.end() || miniCanvasIt->second == nullptr) {
-                std::cout << "- ERROR: did not find " << cMiniCanvas << " in global canvas settings" << std::endl;
-                continue; 
+                std::cerr << "- ERROR: required mini canvas " << cMiniCanvas
+                          << " is absent or was not requested as a mini pad"
+                          << std::endl;
+                delete globalCanvas;
+                return 18;
             }
             globalCanvas->cd();
             miniCanvasIt->second->Draw();
@@ -3089,6 +4892,9 @@ int improvedPlotting_THnSparse(const char* configuration) {
         }
     } // Loop over global canvas settings
     std::cout << "Global canvases drawn without problems (...?)" << std::endl;
+    // Publish the frozen machine-readable boundary definition only after the
+    // complete requested plotting workflow has succeeded.
+    WriteMultiplicityBoundaryReceipt(configs_from_json);
 
     // TODO: in existing functions, add the TUNE[i]/TUNE[j] subratio plots
     // (including error propagation)

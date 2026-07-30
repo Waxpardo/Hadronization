@@ -1,5 +1,11 @@
 # Final Analysis Plotting
 
+> Legacy independent-versus-combined comparison path. These macros consume
+> dated charge-combined analysis files and are not the raw-v5
+> charge-resolved publication balancing pipeline. A paper figure from this
+> directory must remain explicitly labeled legacy/inclusive until its
+> provenance and scientific role are reviewed.
+
 This directory contains the final comparison macros that read the reduced analysis outputs under `AnalyzedData` and write the summary plots under `PlottingScripts/FinalAnalysis/Plots`. The current directory has two source macros. `Plot_MultiplicityDistributions_TwoSamples.C` compares multiplicity distributions between two analyzed samples. `Plot_SelectedParticleYields_IndependentVsCombined.C` compares selected per-event particle yields and draws the independent-over-combined ratio in the same canvas.
 
 ## Inputs

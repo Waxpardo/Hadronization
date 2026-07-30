@@ -1,287 +1,506 @@
-# Plotting Scripts
+# Plotting scripts
 
-This directory contains the plotting layer for the hadronization analysis. The current paper workflow combines Paul's THnSparse plotting macro for the pair-correlation analysis with a raw-tree inclusive macro for single-particle kinematic spectra, and treats `MONASH`, `JUNCTIONS`, and `CLOSEPACKING` as equal tunes.
+The publication plotting path preserves Paul Veen's merged THnSparse
+architecture and adds fail-closed input, selection, uncertainty, styling, and
+provenance checks. New central plots must start with
+`improvedPlotting_THnSparse.C`; `improvedPlotting.C` and earlier plotting
+macros remain legacy.
 
-## Paper THnSparse Inputs
+The complete production-to-paper runbook is
+[`../REPRODUCIBILITY.md`](../REPRODUCIBILITY.md). A rendered canvas is not
+publication evidence unless its central and block inputs, numerical records,
+and visual review all pass.
 
-Paul's plotting macro does not read the raw PYTHIA ROOT trees directly. It reads pair-named ROOT files produced by:
+## Active components
+
+- `improvedPlotting_THnSparse.C`: balancing yields, tune ratios,
+  baryon-to-reference-meson ratios, tune double ratios, and configured
+  OS/SS/correlation canvases.
+- `TunePlotStyle.h`: sole tune-style source.
+- `configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json`: full paper
+  selection.
+- `configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json`:
+  reduced/smoke selection with the same scientific and error contracts.
+- `run_paper_plots.sh`: supported command-line entry point.
+- `Plot_InclusiveKinematicSpectra_Raw.C`: inclusive raw-v5 kinematics.
+- `Plot_MultiplicityDistribution_PercentileBoundaries.C`: multiplicity
+  distribution and class boundaries.
+- `validate_subsample_log.py` and input/coverage validators: machine-readable
+  statistical and provenance checks.
+
+`Plot_KinematicSpectra_THnSparse.C` is diagnostic because its objects are
+trigger/pair conditioned. It is not an inclusive single-particle spectrum.
+
+The full and reduced/smoke configurations are canonical metadata-v2,
+ordered-pair, factor-one configurations. They are not compatible with the
+checked-in legacy selector. Until a sealed canonical selector is activated,
+canonical `all`, `paper`, `smoke`, and THnSparse targets must fail closed;
+only the explicitly named `legacy-regression` target may read the dated
+metadata-free sample, and its products are never paper candidates.
+
+## Pair input contract
+
+The macro reads Paul-compatible pair files containing:
 
 ```text
-AnalysisScripts/status_analysis_THnSparse_qq.C
+summed MULTIPLICITY        TH1D
+hTrKinematics              THnSparseD
+hAsKinematics              THnSparseD
+hCorrelations              THnSparseD
 ```
 
-Those pair files contain:
+For the new pipeline, those objects are produced once per raw file for all
+300 signed pair definitions by
+`AnalysisScripts/status_analysis_THnSparse_qq.C`, then merged from a sealed
+canonical manifest.
+
+Canonical merged layout:
 
 ```text
-summed MULTIPLICITY
-hTrKinematics
-hAsKinematics
-hCorrelations
+AnalyzedData/complete_root_<TAG>_MONASH/
+AnalyzedData/complete_root_<TAG>_JUNCTIONS/
+AnalyzedData/complete_root_<TAG>_CLOSEPACKING/
+AnalyzedData/SUBSAMPLES_<TAG>/combined_root_subSamples_<TUNE>/combined_root_1/
+...
+AnalyzedData/SUBSAMPLES_<TAG>/combined_root_subSamples_<TUNE>/combined_root_10/
 ```
 
-The root-level scripts create the expected input layout:
+The macro also supports the established nested tune layouts. Relative paths
+resolve from `HADRONIZATION_BASE` or the checkout; absolute paths are accepted
+only for explicit private diagnostics.
+
+## Dataset selector
+
+`../config/dataset_selector.json` is the single active data switch. Validate
+and show it:
 
 ```bash
-./submit_status_analysis.sh ALL 100 Job700
-./merge_root_files.sh ALL Job700 21_06_2026
-./make_subsamples.sh
+python3 tools/dataset_selector.py validate
+python3 tools/dataset_selector.py show
+python3 tools/dataset_selector.py shell
 ```
 
-For the full 100-job THnSparse inputs, use the hybrid merge backend if plain `hadd` or serial object merging is too slow. It applies chunked `hadd` only to the heavy charm-trigger pair files and leaves the rest on the object-preserving merger:
+The runner evaluates the `shell` output. It null-safely exports
+`HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE`,
+`HADRONIZATION_CANONICAL_MANIFEST`, `HADRONIZATION_PRODUCTION_ROOT`,
+`HADRONIZATION_ANALYSIS_ROOT`, `HADRONIZATION_RAW_BASE`,
+`HADRONIZATION_ANALYZED_DATA_BASE`, `HADRONIZATION_COMPLETE_ROOT_TAG`, and
+`HADRONIZATION_SUBSAMPLE_BASE`. Canonical entries must populate the manifest
+and production/analysis roots; legacy entries export empty values for fields
+that do not exist rather than the literal string `None`.
+
+The checked-in active dataset is still the regression-only:
+
+```text
+/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH
+/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS
+/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING
+/data/alice/ipardoza/Hadronization/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH
+/data/alice/ipardoza/Hadronization/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS
+/data/alice/ipardoza/Hadronization/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING
+```
+
+These paths are shown only to identify the real Nikhef regression data. The
+JSON configs themselves remain checkout-relative:
+
+```json
+"base_dir": "AnalyzedData",
+"bb_bar_complete_root_dir": "complete_root_21_06_2026",
+"cc_bar_complete_root_dir": "complete_root_21_06_2026",
+"bb_bar_complete_root_dir_sub_samples": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
+"cc_bar_complete_root_dir_sub_samples": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
+"nSubSamples": 10
+```
+
+The `21_06_2026` sample is structurally coherent legacy evidence, not raw-v5.
+Do not describe it as using the new trigger-origin selector or no-0.5
+semantics. Add a publication-ineligible `status: canonical_candidate`
+selector entry after a new campaign has been sealed, analyzed, merged, and
+validated. Use it to generate boundary, robustness, and review evidence.
+Switch it to `status: canonical` only after the exact final scientific review
+and project-owner authorization validate; all candidate plots must then be
+regenerated.
+The legacy selector has `publication_eligible: false`; canonical paper
+targets must refuse it and direct the operator to the explicitly named legacy
+regression target.
+
+`USE_DATASET_SELECTOR=false` is diagnostic-only and must be recorded in the
+run log.
+
+## Selection contract: apply every cut exactly once
+
+Both JSON configs declare:
+
+```text
+v2_metadata_or_tagged_legacy_recuts_v1
+```
+
+The rule is:
+
+1. New `paul_pair_objects_primary_ground_v2` pair files already contain the
+   exact trigger `pT > 1 GeV/c`, associate `pT > 0.15 GeV/c`, and
+   `|eta| <= 4` selection from upstream analysis. The plotter validates the
+   complete metadata and does not re-cut pT/eta. It applies only the requested
+   multiplicity projection.
+2. Metadata-free files are accepted only when their complete-root tag exactly
+   equals `complete_root_21_06_2026`, under the standalone
+   `legacy-regression` diagnostic with `tagged_legacy_recuts_only_v1`,
+   `legacy_identical_ss_half_v1`, and factor `0.5`. Matching Paul’s stable
+   main, the configured trigger and associate pT/eta cuts are applied to the
+   correlation numerator and the configured trigger cuts are applied to the
+   trigger-normalization denominator. The checked-in factor-one paper configs
+   reject all metadata-free files.
+3. Partial/mixed metadata, inconsistent role thresholds, inactive-looking
+   config fields, or any undeclared upper-pT selection are fatal.
+
+This prevents double selection in raw-v5 while keeping Paul’s exact historical
+projection reproducible. The diagnostic does not change the canonical
+metadata-v2 central-value path. The executable test is
+`Validation/TestPlotProjectionCuts.C`.
+
+Individual non-full phi recuts are rejected when they would make the
+correlation numerator and trigger denominator inconsistent.
+
+## Full and reduced configs
+
+The full config retains:
+
+- grouped beauty and charm triggers;
+- multiple trigger choices;
+- `TriggerToUse` per canvas;
+- MONASH, JUNCTIONS, CLOSEPACKING;
+- config-driven mini and global canvases;
+- combined beauty/charm layouts;
+- several numerator tunes over one denominator;
+- ordinary yields and baryon-to-reference-meson ratios.
+
+The complete-root config is a deliberately small validation subset: B+ and D+
+trigger groups, their signed reference mesons, Lambda-b/Lambda-c associates,
+all three tunes, and the 1--10% activity class. It contains 16 mini canvases
+feeding two global canvases. Sigma-b and duplicate standalone canvases are
+excluded; Sigma-b remains review-blocked and is not evidence needed by this
+smoke test. The config retains all 11 ordered activity definitions so the
+percentile partition and frozen-boundary contract are still validated. It
+has the same grouped schema, `TriggerToUse`, selection contract, and ten-block
+error prescription as the full config. It is not a no-error target and it is
+not a substitute for the full paper run.
+
+Both set:
+
+```json
+"calculate_errors": true,
+"nSubSamples": 10
+```
+
+## Final-plot provenance
+
+Every output-producing `run_paper_plots.sh` target is wrapped by
+`tools/final_plot_provenance.py`. The wrapper snapshots the declared output
+roots before ROOT runs and accepts only regenerated canvases with a complete
+PDF/PNG/ROOT-macro triplet. It then writes:
+
+- one adjacent `<output>.provenance.json` sidecar for every PDF, PNG, and
+  generated ROOT macro; and
+- one run receipt under the output root's `provenance/` directory.
+
+The run receipt binds the exact command and target, UTC timestamp, plotting
+commit/tree, generator/configuration hashes and payload, selection/cut/schema
+versions, analysis commit, canonical-manifest hash, all ten block-manifest
+hashes, every configured ROOT-input hash, the
+`multiplicity_boundary_receipt_v1.json` hash, and every output checksum.
+Canonical pair inputs must carry valid
+`hf_merged_pair_directory_provenance_v2` and checksum inventories whose
+copied source manifests match the sealed central or corresponding block
+manifest. Canonical raw plots recheck every sealed-manifest file size and
+SHA-256. Missing inputs, stale hashes, incomplete output triplets, a missing
+boundary receipt, or a tracked-dirty release checkout fail the plotting
+command after ROOT and prevent promotion.
+
+`canonical_candidate` uses the same sealed canonical inputs and numerical
+checks but records `canonical-validation-pair` or
+`canonical-validation-raw` provenance with
+`publication_eligible=false`. This is the required non-circular review stage,
+not a way to promote an unauthorised result.
+
+Verify any artifact before copying it into the paper:
 
 ```bash
-MERGE_BACKEND=hybrid HADD_JOBS=1 HADD_FINAL_JOBS=4 HADD_CHUNK_SIZE=10 ./merge_root_files.sh ALL Job700 21_06_2026
-MERGE_BACKEND=hybrid HADD_JOBS=1 HADD_FINAL_JOBS=4 HADD_CHUNK_SIZE=10 ./make_subsamples.sh
+python3 tools/final_plot_provenance.py verify \
+  --checkout "$PWD" \
+  --sidecar PlottingScripts/Plots/THnSparse/<plot>_PDF.pdf.provenance.json
 ```
 
-For a smaller validation run, change the number of raw files passed to `submit_status_analysis.sh` and use distinct output tags when merging and subsampling. The submit wrapper sorts available files by numeric job id and selects the first N completed files for each tune; it does not require the selected files to be exactly job ids `0` through `N-1`.
+`legacy-regression` receives the same output checks, but its sidecars always
+set `publication_eligible=false` and explicitly state that canonical and
+block manifests are unavailable.
+`PLOT_PROVENANCE_DEVELOPMENT=true` permits a tracked-dirty checkout for
+development diagnostics only; it is recorded and is not the release
+procedure.
 
-`make_subsamples.sh` uses non-overlapping shuffled partitions by default. With no arguments, it runs the final paper default: all three tunes, ten independent 10-job subsamples per tune, `Job700` input, and `SUBSAMPLES_700` output. This covers all 100 jobs per tune.
-
-When using distinct validation tags, copy one of the JSON configs and update:
-
-```text
-bb_bar_complete_root_dir
-cc_bar_complete_root_dir
-bb_bar_complete_root_dir_sub_samples
-cc_bar_complete_root_dir_sub_samples
-```
-
-Then run the paper runner with the copied config through `THNSPARSE_CONFIG`, `THNSPARSE_COMPLETE_ROOT_CONFIG`, or `MULTIPLICITY_CONFIG`.
-
-Expected complete-root inputs:
-
-```text
-AnalyzedData/complete_root_21_06_2026_MONASH
-AnalyzedData/complete_root_21_06_2026_JUNCTIONS
-AnalyzedData/complete_root_21_06_2026_CLOSEPACKING
-```
-
-Expected subsample inputs for both checked-in paper configs:
-
-```text
-AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH
-AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS
-AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING
-```
-
-The plotting macro accepts both this flat layout and a nested tune layout. Checked-in JSON paths are checkout-relative. Set `HADRONIZATION_BASE=/data/alice/ipardoza/Hadronization` (or another checkout root) to resolve them from elsewhere; absolute paths remain supported for private diagnostic configs.
-
-Before plotting the production, validate more than the directory counts:
-
-```bash
-./PlottingScripts/run_paper_plots.sh validate-inputs
-```
-
-This opens every central and subsample ROOT file, checks the required object types, verifies identical 56-file inventories, proves that each tune's ten manifests partition job IDs 0--99 exactly once, and compares all required objects in representative final plotted pairs with the ten-subsample union. It writes `PlottingScripts/validation/final_thnsparse_input_validation.json`, which is the provenance manifest for the central production that otherwise has no `jobs_used.txt`.
-
-## Main Paper Runner
-
-Use the paper runner from the repository root:
-
-```bash
-./PlottingScripts/run_paper_plots.sh list
-./PlottingScripts/run_paper_plots.sh smoke
-./PlottingScripts/run_paper_plots.sh
-```
-
-Targets:
-
-- `smoke`: multiplicity-boundary plot, kinematic spectra, plus a reduced THnSparse canvas selection with ten-subsample errors.
-- `thnsparse-complete-root`: reduced THnSparse selection; central values come from complete-root and errors from the same ten subsamples.
-- `thnsparse`: full paper THnSparse selection with ten-subsample errors.
-- `audit-subsamples`: non-drawing full scan that reports every observable with fewer than ten finite subsamples and exits nonzero when deficiencies exist.
-- `validate-inputs`: validate ROOT objects, configured OS/SS pairs, manifests, and central/subsample consistency.
-- `multiplicity-boundaries`: charged-particle multiplicity distribution with percentile boundary lines.
-- `multiplicity-compact`: MONASH-only compact multiplicity-percentile plot.
-- `multiplicity-spectrum`: shared raw `N_{ch}` spectrum with `JUNCTIONS/MONASH` and `CLOSEPACKING/MONASH` ratio panel plus a MONASH percentile-boundary inset.
-- `kinematic-spectra`: inclusive raw-tree pT, eta, phi, and multiplicity spectra.
-- `all` / `paper`: multiplicity boundaries, kinematic spectra, plus the full THnSparse config.
-
-The runner resolves the repository root from `HADRONIZATION_BASE` or from its own location, sources `setupEnv.sh` when present, and runs ROOT in batch mode.
-
-The kinematic spectra target reads the generated raw HF files by default:
-
-```bash
-./PlottingScripts/run_paper_plots.sh kinematic-spectra
-./PlottingScripts/run_paper_plots.sh multiplicity-spectrum
-./PlottingScripts/run_paper_plots.sh multiplicity-compact
-```
-
-Useful overrides:
-
-```bash
-KINEMATIC_RAW_BASE=RootFiles/HF \
-KINEMATIC_OUTPUT_DIR=PlottingScripts/Plots/KinematicSpectraFull \
-./PlottingScripts/run_paper_plots.sh kinematic-spectra
-```
-
-The default kinematic output is shape-normalized. Set `KINEMATIC_NORMALIZE=false` to draw bin-width-normalized counts. Set `KINEMATIC_STRICT=false` to skip missing tunes instead of treating them as errors.
-
-The paper kinematic spectra are inclusive single-particle spectra. They are filled directly from the generated raw tree with exact PDG-ID matching and no trigger/associate pair conditioning. In the new canonical producer, stored associates satisfy `pT > 0.15 GeV/c` and `|eta| <= 4`; the plotting macro adds no extra kinematic cuts. Absolute `phi` is wrapped to `[-pi, pi)`. Legacy raw files may encode the earlier boundary convention and must be labelled by schema.
-
-`Plot_KinematicSpectra_THnSparse.C` is kept for diagnostic trigger/associate and correlation checks, but those spectra are pair-conditioned by construction and are not the final inclusive single-particle kinematic spectra.
-
-Kinematic spectra are written into subdirectories by plot family:
-
-```text
-PlottingScripts/Plots/KinematicSpectra/Multiplicity
-PlottingScripts/Plots/KinematicSpectra/Inclusive/pT
-PlottingScripts/Plots/KinematicSpectra/Inclusive/eta
-PlottingScripts/Plots/KinematicSpectra/Inclusive/phi
-```
-
-Event-level spectra that are independent of the selected heavy-flavour species are intentionally drawn once. In particular, charged multiplicity comes from the same HF event sample for charm and beauty, so the paper macro writes one shared multiplicity plot per tune rather than duplicate charm and beauty versions. The shared multiplicity spectrum is limited to `N_{ch} <= 170` and includes a lower ratio panel for `JUNCTIONS/MONASH` and `CLOSEPACKING/MONASH`. Its main panel also carries a compact MONASH percentile-boundary inset and a short energy/acceptance annotation below the legend.
-
-Across the new canonical production plots, `N_{ch}` means direct charged primary `e^{+-}`, `mu^{+-}`, `pi^{+-}`, `K^{+-}`, and `p`/anti-`p` with positive PYTHIA status `81-89`, `pT > 0.15 GeV/c`, and `|eta| <= 4` in pp at `sqrt(s)=14 TeV`. This is not called “prompt.” Multiplicity percentile labels are interpreted from low to high activity as `90-100% -> ... -> 0-1%`.
-
-## THnSparse Configs
-
-Full config with subsampling:
-
-```text
-PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json
-```
-
-Reduced-scope config for smoke tests:
-
-```text
-PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json
-```
-
-Both configs set `calculate_errors=true`, use the same central complete-root production and ten disjoint subsamples, and share the grouped-trigger/`TriggerToUse`/multi-numerator-tune schema. The smoke config has a reduced trigger/correlation and final-global-canvas scope; it is not a no-error configuration. Because the current production is sparse, its THnSparse selection explicitly validates the one activity class (`1-10%`) that has ten finite subsamples across every reduced beauty/charm pair and tune.
-
-Both configs use the same tunes and event-activity percentile classes, ordered
-from lowest to highest multiplicity:
+Both order nonintegrated activity classes from low to high:
 
 ```text
 90-100, 80-90, 70-80, 60-70, 50-60, 40-50,
 30-40, 20-30, 10-20, 1-10, 0-1
 ```
 
-The full config keeps all classes active and strict. An exhaustive real-input
-coverage audit found 610 incomplete yield/ratio cases: 540 beauty and 70
-charm. Only 468 of 1,152 logged yield/ratio statistics had `n=10`; details are
-in `validation/final_thnsparse_subsample_coverage.json`. Consequently the full
-paper target currently stops with an error, and no full THnSparse output should
-be promoted. The smoke canvases list all classes except `1-10%` in
-`bins_to_ignore`; the macro skips subsample calculation only for a bin unused
-by every output canvas. `subsample_error_bins_to_exclude` remains empty, so
-the smoke run validates the plotting/error plumbing without fabricating an
-uncertainty for any drawn point.
+The THnSparse stage freezes these tune-specific integer thresholds in
+`multiplicity_boundary_receipt_v1.json` under its configured output
+directory. The receipt binds the config SHA-256, central source path/hash,
+complete histogram identity (edges, contents, errors, and `Sumw2`),
+thresholds, achieved fractions, and disjoint/exhaustive integer partition.
+The standalone multiplicity-boundary plot requires and revalidates this
+receipt in strict mode, so run the matching THnSparse target first. It rejects
+nonfinite/negative bins, nonconsecutive integer centers, nonzero
+underflow/overflow, and failed quantiles. Visual boundaries are drawn at
+`threshold+0.5`; the adjacent higher-activity class begins at
+`threshold+1`.
 
-All checked-in paths are relative to the Hadronization checkout unless they are `NONE`. Absolute paths are accepted by the resolver for private overrides but are not required by the defaults.
+The old regression sample does not have ten finite trigger normalizations for
+every full-config observable. Its exhaustive audit found 610 incomplete
+yield/ratio cases (540 beauty, 70 charm). The explicit noncanonical
+`legacy-regression` overlay uses the reduced selection whose 1--10% class
+historically proved input/error plumbing; it does not prove full-paper
+coverage. Canonical full/smoke targets refuse the legacy selector before ROOT
+runs.
 
-Central values are calculated from the full complete-root files. For each ordinary balancing yield, the error is
+A new canonical dataset must rerun the exhaustive matrix. Every point
+reachable from a final canvas needs ten finite estimates; an excluded smoke
+bin cannot support a paper statement.
+
+## Statistics
+
+Central values come from the full complete-root union. For ten disjoint block
+estimates:
 
 ```text
-SEM = sample standard deviation(yield_1, ..., yield_10) / sqrt(10)
+SEM = sqrt(sum((x_k - mean(x))^2) / (10*9))
 ```
 
-with the sample standard deviation using `N-1`. Baryon/meson ratios are formed separately inside every subsample before the SEM is calculated. JUNCTIONS/MONASH and CLOSEPACKING/MONASH uncertainties combine the independently generated tune uncertainties in quadrature; baryon/meson tune double ratios use the matching associate ratio uncertainty from each tune. The same OS/SS cuts and trigger normalization are applied to central and subsample calculations. The canonical ordered-pair producer uses `same_sign_pair_factor = 1.0`; the legacy identical-species factor of 0.5 is not applied. Non-finite denominators and zero uncertainties on final plotted points stop the run with an explicit error.
+Equivalently, SEM is the sample standard deviation using `N-1`, divided by
+`sqrt(10)`.
 
-The multiplicity-integrated angular-correlation panels also use the ten
-disjoint blocks. Their OS and SS curves carry a per-`Delta phi`-bin SEM after
-block-local trigger normalisation. The OS-minus-SS curve is subtracted inside
-each block before its SEM is computed, so OS/SS covariance is retained. Native
-ROOT projection errors are not mixed into these paper panels. The integrated
-class is selected by its explicit `0-100%` bounds, not by assuming a
-particular JSON array position.
+The four drawing paths are:
 
-After a verbose full run, validate and summarise every subsample-statistics line:
+- `drawBalancingPlots`;
+- `drawBalancingPlotsTUNERatios`;
+- `drawBalancingBaryonMesonRatioPlots`;
+- `drawBalancingBaryonMesonRatioPlotsTUNERatios`.
 
-```bash
-./PlottingScripts/validate_subsample_log.py \
-  logs/final_paper_plots_thnsparse.log \
-  --json-output PlottingScripts/validation/final_thnsparse_uncertainty_validation.json
-```
+Their common rules are:
 
-The validator requires `n=10`, finite statistics, and positive SEM for every
-non-degenerate statistic. It permits only an exactly self-divided meson
-baseline ratio to have zero spread, rejects placeholder `1e-10` errors and
-missing ROOT inputs or zero trigger normalizations, and extracts charm/beauty
-yield and baryon/meson examples for all tunes. Configured coverage exclusions
-do not emit a statistics record and cannot be referenced by a final canvas.
+- normalize OS and SS with the matching trigger count inside each block;
+- subtract OS-minus-SS inside each block;
+- integrate a block before estimating yield SEM;
+- form a baryon/reference-meson ratio inside each block;
+- retain within-tune numerator/denominator covariance;
+- propagate independently generated tune uncertainties independently;
+- in tune double ratios, use the matching associate ratio uncertainty for
+  both numerator and denominator tunes;
+- canonical ordered-pair inputs use same-sign factor 1.0;
+- reject zero/non-finite denominators, NaN, infinity, incomplete finite
+  blocks, and placeholder `1e-10` errors.
 
-`TunePlotStyle.h` is the source of truth for tune appearance:
+Multiplicity-integrated angular-correlation panels also use per-Delta-phi-bin
+block SEM. OS-minus-SS is formed inside a block before the bin SEM. Native
+ROOT projection errors are not mixed into the final panels.
+
+ROOT `Sumw2` remains useful for input validation but is not the covariance
+estimator for normalized or nonlinear observables.
+
+## Tune style
+
+`TunePlotStyle.h` is authoritative:
 
 | Tune | Colour | Marker | Line |
-|---|---:|---:|---:|
+|---|---|---:|---|
 | MONASH | black | 20 | solid |
 | JUNCTIONS | blue+1 | 21 | dashed |
 | CLOSEPACKING | magenta+1 | 22 | style 7 |
 
-Tune-ratio curves use the numerator tune style. Species or multiplicity line styles may refine the line pattern, but never replace the tune colour or marker.
+Tune ratios use the numerator tune style. Species or multiplicity line styles
+may add a distinction but cannot override tune colour/marker. Legends show
+both line and marker. Stale JSON colours for known tunes cannot contradict
+the header.
 
-## Direct ROOT Commands
+## Supported runner
 
-Reduced-scope smoke test (complete-root central values plus subsample SEM):
+List targets:
 
 ```bash
-root -l -b <<'ROOT'
-.L PlottingScripts/improvedPlotting_THnSparse.C+
-improvedPlotting_THnSparse("PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json")
-.q
-ROOT
+./PlottingScripts/run_paper_plots.sh list
 ```
 
-Full THnSparse plotting:
+Key targets:
+
+- `validate-inputs`: validate configured pairs, ROOT object types,
+  central/block inventories, provenance, disjointness, and all configured
+  final-pair block-union consistency;
+- `audit-subsamples`: scan the full configured observable space without
+  silently dropping deficient points;
+- `smoke` / `quick`: reduced-scope pair and multiplicity-boundary plots with
+  the same ten-block SEM; this target deliberately omits the full
+  300-million-event inclusive raw-kinematics scan;
+- `thnsparse-complete-root`: reduced THnSparse selection;
+- `thnsparse`: strict full THnSparse selection;
+- `multiplicity-boundaries`: percentile boundary plot;
+- `multiplicity-spectrum`: shared raw multiplicity spectrum and tune/MONASH
+  ratios;
+- `kinematic-spectra`: inclusive raw-tree pT, eta, phi, and multiplicity;
+- `legacy-regression`: exact, nonpublication stable-main Paul recut
+  projection;
+- `all` / `paper`: current complete paper suite.
+
+The `final-multiplicity` and `final-yields` targets are retained
+`legacy-unsealed` comparisons. Their provenance is always
+`publication_eligible=false`; despite the historical “FinalAnalysis” directory
+name, they are not canonical paper targets.
+
+Run in this order:
 
 ```bash
-root -l -b <<'ROOT'
-.L PlottingScripts/improvedPlotting_THnSparse.C+
-improvedPlotting_THnSparse("PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json")
-.q
-ROOT
-```
+mkdir -p logs
+jq empty \
+  PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json \
+  PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json
 
-Multiplicity-boundary plot:
+./PlottingScripts/run_paper_plots.sh validate-inputs
+./PlottingScripts/run_paper_plots.sh audit-subsamples
 
-```bash
-root -l -b -q 'PlottingScripts/Plot_MultiplicityDistribution_PercentileBoundaries.C'
-```
+VERBOSE=true ./PlottingScripts/run_paper_plots.sh smoke \
+  2>&1 | tee logs/final_paper_plots_smoke.log
 
-Kinematic spectra:
+VERBOSE=true ./PlottingScripts/run_paper_plots.sh thnsparse \
+  2>&1 | tee logs/final_paper_plots_thnsparse.log
 
-```bash
-root -l -b <<'ROOT'
-.L PlottingScripts/Plot_InclusiveKinematicSpectra_Raw.C+
-Plot_InclusiveKinematicSpectra_Raw("RootFiles/HF",
-                                   "PlottingScripts/Plots/KinematicSpectra",
-                                   true, true)
-.q
-ROOT
-```
-
-Raw multiplicity spectrum only:
-
-```bash
 ./PlottingScripts/run_paper_plots.sh multiplicity-spectrum
+./PlottingScripts/run_paper_plots.sh all
 ```
 
-Compact MONASH percentile-boundary plot:
+Do not treat smoke success as full success. If the full run fails the
+coverage gate, stop promotion.
 
-```bash
-./PlottingScripts/run_paper_plots.sh multiplicity-compact
-```
+For a canonical dataset, input validation requires the immutable all-tune
+source manifests and explicit selected-tune merge provenance, checks every
+configured final OS/SS pair, and confirms its central values close against
+the ten blocks. The upstream canonical merge must also retain
+`canonical_merge_contract.json` and the per-tune
+`pair_block_closure_<TAG>_<TUNE>.log` evidence from
+`Validation/validate_pair_block_closure.sh`; those logs cover all 300 pair
+identities and stored contents plus `Sumw2`, not merely the plotted subset.
 
-## Outputs
+## Log validation
 
-The current paper runner writes under:
+The verbose log contains:
 
 ```text
-PlottingScripts/Plots/THnSparse
-PlottingScripts/Plots/THnSparseCompleteRoot
-PlottingScripts/Plots/MultiplicityDistribution
-PlottingScripts/Plots/KinematicSpectra
+subsample yield stats
+subsample ratio stats
+stdError=
 ```
 
-These are generated artifacts and are ignored by Git. Regenerate them from the macros instead of committing them.
+Validate it:
 
-The 78 formerly tracked July validation artifacts removed from version control are listed exactly in `PlottingScripts/validation/removed_tracked_plot_inventory.txt`.
+```bash
+./PlottingScripts/validate_subsample_log.py \
+  logs/final_paper_plots_thnsparse.log \
+  --json-output \
+PlottingScripts/validation/final_thnsparse_uncertainty_validation.json
+```
 
-The final full THnSparse run writes the integrated beauty and charm yield canvases, the combined multiplicity-dependent yield canvas, the combined multiplicity-dependent baryon/meson canvas, and the configured MONASH OS/SS correlation canvas under `PlottingScripts/Plots/THnSparse`. The reduced validation products are written under `PlottingScripts/Plots/THnSparseCompleteRoot` and are not paper deliverables. `PlottingScripts/PAPER_FIGURE_PROVENANCE.md` maps the current paper draft's `includegraphics` entries to generators and outputs.
+Require the expected record count, `n=10`, finite estimates, and positive SEM
+for every nondegenerate final point. Investigate a genuinely zero observable;
+do not silently accept, hide, or replace it.
 
-## Older Plotting Code
+## Inclusive raw kinematics
 
-The directory still contains older plotting macros such as `improvedPlotting.C`, `combinedCanvasPlots.C`, `B_Balancing_GeneralPlotting.C`, and `PlottingWizard.C`. They are kept for reference and older studies, but the current paper pipeline should start from `run_paper_plots.sh` and the THnSparse configs above.
+The active inclusive single-particle macro reads raw production directly:
+
+```bash
+./PlottingScripts/run_paper_plots.sh kinematic-spectra
+```
+
+It uses exact signed-PDG matching and raw-v5 provenance. It is not
+trigger/associate conditioned. The producer retains the central acceptance;
+the plotting macro does not add a hidden upper-pT selection. Absolute phi is
+displayed in `[-pi, pi)`, while Paul's correlation Delta-phi convention is
+`[-pi/2, 3pi/2)`.
+
+For `status: canonical`, the macro reads file membership only from the
+checksum-bound, sealed canonical manifest and verifies its freeze summary,
+raw-validation receipt, seal, file sizes, unique contiguous slots, and ten
+equal modulo blocks. It supports equal tune exposure `N >= 100` when
+`N % 10 == 0`; an expanded final campaign is therefore not silently truncated
+to the initial 100-file/tune stage. Unlisted reserves or other ROOT files
+under the production tree are not discovered, and every selected file's size
+and SHA-256 must match its sealed manifest row. Recursive tune-directory
+discovery remains available only as the explicitly requested
+`legacy_recursive_diagnostic` mode and must not be used for a canonical paper
+result.
+
+`Validate_THnSparse_Production.C` and the multiplicity-boundary macro consume
+the same selected analyzed-data base and complete-root tag. Metadata-v2
+central/block files are accepted only with the exact upstream selection
+contract. Metadata-free files are accepted only for the exact configured
+legacy tag. Canonical merged directories contain the immutable all-tune
+source manifest (`3*N` central rows, `3*N/10` block rows); merge provenance
+records the explicit selected-tune filter. The fixed 300 count in this stage
+is the generated pair-file registry, not the number of selected raw inputs.
+
+The shared multiplicity plot uses `NCH_HADRONISATION_V1`, not “prompt” or
+minimum-bias charged multiplicity. A display-axis limit is not an event
+selection and must be distinguishable from ROOT overflow accounting.
+
+## Optional pads and global canvases
+
+Every optional mini-pad pointer starts as `nullptr`. A drawing function returns
+`nullptr` if no mini pad was requested. Global composition must fail closed on
+a required missing pad and never dereference it. Every plotted
+`value +/- uncertainty` envelope must be finite, must stay positive on a
+logarithmic y axis, and must fit inside the configured y-axis range.
+Empty or clipped one-bin smoke pads are validation defects, not final layouts.
+
+## Outputs and provenance
+
+Generated outputs are ignored:
+
+```text
+PlottingScripts/Plots/THnSparse/
+PlottingScripts/Plots/THnSparseCompleteRoot/
+PlottingScripts/Plots/MultiplicityDistribution/
+PlottingScripts/Plots/KinematicSpectra/
+```
+
+Do not commit bulk PDF, PNG, or ROOT-generated macro files. The 78 stale
+tracked July validation artifacts remain removed and are inventoried in
+`validation/removed_tracked_plot_inventory.txt`.
+
+The full deliverables include:
+
+```text
+global_balancing_plots_multiplicity_{PDF,PNG,MACRO}
+global_balancing_baryon_over_meson_ratio_multiplicity_{PDF,PNG,MACRO}
+configured final OS/SS correlation outputs
+```
+
+Reduced equivalents are validation only. Every promoted plot needs a
+sidecar/index row with code/config/input/manifest/block hashes, exact command,
+timestamp, generated checksum, paper-copy path, and paper consumer. Inspect
+every rendered PDF page for error bars, tune styles, legends, multiplicity
+order, clipping, and empty pads before promotion.
+
+## Legacy plotting
+
+The following remain historical/diagnostic:
+
+- `improvedPlotting.C`;
+- `combinedCanvasPlots.C`;
+- `B_Balancing_GeneralPlotting.C`;
+- `PlottingWizard.C`;
+- old pT JSON configs with personal absolute paths;
+- `Balancing_and_Sampling/` plot/error code.
+
+Their old absolute paths, charge combinations, native errors, or sampling
+rules are not silently upgraded. Retain them for reproduction and label any
+paper figure that still depends on them until it has a validated active
+replacement.

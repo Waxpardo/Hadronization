@@ -2,9 +2,14 @@
 // Plot_InclusiveKinematicSpectra_Raw.C
 //
 // Draw inclusive single-particle kinematic spectra directly from the generated
-// raw RootFiles/HF trees. This deliberately does not use hTrKinematics or
-// hAsKinematics from the THnSparse pair files, because those objects are
-// trigger/associate conditioned and are not inclusive particle spectra.
+// raw trees. Canonical raw-v5 files are selected exclusively through the
+// sealed canonical manifest and read through their
+// authoritative heavy-particle vectors and event weights; the legacy
+// recursive ID/PT/ETA/PHI reader remains an explicitly labelled diagnostic
+// path.
+// This deliberately does not use hTrKinematics or hAsKinematics from the
+// THnSparse pair files, because those objects are trigger/associate
+// conditioned and are not inclusive particle spectra.
 //
 // Default usage from the Hadronization repository root:
 //
@@ -12,18 +17,22 @@
 //   .L PlottingScripts/Plot_InclusiveKinematicSpectra_Raw.C+
 //   Plot_InclusiveKinematicSpectra_Raw("RootFiles/HF",
 //                                      "PlottingScripts/Plots/KinematicSpectra",
-//                                      true, true)
+//                                      true, true,
+//                                      "selector")
 //   .q
 //   ROOT
 // ---------------------------------------------------------------------------
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <memory>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -41,16 +50,31 @@
 #include "TString.h"
 #include "TStyle.h"
 #include "TSystem.h"
+#include "TTree.h"
 
 #include "HistogramErrorUtils.h"
 #include "TunePlotStyle.h"
+#include "../SimulationScripts/GeneratedHeavyFlavourRegistry.h"
+#include "../SimulationScripts/HeavyFlavourUtils.h"
+#include "../SimulationScripts/Sha256.h"
+
+#if __has_include(<nlohmann/json.hpp>)
+#include <nlohmann/json.hpp>
+#elif __has_include("nlohmann/json.hpp")
+#include "nlohmann/json.hpp"
+#else
+#error "Could not find nlohmann/json.hpp. Source setupEnv.sh before compiling."
+#endif
+
+using json = nlohmann::json;
 
 namespace InclusiveRawKinematics {
 
 constexpr double kMultiplicityXMax = 170.0;
 constexpr double kMultiplicityRatioYMin = 0.0;
 constexpr double kMultiplicityRatioYMax = 4.0;
-constexpr int kSharedMultiplicityLineStyle = 1;
+constexpr double kInclusivePtConfiguredMaxGeV = 7000.0;
+constexpr double kInclusivePtDisplayMaxGeV = 50.0;
 
 struct MultiplicityPercentileClass {
   double minPercentile;
@@ -75,9 +99,172 @@ struct TuneData {
   std::string tune;
   int nFiles = 0;
   Long64_t nEvents = 0;
+  Long64_t nSelectedParticles = 0;
+  double selectedParticleWeight = 0.0;
+  std::string inputContract;
   std::map<std::string, HistSet> spectra;
   TH1D* multiplicity = nullptr;
 };
+
+enum class RawInputMode {
+  kCanonicalV5,
+  kLegacy
+};
+
+enum class DatasetInputMode {
+  kCanonicalManifest,
+  kLegacyRecursiveDiagnostic
+};
+
+std::vector<std::string> TuneNames();
+
+struct RawInputContract {
+  RawInputMode mode = RawInputMode::kLegacy;
+  bool hasEventWeight = false;
+  std::string schema;
+};
+
+const char* RawInputModeName(RawInputMode mode)
+{
+  return mode == RawInputMode::kCanonicalV5
+           ? "canonical raw-v5 heavy-vector mode"
+           : "legacy ID/PT/ETA/PHI compatibility mode";
+}
+
+const char* DatasetInputModeName(DatasetInputMode mode)
+{
+  return mode == DatasetInputMode::kCanonicalManifest
+           ? "sealed_canonical_manifest"
+           : "legacy_recursive_diagnostic";
+}
+
+bool HasBranch(TTree* tree, const char* name)
+{
+  return tree && tree->GetBranch(name);
+}
+
+bool HasAllBranches(TTree* tree, const std::vector<const char*>& names)
+{
+  return std::all_of(names.begin(), names.end(),
+                     [tree](const char* name) { return HasBranch(tree, name); });
+}
+
+bool HasAnyBranch(TTree* tree, const std::vector<const char*>& names)
+{
+  return std::any_of(names.begin(), names.end(),
+                     [tree](const char* name) { return HasBranch(tree, name); });
+}
+
+bool ReadMetadataString(TTree* metadata, const char* name, std::string& value)
+{
+  if (!metadata || metadata->GetEntries() != 1 || !metadata->GetBranch(name)) {
+    return false;
+  }
+  std::string* pointer = nullptr;
+  metadata->SetBranchAddress(name, &pointer);
+  const bool ok = metadata->GetEntry(0) > 0 && pointer;
+  if (ok) value = *pointer;
+  metadata->ResetBranchAddresses();
+  return ok;
+}
+
+RawInputContract InspectRawInputContract(const std::string& filePath)
+{
+  std::unique_ptr<TFile> file(TFile::Open(filePath.c_str(), "READ"));
+  if (!file || file->IsZombie()) {
+    throw std::runtime_error("Could not open raw input: " + filePath);
+  }
+
+  TTree* tree = dynamic_cast<TTree*>(file->Get("tree"));
+  if (!tree) {
+    throw std::runtime_error("Raw input has no tree: " + filePath);
+  }
+
+  const std::vector<const char*> canonicalBranches = {
+    "event_weight", "heavyPdg", "heavyStatus", "heavyIsFinal",
+    "heavyCentral", "heavyPt", "heavyEta", "heavyPhi"
+  };
+  const std::vector<const char*> legacyBranches = {"ID", "PT", "ETA", "PHI"};
+
+  if (HasAllBranches(tree, canonicalBranches)) {
+    RawInputContract contract;
+    contract.mode = RawInputMode::kCanonicalV5;
+    contract.hasEventWeight = true;
+
+    TTree* metadata = dynamic_cast<TTree*>(file->Get("job_metadata"));
+    if (!ReadMetadataString(metadata, "raw_schema", contract.schema)) {
+      throw std::runtime_error(
+        "Authoritative heavy-vector input is missing job_metadata.raw_schema: " +
+        filePath);
+    }
+    if (contract.schema != Hadronization::kRawSchema) {
+      throw std::runtime_error(
+        "Unsupported authoritative raw schema '" + contract.schema +
+        "' in " + filePath + " (expected " +
+        std::string(Hadronization::kRawSchema) + ")");
+    }
+
+    std::string speciesSchema;
+    std::string speciesSha256;
+    if (!ReadMetadataString(
+          metadata, "species_registry_schema", speciesSchema) ||
+        !ReadMetadataString(
+          metadata, "species_registry_sha256", speciesSha256)) {
+      throw std::runtime_error(
+        "Canonical raw input is missing species-registry metadata required "
+        "to interpret heavyCentral: " + filePath);
+    }
+    if (speciesSchema !=
+          std::string(Hadronization::kSpeciesRegistrySchema) ||
+        speciesSha256 !=
+          std::string(Hadronization::kSpeciesRegistrySha256)) {
+      throw std::runtime_error(
+        "Canonical raw input species registry does not match this plotting "
+        "checkout: " + filePath);
+    }
+    return contract;
+  }
+
+  if (HasAnyBranch(tree, canonicalBranches)) {
+    throw std::runtime_error(
+      "Raw input has an incomplete authoritative heavy-vector contract: " +
+      filePath);
+  }
+  if (!HasAllBranches(tree, legacyBranches)) {
+    throw std::runtime_error(
+      "Raw input is neither canonical raw-v5 nor a supported legacy tree: " +
+      filePath);
+  }
+
+  RawInputContract contract;
+  contract.mode = RawInputMode::kLegacy;
+  contract.hasEventWeight = HasBranch(tree, "event_weight");
+  contract.schema = "legacy_status";
+  return contract;
+}
+
+void RequireCompatibleContract(const RawInputContract& expected,
+                               const RawInputContract& observed,
+                               const std::string& filePath)
+{
+  if (expected.mode != observed.mode ||
+      expected.hasEventWeight != observed.hasEventWeight ||
+      expected.schema != observed.schema) {
+    throw std::runtime_error(
+      "Mixed raw-tree contracts within one tune are not supported; mismatch at " +
+      filePath);
+  }
+}
+
+bool PassCanonicalInclusiveSelection(int status, int isFinal, int central,
+                                     double pt, double eta)
+{
+  // These are inclusive single-particle, associate-acceptance spectra. They
+  // deliberately do not impose a selected-hard-origin requirement.
+  return isFinal && central &&
+         Hadronization::IsDirectPrimaryStatus(status) &&
+         Hadronization::IsCentralKinematic(pt, eta, false);
+}
 
 std::string JoinPath(const std::vector<std::string>& pieces)
 {
@@ -132,6 +319,20 @@ std::string ResolveFromBase(const std::string& path, const std::string& base)
   return JoinPath({base, expanded});
 }
 
+std::string ParentPath(const std::string& path)
+{
+  const size_t slash = path.find_last_of('/');
+  if (slash == std::string::npos) return ".";
+  if (slash == 0) return "/";
+  return path.substr(0, slash);
+}
+
+std::string EnvironmentValue(const char* name)
+{
+  const char* value = std::getenv(name);
+  return value ? std::string(value) : std::string();
+}
+
 bool IsDirectory(const std::string& path)
 {
   void* dir = gSystem->OpenDirectory(path.c_str());
@@ -161,6 +362,405 @@ void CollectRootFiles(const std::string& path, std::vector<std::string>& files)
   }
 
   if (path.size() >= 5 && path.substr(path.size() - 5) == ".root") files.push_back(path);
+}
+
+bool IsSafeRelativePath(const std::string& path)
+{
+  if (path.empty() || IsAbsolutePath(path)) return false;
+  std::istringstream stream(path);
+  std::string component;
+  while (std::getline(stream, component, '/')) {
+    if (component.empty() || component == "." || component == "..") {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool IsLowerHexSha256(const std::string& value)
+{
+  return value.size() == 64 &&
+         std::all_of(
+           value.begin(), value.end(),
+           [](unsigned char character) {
+             return std::isdigit(character) ||
+                    (character >= 'a' && character <= 'f');
+           });
+}
+
+json ReadJsonFile(const std::string& path, const std::string& label)
+{
+  std::ifstream input(path);
+  if (!input) {
+    throw std::runtime_error("Missing " + label + ": " + path);
+  }
+  json value;
+  input >> value;
+  if (!value.is_object()) {
+    throw std::runtime_error(label + " is not a JSON object: " + path);
+  }
+  return value;
+}
+
+struct RawFileSelection {
+  DatasetInputMode mode = DatasetInputMode::kLegacyRecursiveDiagnostic;
+  std::string source;
+  std::map<std::string, std::vector<std::string>> filesByTune;
+};
+
+DatasetInputMode ResolveDatasetInputMode(const std::string& requested)
+{
+  if (requested == "legacy_recursive_diagnostic") {
+    return DatasetInputMode::kLegacyRecursiveDiagnostic;
+  }
+  const std::string status = EnvironmentValue(
+      "HADRONIZATION_DATASET_STATUS");
+  const std::string publicationEligible = EnvironmentValue(
+      "HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE");
+  if (requested == "canonical_manifest") {
+    if (status != "canonical" || publicationEligible != "true") {
+      throw std::runtime_error(
+          "canonical_manifest mode requires "
+          "HADRONIZATION_DATASET_STATUS=canonical and "
+          "HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE=true");
+    }
+    return DatasetInputMode::kCanonicalManifest;
+  }
+  if (requested != "selector") {
+    throw std::runtime_error(
+        "Unknown raw input mode '" + requested +
+        "'; use selector, canonical_manifest, or "
+        "legacy_recursive_diagnostic");
+  }
+  if (status == "canonical" && publicationEligible == "true") {
+    return DatasetInputMode::kCanonicalManifest;
+  }
+  if (status.rfind("legacy", 0) == 0 &&
+      publicationEligible == "false") {
+    return DatasetInputMode::kLegacyRecursiveDiagnostic;
+  }
+  throw std::runtime_error(
+      "selector mode requires a consistent status/publication-eligibility "
+      "pair from tools/dataset_selector.py; direct legacy diagnostics must "
+      "pass legacy_recursive_diagnostic explicitly");
+}
+
+RawFileSelection LoadCanonicalManifestSelection(
+    const std::string& hadronizationBase)
+{
+  const std::string configuredManifest = EnvironmentValue(
+      "HADRONIZATION_CANONICAL_MANIFEST");
+  const std::string configuredProduction = EnvironmentValue(
+      "HADRONIZATION_PRODUCTION_ROOT");
+  if (configuredManifest.empty() || configuredProduction.empty()) {
+    throw std::runtime_error(
+        "Canonical dataset selection requires both "
+        "HADRONIZATION_CANONICAL_MANIFEST and "
+        "HADRONIZATION_PRODUCTION_ROOT");
+  }
+  const std::string manifestPath =
+      ResolveFromBase(configuredManifest, hadronizationBase);
+  const std::string productionRoot =
+      ResolveFromBase(configuredProduction, hadronizationBase);
+  const std::string freezeDirectory = ParentPath(manifestPath);
+  const std::string summaryPath =
+      JoinPath({freezeDirectory, "freeze_summary.json"});
+  const std::string receiptPath =
+      JoinPath({freezeDirectory,
+                "canonical_raw_validation_receipt.json"});
+  const std::string sealPath =
+      JoinPath({freezeDirectory, "freeze_seal.json"});
+
+  const std::string manifestSha =
+      Hadronization::Sha256FileHex(manifestPath);
+  const std::string receiptSha =
+      Hadronization::Sha256FileHex(receiptPath);
+  const json summary = ReadJsonFile(summaryPath, "canonical freeze summary");
+  const json receipt =
+      ReadJsonFile(receiptPath, "canonical raw-validation receipt");
+  const json seal = ReadJsonFile(sealPath, "canonical freeze seal");
+  const std::string summarySchema = summary.value("schema", "");
+  const bool firstStage =
+      summarySchema == "hf_canonical_freeze_summary_v3";
+  const bool superseding =
+      summarySchema == "hf_superseding_canonical_freeze_summary_v4";
+  const std::string rowSchema =
+      firstStage ? "hf_canonical_raw_manifest_v2"
+                 : "hf_superseding_canonical_raw_manifest_v3";
+  const std::string receiptSchema =
+      firstStage ? "hf_canonical_raw_validation_receipt_v2"
+                 : "hf_superseding_canonical_raw_validation_receipt_v3";
+  const std::string sealSchema =
+      firstStage ? "hf_canonical_freeze_seal_v2"
+                 : "hf_superseding_canonical_freeze_seal_v3";
+  const int jobsPerTune = summary.value("jobs_per_tune", -1);
+  const int expectedRows =
+      jobsPerTune > 0 ? static_cast<int>(TuneNames().size()) * jobsPerTune
+                      : -1;
+  const bool validShape =
+      (firstStage && jobsPerTune == 100) ||
+      (superseding && jobsPerTune >= 110 && jobsPerTune % 10 == 0);
+  std::map<std::string, std::vector<std::string>> sealedSourceContracts;
+  std::map<std::string, int> sealedSourceExposure;
+  bool validSourceInventory = !superseding;
+  if (superseding) {
+    const json sources = summary.value("source_freezes", json::array());
+    int sourceJobs = 0;
+    validSourceInventory = sources.is_array() && sources.size() >= 2;
+    if (validSourceInventory) {
+      for (const auto& source : sources) {
+        const std::string campaign = source.value("campaign", "");
+        const std::vector<std::string> contract = {
+            source.value("canonical_manifest_sha256", ""),
+            source.value("freeze_summary_sha256", ""),
+            source.value("freeze_seal_sha256", ""),
+        };
+        const int sourceExposure =
+            source.value("jobs_in_final_union_per_tune", -1);
+        if (campaign.empty() ||
+            source.value("production_prefix", "") != campaign ||
+            sourceExposure < 1 ||
+            !std::all_of(
+                contract.begin(), contract.end(),
+                [](const std::string& value) {
+                  return IsLowerHexSha256(value);
+                }) ||
+            !sealedSourceContracts.emplace(campaign, contract).second) {
+          validSourceInventory = false;
+          break;
+        }
+        sealedSourceExposure[campaign] = sourceExposure;
+        sourceJobs += sourceExposure;
+      }
+      validSourceInventory =
+          validSourceInventory && sourceJobs == jobsPerTune &&
+          sources.back().value("campaign", "") ==
+              summary.value("campaign", "") &&
+          Hadronization::Sha256Hex(sources.dump()) ==
+              summary.value("source_freezes_sha256", "");
+    }
+  }
+  const bool validSupersedingBinding =
+      !superseding ||
+      (validSourceInventory &&
+       IsLowerHexSha256(summary.value("source_freezes_sha256", "")) &&
+       receipt.value("jobs_per_tune", -1) == jobsPerTune &&
+       seal.value("jobs_per_tune", -1) == jobsPerTune &&
+       receipt.value("source_freezes_sha256", "") ==
+           summary.value("source_freezes_sha256", "") &&
+       seal.value("source_freezes_sha256", "") ==
+           summary.value("source_freezes_sha256", "") &&
+       receipt.value("supersedes", json::object()) ==
+           summary.value("supersedes", json::object()) &&
+       seal.value("supersedes", json::object()) ==
+           summary.value("supersedes", json::object()));
+  if ((!firstStage && !superseding) ||
+      summary.value("canonical_manifest_sha256", "") != manifestSha ||
+      !validShape ||
+      summary.value("state", "") !=
+          "AWAITING_EXHAUSTIVE_RAW_VALIDATION" ||
+      summary.value("campaign", "").empty() ||
+      summary.value("campaign_ordinal", -1) < 1 ||
+      summary.value("successful_events_per_job", -1) != 1000000 ||
+      summary.value("successful_events_per_tune", -1LL) !=
+          static_cast<Long64_t>(jobsPerTune) * 1000000LL ||
+      summary.value("block_count", -1) != 10 ||
+      summary.value("jobs_per_tune_per_block", -1) != jobsPerTune / 10 ||
+      receipt.value("schema", "") != receiptSchema ||
+      receipt.value("state", "") != "PASS" ||
+      receipt.value("canonical_manifest_sha256", "") != manifestSha ||
+      receipt.value("canonical_manifest_rows", -1) != expectedRows ||
+      receipt.value("validated_raw_files", -1) != expectedRows ||
+      receipt.value("validated_successful_events", -1LL) !=
+          static_cast<Long64_t>(expectedRows) * 1000000LL ||
+      seal.value("schema", "") != sealSchema ||
+      seal.value("state", "") != "SEALED" ||
+      seal.value("canonical_manifest_sha256", "") != manifestSha ||
+      seal.value("validation_receipt_path", "") !=
+          "canonical_raw_validation_receipt.json" ||
+      seal.value("validation_receipt_sha256", "") != receiptSha ||
+      !validSupersedingBinding) {
+    throw std::runtime_error(
+        "Canonical raw manifest is not bound to the expected sealed PASS "
+        "freeze: " + manifestPath);
+  }
+
+  RawFileSelection selection;
+  selection.mode = DatasetInputMode::kCanonicalManifest;
+  selection.source = manifestPath;
+  const std::vector<std::string> tunes = TuneNames();
+  std::map<std::string, std::set<int>> slots;
+  std::map<std::string, std::map<int, int>> blockCounts;
+  std::map<std::string, std::map<int, std::string>> pathsBySlot;
+  std::map<std::string, std::vector<std::string>> sourceContracts;
+  std::map<std::string, std::map<std::string, int>> sourceTuneCounts;
+  std::set<std::string> rawPaths;
+  std::ifstream input(manifestPath);
+  if (!input) {
+    throw std::runtime_error(
+        "Cannot open canonical manifest: " + manifestPath);
+  }
+  int rows = 0;
+  std::string line;
+  while (std::getline(input, line)) {
+    if (line.empty()) continue;
+    const json row = json::parse(line);
+    const std::string tune = row.at("tune").get<std::string>();
+    if (std::find(tunes.begin(), tunes.end(), tune) == tunes.end()) {
+      throw std::runtime_error(
+          "Unknown tune in canonical manifest: " + tune);
+    }
+    const int slot = row.at("canonical_slot").get<int>();
+    const int block = row.at("block").get<int>();
+    const std::string rawRelative = row.at("raw_path").get<std::string>();
+    const std::string expectedRawSha =
+        row.at("raw_sha256").get<std::string>();
+    bool validCampaignBinding = false;
+    if (firstStage) {
+      validCampaignBinding =
+          row.value("campaign", "") == summary.value("campaign", "");
+    } else {
+      const std::string sourceCampaign = row.value("campaign", "");
+      const std::vector<std::string> sourceContract = {
+          row.value("source_manifest_sha256", ""),
+          row.value("source_freeze_summary_sha256", ""),
+          row.value("source_freeze_seal_sha256", ""),
+      };
+      validCampaignBinding =
+          !sourceCampaign.empty() &&
+          row.value("source_production_prefix", "") == sourceCampaign &&
+          row.value("source_canonical_slot", -1) >= 0 &&
+          row.value("final_campaign", "") ==
+              summary.value("campaign", "") &&
+          row.value("final_campaign_ordinal", -1) ==
+              summary.value("campaign_ordinal", -1) &&
+          std::all_of(
+              sourceContract.begin(), sourceContract.end(),
+              [](const std::string& value) {
+                return IsLowerHexSha256(value);
+              });
+      const auto known = sourceContracts.find(sourceCampaign);
+      if (validCampaignBinding && known == sourceContracts.end()) {
+        sourceContracts[sourceCampaign] = sourceContract;
+      } else if (validCampaignBinding && known->second != sourceContract) {
+        validCampaignBinding = false;
+      }
+      const auto sealed = sealedSourceContracts.find(sourceCampaign);
+      if (validCampaignBinding &&
+          (sealed == sealedSourceContracts.end() ||
+           sealed->second != sourceContract)) {
+        validCampaignBinding = false;
+      }
+      if (validCampaignBinding) {
+        ++sourceTuneCounts[sourceCampaign][tune];
+      }
+    }
+    if (row.at("schema").get<std::string>() != rowSchema ||
+        row.at("raw_schema").get<std::string>() !=
+            "hf_primary_ground_raw_v5" ||
+        row.at("selector").get<std::string>() !=
+            "hard_trigger_primary_ground__primary_ground_associate_v1" ||
+        row.at("requested_successes").get<int>() != 1000000 ||
+        !IsLowerHexSha256(expectedRawSha) ||
+        !validCampaignBinding ||
+        slot < 0 || slot >= jobsPerTune || block != slot % 10 ||
+        !slots[tune].insert(slot).second ||
+        !IsSafeRelativePath(rawRelative) ||
+        !rawPaths.insert(rawRelative).second) {
+      throw std::runtime_error(
+          "Invalid or duplicate canonical manifest row");
+    }
+
+    const std::string rawPath =
+        JoinPath({productionRoot, rawRelative});
+    Long_t id = 0;
+    Long64_t bytes = 0;
+    Long_t flags = 0;
+    Long_t modification = 0;
+    if (gSystem->GetPathInfo(rawPath.c_str(), &id, &bytes, &flags,
+                             &modification) != 0 ||
+        bytes <= 0 ||
+        bytes != row.at("raw_bytes").get<Long64_t>()) {
+      throw std::runtime_error(
+          "Canonical raw file is missing or has the wrong size: " +
+          rawPath);
+    }
+    if (Hadronization::Sha256FileHex(rawPath) != expectedRawSha) {
+      throw std::runtime_error(
+          "Canonical raw file checksum differs from the sealed manifest: " +
+          rawPath);
+    }
+    ++blockCounts[tune][block];
+    pathsBySlot[tune][slot] = rawPath;
+    ++rows;
+  }
+  if (rows != expectedRows) {
+    throw std::runtime_error(
+        "Canonical manifest row count differs from the sealed summary");
+  }
+  if (superseding && sourceContracts != sealedSourceContracts) {
+    throw std::runtime_error(
+        "Superseding manifest/source-freeze inventory differs");
+  }
+  if (superseding) {
+    for (const auto& source : sealedSourceExposure) {
+      for (const auto& tune : tunes) {
+        if (sourceTuneCounts[source.first][tune] != source.second) {
+          throw std::runtime_error(
+              "Superseding source has unequal or incorrect tune exposure: " +
+              source.first);
+        }
+      }
+    }
+  }
+  for (const std::string& tune : tunes) {
+    if (static_cast<int>(slots[tune].size()) != jobsPerTune) {
+      throw std::runtime_error(
+          "Canonical manifest does not contain the sealed equal exposure for " +
+          tune);
+    }
+    for (int slot = 0; slot < jobsPerTune; ++slot) {
+      if (!slots[tune].count(slot) || !pathsBySlot[tune].count(slot)) {
+        throw std::runtime_error(
+            "Canonical manifest slots are not contiguous for " + tune);
+      }
+      selection.filesByTune[tune].push_back(pathsBySlot[tune].at(slot));
+    }
+    for (int block = 0; block < 10; ++block) {
+      if (blockCounts[tune][block] != jobsPerTune / 10) {
+        throw std::runtime_error(
+            "Canonical manifest blocks do not have equal exposure for " +
+            tune);
+      }
+    }
+  }
+  return selection;
+}
+
+RawFileSelection LoadRawFileSelection(const std::string& inputBaseDir,
+                                      const std::string& requestedMode,
+                                      const std::string& hadronizationBase)
+{
+  const DatasetInputMode mode = ResolveDatasetInputMode(requestedMode);
+  if (mode == DatasetInputMode::kCanonicalManifest) {
+    return LoadCanonicalManifestSelection(hadronizationBase);
+  }
+
+  RawFileSelection selection;
+  selection.mode = DatasetInputMode::kLegacyRecursiveDiagnostic;
+  selection.source = inputBaseDir;
+  for (const std::string& tune : TuneNames()) {
+    CollectRootFiles(
+        JoinPath({inputBaseDir, tune}), selection.filesByTune[tune]);
+    std::sort(selection.filesByTune[tune].begin(),
+              selection.filesByTune[tune].end());
+  }
+  std::cerr
+      << "WARNING: using explicit legacy recursive diagnostic input. "
+         "Directory discovery can include reserves or unrelated files and "
+         "must never be used for a canonical publication result."
+      << std::endl;
+  return selection;
 }
 
 void EnsureDirectory(const std::string& path)
@@ -227,7 +827,7 @@ const char* MultiplicityDefinitionLine1()
 
 const char* MultiplicityDefinitionLine2()
 {
-  return "#it{p}_{T} #geq 0.15 GeV/#it{c}";
+  return "#it{p}_{T} > 0.15 GeV/#it{c}";
 }
 
 const char* MultiplicityDefinitionLine3()
@@ -265,9 +865,32 @@ std::vector<MultiplicityPercentileClass> MultiplicityPercentileClasses()
 HistSet BookSpeciesHistograms(const SpeciesDef& species, const std::string& tune)
 {
   const std::string prefix = "hInclusive_" + species.key + "_" + tune;
+  // Keep the established 0.5 GeV bins in the displayed 0--50 GeV region,
+  // then use coarse tail bins so no selected raw-v5 particle is silently
+  // discarded from normalization. ROOT upper edges are exclusive, hence the
+  // one-ULP extension that includes exactly 7000 GeV.
+  std::vector<double> ptEdges;
+  for (int index = 0; index <= 100; ++index) {
+    ptEdges.push_back(0.5 * static_cast<double>(index));
+  }
+  for (double edge : {
+         60.0, 75.0, 100.0, 150.0, 250.0, 500.0,
+         1000.0, 2000.0, 4000.0}) {
+    ptEdges.push_back(edge);
+  }
+  ptEdges.push_back(
+    std::nextafter(kInclusivePtConfiguredMaxGeV,
+                   std::numeric_limits<double>::infinity()));
+
   HistSet hists;
-  hists.pt = new TH1D((prefix + "_pT").c_str(), "", 100, 0.0, 50.0);
-  hists.eta = new TH1D((prefix + "_eta").c_str(), "", 100, -4.0, 4.0);
+  hists.pt = new TH1D((prefix + "_pT").c_str(), "",
+                      static_cast<int>(ptEdges.size()) - 1,
+                      ptEdges.data());
+  // ROOT histogram upper edges are exclusive, and one nextafter step still
+  // rounds eta = +4 into overflow in TH1::FindBin. This negligible guard
+  // keeps the documented inclusive endpoint visible.
+  hists.eta =
+    new TH1D((prefix + "_eta").c_str(), "", 100, -4.0, 4.0 + 1.0e-12);
   hists.phi = new TH1D((prefix + "_phi").c_str(), "", 100, -Pi(), Pi());
 
   for (TH1D* hist : {hists.pt, hists.eta, hists.phi}) {
@@ -288,13 +911,26 @@ void DeleteHistSet(HistSet& hists)
   hists.phi = nullptr;
 }
 
-void AddMultiplicityHistogram(TuneData& data, const std::string& filePath)
+void AddMultiplicityHistogram(TuneData& data, const std::string& filePath,
+                              bool strictInputs)
 {
   std::unique_ptr<TFile> file(TFile::Open(filePath.c_str(), "READ"));
-  if (!file || file->IsZombie()) return;
+  if (!file || file->IsZombie()) {
+    if (strictInputs) {
+      throw std::runtime_error(
+          "Could not open multiplicity input: " + filePath);
+    }
+    return;
+  }
 
   TH1D* source = dynamic_cast<TH1D*>(file->Get("hMULTIPLICITY"));
-  if (!source) return;
+  if (!source) {
+    if (strictInputs) {
+      throw std::runtime_error(
+          "Missing hMULTIPLICITY in raw input: " + filePath);
+    }
+    return;
+  }
 
   if (!data.multiplicity) {
     data.multiplicity = dynamic_cast<TH1D*>(source->Clone(("hMultiplicity_" + data.tune).c_str()));
@@ -306,18 +942,26 @@ void AddMultiplicityHistogram(TuneData& data, const std::string& filePath)
 }
 
 TuneData BuildTuneSpectra(const std::string& tune,
-                          const std::string& inputBaseDir,
+                          const std::vector<std::string>& selectedFiles,
+                          DatasetInputMode datasetMode,
                           bool strictInputs)
 {
-  const std::string tuneDir = JoinPath({inputBaseDir, tune});
-  std::vector<std::string> files;
-  CollectRootFiles(tuneDir, files);
-  std::sort(files.begin(), files.end());
+  const std::vector<std::string>& files = selectedFiles;
+  const bool canonical =
+      datasetMode == DatasetInputMode::kCanonicalManifest;
+  const bool effectiveStrictInputs = strictInputs || canonical;
 
   if (files.empty()) {
-    const std::string message = "No raw ROOT files found for tune " + tune + " in " + tuneDir;
-    if (strictInputs) throw std::runtime_error(message);
+    const std::string message =
+        "No selected raw ROOT files found for tune " + tune;
+    if (effectiveStrictInputs) throw std::runtime_error(message);
     std::cerr << "WARNING: " << message << std::endl;
+  }
+  if (canonical &&
+      (files.size() < 100 || files.size() % 10 != 0)) {
+    throw std::runtime_error(
+        "Canonical raw selection must contain at least 100 files and equal "
+        "ten-block exposure for " + tune);
   }
 
   TuneData data;
@@ -331,33 +975,84 @@ TuneData BuildTuneSpectra(const std::string& tune,
     data.spectra[species.key] = BookSpeciesHistograms(species, tune);
   }
 
+  RawInputContract contract;
+  if (!files.empty()) {
+    contract = InspectRawInputContract(files.front());
+    for (size_t index = 1; index < files.size(); ++index) {
+      RequireCompatibleContract(
+        contract, InspectRawInputContract(files[index]), files[index]);
+    }
+    const RawInputMode expectedMode =
+        canonical ? RawInputMode::kCanonicalV5 : RawInputMode::kLegacy;
+    if (contract.mode != expectedMode) {
+      throw std::runtime_error(
+          std::string("Raw file contract does not match dataset input mode ") +
+          DatasetInputModeName(datasetMode) + " for " + tune);
+    }
+    data.inputContract = RawInputModeName(contract.mode);
+    if (contract.mode == RawInputMode::kCanonicalV5) {
+      data.inputContract += " (" + contract.schema + ")";
+    } else {
+      data.inputContract +=
+        contract.hasEventWeight ? " (stored event_weight)" : " (unit weights)";
+      std::cerr
+        << "WARNING: " << tune << " uses " << RawInputModeName(contract.mode)
+        << ". Final-state and pT/eta acceptance are assumed to have been "
+           "applied by the legacy producer; direct-primary and origin "
+           "semantics cannot be reconstructed from these branches. "
+        << (contract.hasEventWeight
+              ? "The stored event_weight is used."
+              : "No event_weight branch exists, so unit weights are used.")
+        << std::endl;
+    }
+  }
+
   TChain chain("tree");
   for (const std::string& file : files) {
     chain.Add(file.c_str());
-    AddMultiplicityHistogram(data, file);
+    AddMultiplicityHistogram(data, file, effectiveStrictInputs);
   }
 
   if (files.empty()) return data;
 
-  if (!chain.GetBranch("ID") || !chain.GetBranch("PT") ||
-      !chain.GetBranch("ETA") || !chain.GetBranch("PHI")) {
-    throw std::runtime_error("Raw tree for " + tune + " is missing one of ID, PT, ETA, or PHI");
-  }
+  chain.SetBranchStatus("*", 0);
 
-  std::vector<Int_t>* id = nullptr;
+  Double_t eventWeight = 1.0;
+  std::vector<Int_t>* pdg = nullptr;
+  std::vector<Int_t>* status = nullptr;
+  std::vector<Int_t>* isFinal = nullptr;
+  std::vector<Int_t>* central = nullptr;
   std::vector<Double_t>* pt = nullptr;
   std::vector<Double_t>* eta = nullptr;
   std::vector<Double_t>* phi = nullptr;
 
-  chain.SetBranchStatus("*", 0);
-  chain.SetBranchStatus("ID", 1);
-  chain.SetBranchStatus("PT", 1);
-  chain.SetBranchStatus("ETA", 1);
-  chain.SetBranchStatus("PHI", 1);
-  chain.SetBranchAddress("ID", &id);
-  chain.SetBranchAddress("PT", &pt);
-  chain.SetBranchAddress("ETA", &eta);
-  chain.SetBranchAddress("PHI", &phi);
+  if (contract.hasEventWeight) {
+    chain.SetBranchStatus("event_weight", 1);
+    chain.SetBranchAddress("event_weight", &eventWeight);
+  }
+
+  if (contract.mode == RawInputMode::kCanonicalV5) {
+    for (const char* branch : {"heavyPdg", "heavyStatus", "heavyIsFinal",
+                               "heavyCentral", "heavyPt", "heavyEta",
+                               "heavyPhi"}) {
+      chain.SetBranchStatus(branch, 1);
+    }
+    chain.SetBranchAddress("heavyPdg", &pdg);
+    chain.SetBranchAddress("heavyStatus", &status);
+    chain.SetBranchAddress("heavyIsFinal", &isFinal);
+    chain.SetBranchAddress("heavyCentral", &central);
+    chain.SetBranchAddress("heavyPt", &pt);
+    chain.SetBranchAddress("heavyEta", &eta);
+    chain.SetBranchAddress("heavyPhi", &phi);
+  } else {
+    for (const char* branch : {"ID", "PT", "ETA", "PHI"}) {
+      chain.SetBranchStatus(branch, 1);
+    }
+    chain.SetBranchAddress("ID", &pdg);
+    chain.SetBranchAddress("PT", &pt);
+    chain.SetBranchAddress("ETA", &eta);
+    chain.SetBranchAddress("PHI", &phi);
+  }
 
   const Long64_t nEntries = chain.GetEntries();
   data.nEvents = nEntries;
@@ -367,20 +1062,71 @@ TuneData BuildTuneSpectra(const std::string& tune,
       std::cout << tune << ": processed " << (entry + 1) << " / " << nEntries << " events\r" << std::flush;
     }
 
-    chain.GetEntry(entry);
-    if (!id || !pt || !eta || !phi) continue;
+    eventWeight = 1.0;
+    if (chain.GetEntry(entry) <= 0 || !pdg || !pt || !eta || !phi) {
+      throw std::runtime_error(
+        "Could not read required raw vectors for " + tune +
+        " at tree entry " + std::to_string(entry));
+    }
+    if (!std::isfinite(eventWeight)) {
+      throw std::runtime_error(
+        "Non-finite event_weight for " + tune +
+        " at tree entry " + std::to_string(entry));
+    }
 
-    const size_t n = id->size();
-    if (pt->size() != n || eta->size() != n || phi->size() != n) continue;
+    const size_t n = pdg->size();
+    const bool commonSizesMatch =
+      pt->size() == n && eta->size() == n && phi->size() == n;
+    const bool canonicalSizesMatch =
+      contract.mode != RawInputMode::kCanonicalV5 ||
+      (status && isFinal && central && status->size() == n &&
+       isFinal->size() == n && central->size() == n);
+    if (!commonSizesMatch || !canonicalSizesMatch) {
+      throw std::runtime_error(
+        "Inconsistent raw-vector lengths for " + tune +
+        " at tree entry " + std::to_string(entry));
+    }
 
     for (size_t i = 0; i < n; ++i) {
-      const auto found = speciesByPdg.find(id->at(i));
+      const auto found = speciesByPdg.find(pdg->at(i));
       if (found == speciesByPdg.end()) continue;
 
+      const double particlePt = pt->at(i);
+      const double particleEta = eta->at(i);
+      const double particlePhi = phi->at(i);
+      if (!std::isfinite(particlePt) || !std::isfinite(particleEta) ||
+          !std::isfinite(particlePhi)) {
+        throw std::runtime_error(
+          "Non-finite selected-particle kinematics for " + tune +
+          " at tree entry " + std::to_string(entry));
+      }
+
+      if (contract.mode == RawInputMode::kCanonicalV5 &&
+          !PassCanonicalInclusiveSelection(
+            status->at(i), isFinal->at(i), central->at(i),
+            particlePt, particleEta)) {
+        continue;
+      }
+
       HistSet& hists = data.spectra[found->second];
-      hists.pt->Fill(pt->at(i));
-      hists.eta->Fill(eta->at(i));
-      hists.phi->Fill(WrapToMinusPiPi(phi->at(i)));
+      const int ptBin = hists.pt->FindFixBin(particlePt);
+      if (ptBin <= 0 || ptBin > hists.pt->GetNbinsX()) {
+        std::ostringstream message;
+        message
+          << "Selected particle pT histogram overflow for " << tune
+          << " at tree entry " << entry
+          << ", vector index " << i
+          << ": pT=" << particlePt
+          << " GeV/c is outside [0, nextafter("
+          << kInclusivePtConfiguredMaxGeV
+          << ", +inf)). Refuse to truncate a publication spectrum.";
+        throw std::runtime_error(message.str());
+      }
+      hists.pt->Fill(particlePt, eventWeight);
+      hists.eta->Fill(particleEta, eventWeight);
+      hists.phi->Fill(WrapToMinusPiPi(particlePhi), eventWeight);
+      ++data.nSelectedParticles;
+      data.selectedParticleWeight += eventWeight;
     }
   }
   if (nEntries >= 5000000) std::cout << std::string(80, ' ') << "\r" << std::flush;
@@ -389,25 +1135,54 @@ TuneData BuildTuneSpectra(const std::string& tune,
 }
 
 TuneData BuildTuneMultiplicityOnly(const std::string& tune,
-                                   const std::string& inputBaseDir,
+                                   const std::vector<std::string>& selectedFiles,
+                                   DatasetInputMode datasetMode,
                                    bool strictInputs)
 {
-  const std::string tuneDir = JoinPath({inputBaseDir, tune});
-  std::vector<std::string> files;
-  CollectRootFiles(tuneDir, files);
-  std::sort(files.begin(), files.end());
+  const std::vector<std::string>& files = selectedFiles;
+  const bool canonical =
+      datasetMode == DatasetInputMode::kCanonicalManifest;
+  const bool effectiveStrictInputs = strictInputs || canonical;
 
   if (files.empty()) {
-    const std::string message = "No raw ROOT files found for tune " + tune + " in " + tuneDir;
-    if (strictInputs) throw std::runtime_error(message);
+    const std::string message =
+        "No selected raw ROOT files found for tune " + tune;
+    if (effectiveStrictInputs) throw std::runtime_error(message);
     std::cerr << "WARNING: " << message << std::endl;
+  }
+  if (canonical &&
+      (files.size() < 100 || files.size() % 10 != 0)) {
+    throw std::runtime_error(
+        "Canonical raw selection must contain at least 100 files and equal "
+        "ten-block exposure for " + tune);
   }
 
   TuneData data;
   data.tune = tune;
   data.nFiles = static_cast<int>(files.size());
 
-  for (const std::string& file : files) AddMultiplicityHistogram(data, file);
+  if (!files.empty()) {
+    const RawInputContract first = InspectRawInputContract(files.front());
+    const RawInputMode expectedMode =
+        canonical ? RawInputMode::kCanonicalV5 : RawInputMode::kLegacy;
+    if (first.mode != expectedMode) {
+      throw std::runtime_error(
+          std::string("Raw file contract does not match dataset input mode ") +
+          DatasetInputModeName(datasetMode) + " for " + tune);
+    }
+    for (size_t index = 1; index < files.size(); ++index) {
+      const RawInputContract observed =
+          InspectRawInputContract(files[index]);
+      RequireCompatibleContract(first, observed, files[index]);
+      if (observed.mode != expectedMode) {
+        throw std::runtime_error(
+            "Raw file contract changes within selected multiplicity input");
+      }
+    }
+  }
+  for (const std::string& file : files) {
+    AddMultiplicityHistogram(data, file, effectiveStrictInputs);
+  }
   data.nEvents = data.multiplicity
                    ? static_cast<Long64_t>(std::llround(data.multiplicity->GetEntries()))
                    : 0;
@@ -513,7 +1288,10 @@ double MaximumWithErrors(const std::vector<TH1D*>& hists)
   double maximum = 0.0;
   for (TH1D* hist : hists) {
     if (!hist) continue;
-    for (int bin = 1; bin <= hist->GetNbinsX(); ++bin) {
+    const int first = std::max(1, hist->GetXaxis()->GetFirst());
+    const int last =
+      std::min(hist->GetNbinsX(), hist->GetXaxis()->GetLast());
+    for (int bin = first; bin <= last; ++bin) {
       maximum = std::max(maximum, hist->GetBinContent(bin) + hist->GetBinError(bin));
     }
   }
@@ -525,7 +1303,10 @@ double PositiveMinimum(const std::vector<TH1D*>& hists)
   double minimum = 1.0e30;
   for (TH1D* hist : hists) {
     if (!hist) continue;
-    for (int bin = 1; bin <= hist->GetNbinsX(); ++bin) {
+    const int first = std::max(1, hist->GetXaxis()->GetFirst());
+    const int last =
+      std::min(hist->GetNbinsX(), hist->GetXaxis()->GetLast());
+    for (int bin = first; bin <= last; ++bin) {
       const double content = hist->GetBinContent(bin);
       if (content > 0.0 && content < minimum) minimum = content;
     }
@@ -738,7 +1519,6 @@ void DrawMultiplicityOverlayWithRatio(const std::vector<TH1D*>& hists,
       hists[i]->GetXaxis()->SetRangeUser(0.0, kMultiplicityXMax);
       hists[i]->GetXaxis()->SetLabelSize(0.0);
       hists[i]->GetXaxis()->SetTitleSize(0.0);
-      hists[i]->SetLineStyle(kSharedMultiplicityLineStyle);
       hists[i]->Draw(i == 0 ? "E1 HIST" : "E1 HIST SAME");
       legend->AddEntry(hists[i], tunes[i].c_str(), "lp");
     }
@@ -775,7 +1555,6 @@ void DrawMultiplicityOverlayWithRatio(const std::vector<TH1D*>& hists,
       ratios[i]->GetYaxis()->SetLabelSize(0.075);
       ratios[i]->GetYaxis()->SetTitleOffset(0.70);
       ratios[i]->GetYaxis()->SetNdivisions(505);
-      ratios[i]->SetLineStyle(kSharedMultiplicityLineStyle);
       ratios[i]->Draw(i == 0 ? "E1 HIST" : "E1 HIST SAME");
     }
 
@@ -830,6 +1609,11 @@ void DrawOverlay(const std::vector<TuneData>& tuneData,
                               normalizeShape);
     if (!hist) continue;
     if (variable == "phi") ApplyPiLabels(hist);
+    if (variable == "pT") {
+      hist->GetXaxis()->SetRangeUser(
+        0.0,
+        std::nextafter(kInclusivePtDisplayMaxGeV, 0.0));
+    }
     hists.push_back(hist);
     tunes.push_back(data.tune);
   }
@@ -918,7 +1702,8 @@ void DeleteTuneData(std::vector<TuneData>& tuneData)
 void Plot_InclusiveKinematicSpectra_Raw(const char* inputBaseDir = "RootFiles/HF",
                                         const char* outputDir = "PlottingScripts/Plots/KinematicSpectra",
                                         bool normalizeShape = true,
-                                        bool strictInputs = true)
+                                        bool strictInputs = true,
+                                        const char* inputMode = "selector")
 {
   using namespace InclusiveRawKinematics;
 
@@ -928,22 +1713,35 @@ void Plot_InclusiveKinematicSpectra_Raw(const char* inputBaseDir = "RootFiles/HF
   const std::string resolvedInput = ResolveFromBase(inputBaseDir ? inputBaseDir : "RootFiles/HF", base);
   const std::string resolvedOutput =
     ResolveFromBase(outputDir ? outputDir : "PlottingScripts/Plots/KinematicSpectra", base);
+  const RawFileSelection selection = LoadRawFileSelection(
+      resolvedInput, inputMode ? inputMode : "selector", base);
   const std::string suffix = normalizeShape ? "shape" : "density";
 
   std::cout << "Inclusive raw kinematic spectra\n";
   std::cout << "================================\n";
   std::cout << "Input base: " << resolvedInput << "\n";
+  std::cout << "Input mode: " << DatasetInputModeName(selection.mode) << "\n";
+  std::cout << "Input selection source: " << selection.source << "\n";
   std::cout << "Output dir: " << resolvedOutput << "\n";
-  std::cout << "Selection: exact PDG ID, stored final-state raw-tree particles, no pair conditioning\n";
-  std::cout << "Raw producer acceptance already applied: pT >= 0.15 GeV/c and |eta| <= 4\n";
-  std::cout << "Additional plotting cuts: none\n\n";
+  std::cout << "Canonical selection: exact PDG ID, final, direct-primary, "
+               "central-registry ground state\n";
+  std::cout << "Inclusive acceptance: pT > 0.15 GeV/c and |eta| <= 4\n";
+  std::cout << "Origin policy: inclusive (no selected-hard-origin requirement); "
+               "no pair conditioning\n";
+  std::cout << "pT histogram: 0--7000 GeV/c (exact 7000 retained; true "
+               "overflow is fatal), displayed through 50 GeV/c\n";
+  std::cout << "Weights: stored event_weight for canonical raw-v5 inputs\n\n";
 
   std::vector<TuneData> tuneData;
   for (const std::string& tune : TuneNames()) {
-    TuneData data = BuildTuneSpectra(tune, resolvedInput, strictInputs);
+    TuneData data = BuildTuneSpectra(
+        tune, selection.filesByTune.at(tune), selection.mode, strictInputs);
     std::cout << tune
               << ": files=" << data.nFiles
-              << " tree entries=" << data.nEvents;
+              << " tree entries=" << data.nEvents
+              << " selected particles=" << data.nSelectedParticles
+              << " selected weighted sum=" << data.selectedParticleWeight
+              << " input=" << data.inputContract;
     if (data.multiplicity) {
       std::cout << " multiplicity entries=" << static_cast<Long64_t>(std::llround(data.multiplicity->GetEntries()));
     }
@@ -995,7 +1793,8 @@ void Plot_InclusiveKinematicSpectra_Raw(const char* inputBaseDir = "RootFiles/HF
 void Plot_InclusiveMultiplicitySpectrum_Raw(const char* inputBaseDir = "RootFiles/HF",
                                             const char* outputDir = "PlottingScripts/Plots/KinematicSpectra",
                                             bool normalizeShape = true,
-                                            bool strictInputs = true)
+                                            bool strictInputs = true,
+                                            const char* inputMode = "selector")
 {
   using namespace InclusiveRawKinematics;
 
@@ -1005,18 +1804,23 @@ void Plot_InclusiveMultiplicitySpectrum_Raw(const char* inputBaseDir = "RootFile
   const std::string resolvedInput = ResolveFromBase(inputBaseDir ? inputBaseDir : "RootFiles/HF", base);
   const std::string resolvedOutput =
     ResolveFromBase(outputDir ? outputDir : "PlottingScripts/Plots/KinematicSpectra", base);
+  const RawFileSelection selection = LoadRawFileSelection(
+      resolvedInput, inputMode ? inputMode : "selector", base);
   const std::string suffix = normalizeShape ? "shape" : "density";
 
   std::cout << "Inclusive raw multiplicity spectrum\n";
   std::cout << "===================================\n";
   std::cout << "Input base: " << resolvedInput << "\n";
+  std::cout << "Input mode: " << DatasetInputModeName(selection.mode) << "\n";
+  std::cout << "Input selection source: " << selection.source << "\n";
   std::cout << "Output dir: " << resolvedOutput << "\n";
-  std::cout << "Nch definition: prompt charged e/mu/pi/K/p, pT >= 0.15 GeV/c, |eta| <= 4, status 81-89\n";
+  std::cout << "Nch definition: status-81--89 charged e/mu/pi/K/p, pT >= 0.15 GeV/c, |eta| <= 4 (not prompt multiplicity)\n";
   std::cout << "pp sqrt(s)=14 TeV\n\n";
 
   std::vector<TuneData> tuneData;
   for (const std::string& tune : TuneNames()) {
-    TuneData data = BuildTuneMultiplicityOnly(tune, resolvedInput, strictInputs);
+    TuneData data = BuildTuneMultiplicityOnly(
+        tune, selection.filesByTune.at(tune), selection.mode, strictInputs);
     std::cout << tune
               << ": files=" << data.nFiles
               << " multiplicity entries=" << data.nEvents
@@ -1035,4 +1839,136 @@ void Plot_InclusiveMultiplicitySpectrum_Raw(const char* inputBaseDir = "RootFile
               true);
 
   DeleteTuneData(tuneData);
+}
+
+int TestInclusiveRawCanonicalManifestSelection(
+    const char* manifestPath,
+    const char* productionRoot,
+    int expectedFilesPerTune = 110)
+{
+  using namespace InclusiveRawKinematics;
+
+  const std::string oldStatus =
+      EnvironmentValue("HADRONIZATION_DATASET_STATUS");
+  const std::string oldEligible =
+      EnvironmentValue("HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE");
+  const std::string oldManifest =
+      EnvironmentValue("HADRONIZATION_CANONICAL_MANIFEST");
+  const std::string oldProduction =
+      EnvironmentValue("HADRONIZATION_PRODUCTION_ROOT");
+  const bool hadStatus = std::getenv("HADRONIZATION_DATASET_STATUS");
+  const bool hadEligible =
+      std::getenv("HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE");
+  const bool hadManifest =
+      std::getenv("HADRONIZATION_CANONICAL_MANIFEST");
+  const bool hadProduction =
+      std::getenv("HADRONIZATION_PRODUCTION_ROOT");
+  auto restore = [&]() {
+    if (hadStatus) {
+      gSystem->Setenv("HADRONIZATION_DATASET_STATUS", oldStatus.c_str());
+    } else {
+      gSystem->Unsetenv("HADRONIZATION_DATASET_STATUS");
+    }
+    if (hadEligible) {
+      gSystem->Setenv(
+          "HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE",
+          oldEligible.c_str());
+    } else {
+      gSystem->Unsetenv(
+          "HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE");
+    }
+    if (hadManifest) {
+      gSystem->Setenv(
+          "HADRONIZATION_CANONICAL_MANIFEST", oldManifest.c_str());
+    } else {
+      gSystem->Unsetenv("HADRONIZATION_CANONICAL_MANIFEST");
+    }
+    if (hadProduction) {
+      gSystem->Setenv(
+          "HADRONIZATION_PRODUCTION_ROOT", oldProduction.c_str());
+    } else {
+      gSystem->Unsetenv("HADRONIZATION_PRODUCTION_ROOT");
+    }
+  };
+
+  int errors = 0;
+  try {
+    gSystem->Setenv("HADRONIZATION_DATASET_STATUS", "canonical");
+    gSystem->Setenv(
+        "HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE", "true");
+    gSystem->Setenv("HADRONIZATION_CANONICAL_MANIFEST", manifestPath);
+    gSystem->Setenv("HADRONIZATION_PRODUCTION_ROOT", productionRoot);
+    const RawFileSelection selection =
+        LoadRawFileSelection("", "selector", FindHadronizationBase());
+    if (selection.mode != DatasetInputMode::kCanonicalManifest) ++errors;
+    for (const std::string& tune : TuneNames()) {
+      const auto found = selection.filesByTune.find(tune);
+      if (found == selection.filesByTune.end() ||
+          static_cast<int>(found->second.size()) != expectedFilesPerTune) {
+        ++errors;
+      }
+      if (found != selection.filesByTune.end() &&
+          std::any_of(
+              found->second.begin(), found->second.end(),
+              [](const std::string& path) {
+                return path.find("reserve") != std::string::npos;
+              })) {
+        ++errors;
+      }
+    }
+    if (ResolveDatasetInputMode("legacy_recursive_diagnostic") !=
+        DatasetInputMode::kLegacyRecursiveDiagnostic) {
+      ++errors;
+    }
+  } catch (const std::exception& error) {
+    std::cerr << "INCLUSIVE_RAW_DATASET_SELECTION_TEST_ERROR "
+              << error.what() << std::endl;
+    ++errors;
+  }
+  restore();
+  std::cout
+      << "INCLUSIVE_RAW_DATASET_SELECTION_TEST "
+      << "errors=" << errors
+      << " files_per_tune=" << expectedFilesPerTune
+      << " reserve_discovery=false"
+      << std::endl;
+  return errors;
+}
+
+int TestInclusiveRawTuneStylePreservation()
+{
+  using namespace InclusiveRawKinematics;
+
+  TH1D source("hInclusiveStyleSource", "", 2, 0.0, 2.0);
+  source.Sumw2();
+  source.SetBinContent(1, 2.0);
+  source.SetBinError(1, 0.2);
+  TH1D denominator("hInclusiveStyleDenominator", "", 2, 0.0, 2.0);
+  denominator.Sumw2();
+  denominator.SetBinContent(1, 1.0);
+  denominator.SetBinError(1, 0.1);
+
+  int errors = 0;
+  for (const std::string& tune :
+       std::vector<std::string>{"MONASH", "JUNCTIONS", "CLOSEPACKING"}) {
+    TH1D* styled = CloneForPlot(
+        &source, "hInclusiveStyle_" + tune, tune, "x", false);
+    TH1D* ratio = BuildRatioHistogram(
+        &source, &denominator, "hInclusiveRatioStyle_" + tune, tune);
+    for (TH1D* histogram : {styled, ratio}) {
+      if (!histogram ||
+          histogram->GetLineColor() != TuneColor(tune) ||
+          histogram->GetMarkerColor() != TuneColor(tune) ||
+          histogram->GetMarkerStyle() != TuneMarker(tune) ||
+          histogram->GetLineStyle() != TuneLineStyle(tune)) {
+        ++errors;
+      }
+    }
+    delete styled;
+    delete ratio;
+  }
+  std::cout << "INCLUSIVE_RAW_TUNE_STYLE_TEST errors=" << errors
+            << " monash_line=1 junctions_line=2 closepacking_line=7"
+            << std::endl;
+  return errors;
 }

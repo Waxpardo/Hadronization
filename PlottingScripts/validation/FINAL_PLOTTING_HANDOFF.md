@@ -2,6 +2,24 @@
 
 Date: 2026-07-29
 
+> Historical regression handoff. This report describes the metadata-free
+> `complete_root_21_06_2026` production and the plotting-only branch before
+> the raw-v5 publication pipeline. Preserve its measured coverage/SEM values
+> as regression evidence, but do not treat its “canonical” wording as a
+> raw-v5 publication claim. The active contracts and next actions are in
+> `REPRODUCIBILITY.md` and
+> `ValidationReports/PREPRODUCTION_GATE_REPORT_20260730.md`.
+
+The historical machine artifacts named below
+(`final_thnsparse_input_validation.json`,
+`final_thnsparse_subsample_coverage.json`, and
+`final_smoke_uncertainty_validation.json`) were retained outside this Git
+checkout and are not available as repository evidence. Consequently, their
+numerical summaries are a dated handoff record, not independently
+reproducible proof. The publication pipeline must regenerate checksum-bound
+equivalents from the final sealed raw-v5 dataset before any result is
+promoted.
+
 ## Outcome
 
 The plotting code, configuration portability, style mapping, input provenance,
@@ -43,7 +61,7 @@ successfully exercises all four drawing paths.
 
 ## Inputs and structural validation
 
-Canonical central inputs:
+Audited legacy central inputs:
 
 ```text
 AnalyzedData/complete_root_21_06_2026_MONASH
@@ -51,7 +69,7 @@ AnalyzedData/complete_root_21_06_2026_JUNCTIONS
 AnalyzedData/complete_root_21_06_2026_CLOSEPACKING
 ```
 
-Canonical subsample inputs:
+Audited legacy subsample inputs:
 
 ```text
 AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH
@@ -59,8 +77,8 @@ AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS
 AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING
 ```
 
-The internal `final_thnsparse_input_validation.json` records a passing Nikhef
-validation with ROOT 6.30/01:
+The unavailable external `final_thnsparse_input_validation.json` was reported
+to record a passing Nikhef validation with ROOT 6.30/01:
 
 - 56 central ROOT pair files for every tune;
 - 10 subsamples for every tune and 56 ROOT pair files in every subsample;
@@ -80,9 +98,10 @@ partitions.
 
 ## Subsample coverage findings
 
-The complete machine-generated record is retained internally as
-`final_thnsparse_subsample_coverage.json`. Across every tune and associate in a
-trigger group, the bins with complete yield/ratio coverage are:
+The unavailable external machine record was named
+`final_thnsparse_subsample_coverage.json`. The handoff reports that, across
+every tune and associate in a trigger group, the bins with complete
+yield/ratio coverage were:
 
 | Flavour | Trigger group | Bins supported for every tune and associate |
 |---|---|---|
@@ -107,8 +126,10 @@ would violate the requested prescription.
 - forms baryon/meson ratios inside each subsample;
 - combines independent tune errors in quadrature;
 - uses the matching associate uncertainty in tune double ratios;
-- applies identical cuts, OS/SS normalization, and same-sign factor 0.5 to
-  central and subsample calculations;
+- applied identical cuts, OS/SS normalization, and the then-legacy same-sign
+  factor 0.5 to central and subsample calculations. The raw-v5 ordered
+  conditional central estimator now uses `same_sign_pair_factor = 1.0`; this
+  historical smoke result cannot validate that corrected central definition;
 - rejects non-finite denominators, non-finite errors, negative errors, and zero
   errors on non-degenerate final points;
 - supports an explicit non-drawing `subsample_coverage_audit` mode;
@@ -117,8 +138,9 @@ would violate the requested prescription.
 - initializes every optional mini pad to `nullptr` and checks it during global
   composition.
 
-The verbose reduced smoke log passed
-`validate_subsample_log.py`:
+The handoff reports that the verbose reduced smoke log passed
+`validate_subsample_log.py`; its external
+`final_smoke_uncertainty_validation.json` is not present in this checkout:
 
 - 30 records total (15 yield and 15 ratio);
 - every record has `n=10`;
@@ -211,9 +233,11 @@ Both JSON files pass `jq`; their activity classes remain ordered
 
 ## Required next action
 
-Produce or repartition inputs so every final plotted pair/bin has ten finite
-trigger normalizations. The beauty production is the limiting case. After
-that:
+Produce the immutable raw-v5 equal-statistics campaign and its sealed
+canonical/block manifests so every final plotted pair/bin has ten finite
+trigger normalizations. Repartitioning this old production alone cannot
+supply the corrected selector, stability, origin, species, and ordered-pair
+contracts. After the new campaign passes Gates A--E:
 
 1. rerun `validate-inputs`;
 2. rerun `audit-subsamples` and require zero failures;

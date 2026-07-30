@@ -1,5 +1,11 @@
 # pT and Multiplicity Plotting
 
+> Legacy/inclusive comparison path. These date-discovery and
+> charge-conjugate-combined macros do not implement the raw-v5 signed
+> trigger-conditioned publication balancing observable. Retain them for
+> historical and explicitly justified inclusive plots; the active balancing
+> workflow is documented in `PlottingScripts/README.md`.
+
 This directory contains the plotting macros that read the reduced heavy-flavour analysis files under `AnalyzedData` and make the current pT, multiplicity, species-resolved, minimum-bias, and baryon-to-meson comparison plots. The macros are written for the subsampled analysis outputs, not for the raw PYTHIA trees. We now use them primarily with the combined-HF `hf_` files, while keeping automatic fallbacks for the older split `bbbar_` and `ccbar_` files.
 
 ## Inputs and Outputs
