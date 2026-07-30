@@ -230,7 +230,7 @@ def fixture(checkout: Path) -> tuple[Path, Path]:
                 "canonical_fixture": {
                     "status": "canonical",
                     "campaign": campaign,
-                    "raw_schema": "hf_primary_ground_raw_v6",
+                    "raw_schema": "hf_primary_ground_raw_v7",
                     "selector":
                         "hard_trigger_primary_ground__primary_ground_associate_v1",
                     "canonical_manifest":

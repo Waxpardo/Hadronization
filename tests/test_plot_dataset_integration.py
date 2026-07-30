@@ -85,7 +85,7 @@ def make_sealed_selection(
                     "raw_path": raw.relative_to(production).as_posix(),
                     "raw_bytes": raw.stat().st_size,
                     "raw_sha256": sha256(raw),
-                    "raw_schema": "hf_primary_ground_raw_v6",
+                    "raw_schema": "hf_primary_ground_raw_v7",
                     "selector":
                         "hard_trigger_primary_ground__"
                         "primary_ground_associate_v1",

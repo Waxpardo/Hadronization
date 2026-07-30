@@ -15,7 +15,7 @@
 
 namespace Hadronization {
 
-inline constexpr const char* kRawSchema = "hf_primary_ground_raw_v6";
+inline constexpr const char* kRawSchema = "hf_primary_ground_raw_v7";
 inline constexpr const char* kSelectorVersion =
     "hard_trigger_primary_ground__primary_ground_associate_v1";
 inline constexpr const char* kOriginAlgorithmVersion =
@@ -541,6 +541,49 @@ inline bool CountsNchPrimaryChargedV1(bool isFinal, bool isCharged,
                                       double eta, double etaMax) {
   return isFinal && isCharged && !hasHeavyConstituent &&
          IsMultiplicityKinematic(pt, eta, etaMax);
+}
+
+// ---------------------------------------------------------------------------
+// Light-hadron compensation grid (auxiliary, raw-v7).
+//
+// The central observable is heavy-flavour compensation. Electric charge and
+// baryon number, however, are balanced predominantly by LIGHT hadrons, which
+// the heavy-hadron collection does not store. Rather than serialise every
+// light particle, the producer accumulates net electric charge and net baryon
+// number of final light primaries on a fixed (eta, phi) grid. The grid is
+// trigger-agnostic: any Delta-phi or Delta-eta profile relative to any trigger
+// is recovered at analysis time by rotating/shifting cell indices, so no
+// future trigger definition is foreclosed.
+//
+// This is auxiliary. It is NOT part of the central selector and must not be
+// presented as a charge or baryon-number balance function without a dedicated
+// analysis and its own validation.
+// ---------------------------------------------------------------------------
+inline constexpr int kLightGridPhiBins = 16;
+inline constexpr int kLightGridEtaBins = 8;
+inline constexpr double kLightGridEtaMax = 4.0;
+inline constexpr int kLightGridCells =
+    kLightGridPhiBins * kLightGridEtaBins;
+inline constexpr const char* kLightCompensationGridSchema =
+    "light_compensation_grid_v1";
+
+// Returns the flat cell index, or -1 when outside the grid acceptance.
+inline int LightGridCell(double eta, double phi) {
+  constexpr double pi = 3.14159265358979323846;
+  if (!std::isfinite(eta) || !std::isfinite(phi)) return -1;
+  if (std::abs(eta) > kLightGridEtaMax) return -1;
+  const double wrapped =
+      std::fmod(phi + 3.0 * pi, 2.0 * pi) - pi;  // [-pi, pi)
+  int phiBin = static_cast<int>(
+      std::floor((wrapped + pi) / (2.0 * pi / kLightGridPhiBins)));
+  if (phiBin < 0) phiBin = 0;
+  if (phiBin >= kLightGridPhiBins) phiBin = kLightGridPhiBins - 1;
+  int etaBin = static_cast<int>(std::floor(
+      (eta + kLightGridEtaMax) /
+      (2.0 * kLightGridEtaMax / kLightGridEtaBins)));
+  if (etaBin < 0) etaBin = 0;
+  if (etaBin >= kLightGridEtaBins) etaBin = kLightGridEtaBins - 1;
+  return etaBin * kLightGridPhiBins + phiBin;
 }
 
 inline double WrapAbsolutePhi(double phi) {

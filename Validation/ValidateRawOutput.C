@@ -335,7 +335,7 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
 
   std::string campaign, tune, role, schema, selector, originAlgorithm;
   std::string speciesSchema, registrySha, configSha;
-  std::string multiplicityDefinition;
+  std::string multiplicityDefinition, lightGridSchema;
   std::string tuneAllowlistSchema, tuneAllowlistSha;
   std::string stabilityAuditSchema, stabilityAuditSha;
   std::string effectiveSettingsSchema, effectiveSettingsSha;
@@ -381,6 +381,8 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
       !ReadString(metadata, "species_registry_sha256", registrySha) ||
       !ReadString(metadata, "multiplicity_definition",
                   multiplicityDefinition) ||
+      !ReadString(metadata, "light_compensation_grid_schema",
+                  lightGridSchema) ||
       !ReadString(metadata, "tune_difference_allowlist_schema",
                   tuneAllowlistSchema) ||
       !ReadString(metadata, "tune_difference_allowlist_sha256",
@@ -489,6 +491,10 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   if (speciesSchema != Hadronization::kSpeciesRegistrySchema ||
       registrySha != Hadronization::kSpeciesRegistrySha256) {
     fail("species-registry checksum mismatch");
+  }
+  if (lightGridSchema !=
+      Hadronization::kLightCompensationGridSchema) {
+    fail("light-compensation-grid contract mismatch");
   }
   if (multiplicityDefinition !=
           Hadronization::kMultiplicityDefinitionVersion ||
@@ -961,6 +967,10 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
           {"multiplicity_primary_charged_eta10_v1", "Int_t", 1},
           {"multiplicity_primary_charged_eta40_v1", "Int_t", 1},
           {"multiplicity_central_by_species", "Int_t", 6},
+          {"light_charge3_grid", "Short_t",
+           Hadronization::kLightGridCells},
+          {"light_baryon_grid", "Short_t",
+           Hadronization::kLightGridCells},
           {"MULTIPLICITY", "Int_t", 1},
           {"PROCESSCODE", "Int_t", 1},
           {"NCHARM", "Int_t", 1},

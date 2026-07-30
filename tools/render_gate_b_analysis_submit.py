@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
-RAW_SCHEMA = "hf_primary_ground_raw_v6"
+RAW_SCHEMA = "hf_primary_ground_raw_v7"
 ORIGIN_ALGORITHM = "signed_heavy_constituent_complete_mothers_unique_v4"
 SAFE_TOKEN = re.compile(r"[A-Za-z0-9._-]+")
 

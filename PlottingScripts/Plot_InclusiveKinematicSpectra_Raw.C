@@ -657,7 +657,7 @@ RawFileSelection LoadCanonicalManifestSelection(
     }
     if (row.at("schema").get<std::string>() != rowSchema ||
         row.at("raw_schema").get<std::string>() !=
-            "hf_primary_ground_raw_v6" ||
+            "hf_primary_ground_raw_v7" ||
         row.at("selector").get<std::string>() !=
             "hard_trigger_primary_ground__primary_ground_associate_v1" ||
         row.at("requested_successes").get<int>() != 1000000 ||

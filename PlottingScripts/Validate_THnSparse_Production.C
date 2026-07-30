@@ -259,7 +259,7 @@ CanonicalManifestEvidence ReadCanonicalTuneManifest(
         if ((rowSchema != "hf_canonical_raw_manifest_v2" &&
              rowSchema != "hf_superseding_canonical_raw_manifest_v3") ||
             row.at("raw_schema").get<std::string>() !=
-                "hf_primary_ground_raw_v6" ||
+                "hf_primary_ground_raw_v7" ||
             row.at("selector").get<std::string>() !=
                 "hard_trigger_primary_ground__primary_ground_associate_v1") {
             throw std::runtime_error(

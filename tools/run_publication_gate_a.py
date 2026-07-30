@@ -40,6 +40,7 @@ ACTIVE_ROOT_MACROS = (
     "Validation/ListUnresolvedOrigins.C",
     "Validation/PTHatSensitivity.C",
     "Validation/ValidateGateDPilotAnalysis.C",
+    "Validation/CalibrateMultiplicityAgainstMinBias.C",
     "PlottingScripts/improvedPlotting_THnSparse.C",
     "PlottingScripts/Plot_InclusiveKinematicSpectra_Raw.C",
     "PlottingScripts/Plot_KinematicSpectra_THnSparse.C",
@@ -47,6 +48,11 @@ ACTIVE_ROOT_MACROS = (
 )
 
 ROOT_TESTS = (
+    # Permanent calibration of the event-activity classifier against the
+    # published minimum-bias reference. This is what licenses describing
+    # NCH_PRIMARY_CHARGED_ETA10_V1 as a genuine charged-particle multiplicity.
+    ("Validation/CalibrateMultiplicityAgainstMinBias.C",
+     "CalibrateMultiplicityAgainstMinBias(20000,false,10.0,false)"),
     ("Validation/TestHardCarrierUniqueness.C", "TestHardCarrierUniqueness()"),
     ("Validation/TestInclusiveRawKinematics.C", "TestInclusiveRawKinematics()"),
     ("Validation/TestPlotProjectionCuts.C", "TestPlotProjectionCuts()"),

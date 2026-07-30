@@ -162,7 +162,7 @@ int ValidateCanonicalRawManifest(const char* manifestPath,
         (role != "primary" && role != "reserve") ||
         (firstStage &&
          (logicalId < kFirstStageSlots) != (role == "primary")) ||
-        row.value("raw_schema", "") != "hf_primary_ground_raw_v6" ||
+        row.value("raw_schema", "") != "hf_primary_ground_raw_v7" ||
         row.value("origin_algorithm", "") !=
             "signed_heavy_constituent_complete_mothers_unique_v4" ||
         row.value("selector", "") !=

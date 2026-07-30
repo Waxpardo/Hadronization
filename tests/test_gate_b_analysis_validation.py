@@ -143,7 +143,7 @@ def main() -> int:
             "campaign": CAMPAIGN,
             "campaign_ordinal": ORDINAL,
             "repository_implementation_commit": commit,
-            "raw_schema": "hf_primary_ground_raw_v6",
+            "raw_schema": "hf_primary_ground_raw_v7",
             "origin_algorithm":
                 "signed_heavy_constituent_complete_mothers_unique_v4",
             "selector":
@@ -217,7 +217,7 @@ def main() -> int:
                 "analysis_macro_sha256": macro_sha,
                 "raw_input": row["stable_name"],
                 "raw_sha256": digest(raw_file),
-                "raw_schema": "hf_primary_ground_raw_v6",
+                "raw_schema": "hf_primary_ground_raw_v7",
                 "raw_input_validation_contract":
                     "analysis_raw_input_fail_closed_v1",
                 "raw_validation_evidence_mode":

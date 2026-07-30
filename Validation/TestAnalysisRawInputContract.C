@@ -31,7 +31,7 @@ void WriteFixture(const std::string& path, Mutation mutation) {
 
   std::string campaign = "RAW_CONTRACT_TEST";
   std::string tune = "MONASH";
-  std::string rawSchema = "hf_primary_ground_raw_v6";
+  std::string rawSchema = "hf_primary_ground_raw_v7";
   std::string selector(Hadronization::kSelectorVersion);
   std::string originAlgorithm =
       "signed_heavy_constituent_complete_mothers_unique_v4";

@@ -4230,7 +4230,7 @@ def generate(args: argparse.Namespace) -> int:
         "pthat_sensitivity_spec_sha256": sha256(pthat_spec),
         "card_sha256": {tune: sha256(path) for tune, path in cards.items()},
         "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
-        "raw_schema": "hf_primary_ground_raw_v6",
+        "raw_schema": "hf_primary_ground_raw_v7",
         "origin_algorithm":
             "signed_heavy_constituent_complete_mothers_unique_v4",
         "block_count": 10,
@@ -4357,7 +4357,7 @@ def validate_gate_b_campaign(
             f"{campaign_dir.resolve()} != {expected_campaign_dir}"
         )
     expected_contract = {
-        "raw_schema": "hf_primary_ground_raw_v6",
+        "raw_schema": "hf_primary_ground_raw_v7",
         "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
         "origin_algorithm":
             "signed_heavy_constituent_complete_mothers_unique_v4",
@@ -4503,7 +4503,7 @@ def validate_full_campaign(
             f"{campaign_dir.resolve()} != {expected_campaign_dir}"
         )
     expected_contract = {
-        "raw_schema": "hf_primary_ground_raw_v6",
+        "raw_schema": "hf_primary_ground_raw_v7",
         "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
         "origin_algorithm":
             "signed_heavy_constituent_complete_mothers_unique_v4",

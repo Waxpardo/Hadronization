@@ -20,6 +20,7 @@
 #include "TObjString.h"
 #include "TParameter.h"
 #include "TROOT.h"
+#include "TString.h"
 #include "TTree.h"
 
 #include <algorithm>
@@ -631,6 +632,10 @@ int main(int argc, char** argv) {
   Int_t primaryAllHeavyMatchValid = 0;
   Int_t multiplicityCentralBySpecies[kMultiplicitySpeciesBuckets] = {
       0, 0, 0, 0, 0, 0};
+  // Auxiliary light-hadron compensation grid (raw-v7). Net charge is summed in
+  // units of e/3 to stay exactly integral.
+  Short_t lightCharge3Grid[kLightGridCells] = {0};
+  Short_t lightBaryonGrid[kLightGridCells] = {0};
 
   std::vector<int> hardIndices;
   std::vector<int> hardBottomIndices;
@@ -693,6 +698,10 @@ int main(int argc, char** argv) {
   tree.Branch("multiplicity_central_by_species",
               multiplicityCentralBySpecies,
               "multiplicity_central_by_species[6]/I");
+  tree.Branch("light_charge3_grid", lightCharge3Grid,
+              Form("light_charge3_grid[%d]/S", kLightGridCells));
+  tree.Branch("light_baryon_grid", lightBaryonGrid,
+              Form("light_baryon_grid[%d]/S", kLightGridCells));
   tree.Branch("hard_indices", &hardIndices);
   tree.Branch("hard_bottom_indices", &hardBottomIndices);
   tree.Branch("hard_ids", &hardIds);
@@ -940,6 +949,8 @@ int main(int argc, char** argv) {
     primaryAllHeavyMatchValid = 1;
     std::fill(std::begin(multiplicityCentralBySpecies),
               std::end(multiplicityCentralBySpecies), 0);
+    std::fill(std::begin(lightCharge3Grid), std::end(lightCharge3Grid), 0);
+    std::fill(std::begin(lightBaryonGrid), std::end(lightBaryonGrid), 0);
 
 #define CLEAR_VECTOR(name) name.clear()
     CLEAR_VECTOR(legacyId); CLEAR_VECTOR(legacyClass); CLEAR_VECTOR(legacyPt);
@@ -1001,6 +1012,21 @@ int main(int argc, char** argv) {
       const int pythiaCharm = pythia.particleData.nQuarksInCode(id, 4);
       const int pythiaBeauty = pythia.particleData.nQuarksInCode(id, 5);
       const bool hasHeavyConstituent = pythiaCharm != 0 || pythiaBeauty != 0;
+      // Auxiliary light-hadron compensation grid: every final light
+      // primary, charged or neutral, since baryon number is carried by
+      // neutrons and Lambdas too.
+      if (particle.isFinal() && !hasHeavyConstituent) {
+        const int cell = LightGridCell(particle.eta(), particle.phi());
+        if (cell >= 0) {
+          lightCharge3Grid[cell] = static_cast<Short_t>(
+              lightCharge3Grid[cell] + pythia.particleData.chargeType(id));
+          if (pythia.particleData.isBaryon(id)) {
+            lightBaryonGrid[cell] = static_cast<Short_t>(
+                lightBaryonGrid[cell] + (id > 0 ? 1 : -1));
+          }
+        }
+      }
+
       if (particle.isFinal() && particle.isCharged()) {
         if (successes < multiplicityAuditEvents) {
           multAuditParticleIndex.push_back(index);
@@ -1480,6 +1506,7 @@ int main(int argc, char** argv) {
   std::string speciesSchema(kSpeciesRegistrySchema);
   std::string speciesSha(kSpeciesRegistrySha256);
   std::string multiplicityDefinition(kMultiplicityDefinitionVersion);
+  std::string lightGridSchema(kLightCompensationGridSchema);
   std::string tuneAllowlistSchema(kTuneDifferenceAllowlistSchema);
   std::string tuneAllowlistSha(kTuneDifferenceAllowlistSha256);
   std::string stabilityAuditSchema(kHeavyStabilityAuditSchema);
@@ -1544,6 +1571,7 @@ int main(int argc, char** argv) {
   metadata.Branch("species_registry_schema", &speciesSchema);
   metadata.Branch("species_registry_sha256", &speciesSha);
   metadata.Branch("multiplicity_definition", &multiplicityDefinition);
+  metadata.Branch("light_compensation_grid_schema", &lightGridSchema);
   metadata.Branch("tune_difference_allowlist_schema",
                   &tuneAllowlistSchema);
   metadata.Branch("tune_difference_allowlist_sha256",

@@ -15,7 +15,7 @@ from pathlib import Path
 
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 SELECTOR = "hard_trigger_primary_ground__primary_ground_associate_v1"
-RAW_SCHEMA = "hf_primary_ground_raw_v6"
+RAW_SCHEMA = "hf_primary_ground_raw_v7"
 ORIGIN_ALGORITHM = "signed_heavy_constituent_complete_mothers_unique_v4"
 ANALYSIS_JOB_SCHEMA = "hf_analysis_job_metadata_v3"
 ANALYSIS_SCHEMA = "paul_pair_objects_primary_ground_v2"

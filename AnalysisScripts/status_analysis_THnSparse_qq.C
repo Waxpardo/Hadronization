@@ -41,7 +41,7 @@ namespace {
 
 using Hadronization::Origin;
 
-constexpr const char* kRequiredRawSchema = "hf_primary_ground_raw_v6";
+constexpr const char* kRequiredRawSchema = "hf_primary_ground_raw_v7";
 constexpr const char* kRequiredOriginAlgorithm =
     "signed_heavy_constituent_complete_mothers_unique_v4";
 constexpr const char* kRequiredEffectiveSettingsSchema =

@@ -152,16 +152,20 @@ int CalibrateMultiplicityAgainstMinBias(int events = 20000,
   const double dndeta = accepted > 0 ? counters[0].total /
                                            (2.0 * counters[0].etaMax * accepted)
                                      : 0.0;
+  int status = 0;
   if (!hardSample) {
     if (dndeta > 6.0 && dndeta < 8.0) {
       std::printf("\nVERDICT: counter reproduces the minimum-bias reference. "
                   "The low value on the hard sample is NOT a counter defect.\n");
     } else {
+      // Fail closed: Gate A uses this return value, so a drifting or broken
+      // counter must block the gate rather than print a warning.
       std::printf("\nVERDICT: counter does NOT reproduce the minimum-bias "
                   "reference (got %.2f). Investigate before production.\n",
                   dndeta);
+      status = 1;
     }
   }
   std::printf("============================\n\n");
-  return 0;
+  return status;
 }

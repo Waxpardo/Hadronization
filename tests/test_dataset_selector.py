@@ -38,7 +38,7 @@ def main() -> int:
         "status": "canonical",
         "publication_eligible": True,
         "campaign": "HF_PUBLICATION_TEST",
-        "raw_schema": "hf_primary_ground_raw_v6",
+        "raw_schema": "hf_primary_ground_raw_v7",
         "selector":
             "hard_trigger_primary_ground__primary_ground_associate_v1",
         "canonical_manifest":

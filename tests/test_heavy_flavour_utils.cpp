@@ -53,7 +53,7 @@ void AssertOrigin(const HeavyOriginMatch& match, Origin origin,
 }  // namespace
 
 int main() {
-  assert(std::string(kRawSchema) == "hf_primary_ground_raw_v6");
+  assert(std::string(kRawSchema) == "hf_primary_ground_raw_v7");
   assert(std::string(kOriginAlgorithmVersion) ==
          "signed_heavy_constituent_complete_mothers_unique_v4");
   assert(std::string(kHeavyStabilityAuditSchema) ==

@@ -75,7 +75,7 @@ def load(path: Path, checkout: Path | None = None) -> tuple[str, dict]:
         ):
             if not isinstance(row[key], str) or not row[key]:
                 raise ValueError(f"canonical dataset requires {key}")
-        if row["raw_schema"] != "hf_primary_ground_raw_v6":
+        if row["raw_schema"] != "hf_primary_ground_raw_v7":
             raise ValueError("canonical dataset has wrong raw schema")
         if (
             row["selector"]

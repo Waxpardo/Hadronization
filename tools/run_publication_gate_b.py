@@ -42,7 +42,7 @@ PROFILES = {
     1: ("0.5", 100_000, "medium", "pthat_sensitivity_low"),
     2: ("2.0", 100_000, "medium", "pthat_sensitivity_high"),
 }
-RAW_SCHEMA = "hf_primary_ground_raw_v6"
+RAW_SCHEMA = "hf_primary_ground_raw_v7"
 SELECTOR = "hard_trigger_primary_ground__primary_ground_associate_v1"
 ORIGIN_ALGORITHM = "signed_heavy_constituent_complete_mothers_unique_v4"
 HEX40 = re.compile(r"^[0-9a-f]{40}$")
