@@ -1,0 +1,2517 @@
+{
+  "extractor": {
+    "mass_width_format": "PDG fixed-width columns 1-32 MCIDs, 34-51 mass, 53-60 positive error, 62-69 negative error, 108-128 name",
+    "particle_sql": "SELECT mcid, pdgid, name, cc_type, charge, quantum_j, quantum_p, quantum_c\nFROM pdgparticle\nWHERE abs(mcid) IN (\n  411, 421, 431, 511, 521, 531, 541,\n  4112, 4122, 4132, 4212, 4222, 4232, 4312, 4322, 4332,\n  5112, 5122, 5132, 5212, 5222, 5232, 5312, 5322, 5332\n)\nORDER BY abs(mcid), mcid DESC",
+    "path": "tools/pdg_2025_species_audit.py",
+    "pdg_info_sql": "SELECT name, value FROM pdginfo ORDER BY name",
+    "version": "pdg_2025_species_extractor_v1",
+    "xi_b_prime_mass_sql": "SELECT p.pdgid, p.description, d.value, d.error_positive, d.error_negative,\n       d.unit_text, d.display_value_text, d.value_type, d.edition,\n       d.in_summary_table\nFROM pdgid AS p\nJOIN pdgdata AS d ON d.pdgid_id = p.id\nWHERE p.pdgid = 'B169M'\n  AND d.edition = '2025'\n  AND d.in_summary_table = 1\nORDER BY d.sort",
+    "xi_b_prime_sql": "SELECT mcid, pdgid, name, cc_type, charge, quantum_j, quantum_p, quantum_c\nFROM pdgparticle\nWHERE pdgid = 'B169'\nORDER BY cc_type DESC"
+  },
+  "operational_registry": {
+    "schema": "heavy_flavour_species_registry_v1",
+    "sha256_at_extraction": "b5277ad692dee32c7732b46e165bbedf23fcc3f6d88bf75ac60c950d9b5ab112",
+    "signed_state_count": 50
+  },
+  "overall_evidence_state": "NEEDS_PHYSICS_REVIEW",
+  "reference_version": "PDG_2025_HEAVY_FLAVOUR_SPECIES_V1",
+  "review_gaps": [
+    {
+      "abs_pdg": 5212,
+      "code": "SIGMA_B_ZERO_UNMEASURED_MODEL_MASS",
+      "signed_pdgs": [
+        -5212,
+        5212
+      ],
+      "summary": "PDG 2025 assigns MCID 5212 and lists Sigma_b0 quantum numbers, but provides no measured Sigma_b0 mass; its generator mass must not be described as a measured PDG value."
+    },
+    {
+      "abs_pdg": 5312,
+      "code": "XI_B_PRIME_MINUS_NO_OFFICIAL_MCID",
+      "signed_pdgs": [
+        -5312,
+        5312
+      ],
+      "summary": "PDG 2025 lists the measured Xi_b'(5935)- state and mass but does not assign it MCID 5312; 5312 remains an operational PYTHIA mapping requiring physics review."
+    },
+    {
+      "abs_pdg": 5322,
+      "code": "XI_B_PRIME_ZERO_NO_DIRECT_PDG_STATE_OR_MCID",
+      "signed_pdgs": [
+        -5322,
+        5322
+      ],
+      "summary": "PDG 2025 has neither an MCID 5322 assignment nor a directly listed measured Xi_b-prime-zero state/mass; this operational PYTHIA entry requires physics review."
+    }
+  ],
+  "schema": "pdg_2025_heavy_flavour_species_reference_v1",
+  "signed_species": [
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 5e-05,
+        "error_positive_gev": 5e-05,
+        "source": "mass_width_2025.txt",
+        "source_line": 135,
+        "source_name_field": "D                   0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 1.86484
+      },
+      "official_particle": {
+        "canonical_name": "D0",
+        "charge3": 0,
+        "charge_conjugation_type": "P",
+        "official_mcid": 421,
+        "parity": "-",
+        "pdgid": "S032",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "ubar"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          2
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "D0",
+      "registry_valence": "c ubar",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 421,
+      "spin2j1": 1
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 5e-05,
+        "error_positive_gev": 5e-05,
+        "source": "mass_width_2025.txt",
+        "source_line": 135,
+        "source_name_field": "D                   0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 1.86484
+      },
+      "official_particle": {
+        "canonical_name": "Dbar0",
+        "charge3": 0,
+        "charge_conjugation_type": "A",
+        "official_mcid": -421,
+        "parity": "-",
+        "pdgid": "S032",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "u"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          2
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "D0bar",
+      "registry_valence": "cbar u",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -421,
+      "spin2j1": 1
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 5e-05,
+        "error_positive_gev": 5e-05,
+        "source": "mass_width_2025.txt",
+        "source_line": 134,
+        "source_name_field": "D                   +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 1.86966
+      },
+      "official_particle": {
+        "canonical_name": "D+",
+        "charge3": 3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 411,
+        "parity": "-",
+        "pdgid": "S031",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "dbar"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          1
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Dplus",
+      "registry_valence": "c dbar",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 411,
+      "spin2j1": 1
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 5e-05,
+        "error_positive_gev": 5e-05,
+        "source": "mass_width_2025.txt",
+        "source_line": 134,
+        "source_name_field": "D                   +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 1.86966
+      },
+      "official_particle": {
+        "canonical_name": "D-",
+        "charge3": -3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -411,
+        "parity": "-",
+        "pdgid": "S031",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "d"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          1
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Dminus",
+      "registry_valence": "cbar d",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -411,
+      "spin2j1": 1
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 7e-05,
+        "error_positive_gev": 7e-05,
+        "source": "mass_width_2025.txt",
+        "source_line": 142,
+        "source_name_field": "D(s)                +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 1.96835
+      },
+      "official_particle": {
+        "canonical_name": "D_s()+",
+        "charge3": 3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 431,
+        "parity": "-",
+        "pdgid": "S034",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "sbar"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          3
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Dsplus",
+      "registry_valence": "c sbar",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 431,
+      "spin2j1": 1
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 7e-05,
+        "error_positive_gev": 7e-05,
+        "source": "mass_width_2025.txt",
+        "source_line": 142,
+        "source_name_field": "D(s)                +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 1.96835
+      },
+      "official_particle": {
+        "canonical_name": "D_s()-",
+        "charge3": -3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -431,
+        "parity": "-",
+        "pdgid": "S034",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "s"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          3
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Dsminus",
+      "registry_valence": "cbar s",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -431,
+      "spin2j1": 1
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00014,
+        "error_positive_gev": 0.00014,
+        "source": "mass_width_2025.txt",
+        "source_line": 246,
+        "source_name_field": "Lambda(c)           +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.28646
+      },
+      "official_particle": {
+        "canonical_name": "Lambda_c()+",
+        "charge3": 3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 4122,
+        "parity": "+",
+        "pdgid": "S033",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "d",
+          "u"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          1,
+          2
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Lambdacplus",
+      "registry_valence": "c u d",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 4122,
+      "spin2j1": 2
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00014,
+        "error_positive_gev": 0.00014,
+        "source": "mass_width_2025.txt",
+        "source_line": 246,
+        "source_name_field": "Lambda(c)           +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.28646
+      },
+      "official_particle": {
+        "canonical_name": "Lambdabar_c()-",
+        "charge3": -3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -4122,
+        "parity": "-",
+        "pdgid": "S033",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "dbar",
+          "ubar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          1,
+          2
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Lambdacplusbar",
+      "registry_valence": "cbar ubar dbar",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -4122,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00014,
+        "error_positive_gev": 0.00014,
+        "source": "mass_width_2025.txt",
+        "source_line": 250,
+        "source_name_field": "Sigma(c)(2455)      0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.45375
+      },
+      "official_particle": {
+        "canonical_name": "Sigma_c(2455)0",
+        "charge3": 0,
+        "charge_conjugation_type": "P",
+        "official_mcid": 4112,
+        "parity": "+",
+        "pdgid": "B104",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "d",
+          "d"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          1,
+          1
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Sigmaczero",
+      "registry_valence": "c d d",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 4112,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00014,
+        "error_positive_gev": 0.00014,
+        "source": "mass_width_2025.txt",
+        "source_line": 250,
+        "source_name_field": "Sigma(c)(2455)      0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.45375
+      },
+      "official_particle": {
+        "canonical_name": "Sigmabar_c(2455)0",
+        "charge3": 0,
+        "charge_conjugation_type": "A",
+        "official_mcid": -4112,
+        "parity": "-",
+        "pdgid": "B104",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "dbar",
+          "dbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          1,
+          1
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Sigmaczerobar",
+      "registry_valence": "cbar dbar dbar",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -4112,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00016,
+        "error_positive_gev": 0.00022,
+        "source": "mass_width_2025.txt",
+        "source_line": 251,
+        "source_name_field": "Sigma(c)(2455)      +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.45265
+      },
+      "official_particle": {
+        "canonical_name": "Sigma_c(2455)+",
+        "charge3": 3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 4212,
+        "parity": "+",
+        "pdgid": "B104",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "u",
+          "d"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          2,
+          1
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Sigmacplus",
+      "registry_valence": "c u d",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 4212,
+      "spin2j1": 2
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00016,
+        "error_positive_gev": 0.00022,
+        "source": "mass_width_2025.txt",
+        "source_line": 251,
+        "source_name_field": "Sigma(c)(2455)      +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.45265
+      },
+      "official_particle": {
+        "canonical_name": "Sigmabar_c(2455)-",
+        "charge3": -3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -4212,
+        "parity": "-",
+        "pdgid": "B104",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "ubar",
+          "dbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          2,
+          1
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Sigmacplusbar",
+      "registry_valence": "cbar ubar dbar",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -4212,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 6,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00014,
+        "error_positive_gev": 0.00014,
+        "source": "mass_width_2025.txt",
+        "source_line": 252,
+        "source_name_field": "Sigma(c)(2455)     ++",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.45397
+      },
+      "official_particle": {
+        "canonical_name": "Sigma_c(2455)++",
+        "charge3": 6,
+        "charge_conjugation_type": "P",
+        "official_mcid": 4222,
+        "parity": "+",
+        "pdgid": "B104",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "u",
+          "u"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          2,
+          2
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Sigmacplusplus",
+      "registry_valence": "c u u",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 4222,
+      "spin2j1": 2
+    },
+    {
+      "charge3": -6,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00014,
+        "error_positive_gev": 0.00014,
+        "source": "mass_width_2025.txt",
+        "source_line": 252,
+        "source_name_field": "Sigma(c)(2455)     ++",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.45397
+      },
+      "official_particle": {
+        "canonical_name": "Sigmabar_c(2455)--",
+        "charge3": -6,
+        "charge_conjugation_type": "A",
+        "official_mcid": -4222,
+        "parity": "-",
+        "pdgid": "B104",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "ubar",
+          "ubar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          2,
+          2
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Sigmacplusplusbar",
+      "registry_valence": "cbar ubar ubar",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -4222,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00028,
+        "error_positive_gev": 0.00028,
+        "source": "mass_width_2025.txt",
+        "source_line": 257,
+        "source_name_field": "Xi(c)               0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.47044
+      },
+      "official_particle": {
+        "canonical_name": "Xi_c()0",
+        "charge3": 0,
+        "charge_conjugation_type": "P",
+        "official_mcid": 4132,
+        "parity": "+",
+        "pdgid": "S048",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "d",
+          "s"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          1,
+          3
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Xiczero",
+      "registry_valence": "c s d",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 4132,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00028,
+        "error_positive_gev": 0.00028,
+        "source": "mass_width_2025.txt",
+        "source_line": 257,
+        "source_name_field": "Xi(c)               0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.47044
+      },
+      "official_particle": {
+        "canonical_name": "Xibar_c()0",
+        "charge3": 0,
+        "charge_conjugation_type": "A",
+        "official_mcid": -4132,
+        "parity": "-",
+        "pdgid": "S048",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "dbar",
+          "sbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          1,
+          3
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Xiczerobar",
+      "registry_valence": "cbar sbar dbar",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -4132,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00023,
+        "error_positive_gev": 0.00023,
+        "source": "mass_width_2025.txt",
+        "source_line": 256,
+        "source_name_field": "Xi(c)               +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.46771
+      },
+      "official_particle": {
+        "canonical_name": "Xi_c()+",
+        "charge3": 3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 4232,
+        "parity": "+",
+        "pdgid": "S045",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "u",
+          "s"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          2,
+          3
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Xicplus",
+      "registry_valence": "c s u",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 4232,
+      "spin2j1": 2
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00023,
+        "error_positive_gev": 0.00023,
+        "source": "mass_width_2025.txt",
+        "source_line": 256,
+        "source_name_field": "Xi(c)               +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.46771
+      },
+      "official_particle": {
+        "canonical_name": "Xibar_c()-",
+        "charge3": -3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -4232,
+        "parity": "-",
+        "pdgid": "S045",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "ubar",
+          "sbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          2,
+          3
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Xicplusbar",
+      "registry_valence": "cbar sbar ubar",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -4232,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0005,
+        "error_positive_gev": 0.0005,
+        "source": "mass_width_2025.txt",
+        "source_line": 259,
+        "source_name_field": "Xi(c)'              0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.5787
+      },
+      "official_particle": {
+        "canonical_name": "Xi_c^'()0",
+        "charge3": 0,
+        "charge_conjugation_type": "P",
+        "official_mcid": 4312,
+        "parity": "+",
+        "pdgid": "S059",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "s",
+          "d"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          3,
+          1
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Xicprimezero",
+      "registry_valence": "c s d (symmetric light diquark)",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 4312,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0005,
+        "error_positive_gev": 0.0005,
+        "source": "mass_width_2025.txt",
+        "source_line": 259,
+        "source_name_field": "Xi(c)'              0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.5787
+      },
+      "official_particle": {
+        "canonical_name": "Xibar_c^'()0",
+        "charge3": 0,
+        "charge_conjugation_type": "A",
+        "official_mcid": -4312,
+        "parity": "-",
+        "pdgid": "S059",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "sbar",
+          "dbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          3,
+          1
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Xicprimezerobar",
+      "registry_valence": "cbar sbar dbar (symmetric light antidiquark)",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -4312,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0005,
+        "error_positive_gev": 0.0005,
+        "source": "mass_width_2025.txt",
+        "source_line": 258,
+        "source_name_field": "Xi(c)'              +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.5782
+      },
+      "official_particle": {
+        "canonical_name": "Xi_c^'()+",
+        "charge3": 3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 4322,
+        "parity": "+",
+        "pdgid": "S058",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "s",
+          "u"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          3,
+          2
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Xicprimeplus",
+      "registry_valence": "c s u (symmetric light diquark)",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 4322,
+      "spin2j1": 2
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0005,
+        "error_positive_gev": 0.0005,
+        "source": "mass_width_2025.txt",
+        "source_line": 258,
+        "source_name_field": "Xi(c)'              +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.5782
+      },
+      "official_particle": {
+        "canonical_name": "Xibar_c^'()-",
+        "charge3": -3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -4322,
+        "parity": "-",
+        "pdgid": "S058",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "sbar",
+          "ubar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          3,
+          2
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Xicprimeplusbar",
+      "registry_valence": "cbar sbar ubar (symmetric light antidiquark)",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -4322,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0004,
+        "error_positive_gev": 0.0004,
+        "source": "mass_width_2025.txt",
+        "source_line": 266,
+        "source_name_field": "Omega(c)            0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.6953
+      },
+      "official_particle": {
+        "canonical_name": "Omega_c()0",
+        "charge3": 0,
+        "charge_conjugation_type": "P",
+        "official_mcid": 4332,
+        "parity": "+",
+        "pdgid": "S047",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "c",
+          "s",
+          "s"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          3,
+          3
+        ]
+      },
+      "qb": 0,
+      "qc": 1,
+      "registry_name": "Omegaczero",
+      "registry_valence": "c s s",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": 4332,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0004,
+        "error_positive_gev": 0.0004,
+        "source": "mass_width_2025.txt",
+        "source_line": 266,
+        "source_name_field": "Omega(c)            0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 2.6953
+      },
+      "official_particle": {
+        "canonical_name": "Omegabar_c()0",
+        "charge3": 0,
+        "charge_conjugation_type": "A",
+        "official_mcid": -4332,
+        "parity": "-",
+        "pdgid": "S047",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "cbar",
+          "sbar",
+          "sbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          4,
+          3,
+          3
+        ]
+      },
+      "qb": 0,
+      "qc": -1,
+      "registry_name": "Omegaczerobar",
+      "registry_valence": "cbar sbar sbar",
+      "review_code": null,
+      "sector": "charm",
+      "signed_pdg": -4332,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 8e-05,
+        "error_positive_gev": 8e-05,
+        "source": "mass_width_2025.txt",
+        "source_line": 149,
+        "source_name_field": "B                   0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.27972
+      },
+      "official_particle": {
+        "canonical_name": "B0",
+        "charge3": 0,
+        "charge_conjugation_type": "P",
+        "official_mcid": 511,
+        "parity": "-",
+        "pdgid": "S042",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "d"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          1
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Bzero",
+      "registry_valence": "d bbar",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": 511,
+      "spin2j1": 1
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 8e-05,
+        "error_positive_gev": 8e-05,
+        "source": "mass_width_2025.txt",
+        "source_line": 149,
+        "source_name_field": "B                   0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.27972
+      },
+      "official_particle": {
+        "canonical_name": "Bbar0",
+        "charge3": 0,
+        "charge_conjugation_type": "A",
+        "official_mcid": -511,
+        "parity": "-",
+        "pdgid": "S042",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "dbar"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          1
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Bzerobar",
+      "registry_valence": "dbar b",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": -511,
+      "spin2j1": 1
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 7e-05,
+        "error_positive_gev": 7e-05,
+        "source": "mass_width_2025.txt",
+        "source_line": 148,
+        "source_name_field": "B                   +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.27941
+      },
+      "official_particle": {
+        "canonical_name": "B+",
+        "charge3": 3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 521,
+        "parity": "-",
+        "pdgid": "S041",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "u"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          2
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Bplus",
+      "registry_valence": "u bbar",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": 521,
+      "spin2j1": 1
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 7e-05,
+        "error_positive_gev": 7e-05,
+        "source": "mass_width_2025.txt",
+        "source_line": 148,
+        "source_name_field": "B                   +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.27941
+      },
+      "official_particle": {
+        "canonical_name": "B-",
+        "charge3": -3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -521,
+        "parity": "-",
+        "pdgid": "S041",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "ubar"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          2
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Bminus",
+      "registry_valence": "ubar b",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": -521,
+      "spin2j1": 1
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 0.0001,
+        "error_positive_gev": 0.0001,
+        "source": "mass_width_2025.txt",
+        "source_line": 153,
+        "source_name_field": "B(s)                0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.36693
+      },
+      "official_particle": {
+        "canonical_name": "B_s()0",
+        "charge3": 0,
+        "charge_conjugation_type": "P",
+        "official_mcid": 531,
+        "parity": "-",
+        "pdgid": "S086",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "s"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          3
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Bszero",
+      "registry_valence": "s bbar",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": 531,
+      "spin2j1": 1
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 0.0001,
+        "error_positive_gev": 0.0001,
+        "source": "mass_width_2025.txt",
+        "source_line": 153,
+        "source_name_field": "B(s)                0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.36693
+      },
+      "official_particle": {
+        "canonical_name": "Bbar_s()0",
+        "charge3": 0,
+        "charge_conjugation_type": "A",
+        "official_mcid": -531,
+        "parity": "-",
+        "pdgid": "S086",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "sbar"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          3
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Bszerobar",
+      "registry_valence": "sbar b",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": -531,
+      "spin2j1": 1
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 0.00032,
+        "error_positive_gev": 0.00032,
+        "source": "mass_width_2025.txt",
+        "source_line": 156,
+        "source_name_field": "B(c)                +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 6.27447
+      },
+      "official_particle": {
+        "canonical_name": "B_c()+",
+        "charge3": 3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 541,
+        "parity": "-",
+        "pdgid": "S091",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "c"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          4
+        ]
+      },
+      "qb": -1,
+      "qc": 1,
+      "registry_name": "Bcplus",
+      "registry_valence": "c bbar",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": 541,
+      "spin2j1": 1
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "meson",
+      "mass": {
+        "error_negative_gev": 0.00032,
+        "error_positive_gev": 0.00032,
+        "source": "mass_width_2025.txt",
+        "source_line": 156,
+        "source_name_field": "B(c)                +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 6.27447
+      },
+      "official_particle": {
+        "canonical_name": "B_c()-",
+        "charge3": -3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -541,
+        "parity": "-",
+        "pdgid": "S091",
+        "spin2j1": 1
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "cbar"
+        ],
+        "kind": "meson",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          4
+        ]
+      },
+      "qb": 1,
+      "qc": -1,
+      "registry_name": "Bcminus",
+      "registry_valence": "cbar b",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": -541,
+      "spin2j1": 1
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00016,
+        "error_positive_gev": 0.00016,
+        "source": "mass_width_2025.txt",
+        "source_line": 268,
+        "source_name_field": "Lambda(b)           0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.61957
+      },
+      "official_particle": {
+        "canonical_name": "Lambda_b()0",
+        "charge3": 0,
+        "charge_conjugation_type": "P",
+        "official_mcid": 5122,
+        "parity": "+",
+        "pdgid": "S040",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "d",
+          "u"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          1,
+          2
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Lambdabzero",
+      "registry_valence": "b u d",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": 5122,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00016,
+        "error_positive_gev": 0.00016,
+        "source": "mass_width_2025.txt",
+        "source_line": 268,
+        "source_name_field": "Lambda(b)           0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.61957
+      },
+      "official_particle": {
+        "canonical_name": "Lambdabar_b()0",
+        "charge3": 0,
+        "charge_conjugation_type": "A",
+        "official_mcid": -5122,
+        "parity": "-",
+        "pdgid": "S040",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "dbar",
+          "ubar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          1,
+          2
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Lambdabzerobar",
+      "registry_valence": "bbar ubar dbar",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": -5122,
+      "spin2j1": 2
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00027,
+        "error_positive_gev": 0.00027,
+        "source": "mass_width_2025.txt",
+        "source_line": 269,
+        "source_name_field": "Sigma(b)            -",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.81564
+      },
+      "official_particle": {
+        "canonical_name": "Sigma_b()-",
+        "charge3": -3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 5112,
+        "parity": "+",
+        "pdgid": "S026",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "d",
+          "d"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          1,
+          1
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Sigmabminus",
+      "registry_valence": "b d d",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": 5112,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00027,
+        "error_positive_gev": 0.00027,
+        "source": "mass_width_2025.txt",
+        "source_line": 269,
+        "source_name_field": "Sigma(b)            -",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.81564
+      },
+      "official_particle": {
+        "canonical_name": "Sigmabar_b()+",
+        "charge3": 3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -5112,
+        "parity": "-",
+        "pdgid": "S026",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "dbar",
+          "dbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          1,
+          1
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Sigmabminusbar",
+      "registry_valence": "bbar dbar dbar",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": -5112,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "UNMEASURED_MODEL_PREDICTION",
+        "generator_mass_status": "QUARK_MODEL_OR_PYTHIA_ONLY",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "NEEDS_PHYSICS_REVIEW",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": null,
+        "error_positive_gev": null,
+        "source": null,
+        "status": "NO_MEASURED_PDG_2025_MASS",
+        "value_gev": null
+      },
+      "official_particle": {
+        "canonical_name": "Sigma_b()0",
+        "charge3": 0,
+        "charge_conjugation_type": "P",
+        "official_mcid": 5212,
+        "parity": "+",
+        "pdgid": "S026",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "u",
+          "d"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          2,
+          1
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Sigmabzero",
+      "registry_valence": "b u d",
+      "review_code": "SIGMA_B_ZERO_UNMEASURED_MODEL_MASS",
+      "sector": "beauty",
+      "signed_pdg": 5212,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "UNMEASURED_MODEL_PREDICTION",
+        "generator_mass_status": "QUARK_MODEL_OR_PYTHIA_ONLY",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "NEEDS_PHYSICS_REVIEW",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": null,
+        "error_positive_gev": null,
+        "source": null,
+        "status": "NO_MEASURED_PDG_2025_MASS",
+        "value_gev": null
+      },
+      "official_particle": {
+        "canonical_name": "Sigmabar_b()0",
+        "charge3": 0,
+        "charge_conjugation_type": "A",
+        "official_mcid": -5212,
+        "parity": "-",
+        "pdgid": "S026",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "ubar",
+          "dbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          2,
+          1
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Sigmabzerobar",
+      "registry_valence": "bbar ubar dbar",
+      "review_code": "SIGMA_B_ZERO_UNMEASURED_MODEL_MASS",
+      "sector": "beauty",
+      "signed_pdg": -5212,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00025,
+        "error_positive_gev": 0.00025,
+        "source": "mass_width_2025.txt",
+        "source_line": 270,
+        "source_name_field": "Sigma(b)            +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.81056
+      },
+      "official_particle": {
+        "canonical_name": "Sigma_b()+",
+        "charge3": 3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 5222,
+        "parity": "+",
+        "pdgid": "S026",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "u",
+          "u"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          2,
+          2
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Sigmabplus",
+      "registry_valence": "b u u",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": 5222,
+      "spin2j1": 2
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.00025,
+        "error_positive_gev": 0.00025,
+        "source": "mass_width_2025.txt",
+        "source_line": 270,
+        "source_name_field": "Sigma(b)            +",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.81056
+      },
+      "official_particle": {
+        "canonical_name": "Sigmabar_b()-",
+        "charge3": -3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -5222,
+        "parity": "-",
+        "pdgid": "S026",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "ubar",
+          "ubar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          2,
+          2
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Sigmabplusbar",
+      "registry_valence": "bbar ubar ubar",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": -5222,
+      "spin2j1": 2
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0004,
+        "error_positive_gev": 0.0004,
+        "source": "mass_width_2025.txt",
+        "source_line": 273,
+        "source_name_field": "Xi(b)               -",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.797
+      },
+      "official_particle": {
+        "canonical_name": "Xi_b()-",
+        "charge3": -3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 5132,
+        "parity": "+",
+        "pdgid": "S069",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "d",
+          "s"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          1,
+          3
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Xibminus",
+      "registry_valence": "b s d",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": 5132,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0004,
+        "error_positive_gev": 0.0004,
+        "source": "mass_width_2025.txt",
+        "source_line": 273,
+        "source_name_field": "Xi(b)               -",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.797
+      },
+      "official_particle": {
+        "canonical_name": "Xibar_b()+",
+        "charge3": 3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -5132,
+        "parity": "-",
+        "pdgid": "S069",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "dbar",
+          "sbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          1,
+          3
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Xibminusbar",
+      "registry_valence": "bbar sbar dbar",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": -5132,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0004,
+        "error_positive_gev": 0.0004,
+        "source": "mass_width_2025.txt",
+        "source_line": 274,
+        "source_name_field": "Xi(b)               0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.7917
+      },
+      "official_particle": {
+        "canonical_name": "Xi_b()0",
+        "charge3": 0,
+        "charge_conjugation_type": "P",
+        "official_mcid": 5232,
+        "parity": "+",
+        "pdgid": "S070",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "u",
+          "s"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          2,
+          3
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Xibzero",
+      "registry_valence": "b s u",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": 5232,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0004,
+        "error_positive_gev": 0.0004,
+        "source": "mass_width_2025.txt",
+        "source_line": 274,
+        "source_name_field": "Xi(b)               0",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.7917
+      },
+      "official_particle": {
+        "canonical_name": "Xibar_b()0",
+        "charge3": 0,
+        "charge_conjugation_type": "A",
+        "official_mcid": -5232,
+        "parity": "-",
+        "pdgid": "S070",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "ubar",
+          "sbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          2,
+          3
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Xibzerobar",
+      "registry_valence": "bbar sbar ubar",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": -5232,
+      "spin2j1": 2
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_XI_B_PRIME_MINUS_STATE",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "NO_OFFICIAL_MCID"
+      },
+      "evidence_state": "NEEDS_PHYSICS_REVIEW",
+      "kind": "baryon",
+      "mass": {
+        "display_value": "5934.9+-0.4",
+        "error_negative_gev": 0.0004135242970782358,
+        "error_positive_gev": 0.0004135242970782358,
+        "source": "pdg-2025-v0.2.3.sqlite:B169M",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.9348838937614605
+      },
+      "official_particle": {
+        "canonical_name": "Xi_b^'(5935)-",
+        "charge3": -3,
+        "charge_conjugation_type": "P",
+        "official_mcid": null,
+        "parity": "+",
+        "pdgid": "B169",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "s",
+          "d"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": false,
+        "quark_digits": [
+          5,
+          3,
+          1
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Xibprimeminus",
+      "registry_valence": "b s d (symmetric light diquark)",
+      "review_code": "XI_B_PRIME_MINUS_NO_OFFICIAL_MCID",
+      "sector": "beauty",
+      "signed_pdg": 5312,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_XI_B_PRIME_MINUS_STATE",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "NO_OFFICIAL_MCID"
+      },
+      "evidence_state": "NEEDS_PHYSICS_REVIEW",
+      "kind": "baryon",
+      "mass": {
+        "display_value": "5934.9+-0.4",
+        "error_negative_gev": 0.0004135242970782358,
+        "error_positive_gev": 0.0004135242970782358,
+        "source": "pdg-2025-v0.2.3.sqlite:B169M",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 5.9348838937614605
+      },
+      "official_particle": {
+        "canonical_name": "Xibar_b^'(5935)+",
+        "charge3": 3,
+        "charge_conjugation_type": "A",
+        "official_mcid": null,
+        "parity": "-",
+        "pdgid": "B169",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "sbar",
+          "dbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": false,
+        "quark_digits": [
+          5,
+          3,
+          1
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Xibprimeminusbar",
+      "registry_valence": "bbar sbar dbar (symmetric light antidiquark)",
+      "review_code": "XI_B_PRIME_MINUS_NO_OFFICIAL_MCID",
+      "sector": "beauty",
+      "signed_pdg": -5312,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "NO_DIRECTLY_LISTED_MEASURED_STATE",
+        "generator_mass_status": "QUARK_MODEL_OR_PYTHIA_ONLY",
+        "official_mcid_status": "NO_OFFICIAL_MCID"
+      },
+      "evidence_state": "NEEDS_PHYSICS_REVIEW",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": null,
+        "error_positive_gev": null,
+        "source": null,
+        "status": "NO_MEASURED_PDG_2025_MASS",
+        "value_gev": null
+      },
+      "official_particle": null,
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "s",
+          "u"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": false,
+        "quark_digits": [
+          5,
+          3,
+          2
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Xibprimezero",
+      "registry_valence": "b s u (symmetric light diquark)",
+      "review_code": "XI_B_PRIME_ZERO_NO_DIRECT_PDG_STATE_OR_MCID",
+      "sector": "beauty",
+      "signed_pdg": 5322,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 0,
+      "classification": {
+        "experimental_state_status": "NO_DIRECTLY_LISTED_MEASURED_STATE",
+        "generator_mass_status": "QUARK_MODEL_OR_PYTHIA_ONLY",
+        "official_mcid_status": "NO_OFFICIAL_MCID"
+      },
+      "evidence_state": "NEEDS_PHYSICS_REVIEW",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": null,
+        "error_positive_gev": null,
+        "source": null,
+        "status": "NO_MEASURED_PDG_2025_MASS",
+        "value_gev": null
+      },
+      "official_particle": null,
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "sbar",
+          "ubar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": false,
+        "quark_digits": [
+          5,
+          3,
+          2
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Xibprimezerobar",
+      "registry_valence": "bbar sbar ubar (symmetric light antidiquark)",
+      "review_code": "XI_B_PRIME_ZERO_NO_DIRECT_PDG_STATE_OR_MCID",
+      "sector": "beauty",
+      "signed_pdg": -5322,
+      "spin2j1": 2
+    },
+    {
+      "charge3": -3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0008,
+        "error_positive_gev": 0.0008,
+        "source": "mass_width_2025.txt",
+        "source_line": 275,
+        "source_name_field": "Omega(b)            -",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 6.0458
+      },
+      "official_particle": {
+        "canonical_name": "Omega_b()-",
+        "charge3": -3,
+        "charge_conjugation_type": "P",
+        "official_mcid": 5332,
+        "parity": "+",
+        "pdgid": "S063",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "b",
+          "s",
+          "s"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          3,
+          3
+        ]
+      },
+      "qb": 1,
+      "qc": 0,
+      "registry_name": "Omegabminus",
+      "registry_valence": "b s s",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": 5332,
+      "spin2j1": 2
+    },
+    {
+      "charge3": 3,
+      "classification": {
+        "experimental_state_status": "MEASURED_PDG_2025",
+        "generator_mass_status": "COMPARED_TO_MEASURED_PDG_2025_MASS",
+        "official_mcid_status": "OFFICIAL_MCID"
+      },
+      "evidence_state": "CORROBORATED",
+      "kind": "baryon",
+      "mass": {
+        "error_negative_gev": 0.0008,
+        "error_positive_gev": 0.0008,
+        "source": "mass_width_2025.txt",
+        "source_line": 275,
+        "source_name_field": "Omega(b)            -",
+        "status": "MEASURED_PDG_2025",
+        "value_gev": 6.0458
+      },
+      "official_particle": {
+        "canonical_name": "Omegabar_b()+",
+        "charge3": 3,
+        "charge_conjugation_type": "A",
+        "official_mcid": -5332,
+        "parity": "-",
+        "pdgid": "S063",
+        "spin2j1": 2
+      },
+      "operational_numbering": {
+        "constituents": [
+          "bbar",
+          "sbar",
+          "sbar"
+        ],
+        "kind": "baryon",
+        "official_mcid_corroborated": true,
+        "quark_digits": [
+          5,
+          3,
+          3
+        ]
+      },
+      "qb": -1,
+      "qc": 0,
+      "registry_name": "Omegabminusbar",
+      "registry_valence": "bbar sbar sbar",
+      "review_code": null,
+      "sector": "beauty",
+      "signed_pdg": -5332,
+      "spin2j1": 2
+    }
+  ],
+  "snapshot_metadata": {
+    "citation": "S. Navas et al. (Particle Data Group), Phys. Rev. D 110, 030001 (2024) and 2025 update",
+    "data_release_timestamp": "2026-05-14 11:31:55 PDT",
+    "edition": "2025",
+    "license": "CC BY 4.0",
+    "producer": "Particle Data Group (PDG)",
+    "schema_version": "0.3",
+    "status": "production"
+  },
+  "sources": {
+    "mass_width": {
+      "repository_copy_committed": false,
+      "sha256": "24df41d7db48d8be875dbc8f69aab95fdf26a0512cd8c033cef2d73cc92c24ef",
+      "url": "https://pdg.lbl.gov/2025/mcdata/mass_width_2025.txt"
+    },
+    "sqlite": {
+      "repository_copy_committed": false,
+      "sha256": "4f1ecd7d9a55bc05f61618cc4574053c1edc6188fab07bb4bb7ebed69f9ec6d3",
+      "url": "https://pdg.lbl.gov/2025/api/pdg-2025-v0.2.3.sqlite"
+    }
+  }
+}

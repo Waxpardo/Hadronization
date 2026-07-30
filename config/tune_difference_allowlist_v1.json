@@ -1,9 +1,15 @@
 {
-  "schema": "pythia_tune_difference_allowlist_v1",
+  "schema": "pythia_tune_difference_allowlist_v2",
   "common_required_card_values": {
     "Beams:eCM": "14000",
     "Beams:idA": "2212",
     "Beams:idB": "2212",
+    "Init:showChangedParticleData": "off",
+    "Init:showMultipartonInteractions": "off",
+    "Next:numberCount": "0",
+    "Next:numberShowEvent": "0",
+    "Next:numberShowInfo": "0",
+    "Next:numberShowProcess": "0",
     "Tune:pp": "14",
     "HardQCD:hardccbar": "on",
     "HardQCD:hardbbbar": "on",
@@ -42,7 +48,11 @@
     "Ropewalk:RopeHadronization"
   ],
   "allowed_per_job_differences": [
+    "Main:numberOfEvents",
+    "PhaseSpace:pTHatMin",
+    "Random:setSeed",
     "Random:seed"
   ],
+  "audit_policy": "Snapshot every Settings entry after pythia.init(). Across aligned jobs, every difference must occur in allowed_tune_differences or allowed_per_job_differences; every other setting must be exactly common.",
   "interpretation": "MONASH, JUNCTIONS, and CLOSEPACKING are full configuration bundles. Differences may not be attributed causally to one switch."
 }

@@ -15,6 +15,9 @@
       "complete_root_tag": "complete_root_21_06_2026",
       "subsample_base": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
       "block_count": 10,
+      "publication_eligible": false,
+      "publication_authorization": null,
+      "publication_authorization_sha256": null,
       "interpretation": "Regression-only input retained as the default until a new canonical manifest and Gates A-D validate."
     }
   }
