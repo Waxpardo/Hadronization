@@ -51,8 +51,8 @@ def main() -> int:
         "max_retries = 0",
         "on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)",
         (
-            'environment = "HADRONIZATION_PTHAT_MIN_OVERRIDE=$(PTHAT);'
-            'HADRONIZATION_STORE_MULTIPLICITY_AUDIT_EVENTS=$(MULT_AUDIT_EVENTS)"'
+            'environment = "HADRONIZATION_PTHAT_MIN_OVERRIDE=$(PTHAT)'
+            ' HADRONIZATION_STORE_MULTIPLICITY_AUDIT_EVENTS=$(MULT_AUDIT_EVENTS)"'
         ),
         (
             "arguments = --campaign $(CAMPAIGN) $(CAMPAIGN_ORDINAL) "

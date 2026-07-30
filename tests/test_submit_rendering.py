@@ -58,6 +58,12 @@ def main() -> int:
         text = output.read_text()
         assert '+JobCategory = "$(CATEGORY)"' in text
         assert "+JobCategory = $(CATEGORY)" not in text
+        assert (
+            "HADRONIZATION_PTHAT_MIN_OVERRIDE=$(PTHAT) "
+            "HADRONIZATION_STORE_MULTIPLICITY_AUDIT_EVENTS="
+            "$(MULT_AUDIT_EVENTS)"
+        ) in text
+        assert "PTHAT);HADRONIZATION" not in text
         assert text.count("render_test,999,") == 3
 
         unsafe = subprocess.run(

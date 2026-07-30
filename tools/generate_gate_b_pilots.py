@@ -21,6 +21,7 @@ def main() -> int:
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--campaign", default="HF_GATEB_primaryGround_pilot_v1")
     parser.add_argument("--campaign-ordinal", type=int, default=2)
+    parser.add_argument("--seed-base", type=int, default=220_000_001)
     args = parser.parse_args()
     root = args.root.resolve()
     output = root / "campaigns" / args.campaign
@@ -45,7 +46,9 @@ def main() -> int:
     )
     for tune_index, tune in enumerate(TUNES):
         for logical_id, pthat, events, category, purpose in profiles:
-            seed = 220_000_001 + tune_index * 10_000 + logical_id * 1_000
+            seed = args.seed_base + tune_index * 10_000 + logical_id * 1_000
+            if not 1 <= seed <= 900_000_000:
+                raise ValueError(f"pilot seed outside PYTHIA domain: {seed}")
             if seed in seeds:
                 raise AssertionError("pilot seed collision")
             seeds.add(seed)
@@ -83,6 +86,7 @@ def main() -> int:
             for tune in TUNES
         },
         "pilot_jobs": len(rows),
+        "seed_base": args.seed_base,
         "purpose": "Gate B one-million logical pilots and pTHat threshold sensitivity",
     }
     output.mkdir(parents=True, exist_ok=True)
