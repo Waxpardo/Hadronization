@@ -132,14 +132,13 @@
   },
   "schema": "hf_gate_b_pthat_sensitivity_spec_v1",
   "scientific_review": {
-    "decision": "APPROVED",
-    "decision_utc": "2026-07-30T23:10:41Z",
-    "events_per_pilot": 1000000,
-    "rationale": "Margins approved as predeclared, before any pilot data exists. Margin VALUES, the 192-comparison family, the Bonferroni critical value 5.797108070583989 and the ten-block structure are all unchanged and must not be loosened after inspecting results. The only change is statistical power: every threshold arm is raised from 100,000 to 1,000,000 successful events per tune so the predeclared equivalence margins are reachable.",
+    "decision": "APPROVE_PTHAT_SENSITIVITY_SPEC",
+    "decision_utc": "2026-07-30T23:18:25Z",
+    "rationale": "Approved by the project owner before any pilot data exists. The margin values, the 192-comparison predeclared family, the Bonferroni critical value 5.797108070583989, the ten-block structure and the trigger-pT and multiplicity binnings are all unchanged by this approval and may not be loosened after inspecting results. The sole accompanying change is statistical power: both pTHat sensitivity arms are raised from 100,000 to 1,000,000 successful events per tune, matching the central arm, because at the frozen critical value a +-15% equivalence margin on the balancing yield requires roughly 2.6% per-block precision that 100,000 events could not deliver for the rarer beauty trigger and multiplicity combinations, which would most likely have produced an INCONCLUSIVE outcome.",
     "reviewer": "I. Pardo Zambrana",
-    "reviewer_role": "project owner / Gate-B owner"
+    "reviewer_role": "project_owner_or_designated_physics_statistics_reviewer"
   },
-  "scientific_review_status": "APPROVED_GATE_B_OWNER",
+  "scientific_review_status": "APPROVED_GATE_B_OWNER_REVIEW",
   "selection": {
     "abs_eta_max_inclusive": 4.0,
     "associate_origins": "inclusive",
