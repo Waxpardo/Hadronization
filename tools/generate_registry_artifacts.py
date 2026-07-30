@@ -124,6 +124,13 @@ def expanded_pairs(definition: dict, by_pdg: dict[int, dict]) -> list[dict]:
                         "trigger_pdg": trigger,
                         "associate_pdg": associate_pdg,
                         "heavy_sign": "OS" if trigger_charge * associate_charge < 0 else "SS",
+                        # A pair is central-eligible only if BOTH endpoints are.
+                        # Review-blocked species remain in the registry and are
+                        # analysed normally, but must not enter central figures.
+                        "central_eligible": bool(
+                            by_pdg[trigger].get("central_eligible", True)
+                            and associate.get("central_eligible", True)
+                        ),
                         "filename": filename,
                         "trigger_label": by_pdg[trigger]["name"],
                         "associate_label": associate["name"],
@@ -138,7 +145,7 @@ def expanded_pairs(definition: dict, by_pdg: dict[int, dict]) -> list[dict]:
 
 def render_species_header(schema: str, sha: str, states: list[dict]) -> str:
     rows = "\n".join(
-        "  {%d, %s, %s, %s, %d, %d, %d, %d},"
+        "  {%d, %s, %s, %s, %d, %d, %d, %d, %s},"
         % (
             state["pdg"],
             cpp_string(state["name"]),
@@ -148,6 +155,7 @@ def render_species_header(schema: str, sha: str, states: list[dict]) -> str:
             state["charge3"],
             state["qc"],
             state["qb"],
+            "true" if state.get("central_eligible", True) else "false",
         )
         for state in states
     )
@@ -171,6 +179,10 @@ struct GroundState {{
   int charge3;
   int qc;
   int qb;
+  // false => produced, stored and analysed normally, but excluded from
+  // central published results pending physics review. See
+  // config/heavy_flavour_species_v1.json for the per-state reason.
+  bool centralEligible;
 }};
 
 inline constexpr std::array<GroundState, {len(states)}> kGroundStates{{{{
@@ -183,6 +195,14 @@ inline const GroundState* FindGroundState(int pdg) {{
   }}
   return nullptr;
 }}
+
+// A state excluded from central results. Callers that build published central
+// figures must skip these; completeness and systematic studies keep them.
+inline bool IsCentralEligible(int signedPdg) {{
+  const GroundState* state = FindGroundState(signedPdg);
+  return state != nullptr && state->centralEligible;
+}}
+
 }}  // namespace Hadronization
 #endif
 """
@@ -190,7 +210,7 @@ inline const GroundState* FindGroundState(int pdg) {{
 
 def render_pair_header(schema: str, source_sha: str, pair_sha: str, pairs: list[dict]) -> str:
     rows = "\n".join(
-        "  {%s, %d, %d, %s, %s, %s, %d, %s},"
+        "  {%s, %d, %d, %s, %s, %s, %d, %s, %s},"
         % (
             cpp_string(pair["sector"]),
             pair["trigger_pdg"],
@@ -200,6 +220,7 @@ def render_pair_header(schema: str, source_sha: str, pair_sha: str, pairs: list[
             cpp_string(pair["associate_kind"]),
             pair["reference_meson_pdg"],
             "true" if pair["legacy_filename"] else "false",
+            "true" if pair["central_eligible"] else "false",
         )
         for pair in pairs
     )
@@ -224,6 +245,8 @@ struct PairDefinition {{
   std::string_view associateKind;
   int referenceMesonPdg;
   bool legacyFilename;
+  // False => excluded from central published results.
+  bool centralEligible;
 }};
 
 inline constexpr std::array<PairDefinition, {len(pairs)}> kPairDefinitions{{{{

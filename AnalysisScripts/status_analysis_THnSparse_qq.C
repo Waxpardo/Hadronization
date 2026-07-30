@@ -1150,6 +1150,11 @@ int status_analysis_THnSparse_qq(
       pair.associate->Write("hAsKinematics");
       pair.correlation->Write("hCorrelations");
       pair.correlationByOrigin->Write("hCorrelationsByOrigin");
+      // Central eligibility travels with the data, so a plotting layer cannot
+      // silently include a review-blocked species in a published figure.
+      TParameter<bool> centralEligible(
+          "centralEligible", pair.definition->centralEligible);
+      centralEligible.Write("centralEligible");
       TObjString originCategorySchema(
           Hadronization::kAssociateOriginCategorySchema);
       originCategorySchema.Write("associate_origin_category_schema");

@@ -150,7 +150,7 @@ void WriteFixture(const std::string& path, Mutation mutation) {
               "primary_all_heavy_match_valid/I");
   for (const char* name : {
            "heavyIndex", "heavyPdg", "heavyStatus", "heavyIsFinal",
-           "heavyCentral", "heavyQc", "heavyQb", "heavyOriginC",
+           "heavyCentral", "heavyStateCategory", "heavyQc", "heavyQb", "heavyOriginC",
            "heavyOriginB", "heavyMatchResolutionC",
            "heavyMatchResolutionB", "heavyMatchedHardC",
            "heavyMatchedHardB", "heavyRejectedHardC",
