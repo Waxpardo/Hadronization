@@ -1,99 +1,135 @@
 # Pre-production gate report — 2026-07-30
 
-Status: **not authorized for the 300M canonical submission**.
+Status: **not authorized for full production**.
 
-This report records evidence gathered on the isolated `full-production`
-branch and isolated Nikhef worktrees. It is not a final publication report.
-Canonical `/data/alice/ipardoza/Hadronization`, the separate deterministic-seed
-feature checkout, the dirty local bibliography, and the untracked paper draft
-were not modified.
+This is a human-readable evidence ledger, not a machine gate artifact. It does
+not substitute for the immutable JSON reports produced by
+`run_publication_gate_{a,b,c,d}.sh`, a project-owner physics decision, or the
+full-production launch authorization.
 
-## Source state
+## Protected source state
 
-- verified baseline: `origin/main` at `11884cf1` when the isolated branch was
-  created;
-- Paul-compatible plotting hardening ancestor: `d8de9b6`;
-- first corrected pilot implementation: `9a8e92b`;
-- clean Gate A validation commit: `738df28`;
-- local implementation worktree:
+- implementation branch: `full-production`;
+- verified stable-main baseline when the isolated worktree was created:
+  `11884cf1ad3613e8e6997bbff32d48a3e7d89570`;
+- isolated local implementation:
   `/private/tmp/hadronization-full-production`;
-- Nikhef diagnostic/development checkout:
-  `/data/alice/ipardoza/Hadronization-full-production`;
-- clean v5 pilot checkout:
-  `/data/alice/ipardoza/Hadronization-full-production-run-v5`.
-- event-unique origin implementation: `c9c24a9`;
-- schema-aware pilot-manifest implementation: `3efde0f`;
-- clean final pilot checkout:
-  `/data/alice/ipardoza/Hadronization-full-production-run-v7`.
+- protected dirty local checkout:
+  `/Users/wax/Documents/Research/Projects/Hadronization`;
+- canonical Nikhef checkout:
+  `/data/alice/ipardoza/Hadronization`;
+- protected, noncanonical Nikhef deterministic-seed checkout:
+  `/data/alice/ipardoza/Hadronization-main`.
 
-## Gate A
+The local bibliography change and untracked paper directory remain outside
+the plotting/production commits. The protected Nikhef feature checkout must
+not be reset, merged, or repurposed for this task. Old
+`/data/alice/ipardoza/Hadronization-full-production*` execution checkouts are
+diagnostic evidence, not canonical `main`.
 
-Result: **pass at commit `738df28`; rerun only if implementation code changes**.
+Paul Veen's merged THnSparse architecture on stable `main` remains the
+scientific-consumer baseline. The publication branch changes it only where a
+test establishes a physics/statistical/methodological or fail-closed
+reproducibility defect.
 
-Evidence on Nikhef:
+## Current implementation contracts
 
-- `ValidationReports/GateA_20260730/producer_forced_build.log`;
-- `ValidationReports/GateA_20260730/compile_and_unit.log`;
-- `ValidationReports/GateA/species_registry_pythia_audit.csv`;
-- `ValidationReports/HF_DEV_settings_20260730x/effective_tune_differences.csv`;
-- clean final-commit transcript:
-  `/data/alice/ipardoza/Hadronization-full-production-validate-v6/ValidationReports/GateA_20260730_final/compile_and_unit_738df28.log`.
+The release candidate must use:
 
-Observed environment:
+| Contract | Version |
+|---|---|
+| raw schema | `hf_primary_ground_raw_v5` |
+| central selector | `hard_trigger_primary_ground__primary_ground_associate_v1` |
+| origin algorithm | `signed_heavy_constituent_complete_mothers_unique_v4` |
+| heavy-stability audit | `heavy_stability_audit_v2` |
+| effective settings | `effective_pythia_settings_exhaustive_v2` |
+| tune allowlist | `pythia_tune_difference_allowlist_v2` |
+| all-primary-heavy match | `primary_all_heavy_constituent_match_v1` |
+| pair analysis schema | `paul_pair_objects_primary_ground_v2` |
+| analysis metadata | `hf_analysis_job_metadata_v3` (raw receipt plus independent fail-closed preflight binding) |
+| canonical manifest | `hf_canonical_raw_manifest_v2` |
+| canonical summary | `hf_canonical_freeze_summary_v3` |
+| canonical validation receipt | `hf_canonical_raw_validation_receipt_v2` |
+| canonical seal | `hf_canonical_freeze_seal_v2` |
 
-- ROOT 6.30/01 ALICE build;
-- PYTHIA 8.315;
-- 50 signed ground-state registry entries;
-- 300 signed ordered pair definitions;
-- effective tune audit: 46 compared settings, 29 differences, consisting of
-  28 allowlisted tune-bundle differences plus the per-job random seed;
-- no project-source compiler warning; external ROOT/PYTHIA headers emit
-  conversion warnings under the intentionally strict flags.
-- final producer SHA-256:
-  `05aa60ab23b638286169ee16272f29aa193500fffed4d5b1c53d007da4e8853e`.
+Any older raw-v3/v4 pilot is historical diagnostic evidence and cannot pass
+the current gates.
 
-Tests passed:
+## Gate status
 
-- species and pair artifact determinism;
-- exact trigger/associate and multiplicity pT/eta boundaries;
-- event-ID collision toy;
-- OS/SS ordered-pair and baryon/reference-meson toy identities;
-- tune-card allowlist;
-- submit rendering, including quoted `JobCategory` and separate Condor
-  environment variables;
-- synthetic plotting projection: one selected numerator entry and one matching
-  trigger denominator;
-- optional mini-pad null safety;
-- pair-directory object, overflow, integral, and inclusive/by-origin closure.
+| Gate | Current status | Why |
+|---|---|---|
+| A | **blocked; must rerun** | Historical passes predate raw-v5 and the final gate/registry contracts. The independent checksum-bound PDG 2025 audit now exists and mechanically corroborates 44/50 signed entries, but six return `NEEDS_PHYSICS_REVIEW`; no physics signoff or registry decision exists. |
+| B | **not passed** | No final fresh-seed raw-v5 nine-pilot campaign has been completed and sealed. pTHat, origin, stability, settings, resource, and compression evidence remain required. |
+| C | **must rerun canonically** | Earlier synthetic/failure tests are useful, but the new immutable ten-requirement runner must pass at the exact release commit. Development mode is always noncanonical FAIL. |
+| D | **not run to completion; storage blocked** | Requires canonical Gate-B PASS, three central raw-v5 pilots, 33 all/block analyses, passing representative smoke points, the versioned exhaustive full-config coverage/sizing audit, a real legacy comparison, measured storage/final capacity evidence, and human visual review. The current volatile read-only storage snapshot is already below the reserve floor. |
+| E | **not authorized; storage blocked** | No owner-created origin decision, no owner-created Gates A--D/pTHat authorization, no approved storage projection, and no final launch go-ahead; current available storage cannot satisfy the 5% reserve even before new allocation. |
 
-All 15 ROOT validation, analysis, merge, and plotting macros loaded or
-compiled successfully in a clean detached worktree. The transcript was
-explicitly scanned for `fatal error`, `Error in <ACLiC>`, undefined
-references, segmentation faults, and cling JIT failures. This scan was added
-after ROOT returned status zero for an earlier ACLiC header failure.
+Historical Gate-A evidence at commits such as `738df28` and `c9c24a9`
+demonstrated useful producer, ROOT macro, registry, and hard-carrier tests.
+Those artifacts must not be cited as a PASS for a later commit.
 
-Repository accountability is recorded in `REPOSITORY_FILE_CATALOG.md`, which
-is generated and checked by `tools/generate_file_catalog.py`. At this report
-revision it contains exactly one row for each of 673 tracked paths:
-32 authoritative, 52 support, 456 generated, and 133 legacy. Every
-authoritative row names a validation path, and the mechanical coverage check
-passes. The protected untracked paper tree and stale raw-v2 campaign material
-are called out separately rather than silently included in the canonical
-pipeline.
+### Independent-PDG audit implemented; physics decision still blocked
 
-The implementation delta at `c9c24a9` was compiled in clean worktree
-`/data/alice/ipardoza/Hadronization-full-production-validate-v7`.
-`ValidationReports/GateA_20260730_event_unique/compile_and_unit_c9c24a9.log`
-records a successful producer build, successful `ValidateRawOutput.C` ACLiC
-load, and
-`HARD_CARRIER_UNIQUENESS_TEST_PASS conflict_groups=1 demoted_matches=2`.
+`Validation/AuditSpeciesRegistry.C`,
+`tools/pdg_2025_species_audit.py`, and
+`config/pdg_2025_species_reference_v1.json` now establish both installed-
+PYTHIA consistency and an independent, per-signed-species comparison against
+official PDG 2025 sources:
 
-## Gate B
+- `https://pdg.lbl.gov/2025/api/pdg-2025-v0.2.3.sqlite`, SHA-256
+  `4f1ecd7d9a55bc05f61618cc4574053c1edc6188fab07bb4bb7ebed69f9ec6d3`;
+- `https://pdg.lbl.gov/2025/mcdata/mass_width_2025.txt`, SHA-256
+  `24df41d7db48d8be875dbc8f69aab95fdf26a0512cd8c033cef2d73cc92c24ef`.
 
-Result: **in progress and not yet passed**.
+The exact non-mutating extraction check is:
 
-Earlier 1,000-success raw-v3 diagnostics, after correcting the trigger audit
-to the publication trigger registry, found:
+```bash
+python3 tools/pdg_2025_species_audit.py extract \
+  --sqlite /absolute/path/to/pdg-2025-v0.2.3.sqlite \
+  --mass-width /absolute/path/to/mass_width_2025.txt \
+  --registry config/heavy_flavour_species_v1.json \
+  --output config/pdg_2025_species_reference_v1.json \
+  --check
+```
+
+The canonical combined PYTHIA/PDG audit is run by:
+
+```bash
+./run_publication_gate_a.sh \
+  Production/validation/<COMMIT>/gate_a
+```
+
+Its underlying official-source command is
+`python3 tools/pdg_2025_species_audit.py check --pythia-csv
+<GATE_A>/species_registry_pythia_audit.csv --require-pythia --output
+<GATE_A>/species_registry_pdg_audit.json`. The audit deliberately exits 2
+with state `NEEDS_PHYSICS_REVIEW`: 44 signed entries are corroborated and six
+(`+/-5212`, `+/-5312`, `+/-5322`) are review-blocked. It records no technical
+failure and explicitly records `owner_signoff_present=false`.
+
+The evidence establishes that the 2025 PDG database:
+
+- does not assign official MCIDs `5312` or `5322`;
+- does not directly list a measured Xi-prime-b-zero state/mass;
+- treats Sigma-b-zero as an unmeasured/model-prediction state.
+
+The implementation is complete, but the scientific decision is not. The
+audit did not change `config/heavy_flavour_species_v1.json`; no reviewed
+treatment, owner signoff, or paper-text decision exists. Gate A must therefore
+remain blocked until physics review decides how the operational PYTHIA
+entries are represented in production and the paper. Do not silently remove,
+relabel, or claim these states as experimentally established.
+
+Historical Gate-C demonstrations showed partial-file rejection, corrupt-file
+rejection, new-seed retry, a synthetic 300-row freeze, ten blocks, and a
+deterministic 100/200/200 render. The current
+`hf_publication_gate_c_report_v1` must reproduce all ten Section-16
+requirements in one immutable canonical run.
+
+## Historical pilot findings
+
+Earlier 1,000-success diagnostics, before the final raw-v5 contract, found:
 
 | Tune | publication trigger candidates | unresolved | fraction |
 |---|---:|---:|---:|
@@ -101,157 +137,258 @@ to the publication trigger registry, found:
 | JUNCTIONS | 470 | 6 | 0.012765957 |
 | CLOSEPACKING | 450 | 4 | 0.008888889 |
 
-All ten unresolved cases were charm triggers with
-`MatchResolution::kAmbiguous`. Exact candidates were inspected with
-`Validation/ListUnresolvedOrigins.C`. The validated pilot goal is zero. If a
-statistically adequate final pilot still has a nonzero fraction, the project
-owner must explicitly approve the exclusion of unresolved triggers from the
-central sample while retaining unresolved associates as an origin category.
-`submit_full_production.sh --submit` enforces that decision with
-`PHYSICS_ORIGIN_SIGNOFF.json`.
+These numbers are not final rates. They established that:
 
-The larger v5 sensitivity pilots confirm that this is a physical
-event-record ambiguity, not a missing object. For example, JUNCTIONS local
-success 59 in the `pTHatMin=0.5` sample (process code 121,
-`pTHat=2.8624 GeV`) contains accepted D+ and D*+ states with the same explicit
-fragmentation mother range 712--718. That range contains two same-sign charm
-carriers, indices 715 and 716, whose ancestry traces respectively to the
-selected hard charm and a shower charm. There is no unique event-record
-assignment of either hadron to one carrier. The conservative matcher therefore
-returns `kAmbiguous` rather than choosing a convenient lineage. Since the
-observed ambiguity fraction is tune dependent, excluding these triggers may
-bias a tune comparison and must not be silently accepted.
+- unresolved cases can be tune dependent;
+- status 81--89 is not equivalent to selected-hard origin;
+- a permissive or iteration-order tie break could bias tune comparisons;
+- final million-event pilots must report trigger and associate origin
+  resolution separately.
 
-They also exposed a separate event-level defect. Five of the six one-pass
-sensitivity analyses aborted on their hard-carrier uniqueness invariant:
-MONASH low-pThat had 1 conflicting ordered pair, JUNCTIONS low/high had 17/19,
-and CLOSEPACKING low/high had 10/32. Only MONASH high-pThat had zero. In
-CLOSEPACKING low-pThat event 13615, final D0 and D+ both have mother range
-916--918, containing the same selected hard charm at index 918; in event
-15614, final anti-Sigma_c++ and D- both have mother range 119--120, containing
-the same selected hard anticharm at index 120. The old matcher called each
-per-hadron walk unique but did not enforce uniqueness across the event.
+Several earlier sensitivity analyses also exposed an event-level duplicate
+hard-carrier defect: multiple final hadrons could claim one selected hard
+quark through a shared string/junction mother range. The implementation now
+demotes every conflicting claim to unresolved and retains rejected indices and
+group/demotion counters. Raw validation independently requires that no
+authoritative duplicate survives.
 
-Commit `c9c24a9` adds the missing event-level constraint. Every final
-open-heavy claim in a duplicate group is conservatively demoted to unresolved
-with `MatchResolution::kDuplicateHardCarrier`; the original conflicting hard
-index and aggregate group/demotion counts remain auditable. The one-pass
-analysis keeps its fatal same-carrier invariant, so a producer or validator
-regression still stops the reduction.
+Raw-v5 adds further closure:
 
-Submission history:
+- complete signed constituent content, including Bc and multi-heavy states;
+- constituent-level all-primary-heavy matching;
+- multi-heavy single-carrier rejection;
+- exhaustive heavy-stability v2 serialization and hash;
+- exhaustive post-init effective-settings v2 serialization and hash;
+- resource/compression metadata needed for Gate-B projections.
 
-- v2 never reached Condor because `+JobCategory` was unquoted;
-- v3 cluster `5200389` held before generation because two environment
-  assignments were joined with a semicolon; its nine attempt-0 seeds are
-  permanently consumed and must not be reused or released;
-- v4 never reached Condor because the login-node batch environment lacked
-  PYTHIA;
-- v5 cluster `5200390` was submitted from Stoomboot with nine fresh seeds and
-  separate environment variables: one 1,000,000-success central job plus
-  100,000-success `pTHatMin=0.5` and `2.0` jobs for each tune.
-- v6 was generated before the event-unique implementation and was never
-  submitted. Its ordinal and seeds remain reserved and will not be reused.
-- v7 was generated at `3efde0f` with ordinal 25 and fresh seed interval
-  beginning at 260000001. Its nine-job schema, hashes, origin algorithm, exact
-  implementation commit, and seed ledger validated before dry-run and
-  submission to cluster `5200393`.
+Only a fresh raw-v5 campaign at the final commit can validate these fixes.
 
-The clean v5 producer was built with GCC 14.2, ROOT 6.30/01 and PYTHIA 8.315;
-its SHA-256 was
-`4ec3818f9ac698eb3f526793df794d2b871ec713c21cd464d16da510b9872184`.
-The v5 run is diagnostic because the later weak-parent-registry commit changes
-the strong/EM cross-check definition. A fresh-seed final pilot from the final
-implementation commit is required before Gate B can pass.
+## Historical campaign/seed ledger
 
-## Gate C
+Known immutable operational history includes:
 
-Result: **pass; rerun final smoke at the release commit**.
+- the old full `HF_100M_primaryGround_ccbb_v1` reservation;
+- Gate-B pilot versions through v7;
+- historical pilot ordinals through 25;
+- a v7 seed range beginning at 260000001;
+- earlier failed/held/unsubmitted attempts whose ordinals and seeds remain
+  burned.
 
-Demonstrated:
+The next planned corrected Gate-B allocation is:
 
-- forced producer failure does not promote a partial file;
-- interrupted/aborted attempt does not promote;
-- corrupt stable output is rejected and not overwritten;
-- a retry requires a new ledger seed;
-- a valid stable output is reused only after validation;
-- unauthorized seed/attempt is rejected;
-- synthetic canonical freeze has exactly 300 unique rows and seeds;
-- each of ten blocks has ten jobs per tune;
-- block union equals the central manifest;
-- 100M successful events per tune are represented;
-- a 500-candidate 100/200/200 submit render is deterministic.
+```text
+campaign ordinal: 26
+seed base:         270000001
+```
 
-## Gate D
+This plan is valid only after a reviewed shared-registry baseline confirms no
+new claim. If the global registry has advanced, allocate a new range; never
+edit or reuse the example.
 
-Result: **not complete**.
+The shared registry root must be absolute and common to every checkout:
 
-The one-pass analysis and pair-directory validator have passed on development
-raw-v3 input, but Gate D still requires a final-commit pilot to complete:
+```text
+/user/ipardoza/.local/state/hadronization/submission_registry
+```
 
-1. exhaustive raw validation for all three tunes;
-2. origin, stability, multiplicity, process, settings, runtime and storage
-   reports;
-3. pTHat sensitivity comparison;
-4. one-pass analysis of the validated pilots;
-5. central/block merge and provenance validation;
-6. reduced THnSparse smoke with finite block SEM;
-7. one raw-event-to-final-bin trace;
-8. final-commit macro compilation and visual inspection.
+Repository identity:
 
-## Correctness defects found and resolved
+```text
+github.com/waxpardo/hadronization
+```
 
-1. Origin audits originally counted every stored heavy species as a trigger;
-   publication triggers now come from the pair registry.
-2. The plotting correlation numerator did not apply configured pT/eta cuts
-   while the trigger denominator did. Both now use identical initialized cuts.
-3. Several plotting cut fields were uninitialized. All are initialized, and
-   unsupported individual phi cuts fail explicitly.
-4. The legacy same-sign factor 0.5 is incorrect for the new ordered-pair
-   estimator. Canonical configs use 1.0.
-5. Pair validation did not prove origin-component closure or all-axis overflow
-   safety. It now does.
-6. Condor `JobCategory` needed quoting.
-7. Condor environment assignments needed spaces, not a semicolon.
-8. Non-interactive Nikhef login shells could lose PYTHIA when `alienv` Tcl
-   initialization failed. A pinned CVMFS fallback and ABI-compatible GCC 14.2
-   runtime were added.
-9. Generic `root-config --libs` introduced unrelated Arrow linkage. The
-   producer now links only Tree, Hist, RIO, and Core.
-10. The strong/EM multiplicity cross-check lacked a machine-readable weak
-    parent table and omitted the neutral-kaon flavour state. The new registry
-    is generated into the C++ build and unit tested.
-11. Production and analysis formerly depended on directory discovery. The
-    canonical path now uses immutable candidate, seed, freeze and block
-    manifests only.
-12. Plot inputs lacked a single dataset switch. `config/dataset_selector.json`
-    now labels the old dataset as regression-only and controls raw, central and
-    block roots.
-13. Independent origin walks could assign one hard carrier to several final
-    hadrons sharing a PYTHIA string/junction mother range. An event-level
-    uniqueness post-pass now demotes every conflicting claim to an auditable
-    unresolved subtype, and raw validation proves no duplicate survives.
-14. The campaign validator assumed every manifest was a 500-candidate
-    production and rejected nine-job Gate-B manifests. Validation is now
-    schema-aware and additionally rejects a pilot generated from a different
-    implementation commit or physics-contract hash.
-15. Gate-B analysis previously required an ad hoc Condor submit description
-    because the canonical submitter accepts only a frozen 300-file manifest.
-    `submit_gate_b_analysis.sh` now exhaustively validates and queues exactly
-    the nine pilot files, and
-    `tools/validate_gate_b_analysis_outputs.py` proves exact raw-checksum and
-    300-pair coverage.
+Identity SHA-256 directory:
 
-## Blocking decisions and work
+```text
+1442238020041daba768ccebfb260e5516bd697057dfb2ab0ae5aa2f0d84dc02
+```
 
-- Complete and exhaustively validate final fresh-seed v7 pilots from
-  `3efde0f`, including event-unique demotion counts, runtime, and pTHat
-  evidence.
-- Obtain explicit project-owner origin sign-off if the final unresolved
-  trigger fraction is nonzero.
-- Only then create and submit the immutable 300M campaign.
-- The paper figures and prose cannot be finalized until the canonical freeze,
-  ten-block analysis, strict uncertainty audit, figure provenance map, and
-  five independent reviews are complete.
+Before the next submission, create one immutable
+`hf_submission_registry_baseline_v1` from every historical full/Gate-B
+campaign. Preserve and burn historical overlaps; do not omit unsuccessful
+campaigns.
 
-No production-scale submission is authorized by this report.
+## HTCondor and storage findings
+
+Read-only Nikhef inspection established:
+
+- Condor submission must occur on a Stoomboot interactive host such as
+  `stbc-i2`, not the login node;
+- rendered jobs need a quoted `+JobCategory` and EL9;
+- `getenv = False` plus explicit environment prevents accidental shell-state
+  inheritance;
+- no automatic retry or release is allowed;
+- `/data/alice` is shared NFS and requires cautious merge/read concurrency;
+- the latest 2026-07-30 read-only Nikhef snapshot, at
+  `2026-07-30T17:39:21+02:00`, reported capacity
+  `36,688,187,162,624` bytes and available space (`f_bavail`)
+  `1,671,602,503,680` bytes. The required 5% reserve is
+  `1,834,409,358,131` bytes, so the filesystem was already short by
+  `162,806,854,451` bytes (about 151.7 GiB) before allocating any new
+  production data.
+
+This storage snapshot is volatile read-only evidence, not a canonical Gate-D
+projection artifact. It is nevertheless an explicit Gate-D/E blocker:
+available space cannot satisfy the reserve rule even for a zero-byte new
+allocation. Gate B must record, per tune, one-million-event elapsed time, peak
+RSS, raw bytes, ROOT compression, and projections for:
+
+- exact 300-file canonical data;
+- all 500 possible candidate outputs;
+- simultaneous partials;
+- 90,000 per-job pair files before merging;
+- central plus ten block merges;
+- plots, logs, receipts, and preserved legacy production.
+
+No full launch is allowed until measured need plus safety margin fits current
+headroom.
+
+Historical queue inspection also found old held/running diagnostic jobs from
+pre-final implementations. They are noncanonical, but they must not be
+removed or released without a deliberate owner decision. Their seeds remain
+burned regardless of disposition.
+
+## Correctness and reproducibility defects addressed in code
+
+The branch contains or is integrating tests/fixes for:
+
+1. exact one-million-success accounting rather than attempt counting;
+2. one event-tree entry for empty-heavy successful events;
+3. integer branch types and globally collision-free event IDs;
+4. complete heavy-hadron stabilization and v2 audit;
+5. signed constituent-aware complete-mother origin v4;
+6. global duplicate-hard-carrier and multi-heavy rejection;
+7. trigger-only hard-origin requirement with inclusive associate origins;
+8. common direct-primary lifecycle selector for both roles;
+9. trigger `pT > 1` and associate `pT > 0.15 GeV/c`;
+10. signed charge-conjugate separation and complete 50-state/300-pair
+    registries;
+11. one raw scan for all pairs;
+12. corrected B0/Sigma_b trigger/filename;
+13. ordered conditional pair counting without central factor 0.5;
+14. canonical-manifest-only analysis/merge/block selection;
+15. append-only exact seed and retry evidence;
+16. cross-checkout submission registry and historical baseline;
+17. semantic validation of canonical Gate A--D and pTHat reports;
+18. complete launch-provenance binding through freeze and seal;
+19. event-ID-modulo Gate-D pilot blocks;
+20. ten-block SEM, nonlinear within-block ratios, and independent-tune
+    propagation;
+21. raw-v5 upstream selection metadata with no downstream double recut;
+22. exact tagged legacy recuts only for `complete_root_21_06_2026`;
+23. fail-closed upper-pT/axis-flow, missing-object, and coverage checks;
+24. canonical tune styling and numerator-tune ratio style;
+25. optional mini-pad null safety and required-pad composition checks.
+
+This list describes intended implementation coverage. Each item still needs
+its final-release Gate-A/D regression evidence.
+
+## Legacy plotting evidence
+
+The real Nikhef regression inputs are:
+
+```text
+AnalyzedData/complete_root_21_06_2026_MONASH
+AnalyzedData/complete_root_21_06_2026_JUNCTIONS
+AnalyzedData/complete_root_21_06_2026_CLOSEPACKING
+AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH
+AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS
+AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING
+```
+
+They contain the expected 56 pair files centrally and in each of ten
+subsamples. Prior validation found required ROOT objects and representative
+central-versus-subsample-union agreement.
+
+The exhaustive statistical audit nevertheless found:
+
+- 610 configured observables without ten finite subsample estimates;
+- 540 beauty and 70 charm incomplete cases;
+- 468 of 1,152 expected final statistical records with `n=10`;
+- 1,781 zero-trigger-normalization warnings.
+
+The historical reduced 1--10% legacy-regression selection produced 30/30
+finite positive SEM records. That proves error propagation for supported
+legacy inputs, not full-paper coverage. The explicit full legacy-regression
+audit must continue to fail its coverage gate. Canonical full/smoke targets
+must refuse the legacy selector; do not promote a reduced legacy-regression
+canvas or label it as raw-v5.
+
+The new plotting selection contract uses pT/eta recuts only for this exact
+metadata-free legacy tag. New pair metadata v2 is selected upstream and is
+validated without a downstream recut.
+
+## Owner decisions
+
+Every full launch requires two distinct real-owner artifacts:
+
+1. `PHYSICS_ORIGIN_SIGNOFF.json`: mandatory, read-only schema
+   `hf_full_production_origin_signoff_v1` with
+   `decision=APPROVE_FULL_PRODUCTION`,
+   `reviewer_role=project_owner`, a real UTC decision, the exact Gate-B
+   path/checksum/campaign/ordinal, and the complete nine-sample
+   tune/threshold-by-sector unresolved table and total. With zero, its exact
+   policy is `No unresolved trigger candidates were observed; no special
+   treatment is required.` With nonzero, its exact policy is `Exclude
+   unresolved triggers centrally; retain unresolved associates as a reported
+   origin category` and it binds a superseding Gate-B PASS.
+2. `FULL_PRODUCTION_GATE_AUTHORIZATION.json`: schema
+   `hf_full_production_gate_authorization_v1`, binding exact canonical Gate A,
+   Gate B, pTHat, Gate C, and Gate D reports, their checksums/logs, the
+   campaign, commit, and origin-decision checksum. Both owner files must be
+   single-link mode-`0444` regular files with real explicitly UTC, non-future
+   owner timestamps.
+
+The bound Gate-D report must include
+`hf_gate_d_storage_projection_v1`, `state=PASS`, and
+`gate_e_storage_authorized=true`. Its preparation and fresh finalization
+capacity checks use `os.statvfs(...).f_bavail`; each filesystem may allocate
+at most 70% of current available space and must retain at least
+`max(5% of capacity, 500 GiB)` after the complete raw, partial, analysis,
+merged-block, plot, log, and evidence projection.
+
+A checksummed FAIL or `NEEDS_SIGNOFF` report is not a PASS. A coding agent
+must not create, backdate, or infer either approval.
+
+## Required next actions
+
+1. Finish code/schema reconciliation and commit the exact release candidate.
+2. Run canonical Gate A from a new clean Nikhef execution checkout.
+3. Build/review the shared historical reservation baseline.
+4. Generate a fresh raw-v5 Gate-B pilot at an unused ordinal/seed interval.
+5. Dry-run, inspect, submit, and monitor exactly nine pilot rows.
+6. Validate every raw file and receipt; run pTHat and aggregate Gate B.
+7. If unresolved triggers are nonzero, stop for owner review and a
+   read-only `campaigns/<GATEB_CAMPAIGN>/GATE_B_PHYSICS_SIGNOFF.json`;
+   verify it with `resolve_publication_gate_b_signoff.sh --verify-only`, then
+   emit a separate immutable superseding Gate-B PASS. Do not alter the
+   original `NEEDS_SIGNOFF` report.
+8. Run canonical Gate C at the same commit.
+9. Run Gate-D preparation, produce the legacy comparison, inspect every
+   rendered PDF page, verify the measured storage projection, and finalize
+   Gate D with a fresh passing capacity recheck.
+10. Recheck `/data/alice` headroom using Gate-B measurements.
+11. Generate a new full campaign; do not reuse historical v1.
+12. Obtain the mandatory origin decision and full Gate-E authorization.
+13. Only then submit 100/200/200 candidates.
+14. Reconcile attempts and failure bias; freeze exactly 100 files/tune.
+15. Seal the 300-file manifest and ten deterministic file blocks.
+16. Run canonical analysis, merging, robustness, strict plotting, exhaustive
+    coverage, figure provenance, paper build, and five final reviews.
+
+## Release blockers
+
+- no canonical raw-v5 Gate-A report at the final commit;
+- no fresh nine-job raw-v5 Gate-B result;
+- no accepted pTHat decision at the final commit;
+- no final origin-resolution decision;
+- no canonical Gate-C report at the final commit;
+- no finalized Gate-D legacy/visual review;
+- no measured storage authorization;
+- no full-production owner authorization;
+- no 300-file canonical freeze/seal;
+- no complete ten-block coverage/precision matrix;
+- no regenerated and reviewed final paper artifacts.
+
+Therefore no production-scale submission or publication-complete claim is
+authorized by this report.
