@@ -71,13 +71,18 @@ if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then
   # login having populated PYTHIA8 first.
   if [[ -z "${PYTHIA8:-}" ]] || ! command -v pythia8-config >/dev/null 2>&1; then
     pythia_package="/cvmfs/alice.cern.ch/el9-x86_64/Packages/pythia/v8315-alice1-23"
+    pythia_gcc_package="/cvmfs/alice.cern.ch/el9-x86_64/Packages/GCC-Toolchain/v14.2.0-alice2-2"
     if [[ ! -x "${pythia_package}/bin/pythia8-config" ]]; then
       echo "ERROR: pinned PYTHIA package is unavailable: ${pythia_package}" >&2
       return 1 2>/dev/null || exit 1
     fi
+    if [[ ! -x "${pythia_gcc_package}/bin/g++" ]]; then
+      echo "ERROR: pinned PYTHIA compiler runtime is unavailable: ${pythia_gcc_package}" >&2
+      return 1 2>/dev/null || exit 1
+    fi
     export PYTHIA8="${pythia_package}"
-    export PATH="${pythia_package}/bin:${PATH}"
-    export LD_LIBRARY_PATH="${pythia_package}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+    export PATH="${pythia_gcc_package}/bin:${pythia_package}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${pythia_gcc_package}/lib64:${pythia_package}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
   fi
 else
   echo "WARNING: CVMFS not available — ROOT and PYTHIA not loaded via alienv."

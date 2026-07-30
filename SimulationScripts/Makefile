@@ -13,7 +13,13 @@ ifeq ($(ROOT_CONFIG),)
 endif
 
 ROOT_CXXFLAGS := $(shell $(ROOT_CONFIG) --cflags)
-ROOT_LIBS     := $(shell $(ROOT_CONFIG) --libs)
+# Link only the ROOT components used by the event producer.  The generic
+# `root-config --libs` set also pulls in RDataFrame/Arrow, which is unrelated
+# to production and makes non-interactive batch builds depend on a much larger
+# alienv runtime.
+ROOT_LIBDIR   := $(shell $(ROOT_CONFIG) --libdir)
+ROOT_LIBS     := -L$(ROOT_LIBDIR) -lTree -lHist -lRIO -lCore \
+                 $(shell $(ROOT_CONFIG) --auxlibs)
 
 # Prefer the explicit PYTHIA8 environment path because some cluster
 # pythia8-config scripts exist but do not return usable flags.
