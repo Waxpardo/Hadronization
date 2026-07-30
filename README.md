@@ -1,5 +1,9 @@
 # Hadronization
 
+> **Design rationale.** Every physics choice in this repository, its motivation and
+> the evidence backing it, is documented in [`docs/DESIGN_AND_RATIONALE.md`](docs/DESIGN_AND_RATIONALE.md).
+> Read that first. Changing a physics definition requires updating it in the same commit.
+
 This repository contains the PYTHIA 8 and ROOT workflow for the
 publication-level heavy-flavour balancing analysis in pp collisions at
 13.6 TeV. The active implementation is developed on the explicitly requested

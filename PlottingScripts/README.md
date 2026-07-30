@@ -1,5 +1,7 @@
 # Plotting scripts
 
+> **Design rationale:** [`../docs/DESIGN_AND_RATIONALE.md`](../docs/DESIGN_AND_RATIONALE.md) explains why each choice was made.
+
 The publication plotting path preserves Paul Veen's merged THnSparse
 architecture and adds fail-closed input, selection, uncertainty, styling, and
 provenance checks. New central plots must start with

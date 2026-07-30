@@ -1,5 +1,7 @@
 # Analysis scripts
 
+> **Design rationale:** [`../docs/DESIGN_AND_RATIONALE.md`](../docs/DESIGN_AND_RATIONALE.md) explains why each choice was made.
+
 The publication analysis is the one-pass, manifest-driven
 `status_analysis_THnSparse_qq.C`. It converts one validated raw-v5 logical
 output into all 300 signed ordered-pair files while preserving the ROOT object

@@ -1,5 +1,9 @@
 # Reproducing the publication analysis
 
+> **Design rationale.** Every physics choice in this repository, its motivation and
+> the evidence backing it, is documented in [`docs/DESIGN_AND_RATIONALE.md`](docs/DESIGN_AND_RATIONALE.md).
+> Read that first. Changing a physics definition requires updating it in the same commit.
+
 This is the authoritative runbook for the publication pipeline. It describes
 the commands that exist in the `full-production` branch; it does not certify
 that a gate has passed or that a full campaign has been authorized. Preserve

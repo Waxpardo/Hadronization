@@ -1,5 +1,7 @@
 # Simulation scripts
 
+> **Design rationale:** [`../docs/DESIGN_AND_RATIONALE.md`](../docs/DESIGN_AND_RATIONALE.md) explains why each choice was made.
+
 This directory contains the PYTHIA 8 producers, three combined-heavy tune
 cards, generated physics registries, and build rules. The publication producer
 is `heavyflavourcorrelations_status.cpp`. Split bbbar/ccbar and broad-qq
