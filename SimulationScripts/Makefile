@@ -66,7 +66,6 @@ heavyflavourcorrelations_status: heavyflavourcorrelations_status.cpp \
                                 HeavyFlavourUtils.h \
                                 Sha256.h \
                                 GeneratedHeavyFlavourRegistry.h \
-                                GeneratedWeakParentRegistry.h \
                                 GeneratedTuneSettingRegistry.h
 	$(CXX) $(CXXFLAGS) -o $(PRODUCER_OUTPUT) $< $(LDFLAGS)
 
