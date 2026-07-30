@@ -15,6 +15,13 @@ if [[ -n "$(git -C "${project_base}" status --porcelain --untracked-files=no)" ]
   echo "ERROR: Gate-B pilots require no tracked worktree changes" >&2
   exit 3
 fi
+python3 "${project_base}/tools/campaign_manifest.py" validate "${campaign_dir}"
+manifest_commit="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["repository_implementation_commit"])' "${campaign_dir}/campaign.json")"
+current_commit="$(git -C "${project_base}" rev-parse HEAD)"
+if [[ "${manifest_commit}" != "${current_commit}" ]]; then
+  echo "ERROR: Gate-B manifest commit ${manifest_commit} differs from checkout ${current_commit}" >&2
+  exit 4
+fi
 "${project_base}/tools/build_producer.sh" "${project_base}"
 campaign_name="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["campaign"])' "${campaign_dir}/campaign.json")"
 mkdir -p "${project_base}/Production/${campaign_name}/condor_logs"/{MONASH,JUNCTIONS,CLOSEPACKING}

@@ -10,6 +10,7 @@ import subprocess
 from pathlib import Path
 
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
+ORIGIN_ALGORITHM = "signed_heavy_carrier_explicit_parent_event_unique_v2"
 
 
 def sha256(path: Path) -> str:
@@ -76,6 +77,7 @@ def main() -> int:
         "repository_implementation_commit": commit,
         "raw_schema": "hf_primary_ground_raw_v3",
         "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
+        "origin_algorithm": ORIGIN_ALGORITHM,
         "species_registry_sha256": sha256(root / "config/heavy_flavour_species_v1.json"),
         "pair_registry_sha256": sha256(root / "config/heavy_flavour_pair_registry_v1.json"),
         "tune_allowlist_sha256": sha256(root / "config/tune_difference_allowlist_v1.json"),

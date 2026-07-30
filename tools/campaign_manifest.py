@@ -16,6 +16,11 @@ from pathlib import Path
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 GLOBAL_OFFSETS = {"MONASH": 0, "JUNCTIONS": 100, "CLOSEPACKING": 300}
 SLOTS = {"MONASH": 100, "JUNCTIONS": 200, "CLOSEPACKING": 200}
+GATE_B_PROFILES = {
+    0: ("1.0", 1_000_000, "long", "one_million_central"),
+    1: ("0.5", 100_000, "medium", "pthat_sensitivity_low"),
+    2: ("2.0", 100_000, "medium", "pthat_sensitivity_high"),
+}
 
 
 def sha256(path: Path) -> str:
@@ -142,21 +147,142 @@ def load_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
 
 
-def validate_campaign(campaign_dir: Path) -> int:
-    config = json.loads((campaign_dir / "campaign.json").read_text())
-    candidates = load_jsonl(campaign_dir / "candidate_manifest.jsonl")
-    ledger = load_jsonl(campaign_dir / "seed_ledger.jsonl")
+def validate_seed_ledger(candidates: list[dict], ledger: list[dict]) -> set[int]:
+    candidate_allocations = {
+        (
+            row["campaign"],
+            row["tune"],
+            int(row["logical_id"]),
+            int(row["attempt"]),
+            int(row["seed"]),
+        )
+        for row in candidates
+    }
+    ledger_allocations = {
+        (
+            row["campaign"],
+            row["tune"],
+            int(row["logical_id"]),
+            int(row["attempt"]),
+            int(row["seed"]),
+        )
+        for row in ledger
+    }
+    if len(ledger_allocations) != len(ledger):
+        raise ValueError("duplicate seed-ledger allocation")
+    if candidate_allocations - ledger_allocations:
+        raise ValueError("candidate without matching seed-ledger allocation")
+    seeds = {int(row["seed"]) for row in ledger}
+    if len(seeds) != len(ledger):
+        raise ValueError("duplicate allocated seed")
+    if any(seed < 1 or seed > 900_000_000 for seed in seeds):
+        raise ValueError("seed outside PYTHIA domain")
+    return seeds
+
+
+def validate_gate_b_campaign(
+    campaign_dir: Path, config: dict, candidates: list[dict], ledger: list[dict]
+) -> int:
+    root = campaign_dir.parents[1]
+    expected_contract = {
+        "raw_schema": "hf_primary_ground_raw_v3",
+        "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
+        "origin_algorithm":
+            "signed_heavy_carrier_explicit_parent_event_unique_v2",
+    }
+    for key, expected_value in expected_contract.items():
+        if config.get(key) != expected_value:
+            raise ValueError(
+                f"Gate-B contract mismatch {key}: "
+                f"{config.get(key)!r} != {expected_value!r}"
+            )
+    expected_hashes = {
+        "species_registry_sha256":
+            sha256(root / "config/heavy_flavour_species_v1.json"),
+        "pair_registry_sha256":
+            sha256(root / "config/heavy_flavour_pair_registry_v1.json"),
+        "tune_allowlist_sha256":
+            sha256(root / "config/tune_difference_allowlist_v1.json"),
+    }
+    for key, expected_value in expected_hashes.items():
+        if config.get(key) != expected_value:
+            raise ValueError(f"Gate-B {key} differs from checkout")
+    for tune in TUNES:
+        card = root / "SimulationScripts" / (
+            f"pythiasettings_Hard_Low_ccbb_{tune}.cmnd"
+        )
+        if config.get("card_sha256", {}).get(tune) != sha256(card):
+            raise ValueError(f"Gate-B card checksum differs for {tune}")
+    current_commit = subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+    ).strip()
+    if config.get("repository_implementation_commit") != current_commit:
+        raise ValueError(
+            "Gate-B implementation commit differs from current checkout"
+        )
+    expected = int(config.get("pilot_jobs", -1))
+    if expected != len(TUNES) * len(GATE_B_PROFILES) or len(candidates) != expected:
+        raise ValueError(
+            f"Gate-B candidate count {len(candidates)} != expected {len(TUNES) * len(GATE_B_PROFILES)}"
+        )
+    if len(ledger) != expected:
+        raise ValueError(f"Gate-B ledger count {len(ledger)} != {expected}")
+    identities = {
+        (row["tune"], int(row["logical_id"]), int(row["attempt"]))
+        for row in candidates
+    }
+    if len(identities) != expected:
+        raise ValueError("duplicate Gate-B candidate identity")
+    seeds = validate_seed_ledger(candidates, ledger)
+    for tune_index, tune in enumerate(TUNES):
+        rows = {
+            int(row["logical_id"]): row
+            for row in candidates
+            if row["tune"] == tune
+        }
+        if set(rows) != set(GATE_B_PROFILES):
+            raise ValueError(f"wrong Gate-B profiles for {tune}")
+        for logical_id, (pthat, events, category, purpose) in GATE_B_PROFILES.items():
+            row = rows[logical_id]
+            expected_seed = (
+                int(config["seed_base"]) + tune_index * 10_000 + logical_id * 1_000
+            )
+            expected_fields = {
+                "campaign": config["campaign"],
+                "campaign_ordinal": int(config["campaign_ordinal"]),
+                "role": "pilot",
+                "attempt": 0,
+                "seed": expected_seed,
+                "requested_successes": events,
+                "pthat_min_override": pthat,
+                "category": category,
+                "purpose": purpose,
+                "multiplicity_audit_events": 100,
+                "stable_name": f"hf_{tune}_job{logical_id:03d}.root",
+            }
+            for key, expected_value in expected_fields.items():
+                if row.get(key) != expected_value:
+                    raise ValueError(
+                        f"Gate-B field mismatch {tune}/{logical_id} {key}: "
+                        f"{row.get(key)!r} != {expected_value!r}"
+                    )
+    print(
+        f"Gate-B campaign valid: candidates={len(candidates)} "
+        f"allocations={len(ledger)} unique_seeds={len(seeds)}"
+    )
+    return 0
+
+
+def validate_full_campaign(
+    config: dict, candidates: list[dict], ledger: list[dict]
+) -> int:
     expected = sum(SLOTS.values())
     if len(candidates) != expected:
         raise ValueError(f"candidate count {len(candidates)} != {expected}")
     identities = {(row["tune"], row["logical_id"], row["attempt"]) for row in candidates}
     if len(identities) != expected:
         raise ValueError("duplicate candidate identity")
-    seeds = [int(row["seed"]) for row in ledger]
-    if len(seeds) != len(set(seeds)):
-        raise ValueError("duplicate allocated seed")
-    if any(seed < 1 or seed > 900_000_000 for seed in seeds):
-        raise ValueError("seed outside PYTHIA domain")
+    seeds = validate_seed_ledger(candidates, ledger)
     for tune in TUNES:
         rows = [row for row in candidates if row["tune"] == tune]
         if len(rows) != SLOTS[tune]:
@@ -170,9 +296,21 @@ def validate_campaign(campaign_dir: Path) -> int:
                 raise ValueError(f"seed mapping mismatch: {row}")
     print(
         f"campaign valid: candidates={len(candidates)} allocations={len(ledger)} "
-        f"unique_seeds={len(set(seeds))}"
+        f"unique_seeds={len(seeds)}"
     )
     return 0
+
+
+def validate_campaign(campaign_dir: Path) -> int:
+    config = json.loads((campaign_dir / "campaign.json").read_text())
+    candidates = load_jsonl(campaign_dir / "candidate_manifest.jsonl")
+    ledger = load_jsonl(campaign_dir / "seed_ledger.jsonl")
+    schema = config.get("schema")
+    if schema == "hf_gate_b_pilot_campaign_v1":
+        return validate_gate_b_campaign(campaign_dir, config, candidates, ledger)
+    if schema == "hf_campaign_v1":
+        return validate_full_campaign(config, candidates, ledger)
+    raise ValueError(f"unsupported campaign schema {schema!r}")
 
 
 def validate(args: argparse.Namespace) -> int:
