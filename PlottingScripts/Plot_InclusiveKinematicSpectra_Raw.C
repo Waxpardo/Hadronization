@@ -822,7 +822,7 @@ int TuneLineStyle(const std::string& tune)
 
 const char* MultiplicityDefinitionLine1()
 {
-  return "pp, #sqrt{s} = 14 TeV";
+  return "pp, #sqrt{s} = 13.6 TeV";
 }
 
 const char* MultiplicityDefinitionLine2()
@@ -1815,7 +1815,7 @@ void Plot_InclusiveMultiplicitySpectrum_Raw(const char* inputBaseDir = "RootFile
   std::cout << "Input selection source: " << selection.source << "\n";
   std::cout << "Output dir: " << resolvedOutput << "\n";
   std::cout << "Nch definition: status-81--89 charged e/mu/pi/K/p, pT >= 0.15 GeV/c, |eta| <= 4 (not prompt multiplicity)\n";
-  std::cout << "pp sqrt(s)=14 TeV\n\n";
+  std::cout << "pp sqrt(s)=13.6 TeV\n\n";
 
   std::vector<TuneData> tuneData;
   for (const std::string& tune : TuneNames()) {

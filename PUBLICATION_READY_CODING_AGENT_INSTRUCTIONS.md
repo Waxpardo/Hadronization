@@ -486,7 +486,7 @@ closure.
 Use one combined heavy-flavour producer and one raw dataset per tune. All
 three tune cards must share:
 
-- proton-proton collisions at 14 TeV;
+- proton-proton collisions at 13.6 TeV;
 - `Tune:pp = 14` as the common base;
 - `HardQCD:hardccbar = on`;
 - `HardQCD:hardbbbar = on`;

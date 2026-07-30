@@ -14,7 +14,7 @@ Next:numberShowInfo = 0
 Next:numberShowProcess = 0
 
 ! Beams and tune
-Beams:eCM = 14000
+Beams:eCM = 13600                              ! sqrt(s) = 13.6 TeV (LHC Run 3), eCM in GeV
 Beams:idA = 2212
 Beams:idB = 2212
 Tune:pp = 14

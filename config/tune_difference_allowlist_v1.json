@@ -1,7 +1,7 @@
 {
   "schema": "pythia_tune_difference_allowlist_v2",
   "common_required_card_values": {
-    "Beams:eCM": "14000",
+    "Beams:eCM": "13600",
     "Beams:idA": "2212",
     "Beams:idB": "2212",
     "Init:showChangedParticleData": "off",

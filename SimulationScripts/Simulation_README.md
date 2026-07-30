@@ -157,7 +157,7 @@ compatibility.
 
 All three combined cards use:
 
-- pp at 14 TeV;
+- pp at 13.6 TeV;
 - `Tune:pp = 14`;
 - `HardQCD:hardccbar = on`;
 - `HardQCD:hardbbbar = on`;

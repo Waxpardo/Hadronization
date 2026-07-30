@@ -2,7 +2,7 @@
 
 This repository contains the PYTHIA 8 and ROOT workflow for the
 publication-level heavy-flavour balancing analysis in pp collisions at
-14 TeV. The active implementation is developed on the explicitly requested
+13.6 TeV. The active implementation is developed on the explicitly requested
 `full-production` branch. Paul Veen's merged THnSparse analysis and plotting
 architecture on stable `main` is the compatibility baseline; changes in this
 branch are limited to demonstrated physics, statistical, scaling, or

@@ -7,7 +7,7 @@
 
 namespace Hadronization {
 inline constexpr std::string_view kTuneDifferenceAllowlistSchema = "pythia_tune_difference_allowlist_v2";
-inline constexpr std::string_view kTuneDifferenceAllowlistSha256 = "137780c2885d1add9a87cbfdf03b223e68dff1acb073124463c5c02f3e009d98";
+inline constexpr std::string_view kTuneDifferenceAllowlistSha256 = "2aee03165413230bfd2f6f836daf221044032603f980af0a0a409c7c457d2aa2";
 struct TuneSettingValue {
   std::string_view name;
   std::string_view value;
@@ -101,7 +101,7 @@ inline constexpr std::array<std::string_view, 4>
 }};
 inline constexpr std::array<TuneSettingValue, 15>
     kCommonRequiredCardValues{{
-  TuneSettingValue{"Beams:eCM", "14000"},
+  TuneSettingValue{"Beams:eCM", "13600"},
   TuneSettingValue{"Beams:idA", "2212"},
   TuneSettingValue{"Beams:idB", "2212"},
   TuneSettingValue{"HardQCD:hardbbbar", "on"},

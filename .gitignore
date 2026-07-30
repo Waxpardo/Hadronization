@@ -16,6 +16,7 @@ __pycache__/
 # Ignore generated production analysis outputs
 /Production/
 /campaigns/
+/Analysis/
 /AnalysisOutput/
 /AnalysisResults/
 /AnalyzedData/complete_root_*/

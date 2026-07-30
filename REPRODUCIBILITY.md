@@ -15,7 +15,7 @@ disjoint statistical blocks.
 The central selector is
 `hard_trigger_primary_ground__primary_ground_associate_v1`.
 
-- collisions: pp at 14 TeV;
+- collisions: pp at 13.6 TeV;
 - PYTHIA: 8.315;
 - ROOT: 6.30/01 ALICE build;
 - processes: `HardQCD:hardccbar = on` and

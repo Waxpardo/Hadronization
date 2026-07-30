@@ -30,7 +30,7 @@
     "pair_registry_sha256": "7ceb3bfef844500a4b65c0d784a8513f0f5588e932121f5ac96a2a6328bc7cbb",
     "pair_registry_path": "config/heavy_flavour_pair_registry_v1.json",
     "tune_difference_allowlist_schema": "pythia_tune_difference_allowlist_v2",
-    "tune_difference_allowlist_sha256": "137780c2885d1add9a87cbfdf03b223e68dff1acb073124463c5c02f3e009d98",
+    "tune_difference_allowlist_sha256": "2aee03165413230bfd2f6f836daf221044032603f980af0a0a409c7c457d2aa2",
     "boundary_configuration_path": "PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json",
     "boundary_configuration_sha256": "37ae8420dfe3431d7e1db84c93b860ba9c15ba647dade236165a5f89b17ae179",
     "effective_settings_schema": "effective_pythia_settings_exhaustive_v2",
