@@ -952,14 +952,33 @@ def main() -> int:
     spec = json.loads(
         (ROOT / "config/pthat_sensitivity_v1.json").read_text()
     )
+
+    # The shipped specification now carries a real Gate-B owner approval, so it
+    # must validate. Both directions are asserted here: a synthetic PENDING
+    # copy must still be rejected, which is what protects the approval gate,
+    # and the real artifact must be accepted. Deriving the pending copy locally
+    # keeps this test independent of whether the repository's own spec happens
+    # to be approved.
+    pthat.validate_spec(spec)
+
+    pending = copy.deepcopy(spec)
+    pending["scientific_review_status"] = "PENDING_GATE_B_OWNER_REVIEW"
+    pending["scientific_review"] = {
+        "decision": "PENDING",
+        "reviewer": None,
+        "reviewer_role": None,
+        "decision_utc": None,
+        "rationale": "Pending copy used to prove the approval gate rejects it.",
+    }
     try:
-        pthat.validate_spec(spec)
+        pthat.validate_spec(pending)
     except ValueError as error:
         assert "lacks the required pre-pilot" in str(error)
     else:
         raise AssertionError(
             "pending pTHat scientific-review status was accepted"
         )
+
     spec["scientific_review_status"] = "APPROVED_GATE_B_OWNER_REVIEW"
     spec["scientific_review"] = {
         "decision": "APPROVE_PTHAT_SENSITIVITY_SPEC",

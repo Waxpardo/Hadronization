@@ -17,6 +17,47 @@ VALIDATOR = ROOT / "tools/campaign_manifest.py"
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 
 
+
+
+def _pending_pthat_spec_bytes() -> bytes:
+    """An unapproved copy of the shipped pTHat specification.
+
+    The repository's specification now carries a real Gate-B owner approval, so
+    any "must be blocked" case has to derive its own unapproved copy instead of
+    assuming the shipped artifact is unapproved.
+    """
+    spec = json.loads((ROOT / "config/pthat_sensitivity_v1.json").read_text())
+    spec["scientific_review_status"] = "PENDING_GATE_B_OWNER_REVIEW"
+    spec["scientific_review"] = {
+        "decision": "PENDING",
+        "reviewer": None,
+        "reviewer_role": None,
+        "decision_utc": None,
+        "rationale": "Unapproved copy used to prove the gate blocks it.",
+    }
+    return (json.dumps(spec, indent=2, sort_keys=True) + "\n").encode()
+
+
+def _write_pending_pthat_spec(root: Path) -> None:
+    """Force the copied spec into the PENDING state.
+
+    The repository's own specification now carries a real Gate-B owner
+    approval, so a "must fail" case has to construct its own unapproved copy
+    rather than relying on the shipped artifact being unapproved.
+    """
+    target = root / "config/pthat_sensitivity_v1.json"
+    spec = json.loads(target.read_text())
+    spec["scientific_review_status"] = "PENDING_GATE_B_OWNER_REVIEW"
+    spec["scientific_review"] = {
+        "decision": "PENDING",
+        "reviewer": None,
+        "reviewer_role": None,
+        "decision_utc": None,
+        "rationale": "Unapproved copy used to prove the campaign gate blocks it.",
+    }
+    target.write_text(json.dumps(spec, indent=2, sort_keys=True) + "\n")
+
+
 def approve_pthat_spec_for_fixture(path: Path) -> None:
     payload = json.loads(path.read_text())
     payload["scientific_review_status"] = "APPROVED_GATE_B_OWNER_REVIEW"
@@ -61,6 +102,7 @@ def prepare_contract_checkout(root: Path) -> None:
         ROOT / "tools/evaluate_pthat_sensitivity.py",
         root / "tools/evaluate_pthat_sensitivity.py",
     )
+    _write_pending_pthat_spec(root)
     pending = run(
         "python3",
         str(GENERATOR),
@@ -75,6 +117,11 @@ def prepare_contract_checkout(root: Path) -> None:
         expect=1,
     )
     assert "pre-pilot scientific approval" in pending.stderr
+    # Restore the genuine approved specification for the success cases.
+    shutil.copy2(
+        ROOT / "config/pthat_sensitivity_v1.json",
+        root / "config/pthat_sensitivity_v1.json",
+    )
     approve_pthat_spec_for_fixture(
         root / "config/pthat_sensitivity_v1.json"
     )
@@ -113,9 +160,7 @@ def main() -> int:
         assert "Gate-B campaign valid: candidates=9" in valid.stdout
         fixture_spec = fixture / "config/pthat_sensitivity_v1.json"
         approved_spec = fixture_spec.read_bytes()
-        fixture_spec.write_bytes(
-            (ROOT / "config/pthat_sensitivity_v1.json").read_bytes()
-        )
+        fixture_spec.write_bytes(_pending_pthat_spec_bytes())
         pending_validation = run(
             "python3",
             str(VALIDATOR),

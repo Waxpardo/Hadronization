@@ -24,6 +24,26 @@ import campaign_manifest as contract  # noqa: E402
 import run_publication_gate_b as gate_b  # noqa: E402
 
 
+
+def _pending_pthat_spec_bytes() -> bytes:
+    """An unapproved copy of the shipped pTHat specification.
+
+    The repository's specification now carries a real Gate-B owner approval, so
+    any "must be blocked" case has to derive its own unapproved copy instead of
+    assuming the shipped artifact is unapproved.
+    """
+    spec = json.loads((ROOT / "config/pthat_sensitivity_v1.json").read_text())
+    spec["scientific_review_status"] = "PENDING_GATE_B_OWNER_REVIEW"
+    spec["scientific_review"] = {
+        "decision": "PENDING",
+        "reviewer": None,
+        "reviewer_role": None,
+        "decision_utc": None,
+        "rationale": "Unapproved copy used to prove the gate blocks it.",
+    }
+    return (json.dumps(spec, indent=2, sort_keys=True) + "\n").encode()
+
+
 def approve_pthat_spec_for_fixture(path: Path) -> None:
     payload = json.loads(path.read_text())
     payload["scientific_review_status"] = "APPROVED_GATE_B_OWNER_REVIEW"
@@ -274,9 +294,7 @@ def main() -> int:
         ]
         fixture_spec = fixture / "config/pthat_sensitivity_v1.json"
         approved_spec = fixture_spec.read_bytes()
-        fixture_spec.write_bytes(
-            (ROOT / "config/pthat_sensitivity_v1.json").read_bytes()
-        )
+        fixture_spec.write_bytes(_pending_pthat_spec_bytes())
         pending_authorization = run(
             *authorization_arguments,
             expect=1,
