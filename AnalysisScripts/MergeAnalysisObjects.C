@@ -4,12 +4,17 @@
 // fallback when hadd becomes pathological on accumulated THnSparse objects.
 
 #include <fstream>
+#include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
 #include "TFile.h"
+#include "TAxis.h"
+#include "TArrayD.h"
 #include "TH1.h"
 #include "THnSparse.h"
 #include "TKey.h"
@@ -45,6 +50,67 @@ std::vector<std::string> ReadInputList(const char* inputListPath)
     return paths;
 }
 
+bool IsLowerHex(const std::string& value, std::size_t length)
+{
+    return value.size() == length &&
+           std::all_of(value.begin(), value.end(), [](unsigned char character) {
+               return std::isdigit(character) ||
+                      (character >= 'a' && character <= 'f');
+           });
+}
+
+bool AxesEqual(const TAxis* first, const TAxis* second)
+{
+    if (!first || !second ||
+        first->GetNbins() != second->GetNbins() ||
+        first->GetXmin() != second->GetXmin() ||
+        first->GetXmax() != second->GetXmax()) {
+        return false;
+    }
+    const TArrayD* firstBins = first->GetXbins();
+    const TArrayD* secondBins = second->GetXbins();
+    if (!firstBins || !secondBins ||
+        firstBins->GetSize() != secondBins->GetSize()) {
+        return false;
+    }
+    for (int index = 0; index < firstBins->GetSize(); ++index) {
+        if (firstBins->At(index) != secondBins->At(index)) return false;
+    }
+    return true;
+}
+
+bool HistogramsCompatible(const TH1* first, const TH1* second)
+{
+    if (!first || !second ||
+        first->GetDimension() != second->GetDimension() ||
+        first->GetSumw2N() != second->GetSumw2N() ||
+        !AxesEqual(first->GetXaxis(), second->GetXaxis())) {
+        return false;
+    }
+    if (first->GetDimension() >= 2 &&
+        !AxesEqual(first->GetYaxis(), second->GetYaxis())) {
+        return false;
+    }
+    return first->GetDimension() < 3 ||
+           AxesEqual(first->GetZaxis(), second->GetZaxis());
+}
+
+bool SparseHistogramsCompatible(const THnSparse* first,
+                                const THnSparse* second)
+{
+    if (!first || !second ||
+        first->GetNdimensions() != second->GetNdimensions() ||
+        first->GetCalculateErrors() != second->GetCalculateErrors()) {
+        return false;
+    }
+    for (int axis = 0; axis < first->GetNdimensions(); ++axis) {
+        if (!AxesEqual(first->GetAxis(axis), second->GetAxis(axis))) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool AddObject(TObject* target,
                TObject* source,
                const std::string& objectName,
@@ -57,7 +123,12 @@ bool AddObject(TObject* target,
                       << " is not a TH1-compatible object" << std::endl;
             return false;
         }
-        targetHist->Add(sourceHist);
+        if (!HistogramsCompatible(targetHist, sourceHist) ||
+            !targetHist->Add(sourceHist)) {
+            std::cerr << "ERROR: incompatible TH1 axis/error schema for '"
+                      << objectName << "' in " << sourcePath << std::endl;
+            return false;
+        }
         return true;
     }
 
@@ -68,6 +139,14 @@ bool AddObject(TObject* target,
                       << " is not a THnSparse-compatible object" << std::endl;
             return false;
         }
+        if (!SparseHistogramsCompatible(targetSparse, sourceSparse)) {
+            std::cerr << "ERROR: incompatible THnSparse axis/error schema for '"
+                      << objectName << "' in " << sourcePath << std::endl;
+            return false;
+        }
+        // THnSparse::Add returns void in supported ROOT releases, so the
+        // complete axis/error-schema comparison above is the fail-closed
+        // compatibility check performed before mutating the target.
         targetSparse->Add(sourceSparse);
         return true;
     }
@@ -85,7 +164,13 @@ bool AddObject(TObject* target,
 
     const bool additive =
         objectName == "input_events" ||
+        objectName == "source_input_events" ||
+        objectName == "input_file_count" ||
         objectName == "input_sum_weights" ||
+        objectName == "primary_all_heavy_closure_failures" ||
+        objectName == "direct_primary_heavy_count" ||
+        objectName == "central_ground_state_count" ||
+        objectName == "central_hard_trigger_count" ||
         objectName == "trigger_count" ||
         objectName == "trigger_sum_weights" ||
         objectName == "pair_count" ||
@@ -104,7 +189,10 @@ bool AddObject(TObject* target,
     }
     if (auto* targetInt = dynamic_cast<TParameter<int>*>(target)) {
         auto* sourceInt = dynamic_cast<TParameter<int>*>(source);
-        if (!sourceInt || targetInt->GetVal() != sourceInt->GetVal()) {
+        if (!sourceInt) return false;
+        if (additive) {
+            targetInt->SetVal(targetInt->GetVal() + sourceInt->GetVal());
+        } else if (targetInt->GetVal() != sourceInt->GetVal()) {
             std::cerr << "ERROR: invariant integer parameter '" << objectName
                       << "' differs in " << sourcePath << std::endl;
             return false;
@@ -144,6 +232,16 @@ int MergeAnalysisObjects(const char* inputListPath,
         std::cerr << "ERROR: input list is empty: " << inputListPath << std::endl;
         return 1;
     }
+    if (std::set<std::string>(inputPaths.begin(), inputPaths.end()).size() !=
+        inputPaths.size()) {
+        std::cerr << "ERROR: duplicate path in input list: "
+                  << inputListPath << std::endl;
+        return 1;
+    }
+    if (!IsLowerHex(manifestSha256, 64)) {
+        std::cerr << "ERROR: invalid source-manifest SHA-256" << std::endl;
+        return 1;
+    }
 
     std::unique_ptr<TFile> firstFile(TFile::Open(inputPaths.front().c_str(), "READ"));
     if (!firstFile || firstFile->IsZombie()) {
@@ -154,6 +252,7 @@ int MergeAnalysisObjects(const char* inputListPath,
 
     std::vector<std::string> objectNames;
     std::vector<std::unique_ptr<TObject>> mergedObjects;
+    std::set<std::string> sourceObjectNames;
 
     TIter nextKey(firstFile->GetListOfKeys());
     TKey* key = nullptr;
@@ -166,6 +265,18 @@ int MergeAnalysisObjects(const char* inputListPath,
         }
 
         const std::string keyName = key->GetName();
+        if (!sourceObjectNames.insert(keyName).second) {
+            std::cerr << "ERROR: duplicate ROOT key in first input: "
+                      << keyName << std::endl;
+            return 3;
+        }
+        // This SHA identifies one raw file and therefore cannot be represented
+        // by a single value after merging.  The exact source-manifest SHA
+        // written below replaces it for merged products.
+        if (keyName == "upstream_raw_sha256" ||
+            keyName == "upstream_effective_settings_sha256") {
+            continue;
+        }
         TObject* clone = object->Clone(keyName.c_str());
         if (!clone) {
             std::cerr << "ERROR: could not clone object: "
@@ -193,6 +304,16 @@ int MergeAnalysisObjects(const char* inputListPath,
             std::cerr << "ERROR: could not open input file: "
                       << inputPaths[i] << std::endl;
             return 6;
+        }
+        std::set<std::string> currentObjectNames;
+        TIter currentKey(inputFile->GetListOfKeys());
+        while (auto* objectKey = dynamic_cast<TKey*>(currentKey())) {
+            currentObjectNames.insert(objectKey->GetName());
+        }
+        if (currentObjectNames != sourceObjectNames) {
+            std::cerr << "ERROR: ROOT object-key set differs in "
+                      << inputPaths[i] << std::endl;
+            return 7;
         }
 
         for (std::size_t j = 0; j < objectNames.size(); ++j) {
@@ -244,5 +365,47 @@ int MergeAnalysisObjects(const char* inputListPath,
         std::cout << "Wrote merged file: " << outputPath << std::endl;
     }
 
+    return 0;
+}
+
+int TestMergeAnalysisAxisCompatibility()
+{
+    TH1D first("merge_axis_first", "", 2, 0.0, 2.0);
+    TH1D same("merge_axis_same", "", 2, 0.0, 2.0);
+    TH1D shifted("merge_axis_shifted", "", 2, 0.5, 2.5);
+    first.Sumw2();
+    same.Sumw2();
+    shifted.Sumw2();
+    if (!AddObject(&first, &same, "hCompatible", "synthetic-compatible")) {
+        return 1;
+    }
+    if (AddObject(&first, &shifted, "hShifted", "synthetic-shifted")) {
+        return 2;
+    }
+
+    const int bins[2] = {2, 3};
+    const double minimum[2] = {0.0, -1.0};
+    const double maximum[2] = {2.0, 2.0};
+    const double shiftedMaximum[2] = {2.0, 3.0};
+    THnSparseD sparseFirst(
+        "merge_sparse_first", "", 2, bins, minimum, maximum);
+    THnSparseD sparseSame(
+        "merge_sparse_same", "", 2, bins, minimum, maximum);
+    THnSparseD sparseShifted(
+        "merge_sparse_shifted", "", 2, bins, minimum, shiftedMaximum);
+    sparseFirst.Sumw2();
+    sparseSame.Sumw2();
+    sparseShifted.Sumw2();
+    if (!AddObject(
+            &sparseFirst, &sparseSame, "hSparseCompatible",
+            "synthetic-compatible")) {
+        return 3;
+    }
+    if (AddObject(
+            &sparseFirst, &sparseShifted, "hSparseShifted",
+            "synthetic-shifted")) {
+        return 4;
+    }
+    std::cout << "MERGE_AXIS_COMPATIBILITY_PASS" << std::endl;
     return 0;
 }

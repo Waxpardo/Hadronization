@@ -4,22 +4,42 @@
 #include <TSystem.h>
 
 #include <cstdio>
+#include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <set>
 #include <string>
 #include <vector>
 
 int MergeCanonicalAnalysis(const char* slotListPath, const char* perJobRoot,
                            const char* tune, const char* outputDirectory,
-                           const char* manifestSha256) {
+                           const char* manifestSha256,
+                           int expectedSlotCount) {
   std::ifstream slotStream(slotListPath);
   std::vector<int> slots;
   int slot = -1;
   while (slotStream >> slot) slots.push_back(slot);
-  if (slots.empty()) {
-    std::cerr << "CANONICAL_MERGE_ERROR empty slot list\n";
+  const std::set<std::string> allowedTunes = {
+      "MONASH", "JUNCTIONS", "CLOSEPACKING"};
+  const std::set<int> uniqueSlots(slots.begin(), slots.end());
+  const std::string manifestSha(manifestSha256);
+  const bool validManifestSha =
+      manifestSha.size() == 64 &&
+      std::all_of(
+          manifestSha.begin(), manifestSha.end(), [](unsigned char character) {
+            return std::isdigit(character) ||
+                   (character >= 'a' && character <= 'f');
+          });
+  if (expectedSlotCount <= 0 ||
+      static_cast<int>(slots.size()) != expectedSlotCount ||
+      uniqueSlots.size() != slots.size() ||
+      std::any_of(slots.begin(), slots.end(),
+                  [](int value) { return value < 0; }) ||
+      !allowedTunes.count(tune) || !validManifestSha) {
+    std::cerr << "CANONICAL_MERGE_ERROR invalid slot/tune/manifest contract\n";
     return 1;
   }
   if (gSystem->mkdir(outputDirectory, true) != 0 &&
@@ -35,9 +55,16 @@ int MergeCanonicalAnalysis(const char* slotListPath, const char* perJobRoot,
               << ".txt";
     std::ofstream inputs(temporary.str());
     for (const int canonicalSlot : slots) {
-      inputs << perJobRoot << "/" << tune << "/slot_" << std::setw(3)
-             << std::setfill('0') << canonicalSlot << "/" << pair.filename
-             << "\n";
+      std::ostringstream inputPath;
+      inputPath << perJobRoot << "/" << tune << "/slot_" << std::setw(3)
+                << std::setfill('0') << canonicalSlot << "/"
+                << pair.filename;
+      if (gSystem->AccessPathName(inputPath.str().c_str())) {
+        std::cerr << "CANONICAL_MERGE_ERROR missing manifest input "
+                  << inputPath.str() << "\n";
+        return 3;
+      }
+      inputs << inputPath.str() << "\n";
     }
     inputs.close();
     const std::string output =

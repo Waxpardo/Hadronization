@@ -1,226 +1,408 @@
-# Analysis Scripts
+# Analysis scripts
 
-This directory contains the ROOT macros and shell wrappers that reduce simulation ROOT trees into histogram files used by the plotting layer. The canonical publication balancing path is manifest-driven and uses `status_analysis_THnSparse_qq.C`. The `hf_mult_pt_analysis_multi.C` and split bbbar/ccbar workflows documented later are legacy or inclusive-spectrum references, not the canonical balancing reduction. See the top-level `REPRODUCIBILITY.md`.
+The publication analysis is the one-pass, manifest-driven
+`status_analysis_THnSparse_qq.C`. It converts one validated raw-v5 logical
+output into all 300 signed ordered-pair files while preserving the ROOT object
+names and filenames consumed by Paul Veen's THnSparse plotting architecture.
+It deliberately rejects text-file lists of independent raw jobs: the
+effective-settings digest contains each job's random seed. Analyze one
+manifest row at a time, then combine only through the manifest-bound
+`MergeCanonicalAnalysis.C` path.
 
-## Canonical one-pass balancing analysis
+`hf_mult_pt_analysis_multi.C`, split bbbar/ccbar reductions, and older status
+macros are retained as legacy/inclusive regressions. They are not inputs to
+new central balancing results.
 
-`submit_status_analysis.sh` accepts a validated freeze directory, production
-root, and analysis output root. It queues only the 300 raw paths enumerated in
-`canonical_manifest.jsonl`; directory discovery and “first N files” selection
-are forbidden.
+See [`../REPRODUCIBILITY.md`](../REPRODUCIBILITY.md) for the complete gate and
+production sequence.
+
+## Input contract
+
+Canonical input must validate:
+
+```text
+raw schema       hf_primary_ground_raw_v5
+selector         hard_trigger_primary_ground__primary_ground_associate_v1
+origin           signed_heavy_constituent_complete_mothers_unique_v4
+stability        heavy_stability_audit_v2
+settings         effective_pythia_settings_exhaustive_v2
+```
+
+The analysis also binds signed species/pair registries, tune allowlist,
+campaign, raw checksum, commit, and one successful-event entry per event.
+Legacy schemas require an explicitly labeled regression reader; they cannot
+enter the canonical path.
+
+## Central selector and pair convention
+
+Both roles require:
+
+- signed ground-state registry membership;
+- direct-primary positive PYTHIA status 81--89;
+- generator stability;
+- `|eta| <= 4`.
+
+Triggers additionally require resolved selected-hard origin and
+`pT > 1 GeV/c`. Associates retain hard, shower, MPI, other, and unresolved
+origins and require `pT > 0.15 GeV/c`.
+
+Pairs are ordered and trigger conditioned. Every eligible trigger is paired
+with every distinct eligible associate; self-pairs are excluded by event
+record index. OS/SS uses signed net charm or beauty, never electric charge.
+The canonical same-sign factor is 1.0. The legacy 0.5 convention is not
+applied.
+
+The pair macro fills associate-origin components in parallel and validates
+that their bin-by-bin sum equals the inclusive object. It also retains the
+validation-only all-primary-heavy closure needed to quantify central
+ground-state coverage.
+
+In pair-file schema v2, the historical
+`primary_all_heavy_closure_failures` `TParameter` specifically counts selected
+events for which raw `primary_all_heavy_match_valid != 1`. It is therefore an
+invariant-failure counter, not the multi-category closure table emitted by
+`Validation/AuditOriginResolution.C`. The name is retained to avoid silently
+changing Paul's pair-file contract; publication validation requires the value
+to be zero.
+
+## Per-pair ROOT compatibility
+
+Every pair file contains:
+
+```text
+summed MULTIPLICITY
+hTrKinematics
+hAsKinematics
+hCorrelations
+hCorrelationsByOrigin
+associate_origin_category_schema
+associate_origin_category_labels
+```
+
+Their established meanings are:
+
+- `summed MULTIPLICITY`: all successful input events, independent of whether
+  the selected pair occurs;
+- `hTrKinematics`: one entry per eligible trigger, independent of whether the
+  configured associate occurs;
+- `hAsKinematics`: one entry per accepted trigger-associate pair; it is not
+  an inclusive single-particle spectrum;
+- `hCorrelations`: one entry per accepted ordered pair;
+- `hCorrelationsByOrigin`: the same entries with an eighth, versioned
+  associate-origin category axis. Categories 1--6 are selected-hard companion,
+  selected-hard noncompanion, shower, MPI, other resolved, and
+  unresolved/ambiguous. The two adjacent `TObjString` objects pin the exact
+  schema and label mapping so a downstream projection cannot silently
+  reinterpret an integer category.
+
+Each file also stores versioned analysis/selection metadata, trigger and
+associate thresholds, pair identity, raw checksum, campaign/manifest binding,
+event/trigger/pair accounting, same-sign factor, event-filter contract, and
+axis-flow diagnostics.
+
+The physical THnSparse axes provide headroom rather than an analysis upper
+selection. Underflow/overflow is audited. A populated unexpected flow or
+undeclared pT/multiplicity truncation fails validation.
+
+## Single-file worker
+
+The wrapper is:
+
+```text
+run_status_analysis.sh RAW_ROOT_FILE FINAL_PAIR_DIRECTORY \
+  [CAMPAIGN TUNE LOGICAL_ID RAW_SHA256 ANALYSIS_COMMIT MACRO_SHA256 \
+   PURPOSE [CANONICAL_MANIFEST_SHA256 RAW_VALIDATION_RECEIPT \
+   RAW_VALIDATION_RECEIPT_SHA256]]
+```
+
+Publication jobs always use the full provenance arguments rendered by the
+submit tools. The wrapper:
+
+1. requires a tracked-clean analysis checkout;
+2. pins macro, raw, commit, and optional manifest hashes;
+3. for canonical jobs, verifies the manifest-selected immutable
+   `hf_raw_validation_receipt_v1`, its validation log, the raw checksum, and
+   the exact campaign/tune/logical identity;
+4. independently applies `analysis_raw_input_fail_closed_v1` before filling:
+   `complete=1`, requested = successful = metadata/tree entries, attempts =
+   successes + failures, all zero-required producer invariant counters,
+   exact consumed scalar/vector types, finite weights and kinematics, vector
+   cardinality, per-event invariant flags, and weight-sum closure;
+5. creates an attempt-unique staging directory;
+6. scans the raw file once and writes all 300 pairs;
+7. validates the full directory;
+8. writes `hf_analysis_job_metadata_v3`, including the raw-validation
+   evidence mode and receipt path/SHA-256 (or explicit nulls for a
+   noncanonical direct-preflight diagnostic);
+9. atomically promotes the directory.
+
+An existing directory is reused only if its pair inventory, clean analysis
+log, v3 job metadata, raw checksum, commit, macro, event filter, manifest, and
+receipt binding all validate exactly; it is never silently overwritten.
+
+### Event-filter modes
+
+Normal canonical per-file analysis uses all events:
+
+```text
+event_filter_schema = all_events_v1
+modulo = 0
+remainder = -1
+```
+
+Gate D uses ten disjoint pilot blocks by setting:
+
+```bash
+export HADRONIZATION_EVENT_FILTER_MODULO=10
+export HADRONIZATION_EVENT_FILTER_REMAINDER=<0..9>
+```
+
+The macro then accepts unsigned `event_id % 10 == remainder` and writes
+`unsigned_event_id_modulo_v1`. Remainders 0--9 must be disjoint and their
+histogram union must reproduce the all-event pilot. This is Gate-D pilot
+validation. The first-stage 100M/tune freeze instead defines ten deterministic
+file-level block manifests, each containing ten complete files per tune. A
+reviewed superseding freeze keeps the same ten blocks with `N/10` complete
+files per tune, where equal `N >= 100` is read from the sealed manifest.
+
+## Canonical sealed-manifest analysis
+
+The sealed freeze is the only source of queued raw paths:
 
 ```bash
 ./submit_status_analysis.sh \
   Production/<CAMPAIGN>/freeze \
-  Production/<CAMPAIGN> \
+  <PRODUCTION_ROOT> \
   AnalysisOutput/<CAMPAIGN> \
   --dry-run
+```
 
+Inspect `AnalysisOutput/<CAMPAIGN>/submit_canonical_analysis.sub`, then submit
+from a Stoomboot interactive host:
+
+```bash
 ./submit_status_analysis.sh \
   Production/<CAMPAIGN>/freeze \
-  Production/<CAMPAIGN> \
+  <PRODUCTION_ROOT> \
   AnalysisOutput/<CAMPAIGN> \
   --submit
 ```
 
-Each job invokes `run_status_analysis.sh`, which reads one canonical raw file
-once and writes all 300 signed ordered-pair ROOT files to a unique staging
-directory. The directory is promoted only after
-`Validation/validate_pair_directory.sh` passes. Each pair file contains
-`summed MULTIPLICITY`, `hTrKinematics`, `hAsKinematics`, `hCorrelations`, and
-the origin-decomposed correlation object plus immutable metadata.
+The renderer queues exactly the `3*N` rows from
+`canonical_manifest.jsonl`: 300 rows in the 100-file/tune first stage, or the
+full equal-tune superseding exposure with `N >= 100` and `N % 10 == 0`.
+Directory discovery, “first N,” and unlisted reserve files are forbidden. For
+a first-stage freeze, `<PRODUCTION_ROOT>` is
+`Production/<CAMPAIGN>`. A superseding manifest can contain rows from several
+immutable source campaigns, so its production root is the collection root
+`Production`. The submit pins:
 
-The selector is
-`hard_trigger_primary_ground__primary_ground_associate_v1`. Triggers satisfy
-`pT > 1.0 GeV/c`, associates satisfy `pT > 0.15 GeV/c`, both satisfy
-`|eta| <= 4`, and both are direct-primary generator-stable registry states.
-Triggers additionally require resolved matching to the selected hard heavy
-quark. Associates retain all origin categories. Pairs are ordered, so the
-canonical analysis does not apply the legacy same-sign factor of 0.5.
+- raw path and SHA-256;
+- campaign/tune/logical ID/canonical slot;
+- analysis commit;
+- macro SHA-256;
+- canonical-manifest SHA-256;
+- output directory.
 
-After all analysis jobs validate, merge only the frozen central and block
-manifests:
+Condor does not inherit the submitter environment.
+
+After completion:
 
 ```bash
 python3 tools/validate_analysis_outputs.py \
   Production/<CAMPAIGN>/freeze/canonical_manifest.jsonl \
   AnalysisOutput/<CAMPAIGN> \
+  --production-root <PRODUCTION_ROOT> \
+  --checkout "$PWD" \
   --report AnalysisOutput/<CAMPAIGN>/validation/analysis_outputs.json
+```
 
+The `hf_analysis_output_validation_v2` report requires all `3*N` canonical
+per-raw-file directories, one exact raw checksum per directory, and all 300
+fixed signed-pair files inside each directory. Extra directories or missing
+pairs fail. Here 300 is the pair-registry size, not the number of final raw
+inputs.
+
+## Gate-B pilot analysis
+
+For the exact nine Gate-B rows outside the automated Gate-D preparation:
+
+```bash
+./submit_gate_b_analysis.sh \
+  campaigns/<GATEB_CAMPAIGN> \
+  Production/<GATEB_CAMPAIGN> \
+  AnalysisOutput/<GATEB_CAMPAIGN> \
+  --dry-run
+```
+
+Use `--submit` on Stoomboot after inspection. Optional
+`--scope=central` and `--scope=sensitivity` restrict processing to that exact
+manifest-declared subset; they do not discover files. The validator is:
+
+```bash
+python3 tools/validate_gate_b_analysis_outputs.py \
+  campaigns/<GATEB_CAMPAIGN> \
+  Production/<GATEB_CAMPAIGN> \
+  AnalysisOutput/<GATEB_CAMPAIGN> \
+  --report AnalysisOutput/<GATEB_CAMPAIGN>/validation/outputs.json
+```
+
+## Canonical merging and ten blocks
+
+The freeze contains:
+
+```text
+canonical_manifest.jsonl
+block_01.jsonl ... block_10.jsonl
+```
+
+Each block has `N/10` complete files per tune (ten in the first stage). The ten
+manifests are disjoint and their union is exactly the central manifest.
+Assignment is frozen before analysis as
+`block = canonical_slot % 10`; it is not random and does not depend on any
+physics observable.
+
+Merge both central and block products:
+
+```bash
 ./merge_root_files.sh \
   Production/<CAMPAIGN>/freeze \
+  <PRODUCTION_ROOT> \
   AnalysisOutput/<CAMPAIGN> \
   AnalyzedData \
   <OUTPUT_TAG>
 ```
 
-The merge produces one complete-root directory and ten disjoint block
-directories per tune. Existing final directories are never overwritten.
+Arguments are, in order: freeze directory, production root, analysis root,
+analyzed-data base, and optional output tag. Do not omit the production root.
+Use `Production/<CAMPAIGN>` for a first-stage freeze and the `Production`
+collection root for a superseding union whose manifest rows carry their source
+campaign prefixes.
 
-## Base Path and Environment
-
-The wrappers resolve the repository base from `base_path.txt` when it exists and otherwise from the local directory structure. They export `HADRONIZATION_BASE`, move to the repository base, source `setupEnv.sh`, and then call ROOT with ACLiC compilation. This means that in ordinary use you run the wrappers from the repository base and do not need to load ROOT separately, although direct ROOT calls still require the environment to be available.
-
-```bash
-./AnalysisScripts/run_hf_analysis.sh 27-03-2026
-```
-
-The wrappers accept the output tag, the number of subsamples, and the charge mode. The number of subsamples defaults to ten. The charge mode defaults to `combined`. The order of the last two arguments is intentionally flexible.
-
-```bash
-./AnalysisScripts/run_hf_analysis.sh 27-03-2026 10 combined
-./AnalysisScripts/run_hf_analysis.sh 27-03-2026 combined 10
-./AnalysisScripts/run_hf_analysis.sh 27-03-2026 10 separate
-```
-
-The `separate` mode writes additional `Particle` and `Bar` histograms for charge-separated plotting while keeping the charge-conjugate-combined histograms. The `combined` mode writes only the combined names. The plotting layer always prefers the combined names and only sums split histograms when a combined histogram is absent.
-
-## Legacy unified inclusive analysis
-
-The legacy/inclusive macro is `hf_mult_pt_analysis_multi.C`. It reads the combined-HF simulation files from:
+Outputs are:
 
 ```text
-RootFiles/HF/MONASH
-RootFiles/HF/JUNCTIONS
+AnalyzedData/complete_root_<OUTPUT_TAG>_MONASH/
+AnalyzedData/complete_root_<OUTPUT_TAG>_JUNCTIONS/
+AnalyzedData/complete_root_<OUTPUT_TAG>_CLOSEPACKING/
+AnalyzedData/SUBSAMPLES_<OUTPUT_TAG>/combined_root_subSamples_<TUNE>/combined_root_1/
+...
+AnalyzedData/SUBSAMPLES_<OUTPUT_TAG>/combined_root_subSamples_<TUNE>/combined_root_10/
 ```
 
-It expects a `tree` with at least `ID`, `PT`, `MULTIPLICITY`, and preferably `HFCLASS`. The intended classification comes from `HFCLASS`, where beauty is `5`, charm is `4`, Bc is `45`, and pions are `0`. The macro can still use PDG information in parts of the logic, but the unified tree format is the correct input format for new productions.
+Every merged directory is staged, object/provenance validated, checksummed,
+and promoted only if the destination is absent. An existing destination is
+accepted only if its contents and provenance validate exactly.
 
-The macro reads each raw ROOT file once. During that pass it fills beauty and charm histogram sets separately, assigns each event to a subsample by deterministic round-robin event index, and writes one output file per tune, flavor, and subsample. For the default ten-subsample run, the output layout is:
+`make_subsamples.sh` is a compatibility entry point to the same canonical
+merge command:
+
+```bash
+./make_subsamples.sh \
+  Production/<CAMPAIGN>/freeze \
+  <PRODUCTION_ROOT> \
+  AnalysisOutput/<CAMPAIGN> \
+  AnalyzedData \
+  <OUTPUT_TAG>
+```
+
+It no longer offers random/bootstrap discovery for publication inputs.
+
+## Multiplicity classes
+
+The central counter is `NCH_HADRONISATION_V1`: direct positive-status 81--89
+e, mu, pi, K, p/antiproton with `pT > 0.15 GeV/c` and `|eta| <= 4`.
+Percentiles are derived separately for each tune from every event in the
+frozen canonical sample, before trigger selection. They are hard-heavy-sample
+percentiles, not minimum-bias centrality.
+
+Integer classes must be mutually exclusive and exhaustive. Boundaries,
+inequalities, achieved fractions, and overflow handling are provenance, and
+the same full-sample boundaries are used for all ten blocks. Plot order is:
 
 ```text
-AnalyzedData/<OUTPUT_TAG>/Beauty/hf_MONASH_sub0.root
-AnalyzedData/<OUTPUT_TAG>/Beauty/hf_MONASH_sub1.root
-AnalyzedData/<OUTPUT_TAG>/Beauty/hf_JUNCTIONS_sub0.root
-AnalyzedData/<OUTPUT_TAG>/Charm/hf_MONASH_sub0.root
-AnalyzedData/<OUTPUT_TAG>/Charm/hf_JUNCTIONS_sub0.root
+90-100, 80-90, 70-80, 60-70, 50-60, 40-50,
+30-40, 20-30, 10-20, 1-10, 0-1
 ```
 
-The wrapper call is:
+## Statistical estimators
 
-```bash
-./AnalysisScripts/run_hf_analysis.sh <OUTPUT_TAG> [NSUB] [CHARGE_MODE]
-```
-
-The direct ROOT call is:
-
-```bash
-root -l -b -q 'AnalysisScripts/hf_mult_pt_analysis_multi.C+(10,"27-03-2026","combined")'
-```
-
-There is also `hf_mult_pt_analysis_multi_100M` inside the macro as a convenience entry point. It uses the same analysis logic and only changes the intended tag convention.
-
-The unified macro counts Bc hadrons with the beauty output by default and does not also count them in charm. This avoids double counting when charm and beauty summaries are later compared. If a later study needs Bc to contribute to charm as well, that is a physics choice and must be changed deliberately in the macro.
-
-## Split Analysis
-
-The split macros are `bb_mult_pt_analysis_multi.C` and `cc_mult_pt_analysis_multi.C`. They read the old independent production layout:
+Central values come from the complete sealed `N`-file union per tune
+(`N=100` in the first stage). They are not the mean of block estimators. With
+`K=10`:
 
 ```text
-RootFiles/bbbar/MONASH
-RootFiles/bbbar/JUNCTIONS
-RootFiles/ccbar/MONASH
-RootFiles/ccbar/JUNCTIONS
+SEM = sqrt(sum((x_k - mean(x))^2) / (K*(K-1)))
 ```
 
-The beauty wrapper is:
+Compute inside every block:
+
+- OS and SS per-trigger normalization;
+- OS-minus-SS subtraction;
+- integration;
+- baryon-to-reference-meson balancing-yield ratio.
+
+This retains OS/SS and numerator/denominator covariance. Tunes are
+independently generated, so same-numbered blocks are not treated as paired
+events; tune-ratio errors use independent propagation. ROOT `Sumw2` is
+retained as input validation, not substituted for the block covariance.
+
+Zero trigger/reference denominators and non-finite values are errors.
+Negative finite OS-minus-SS yields are retained and reported. Every final
+point needs ten finite estimates and a positive SEM unless a documented
+deterministic identity proves degeneracy.
+
+Run the predeclared ten-block, largest equal-exposure slot-modulo divisor in
+`[11,20]` (falling back to ten), and manifest-derived `N`-file delete-one
+comparison:
 
 ```bash
-./AnalysisScripts/run_bb_analysis.sh 12-01-2026 10 combined
+python3 tools/statistical_robustness.py \
+  --canonical-freeze Production/<CAMPAIGN>/freeze \
+  --per-job-root AnalysisOutput/<CAMPAIGN>/per_job \
+  --output-directory \
+AnalysisOutput/<CAMPAIGN>/validation/statistical_robustness \
+  --checkout "$PWD"
 ```
 
-The charm wrapper is:
+## Legacy and diagnostic analysis
 
-```bash
-./AnalysisScripts/run_cc_analysis.sh 12-01-2026 10 combined
-```
+The following are not canonical balancing inputs:
 
-The split input tree is expected to contain `ID`, `PT`, and `MULTIPLICITY`, with the other kinematic and ancestry branches available from the producer. Since the split files do not have `HFCLASS`, the macros classify particles from the absolute PDG id. They write `bbbar_<TUNE>_sub<i>.root` into `AnalyzedData/<OUTPUT_TAG>/Beauty` and `ccbar_<TUNE>_sub<i>.root` into `AnalyzedData/<OUTPUT_TAG>/Charm`.
+- `hf_mult_pt_analysis_multi.C`;
+- `bb_mult_pt_analysis_multi.C`;
+- `cc_mult_pt_analysis_multi.C`;
+- `status_analysis_bb.C`, `status_analysis_cc.C`, `status_analysis_qq.C`;
+- discovery-based `Job700` commands;
+- round-robin event subsamples from older inclusive scripts;
+- hybrid/manual merges of unmanifested directories.
 
-## Status-analysis history and compatibility
+They remain useful for historical/inclusive comparisons. In particular,
+`hAsKinematics` from the pair path is pair conditioned and cannot be
+relabeled as an inclusive spectrum; active inclusive spectra are produced
+from raw trees by the dedicated plotting consumer.
 
-`status_analysis_bb.C`, `status_analysis_cc.C`, and `status_analysis_qq.C` are older status-code and ancestry inspection macros. They work closer to the angular-correlation studies than to the current pT-versus-multiplicity reduction. The bb and cc versions inspect the split beauty and charm style inputs. The qq version includes broader ancestry tracing and sphericity-related helper logic. These macros are useful when the question is about production origin, mother relationships, status codes, and older correlation objects rather than the reduced `AnalyzedData` files used by the current plotting layer.
-
-`status_analysis_THnSparse_qq.C` is the canonical converter used by Paul's THnSparse plotting pipeline. It reads canonical raw HF production ROOT files and writes the signed-pair contract consumed by `PlottingScripts/improvedPlotting_THnSparse.C`.
-
-The following discovery-based commands describe the legacy `Job700` production only and must not be used for a new canonical campaign:
-
-```bash
-./submit_status_analysis.sh ALL 100 Job700
-./merge_root_files.sh ALL Job700 21_06_2026
-./make_subsamples.sh
-```
-
-For large THnSparse outputs, `merge_root_files.sh` and `make_subsamples.sh` also support a hybrid merge backend. This is the recommended production setting when the charm-trigger pair files are large:
-
-```bash
-MERGE_BACKEND=hybrid HADD_JOBS=1 HADD_FINAL_JOBS=4 HADD_CHUNK_SIZE=10 ./merge_root_files.sh ALL Job700 21_06_2026
-MERGE_BACKEND=hybrid HADD_JOBS=1 HADD_FINAL_JOBS=4 HADD_CHUNK_SIZE=10 ./make_subsamples.sh
-```
-
-For a single tune, replace `ALL` with `MONASH`, `JUNCTIONS`, or `CLOSEPACKING`. The submit wrapper reads raw files from `RootFiles/HF/<TUNE>` by default on the production filesystem and selects the first requested number of available files sorted by numeric job id. The merge wrapper writes `AnalyzedData/complete_root_21_06_2026_<TUNE>`, and the subsample wrapper writes `AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_<TUNE>`.
-
-Subsamples are non-overlapping shuffled partitions by default. With no arguments, `make_subsamples.sh` runs the final paper default: all three tunes, ten independent 10-job subsamples per tune, `Job700` input, and `SUBSAMPLES_700` output. This covers all 100 jobs per tune.
-
-## Subsamples
-
-All three analysis macros use round-robin event assignment. With ten subsamples, event zero goes to subsample zero, event one to subsample one, and event ten returns to subsample zero. This keeps event counts nearly equal and makes the split reproducible without depending on file boundaries.
-
-The subsamples are the statistical unit used later by the plotting macros. Spectra are usually built once per subsample, normalized at the subsample level, and then combined as a mean with a standard error of the mean. Ratio plots follow the same principle by constructing a ratio per subsample before computing the plotted mean and error.
-
-## Histograms Written
-
-Every current analysis output writes `fHistEventCount`, `fHistTaggedEventCount`, `fHistMultiplicity`, `fHistTaggedMultiplicity`, and `fHistPDGMult`. The event count is the total number of events processed for that subsample. The tagged event count is the number of events relevant for the output flavor. The tagged multiplicity histogram is what the final-analysis multiplicity comparison prefers, because it compares charm-tagged or beauty-tagged event multiplicities rather than all events in a combined-HF file.
-
-Beauty outputs write aggregate histograms called `fHistPtBeautyMesons` and `fHistPtBeautyBaryons`. The main species histograms are `fHistPtBplus`, `fHistPtBzero`, `fHistPtBs0`, `fHistPtBcplus`, `fHistPtLambdab`, `fHistPtSigmabPlus`, `fHistPtSigmabZero`, `fHistPtSigmabMinus`, `fHistPtXibZero`, `fHistPtXibMinus`, and `fHistPtOmegabMinus`. Pion histograms are `fHistPtPionsCharged`, `fHistPtPiPlus`, `fHistPtPiMinus`, and `fHistPtPi0`.
-
-Charm outputs write aggregate histograms called `fHistPtCharmMesons` and `fHistPtCharmBaryons`. The main species histograms are `fHistPtDplus`, `fHistPtDzero`, `fHistPtDsplus`, `fHistPtLambdac`, `fHistPtLambdacPlus`, `fHistPtSigmacPlusPlus`, `fHistPtSigmacPlus`, `fHistPtSigmacZero`, `fHistPtXicPlus`, `fHistPtXicZero`, and `fHistPtOmegacZero`. The macro writes `fHistPtLambdac` as the canonical current name and keeps `fHistPtLambdacPlus` for compatibility with older plotting code.
-
-In `separate` charge mode, the species histograms acquire additional names with `Particle` and `Bar` suffixes. For example, `fHistPtDplusParticle` and `fHistPtDplusBar` are written alongside `fHistPtDplus`. The same pattern is used for the supported beauty and charm species.
-
-## Output Tags and Present Samples
-
-The `OUTPUT_TAG` is simply the directory name under `AnalyzedData`. The current checkout includes older independent split samples dated `10-09-2025` and `12-01-2026`, a combined-HF sample dated `27-03-2026`, and the larger `08-04-2026_100M_Combined` and `08-04-2026_100M_Separate` reduced outputs. Pure date tags are interpreted by downstream plotting helpers when they sort folders of the form `DD-MM-YYYY`; descriptive tags remain valid analysis directories but are not part of the automatic latest-date ordering unless the plotting helper explicitly accepts them.
+The dated:
 
 ```text
-AnalyzedData/10-09-2025
-AnalyzedData/12-01-2026
-AnalyzedData/27-03-2026
-AnalyzedData/08-04-2026_100M_Combined
-AnalyzedData/08-04-2026_100M_Separate
+AnalyzedData/complete_root_21_06_2026_<TUNE>
+AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_<TUNE>
 ```
 
-## Count Events Utility
+are metadata-free legacy regression inputs. They retain Paul's old effective
+selection and do not demonstrate raw-v5 selector coverage.
 
-`AnalysisScripts/CountEvents/count_events.sh` runs `count_events_bb_cc.C` from the repository base and then removes the ACLiC artifacts produced by that macro. It is written for the old split bbbar and ccbar layout.
+## Generated data
 
-```bash
-./AnalysisScripts/CountEvents/count_events.sh
+Canonical analysis and merged outputs live under ignored paths:
+
+```text
+AnalysisOutput/
+AnalyzedData/complete_root_*/
+AnalyzedData/SUBSAMPLES_*/
 ```
 
-For the current combined-HF raw files, use `generated_heavy_flavor_summary.C`. It recursively scans one raw ROOT file or a directory of raw ROOT files, counts total processed events, reports the requested B, D, `Lambda_b`, and `Lambda_c` particle and antiparticle yields, prints a table, and writes the same table to CSV. In the default `auto` backend it uses the producer-level histograms, which are filled from the same stored final-state particles as the tree and are much faster for full 100M samples. Use the optional fifth argument `"tree"` if you specifically need a tree scan.
-
-```bash
-root -l -b -q 'AnalysisScripts/CountEvents/generated_heavy_flavor_summary.C++("RootFiles/HF/MONASH","monash_generated_hf_summary.csv")'
-root -l -b -q 'AnalysisScripts/CountEvents/generated_heavy_flavor_summary.C++("RootFiles/HF/JUNCTIONS","junctions_generated_hf_summary.csv")'
-root -l -b -q 'AnalysisScripts/CountEvents/generated_heavy_flavor_summary.C++("RootFiles/HF/CLOSEPACKING","closepacking_generated_hf_summary.csv")'
-root -l -b -q 'AnalysisScripts/CountEvents/generated_heavy_flavor_summary.C++("RootFiles/HF/MONASH","monash_tree_scan.csv","tree","stored","tree")'
-```
-
-For the paper-ready table across all three tunes, call the LaTeX-table entry point after loading the macro:
-
-```bash
-root -l -b <<'ROOTCMDS'
-.L AnalysisScripts/CountEvents/generated_heavy_flavor_summary.C+
-generated_heavy_flavor_summary_latex_table("RootFiles/HF", "Paper/Tables/generated_heavy_flavor_summary.tex");
-.q
-ROOTCMDS
-```
-
-The current generated tree stores accepted final-state heavy hadrons and pions, not the full PYTHIA parton-level event record. Because of that, this macro normalizes the species yields to the accepted final-hadron heavy-flavour valence content available in the tree: each beauty-only hadron contributes one `b` or `bbar` unit, each charm-only hadron contributes one `c` or `cbar` unit, and each `Bc` hadron contributes one unit to both. A true generated pre-hadronization `b` or `c` quark count would require adding dedicated quark counters to the producer.
-
-## Failure Modes
-
-If a wrapper reports that `root` is missing, `setupEnv.sh` either could not be sourced or the ALICE CVMFS environment is unavailable on that machine. If a wrapper reports that an input directory is missing, check whether the raw production files are present under `RootFiles` on that host. If ROOT prints histogram replacement warnings during a large run, they are usually in-memory name reuse warnings and not output-file overwrites; the current macros use `TH1::AddDirectory(kFALSE)` style handling where needed and write each subsample to a separate file.
-
-If a plotting macro later reports missing histograms, first check whether the analysis was run with the same `NSUB` that the plot is trying to read, and then check whether the sample is an `hf_` combined sample or a `bbbar_`/`ccbar_` split sample. The plotting layer can handle both naming schemes, but the files must be present for every requested subsample.
+They are generated but not disposable: preserve the manifests, validation
+reports, provenance sidecars, merge logs, and checksums used for a release.
+Never broad-clean a shared analysis checkout or overwrite a dated legacy
+directory.
