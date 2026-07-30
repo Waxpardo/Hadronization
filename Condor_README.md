@@ -1,8 +1,52 @@
 # Condor Jobs
 
-This file documents the Condor interface for running the Hadronization simulations on the shared Nikhef/Stoomboot filesystem. We now use one wrapper, `runCondorJob.sh`, for both the current unified heavy-flavour production and the older split bbbar/ccbar production. The wrapper resolves the repository base, loads the ROOT and PYTHIA environment, creates a per-job work directory, edits the event count in a copied `.cmnd` card, runs the selected executable, and moves the completed ROOT file into the final `RootFiles` directory.
+This file documents the Condor interface for running the Hadronization simulations on the shared Nikhef/Stoomboot filesystem. The canonical publication path is immutable-campaign driven. `runCondorJob.sh --campaign` validates each logical attempt against the campaign and seed ledger, writes a unique partial file, validates it, and atomically promotes it under `Production/<campaign>/raw/<TUNE>`. Older argument forms are delegated to `runCondorJob_legacy.sh`; the fixed `submitCondor_*.sub`, `RootFiles`, and `Jobs` descriptions later in this document are retained only for legacy reproducibility.
 
-## Base Path
+## Canonical campaign submission
+
+Use a clean committed execution worktree and generate a new immutable campaign:
+
+```bash
+source setupEnv.sh
+python3 tools/campaign_manifest.py generate \
+  --campaign <CAMPAIGN> \
+  --campaign-ordinal <UNUSED_ORDINAL> \
+  --events 1000000 \
+  --seed-base <UNUSED_SEED_BASE> \
+  --max-attempts 1000
+python3 tools/campaign_manifest.py validate campaigns/<CAMPAIGN>
+./submit_full_production.sh campaigns/<CAMPAIGN> --dry-run
+```
+
+Run `condor_submit` only from a Stoomboot submit node. `--submit` is
+fail-closed: it requires the validated 100/200/200 candidate manifest, an exact
+recorded implementation commit, no tracked source changes, a successful
+producer build, and `PHYSICS_ORIGIN_SIGNOFF.json`. The sign-off is mandatory
+when the validated pilots show any nonzero unresolved-trigger fraction.
+
+```bash
+./submit_full_production.sh campaigns/<CAMPAIGN> --submit
+```
+
+The first 100 candidates per tune are primary; JUNCTIONS and CLOSEPACKING also
+have 100 predeclared reserves each. Exactly 100 successful one-million-event
+jobs per tune enter the final frozen sample. Reserve selection is allowed only
+to replace a documented invalid primary, never to improve a measured result.
+
+Automatic Condor retries are disabled. After a failed attempt, allocate a
+fresh seed in the locked ledger and render an explicit retry:
+
+```bash
+python3 tools/campaign_manifest.py allocate-retry \
+  campaigns/<CAMPAIGN> TUNE LOGICAL_ID \
+  --reason "documented failure"
+```
+
+Never release a held attempt that may have started and never reuse its seed.
+Stable validated outputs are never overwritten. Failed partials and attempt
+metadata remain available for audit.
+
+## Legacy fixed-path workflow
 
 The submit files contain absolute paths because Condor does not read `base_path.txt` by itself. The present cluster path is:
 
@@ -50,7 +94,7 @@ condor_submit submitCondor_hf_CLOSEPACKING_100M.sub
 
 The Close Packing submit file queues one hundred one-million-event jobs for `CLOSEPACKING` and uses the `long` category.
 
-The unified HF submit files retry non-zero exits up to five times. This covers
+The legacy unified HF submit files retry non-zero exits up to five times. This covers
 Stoomboot walltime/draining evictions, which can leave a partial ROOT file in
 the job work directory. On each retry, `runCondorJob.sh` removes only the stale
 workdir output, keeps any already-moved final output untouched, and folds the

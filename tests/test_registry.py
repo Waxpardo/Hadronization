@@ -15,6 +15,9 @@ def main() -> int:
     )
     species = json.loads((ROOT / "config/heavy_flavour_species_v1.json").read_text())
     pairs = json.loads((ROOT / "config/heavy_flavour_pair_registry_v1.json").read_text())
+    weak_parents = json.loads(
+        (ROOT / "config/weak_decay_parent_registry_v1.json").read_text()
+    )
     states = {int(row["pdg"]): row for row in species["signed_states"]}
 
     assert len(states) == 50
@@ -23,6 +26,9 @@ def main() -> int:
     assert states[541]["qc"] == 1 and states[541]["qb"] == -1
     assert states[-541]["qc"] == -1 and states[-541]["qb"] == 1
     assert all(abs(row["spin2j1"]) in {1, 2} for row in states.values())
+    weak_pdgs = [int(row["pdg"]) for row in weak_parents["light_parent_abs_pdgs"]]
+    assert len(weak_pdgs) == len(set(weak_pdgs)) == 14
+    assert 311 in weak_pdgs
 
     expanded = pairs["pairs"]
     assert pairs["pair_count"] == len(expanded) == 300

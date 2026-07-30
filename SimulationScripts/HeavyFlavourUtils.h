@@ -1,6 +1,9 @@
 #ifndef HADRONIZATION_HEAVY_FLAVOUR_UTILS_H
 #define HADRONIZATION_HEAVY_FLAVOUR_UTILS_H
 
+#include "GeneratedWeakParentRegistry.h"
+
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -184,28 +187,16 @@ inline double WrapDeltaPhi(double triggerPhi, double associatePhi) {
 }
 
 inline bool IsKnownWeakParent(int absPdg) {
-  // Versioned NCH_FINAL_STRONG_EM_V1 exclusion list. Heavy parents are
-  // included even though the central production disables their decays.
-  switch (std::abs(absPdg)) {
-    case 13:
-    case 15:
-    case 211:
-    case 310:
-    case 130:
-    case 321:
-    case 2112:
-    case 3122:
-    case 3112:
-    case 3222:
-    case 3312:
-    case 3322:
-    case 3334:
-      return true;
-    default:
-      break;
+  // NCH_FINAL_STRONG_EM_V1 light-parent exclusions are generated from the
+  // machine-readable weak-decay registry. Heavy parents are included below
+  // even though the central production disables their decays.
+  const int id = std::abs(absPdg);
+  if (std::find(kWeakLightParentAbsPdgs.begin(),
+                kWeakLightParentAbsPdgs.end(), id) !=
+      kWeakLightParentAbsPdgs.end()) {
+    return true;
   }
   // Conventional open-heavy PDG encodings contain a c/b quark digit.
-  const int id = std::abs(absPdg);
   return ((id / 10) % 10 == 4 || (id / 100) % 10 == 4 ||
           (id / 1000) % 10 == 4 || (id / 10) % 10 == 5 ||
           (id / 100) % 10 == 5 || (id / 1000) % 10 == 5);

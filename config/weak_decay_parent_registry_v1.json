@@ -1,0 +1,26 @@
+{
+  "schema": "weak_decay_parent_registry_v1",
+  "interpretation": "A final accepted charged particle is excluded from NCH_FINAL_STRONG_EM_V1 when any explicit ancestor is one of these long-lived weakly decaying light particles, or is an open-heavy hadron identified by a charm/beauty digit in the conventional PDG hadron code.",
+  "light_parent_abs_pdgs": [
+    {"pdg": 13, "name": "muon", "reason": "weak leptonic decay"},
+    {"pdg": 15, "name": "tau", "reason": "weak leptonic/hadronic decay"},
+    {"pdg": 211, "name": "charged pion", "reason": "weak decay"},
+    {"pdg": 311, "name": "neutral kaon flavour state", "reason": "weak neutral-kaon lineage"},
+    {"pdg": 310, "name": "K0S", "reason": "weak decay"},
+    {"pdg": 130, "name": "K0L", "reason": "weak decay"},
+    {"pdg": 321, "name": "charged kaon", "reason": "weak decay"},
+    {"pdg": 2112, "name": "neutron", "reason": "weak beta decay"},
+    {"pdg": 3122, "name": "Lambda", "reason": "weak decay"},
+    {"pdg": 3112, "name": "Sigma-", "reason": "weak decay"},
+    {"pdg": 3222, "name": "Sigma+", "reason": "weak decay"},
+    {"pdg": 3312, "name": "Xi-", "reason": "weak decay"},
+    {"pdg": 3322, "name": "Xi0", "reason": "weak decay"},
+    {"pdg": 3334, "name": "Omega-", "reason": "weak decay"}
+  ],
+  "open_heavy_rule": "For conventional positive hadron PDG codes, classify the particle as an open-heavy weak parent when the tens, hundreds, or thousands quark digit is 4 or 5.",
+  "known_limitations": [
+    "Classification follows explicit generator ancestry and therefore depends on preserved mother links.",
+    "All heavy-hadron decays are disabled in the canonical sample, so heavy-decay charged daughters are absent even though heavy parents remain in the exclusion rule.",
+    "This is a generator-level robustness counter, not an experimental primary-particle definition."
+  ]
+}

@@ -118,7 +118,7 @@ KINEMATIC_OUTPUT_DIR=PlottingScripts/Plots/KinematicSpectraFull \
 
 The default kinematic output is shape-normalized. Set `KINEMATIC_NORMALIZE=false` to draw bin-width-normalized counts. Set `KINEMATIC_STRICT=false` to skip missing tunes instead of treating them as errors.
 
-The paper kinematic spectra are inclusive single-particle spectra. They are filled directly from the generated raw tree with exact PDG-ID matching and no trigger/associate pair conditioning. The raw producer already applied its final-state particle acceptance (`pT >= 0.15 GeV/c`, `|eta| <= 4`); the plotting macro adds no extra kinematic cuts. Absolute `phi` is wrapped to `[-pi, pi)`.
+The paper kinematic spectra are inclusive single-particle spectra. They are filled directly from the generated raw tree with exact PDG-ID matching and no trigger/associate pair conditioning. In the new canonical producer, stored associates satisfy `pT > 0.15 GeV/c` and `|eta| <= 4`; the plotting macro adds no extra kinematic cuts. Absolute `phi` is wrapped to `[-pi, pi)`. Legacy raw files may encode the earlier boundary convention and must be labelled by schema.
 
 `Plot_KinematicSpectra_THnSparse.C` is kept for diagnostic trigger/associate and correlation checks, but those spectra are pair-conditioned by construction and are not the final inclusive single-particle kinematic spectra.
 
@@ -133,7 +133,7 @@ PlottingScripts/Plots/KinematicSpectra/Inclusive/phi
 
 Event-level spectra that are independent of the selected heavy-flavour species are intentionally drawn once. In particular, charged multiplicity comes from the same HF event sample for charm and beauty, so the paper macro writes one shared multiplicity plot per tune rather than duplicate charm and beauty versions. The shared multiplicity spectrum is limited to `N_{ch} <= 170` and includes a lower ratio panel for `JUNCTIONS/MONASH` and `CLOSEPACKING/MONASH`. Its main panel also carries a compact MONASH percentile-boundary inset and a short energy/acceptance annotation below the legend.
 
-Across the current production plots, `N_{ch}` means prompt charged primary `e^{+-}`, `mu^{+-}`, `pi^{+-}`, `K^{+-}`, and `p`/anti-`p` with PYTHIA status `81-89`, `pT >= 0.15 GeV/c`, and `|eta| <= 4` in pp at `sqrt(s)=14 TeV`. Multiplicity percentile labels are interpreted from low to high activity as `90-100% -> ... -> 0-1%`.
+Across the new canonical production plots, `N_{ch}` means direct charged primary `e^{+-}`, `mu^{+-}`, `pi^{+-}`, `K^{+-}`, and `p`/anti-`p` with positive PYTHIA status `81-89`, `pT > 0.15 GeV/c`, and `|eta| <= 4` in pp at `sqrt(s)=14 TeV`. This is not called “prompt.” Multiplicity percentile labels are interpreted from low to high activity as `90-100% -> ... -> 0-1%`.
 
 ## THnSparse Configs
 
@@ -176,7 +176,7 @@ Central values are calculated from the full complete-root files. For each ordina
 SEM = sample standard deviation(yield_1, ..., yield_10) / sqrt(10)
 ```
 
-with the sample standard deviation using `N-1`. Baryon/meson ratios are formed separately inside every subsample before the SEM is calculated. JUNCTIONS/MONASH and CLOSEPACKING/MONASH uncertainties combine the independently generated tune uncertainties in quadrature; baryon/meson tune double ratios use the matching associate ratio uncertainty from each tune. The same OS/SS cuts, trigger normalization, and same-sign factor-of-two correction are applied to central and subsample calculations. Non-finite denominators and zero uncertainties on final plotted points stop the run with an explicit error.
+with the sample standard deviation using `N-1`. Baryon/meson ratios are formed separately inside every subsample before the SEM is calculated. JUNCTIONS/MONASH and CLOSEPACKING/MONASH uncertainties combine the independently generated tune uncertainties in quadrature; baryon/meson tune double ratios use the matching associate ratio uncertainty from each tune. The same OS/SS cuts and trigger normalization are applied to central and subsample calculations. The canonical ordered-pair producer uses `same_sign_pair_factor = 1.0`; the legacy identical-species factor of 0.5 is not applied. Non-finite denominators and zero uncertainties on final plotted points stop the run with an explicit error.
 
 After a verbose full run, validate and summarise every subsample-statistics line:
 

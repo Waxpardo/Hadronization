@@ -1,14 +1,14 @@
 # Hadronization
 
-This repository is the working code base for heavy-flavour hadronization studies in proton-proton collisions with PYTHIA 8 and ROOT. We now use it as a complete local and Stoomboot workflow: it can generate MONASH, JUNCTIONS, and CLOSEPACKING samples, reduce the raw ROOT trees into subsampled analysis histograms, and make the present comparison plots for multiplicity, pT spectra, selected-particle yields, and baryon-to-meson ratios.
+This repository is the working code base for heavy-flavour hadronization studies in proton-proton collisions with PYTHIA 8 and ROOT. The authoritative publication workflow, exact physics definitions, validation gates, immutable-manifest procedure, and reproduction commands are in [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md). Older commands retained later in this README reproduce legacy studies unless explicitly identified as canonical.
 
-The present chain is centered on a unified heavy-flavour production. In that production charm and beauty are allowed in the same PYTHIA run, and the output tree keeps charm hadrons, beauty hadrons, Bc hadrons, pions, event multiplicity, process code, and per-event heavy-flavour counters. The older split production, where bbbar and ccbar are generated and analyzed independently, is still kept because it is needed for reference samples and for comparisons to earlier productions. In practice, we now make new combined HF samples with `SimulationScripts/heavyflavourcorrelations_status.cpp`, analyze them with `AnalysisScripts/hf_mult_pt_analysis_multi.C`, and compare them to the independent samples through the plotting macros under `PlottingScripts`.
+The canonical chain uses the unified producer `SimulationScripts/heavyflavourcorrelations_status.cpp`, raw schema `hf_primary_ground_raw_v3`, a frozen campaign manifest, and the one-pass signed-pair analysis `AnalysisScripts/status_analysis_THnSparse_qq.C`. Charm and beauty are enabled in the same PYTHIA run. The 50-state signed species registry and 300-pair registry are versioned under `config/`. The older split production and `hf_mult_pt_analysis_multi.C` remain regression and inclusive-spectrum references; they are not the canonical balancing-analysis reduction.
 
 ## Repository Map
 
 `SimulationScripts` contains the PYTHIA producers, settings cards, and Makefile. The important executable for current work is `heavyflavourcorrelations_status`, while `bbbarcorrelations_status`, `bbbarcorrelations_status_JUNCTIONS`, `ccbarcorrelations_status`, and `ccbarcorrelations_status_JUNCTIONS` are the split legacy producers. The `pythiasettings_Hard_Low_ccbb_MONASH.cmnd`, `pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd`, and `pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd` cards are the current combined-HF cards. The split cards remain available as `pythiasettings_Hard_Low_bb*.cmnd` and `pythiasettings_Hard_Low_cc*.cmnd`.
 
-`AnalysisScripts` contains the ROOT reduction macros and shell wrappers. The current macro `hf_mult_pt_analysis_multi.C` reads `RootFiles/HF/MONASH`, `RootFiles/HF/JUNCTIONS`, and `RootFiles/HF/CLOSEPACKING`, splits the events into subsamples, and writes charm and beauty histogram files into `AnalyzedData/<tag>/Charm` and `AnalyzedData/<tag>/Beauty`. The split macros `bb_mult_pt_analysis_multi.C` and `cc_mult_pt_analysis_multi.C` do the same for the independent old samples.
+`AnalysisScripts` contains the ROOT reduction macros and shell wrappers. The canonical balancing macro is `status_analysis_THnSparse_qq.C`: each frozen raw file is read once and produces all signed ordered-pair outputs. `hf_mult_pt_analysis_multi.C`, `bb_mult_pt_analysis_multi.C`, and `cc_mult_pt_analysis_multi.C` are retained for legacy/inclusive-spectrum comparisons and must not be mixed into the canonical balancing chain.
 
 `PlottingScripts/PtMultiplicity` contains the current physics plotting macros for pT spectra, multiplicity-dependent spectra, baryon-to-meson ratios, species-resolved spectra, single-particle spectra, and minimum-bias spectra. These macros read the reduced `AnalyzedData` files rather than the raw simulation trees. They prefer the `hf_` file naming scheme and fall back to `bbbar_` or `ccbar_` when an older split sample is being plotted.
 
@@ -159,7 +159,7 @@ The default `all` target runs the multiplicity-boundary plot, inclusive raw kine
 
 The canonical tune style is defined only in `PlottingScripts/TunePlotStyle.h`: MONASH is black/marker 20/solid, JUNCTIONS is blue+1/marker 21/dashed, and CLOSEPACKING is magenta+1/marker 22/line style 7. Tune-ratio curves inherit the numerator tune style.
 
-Paper kinematic spectra are inclusive single-particle spectra drawn directly from `RootFiles/HF`, not from trigger/associate-conditioned THnSparse pair outputs. Exact PDG-ID matching is used, the raw producer acceptance is preserved, and absolute `phi` is displayed in `[-pi, pi)`. Correlation `Delta phi` plots in Paul's THnSparse macro keep the shifted `[-pi/2, 3pi/2]` convention. The charged multiplicity definition used for these figures is prompt charged primary `e`, `mu`, `pi`, `K`, and `p` species, including antiparticles, with PYTHIA status `81-89`, `pT >= 0.15 GeV/c`, `|eta| <= 4`, in pp at `sqrt(s)=14 TeV`; activity classes are read from low to high multiplicity as `90-100% -> ... -> 0-1%`.
+Paper kinematic spectra are inclusive single-particle spectra drawn directly from raw production, not from trigger/associate-conditioned THnSparse pair outputs. Exact PDG-ID matching is used, the raw producer acceptance is preserved, and absolute `phi` is displayed in `[-pi, pi)`. Correlation `Delta phi` plots in Paul's THnSparse macro keep the shifted `[-pi/2, 3pi/2]` convention. For new canonical figures, charged multiplicity means direct charged primary `e`, `mu`, `pi`, `K`, and `p` species, including antiparticles, with positive PYTHIA status `81-89`, `pT > 0.15 GeV/c`, `|eta| <= 4`, in pp at `sqrt(s)=14 TeV`; activity classes are read from low to high multiplicity as `90-100% -> ... -> 0-1%`. “Prompt” is not used as a synonym for this generator-status definition.
 
 The current pT and multiplicity plots are made from `AnalyzedData`, not from `RootFiles`. If no date is passed, the plotting helpers search for the latest dated folder under `AnalyzedData`. In ordinary use, we pass the date explicitly so that no older production is selected by accident.
 
@@ -180,14 +180,13 @@ The pT and multiplicity plots are written to `PlottingScripts/PtMultiplicity/Plo
 
 ## Condor Workflow
 
-The Condor entry point is `runCondorJob.sh`. It supports both the current combined-HF workflow and the older split workflow. The submit files use the shared filesystem and do not transfer files through Condor.
+The Condor execution entry point is `runCondorJob.sh`. Canonical invocations use its `--campaign` form and are rendered from an immutable campaign manifest. Older argument forms are delegated to `runCondorJob_legacy.sh`; the fixed submit files below are historical examples, not publication-production entry points.
 
 ```bash
-./update_submit_paths.sh
-condor_submit submitCondor_hf_10M.sub
+./submit_full_production.sh campaigns/<CAMPAIGN> --dry-run
 ```
 
-`submitCondor_hf_10M.sub` submits ten one-million-event jobs per MONASH/JUNCTIONS tune. `submitCondor_hf_90M.sub` submits ninety one-million-event jobs per MONASH/JUNCTIONS tune. `submitCondor_hf_CLOSEPACKING_100M.sub` submits one hundred one-million-event jobs for the Close Packing tune. `submitCondor_10M.sub` submits the old split bbbar and ccbar production for MONASH and JUNCTIONS. The wrapper names output files with the Condor cluster and job id, writes the ROOT file inside the job work directory, and moves the completed file to `RootFiles/...` only after a successful run.
+For the canonical path, `submit_full_production.sh` validates a 100/200/200 candidate manifest, rebuilds the producer, renders a no-auto-retry submit file, and requires explicit origin-resolution sign-off before `--submit`. Historical `submitCondor_*.sub` files remain only to reproduce older samples. Canonical partial files are validated and atomically promoted under `Production/<campaign>/raw/<TUNE>`; they are not written into the old discovery-based `RootFiles` pool.
 
 ## Data and Versioning
 

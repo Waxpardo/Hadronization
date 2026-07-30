@@ -1,6 +1,61 @@
 # Analysis Scripts
 
-This directory contains the ROOT macros and shell wrappers that reduce simulation ROOT trees into the subsampled histogram files used by the plotting layer. We now treat the unified heavy-flavour analysis as the normal path and the split bbbar/ccbar analysis as the reference path for older independent samples.
+This directory contains the ROOT macros and shell wrappers that reduce simulation ROOT trees into histogram files used by the plotting layer. The canonical publication balancing path is manifest-driven and uses `status_analysis_THnSparse_qq.C`. The `hf_mult_pt_analysis_multi.C` and split bbbar/ccbar workflows documented later are legacy or inclusive-spectrum references, not the canonical balancing reduction. See the top-level `REPRODUCIBILITY.md`.
+
+## Canonical one-pass balancing analysis
+
+`submit_status_analysis.sh` accepts a validated freeze directory, production
+root, and analysis output root. It queues only the 300 raw paths enumerated in
+`canonical_manifest.jsonl`; directory discovery and “first N files” selection
+are forbidden.
+
+```bash
+./submit_status_analysis.sh \
+  Production/<CAMPAIGN>/freeze \
+  Production/<CAMPAIGN> \
+  AnalysisOutput/<CAMPAIGN> \
+  --dry-run
+
+./submit_status_analysis.sh \
+  Production/<CAMPAIGN>/freeze \
+  Production/<CAMPAIGN> \
+  AnalysisOutput/<CAMPAIGN> \
+  --submit
+```
+
+Each job invokes `run_status_analysis.sh`, which reads one canonical raw file
+once and writes all 300 signed ordered-pair ROOT files to a unique staging
+directory. The directory is promoted only after
+`Validation/validate_pair_directory.sh` passes. Each pair file contains
+`summed MULTIPLICITY`, `hTrKinematics`, `hAsKinematics`, `hCorrelations`, and
+the origin-decomposed correlation object plus immutable metadata.
+
+The selector is
+`hard_trigger_primary_ground__primary_ground_associate_v1`. Triggers satisfy
+`pT > 1.0 GeV/c`, associates satisfy `pT > 0.15 GeV/c`, both satisfy
+`|eta| <= 4`, and both are direct-primary generator-stable registry states.
+Triggers additionally require resolved matching to the selected hard heavy
+quark. Associates retain all origin categories. Pairs are ordered, so the
+canonical analysis does not apply the legacy same-sign factor of 0.5.
+
+After all analysis jobs validate, merge only the frozen central and block
+manifests:
+
+```bash
+python3 tools/validate_analysis_outputs.py \
+  Production/<CAMPAIGN>/freeze/canonical_manifest.jsonl \
+  AnalysisOutput/<CAMPAIGN> \
+  --report AnalysisOutput/<CAMPAIGN>/validation/analysis_outputs.json
+
+./merge_root_files.sh \
+  Production/<CAMPAIGN>/freeze \
+  AnalysisOutput/<CAMPAIGN> \
+  AnalyzedData \
+  <OUTPUT_TAG>
+```
+
+The merge produces one complete-root directory and ten disjoint block
+directories per tune. Existing final directories are never overwritten.
 
 ## Base Path and Environment
 
@@ -20,9 +75,9 @@ The wrappers accept the output tag, the number of subsamples, and the charge mod
 
 The `separate` mode writes additional `Particle` and `Bar` histograms for charge-separated plotting while keeping the charge-conjugate-combined histograms. The `combined` mode writes only the combined names. The plotting layer always prefers the combined names and only sums split histograms when a combined histogram is absent.
 
-## Unified Heavy-Flavour Analysis
+## Legacy unified inclusive analysis
 
-The current macro is `hf_mult_pt_analysis_multi.C`. It reads the combined-HF simulation files from:
+The legacy/inclusive macro is `hf_mult_pt_analysis_multi.C`. It reads the combined-HF simulation files from:
 
 ```text
 RootFiles/HF/MONASH
@@ -82,13 +137,13 @@ The charm wrapper is:
 
 The split input tree is expected to contain `ID`, `PT`, and `MULTIPLICITY`, with the other kinematic and ancestry branches available from the producer. Since the split files do not have `HFCLASS`, the macros classify particles from the absolute PDG id. They write `bbbar_<TUNE>_sub<i>.root` into `AnalyzedData/<OUTPUT_TAG>/Beauty` and `ccbar_<TUNE>_sub<i>.root` into `AnalyzedData/<OUTPUT_TAG>/Charm`.
 
-## Status Analysis Macros
+## Status-analysis history and compatibility
 
 `status_analysis_bb.C`, `status_analysis_cc.C`, and `status_analysis_qq.C` are older status-code and ancestry inspection macros. They work closer to the angular-correlation studies than to the current pT-versus-multiplicity reduction. The bb and cc versions inspect the split beauty and charm style inputs. The qq version includes broader ancestry tracing and sphericity-related helper logic. These macros are useful when the question is about production origin, mother relationships, status codes, and older correlation objects rather than the reduced `AnalyzedData` files used by the current plotting layer.
 
-`status_analysis_THnSparse_qq.C` is the converter used by Paul's THnSparse plotting pipeline. It reads raw HF production ROOT files and writes pair-named files such as `BplusBminus.root`, `BplusBplus.root`, `DplusDminus.root`, and `DplusDplus.root`. These files contain `summed MULTIPLICITY`, `hTrKinematics`, `hAsKinematics`, and `hCorrelations`, which are the objects consumed by `PlottingScripts/improvedPlotting_THnSparse.C`.
+`status_analysis_THnSparse_qq.C` is the canonical converter used by Paul's THnSparse plotting pipeline. It reads canonical raw HF production ROOT files and writes the signed-pair contract consumed by `PlottingScripts/improvedPlotting_THnSparse.C`.
 
-The shell wrappers at the repository root now treat `MONASH`, `JUNCTIONS`, and `CLOSEPACKING` equally. They accept a tune name or `ALL`:
+The following discovery-based commands describe the legacy `Job700` production only and must not be used for a new canonical campaign:
 
 ```bash
 ./submit_status_analysis.sh ALL 100 Job700

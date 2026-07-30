@@ -40,6 +40,15 @@ int main() {
     assert(CountsNchFinalStrongEmV1(pdg, true, 1.0, 0.0, false));
     assert(!CountsNchFinalStrongEmV1(pdg, true, 1.0, 0.0, true));
   }
+  for (const int weakParent : {13, 15, 211, 311, 310, 130, 321, 2112,
+                               3122, 3112, 3222, 3312, 3322, 3334,
+                               411, 511}) {
+    assert(IsKnownWeakParent(weakParent));
+    assert(IsKnownWeakParent(-weakParent));
+  }
+  for (const int strongOrStableParent : {22, 111, 113, 221, 223, 2212}) {
+    assert(!IsKnownWeakParent(strongOrStableParent));
+  }
 
   std::set<std::uint64_t> ids;
   for (int tune = 0; tune < 3; ++tune) {

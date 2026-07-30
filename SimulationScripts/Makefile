@@ -57,7 +57,8 @@ ccbarcorrelations_status_JUNCTIONS: ccbarcorrelations_status_JUNCTIONS.cpp
 
 heavyflavourcorrelations_status: heavyflavourcorrelations_status.cpp \
                                 HeavyFlavourUtils.h \
-                                GeneratedHeavyFlavourRegistry.h
+                                GeneratedHeavyFlavourRegistry.h \
+                                GeneratedWeakParentRegistry.h
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:

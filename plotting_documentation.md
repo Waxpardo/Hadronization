@@ -34,7 +34,7 @@ AnalyzedData/<TUNE>/complete_root_<tag>_<TUNE>/<pair>.root
 AnalyzedData/<TUNE>/complete_root_<tag>/<pair>.root
 ```
 
-The canonical Nikhef production is:
+The checked-in `21_06_2026` Nikhef production is a legacy regression dataset:
 
 ```text
 /data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH
@@ -44,6 +44,10 @@ The canonical Nikhef production is:
 /data/alice/ipardoza/Hadronization/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS
 /data/alice/ipardoza/Hadronization/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING
 ```
+
+It remains the default only until the new `hf_primary_ground_raw_v3`
+campaign has passed Gates A--D, been frozen, analyzed, and merged. It must not
+be described as having the new selector or ordered-pair semantics.
 
 Every pair file must contain `summed MULTIPLICITY` (`TH1D`) and
 `hTrKinematics`, `hAsKinematics`, and `hCorrelations` (`THnSparseD`).
@@ -101,6 +105,13 @@ computes central values for all configured bins first. All four drawing paths
 honor `bins_to_ignore`; ordinary yield canvases additionally select their
 requested curves through `legend_entries`.
 
+The canonical upstream selector applies trigger `pT > 1.0 GeV/c`, associate
+`pT > 0.15 GeV/c`, and `|eta| <= 4` to both roles. The plotting macro applies
+its configured trigger/associate pT and eta ranges symmetrically to the
+correlation numerator and trigger denominator. It rejects unsupported
+individual non-full phi cuts instead of silently producing inconsistent
+normalization.
+
 ## Four drawing paths
 
 - `drawBalancingPlots`: ordinary OS-minus-SS balancing yields.
@@ -130,8 +141,9 @@ quadrature. A baryon/meson tune double ratio uses the matching associate's
 baryon/meson uncertainty for both numerator and denominator tunes.
 
 Central and subsample calculations use identical THnSparse cuts, multiplicity
-boundaries, OS/SS normalization, and the factor-of-two correction for
-same-sign double counting. The macro rejects missing inputs, wrong object
+boundaries, and OS/SS normalization. New canonical pair files contain ordered
+trigger-associate pairs and use `same_sign_pair_factor = 1.0`; the legacy
+identical-species factor of 0.5 is not applied. The macro rejects missing inputs, wrong object
 types, non-finite ratios, incomplete finite-subsample sets, and non-positive
 uncertainties for final plotted points. A diagnostic config may explicitly set
 `calculate_errors=false`; it draws zero-length errors and is not a paper config.
