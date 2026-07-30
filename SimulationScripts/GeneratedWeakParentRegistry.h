@@ -7,7 +7,13 @@
 
 namespace Hadronization {
 inline constexpr std::string_view kWeakParentRegistrySchema = "weak_decay_parent_registry_v1";
-inline constexpr std::string_view kWeakParentRegistrySha256 = "b0e3aff7e1d7cf6d62571a644e8ba38d5b99769c303c82cc05cc8e0beaa4ee0e";
+inline constexpr std::string_view kWeakParentRegistrySha256 = "de97ca0749605b238617a58ae06283c2eb353791e81e5b1efcf975e8e25012c4";
+inline constexpr std::string_view kWeakDecayTransitionRuleVersion =
+    "weak_decay_transition_pythia_status_v1";
+inline constexpr int kWeakDecayProductStatusAbsMin =
+    91;
+inline constexpr int kWeakDecayProductStatusAbsMax =
+    97;
 inline constexpr std::array<int, 14> kWeakLightParentAbsPdgs{{13, 15, 211, 311, 310, 130, 321, 2112, 3122, 3112, 3222, 3312, 3322, 3334}};
 }  // namespace Hadronization
 #endif

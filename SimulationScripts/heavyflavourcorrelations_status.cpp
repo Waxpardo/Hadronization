@@ -8,7 +8,9 @@
 // unchanged and must be allocated by the immutable campaign seed ledger.
 
 #include "GeneratedHeavyFlavourRegistry.h"
+#include "GeneratedTuneSettingRegistry.h"
 #include "HeavyFlavourUtils.h"
+#include "Sha256.h"
 
 #include "Pythia8/Pythia.h"
 
@@ -32,10 +34,12 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <locale>
 #include <map>
 #include <set>
 #include <sstream>
 #include <string>
+#include <sys/resource.h>
 #include <vector>
 
 using namespace Pythia8;
@@ -53,9 +57,18 @@ struct StabilityRow {
   int charge3 = 0;
   int nCharm = 0;
   int nBeauty = 0;
+  int nc = 0;
+  int ncbar = 0;
+  int nb = 0;
+  int nbbar = 0;
+  int qc = 0;
+  int qb = 0;
+  int strangeness = 0;
   int openHeavy = 0;
   int hiddenHeavy = 0;
   int central = 0;
+  int hasAnti = 0;
+  int antiparticleVerified = 0;
   double mass = 0.0;
   double tau0 = 0.0;
   int canDecay = 0;
@@ -69,16 +82,30 @@ struct HardParton {
   int id = 0;
 };
 
-struct OriginMatch {
-  Origin origin = Origin::kUnresolved;
-  int hardRootIndex = -1;
-  int depth = -1;
-  MatchResolution resolution = MatchResolution::kNotApplicable;
-};
+using OriginMatch = HeavyOriginMatch;
 
 std::string GetEnv(const char* name, const std::string& fallback = "") {
   const char* value = std::getenv(name);
   return value ? value : fallback;
+}
+
+ULong64_t PeakRssKiB() {
+  struct rusage usage {};
+  if (getrusage(RUSAGE_SELF, &usage) != 0 || usage.ru_maxrss <= 0) {
+    throw std::runtime_error("getrusage returned no positive peak RSS");
+  }
+#if defined(__APPLE__)
+  // Darwin reports ru_maxrss in bytes.
+  return static_cast<ULong64_t>(
+      (static_cast<unsigned long long>(usage.ru_maxrss) + 1023ULL) /
+      1024ULL);
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || \
+    defined(__OpenBSD__)
+  // Linux and the BSDs report ru_maxrss in KiB.
+  return static_cast<ULong64_t>(usage.ru_maxrss);
+#else
+#error "Define the ru_maxrss unit conversion for this target platform"
+#endif
 }
 
 std::string ResolveSettingsFile(const std::string& mode) {
@@ -115,52 +142,14 @@ std::vector<int> ExplicitMotherIndices(const Event& event, int particleIndex) {
   return result;
 }
 
-std::vector<int> DirectMotherEndpoints(const Event& event, int particleIndex) {
-  std::vector<int> result{
-      event[particleIndex].mother1(), event[particleIndex].mother2()};
-  result.erase(std::remove_if(result.begin(), result.end(),
-                              [&event](int index) {
-                                return index <= 0 || index >= event.size();
-                              }),
-               result.end());
-  std::sort(result.begin(), result.end());
-  result.erase(std::unique(result.begin(), result.end()), result.end());
-  return result;
-}
-
-bool CarriesSignedHeavyConstituent(int pdg, int flavour, int requiredSign) {
-  if (pdg == requiredSign * flavour) return true;
-  const int absolute = std::abs(pdg);
-  // PYTHIA/PDG diquark code q1 q2 0 spin. The sign identifies a diquark or
-  // antidiquark, so a heavy-flavour-bearing junction endpoint is explicit.
-  if (absolute >= 1000 && absolute <= 9999 &&
-      (absolute / 10) % 10 == 0) {
-    const int q1 = (absolute / 1000) % 10;
-    const int q2 = (absolute / 100) % 10;
-    const int sign = pdg > 0 ? 1 : -1;
-    return sign == requiredSign && (q1 == flavour || q2 == flavour);
-  }
-  return false;
-}
-
-bool HasWeakAncestor(const Event& event, int particleIndex) {
-  std::deque<int> queue;
-  std::set<int> visited;
-  for (const int mother : ExplicitMotherIndices(event, particleIndex)) {
-    queue.push_back(mother);
-  }
-  while (!queue.empty()) {
-    const int index = queue.front();
-    queue.pop_front();
-    if (index <= 0 || index >= event.size() || !visited.insert(index).second) {
-      continue;
-    }
-    if (IsKnownWeakParent(std::abs(event[index].id()))) return true;
-    for (const int mother : ExplicitMotherIndices(event, index)) {
-      queue.push_back(mother);
-    }
-  }
-  return false;
+bool HasWeakDecayTransition(const Event& event, int particleIndex) {
+  return HasWeakDecayTransitionV1(
+      particleIndex, event.size(),
+      [&event](int index) { return event[index].id(); },
+      [&event](int index) { return event[index].status(); },
+      [&event](int index) {
+        return ExplicitMotherIndices(event, index);
+      });
 }
 
 std::vector<HardParton> FindHardPartons(const Event& event) {
@@ -171,118 +160,51 @@ std::vector<HardParton> FindHardPartons(const Event& event) {
         (std::abs(particle.id()) != 4 && std::abs(particle.id()) != 5)) {
       continue;
     }
-    int bottom = particle.iBotCopy();
-    if (bottom <= 0 || bottom >= event.size()) bottom = index;
+    const int bottom = particle.iBotCopy();
     result.push_back({index, bottom, particle.id()});
   }
   return result;
 }
 
-std::vector<int> NearestHeavyAncestors(const Event& event,
-                                       const std::vector<int>& starts,
-                                       int flavour, int requiredSign) {
-  std::deque<std::pair<int, int>> queue;
-  std::set<int> visited;
-  for (const int start : starts) queue.push_back({start, 0});
-  int foundDepth = -1;
-  std::vector<int> found;
-  while (!queue.empty()) {
-    const auto [index, depth] = queue.front();
-    queue.pop_front();
-    if (foundDepth >= 0 && depth > foundDepth) break;
-    if (index <= 0 || index >= event.size() || !visited.insert(index).second) {
-      continue;
-    }
-    const Particle& ancestor = event[index];
-    if (std::abs(ancestor.id()) == flavour &&
-        (ancestor.id() > 0 ? 1 : -1) == requiredSign) {
-      foundDepth = depth;
-      found.push_back(index);
-      continue;
-    }
-    for (const int mother : DirectMotherEndpoints(event, index)) {
-      if (CarriesSignedHeavyConstituent(event[mother].id(), flavour,
-                                        requiredSign)) {
-        queue.push_back({mother, depth + 1});
-      }
+bool IsExactSignedHardPair(const Event& event,
+                           const std::vector<HardParton>& hardPartons) {
+  if (hardPartons.size() != 2U) return false;
+  const int flavour = std::abs(hardPartons.front().id);
+  if ((flavour != 4 && flavour != 5) ||
+      hardPartons[0].id != -hardPartons[1].id) {
+    return false;
+  }
+  std::set<int> roots;
+  for (const auto& hard : hardPartons) {
+    if (hard.rootIndex <= 0 || hard.rootIndex >= event.size() ||
+        hard.bottomIndex <= 0 || hard.bottomIndex >= event.size() ||
+        event[hard.rootIndex].statusAbs() != 23 ||
+        event[hard.rootIndex].id() != hard.id ||
+        event[hard.rootIndex].iBotCopy() != hard.bottomIndex ||
+        !roots.insert(hard.rootIndex).second) {
+      return false;
     }
   }
-  return found;
+  return true;
 }
 
 OriginMatch MatchOrigin(const Event& event, int particleIndex, int flavour,
                         int requiredSign,
                         const std::vector<HardParton>& hardPartons) {
-  if (requiredSign == 0) return {};
-  // PYTHIA records the complete fragmenting string/junction parton range as
-  // the hadron's mothers. Search that range for the nearest matching signed
-  // heavy constituent. Multiple equally near candidates remain unresolved;
-  // selecting a convenient one would double-assign a hard constituent.
-  const std::vector<int> allMothers =
-      ExplicitMotherIndices(event, particleIndex);
-  std::vector<int> starts;
-  for (const int mother : allMothers) {
-    if (CarriesSignedHeavyConstituent(event[mother].id(), flavour,
-                                     requiredSign)) {
-      starts.push_back(mother);
-    }
-  }
-  // A heavy hadron without a uniquely traceable heavy-carrying string
-  // constituent is unresolved by construction. Searching unrelated gluons in
-  // the complete string range can spuriously connect it to another hard quark.
-  if (starts.empty()) {
-    return {Origin::kUnresolved, -1, -1,
-            MatchResolution::kMissingCarrier};
-  }
-
-  std::vector<int> candidates =
-      NearestHeavyAncestors(event, starts, flavour, requiredSign);
-  int totalDepth = 1;
-  std::set<int> lineageVisited;
-  while (candidates.size() == 1 && totalDepth < 1000) {
-    const int index = candidates.front();
-    if (!lineageVisited.insert(index).second) {
-      return {Origin::kUnresolved, -1, totalDepth,
-              MatchResolution::kBrokenLineage};
-    }
-    const Particle& ancestor = event[index];
-    for (const auto& hard : hardPartons) {
-      if (hard.id != requiredSign * flavour) continue;
-      if (index == hard.rootIndex) {
-        return {Origin::kSelectedHard, hard.rootIndex, totalDepth,
-                MatchResolution::kUnique};
-      }
-    }
-    candidates.clear();
-    for (const int mother : DirectMotherEndpoints(event, index)) {
-      if (mother <= 0 || mother >= event.size()) continue;
-      const Particle& parent = event[mother];
-      if (std::abs(parent.id()) == flavour &&
-          (parent.id() > 0 ? 1 : -1) == requiredSign) {
-        candidates.push_back(mother);
-      }
-    }
-    std::sort(candidates.begin(), candidates.end());
-    candidates.erase(std::unique(candidates.begin(), candidates.end()),
-                     candidates.end());
-    if (candidates.empty()) {
-      const int sourceStatus = ancestor.statusAbs();
-      if (sourceStatus >= 31 && sourceStatus <= 39) {
-        return {Origin::kMPI, -1, totalDepth, MatchResolution::kUnique};
-      }
-      if (sourceStatus >= 41 && sourceStatus <= 59) {
-        return {Origin::kShower, -1, totalDepth,
-                MatchResolution::kUnique};
-      }
-      return {Origin::kOtherResolved, -1, totalDepth,
-              MatchResolution::kUnique};
-    }
-    ++totalDepth;
-  }
-  // Multiple equally near heavy ancestors are a genuine unresolved topology.
-  return {Origin::kUnresolved, -1, totalDepth,
-          candidates.size() > 1 ? MatchResolution::kAmbiguous
-                                : MatchResolution::kBrokenLineage};
+  return MatchHeavyOriginGraph(
+      particleIndex, event.size(), flavour, requiredSign,
+      [&event](int index) { return event[index].id(); },
+      [&event](int index) { return event[index].status(); },
+      [&event](int index) {
+        return ExplicitMotherIndices(event, index);
+      },
+      [&hardPartons](int index, int signedFlavour) {
+        return std::any_of(
+            hardPartons.begin(), hardPartons.end(),
+            [index, signedFlavour](const HardParton& hard) {
+              return hard.rootIndex == index && hard.id == signedFlavour;
+            });
+      });
 }
 
 void CollectOriginAuditNodes(const Event& event, int particleIndex, int flavour,
@@ -301,7 +223,7 @@ void CollectOriginAuditNodes(const Event& event, int particleIndex, int flavour,
     const int index = queue.front();
     queue.pop_front();
     if (!expanded.insert(index).second) continue;
-    for (const int mother : DirectMotherEndpoints(event, index)) {
+    for (const int mother : ExplicitMotherIndices(event, index)) {
       nodes.insert(mother);
       if (CarriesSignedHeavyConstituent(event[mother].id(), flavour,
                                        requiredSign)) {
@@ -327,9 +249,15 @@ std::string CaptureStatistics(Pythia& pythia) {
   return capture.str();
 }
 
-std::vector<std::string> ConfiguredSettingKeys(
-    const std::string& settingsFile) {
-  std::set<std::string> keys;
+bool IsKnownSetting(Settings& settings, const std::string& key) {
+  return settings.isFlag(key) || settings.isMode(key) ||
+         settings.isParm(key) || settings.isWord(key) ||
+         settings.isFVec(key) || settings.isMVec(key) ||
+         settings.isPVec(key) || settings.isWVec(key);
+}
+
+std::vector<std::string> CardSettingKeys(const std::string& settingsFile) {
+  std::vector<std::string> keys;
   std::ifstream stream(settingsFile);
   if (!stream) {
     throw std::runtime_error("cannot reopen settings file for audit");
@@ -344,20 +272,79 @@ std::vector<std::string> ConfiguredSettingKeys(
     const std::size_t first = key.find_first_not_of(" \t\r\n");
     const std::size_t last = key.find_last_not_of(" \t\r\n");
     if (first == std::string::npos) continue;
-    keys.insert(key.substr(first, last - first + 1));
+    keys.push_back(key.substr(first, last - first + 1));
   }
-  keys.insert("Random:setSeed");
-  keys.insert("Random:seed");
-  return {keys.begin(), keys.end()};
+  std::sort(keys.begin(), keys.end());
+  keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
+  return keys;
+}
+
+std::vector<std::string> AuditedSettingKeys(
+    Settings& settings, const std::string& settingsFile) {
+  const std::vector<std::string> configured = CardSettingKeys(settingsFile);
+  std::set<std::string> declared;
+  std::vector<std::string> audited;
+  audited.reserve(kAuditedPythiaSettingKeys.size());
+  for (const std::string_view key : kAuditedPythiaSettingKeys) {
+    const std::string value(key);
+    if (!declared.insert(value).second || !IsKnownSetting(settings, value)) {
+      throw std::runtime_error(
+          "unknown or duplicate setting in generated tune audit: " + value);
+    }
+    audited.push_back(value);
+  }
+  for (const auto& key : configured) {
+    if (!IsKnownSetting(settings, key)) {
+      throw std::runtime_error(
+          "unknown or misspelled setting in PYTHIA card: " + key);
+    }
+    if (declared.count(key) == 0) {
+      throw std::runtime_error(
+          "configured setting is absent from tune allowlist: " + key);
+    }
+  }
+  return audited;
 }
 
 std::vector<std::pair<std::string, std::string>> EffectiveSettingRows(
-    Pythia& pythia, const std::vector<std::string>& keys) {
-  std::vector<std::pair<std::string, std::string>> rows;
-  for (const auto& key : keys) {
-    rows.push_back({key, pythia.settings.output(key, false)});
+    Pythia& pythia) {
+  std::map<std::string, std::string> values;
+  const auto append = [&](const auto& entries) {
+    for (const auto& [normalizedName, entry] : entries) {
+      (void)normalizedName;
+      if (entry.name.empty() ||
+          !values
+               .emplace(entry.name,
+                        pythia.settings.output(entry.name, false))
+               .second) {
+        throw std::runtime_error(
+            "duplicate/empty name in exhaustive post-init settings");
+      }
+    }
+  };
+  append(pythia.settings.getFlagMap(""));
+  append(pythia.settings.getModeMap(""));
+  append(pythia.settings.getParmMap(""));
+  append(pythia.settings.getWordMap(""));
+  append(pythia.settings.getFVecMap(""));
+  append(pythia.settings.getMVecMap(""));
+  append(pythia.settings.getPVecMap(""));
+  append(pythia.settings.getWVecMap(""));
+  if (values.empty()) {
+    throw std::runtime_error("exhaustive post-init settings snapshot is empty");
   }
-  return rows;
+  return {values.begin(), values.end()};
+}
+
+std::string SerializeEffectiveSettings(
+    const std::vector<std::pair<std::string, std::string>>& rows) {
+  std::ostringstream stream;
+  stream.imbue(std::locale::classic());
+  stream << "schema=" << kEffectiveSettingsSchema << "\n";
+  for (const auto& [name, value] : rows) {
+    stream << std::quoted(name) << '\t' << std::quoted(value) << '\n';
+  }
+  return stream.str();
 }
 
 std::vector<StabilityRow> StabilizeHeavyHadrons(Pythia& pythia) {
@@ -379,24 +366,41 @@ std::vector<StabilityRow> StabilizeHeavyHadrons(Pythia& pythia) {
     for (const int signedId : signs) {
       const HeavyContent content = DecodeHeavyContent(
           signedId, entry->isMeson(), entry->isBaryon());
-      rows.push_back({
-          signedId,
-          pythia.particleData.name(signedId),
-          1,
-          entry->isMeson() ? 1 : 0,
-          entry->isBaryon() ? 1 : 0,
-          entry->spinType(),
-          entry->chargeType(signedId),
-          nCharm,
-          nBeauty,
-          ((content.qc() != 0) || (content.qb() != 0)) ? 1 : 0,
-          (content.hiddenCharm() || content.hiddenBeauty()) ? 1 : 0,
-          FindGroundState(signedId) ? 1 : 0,
-          entry->m0(),
-          entry->tau0(),
-          entry->canDecay() ? 1 : 0,
-          original ? 1 : 0,
-          0});
+      StabilityRow row;
+      row.pdg = signedId;
+      row.name = pythia.particleData.name(signedId);
+      row.isHadron = 1;
+      row.isMeson = entry->isMeson() ? 1 : 0;
+      row.isBaryon = entry->isBaryon() ? 1 : 0;
+      row.spinType = entry->spinType();
+      row.charge3 = entry->chargeType(signedId);
+      row.nCharm = nCharm;
+      row.nBeauty = nBeauty;
+      row.nc = content.nc;
+      row.ncbar = content.ncbar;
+      row.nb = content.nb;
+      row.nbbar = content.nbbar;
+      row.qc = content.qc();
+      row.qb = content.qb();
+      row.strangeness = content.strangeness();
+      row.openHeavy = (content.qc() != 0 || content.qb() != 0) ? 1 : 0;
+      row.hiddenHeavy =
+          (content.hiddenCharm() || content.hiddenBeauty()) ? 1 : 0;
+      row.central = FindGroundState(signedId) ? 1 : 0;
+      row.hasAnti = entry->hasAnti() ? 1 : 0;
+      row.antiparticleVerified =
+          (!entry->hasAnti() ||
+           (pythia.particleData.isHadron(-signedId) &&
+            pythia.particleData.nQuarksInCode(-signedId, 4) == nCharm &&
+            pythia.particleData.nQuarksInCode(-signedId, 5) == nBeauty))
+              ? 1
+              : 0;
+      row.mass = entry->m0();
+      row.tau0 = entry->tau0();
+      row.canDecay = entry->canDecay() ? 1 : 0;
+      row.originalMayDecay = original ? 1 : 0;
+      row.finalMayDecay = 0;
+      rows.push_back(row);
     }
   }
   for (const int id : heavyIds) {
@@ -405,7 +409,46 @@ std::vector<StabilityRow> StabilizeHeavyHadrons(Pythia& pythia) {
                                std::to_string(id));
     }
   }
+  std::sort(rows.begin(), rows.end(),
+            [](const StabilityRow& left, const StabilityRow& right) {
+              if (left.pdg != right.pdg) return left.pdg < right.pdg;
+              return left.name < right.name;
+            });
   return rows;
+}
+
+void VerifyPostInitHeavyStability(Pythia& pythia,
+                                  std::vector<StabilityRow>& rows) {
+  for (auto& row : rows) {
+    row.finalMayDecay =
+        pythia.particleData.mayDecay(row.pdg) ? 1 : 0;
+    if (row.finalMayDecay != 0) {
+      throw std::runtime_error(
+          "post-init heavy hadron remained decay-enabled: " +
+          std::to_string(row.pdg));
+    }
+  }
+}
+
+std::string SerializeStabilityAudit(const std::vector<StabilityRow>& rows) {
+  std::ostringstream stream;
+  stream.imbue(std::locale::classic());
+  stream << "schema=" << kHeavyStabilityAuditSchema << "\n";
+  stream << std::scientific << std::setprecision(17);
+  for (const auto& row : rows) {
+    stream << row.pdg << '\t' << std::quoted(row.name) << '\t'
+           << row.isHadron << '\t' << row.isMeson << '\t' << row.isBaryon
+           << '\t' << row.spinType << '\t' << row.charge3 << '\t'
+           << row.nCharm << '\t' << row.nBeauty << '\t' << row.nc << '\t'
+           << row.ncbar << '\t' << row.nb << '\t' << row.nbbar << '\t'
+           << row.qc << '\t' << row.qb << '\t' << row.strangeness << '\t'
+           << row.openHeavy << '\t' << row.hiddenHeavy << '\t'
+           << row.central << '\t' << row.hasAnti << '\t'
+           << row.antiparticleVerified << '\t' << row.mass << '\t'
+           << row.tau0 << '\t' << row.canDecay << '\t'
+           << row.originalMayDecay << '\t' << row.finalMayDecay << '\n';
+  }
+  return stream.str();
 }
 
 int HardChannel(const std::vector<HardParton>& hardPartons) {
@@ -460,14 +503,25 @@ int main(int argc, char** argv) {
   }
 
   Pythia pythia;
-  if (!pythia.readFile(settingsFile)) {
+  if (!pythia.readFile(settingsFile) || pythia.settings.readingFailed()) {
     std::cerr << "ERROR: could not read PYTHIA card " << settingsFile << "\n";
     return 3;
   }
-  pythia.readString("Random:setSeed = on");
-  pythia.readString("Random:seed = " + std::to_string(seed));
-  const std::vector<std::string> configuredSettingKeys =
-      ConfiguredSettingKeys(settingsFile);
+  if (!pythia.readString("Random:setSeed = on") ||
+      !pythia.readString("Random:seed = " + std::to_string(seed)) ||
+      pythia.settings.readingFailed()) {
+    std::cerr << "ERROR: could not apply deterministic seed settings\n";
+    return 3;
+  }
+  std::vector<std::string> configuredSettingKeys;
+  try {
+    configuredSettingKeys =
+        AuditedSettingKeys(pythia.settings, settingsFile);
+  } catch (const std::exception& error) {
+    std::cerr << "ERROR: tune-setting audit setup failed: " << error.what()
+              << "\n";
+    return 3;
+  }
 
   std::vector<StabilityRow> stabilityRows;
   try {
@@ -481,9 +535,35 @@ int main(int argc, char** argv) {
     std::cerr << "ERROR: PYTHIA initialization failed\n";
     return 3;
   }
+  try {
+    VerifyPostInitHeavyStability(pythia, stabilityRows);
+  } catch (const std::exception& error) {
+    std::cerr << "ERROR: post-init heavy-stability audit failed: "
+              << error.what() << "\n";
+    return 3;
+  }
   const std::string effectiveSettings = CaptureChangedSettings(pythia);
-  const auto effectiveSettingRows =
-      EffectiveSettingRows(pythia, configuredSettingKeys);
+  const auto effectiveSettingRows = EffectiveSettingRows(pythia);
+  {
+    std::set<std::string> exhaustiveNames;
+    for (const auto& [name, value] : effectiveSettingRows) {
+      (void)value;
+      exhaustiveNames.insert(name);
+    }
+    for (const auto& configured : configuredSettingKeys) {
+      if (exhaustiveNames.count(configured) == 0U) {
+        std::cerr << "ERROR: configured setting is absent from exhaustive "
+                     "post-init snapshot: "
+                  << configured << "\n";
+        return 3;
+      }
+    }
+  }
+  const std::string effectiveSettingsCanonical =
+      SerializeEffectiveSettings(effectiveSettingRows);
+  const std::string effectiveSettingsSha256 =
+      Sha256Hex(effectiveSettingsCanonical);
+  const double phaseSpacePthatMin = pythia.parm("PhaseSpace:pTHatMin");
   const std::uint64_t requestedSuccesses =
       static_cast<std::uint64_t>(pythia.mode("Main:numberOfEvents"));
   if (requestedSuccesses == 0 || requestedSuccesses >= (1ULL << 20)) {
@@ -554,37 +634,59 @@ int main(int argc, char** argv) {
   Int_t nCharmOnly = 0;
   Int_t nBeautyOnly = 0;
   Int_t nBc = 0;
+  Int_t finalHeavyQcSum = 0;
+  Int_t finalHeavyQbSum = 0;
+  Int_t heavyFlavourConservationOk = 0;
+  Int_t originClassificationValid = 0;
+  Int_t primaryAllHeavyMatchValid = 0;
   Int_t multiplicityDirectBySpecies[5] = {0, 0, 0, 0, 0};
   Int_t multiplicityStrongEmBySpecies[5] = {0, 0, 0, 0, 0};
 
   std::vector<int> hardIndices;
   std::vector<int> hardBottomIndices;
-  std::vector<int> hardIds;
+  std::vector<int> hardIds, hardStatus, hardBottomIds, hardBottomStatus;
+  std::vector<double> hardPx, hardPy, hardPz, hardE;
 
   // Legacy reader branches. They now contain every recognized heavy hadron
   // over full phase space; the integer-rich branches below are authoritative.
   std::vector<int> legacyId;
   std::vector<int> legacyClass;
   std::vector<double> legacyPt, legacyEta, legacyY, legacyPhi, legacyCharge;
-  std::vector<double> legacyStatus, legacyMother, legacyMotherId;
+  // Raw-v5 never serializes discrete status/index values as floating point.
+  // The upper-case names are retained only as a migration convenience for
+  // schema-aware consumers; historical raw schemas keep their original
+  // vector<double> representation in the explicitly labelled legacy reader.
+  std::vector<int> legacyStatus, legacyMother, legacyMotherId;
 
   std::vector<int> heavyIndex, heavyPdg, heavyStatus, heavyStatusAbs;
   std::vector<int> heavyIsFinal, heavyIsMeson, heavyIsBaryon, heavyCharge3;
+  std::vector<int> heavySpinType;
   std::vector<int> heavyMother1, heavyMother2, heavyDaughter1, heavyDaughter2;
   std::vector<int> heavyMotherOffsets, heavyMothers;
   std::vector<int> heavyNc, heavyNcbar, heavyNb, heavyNbbar, heavyQc, heavyQb;
   std::vector<int> heavyBaryonNumber, heavyStrangeness, heavyCentral;
-  std::vector<int> heavyOpen, heavyHidden;
+  std::vector<int> heavyOpen, heavyHidden, heavyStateCategory;
   std::vector<int> heavyOriginC, heavyOriginB;
   std::vector<int> heavyMatchResolutionC, heavyMatchResolutionB;
   std::vector<int> heavyMatchedHardC, heavyMatchedHardB;
-  std::vector<int> heavyConflictingHardC, heavyConflictingHardB;
+  std::vector<int> heavyRejectedHardC, heavyRejectedHardB;
   std::vector<int> heavyOriginDepthC, heavyOriginDepthB;
+  std::vector<int> heavyConstituentOffsets, heavyConstituentParentSlot;
+  std::vector<int> heavyConstituentPdg, heavyConstituentOrdinal;
+  std::vector<int> heavyConstituentOrigin;
+  std::vector<int> heavyConstituentMatchResolution;
+  std::vector<int> heavyConstituentMatchedHard;
+  std::vector<int> heavyConstituentRejectedHard;
+  std::vector<int> heavyConstituentOriginDepth;
   std::vector<double> heavyPx, heavyPy, heavyPz, heavyE, heavyPt, heavyEta;
   std::vector<double> heavyY, heavyPhi, heavyMass;
   std::vector<int> ancestryIndex, ancestryPdg, ancestryStatus;
   std::vector<int> ancestryMother1, ancestryMother2;
-  std::vector<int> multAuditPdg, multAuditStatus, multAuditHasWeakAncestor;
+  std::vector<int> ancestryMotherOffsets, ancestryMothers;
+  std::vector<int> multAuditParticleIndex, multAuditPdg, multAuditStatus;
+  std::vector<int> multAuditHasWeakDecayTransition;
+  std::vector<int> multAuditEventPdg, multAuditEventStatus;
+  std::vector<int> multAuditEventMotherOffsets, multAuditEventMothers;
   std::vector<double> multAuditPt, multAuditEta;
 
   tree.Branch("event_id", &eventId, "event_id/l");
@@ -607,6 +709,13 @@ int main(int argc, char** argv) {
   tree.Branch("hard_indices", &hardIndices);
   tree.Branch("hard_bottom_indices", &hardBottomIndices);
   tree.Branch("hard_ids", &hardIds);
+  tree.Branch("hard_status", &hardStatus);
+  tree.Branch("hard_bottom_ids", &hardBottomIds);
+  tree.Branch("hard_bottom_status", &hardBottomStatus);
+  tree.Branch("hard_px", &hardPx);
+  tree.Branch("hard_py", &hardPy);
+  tree.Branch("hard_pz", &hardPz);
+  tree.Branch("hard_e", &hardE);
 
   tree.Branch("ID", &legacyId);
   tree.Branch("HFCLASS", &legacyClass);
@@ -623,6 +732,17 @@ int main(int argc, char** argv) {
   tree.Branch("NCHARM", &nCharmOnly, "NCHARM/I");
   tree.Branch("NBEAUTY", &nBeautyOnly, "NBEAUTY/I");
   tree.Branch("NBC", &nBc, "NBC/I");
+  tree.Branch("final_heavy_qc_sum", &finalHeavyQcSum,
+              "final_heavy_qc_sum/I");
+  tree.Branch("final_heavy_qb_sum", &finalHeavyQbSum,
+              "final_heavy_qb_sum/I");
+  tree.Branch("heavy_flavour_conservation_ok",
+              &heavyFlavourConservationOk,
+              "heavy_flavour_conservation_ok/I");
+  tree.Branch("origin_classification_valid", &originClassificationValid,
+              "origin_classification_valid/I");
+  tree.Branch("primary_all_heavy_match_valid", &primaryAllHeavyMatchValid,
+              "primary_all_heavy_match_valid/I");
 
 #define BRANCH_VECTOR(name) tree.Branch(#name, &name)
   BRANCH_VECTOR(heavyIndex);
@@ -633,6 +753,7 @@ int main(int argc, char** argv) {
   BRANCH_VECTOR(heavyIsMeson);
   BRANCH_VECTOR(heavyIsBaryon);
   BRANCH_VECTOR(heavyCharge3);
+  BRANCH_VECTOR(heavySpinType);
   BRANCH_VECTOR(heavyMother1);
   BRANCH_VECTOR(heavyMother2);
   BRANCH_VECTOR(heavyDaughter1);
@@ -650,16 +771,26 @@ int main(int argc, char** argv) {
   BRANCH_VECTOR(heavyCentral);
   BRANCH_VECTOR(heavyOpen);
   BRANCH_VECTOR(heavyHidden);
+  BRANCH_VECTOR(heavyStateCategory);
   BRANCH_VECTOR(heavyOriginC);
   BRANCH_VECTOR(heavyOriginB);
   BRANCH_VECTOR(heavyMatchResolutionC);
   BRANCH_VECTOR(heavyMatchResolutionB);
   BRANCH_VECTOR(heavyMatchedHardC);
   BRANCH_VECTOR(heavyMatchedHardB);
-  BRANCH_VECTOR(heavyConflictingHardC);
-  BRANCH_VECTOR(heavyConflictingHardB);
+  BRANCH_VECTOR(heavyRejectedHardC);
+  BRANCH_VECTOR(heavyRejectedHardB);
   BRANCH_VECTOR(heavyOriginDepthC);
   BRANCH_VECTOR(heavyOriginDepthB);
+  BRANCH_VECTOR(heavyConstituentOffsets);
+  BRANCH_VECTOR(heavyConstituentParentSlot);
+  BRANCH_VECTOR(heavyConstituentPdg);
+  BRANCH_VECTOR(heavyConstituentOrdinal);
+  BRANCH_VECTOR(heavyConstituentOrigin);
+  BRANCH_VECTOR(heavyConstituentMatchResolution);
+  BRANCH_VECTOR(heavyConstituentMatchedHard);
+  BRANCH_VECTOR(heavyConstituentRejectedHard);
+  BRANCH_VECTOR(heavyConstituentOriginDepth);
   BRANCH_VECTOR(heavyPx);
   BRANCH_VECTOR(heavyPy);
   BRANCH_VECTOR(heavyPz);
@@ -674,11 +805,18 @@ int main(int argc, char** argv) {
   BRANCH_VECTOR(ancestryStatus);
   BRANCH_VECTOR(ancestryMother1);
   BRANCH_VECTOR(ancestryMother2);
+  BRANCH_VECTOR(ancestryMotherOffsets);
+  BRANCH_VECTOR(ancestryMothers);
+  BRANCH_VECTOR(multAuditParticleIndex);
   BRANCH_VECTOR(multAuditPdg);
   BRANCH_VECTOR(multAuditStatus);
-  BRANCH_VECTOR(multAuditHasWeakAncestor);
+  BRANCH_VECTOR(multAuditHasWeakDecayTransition);
   BRANCH_VECTOR(multAuditPt);
   BRANCH_VECTOR(multAuditEta);
+  BRANCH_VECTOR(multAuditEventPdg);
+  BRANCH_VECTOR(multAuditEventStatus);
+  BRANCH_VECTOR(multAuditEventMotherOffsets);
+  BRANCH_VECTOR(multAuditEventMothers);
 #undef BRANCH_VECTOR
 
   TH1D hMultiplicity("hMULTIPLICITY",
@@ -705,6 +843,13 @@ int main(int argc, char** argv) {
   std::uint64_t duplicateHardCarrierConflictGroupsB = 0;
   std::uint64_t duplicateHardCarrierDemotionsC = 0;
   std::uint64_t duplicateHardCarrierDemotionsB = 0;
+  std::uint64_t multiHeavyConstituentRejectionsC = 0;
+  std::uint64_t multiHeavyConstituentRejectionsB = 0;
+  std::uint64_t heavyFlavourConservationFailures = 0;
+  std::uint64_t originClassificationFailures = 0;
+  std::uint64_t primaryAllHeavyConflictGroups = 0;
+  std::uint64_t primaryAllHeavyDemotions = 0;
+  std::uint64_t primaryAllHeavyMatchFailures = 0;
 
   std::cout << "PRODUCTION_START campaign=" << campaign << " tune=" << tune
             << " logical_id=" << logicalId << " role=" << role
@@ -735,14 +880,67 @@ int main(int argc, char** argv) {
     hardScale = pythia.info.scalup();
     nMPI = pythia.info.nMPI();
     const std::vector<HardParton> hardPartons = FindHardPartons(pythia.event);
+    if (!IsExactSignedHardPair(pythia.event, hardPartons)) {
+      std::cerr << "ERROR: generated event does not contain exactly one "
+                   "validated signed hard-heavy pair"
+                << " process_code=" << processCode
+                << " local_success=" << successes
+                << " candidates=" << hardPartons.size() << "\n";
+      for (const auto& hard : hardPartons) {
+        const bool rootInRange =
+            hard.rootIndex > 0 && hard.rootIndex < pythia.event.size();
+        const bool bottomInRange =
+            hard.bottomIndex > 0 && hard.bottomIndex < pythia.event.size();
+        std::cerr << "  hard root=" << hard.rootIndex
+                  << " id=" << hard.id
+                  << " root_status="
+                  << (rootInRange ? pythia.event[hard.rootIndex].status() : 0)
+                  << " bottom=" << hard.bottomIndex
+                  << " bottom_id="
+                  << (bottomInRange ? pythia.event[hard.bottomIndex].id() : 0)
+                  << " bottom_status="
+                  << (bottomInRange
+                          ? pythia.event[hard.bottomIndex].status()
+                          : 0)
+                  << "\n";
+      }
+      output.Close();
+      return 6;
+    }
     hardChannel = HardChannel(hardPartons);
+    const int processHardChannel =
+        (processCode == 121 || processCode == 122)
+            ? 4
+            : ((processCode == 123 || processCode == 124) ? 5 : 0);
+    if (hardChannel != processHardChannel) {
+      std::cerr << "ERROR: verified hard pair disagrees with PYTHIA process "
+                   "code mapping"
+                << " process_code=" << processCode
+                << " hard_channel=" << hardChannel << "\n";
+      output.Close();
+      return 6;
+    }
     hardIndices.clear();
     hardBottomIndices.clear();
     hardIds.clear();
+    hardStatus.clear();
+    hardBottomIds.clear();
+    hardBottomStatus.clear();
+    hardPx.clear();
+    hardPy.clear();
+    hardPz.clear();
+    hardE.clear();
     for (const auto& hard : hardPartons) {
       hardIndices.push_back(hard.rootIndex);
       hardBottomIndices.push_back(hard.bottomIndex);
       hardIds.push_back(hard.id);
+      hardStatus.push_back(pythia.event[hard.rootIndex].status());
+      hardBottomIds.push_back(pythia.event[hard.bottomIndex].id());
+      hardBottomStatus.push_back(pythia.event[hard.bottomIndex].status());
+      hardPx.push_back(pythia.event[hard.rootIndex].px());
+      hardPy.push_back(pythia.event[hard.rootIndex].py());
+      hardPz.push_back(pythia.event[hard.rootIndex].pz());
+      hardE.push_back(pythia.event[hard.rootIndex].e());
     }
 
     multiplicity = 0;
@@ -750,6 +948,11 @@ int main(int argc, char** argv) {
     nCharmOnly = 0;
     nBeautyOnly = 0;
     nBc = 0;
+    finalHeavyQcSum = 0;
+    finalHeavyQbSum = 0;
+    heavyFlavourConservationOk = 0;
+    originClassificationValid = 1;
+    primaryAllHeavyMatchValid = 1;
     std::fill(std::begin(multiplicityDirectBySpecies),
               std::end(multiplicityDirectBySpecies), 0);
     std::fill(std::begin(multiplicityStrongEmBySpecies),
@@ -763,7 +966,8 @@ int main(int argc, char** argv) {
     CLEAR_VECTOR(heavyIndex); CLEAR_VECTOR(heavyPdg); CLEAR_VECTOR(heavyStatus);
     CLEAR_VECTOR(heavyStatusAbs); CLEAR_VECTOR(heavyIsFinal);
     CLEAR_VECTOR(heavyIsMeson); CLEAR_VECTOR(heavyIsBaryon);
-    CLEAR_VECTOR(heavyCharge3); CLEAR_VECTOR(heavyMother1);
+    CLEAR_VECTOR(heavyCharge3); CLEAR_VECTOR(heavySpinType);
+    CLEAR_VECTOR(heavyMother1);
     CLEAR_VECTOR(heavyMother2); CLEAR_VECTOR(heavyDaughter1);
     CLEAR_VECTOR(heavyDaughter2); CLEAR_VECTOR(heavyMotherOffsets);
     CLEAR_VECTOR(heavyMothers); CLEAR_VECTOR(heavyNc); CLEAR_VECTOR(heavyNcbar);
@@ -771,35 +975,68 @@ int main(int argc, char** argv) {
     CLEAR_VECTOR(heavyQb); CLEAR_VECTOR(heavyBaryonNumber);
     CLEAR_VECTOR(heavyStrangeness); CLEAR_VECTOR(heavyCentral);
     CLEAR_VECTOR(heavyOpen); CLEAR_VECTOR(heavyHidden);
+    CLEAR_VECTOR(heavyStateCategory);
     CLEAR_VECTOR(heavyOriginC); CLEAR_VECTOR(heavyOriginB);
     CLEAR_VECTOR(heavyMatchResolutionC);
     CLEAR_VECTOR(heavyMatchResolutionB);
     CLEAR_VECTOR(heavyMatchedHardC); CLEAR_VECTOR(heavyMatchedHardB);
-    CLEAR_VECTOR(heavyConflictingHardC); CLEAR_VECTOR(heavyConflictingHardB);
+    CLEAR_VECTOR(heavyRejectedHardC); CLEAR_VECTOR(heavyRejectedHardB);
     CLEAR_VECTOR(heavyOriginDepthC); CLEAR_VECTOR(heavyOriginDepthB);
+    CLEAR_VECTOR(heavyConstituentOffsets);
+    CLEAR_VECTOR(heavyConstituentParentSlot);
+    CLEAR_VECTOR(heavyConstituentPdg);
+    CLEAR_VECTOR(heavyConstituentOrdinal);
+    CLEAR_VECTOR(heavyConstituentOrigin);
+    CLEAR_VECTOR(heavyConstituentMatchResolution);
+    CLEAR_VECTOR(heavyConstituentMatchedHard);
+    CLEAR_VECTOR(heavyConstituentRejectedHard);
+    CLEAR_VECTOR(heavyConstituentOriginDepth);
     CLEAR_VECTOR(heavyPx); CLEAR_VECTOR(heavyPy); CLEAR_VECTOR(heavyPz);
     CLEAR_VECTOR(heavyE); CLEAR_VECTOR(heavyPt); CLEAR_VECTOR(heavyEta);
     CLEAR_VECTOR(heavyY); CLEAR_VECTOR(heavyPhi); CLEAR_VECTOR(heavyMass);
     CLEAR_VECTOR(ancestryIndex); CLEAR_VECTOR(ancestryPdg);
     CLEAR_VECTOR(ancestryStatus); CLEAR_VECTOR(ancestryMother1);
-    CLEAR_VECTOR(ancestryMother2);
-    CLEAR_VECTOR(multAuditPdg); CLEAR_VECTOR(multAuditStatus);
-    CLEAR_VECTOR(multAuditHasWeakAncestor); CLEAR_VECTOR(multAuditPt);
-    CLEAR_VECTOR(multAuditEta);
+    CLEAR_VECTOR(ancestryMother2); CLEAR_VECTOR(ancestryMotherOffsets);
+    CLEAR_VECTOR(ancestryMothers);
+    CLEAR_VECTOR(multAuditParticleIndex); CLEAR_VECTOR(multAuditPdg);
+    CLEAR_VECTOR(multAuditStatus);
+    CLEAR_VECTOR(multAuditHasWeakDecayTransition);
+    CLEAR_VECTOR(multAuditPt); CLEAR_VECTOR(multAuditEta);
+    CLEAR_VECTOR(multAuditEventPdg); CLEAR_VECTOR(multAuditEventStatus);
+    CLEAR_VECTOR(multAuditEventMotherOffsets);
+    CLEAR_VECTOR(multAuditEventMothers);
 #undef CLEAR_VECTOR
     heavyMotherOffsets.push_back(0);
+    heavyConstituentOffsets.push_back(0);
     std::set<int> ancestryNodes;
+
+    if (successes < multiplicityAuditEvents) {
+      multAuditEventMotherOffsets.push_back(0);
+      for (int index = 0; index < pythia.event.size(); ++index) {
+        multAuditEventPdg.push_back(pythia.event[index].id());
+        multAuditEventStatus.push_back(pythia.event[index].status());
+        for (const int mother :
+             ExplicitMotherIndices(pythia.event, index)) {
+          multAuditEventMothers.push_back(mother);
+        }
+        multAuditEventMotherOffsets.push_back(
+            static_cast<int>(multAuditEventMothers.size()));
+      }
+    }
 
     for (int index = 0; index < pythia.event.size(); ++index) {
       const Particle& particle = pythia.event[index];
       const int id = particle.id();
       const int absId = std::abs(id);
       if (particle.isFinal() && IsMultiplicitySpecies(absId)) {
-        const bool hasWeakAncestor = HasWeakAncestor(pythia.event, index);
+        const bool hasWeakDecayTransition =
+            HasWeakDecayTransition(pythia.event, index);
         if (successes < multiplicityAuditEvents) {
+          multAuditParticleIndex.push_back(index);
           multAuditPdg.push_back(id);
           multAuditStatus.push_back(particle.status());
-          multAuditHasWeakAncestor.push_back(hasWeakAncestor ? 1 : 0);
+          multAuditHasWeakDecayTransition.push_back(
+              hasWeakDecayTransition ? 1 : 0);
           multAuditPt.push_back(particle.pT());
           multAuditEta.push_back(particle.eta());
         }
@@ -812,7 +1049,7 @@ int main(int argc, char** argv) {
         }
         if (CountsNchFinalStrongEmV1(
                 id, particle.isFinal(), particle.pT(), particle.eta(),
-                hasWeakAncestor)) {
+                hasWeakDecayTransition)) {
           ++multiplicityStrongEm;
           ++multiplicityStrongEmBySpecies[speciesIndex];
         }
@@ -838,14 +1075,35 @@ int main(int argc, char** argv) {
           MatchOrigin(pythia.event, index, 5,
                       content.qb() > 0 ? 1 : (content.qb() < 0 ? -1 : 0),
                       hardPartons);
-      CollectOriginAuditNodes(
-          pythia.event, index, 4,
-          content.qc() > 0 ? 1 : (content.qc() < 0 ? -1 : 0),
-          ancestryNodes);
-      CollectOriginAuditNodes(
-          pythia.event, index, 5,
-          content.qb() > 0 ? 1 : (content.qb() < 0 ? -1 : 0),
-          ancestryNodes);
+      const std::array<std::pair<int, int>, 4> signedConstituents{{
+          {4, content.nc},
+          {-4, content.ncbar},
+          {5, content.nb},
+          {-5, content.nbbar},
+      }};
+      const int heavySlot = static_cast<int>(heavyPdg.size());
+      for (const auto& [signedFlavour, count] : signedConstituents) {
+        if (count <= 0) continue;
+        const int flavour = std::abs(signedFlavour);
+        const int sign = signedFlavour > 0 ? 1 : -1;
+        const OriginMatch constituentMatch =
+            MatchOrigin(pythia.event, index, flavour, sign, hardPartons);
+        CollectOriginAuditNodes(pythia.event, index, flavour, sign,
+                                ancestryNodes);
+        for (int ordinal = 0; ordinal < count; ++ordinal) {
+          heavyConstituentParentSlot.push_back(heavySlot);
+          heavyConstituentPdg.push_back(signedFlavour);
+          heavyConstituentOrdinal.push_back(ordinal);
+          heavyConstituentOrigin.push_back(
+              static_cast<int>(constituentMatch.origin));
+          heavyConstituentMatchResolution.push_back(
+              static_cast<int>(constituentMatch.resolution));
+          heavyConstituentMatchedHard.push_back(
+              constituentMatch.hardRootIndex);
+          heavyConstituentRejectedHard.push_back(-1);
+          heavyConstituentOriginDepth.push_back(constituentMatch.depth);
+        }
+      }
       if (static_cast<int>(successes) == debugLocalEvent) {
         std::cout << "DEBUG_HEAVY_ORIGIN index=" << index << " pdg=" << id
                   << " status=" << particle.status()
@@ -889,25 +1147,40 @@ int main(int argc, char** argv) {
       heavyIsMeson.push_back(isMeson ? 1 : 0);
       heavyIsBaryon.push_back(isBaryon ? 1 : 0);
       heavyCharge3.push_back(pythia.particleData.chargeType(id));
+      const int spinType = pythia.particleData.spinType(id);
+      heavySpinType.push_back(spinType);
       heavyMother1.push_back(particle.mother1());
       heavyMother2.push_back(particle.mother2());
       heavyDaughter1.push_back(particle.daughter1());
       heavyDaughter2.push_back(particle.daughter2());
-      for (const int mother : particle.motherList()) heavyMothers.push_back(mother);
+      for (const int mother : ExplicitMotherIndices(pythia.event, index)) {
+        heavyMothers.push_back(mother);
+      }
       heavyMotherOffsets.push_back(static_cast<int>(heavyMothers.size()));
+      heavyConstituentOffsets.push_back(
+          static_cast<int>(heavyConstituentPdg.size()));
       heavyNc.push_back(content.nc);
       heavyNcbar.push_back(content.ncbar);
       heavyNb.push_back(content.nb);
       heavyNbbar.push_back(content.nbbar);
       heavyQc.push_back(content.qc());
       heavyQb.push_back(content.qb());
-      heavyBaryonNumber.push_back(
-          pythia.particleData.baryonNumberType(id));
+      int baryonNumber = 0;
+      if (!DecodePythiaBaryonNumber(
+              id, isMeson, isBaryon,
+              pythia.particleData.baryonNumberType(id), baryonNumber)) {
+        ++contentDecodeFailures;
+      }
+      heavyBaryonNumber.push_back(baryonNumber);
       heavyStrangeness.push_back(content.strangeness());
-      heavyCentral.push_back(FindGroundState(id) ? 1 : 0);
+      const bool centralGroundState = FindGroundState(id) != nullptr;
+      heavyCentral.push_back(centralGroundState ? 1 : 0);
       heavyOpen.push_back((content.qc() != 0 || content.qb() != 0) ? 1 : 0);
       heavyHidden.push_back(
           (content.hiddenCharm() || content.hiddenBeauty()) ? 1 : 0);
+      heavyStateCategory.push_back(
+          static_cast<int>(ClassifyHeavyStateDetailed(
+              centralGroundState, content, isMeson, spinType)));
       heavyOriginC.push_back(static_cast<int>(charmOrigin.origin));
       heavyOriginB.push_back(static_cast<int>(beautyOrigin.origin));
       heavyMatchResolutionC.push_back(
@@ -943,19 +1216,159 @@ int main(int argc, char** argv) {
     duplicateHardCarrierConflictGroupsB += beautyUniqueness.conflictGroups;
     duplicateHardCarrierDemotionsC += charmUniqueness.demotedMatches;
     duplicateHardCarrierDemotionsB += beautyUniqueness.demotedMatches;
-    heavyConflictingHardC.assign(heavyPdg.size(), -1);
-    heavyConflictingHardB.assign(heavyPdg.size(), -1);
+    heavyRejectedHardC.assign(heavyPdg.size(), -1);
+    heavyRejectedHardB.assign(heavyPdg.size(), -1);
     for (std::size_t index = 0; index < heavyPdg.size(); ++index) {
       if (heavyMatchResolutionC[index] ==
           static_cast<int>(MatchResolution::kDuplicateHardCarrier)) {
-        heavyConflictingHardC[index] = originalMatchedHardC[index];
+        heavyRejectedHardC[index] = originalMatchedHardC[index];
       }
       if (heavyMatchResolutionB[index] ==
           static_cast<int>(MatchResolution::kDuplicateHardCarrier)) {
-        heavyConflictingHardB[index] = originalMatchedHardB[index];
+        heavyRejectedHardB[index] = originalMatchedHardB[index];
+      }
+    }
+    multiHeavyConstituentRejectionsC += RejectFinalMultiHeavyCarrier(
+        heavyIsFinal, heavyQc, heavyOriginC, heavyMatchResolutionC,
+        heavyMatchedHardC, heavyRejectedHardC);
+    multiHeavyConstituentRejectionsB += RejectFinalMultiHeavyCarrier(
+        heavyIsFinal, heavyQb, heavyOriginB, heavyMatchResolutionB,
+        heavyMatchedHardB, heavyRejectedHardB);
+
+    std::vector<int> constituentParentIsFinal;
+    constituentParentIsFinal.reserve(heavyConstituentParentSlot.size());
+    for (const int parentSlot : heavyConstituentParentSlot) {
+      if (parentSlot < 0 ||
+          parentSlot >= static_cast<int>(heavyIsFinal.size())) {
+        primaryAllHeavyMatchValid = 0;
+        constituentParentIsFinal.push_back(0);
+      } else {
+        constituentParentIsFinal.push_back(heavyIsFinal[parentSlot]);
+      }
+    }
+    const CarrierUniquenessResult constituentUniqueness =
+        EnforceUniqueFinalConstituentHardCarrier(
+            heavyConstituentParentSlot, constituentParentIsFinal,
+            heavyConstituentPdg,
+            heavyConstituentOrigin, heavyConstituentMatchResolution,
+            heavyConstituentMatchedHard, heavyConstituentRejectedHard);
+    primaryAllHeavyConflictGroups += constituentUniqueness.conflictGroups;
+    primaryAllHeavyDemotions += constituentUniqueness.demotedMatches;
+
+    std::map<int, int> survivingFinalConstituentParent;
+    for (std::size_t constituent = 0;
+         constituent < heavyConstituentPdg.size(); ++constituent) {
+      const int parentSlot = heavyConstituentParentSlot[constituent];
+      const int signedFlavour = heavyConstituentPdg[constituent];
+      const int origin = heavyConstituentOrigin[constituent];
+      const int resolution =
+          heavyConstituentMatchResolution[constituent];
+      const int matched = heavyConstituentMatchedHard[constituent];
+      const int rejected = heavyConstituentRejectedHard[constituent];
+      const bool isFinal = constituentParentIsFinal[constituent] != 0;
+      if ((std::abs(signedFlavour) != 4 &&
+           std::abs(signedFlavour) != 5) ||
+          (origin == static_cast<int>(Origin::kSelectedHard) &&
+           (resolution != static_cast<int>(MatchResolution::kUnique) ||
+            matched < 0 || rejected != -1)) ||
+          (origin != static_cast<int>(Origin::kSelectedHard) &&
+           matched != -1) ||
+          (origin == static_cast<int>(Origin::kUnresolved) &&
+           resolution == static_cast<int>(MatchResolution::kUnique))) {
+        primaryAllHeavyMatchValid = 0;
+        continue;
+      }
+      if (matched >= 0) {
+        const auto hard = std::find_if(
+            hardPartons.begin(), hardPartons.end(),
+            [matched](const HardParton& candidate) {
+              return candidate.rootIndex == matched;
+            });
+        bool distinctParentConflict = false;
+        if (isFinal) {
+          const auto [claim, inserted] =
+              survivingFinalConstituentParent.emplace(matched, parentSlot);
+          distinctParentConflict = !inserted && claim->second != parentSlot;
+        }
+        if (hard == hardPartons.end() || hard->id != signedFlavour ||
+            distinctParentConflict) {
+          primaryAllHeavyMatchValid = 0;
+        }
+      }
+      if (rejected >= 0) {
+        const auto hard = std::find_if(
+            hardPartons.begin(), hardPartons.end(),
+            [rejected](const HardParton& candidate) {
+              return candidate.rootIndex == rejected;
+            });
+        if (hard == hardPartons.end() || hard->id != signedFlavour ||
+            resolution !=
+                static_cast<int>(
+                    MatchResolution::kDuplicateHardCarrier)) {
+          primaryAllHeavyMatchValid = 0;
+        }
       }
     }
 
+    std::set<int> survivingFinalHardC;
+    std::set<int> survivingFinalHardB;
+    for (std::size_t index = 0; index < heavyPdg.size(); ++index) {
+      if (heavyIsFinal[index]) {
+        finalHeavyQcSum += heavyQc[index];
+        finalHeavyQbSum += heavyQb[index];
+      }
+      const auto validateSelectedCarrier =
+          [&](int sectorCharge, int origin, int resolution, int matchedHard,
+              int rejectedHard, int flavour, std::set<int>& surviving) {
+            if (sectorCharge == 0) {
+              return origin == static_cast<int>(Origin::kUnresolved) &&
+                     resolution ==
+                         static_cast<int>(MatchResolution::kNotApplicable) &&
+                     matchedHard == -1 && rejectedHard == -1;
+            }
+            if (origin != static_cast<int>(Origin::kSelectedHard)) {
+              return matchedHard == -1;
+            }
+            const auto hard = std::find_if(
+                hardPartons.begin(), hardPartons.end(),
+                [matchedHard](const HardParton& candidate) {
+                  return candidate.rootIndex == matchedHard;
+                });
+            const int requiredId =
+                sectorCharge > 0 ? flavour : -flavour;
+            if (resolution != static_cast<int>(MatchResolution::kUnique) ||
+                rejectedHard != -1 || hard == hardPartons.end() ||
+                hard->id != requiredId ||
+                (heavyIsFinal[index] &&
+                 !surviving.insert(matchedHard).second)) {
+              return false;
+            }
+            return true;
+          };
+      if (!validateSelectedCarrier(
+              heavyQc[index], heavyOriginC[index],
+              heavyMatchResolutionC[index], heavyMatchedHardC[index],
+              heavyRejectedHardC[index], 4, survivingFinalHardC) ||
+          !validateSelectedCarrier(
+              heavyQb[index], heavyOriginB[index],
+              heavyMatchResolutionB[index], heavyMatchedHardB[index],
+              heavyRejectedHardB[index], 5, survivingFinalHardB)) {
+        originClassificationValid = 0;
+      }
+    }
+    heavyFlavourConservationOk =
+        finalHeavyQcSum == 0 && finalHeavyQbSum == 0 ? 1 : 0;
+    if (!heavyFlavourConservationOk) {
+      ++heavyFlavourConservationFailures;
+    }
+    if (!originClassificationValid) {
+      ++originClassificationFailures;
+    }
+    if (!primaryAllHeavyMatchValid) {
+      ++primaryAllHeavyMatchFailures;
+    }
+
+    ancestryMotherOffsets.push_back(0);
     for (const int index : ancestryNodes) {
       const Particle& ancestor = pythia.event[index];
       ancestryIndex.push_back(index);
@@ -963,6 +1376,11 @@ int main(int argc, char** argv) {
       ancestryStatus.push_back(ancestor.status());
       ancestryMother1.push_back(ancestor.mother1());
       ancestryMother2.push_back(ancestor.mother2());
+      for (const int mother : ExplicitMotherIndices(pythia.event, index)) {
+        ancestryMothers.push_back(mother);
+      }
+      ancestryMotherOffsets.push_back(
+          static_cast<int>(ancestryMothers.size()));
     }
 
     hMultiplicity.Fill(multiplicity, eventWeight);
@@ -982,9 +1400,22 @@ int main(int argc, char** argv) {
   }
 
   const std::string pythiaStatistics = CaptureStatistics(pythia);
+  const std::string stabilityAuditCanonical =
+      SerializeStabilityAudit(stabilityRows);
+  const std::string stabilityAuditSha256 =
+      Sha256Hex(stabilityAuditCanonical);
+  double metadataPthatMin = phaseSpacePthatMin;
+  double pythiaSigmaGenMb = pythia.info.sigmaGen();
+  double pythiaSigmaErrMb = pythia.info.sigmaErr();
+  double pythiaWeightSum = pythia.info.weightSum();
   const bool complete = successes == requestedSuccesses &&
                         attempts == successes + failures &&
-                        static_cast<std::uint64_t>(tree.GetEntries()) == successes;
+                        static_cast<std::uint64_t>(tree.GetEntries()) ==
+                            successes &&
+                        contentDecodeFailures == 0 &&
+                        heavyFlavourConservationFailures == 0 &&
+                        originClassificationFailures == 0 &&
+                        primaryAllHeavyMatchFailures == 0;
 
   output.cd();
   tree.Write();
@@ -1004,11 +1435,24 @@ int main(int argc, char** argv) {
   stability.Branch("charge3", &stabilityValue.charge3, "charge3/I");
   stability.Branch("n_charm", &stabilityValue.nCharm, "n_charm/I");
   stability.Branch("n_beauty", &stabilityValue.nBeauty, "n_beauty/I");
+  stability.Branch("n_c", &stabilityValue.nc, "n_c/I");
+  stability.Branch("n_cbar", &stabilityValue.ncbar, "n_cbar/I");
+  stability.Branch("n_b", &stabilityValue.nb, "n_b/I");
+  stability.Branch("n_bbar", &stabilityValue.nbbar, "n_bbar/I");
+  stability.Branch("q_c", &stabilityValue.qc, "q_c/I");
+  stability.Branch("q_b", &stabilityValue.qb, "q_b/I");
+  stability.Branch("strangeness", &stabilityValue.strangeness,
+                   "strangeness/I");
   stability.Branch("open_heavy", &stabilityValue.openHeavy, "open_heavy/I");
   stability.Branch("hidden_heavy", &stabilityValue.hiddenHeavy,
                    "hidden_heavy/I");
   stability.Branch("central_registry", &stabilityValue.central,
                    "central_registry/I");
+  stability.Branch("has_antiparticle", &stabilityValue.hasAnti,
+                   "has_antiparticle/I");
+  stability.Branch("antiparticle_verified",
+                   &stabilityValue.antiparticleVerified,
+                   "antiparticle_verified/I");
   stability.Branch("mass", &stabilityValue.mass, "mass/D");
   stability.Branch("tau0", &stabilityValue.tau0, "tau0/D");
   stability.Branch("can_decay", &stabilityValue.canDecay, "can_decay/I");
@@ -1036,7 +1480,7 @@ int main(int argc, char** argv) {
 
   TTree effectiveSettingsTree(
       "effective_settings",
-      "post-init values for every explicitly configured PYTHIA setting");
+      "exhaustive post-init values for every PYTHIA Settings entry");
   std::string effectiveSettingName;
   std::string effectiveSettingValue;
   effectiveSettingsTree.Branch("name", &effectiveSettingName);
@@ -1052,12 +1496,34 @@ int main(int argc, char** argv) {
   const auto elapsedSeconds =
       std::chrono::duration_cast<std::chrono::seconds>(wallEnd - wallStart)
           .count();
+  ULong64_t peakRssKiB = 0;
+  try {
+    peakRssKiB = PeakRssKiB();
+  } catch (const std::exception& error) {
+    std::cerr << "ERROR: resource accounting failed: " << error.what()
+              << "\n";
+    output.Close();
+    return 8;
+  }
+  Int_t rootCompressionSettings = output.GetCompressionSettings();
+  Int_t rootCompressionAlgorithm = output.GetCompressionAlgorithm();
+  Int_t rootCompressionLevel = output.GetCompressionLevel();
   TTree metadata("job_metadata", "immutable logical-attempt metadata");
   std::string rawSchema = kRawSchema;
   std::string selector = kSelectorVersion;
   std::string originAlgorithm = kOriginAlgorithmVersion;
   std::string speciesSchema(kSpeciesRegistrySchema);
   std::string speciesSha(kSpeciesRegistrySha256);
+  std::string weakParentSchema(kWeakParentRegistrySchema);
+  std::string weakParentSha(kWeakParentRegistrySha256);
+  std::string weakTransitionRule(kWeakDecayTransitionRuleVersion);
+  std::string tuneAllowlistSchema(kTuneDifferenceAllowlistSchema);
+  std::string tuneAllowlistSha(kTuneDifferenceAllowlistSha256);
+  std::string stabilityAuditSchema(kHeavyStabilityAuditSchema);
+  std::string stabilityAuditSha = stabilityAuditSha256;
+  std::string effectiveSettingsSchema = kEffectiveSettingsSchema;
+  std::string effectiveSettingsSha = effectiveSettingsSha256;
+  std::string primaryAllHeavySchema = kPrimaryAllHeavyMatchSchema;
   std::string configSha = GetEnv("HADRONIZATION_CONFIG_SHA256", "UNRECORDED");
   std::string executableSha =
       GetEnv("HADRONIZATION_EXECUTABLE_SHA256", "UNRECORDED");
@@ -1084,7 +1550,23 @@ int main(int argc, char** argv) {
       duplicateHardCarrierConflictGroupsB;
   ULong64_t duplicateDemotionsC = duplicateHardCarrierDemotionsC;
   ULong64_t duplicateDemotionsB = duplicateHardCarrierDemotionsB;
+  ULong64_t multiHeavyRejectionsC = multiHeavyConstituentRejectionsC;
+  ULong64_t multiHeavyRejectionsB = multiHeavyConstituentRejectionsB;
+  ULong64_t conservationFailures = heavyFlavourConservationFailures;
+  ULong64_t classificationFailures = originClassificationFailures;
+  ULong64_t allHeavyConflictGroups = primaryAllHeavyConflictGroups;
+  ULong64_t allHeavyDemotions = primaryAllHeavyDemotions;
+  ULong64_t allHeavyFailures = primaryAllHeavyMatchFailures;
+  ULong64_t effectiveSettingCount = effectiveSettingRows.size();
   ULong64_t multiplicityAuditEventCount = multiplicityAuditEvents;
+  Long64_t startUnixSeconds =
+      std::chrono::duration_cast<std::chrono::seconds>(
+          wallStart.time_since_epoch())
+          .count();
+  Long64_t endUnixSeconds =
+      std::chrono::duration_cast<std::chrono::seconds>(
+          wallEnd.time_since_epoch())
+          .count();
   Long64_t elapsed = elapsedSeconds;
   Int_t completeFlag = complete ? 1 : 0;
   std::string metadataCampaign = campaign;
@@ -1098,6 +1580,21 @@ int main(int argc, char** argv) {
   metadata.Branch("origin_algorithm", &originAlgorithm);
   metadata.Branch("species_registry_schema", &speciesSchema);
   metadata.Branch("species_registry_sha256", &speciesSha);
+  metadata.Branch("weak_parent_registry_schema", &weakParentSchema);
+  metadata.Branch("weak_parent_registry_sha256", &weakParentSha);
+  metadata.Branch("weak_decay_transition_rule", &weakTransitionRule);
+  metadata.Branch("tune_difference_allowlist_schema",
+                  &tuneAllowlistSchema);
+  metadata.Branch("tune_difference_allowlist_sha256",
+                  &tuneAllowlistSha);
+  metadata.Branch("heavy_stability_audit_schema", &stabilityAuditSchema);
+  metadata.Branch("heavy_stability_audit_sha256", &stabilityAuditSha);
+  metadata.Branch("effective_settings_schema", &effectiveSettingsSchema);
+  metadata.Branch("effective_settings_sha256", &effectiveSettingsSha);
+  metadata.Branch("effective_settings_entries", &effectiveSettingCount,
+                  "effective_settings_entries/l");
+  metadata.Branch("primary_all_heavy_match_schema",
+                  &primaryAllHeavySchema);
   metadata.Branch("config_sha256", &configSha);
   metadata.Branch("executable_sha256", &executableSha);
   metadata.Branch("repository_commit", &repositoryCommit);
@@ -1116,6 +1613,14 @@ int main(int argc, char** argv) {
   metadata.Branch("tree_entries", &entryCount, "tree_entries/l");
   metadata.Branch("sum_weights", &sumWeights, "sum_weights/D");
   metadata.Branch("sum_weights2", &sumWeights2, "sum_weights2/D");
+  metadata.Branch("phase_space_pthat_min", &metadataPthatMin,
+                  "phase_space_pthat_min/D");
+  metadata.Branch("pythia_sigma_gen_mb", &pythiaSigmaGenMb,
+                  "pythia_sigma_gen_mb/D");
+  metadata.Branch("pythia_sigma_err_mb", &pythiaSigmaErrMb,
+                  "pythia_sigma_err_mb/D");
+  metadata.Branch("pythia_weight_sum", &pythiaWeightSum,
+                  "pythia_weight_sum/D");
   metadata.Branch("multiplicity_overflow", &multOverflow,
                   "multiplicity_overflow/l");
   metadata.Branch("multiplicity_strong_em_overflow", &multStrongOverflow,
@@ -1134,9 +1639,39 @@ int main(int argc, char** argv) {
   metadata.Branch("duplicate_hard_carrier_demotions_beauty",
                   &duplicateDemotionsB,
                   "duplicate_hard_carrier_demotions_beauty/l");
+  metadata.Branch("multi_heavy_constituent_rejections_charm",
+                  &multiHeavyRejectionsC,
+                  "multi_heavy_constituent_rejections_charm/l");
+  metadata.Branch("multi_heavy_constituent_rejections_beauty",
+                  &multiHeavyRejectionsB,
+                  "multi_heavy_constituent_rejections_beauty/l");
+  metadata.Branch("heavy_flavour_conservation_failures",
+                  &conservationFailures,
+                  "heavy_flavour_conservation_failures/l");
+  metadata.Branch("origin_classification_failures",
+                  &classificationFailures,
+                  "origin_classification_failures/l");
+  metadata.Branch("primary_all_heavy_conflict_groups",
+                  &allHeavyConflictGroups,
+                  "primary_all_heavy_conflict_groups/l");
+  metadata.Branch("primary_all_heavy_demotions", &allHeavyDemotions,
+                  "primary_all_heavy_demotions/l");
+  metadata.Branch("primary_all_heavy_match_failures", &allHeavyFailures,
+                  "primary_all_heavy_match_failures/l");
   metadata.Branch("multiplicity_audit_events", &multiplicityAuditEventCount,
                   "multiplicity_audit_events/l");
+  metadata.Branch("start_unix_seconds", &startUnixSeconds,
+                  "start_unix_seconds/L");
+  metadata.Branch("end_unix_seconds", &endUnixSeconds,
+                  "end_unix_seconds/L");
   metadata.Branch("elapsed_seconds", &elapsed, "elapsed_seconds/L");
+  metadata.Branch("peak_rss_kib", &peakRssKiB, "peak_rss_kib/l");
+  metadata.Branch("root_compression_settings", &rootCompressionSettings,
+                  "root_compression_settings/I");
+  metadata.Branch("root_compression_algorithm", &rootCompressionAlgorithm,
+                  "root_compression_algorithm/I");
+  metadata.Branch("root_compression_level", &rootCompressionLevel,
+                  "root_compression_level/I");
   metadata.Branch("host", &host);
   metadata.Branch("condor_cluster", &condorCluster);
   metadata.Branch("condor_process", &condorProcess);
@@ -1146,12 +1681,25 @@ int main(int argc, char** argv) {
 
   TObjString settingsObject(effectiveSettings.c_str());
   settingsObject.Write("effective_changed_settings");
+  TObjString effectiveSettingsCanonicalObject(
+      effectiveSettingsCanonical.c_str());
+  effectiveSettingsCanonicalObject.Write("effective_settings_canonical");
+  TObjString effectiveSettingsShaObject(effectiveSettingsSha256.c_str());
+  effectiveSettingsShaObject.Write("effective_settings_sha256");
   TObjString statisticsObject(pythiaStatistics.c_str());
   statisticsObject.Write("pythia_statistics");
+  TObjString stabilityCanonicalObject(stabilityAuditCanonical.c_str());
+  stabilityCanonicalObject.Write("heavy_stability_audit_canonical");
+  TObjString stabilityShaObject(stabilityAuditSha256.c_str());
+  stabilityShaObject.Write("heavy_stability_audit_sha256");
   TObjString multiplicityCentral(kMultiplicityCentral);
   multiplicityCentral.Write("multiplicity_central_version");
   TObjString multiplicityCrossCheck(kMultiplicityCrossCheck);
   multiplicityCrossCheck.Write("multiplicity_crosscheck_version");
+  TObjString weakTransitionContract(kWeakDecayTransitionRuleVersion.data());
+  weakTransitionContract.Write("weak_decay_transition_rule");
+  TObjString primaryAllHeavyMatchContract(kPrimaryAllHeavyMatchSchema);
+  primaryAllHeavyMatchContract.Write("primary_all_heavy_match_version");
   output.Write();
   output.Close();
 
