@@ -47,6 +47,13 @@ def main() -> int:
     project = args.project_base.resolve()
     production = args.production_root.resolve()
     analysis = args.analysis_root.resolve()
+    for name, path in {
+        "project_base": project,
+        "production_root": production,
+        "analysis_root": analysis,
+    }.items():
+        if any(character.isspace() for character in str(path)) or "," in str(path):
+            raise ValueError(f"{name} contains whitespace or comma: {path}")
     lines = [
         "universe = vanilla",
         f"executable = {project}/run_status_analysis.sh",
@@ -72,7 +79,7 @@ def main() -> int:
         "should_transfer_files = NO",
         "max_retries = 0",
         "on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)",
-        'arguments = "$(RAW_PATH)" "$(OUTPUT_DIRECTORY)"',
+        "arguments = $(RAW_PATH) $(OUTPUT_DIRECTORY)",
         (
             "queue TUNE,LOGICAL_ID,CATEGORY,RAW_PATH,OUTPUT_DIRECTORY from ("
         ),

@@ -111,6 +111,8 @@ def main() -> int:
         )
         analysis_text = analysis_output.read_text()
         assert '+JobCategory = "$(CATEGORY)"' in analysis_text
+        assert "arguments = $(RAW_PATH) $(OUTPUT_DIRECTORY)" in analysis_text
+        assert 'arguments = "$(RAW_PATH)"' not in analysis_text
         assert analysis_text.count(",job_") == 0
         assert analysis_text.count(".root,") == 9
         assert "per_pthat/MONASH/job_000" in analysis_text
