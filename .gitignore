@@ -14,6 +14,9 @@ __pycache__/
 !AnalyzedData/**/*.root
 
 # Ignore generated production analysis outputs
+/Production/
+/campaigns/
+/AnalysisOutput/
 /AnalysisResults/
 /AnalyzedData/complete_root_*/
 /AnalyzedData/SUBSAMPLES_*/
@@ -54,7 +57,12 @@ Balancing_and_Sampling/**/Plots/
 SimulationScripts/heavyflavourcorrelations_status
 SimulationScripts/bbbarcorrelations_status
 SimulationScripts/bbbarcorrelations_status_JUNCTIONS
+SimulationScripts/ccbarcorrelations_status
 SimulationScripts/ccbarcorrelations_status_JUNCTIONS
+
+# Working paper draft. Kept in the checkout as reference only; it is
+# deliberately untracked so plotting/production branches never overwrite it.
+Paper/Heavy_flavour_hadronisation_model_paper/
 
 # Scratch/tooling directories
 .codex-tmp/
