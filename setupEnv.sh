@@ -64,6 +64,21 @@ if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then
     # shellcheck source=/dev/null
     source "${root_package}/bin/thisroot.sh"
   fi
+
+  # alienv can fail to initialise its Tcl interpreter in non-interactive
+  # Nikhef shells.  In that case, pin the same PYTHIA 8.315 CVMFS package
+  # directly so builds and Condor wrappers do not depend on an interactive
+  # login having populated PYTHIA8 first.
+  if [[ -z "${PYTHIA8:-}" ]] || ! command -v pythia8-config >/dev/null 2>&1; then
+    pythia_package="/cvmfs/alice.cern.ch/el9-x86_64/Packages/pythia/v8315-alice1-23"
+    if [[ ! -x "${pythia_package}/bin/pythia8-config" ]]; then
+      echo "ERROR: pinned PYTHIA package is unavailable: ${pythia_package}" >&2
+      return 1 2>/dev/null || exit 1
+    fi
+    export PYTHIA8="${pythia_package}"
+    export PATH="${pythia_package}/bin:${PATH}"
+    export LD_LIBRARY_PATH="${pythia_package}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+  fi
 else
   echo "WARNING: CVMFS not available — ROOT and PYTHIA not loaded via alienv."
   echo "         Run this script on the Nikhef cluster to get the full environment."
