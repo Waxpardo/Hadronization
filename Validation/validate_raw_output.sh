@@ -13,6 +13,9 @@ successes="$5"
 attempt="${6:--1}"
 seed="${7:--1}"
 script_dir="$(cd "$(dirname "$0")" && pwd)"
+project_base="$(cd "${script_dir}/.." && pwd)"
+export HADRONIZATION_BASE="${HADRONIZATION_BASE:-${project_base}}"
+source "${project_base}/setupEnv.sh"
 
 validation_log="$(mktemp /tmp/hadronization_raw_validation_XXXXXX.log)"
 trap 'rm -f "${validation_log}"' EXIT

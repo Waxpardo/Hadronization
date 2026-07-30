@@ -38,6 +38,7 @@ esac
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 project_base="${HADRONIZATION_BASE:-${script_dir}}"
 project_base="${project_base%/}"
+export HADRONIZATION_BASE="${project_base}"
 if [[ -n "$(git -C "${project_base}" status --porcelain --untracked-files=no)" ]]; then
   echo "ERROR: Gate-B analysis requires no tracked worktree changes" >&2
   exit 3
@@ -45,6 +46,7 @@ fi
 python3 "${project_base}/tools/campaign_manifest.py" validate \
   "${campaign_dir}" --implementation-policy ancestor \
   --checkout-root "${project_base}"
+source "${project_base}/setupEnv.sh"
 
 mkdir -p "${analysis_root}/validation/raw" \
   "${analysis_root}/condor_logs"/{MONASH,JUNCTIONS,CLOSEPACKING}
