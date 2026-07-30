@@ -241,7 +241,11 @@ inside each block before their SEM is computed.  Independent tune-ratio
 uncertainties are combined in quadrature.  Zero or non-finite denominators
 are fatal.  The run log must show `n=10`, finite nonzero `stdError` for every
 non-degenerate final point, no missing files or objects, and no placeholder
-errors.
+errors.  Multiplicity-integrated angular correlations use the same blocks:
+OS and SS are trigger-normalised inside each block, every `Delta phi` bin gets
+the block SEM, and OS-minus-SS is subtracted per block before its SEM is
+calculated.  Native ROOT projection errors are not mixed into these paper
+panels.
 
 The canonical tune style comes only from
 `PlottingScripts/TunePlotStyle.h`: MONASH black/20/solid, JUNCTIONS

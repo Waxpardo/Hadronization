@@ -664,6 +664,27 @@ bool isInVector(const std::string& value, const std::vector<std::string>& vec) {
     return std::find(vec.begin(), vec.end(), value) != vec.end();
 }
 
+bool IsBinUsedByAnyCanvas(
+    const CONFIGS& configs,
+    const char* flavour,
+    const std::string& trigger,
+    const std::string& histogramName
+) {
+    for (const auto& canvas : configs.vCanvasConfigs) {
+        if (!canvas.FLAVOUR.empty() && canvas.FLAVOUR != flavour) {
+            continue;
+        }
+        if (!canvas.TriggerToUse.empty() &&
+            canvas.TriggerToUse != trigger) {
+            continue;
+        }
+        if (!isInVector(histogramName, canvas.vBinsToIgnore)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 YieldsAndErrors YieldsAndErrorsForGivenTrigger(const std::string& trigger, const YieldsAndErrorsMap& mapYieldsAndErrors, bool CALCULATE_ERRORS) {
     YieldsAndErrors yieldsAndErrors;
@@ -1270,6 +1291,55 @@ SubsampleStatistics calculateSubsampleStatistics(const std::vector<Double_t>& va
     return stats;
 }
 
+bool IsIntegratedMultiplicityBin(const BinsFromTHnSparse& bin) {
+    constexpr Double_t tolerance = 1e-9;
+    return std::abs(bin.multiplicityMin) < tolerance &&
+           std::abs(bin.multiplicityMax - 100.0) < tolerance;
+}
+
+void ApplyCorrelationSubsampleSEM(
+    TH1D* central,
+    const std::vector<std::vector<Double_t>>& blockBinValues,
+    Int_t expectedSubsamples,
+    const std::string& context
+) {
+    if (!central) {
+        throw std::runtime_error(
+            "Cannot apply correlation uncertainty to null histogram: " +
+            context);
+    }
+    if (blockBinValues.size() !=
+        static_cast<std::size_t>(central->GetNbinsX() + 1)) {
+        throw std::runtime_error(
+            "Correlation uncertainty bin layout mismatch: " + context);
+    }
+    for (Int_t bin = 1; bin <= central->GetNbinsX(); ++bin) {
+        const SubsampleStatistics stats =
+            calculateSubsampleStatistics(blockBinValues[bin]);
+        if (stats.nValues != expectedSubsamples ||
+            !std::isfinite(stats.stdError) || stats.stdError < 0.0) {
+            throw std::runtime_error(
+                Form("Invalid correlation-bin SEM for %s bin=%d n=%d sem=%g",
+                     context.c_str(), bin, stats.nValues, stats.stdError));
+        }
+        const Double_t centralValue = central->GetBinContent(bin);
+        if (centralValue != 0.0 && stats.stdError == 0.0) {
+            throw std::runtime_error(
+                Form("Zero correlation-bin SEM for nonzero %s bin=%d",
+                     context.c_str(), bin));
+        }
+        central->SetBinError(bin, stats.stdError);
+        std::cout << "CORRELATION_BIN_UNCERTAINTY"
+                  << " context=" << context
+                  << " bin=" << bin
+                  << " n=" << stats.nValues
+                  << " central=" << centralValue
+                  << " block_mean=" << stats.mean
+                  << " stdError=" << stats.stdError
+                  << std::endl;
+    }
+}
+
 
 // Simple function to calculate the yield given by two normalised OS and SS histograms
 // Their angular spectra are subtracted (OS - SS) to reduce background
@@ -1582,136 +1652,38 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     }
 
 
-                    // If requested: draw correlation plots
-                    // This part is hard-coded for now, but could get its own configuration section in the json
-                    // to customise what should be drawn and how already in the json
-                    // TODO: this needs to be automised and configurable in the json as well
-                    // TODO: make the plots also for different multiplicity bins
-                    if (DRAW_CORRELATION_PLOTS && k==0) { // assumed k=0 is the integrated multiplicity bin (TODO: change that)
+                    const bool drawThisCorrelation =
+                        DRAW_CORRELATION_PLOTS &&
+                        IsIntegratedMultiplicityBin(binFromTHnSparse) &&
+                        TUNE == "MONASH" &&
+                        (fileNamesOSandSS.OS == "BplusBminus.root" ||
+                         fileNamesOSandSS.OS == "LbbarBminus.root" ||
+                         fileNamesOSandSS.OS == "DplusDminus.root" ||
+                         fileNamesOSandSS.OS == "LambdacplusDminus.root");
 
-                        // Hard-coded: we only want to show correlations for B+B- and D+D-
-                        // TODO: put an option in the configuration.json to give a list of desired correlations to draw
-                        if (TUNE == "MONASH" &&
-                           (strcmp(fileNamesOSandSS.OS.c_str(), "BplusBminus.root") == 0 ||
-                            strcmp(fileNamesOSandSS.OS.c_str(), "LbbarBminus.root") == 0 ||
-                            strcmp(fileNamesOSandSS.OS.c_str(), "DplusDminus.root") == 0 ||
-                            strcmp(fileNamesOSandSS.OS.c_str(), "LambdacplusDminus.root") == 0
-                            )) {
-                                TH1D *hSub = (TH1D*)hDPhiOS->Clone(Form("%s_sub",fileNamesOSandSS.OS.c_str()));
-                                hSub->SetDirectory(nullptr);
-                                hSub->Add(hDPhiSS,-1);
-                                TPad *padOSSS = nullptr;
-                                TPad *padSub  = nullptr;
-                                TString title;
-
-                                if (fileNamesOSandSS.OS == "DplusDminus.root") {
-                                    padOSSS = pCharmMeson;
-                                    padSub  = pCharmMesonSub;
-                                    title = "D^{+} trigger";
-                                }
-                                else if (fileNamesOSandSS.OS == "LambdacplusDminus.root") {
-                                    padOSSS = pCharmBaryon;
-                                    padSub  = pCharmBaryonSub;
-                                    title = "#Lambda_{c}^{+} trigger";
-                                }
-                                else if (fileNamesOSandSS.OS == "BplusBminus.root") {
-                                    padOSSS = pBeautyMeson;
-                                    padSub  = pBeautyMesonSub;
-                                    title = "B^{+} trigger";
-                                }
-                                else if (fileNamesOSandSS.OS == "LbbarBminus.root") {
-                                    padOSSS = pBeautyBaryon;
-                                    padSub  = pBeautyBaryonSub;
-                                    title = "#bar#Lambda_{b}^{0} trigger";
-                                }
-
-                                if (padOSSS) {
-                                    cAngularCorrelations->cd();
-                                    padOSSS->cd();
-                                    hDPhiOS->SetLineColor(kBlack);
-                                    hDPhiSS->SetLineColor(kRed);
-                                    hDPhiSS->SetLineStyle(2);
-                                    hDPhiOS->SetTitle(title);
-                                    hDPhiOS->GetYaxis()->SetRangeUser(1e-6, 1e-2);
-                                    hDPhiOS->SetStats(0);
-                                    hDPhiSS->SetStats(0);
-                                    TH1D* drawnOS = static_cast<TH1D*>(hDPhiOS->DrawCopy("hist"));
-                                    TH1D* drawnSS = static_cast<TH1D*>(hDPhiSS->DrawCopy("hist same"));
-
-                                    auto leg = new TLegend(0.60,0.75,0.88,0.88);
-                                    leg->SetBorderSize(0);
-                                    leg->SetFillStyle(0);
-                                    leg->AddEntry(drawnOS,"OS","l");
-                                    leg->AddEntry(drawnSS,"SS","l");
-                                    leg->Draw();
-
-                                    padSub->cd();
-                                    hSub->SetLineColor(kBlue);
-                                    hSub->SetTitle("");
-                                    hSub->DrawCopy("hist");
-                                }
-                                delete hSub;
-
-                                /*
-                                TCanvas *c_correlations_OS_SS = new TCanvas(Form("c_correlations_OS_SS %s for [%f, %f]", fileNamesOSandSS.OS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), Form("c_correlations_OS_SS %s for [%f, %f]", fileNamesOSandSS.OS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), 800, 600);
-                                TPad *cMiniPadOS = createMiniPad("cMiniPadOS", 0.00, 0.00, 0.50, 1.00);
-                                TPad *cMiniPadOSSS = createMiniPad("cMiniPadSS", 0.50, 0.00, 1.00, 1.00);
-                                TH1D *hTemplateOS = (TH1D*)hDPhiOS->Clone("hTemplateOS");
-                                TH1D *hTemplateOSSS = (TH1D*)hDPhiSS->Clone("hTemplateOSSS");
-
-                                cMiniPadOS->cd();
-                                hTemplateOS->SetStats(0);
-                                hTemplateOS->SetTitle(Form("OS: %s%s", fileNamesOSandSS.trigger.c_str(), fileNamesOSandSS.associateOS.c_str()));
-                                hTemplateOS->GetXaxis()->SetTitle(hDPhiOS->GetXaxis()->GetTitle());
-                                hTemplateOS->GetYaxis()->SetTitle(hDPhiOS->GetYaxis()->GetTitle());
-                                hTemplateOS->GetYaxis()->SetRangeUser(0.,1.2*hDPhiOS->GetMaximum());
-                                if (strcmp(fileNamesOSandSS.OS.c_str(), "BplusBminus.root") == 0) { hDPhiOS->SetLineColor(kRed); }
-                                if (strcmp(fileNamesOSandSS.OS.c_str(), "DplusDminus.root") == 0) { hDPhiOS->SetLineColor(kBlue); }
-                                hTemplateOS->Draw("PE");
-                                hDPhiOS->Draw("PE SAME");
-
-                                cMiniPadOSSS->cd();
-                                hTemplateOSSS->SetStats(0);
-                                hTemplateOSSS->SetTitle(Form("SS: %s%s", fileNamesOSandSS.trigger.c_str(), fileNamesOSandSS.associateSS.c_str()));
-                                hTemplateOSSS->GetXaxis()->SetTitle(hDPhiOS->GetXaxis()->GetTitle());
-                                hTemplateOSSS->GetYaxis()->SetTitle(hDPhiOS->GetYaxis()->GetTitle());
-                                Double_t ymin = 0;
-                                if (hDPhiSS->GetMinimum() != 0) { ymin = 0.1*std::min(hDPhiOS->GetMinimum(), hDPhiSS->GetMinimum()); }
-                                else { ymin = 0.1*std::min(hDPhiOS->GetMinimum(), hDPhiSS->GetMinimum())+1e-6; }
-                                
-                                Double_t ymax = 10*std::max(hDPhiOS->GetMaximum(), hDPhiSS->GetMaximum());
-                                hTemplateOSSS->GetYaxis()->SetRangeUser(ymin, ymax);
-                                gPad->SetLogy();
-                                if (strcmp(fileNamesOSandSS.OS.c_str(), "BplusBminus.root") == 0) { hDPhiSS->SetLineColor(kRed); }
-                                if (strcmp(fileNamesOSandSS.OS.c_str(), "DplusDminus.root") == 0) { hDPhiSS->SetLineColor(kBlue); }
-                                // hDPhiOS->SetLineStyle(1);
-                                hDPhiSS->SetLineStyle(2);
-
-                                hTemplateOSSS->Draw("PE");
-                                hDPhiOS->Draw("PE SAME");
-                                hDPhiSS->Draw("PE SAME");
-
-                                TLegend *leg = new TLegend(0.60,0.75,0.88,0.88);
-                                leg->SetBorderSize(0);
-                                leg->SetFillStyle(0);
-                                leg->AddEntry((TObject*)0,
-                                Form("%.1f #leq N_{ch} percentile #leq %.1f", binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), "");
-                                leg->AddEntry(hDPhiOS,"OS","lep");
-                                leg->AddEntry(hDPhiSS,"SS","lep");
-                                leg->Draw();
-
-                                c_correlations_OS_SS->cd();
-                                writeCanvasToFiles(VERBOSE, c_correlations_OS_SS, correlationPlotDir, Form("c_correlations_OS_SS %s for [%f, %f]", fileNamesOSandSS.OS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax));
-                                */
-                        }
-                    }
-
-
-                    // Calculate the error on the yield by subsampling with N samples
+                    // Calculate the yield and per-bin correlation errors by
+                    // subsampling with N disjoint blocks.
                     // Not the most efficient way, but it is straightforward and clear
                     // and anyways the files are quite small so it doesn't take too long
+                    const bool requiredByCanvas = IsBinUsedByAnyCanvas(
+                        configs_from_json, FLAVOUR, trigger,
+                        binFromTHnSparse.hDPhi);
                     const bool excludeSubsampleError =
-                        isInVector(binFromTHnSparse.hDPhi, vSubsampleErrorBinsToExclude);
+                        isInVector(
+                            binFromTHnSparse.hDPhi,
+                            vSubsampleErrorBinsToExclude) ||
+                        (!SUBSAMPLE_COVERAGE_AUDIT &&
+                         !drawThisCorrelation && !requiredByCanvas);
+                    std::vector<std::vector<Double_t>> subOSBinValues;
+                    std::vector<std::vector<Double_t>> subSSBinValues;
+                    std::vector<std::vector<Double_t>> subDifferenceBinValues;
+                    if (drawThisCorrelation) {
+                        const std::size_t binSlots =
+                            static_cast<std::size_t>(hDPhiOS->GetNbinsX() + 1);
+                        subOSBinValues.resize(binSlots);
+                        subSSBinValues.resize(binSlots);
+                        subDifferenceBinValues.resize(binSlots);
+                    }
                     if (CALCULATE_ERRORS && excludeSubsampleError) {
                         const Double_t unavailableError =
                             std::numeric_limits<Double_t>::quiet_NaN();
@@ -1723,7 +1695,10 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             << " tune=" << TUNE
                             << " pair=" << fileNamesOSandSS.OS
                             << " bin=" << binFromTHnSparse.hDPhi
-                            << " reason=configured-production-coverage"
+                            << " reason="
+                            << (requiredByCanvas
+                                    ? "configured-production-coverage"
+                                    : "not-used-by-any-output-canvas")
                             << std::endl;
                     }
                     if (CALCULATE_ERRORS && !excludeSubsampleError) {
@@ -1779,6 +1754,20 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             Double_t subYield = calculateOneYield(VERBOSE, hDPhiOS_subSamples, hTrPtOS_subSamples, hDPhiSS_subSamples, hTrPtSS_subSamples,
                                                                 FLAVOUR, i, j, k, l);
                             vSubYields[i][j][k][l - 1] = subYield;
+                            if (drawThisCorrelation) {
+                                for (Int_t bin = 1;
+                                     bin <= hDPhiOS_subSamples->GetNbinsX();
+                                     ++bin) {
+                                    const Double_t os =
+                                        hDPhiOS_subSamples->GetBinContent(bin);
+                                    const Double_t ss =
+                                        hDPhiSS_subSamples->GetBinContent(bin);
+                                    subOSBinValues[bin].push_back(os);
+                                    subSSBinValues[bin].push_back(ss);
+                                    subDifferenceBinValues[bin].push_back(
+                                        os - ss);
+                                }
+                            }
                             if (VERBOSE) {
                                 std::cout << "vSubYields[" << i << "][" << j << "][" << k << "][" << (l - 1) << "] = " << subYield << std::endl;
                                 std::cout << std::endl;
@@ -1912,6 +1901,108 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
 
 
                     } // calculate errors
+
+                    if (drawThisCorrelation) {
+                        if (!CALCULATE_ERRORS || excludeSubsampleError) {
+                            throw std::runtime_error(
+                                "Final angular-correlation panels require "
+                                "ten-block subsample uncertainties: " +
+                                fileNamesOSandSS.OS);
+                        }
+                        const std::string uncertaintyContext =
+                            std::string(FLAVOUR) + "_" + TUNE + "_" +
+                            fileNamesOSandSS.OS;
+                        ApplyCorrelationSubsampleSEM(
+                            hDPhiOS, subOSBinValues, nSubSamples,
+                            uncertaintyContext + "_OS");
+                        ApplyCorrelationSubsampleSEM(
+                            hDPhiSS, subSSBinValues, nSubSamples,
+                            uncertaintyContext + "_SS");
+
+                        TH1D *hSub = static_cast<TH1D*>(
+                            hDPhiOS->Clone(
+                                Form("%s_sub",
+                                     fileNamesOSandSS.OS.c_str())));
+                        hSub->SetDirectory(nullptr);
+                        hSub->Add(hDPhiSS, -1.0);
+                        ApplyCorrelationSubsampleSEM(
+                            hSub, subDifferenceBinValues, nSubSamples,
+                            uncertaintyContext + "_OSminusSS");
+
+                        TPad *padOSSS = nullptr;
+                        TPad *padSub = nullptr;
+                        TString title;
+                        if (fileNamesOSandSS.OS ==
+                            "DplusDminus.root") {
+                            padOSSS = pCharmMeson;
+                            padSub = pCharmMesonSub;
+                            title = "D^{+} trigger";
+                        } else if (fileNamesOSandSS.OS ==
+                                   "LambdacplusDminus.root") {
+                            padOSSS = pCharmBaryon;
+                            padSub = pCharmBaryonSub;
+                            title = "#Lambda_{c}^{+} trigger";
+                        } else if (fileNamesOSandSS.OS ==
+                                   "BplusBminus.root") {
+                            padOSSS = pBeautyMeson;
+                            padSub = pBeautyMesonSub;
+                            title = "B^{+} trigger";
+                        } else if (fileNamesOSandSS.OS ==
+                                   "LbbarBminus.root") {
+                            padOSSS = pBeautyBaryon;
+                            padSub = pBeautyBaryonSub;
+                            title = "#bar#Lambda_{b}^{0} trigger";
+                        }
+                        if (!padOSSS || !padSub) {
+                            delete hSub;
+                            throw std::runtime_error(
+                                "Missing configured angular-correlation pad "
+                                "for " + fileNamesOSandSS.OS);
+                        }
+
+                        cAngularCorrelations->cd();
+                        padOSSS->cd();
+                        hDPhiOS->SetLineColor(kBlack);
+                        hDPhiOS->SetMarkerColor(kBlack);
+                        hDPhiOS->SetMarkerStyle(20);
+                        hDPhiSS->SetLineColor(kRed + 1);
+                        hDPhiSS->SetMarkerColor(kRed + 1);
+                        hDPhiSS->SetMarkerStyle(24);
+                        hDPhiSS->SetLineStyle(2);
+                        hDPhiOS->SetTitle(title);
+                        hDPhiOS->GetXaxis()->SetTitle("#Delta#varphi");
+                        hDPhiOS->GetYaxis()->SetTitle(
+                            "pairs per trigger / bin");
+                        hDPhiOS->GetYaxis()->SetRangeUser(1e-6, 1e-2);
+                        hDPhiOS->SetStats(0);
+                        hDPhiSS->SetStats(0);
+                        TH1D* drawnOS = static_cast<TH1D*>(
+                            hDPhiOS->DrawCopy("E1"));
+                        TH1D* drawnSS = static_cast<TH1D*>(
+                            hDPhiSS->DrawCopy("E1 same"));
+
+                        auto leg = new TLegend(0.55, 0.70, 0.88, 0.88);
+                        leg->SetBorderSize(0);
+                        leg->SetFillStyle(0);
+                        leg->AddEntry(drawnOS, "OS", "lep");
+                        leg->AddEntry(drawnSS, "SS", "lep");
+                        leg->AddEntry(
+                            static_cast<TObject*>(nullptr),
+                            "0-100%, 10-block SEM", "");
+                        leg->Draw();
+
+                        padSub->cd();
+                        hSub->SetLineColor(kBlue + 1);
+                        hSub->SetMarkerColor(kBlue + 1);
+                        hSub->SetMarkerStyle(20);
+                        hSub->SetTitle("");
+                        hSub->GetXaxis()->SetTitle("#Delta#varphi");
+                        hSub->GetYaxis()->SetTitle(
+                            "(OS-SS) pairs per trigger / bin");
+                        hSub->SetStats(0);
+                        hSub->DrawCopy("E1");
+                        delete hSub;
+                    }
 
                     delete hDPhiOS;
                     delete hDPhiSS;

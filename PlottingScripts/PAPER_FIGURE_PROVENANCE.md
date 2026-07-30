@@ -34,8 +34,10 @@ Paper captions for regenerated tune plots should state: MONASH
 black/circle/solid, JUNCTIONS blue/square/dashed, CLOSEPACKING
 magenta/triangle/line-style 7; vertical bars are the SEM from ten disjoint
 subsamples. Tune-ratio curves inherit the numerator tune style. Angular
-correlation panels are drawn as central-value histogram lines and do not show
-the subsample SEM.
+correlation panels use central complete-root values with a per-`Delta phi`
+bin SEM from the ten disjoint blocks. OS-minus-SS is formed inside each block
+before calculating its SEM, preserving OS/SS covariance; native ROOT
+projection errors are not used for those paper bars.
 
 None of the regenerated full THnSparse canvases is ready for paper promotion.
 The exhaustive real-input audit found 610 incomplete ten-subsample coverage

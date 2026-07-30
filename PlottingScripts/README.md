@@ -164,9 +164,11 @@ coverage audit found 610 incomplete yield/ratio cases: 540 beauty and 70
 charm. Only 468 of 1,152 logged yield/ratio statistics had `n=10`; details are
 in `validation/final_thnsparse_subsample_coverage.json`. Consequently the full
 paper target currently stops with an error, and no full THnSparse output should
-be promoted. The smoke config lists all classes except `1-10%` in
-`subsample_error_bins_to_exclude` and `bins_to_ignore` so it can validate the
-plotting/error plumbing without fabricating unsupported points.
+be promoted. The smoke canvases list all classes except `1-10%` in
+`bins_to_ignore`; the macro skips subsample calculation only for a bin unused
+by every output canvas. `subsample_error_bins_to_exclude` remains empty, so
+the smoke run validates the plotting/error plumbing without fabricating an
+uncertainty for any drawn point.
 
 All checked-in paths are relative to the Hadronization checkout unless they are `NONE`. Absolute paths are accepted by the resolver for private overrides but are not required by the defaults.
 
@@ -177,6 +179,14 @@ SEM = sample standard deviation(yield_1, ..., yield_10) / sqrt(10)
 ```
 
 with the sample standard deviation using `N-1`. Baryon/meson ratios are formed separately inside every subsample before the SEM is calculated. JUNCTIONS/MONASH and CLOSEPACKING/MONASH uncertainties combine the independently generated tune uncertainties in quadrature; baryon/meson tune double ratios use the matching associate ratio uncertainty from each tune. The same OS/SS cuts and trigger normalization are applied to central and subsample calculations. The canonical ordered-pair producer uses `same_sign_pair_factor = 1.0`; the legacy identical-species factor of 0.5 is not applied. Non-finite denominators and zero uncertainties on final plotted points stop the run with an explicit error.
+
+The multiplicity-integrated angular-correlation panels also use the ten
+disjoint blocks. Their OS and SS curves carry a per-`Delta phi`-bin SEM after
+block-local trigger normalisation. The OS-minus-SS curve is subtracted inside
+each block before its SEM is computed, so OS/SS covariance is retained. Native
+ROOT projection errors are not mixed into these paper panels. The integrated
+class is selected by its explicit `0-100%` bounds, not by assuming a
+particular JSON array position.
 
 After a verbose full run, validate and summarise every subsample-statistics line:
 

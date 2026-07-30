@@ -83,6 +83,52 @@ int TestPlotProjectionCuts() {
     return 2;
   }
 
-  std::cout << "PLOT_PROJECTION_TEST_PASS numerator=1 denominator=1\n";
+  if (!IsIntegratedMultiplicityBin(cuts)) {
+    std::cerr << "PLOT_PROJECTION_TEST_ERROR integrated-bin detection\n";
+    return 3;
+  }
+  BinsFromTHnSparse nonIntegrated = cuts;
+  nonIntegrated.multiplicityMin = 1.0;
+  nonIntegrated.multiplicityMax = 10.0;
+  if (IsIntegratedMultiplicityBin(nonIntegrated)) {
+    std::cerr << "PLOT_PROJECTION_TEST_ERROR nonintegrated bin accepted\n";
+    return 4;
+  }
+  CONFIGS canvasConfig{};
+  canvasConfigs smokeCanvas{};
+  smokeCanvas.FLAVOUR = "CHARM";
+  smokeCanvas.TriggerToUse = "D^{+}";
+  smokeCanvas.vBinsToIgnore = {"hDPhiM90_100"};
+  canvasConfig.vCanvasConfigs.push_back(smokeCanvas);
+  if (IsBinUsedByAnyCanvas(
+          canvasConfig, "CHARM", "D^{+}", "hDPhiM90_100") ||
+      !IsBinUsedByAnyCanvas(
+          canvasConfig, "CHARM", "D^{+}", "hDPhiM1_10") ||
+      IsBinUsedByAnyCanvas(
+          canvasConfig, "BEAUTY", "B^{+}", "hDPhiM1_10")) {
+    std::cerr << "PLOT_PROJECTION_TEST_ERROR canvas-bin selection\n";
+    return 5;
+  }
+
+  TH1D correlationWithSEM("correlationWithSEM", "test", 2, 0.0, 2.0);
+  correlationWithSEM.SetBinContent(1, 5.5);
+  std::vector<std::vector<Double_t>> blockBinValues(3);
+  for (Int_t value = 1; value <= 10; ++value) {
+    blockBinValues[1].push_back(static_cast<Double_t>(value));
+    blockBinValues[2].push_back(0.0);
+  }
+  ApplyCorrelationSubsampleSEM(
+      &correlationWithSEM, blockBinValues, 10, "projection_test");
+  const Double_t expectedSEM = std::sqrt(82.5 / 9.0) / std::sqrt(10.0);
+  if (std::abs(correlationWithSEM.GetBinError(1) - expectedSEM) > 1e-12 ||
+      correlationWithSEM.GetBinError(2) != 0.0) {
+    std::cerr << "PLOT_PROJECTION_TEST_ERROR block SEM="
+              << correlationWithSEM.GetBinError(1)
+              << " expected=" << expectedSEM << "\n";
+    return 6;
+  }
+
+  std::cout << "PLOT_PROJECTION_TEST_PASS numerator=1 denominator=1"
+            << " block_sem=" << correlationWithSEM.GetBinError(1) << "\n";
   return 0;
 }

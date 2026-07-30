@@ -81,6 +81,10 @@ The full config keeps every class active. The real-input coverage audit found
 610 incomplete yield/ratio cases (540 beauty and 70 charm), so the strict full
 paper run currently fails. The reduced smoke config excludes every class
 except `1-10%`, the only class with `n=10` across all reduced pairs and tunes.
+It does so with each canvas's `bins_to_ignore`; the macro skips subsample
+calculation only when a bin is unused by every output canvas. The checked-in
+`subsample_error_bins_to_exclude` list remains empty, so no drawn point can
+silently receive an unavailable error.
 This makes smoke a plumbing/error-propagation validation, not a substitute
 paper result. The complete matrix is stored in
 `PlottingScripts/validation/final_thnsparse_subsample_coverage.json`; a larger
@@ -155,9 +159,15 @@ types, non-finite ratios, incomplete finite-subsample sets, and non-positive
 uncertainties for final plotted points. A diagnostic config may explicitly set
 `calculate_errors=false`; it draws zero-length errors and is not a paper config.
 
-The optional integrated angular-correlation canvas is drawn with histogram
-lines (`hist`), not point error bars. Therefore native ROOT projection errors
-are not mixed visually with the subsample SEM used by the yield figures.
+The optional multiplicity-integrated angular-correlation canvas uses the same
+ten disjoint blocks, not native ROOT projection errors. OS and SS are
+normalised by their matching trigger count inside each block, and every
+`Delta phi` bin receives the block SEM. The OS-minus-SS uncertainty is the SEM
+of the subtraction formed inside each block, preserving the OS/SS covariance.
+The central line remains the full complete-root result. The macro identifies
+the integrated class by its explicit `0-100%` bounds rather than by list
+position and refuses to draw a final correlation panel without ten finite
+block values.
 
 ## Tune style
 
