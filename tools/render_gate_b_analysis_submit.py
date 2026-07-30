@@ -18,6 +18,9 @@ def main() -> int:
     parser.add_argument("production_root", type=Path)
     parser.add_argument("analysis_root", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument(
+        "--scope", choices=("all", "central", "sensitivity"), default="all"
+    )
     args = parser.parse_args()
     campaign_dir = args.campaign_dir.resolve()
     config = json.loads((campaign_dir / "campaign.json").read_text())
@@ -28,6 +31,16 @@ def main() -> int:
     ]
     if config.get("schema") != "hf_gate_b_pilot_campaign_v1" or len(rows) != 9:
         raise ValueError("expected a validated nine-row Gate-B pilot campaign")
+    if args.scope == "central":
+        rows = [row for row in rows if row["purpose"] == "one_million_central"]
+    elif args.scope == "sensitivity":
+        rows = [row for row in rows if row["purpose"] != "one_million_central"]
+    expected_rows = {"all": 9, "central": 3, "sensitivity": 6}[args.scope]
+    if len(rows) != expected_rows:
+        raise ValueError(
+            f"Gate-B {args.scope} scope has {len(rows)} rows, "
+            f"expected {expected_rows}"
+        )
     tune_order = {tune: index for index, tune in enumerate(TUNES)}
     rows.sort(key=lambda row: (tune_order[row["tune"]], int(row["logical_id"])))
 
@@ -77,7 +90,10 @@ def main() -> int:
     lines.append(")")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text("\n".join(lines) + "\n")
-    print(f"GATE_B_ANALYSIS_SUBMIT_RENDERED rows={len(rows)} output={args.output}")
+    print(
+        f"GATE_B_ANALYSIS_SUBMIT_RENDERED scope={args.scope} "
+        f"rows={len(rows)} output={args.output}"
+    )
     return 0
 
 

@@ -85,6 +85,11 @@ def main() -> int:
                         "tune": tune,
                         "logical_id": logical_id,
                         "category": category,
+                        "purpose": (
+                            "one_million_central"
+                            if logical_id == 0
+                            else "pthat_sensitivity"
+                        ),
                         "stable_name": f"hf_{tune}_job{logical_id:03d}.root",
                     }
                 )
@@ -110,6 +115,24 @@ def main() -> int:
         assert analysis_text.count(".root,") == 9
         assert "per_pthat/MONASH/job_000" in analysis_text
         assert "per_pthat/CLOSEPACKING/job_002" in analysis_text
+        sensitivity_output = temporary / "gate_b_sensitivity_analysis.sub"
+        subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "tools/render_gate_b_analysis_submit.py"),
+                str(gate_b_campaign),
+                str(ROOT),
+                str(temporary / "production"),
+                str(temporary / "analysis"),
+                str(sensitivity_output),
+                "--scope",
+                "sensitivity",
+            ],
+            check=True,
+        )
+        sensitivity_text = sensitivity_output.read_text()
+        assert sensitivity_text.count(".root,") == 6
+        assert "job000.root" not in sensitivity_text
 
         unsafe = subprocess.run(
             [

@@ -8,11 +8,14 @@ Usage:
   ./submit_gate_b_analysis.sh CAMPAIGN_DIR PRODUCTION_ROOT ANALYSIS_ROOT --submit
 
 Validate and queue exactly the nine raw files declared by a Gate-B pilot
-manifest. Directory discovery and retry are forbidden.
+manifest. Append --scope=central or --scope=sensitivity to validate and queue
+only that declared subset while the other jobs are still running. Directory
+discovery and retry are forbidden.
 USAGE
 }
 
-if [[ "$#" -ne 4 || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+if [[ ("$#" -ne 4 && "$#" -ne 5) ||
+      "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   usage
   exit 2
 fi
@@ -20,6 +23,13 @@ campaign_dir="$(cd "$1" && pwd)"
 production_root="$(cd "$2" && pwd)"
 analysis_root="$3"
 mode="$4"
+scope="all"
+case "${5:-}" in
+  "") ;;
+  --scope=central) scope="central" ;;
+  --scope=sensitivity) scope="sensitivity" ;;
+  *) usage; exit 2 ;;
+esac
 case "${mode}" in
   --dry-run|--submit) ;;
   *) usage; exit 2 ;;
@@ -62,11 +72,15 @@ while IFS=$'\t' read -r tune logical_id successes attempt seed stable_name; do
     exit 5
   fi
 done < <(
-  python3 - "${campaign_dir}/candidate_manifest.jsonl" <<'PY'
+  python3 - "${campaign_dir}/candidate_manifest.jsonl" "${scope}" <<'PY'
 import json
 import sys
 for line in open(sys.argv[1]):
     row = json.loads(line)
+    if sys.argv[2] == "central" and row["purpose"] != "one_million_central":
+        continue
+    if sys.argv[2] == "sensitivity" and row["purpose"] == "one_million_central":
+        continue
     print(
         row["tune"],
         row["logical_id"],
@@ -79,12 +93,12 @@ for line in open(sys.argv[1]):
 PY
 )
 
-submit_file="${analysis_root}/submit_gate_b_analysis.sub"
+submit_file="${analysis_root}/submit_gate_b_analysis_${scope}.sub"
 python3 "${project_base}/tools/render_gate_b_analysis_submit.py" \
   "${campaign_dir}" "${project_base}" "${production_root}" \
-  "${analysis_root}" "${submit_file}"
+  "${analysis_root}" "${submit_file}" --scope "${scope}"
 if [[ "${mode}" == "--dry-run" ]]; then
-  echo "GATE_B_ANALYSIS_DRY_RUN_OK submit_file=${submit_file}"
+  echo "GATE_B_ANALYSIS_DRY_RUN_OK scope=${scope} submit_file=${submit_file}"
   exit 0
 fi
 condor_submit "${submit_file}"
