@@ -9,8 +9,14 @@ import json
 import subprocess
 from pathlib import Path
 
+from campaign_manifest import (
+    SAFE_CAMPAIGN,
+    effective_card_sha256,
+    validate_pthat_spec_preapproval,
+)
+
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
-ORIGIN_ALGORITHM = "signed_heavy_carrier_explicit_parent_event_unique_v2"
+ORIGIN_ALGORITHM = "signed_heavy_constituent_complete_mothers_unique_v4"
 
 
 def sha256(path: Path) -> str:
@@ -24,7 +30,14 @@ def main() -> int:
     parser.add_argument("--campaign-ordinal", type=int, default=2)
     parser.add_argument("--seed-base", type=int, default=220_000_001)
     args = parser.parse_args()
+    if not SAFE_CAMPAIGN.fullmatch(args.campaign):
+        raise SystemExit(
+            "campaign may contain only letters, digits, dot, underscore, and hyphen"
+        )
+    if not 1 <= args.campaign_ordinal <= 65_535:
+        raise SystemExit("campaign-ordinal must be in [1,65535]")
     root = args.root.resolve()
+    validate_pthat_spec_preapproval(root)
     output = root / "campaigns" / args.campaign
     if output.exists() and any(output.iterdir()):
         raise SystemExit(f"refusing to alter nonempty pilot campaign: {output}")
@@ -68,16 +81,29 @@ def main() -> int:
                     "purpose": purpose,
                     "multiplicity_audit_events": 100,
                     "stable_name": f"hf_{tune}_job{logical_id:03d}.root",
+                    "repository_commit": commit,
+                    "effective_card_sha256": effective_card_sha256(
+                        root
+                        / "SimulationScripts"
+                        / f"pythiasettings_Hard_Low_ccbb_{tune}.cmnd",
+                        events,
+                        pthat,
+                    ),
                 }
             )
     campaign = {
         "schema": "hf_gate_b_pilot_campaign_v1",
         "campaign": args.campaign,
         "campaign_ordinal": args.campaign_ordinal,
+        "repository_commit": commit,
         "repository_implementation_commit": commit,
-        "raw_schema": "hf_primary_ground_raw_v3",
+        "repository_dirty_at_generation": False,
+        "raw_schema": "hf_primary_ground_raw_v5",
         "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
         "origin_algorithm": ORIGIN_ALGORITHM,
+        "pthat_sensitivity_spec_sha256": sha256(
+            root / "config/pthat_sensitivity_v1.json"
+        ),
         "species_registry_sha256": sha256(root / "config/heavy_flavour_species_v1.json"),
         "pair_registry_sha256": sha256(root / "config/heavy_flavour_pair_registry_v1.json"),
         "tune_allowlist_sha256": sha256(root / "config/tune_difference_allowlist_v1.json"),

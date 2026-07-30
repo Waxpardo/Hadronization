@@ -15,30 +15,50 @@ AUTHORITATIVE_EXACT = {
     "setupEnv.sh",
     "runCondorJob.sh",
     "submit_full_production.sh",
+    "submit_full_retry.sh",
     "submit_gate_b_pilots.sh",
     "submit_gate_b_analysis.sh",
     "run_status_analysis.sh",
     "submit_status_analysis.sh",
     "merge_root_files.sh",
+    "make_subsamples.sh",
     "SimulationScripts/Makefile",
     "SimulationScripts/heavyflavourcorrelations_status.cpp",
     "SimulationScripts/HeavyFlavourUtils.h",
+    "SimulationScripts/Sha256.h",
     "SimulationScripts/GeneratedHeavyFlavourRegistry.h",
+    "SimulationScripts/GeneratedTuneSettingRegistry.h",
     "SimulationScripts/GeneratedWeakParentRegistry.h",
     "SimulationScripts/pythiasettings_Hard_Low_ccbb_MONASH.cmnd",
     "SimulationScripts/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd",
     "SimulationScripts/pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd",
     "AnalysisScripts/status_analysis_THnSparse_qq.C",
+    "AnalysisScripts/AssociateOriginCategoryContract.h",
     "AnalysisScripts/GeneratedPairRegistry.h",
     "AnalysisScripts/MergeAnalysisObjects.C",
     "AnalysisScripts/MergeCanonicalAnalysis.C",
     "PlottingScripts/improvedPlotting_THnSparse.C",
+    "PlottingScripts/HistogramErrorUtils.h",
+    "PlottingScripts/MultiplicityBoundaryUtils.h",
+    "PlottingScripts/PairInputSelectionUtils.h",
     "PlottingScripts/TunePlotStyle.h",
     "PlottingScripts/Plot_InclusiveKinematicSpectra_Raw.C",
     "PlottingScripts/Plot_MultiplicityDistribution_PercentileBoundaries.C",
     "PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json",
     "PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json",
     "PlottingScripts/run_paper_plots.sh",
+    "tools/campaign_manifest.py",
+    "tools/canonical_manifest.py",
+    "tools/canonical_merge_contract.py",
+    "tools/dataset_selector.py",
+    "tools/final_plot_provenance.py",
+    "tools/merged_pair_provenance.py",
+    "tools/render_analysis_submit.py",
+    "tools/render_gate_b_analysis_submit.py",
+    "tools/render_production_submit.py",
+    "tools/statistical_robustness.py",
+    "tools/validate_analysis_outputs.py",
+    "tools/validate_gate_b_analysis_outputs.py",
 }
 
 AUTHORITATIVE_PREFIXES = (
@@ -68,7 +88,6 @@ LEGACY_EXACT = {
     "submitCondor_hf_90M.sub",
     "submitCondor_hf_CLOSEPACKING_100M.sub",
     "update_submit_paths.sh",
-    "make_subsamples.sh",
 }
 
 GENERATED_SUFFIXES = {
@@ -94,13 +113,19 @@ def tracked_paths(root: Path) -> list[str]:
     return sorted(paths)
 
 
-def is_text(path: Path) -> bool:
-    if path.suffix.lower() in GENERATED_SUFFIXES:
+def index_blob(root: Path, relative: str) -> bytes:
+    return subprocess.check_output(
+        ["git", "-C", str(root), "cat-file", "blob", f":{relative}"]
+    )
+
+
+def is_text(relative: str, data: bytes) -> bool:
+    if Path(relative).suffix.lower() in GENERATED_SUFFIXES:
         return False
     try:
-        path.read_text(errors="strict")
+        data.decode(errors="strict")
         return True
-    except (UnicodeDecodeError, OSError):
+    except UnicodeDecodeError:
         return False
 
 
@@ -136,6 +161,7 @@ def owner_and_stage(path: str) -> tuple[str, str]:
         "setupEnv.sh",
         "runCondorJob.sh",
         "submit_full_production.sh",
+        "submit_full_retry.sh",
         "submit_gate_b_pilots.sh",
     }:
         return "production", "PYTHIA generation"
@@ -144,11 +170,16 @@ def owner_and_stage(path: str) -> tuple[str, str]:
         "submit_status_analysis.sh",
         "submit_gate_b_analysis.sh",
         "merge_root_files.sh",
+        "make_subsamples.sh",
     }:
         return "analysis", "raw-to-pair reduction/merge"
     if path.startswith("PlottingScripts/") or path == "plotting_documentation.md":
         return "plotting", "pair inputs-to-figures"
     if path.startswith("Validation/") or path.startswith("tests/"):
+        return "validation", "gates A-D"
+    if path.startswith("run_publication_gate_") or path == (
+        "resolve_publication_gate_b_signoff.sh"
+    ):
         return "validation", "gates A-D"
     if path.startswith("tools/") or path.startswith("config/"):
         return "contracts", "manifest/configuration"
@@ -168,6 +199,13 @@ def classify(path: str) -> tuple[str, str]:
         return "stale", "remove from future release after owner confirmation"
     if path.startswith("AnalyzedData/") or suffix in GENERATED_SUFFIXES:
         return "generated", "regenerate from its documented legacy/current producer"
+    pending_review_configs = {
+        "config/pdg_2025_species_reference_v1.json",
+        "config/pthat_sensitivity_v1.json",
+        "config/statistical_robustness_v1.json",
+    }
+    if path in pending_review_configs:
+        return "support", "named scientific review before publication promotion"
     if path in AUTHORITATIVE_EXACT or path.startswith(AUTHORITATIVE_PREFIXES):
         return "authoritative", ""
     if path in LEGACY_EXACT or path.startswith(LEGACY_PREFIXES):
@@ -188,6 +226,8 @@ def classify(path: str) -> tuple[str, str]:
         "Analysis_README.md"
     ):
         return "legacy", "AnalysisScripts/status_analysis_THnSparse_qq.C"
+    if path == "SimulationScripts/Simulation_README.md":
+        return "support", ""
     if path.startswith("SimulationScripts/"):
         return "legacy", "SimulationScripts/heavyflavourcorrelations_status.cpp"
     if path.startswith("PlottingScripts/"):
@@ -279,12 +319,15 @@ def main() -> int:
     if len(paths) != len(set(paths)):
         raise ValueError("duplicate tracked catalog path")
 
+    blob_by_path: dict[str, bytes] = {}
     text_by_path: dict[str, str] = {}
     basename_to_paths: dict[str, list[str]] = defaultdict(list)
     for relative in paths:
-        path = root / relative
-        if path.exists() and path.is_file() and is_text(path):
-            text_by_path[relative] = path.read_text(errors="replace")
+        if relative != "REPOSITORY_FILE_CATALOG.md":
+            data = index_blob(root, relative)
+            blob_by_path[relative] = data
+            if is_text(relative, data):
+                text_by_path[relative] = data.decode(errors="replace")
         basename_to_paths[Path(relative).name].append(relative)
 
     rows = []
@@ -320,8 +363,8 @@ def main() -> int:
         if relative == "REPOSITORY_FILE_CATALOG.md":
             size = "self"
             sha = "self"
-        elif path.exists() and path.is_file():
-            data = path.read_bytes()
+        elif relative in blob_by_path:
+            data = blob_by_path[relative]
             size = str(len(data))
             sha = hashlib.sha256(data).hexdigest()[:16]
         else:
@@ -354,13 +397,57 @@ def main() -> int:
         )
 
     untracked_notes = []
+    protected_input_rows: list[tuple[str, int, str]] = []
+    bibliography_relative = "Literature/References.bib"
+    bibliography_path = root / bibliography_relative
+    if bibliography_relative in blob_by_path and bibliography_path.is_file():
+        worktree_bytes = bibliography_path.read_bytes()
+        if worktree_bytes != blob_by_path[bibliography_relative]:
+            bibliography_sha = hashlib.sha256(worktree_bytes).hexdigest()
+            untracked_notes.append(
+                f"- `{bibliography_relative}`: protected modified working "
+                f"bibliography input ({len(worktree_bytes)} bytes, SHA-256 "
+                f"`{bibliography_sha}`); excluded from index-derived catalog "
+                "truth and from production/plotting commits."
+            )
+            protected_input_rows.append(
+                (
+                    bibliography_relative,
+                    len(worktree_bytes),
+                    bibliography_sha,
+                )
+            )
     paper = root / "Paper/Heavy_flavour_hadronisation_model_paper"
     if paper.is_dir():
-        files = [item for item in paper.rglob("*") if item.is_file()]
+        files = sorted(item for item in paper.rglob("*") if item.is_file())
+        paper_digest = hashlib.sha256()
+        paper_bytes = 0
+        for item in files:
+            relative = item.relative_to(paper).as_posix()
+            data = item.read_bytes()
+            paper_bytes += len(data)
+            paper_digest.update(relative.encode())
+            paper_digest.update(b"\0")
+            paper_digest.update(str(len(data)).encode())
+            paper_digest.update(b"\0")
+            paper_digest.update(hashlib.sha256(data).hexdigest().encode())
+            paper_digest.update(b"\n")
+            protected_input_rows.append(
+                (
+                    (
+                        "Paper/Heavy_flavour_hadronisation_model_paper/"
+                        f"{relative}"
+                    ),
+                    len(data),
+                    hashlib.sha256(data).hexdigest(),
+                )
+            )
         untracked_notes.append(
             f"- `Paper/Heavy_flavour_hadronisation_model_paper/`: protected "
-            f"untracked working-paper tree ({len(files)} files at generation); "
-            "scientific consumer of final figures; not staged or rewritten by this catalog."
+            f"untracked working-paper tree ({len(files)} files, "
+            f"{paper_bytes} bytes, path/size/content tree SHA-256 "
+            f"`{paper_digest.hexdigest()}` at generation); scientific consumer "
+            "of final figures; not staged or rewritten by this catalog."
         )
     campaigns = root / "campaigns"
     if campaigns.is_dir():
@@ -373,9 +460,11 @@ def main() -> int:
         "# Repository file catalog",
         "",
         "Generated mechanically by `tools/generate_file_catalog.py` and then "
-        "subject to human architecture review. Every path from `git ls-files` "
-        "is represented exactly once. Text files were decoded and indexed; "
-        "binary files were inspected by type, size, and SHA-256 prefix.",
+        "subject to human architecture review. Every path from the Git index "
+        "(`git ls-files`) is represented exactly once. Bytes, references, "
+        "sizes, and checksums come from index blobs rather than the dirty "
+        "worktree; binary files were inspected by type, size, and SHA-256 "
+        "prefix.",
         "",
         f"- catalogued tracked paths: **{len(rows)}**",
         f"- unique catalog paths: **{len({row[0] for row in rows})}**",
@@ -391,6 +480,22 @@ def main() -> int:
         "## Intentional untracked operational inputs",
         "",
         *(untracked_notes or ["- None detected."]),
+        "",
+        "## Protected working-input ledger",
+        "",
+        (
+            f"- accounted protected input files: "
+            f"**{len(protected_input_rows)}**"
+        ),
+        "",
+        "| Path | Bytes | SHA-256 |",
+        "|---|---:|---|",
+        *[
+            "| `"
+            + relative.replace("|", "\\|").replace("`", "\\`")
+            + f"` | {size} | `{digest}` |"
+            for relative, size, digest in protected_input_rows
+        ],
         "",
         "## Complete ledger",
         "",

@@ -26,17 +26,100 @@ def main() -> int:
         capture_output=True,
     ).stdout
     assert "HADRONIZATION_COMPLETE_ROOT_TAG=complete_root_21_06_2026" in shell
+    assert "HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE=false" in shell
     assert "HADRONIZATION_SUBSAMPLE_BASE=" in shell
+    assert "HADRONIZATION_CANONICAL_MANIFEST=''" in shell
+    assert "HADRONIZATION_PRODUCTION_ROOT=''" in shell
+    assert "HADRONIZATION_ANALYSIS_ROOT=''" in shell
+
+    payload = json.loads(SELECTOR.read_text())
+    canonical = {
+        **payload["datasets"]["legacy_21_06_2026"],
+        "status": "canonical",
+        "publication_eligible": True,
+        "campaign": "HF_PUBLICATION_TEST",
+        "raw_schema": "hf_primary_ground_raw_v5",
+        "selector":
+            "hard_trigger_primary_ground__primary_ground_associate_v1",
+        "canonical_manifest":
+            "Production/HF_PUBLICATION_TEST/freeze/canonical_manifest.jsonl",
+        "production_root": "Production/HF_PUBLICATION_TEST",
+        "analysis_root": "AnalysisOutput/HF_PUBLICATION_TEST",
+        "raw_base": "Production/HF_PUBLICATION_TEST",
+        "complete_root_tag": "HF_PUBLICATION_TEST",
+        "subsample_base":
+            "AnalyzedData/SUBSAMPLES_HF_PUBLICATION_TEST/"
+            "combined_root_subSamples",
+    }
+    payload["datasets"]["canonical_test"] = canonical
+    payload["active_dataset"] = "canonical_test"
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "canonical.json"
+        path.write_text(json.dumps(payload))
+        unbound = subprocess.run(
+            [sys.executable, str(TOOL), "shell", "--selector", str(path)],
+            text=True,
+            capture_output=True,
+        )
+        assert unbound.returncode != 0
+        assert "publication authorization is malformed" in unbound.stderr
+
+        candidate_payload = json.loads(json.dumps(payload))
+        candidate_payload["datasets"]["canonical_test"].update(
+            {
+                "status": "canonical_candidate",
+                "publication_eligible": False,
+                "publication_authorization": None,
+                "publication_authorization_sha256": None,
+            }
+        )
+        candidate = Path(directory) / "candidate.json"
+        candidate.write_text(json.dumps(candidate_payload))
+        candidate_result = subprocess.run(
+            [
+                sys.executable,
+                str(TOOL),
+                "shell",
+                "--selector",
+                str(candidate),
+            ],
+            check=True,
+            text=True,
+            capture_output=True,
+        )
+        assert "HADRONIZATION_DATASET_STATUS=canonical_candidate" in (
+            candidate_result.stdout
+        )
+        assert "HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE=false" in (
+            candidate_result.stdout
+        )
 
     payload = json.loads(SELECTOR.read_text())
     payload["datasets"]["bad"] = {
         **payload["datasets"]["legacy_21_06_2026"],
         "status": "canonical",
+        "publication_eligible": True,
         "campaign": None,
     }
     payload["active_dataset"] = "bad"
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "bad.json"
+        path.write_text(json.dumps(payload))
+        failed = subprocess.run(
+            [sys.executable, str(TOOL), "validate", "--selector", str(path)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        assert failed.returncode != 0
+
+    payload = json.loads(SELECTOR.read_text())
+    payload["datasets"]["bad_legacy"] = {
+        **payload["datasets"]["legacy_21_06_2026"],
+        "publication_eligible": True,
+    }
+    payload["active_dataset"] = "bad_legacy"
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "bad-legacy.json"
         path.write_text(json.dumps(payload))
         failed = subprocess.run(
             [sys.executable, str(TOOL), "validate", "--selector", str(path)],

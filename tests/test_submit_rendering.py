@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -16,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="hadronization_submit_test_") as raw:
         temporary = Path(raw)
-        campaign = temporary / "campaign"
+        campaign = temporary / "render_test"
         campaign.mkdir()
         (campaign / "campaign.json").write_text(
             json.dumps({"campaign": "render_test", "campaign_ordinal": 999}) + "\n"
@@ -28,9 +29,10 @@ def main() -> int:
             rows.append(
                 {
                     "campaign": "render_test",
+                    "campaign_ordinal": 999,
                     "tune": tune,
                     "logical_id": tune_index,
-                    "role": "pilot",
+                    "role": "reserve",
                     "attempt": 0,
                     "seed": 880_000_001 + tune_index,
                     "requested_successes": 10,
@@ -43,6 +45,12 @@ def main() -> int:
             "".join(json.dumps(row) + "\n" for row in rows)
         )
         output = temporary / "pilot.sub"
+        producer = ROOT / "SimulationScripts/heavyflavourcorrelations_status"
+        producer_sha = (
+            hashlib.sha256(producer.read_bytes()).hexdigest()
+            if producer.is_file()
+            else "0" * 64
+        )
         subprocess.run(
             [
                 sys.executable,
@@ -51,28 +59,32 @@ def main() -> int:
                 str(ROOT),
                 str(output),
                 "--roles",
-                "pilot",
+                "reserve",
+                "--producer-executable-sha256",
+                producer_sha,
             ],
             check=True,
         )
         text = output.read_text()
         assert '+JobCategory = "$(CATEGORY)"' in text
         assert "+JobCategory = $(CATEGORY)" not in text
-        assert (
-            "HADRONIZATION_PTHAT_MIN_OVERRIDE=$(PTHAT) "
-            "HADRONIZATION_STORE_MULTIPLICITY_AUDIT_EVENTS="
-            "$(MULT_AUDIT_EVENTS)"
-        ) in text
-        assert "PTHAT);HADRONIZATION" not in text
+        assert "getenv = False" in text
+        assert "getenv = True" not in text
+        assert "$(PTHAT) $(MULT_AUDIT_EVENTS)" in text
+        assert "$(EFFECTIVE_CARD_SHA256)" in text
+        assert "$(PRODUCER_EXECUTABLE_SHA256)" in text
         assert text.count("render_test,999,") == 3
 
-        gate_b_campaign = temporary / "gate_b_campaign"
+        gate_b_campaign = temporary / "gate_b_render_test"
         gate_b_campaign.mkdir()
         (gate_b_campaign / "campaign.json").write_text(
             json.dumps(
                 {
                     "schema": "hf_gate_b_pilot_campaign_v1",
                     "campaign": "gate_b_render_test",
+                    "raw_schema": "hf_primary_ground_raw_v5",
+                    "origin_algorithm":
+                        "signed_heavy_constituent_complete_mothers_unique_v4",
                 }
             )
             + "\n"
@@ -96,6 +108,22 @@ def main() -> int:
         (gate_b_campaign / "candidate_manifest.jsonl").write_text(
             "".join(json.dumps(row) + "\n" for row in gate_b_rows)
         )
+        production = temporary / "production"
+        for row in gate_b_rows:
+            raw_file = (
+                production
+                / "raw"
+                / row["tune"]
+                / row["stable_name"]
+            )
+            raw_file.parent.mkdir(parents=True, exist_ok=True)
+            raw_file.write_bytes(
+                f"{row['tune']}:{row['logical_id']}\n".encode()
+            )
+            digest = hashlib.sha256(raw_file.read_bytes()).hexdigest()
+            Path(f"{raw_file}.sha256").write_text(
+                f"{digest}  {raw_file.name}\n"
+            )
         analysis_output = temporary / "gate_b_analysis.sub"
         subprocess.run(
             [
@@ -103,7 +131,7 @@ def main() -> int:
                 str(ROOT / "tools/render_gate_b_analysis_submit.py"),
                 str(gate_b_campaign),
                 str(ROOT),
-                str(temporary / "production"),
+                str(production),
                 str(temporary / "analysis"),
                 str(analysis_output),
             ],
@@ -111,7 +139,13 @@ def main() -> int:
         )
         analysis_text = analysis_output.read_text()
         assert '+JobCategory = "$(CATEGORY)"' in analysis_text
-        assert "arguments = $(RAW_PATH) $(OUTPUT_DIRECTORY)" in analysis_text
+        assert "getenv = False" in analysis_text
+        assert "getenv = True" not in analysis_text
+        assert (
+            "arguments = $(RAW_PATH) $(OUTPUT_DIRECTORY) $(CAMPAIGN) $(TUNE) "
+            "$(LOGICAL_ID) $(RAW_SHA256)"
+        ) in analysis_text
+        assert "HADRONIZATION_BASE=" in analysis_text
         assert 'arguments = "$(RAW_PATH)"' not in analysis_text
         assert analysis_text.count(",job_") == 0
         assert analysis_text.count(".root,") == 9
@@ -124,7 +158,7 @@ def main() -> int:
                 str(ROOT / "tools/render_gate_b_analysis_submit.py"),
                 str(gate_b_campaign),
                 str(ROOT),
-                str(temporary / "production"),
+                str(production),
                 str(temporary / "analysis"),
                 str(sensitivity_output),
                 "--scope",
@@ -148,6 +182,15 @@ def main() -> int:
                 "0",
                 "880000001",
                 "10",
+                "1.0",
+                "10",
+                subprocess.check_output(
+                    ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+                ).strip(),
+                "0" * 64,
+                "0" * 64,
+                "12345",
+                "0",
             ],
             text=True,
             capture_output=True,
