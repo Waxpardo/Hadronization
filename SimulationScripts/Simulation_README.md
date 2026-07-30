@@ -24,7 +24,21 @@ make -C SimulationScripts clean
 
 ## Unified Heavy-Flavour Producer
 
-The current producer is `heavyflavourcorrelations_status.cpp`. It is the program we use when we want one production configuration to scan for charm hadrons, beauty hadrons, Bc hadrons, and pions in the same event record. The program takes a mode, an output ROOT file, and two seed modifiers.
+The current producer is `heavyflavourcorrelations_status.cpp`. It scans one
+combined-hard-process configuration for charm, beauty, and Bc hadrons in a
+single event record. The authoritative campaign interface is documented in
+the repository-level `REPRODUCIBILITY.md`; the short commands below are
+legacy development examples and do not create publication-authorized data.
+
+The raw-v3 producer follows the signed heavy constituent through complete
+PYTHIA mother ranges. Its
+`signed_heavy_carrier_explicit_parent_event_unique_v2` post-pass enforces that
+one selected hard quark is claimed by at most one final open-heavy hadron. If
+several final hadrons share a fragmenting string/junction mother range and
+claim the same hard carrier, all such assignments are marked unresolved with
+`kDuplicateHardCarrier`. The conflicting index is retained in
+`heavyConflictingHardC/B`, and the job metadata records conflict-group and
+demotion counts for independent validation.
 
 ```bash
 ./SimulationScripts/heavyflavourcorrelations_status monash RootFiles/HF/MONASH/hf_MONASH_test.root 123 456

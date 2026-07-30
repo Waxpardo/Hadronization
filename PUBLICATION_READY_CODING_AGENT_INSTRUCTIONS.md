@@ -771,6 +771,18 @@ and heavy-quark copies, including multi-mother junction/reconnection
 topologies. Match the heavy constituent of the hadron to the hard quark of the
 same flavour and sign.
 
+Enforce uniqueness globally within each event after all per-hadron ancestry
+walks. A selected outgoing hard c, cbar, b, or bbar is a physical constituent
+of at most one final open-heavy hadron. PYTHIA string and junction records may
+give several final hadrons the same expanded mother range; therefore two
+locally unique walks can still double-assign one hard carrier. If multiple
+final hadrons claim the same hard carrier, mark every conflicting claim
+unresolved with a dedicated duplicate-carrier resolution code. Do not choose
+one based on iteration order, species, pT, or tune. Preserve the conflicting
+hard index in a separate audit branch, clear the authoritative matched-hard
+field, record conflict-group and demotion totals in job metadata, and make the
+raw validator prove that no selected-hard duplicate survives.
+
 For a central charm-sector trigger, require a resolved match of the hadron’s
 charm content to the selected hard c or cbar. For a central beauty-sector
 trigger, require the analogous b or bbar match. Bc may be a trigger in either
@@ -782,7 +794,8 @@ Classify, at minimum:
 - shower origin;
 - MPI origin;
 - other resolved origin;
-- unresolved/ambiguous.
+- unresolved/ambiguous, including a dedicated duplicate-hard-carrier
+  resolution subtype.
 
 Never guess an unresolved origin. An unresolved candidate cannot be a central
 trigger. A direct-primary ground-state associate remains in the inclusive

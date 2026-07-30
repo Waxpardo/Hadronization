@@ -26,6 +26,8 @@ other, or unresolved origin.  The selector is
 - signed species registry: `config/heavy_flavour_species_v1.json`;
 - signed pair registry: `config/heavy_flavour_pair_registry_v1.json`;
 - raw schema: `hf_primary_ground_raw_v3`;
+- origin algorithm:
+  `signed_heavy_carrier_explicit_parent_event_unique_v2`;
 - trigger acceptance: `pT > 1.0 GeV/c`, `|eta| <= 4`;
 - associate acceptance: `pT > 0.15 GeV/c`, `|eta| <= 4`;
 - multiplicity: direct charged primary e, mu, pi, K, p and antiparticles with
@@ -37,6 +39,19 @@ The generated campaign records hashes of the cards, species registry, pair
 registry, repository commit, schema, selector, event count, seed allocation,
 and candidate role.  Never edit a campaign directory after submission.  A
 changed scientific definition requires a new campaign name and ordinal.
+
+Origin assignment is conservative at both the hadron and event levels.
+Complete PYTHIA mother ranges are traversed for the signed heavy constituent.
+After the per-hadron traversal, each selected outgoing hard c, cbar, b, or
+bbar may be claimed by at most one final open-heavy hadron in that event. If
+two or more final hadrons claim the same carrier, every claim in the conflict
+is changed to `Origin::kUnresolved` with
+`MatchResolution::kDuplicateHardCarrier`; no hadron is selected arbitrarily.
+The original conflicting hard index is retained in
+`heavyConflictingHardC/B`, while `heavyMatchedHardC/B` is cleared. Per-job
+conflict-group and demotion totals are recorded in `job_metadata`. The raw
+validator independently proves that no duplicate selected-hard claim survives
+and that the metadata equals the stored demotions.
 
 ## Worktree and environment
 
@@ -102,6 +117,33 @@ fraction is nonzero, `submit_full_production.sh --submit` requires
 ```
 
 This file records a scientific decision; an agent must not invent it.
+
+Create Gate-B pilots only from a clean checkout of the exact implementation
+commit. Pilot names, campaign ordinals, and seed intervals are immutable and
+must be globally unused:
+
+```bash
+python3 tools/generate_gate_b_pilots.py \
+  --campaign HF_GATEB_primaryGround_pilot_<N> \
+  --campaign-ordinal <UNUSED_ORDINAL> \
+  --seed-base <UNUSED_SEED_BASE>
+
+python3 tools/campaign_manifest.py validate \
+  campaigns/HF_GATEB_primaryGround_pilot_<N>
+
+./submit_gate_b_pilots.sh \
+  campaigns/HF_GATEB_primaryGround_pilot_<N> --dry-run
+
+./submit_gate_b_pilots.sh \
+  campaigns/HF_GATEB_primaryGround_pilot_<N> --submit
+```
+
+The schema-aware validator requires exactly the three declared profiles per
+tune, exact seed-ledger correspondence, matching card/registry/allowlist
+hashes, the current origin algorithm, and a manifest implementation commit
+equal to the checkout. A pilot manifest generated before an implementation
+change is stale: reserve a new name, ordinal, and seed interval; never edit
+the old manifest or reuse its seeds.
 
 ## Create and submit an immutable campaign
 
