@@ -1374,6 +1374,8 @@ For all three tunes:
 ### Gate D: end-to-end analysis smoke test
 
 1. Run one-pass charge-resolved analysis for all central pairs.
+   For Gate-B pilots, render this from the immutable nine-row pilot manifest;
+   do not use a hand-written Condor submit file.
 2. Verify legacy ROOT compatibility objects.
 3. Audit every ROOT axis underflow/overflow and prove that no implicit upper
    pT or multiplicity cut enters the observable.

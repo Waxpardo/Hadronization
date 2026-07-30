@@ -66,6 +66,51 @@ def main() -> int:
         assert "PTHAT);HADRONIZATION" not in text
         assert text.count("render_test,999,") == 3
 
+        gate_b_campaign = temporary / "gate_b_campaign"
+        gate_b_campaign.mkdir()
+        (gate_b_campaign / "campaign.json").write_text(
+            json.dumps(
+                {
+                    "schema": "hf_gate_b_pilot_campaign_v1",
+                    "campaign": "gate_b_render_test",
+                }
+            )
+            + "\n"
+        )
+        gate_b_rows = []
+        for tune in ("MONASH", "JUNCTIONS", "CLOSEPACKING"):
+            for logical_id, category in ((0, "long"), (1, "medium"), (2, "medium")):
+                gate_b_rows.append(
+                    {
+                        "tune": tune,
+                        "logical_id": logical_id,
+                        "category": category,
+                        "stable_name": f"hf_{tune}_job{logical_id:03d}.root",
+                    }
+                )
+        (gate_b_campaign / "candidate_manifest.jsonl").write_text(
+            "".join(json.dumps(row) + "\n" for row in gate_b_rows)
+        )
+        analysis_output = temporary / "gate_b_analysis.sub"
+        subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "tools/render_gate_b_analysis_submit.py"),
+                str(gate_b_campaign),
+                str(ROOT),
+                str(temporary / "production"),
+                str(temporary / "analysis"),
+                str(analysis_output),
+            ],
+            check=True,
+        )
+        analysis_text = analysis_output.read_text()
+        assert '+JobCategory = "$(CATEGORY)"' in analysis_text
+        assert analysis_text.count(",job_") == 0
+        assert analysis_text.count(".root,") == 9
+        assert "per_pthat/MONASH/job_000" in analysis_text
+        assert "per_pthat/CLOSEPACKING/job_002" in analysis_text
+
         unsafe = subprocess.run(
             [
                 str(ROOT / "runCondorJob.sh"),

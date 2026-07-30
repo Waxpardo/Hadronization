@@ -181,7 +181,11 @@ def validate_seed_ledger(candidates: list[dict], ledger: list[dict]) -> set[int]
 
 
 def validate_gate_b_campaign(
-    campaign_dir: Path, config: dict, candidates: list[dict], ledger: list[dict]
+    campaign_dir: Path,
+    config: dict,
+    candidates: list[dict],
+    ledger: list[dict],
+    implementation_policy: str,
 ) -> int:
     root = campaign_dir.parents[1]
     expected_contract = {
@@ -216,10 +220,26 @@ def validate_gate_b_campaign(
     current_commit = subprocess.check_output(
         ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
     ).strip()
-    if config.get("repository_implementation_commit") != current_commit:
-        raise ValueError(
-            "Gate-B implementation commit differs from current checkout"
+    implementation_commit = config.get("repository_implementation_commit")
+    if implementation_policy == "exact" and implementation_commit != current_commit:
+        raise ValueError("Gate-B implementation commit differs from current checkout")
+    if implementation_policy == "ancestor":
+        ancestry = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(root),
+                "merge-base",
+                "--is-ancestor",
+                str(implementation_commit),
+                current_commit,
+            ],
+            check=False,
         )
+        if ancestry.returncode != 0:
+            raise ValueError(
+                "Gate-B implementation commit is not an ancestor of checkout"
+            )
     expected = int(config.get("pilot_jobs", -1))
     if expected != len(TUNES) * len(GATE_B_PROFILES) or len(candidates) != expected:
         raise ValueError(
@@ -301,20 +321,30 @@ def validate_full_campaign(
     return 0
 
 
-def validate_campaign(campaign_dir: Path) -> int:
+def validate_campaign(
+    campaign_dir: Path, implementation_policy: str = "exact"
+) -> int:
     config = json.loads((campaign_dir / "campaign.json").read_text())
     candidates = load_jsonl(campaign_dir / "candidate_manifest.jsonl")
     ledger = load_jsonl(campaign_dir / "seed_ledger.jsonl")
     schema = config.get("schema")
     if schema == "hf_gate_b_pilot_campaign_v1":
-        return validate_gate_b_campaign(campaign_dir, config, candidates, ledger)
+        return validate_gate_b_campaign(
+            campaign_dir,
+            config,
+            candidates,
+            ledger,
+            implementation_policy,
+        )
     if schema == "hf_campaign_v1":
         return validate_full_campaign(config, candidates, ledger)
     raise ValueError(f"unsupported campaign schema {schema!r}")
 
 
 def validate(args: argparse.Namespace) -> int:
-    return validate_campaign(args.campaign_dir.resolve())
+    return validate_campaign(
+        args.campaign_dir.resolve(), args.implementation_policy
+    )
 
 
 def allocate_retry(args: argparse.Namespace) -> int:
@@ -408,6 +438,15 @@ def main() -> int:
     create.set_defaults(function=generate)
     check = subparsers.add_parser("validate")
     check.add_argument("campaign_dir", type=Path)
+    check.add_argument(
+        "--implementation-policy",
+        choices=("exact", "ancestor"),
+        default="exact",
+        help=(
+            "Gate-B only: require the production implementation to equal "
+            "HEAD, or allow it to be an ancestor for later analysis tooling"
+        ),
+    )
     check.set_defaults(function=validate)
     retry = subparsers.add_parser("allocate-retry")
     retry.add_argument("campaign_dir", type=Path)

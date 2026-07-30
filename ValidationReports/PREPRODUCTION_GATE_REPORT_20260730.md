@@ -235,6 +235,12 @@ raw-v3 input, but Gate D still requires a final-commit pilot to complete:
     production and rejected nine-job Gate-B manifests. Validation is now
     schema-aware and additionally rejects a pilot generated from a different
     implementation commit or physics-contract hash.
+15. Gate-B analysis previously required an ad hoc Condor submit description
+    because the canonical submitter accepts only a frozen 300-file manifest.
+    `submit_gate_b_analysis.sh` now exhaustively validates and queues exactly
+    the nine pilot files, and
+    `tools/validate_gate_b_analysis_outputs.py` proves exact raw-checksum and
+    300-pair coverage.
 
 ## Blocking decisions and work
 

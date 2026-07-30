@@ -16,7 +16,9 @@ VALIDATOR = ROOT / "tools/campaign_manifest.py"
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 
 
-def run(*arguments: str, cwd: Path | None = None, expect: int = 0) -> subprocess.CompletedProcess:
+def run(
+    *arguments: str, cwd: Path | None = None, expect: int = 0
+) -> subprocess.CompletedProcess:
     result = subprocess.run(
         list(arguments), cwd=cwd, text=True, capture_output=True, check=False
     )
@@ -71,6 +73,27 @@ def main() -> int:
         valid = run("python3", str(VALIDATOR), "validate", str(campaign_dir))
         assert "Gate-B campaign valid: candidates=9" in valid.stdout
 
+        (fixture / "analysis_tool.txt").write_text("descendant analysis tool\n")
+        run("git", "add", "analysis_tool.txt", cwd=fixture)
+        run("git", "commit", "-q", "-m", "analysis-only descendant", cwd=fixture)
+        exact = run(
+            "python3",
+            str(VALIDATOR),
+            "validate",
+            str(campaign_dir),
+            expect=1,
+        )
+        assert "implementation commit differs" in exact.stderr
+        ancestor = run(
+            "python3",
+            str(VALIDATOR),
+            "validate",
+            str(campaign_dir),
+            "--implementation-policy",
+            "ancestor",
+        )
+        assert "Gate-B campaign valid: candidates=9" in ancestor.stdout
+
         config_path = campaign_dir / "campaign.json"
         config = json.loads(config_path.read_text())
         config["repository_implementation_commit"] = "0" * 40
@@ -80,9 +103,11 @@ def main() -> int:
             str(VALIDATOR),
             "validate",
             str(campaign_dir),
+            "--implementation-policy",
+            "ancestor",
             expect=1,
         )
-        assert "implementation commit differs" in stale.stderr
+        assert "not an ancestor" in stale.stderr
 
     print("campaign-manifest tests passed")
     return 0

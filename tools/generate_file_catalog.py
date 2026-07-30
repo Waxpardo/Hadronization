@@ -16,6 +16,7 @@ AUTHORITATIVE_EXACT = {
     "runCondorJob.sh",
     "submit_full_production.sh",
     "submit_gate_b_pilots.sh",
+    "submit_gate_b_analysis.sh",
     "run_status_analysis.sh",
     "submit_status_analysis.sh",
     "merge_root_files.sh",
@@ -141,6 +142,7 @@ def owner_and_stage(path: str) -> tuple[str, str]:
     if path.startswith("AnalysisScripts/") or path in {
         "run_status_analysis.sh",
         "submit_status_analysis.sh",
+        "submit_gate_b_analysis.sh",
         "merge_root_files.sh",
     }:
         return "analysis", "raw-to-pair reduction/merge"

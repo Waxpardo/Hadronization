@@ -145,6 +145,37 @@ equal to the checkout. A pilot manifest generated before an implementation
 change is stale: reserve a new name, ordinal, and seed interval; never edit
 the old manifest or reuse its seeds.
 
+After all nine raw pilots are promoted, run their one-pass analyses through
+the pilot manifest rather than an ad hoc submit file:
+
+```bash
+./submit_gate_b_analysis.sh \
+  campaigns/HF_GATEB_primaryGround_pilot_<N> \
+  Production/HF_GATEB_primaryGround_pilot_<N> \
+  AnalysisOutput/HF_GATEB_primaryGround_pilot_<N> --dry-run
+
+./submit_gate_b_analysis.sh \
+  campaigns/HF_GATEB_primaryGround_pilot_<N> \
+  Production/HF_GATEB_primaryGround_pilot_<N> \
+  AnalysisOutput/HF_GATEB_primaryGround_pilot_<N> --submit
+
+python3 tools/validate_gate_b_analysis_outputs.py \
+  campaigns/HF_GATEB_primaryGround_pilot_<N> \
+  Production/HF_GATEB_primaryGround_pilot_<N> \
+  AnalysisOutput/HF_GATEB_primaryGround_pilot_<N> \
+  --report AnalysisOutput/HF_GATEB_primaryGround_pilot_<N>/validation/outputs.json
+```
+
+The submitter exhaustively validates the exact nine manifest-declared raw
+files before rendering. It allows the production implementation commit to be
+an ancestor of the analysis checkout so analysis-only validation tooling can
+be added later; the raw schema, selector, origin algorithm, card hashes, and
+registry hashes must still match. Each analysis directory is staged,
+validated, and atomically promoted with its raw SHA-256 and analysis commit.
+The output validator requires exactly nine directories and 300 signed pair
+ROOT files in each, rejects extra directories, and proves raw-checksum
+coverage.
+
 ## Create and submit an immutable campaign
 
 Choose a globally unused seed interval, campaign name, and ordinal.  From a
