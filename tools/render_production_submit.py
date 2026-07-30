@@ -43,7 +43,7 @@ def main() -> int:
         "request_memory = 4GB",
         "request_disk = 4GB",
         '+UseOS = "el9"',
-        "+JobCategory = $(CATEGORY)",
+        '+JobCategory = "$(CATEGORY)"',
         f"log = {project_base}/Production/{campaign['campaign']}/condor_logs/$(TUNE)/job_$(LOGICAL_ID)_$(Cluster)_$(Process).log",
         f"output = {project_base}/Production/{campaign['campaign']}/condor_logs/$(TUNE)/job_$(LOGICAL_ID)_$(Cluster)_$(Process).out",
         f"error = {project_base}/Production/{campaign['campaign']}/condor_logs/$(TUNE)/job_$(LOGICAL_ID)_$(Cluster)_$(Process).err",
