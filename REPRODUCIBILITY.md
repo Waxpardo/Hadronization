@@ -262,3 +262,19 @@ Archive, without modifying the immutable raw files:
 The legacy `21_06_2026` complete-root and `SUBSAMPLES_700` inputs remain
 regression references until a new canonical freeze and all validation gates
 pass.  They must not be relabelled as outputs of the new selector.
+
+`config/dataset_selector.json` is the single active-dataset switch used by
+`run_paper_plots.sh`. It currently labels `legacy_21_06_2026` as
+`legacy_regression_default`. After a new campaign is frozen and merged, add a
+fully populated `status: canonical` entry containing its campaign, raw schema,
+selector, manifest, production root, analysis root, raw base, complete-root
+tag, and block base; validate it with:
+
+```bash
+python3 tools/dataset_selector.py validate
+python3 tools/dataset_selector.py show
+```
+
+Change `active_dataset` only in a reviewed commit after the recorded paths and
+manifests pass validation. `USE_DATASET_SELECTOR=false` is diagnostic-only and
+must be recorded in the run log.

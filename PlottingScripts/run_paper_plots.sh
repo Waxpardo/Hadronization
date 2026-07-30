@@ -31,6 +31,10 @@ Targets:
   list                        Print this target list without running ROOT
 
 Useful environment overrides:
+  DATASET_SELECTOR
+      default: config/dataset_selector.json; selects raw, central, and block roots
+  USE_DATASET_SELECTOR
+      default: true; set false only for an explicitly documented diagnostic
   THNSPARSE_CONFIG
       default: PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json
   THNSPARSE_COMPLETE_ROOT_CONFIG
@@ -92,6 +96,20 @@ project_base="${HADRONIZATION_BASE:-$(cd "${script_dir}/.." && pwd)}"
 project_base="${project_base%/}"
 export HADRONIZATION_BASE="${project_base}"
 
+DATASET_SELECTOR="${DATASET_SELECTOR:-config/dataset_selector.json}"
+dataset_selector_path="${DATASET_SELECTOR}"
+if [[ "${dataset_selector_path}" != /* ]]; then
+  dataset_selector_path="${project_base}/${dataset_selector_path}"
+fi
+if [[ "${USE_DATASET_SELECTOR:-true}" == "true" ]]; then
+  python3 "${project_base}/tools/dataset_selector.py" validate \
+    --selector "${dataset_selector_path}"
+  eval "$(
+    python3 "${project_base}/tools/dataset_selector.py" shell \
+      --selector "${dataset_selector_path}"
+  )"
+fi
+
 default_thnsparse_config="PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json"
 default_complete_root_config="PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json"
 
@@ -102,7 +120,7 @@ MULTIPLICITY_OUTPUT_DIR="${MULTIPLICITY_OUTPUT_DIR:-PlottingScripts/Plots/Multip
 MULTIPLICITY_NORMALIZE="$(normalize_bool "${MULTIPLICITY_NORMALIZE:-false}")"
 MULTIPLICITY_STRICT="$(normalize_bool "${MULTIPLICITY_STRICT:-true}")"
 MULTIPLICITY_COMPACT="$(normalize_bool "${MULTIPLICITY_COMPACT:-false}")"
-KINEMATIC_RAW_BASE="${KINEMATIC_RAW_BASE:-RootFiles/HF}"
+KINEMATIC_RAW_BASE="${KINEMATIC_RAW_BASE:-${HADRONIZATION_RAW_BASE:-RootFiles/HF}}"
 KINEMATIC_OUTPUT_DIR="${KINEMATIC_OUTPUT_DIR:-PlottingScripts/Plots/KinematicSpectra}"
 KINEMATIC_NORMALIZE="$(normalize_bool "${KINEMATIC_NORMALIZE:-true}")"
 KINEMATIC_STRICT="$(normalize_bool "${KINEMATIC_STRICT:-true}")"

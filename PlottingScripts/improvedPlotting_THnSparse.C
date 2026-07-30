@@ -794,6 +794,12 @@ CONFIGS readConfig(const char* configurations) {
     bool CALCULATE_ERRORS = config["calculate_errors"].get<bool>();
     std::string bbBarDir_sub_samples = ResolvePathFromBase(config["bb_bar_complete_root_dir_sub_samples"], hadronizationBase);
     std::string ccBarDir_sub_samples = ResolvePathFromBase(config["cc_bar_complete_root_dir_sub_samples"], hadronizationBase);
+    if (const char* selectedSubsamples =
+            std::getenv("HADRONIZATION_SUBSAMPLE_BASE")) {
+        bbBarDir_sub_samples =
+            ResolvePathFromBase(selectedSubsamples, hadronizationBase);
+        ccBarDir_sub_samples = bbBarDir_sub_samples;
+    }
     int nSubSamples = config["nSubSamples"].get<int>();
     const Double_t SAME_SIGN_PAIR_FACTOR =
         config.value("same_sign_pair_factor", 0.5);
@@ -810,6 +816,10 @@ CONFIGS readConfig(const char* configurations) {
 
     // RootFiles path ("base directory")
     std::string base_dir = ResolvePathFromBase(config["base_dir"], hadronizationBase);
+    if (const char* selectedBase =
+            std::getenv("HADRONIZATION_ANALYZED_DATA_BASE")) {
+        base_dir = ResolvePathFromBase(selectedBase, hadronizationBase);
+    }
 
     // Tunes
     std::vector<std::string> vTUNES;
@@ -820,6 +830,11 @@ CONFIGS readConfig(const char* configurations) {
     // Complete_root_dirs
     std::string bbBarDir = config["bb_bar_complete_root_dir"];
     std::string ccBarDir = config["cc_bar_complete_root_dir"];
+    if (const char* selectedTag =
+            std::getenv("HADRONIZATION_COMPLETE_ROOT_TAG")) {
+        bbBarDir = selectedTag;
+        ccBarDir = selectedTag;
+    }
 
     // Print the portable resolver inputs without implying one fixed on-disk
     // layout. ResolveCompleteRootFile supports both flat and nested tune paths.

@@ -34,6 +34,13 @@ AnalyzedData/<TUNE>/complete_root_<tag>_<TUNE>/<pair>.root
 AnalyzedData/<TUNE>/complete_root_<tag>/<pair>.root
 ```
 
+`config/dataset_selector.json` is the authoritative active-dataset switch.
+`run_paper_plots.sh` validates it and exports the selected raw base,
+AnalyzedData base, complete-root tag, and block base. The checked-in JSON plot
+configs define the observable/canvas schema; the dataset selector defines
+which validated dataset supplies them. Set `USE_DATASET_SELECTOR=false` only
+for an explicitly logged diagnostic.
+
 The checked-in `21_06_2026` Nikhef production is a legacy regression dataset:
 
 ```text

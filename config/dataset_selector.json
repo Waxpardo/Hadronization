@@ -1,0 +1,21 @@
+{
+  "schema": "hadronization_dataset_selector_v1",
+  "active_dataset": "legacy_21_06_2026",
+  "datasets": {
+    "legacy_21_06_2026": {
+      "status": "legacy_regression_default",
+      "campaign": null,
+      "raw_schema": "legacy_status_unknown",
+      "selector": "legacy_status",
+      "canonical_manifest": null,
+      "production_root": null,
+      "analysis_root": null,
+      "raw_base": "RootFiles/HF",
+      "analyzed_data_base": "AnalyzedData",
+      "complete_root_tag": "complete_root_21_06_2026",
+      "subsample_base": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
+      "block_count": 10,
+      "interpretation": "Regression-only input retained as the default until a new canonical manifest and Gates A-D validate."
+    }
+  }
+}
