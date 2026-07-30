@@ -1,0 +1,3185 @@
+{
+  "all_required_objects_present": true,
+  "central_definition": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_<TUNE>",
+  "central_matches_subsample_union_for_representative_final_pairs": true,
+  "checkout": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729",
+  "checkout_resolved": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729",
+  "comparisons": [
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 2804211.0,
+      "central_integral": 2804211.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 2804211.0,
+      "subsample_integral_sum": 2804211.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 322947.0,
+      "central_integral": 322947.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 322947.0,
+      "subsample_integral_sum": 322947.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 322947.0,
+      "central_integral": 322947.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 322947.0,
+      "subsample_integral_sum": 322947.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 2804211.0,
+      "central_integral": 2804211.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 2804211.0,
+      "subsample_integral_sum": 2804211.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 6311.0,
+      "central_integral": 6311.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 6311.0,
+      "subsample_integral_sum": 6311.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 6311.0,
+      "central_integral": 6311.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 6311.0,
+      "subsample_integral_sum": 6311.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 15389827.0,
+      "central_integral": 15389827.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 15389827.0,
+      "subsample_integral_sum": 15389827.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 2767343.0,
+      "central_integral": 2767343.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 2767343.0,
+      "subsample_integral_sum": 2767343.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 2767343.0,
+      "central_integral": 2767343.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 2767343.0,
+      "subsample_integral_sum": 2767343.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 15389827.0,
+      "central_integral": 15389827.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 15389827.0,
+      "subsample_integral_sum": 15389827.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 312083.0,
+      "central_integral": 312083.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 312083.0,
+      "subsample_integral_sum": 312083.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 312083.0,
+      "central_integral": 312083.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 312083.0,
+      "subsample_integral_sum": 312083.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 1978573.0,
+      "central_integral": 1978573.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 1978573.0,
+      "subsample_integral_sum": 1978573.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 351800.0,
+      "central_integral": 351800.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 351800.0,
+      "subsample_integral_sum": 351800.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 351800.0,
+      "central_integral": 351800.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 351800.0,
+      "subsample_integral_sum": 351800.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 205188.0,
+      "central_integral": 205188.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 205188.0,
+      "subsample_integral_sum": 205188.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 23569.0,
+      "central_integral": 23569.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 23569.0,
+      "subsample_integral_sum": 23569.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 23569.0,
+      "central_integral": 23569.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 23569.0,
+      "subsample_integral_sum": 23569.0,
+      "tune": "MONASH"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 2006387.0,
+      "central_integral": 2006387.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 2006387.0,
+      "subsample_integral_sum": 2006387.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 171506.0,
+      "central_integral": 171506.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 171506.0,
+      "subsample_integral_sum": 171506.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 171506.0,
+      "central_integral": 171506.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 171506.0,
+      "subsample_integral_sum": 171506.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 2006387.0,
+      "central_integral": 2006387.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 2006387.0,
+      "subsample_integral_sum": 2006387.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 3041.0,
+      "central_integral": 3041.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 3041.0,
+      "subsample_integral_sum": 3041.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 3041.0,
+      "central_integral": 3041.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 3041.0,
+      "subsample_integral_sum": 3041.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 13052953.0,
+      "central_integral": 13052953.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 13052953.0,
+      "subsample_integral_sum": 13052953.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 1978150.0,
+      "central_integral": 1978150.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 1978150.0,
+      "subsample_integral_sum": 1978150.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 1978150.0,
+      "central_integral": 1978150.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 1978150.0,
+      "subsample_integral_sum": 1978150.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 13052953.0,
+      "central_integral": 13052953.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 13052953.0,
+      "subsample_integral_sum": 13052953.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 194622.0,
+      "central_integral": 194622.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 194622.0,
+      "subsample_integral_sum": 194622.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 194622.0,
+      "central_integral": 194622.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 194622.0,
+      "subsample_integral_sum": 194622.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 6365724.0,
+      "central_integral": 6365724.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 6365724.0,
+      "subsample_integral_sum": 6365724.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 1019320.0,
+      "central_integral": 1019320.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 1019320.0,
+      "subsample_integral_sum": 1019320.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 1019320.0,
+      "central_integral": 1019320.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 1019320.0,
+      "subsample_integral_sum": 1019320.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 462496.0,
+      "central_integral": 462496.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 462496.0,
+      "subsample_integral_sum": 462496.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 36751.0,
+      "central_integral": 36751.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 36751.0,
+      "subsample_integral_sum": 36751.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 36751.0,
+      "central_integral": 36751.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 36751.0,
+      "subsample_integral_sum": 36751.0,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 1967346.0,
+      "central_integral": 1967346.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 1967346.0,
+      "subsample_integral_sum": 1967346.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 166539.0,
+      "central_integral": 166539.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 166539.0,
+      "subsample_integral_sum": 166539.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 166539.0,
+      "central_integral": 166539.0,
+      "entries_match": true,
+      "file": "BplusBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 166539.0,
+      "subsample_integral_sum": 166539.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 1967346.0,
+      "central_integral": 1967346.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 1967346.0,
+      "subsample_integral_sum": 1967346.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 2857.0,
+      "central_integral": 2857.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 2857.0,
+      "subsample_integral_sum": 2857.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 2857.0,
+      "central_integral": 2857.0,
+      "entries_match": true,
+      "file": "BplusBplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 2857.0,
+      "subsample_integral_sum": 2857.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 13376208.0,
+      "central_integral": 13376208.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 13376208.0,
+      "subsample_integral_sum": 13376208.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 2050467.0,
+      "central_integral": 2050467.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 2050467.0,
+      "subsample_integral_sum": 2050467.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 2050467.0,
+      "central_integral": 2050467.0,
+      "entries_match": true,
+      "file": "DplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 2050467.0,
+      "subsample_integral_sum": 2050467.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 13376208.0,
+      "central_integral": 13376208.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 13376208.0,
+      "subsample_integral_sum": 13376208.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 188518.0,
+      "central_integral": 188518.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 188518.0,
+      "subsample_integral_sum": 188518.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 188518.0,
+      "central_integral": 188518.0,
+      "entries_match": true,
+      "file": "DplusDplus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 188518.0,
+      "subsample_integral_sum": 188518.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 5965940.0,
+      "central_integral": 5965940.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 5965940.0,
+      "subsample_integral_sum": 5965940.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 962937.0,
+      "central_integral": 962937.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 962937.0,
+      "subsample_integral_sum": 962937.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 962937.0,
+      "central_integral": 962937.0,
+      "entries_match": true,
+      "file": "LambdacplusDminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 962937.0,
+      "subsample_integral_sum": 962937.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 100000000.0,
+      "central_integral": 100000000.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "summed MULTIPLICITY",
+      "subsample_entries_sum": 100000000.0,
+      "subsample_integral_sum": 100000000.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 958421.0,
+      "central_integral": 958421.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hTrKinematics",
+      "subsample_entries_sum": 958421.0,
+      "subsample_integral_sum": 958421.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 73102.0,
+      "central_integral": 73102.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hAsKinematics",
+      "subsample_entries_sum": 73102.0,
+      "subsample_integral_sum": 73102.0,
+      "tune": "CLOSEPACKING"
+    },
+    {
+      "central_entries": 73102.0,
+      "central_integral": 73102.0,
+      "entries_match": true,
+      "file": "LbbarBminus.root",
+      "integral_checked": true,
+      "integral_match": true,
+      "object": "hCorrelations",
+      "subsample_entries_sum": 73102.0,
+      "subsample_integral_sum": 73102.0,
+      "tune": "CLOSEPACKING"
+    }
+  ],
+  "configuration": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json",
+  "configuration_resolved": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/PlottingScripts/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json",
+  "configured_pair_files": [
+    "BplusBcminus.root",
+    "BplusBcplus.root",
+    "BplusBminus.root",
+    "BplusBplus.root",
+    "BplusBszero.root",
+    "BplusBszerobar.root",
+    "BplusBzero.root",
+    "BplusBzerobar.root",
+    "BplusLb.root",
+    "BplusLbbar.root",
+    "DplusDminus.root",
+    "DplusDplus.root",
+    "DplusDzero.root",
+    "DplusDzerobar.root",
+    "DplusLambdacplus.root",
+    "DplusLambdacplusbar.root",
+    "LambdacplusDminus.root",
+    "LambdacplusDplus.root",
+    "LambdacplusDzero.root",
+    "LambdacplusDzerobar.root",
+    "LambdacplusLambdacplus.root",
+    "LambdacplusLambdacplusbar.root",
+    "LbbarBcminus.root",
+    "LbbarBcplus.root",
+    "LbbarBminus.root",
+    "LbbarBplus.root",
+    "LbbarBszero.root",
+    "LbbarBszerobar.root",
+    "LbbarBzero.root",
+    "LbbarBzerobar.root",
+    "LbbarLb.root",
+    "LbbarLbbar.root"
+  ],
+  "n_subsamples": 10,
+  "representative_union_comparison_files": [
+    "BplusBminus.root",
+    "BplusBplus.root",
+    "DplusDminus.root",
+    "DplusDplus.root",
+    "LambdacplusDminus.root",
+    "LbbarBminus.root"
+  ],
+  "required_objects": [
+    "summed MULTIPLICITY",
+    "hTrKinematics",
+    "hAsKinematics",
+    "hCorrelations"
+  ],
+  "root_version": "6.30/01",
+  "same_configured_object_schemas_across_tunes": true,
+  "same_root_file_inventory_across_tunes": true,
+  "status": "passed",
+  "subsample_definition": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_<TUNE>/combined_root_<1..10>",
+  "subsample_union_job_ids": "0-99 exactly once per tune",
+  "subsamples_disjoint": true,
+  "tunes": {
+    "CLOSEPACKING": {
+      "aggregate_job_count": 100,
+      "aggregate_job_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99
+      ],
+      "central_directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING",
+      "central_directory_resolved": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING",
+      "central_fingerprints": [
+        {
+          "mtime_epoch": 1784081764,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBcminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBcminus.root",
+          "size_bytes": 5935938
+        },
+        {
+          "mtime_epoch": 1784081767,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBcplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBcplus.root",
+          "size_bytes": 5932703
+        },
+        {
+          "mtime_epoch": 1784081769,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBminus.root",
+          "size_bytes": 7552687
+        },
+        {
+          "mtime_epoch": 1784081772,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBplus.root",
+          "size_bytes": 5960908
+        },
+        {
+          "mtime_epoch": 1784081777,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBszero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBszero.root",
+          "size_bytes": 5939212
+        },
+        {
+          "mtime_epoch": 1784081774,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBszerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBszerobar.root",
+          "size_bytes": 6301347
+        },
+        {
+          "mtime_epoch": 1784081782,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBzero.root",
+          "size_bytes": 5960797
+        },
+        {
+          "mtime_epoch": 1784081779,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusBzerobar.root",
+          "size_bytes": 7533467
+        },
+        {
+          "mtime_epoch": 1784081787,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusLb.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusLb.root",
+          "size_bytes": 6569849
+        },
+        {
+          "mtime_epoch": 1784081784,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusLbbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusLbbar.root",
+          "size_bytes": 5947335
+        },
+        {
+          "mtime_epoch": 1784081792,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusSigmabzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusSigmabzero.root",
+          "size_bytes": 6523596
+        },
+        {
+          "mtime_epoch": 1784081789,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusSigmabzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BplusSigmabzerobar.root",
+          "size_bytes": 5946593
+        },
+        {
+          "mtime_epoch": 1784081794,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBcminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBcminus.root",
+          "size_bytes": 5926770
+        },
+        {
+          "mtime_epoch": 1784081796,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBcplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBcplus.root",
+          "size_bytes": 5923625
+        },
+        {
+          "mtime_epoch": 1784081799,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBminus.root",
+          "size_bytes": 7520426
+        },
+        {
+          "mtime_epoch": 1784081801,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBplus.root",
+          "size_bytes": 5952244
+        },
+        {
+          "mtime_epoch": 1784081805,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBszero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBszero.root",
+          "size_bytes": 5930214
+        },
+        {
+          "mtime_epoch": 1784081803,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBszerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBszerobar.root",
+          "size_bytes": 6294369
+        },
+        {
+          "mtime_epoch": 1784081810,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBzero.root",
+          "size_bytes": 5951691
+        },
+        {
+          "mtime_epoch": 1784081808,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroBzerobar.root",
+          "size_bytes": 7539168
+        },
+        {
+          "mtime_epoch": 1784081815,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroLb.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroLb.root",
+          "size_bytes": 6564253
+        },
+        {
+          "mtime_epoch": 1784081812,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroLbbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroLbbar.root",
+          "size_bytes": 5937900
+        },
+        {
+          "mtime_epoch": 1784081820,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroSigmabzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroSigmabzero.root",
+          "size_bytes": 6523596
+        },
+        {
+          "mtime_epoch": 1784081817,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroSigmabzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/BzeroSigmabzerobar.root",
+          "size_bytes": 5946593
+        },
+        {
+          "mtime_epoch": 1784081844,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusDminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusDminus.root",
+          "size_bytes": 23725441
+        },
+        {
+          "mtime_epoch": 1784081870,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusDplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusDplus.root",
+          "size_bytes": 10048538
+        },
+        {
+          "mtime_epoch": 1784081929,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusDzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusDzero.root",
+          "size_bytes": 10058504
+        },
+        {
+          "mtime_epoch": 1784081899,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusDzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusDzerobar.root",
+          "size_bytes": 23679571
+        },
+        {
+          "mtime_epoch": 1784081978,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusLambdacplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusLambdacplus.root",
+          "size_bytes": 8608032
+        },
+        {
+          "mtime_epoch": 1784081954,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusLambdacplusbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DplusLambdacplusbar.root",
+          "size_bytes": 10661210
+        },
+        {
+          "mtime_epoch": 1784082448,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDminus.root",
+          "size_bytes": 38162821
+        },
+        {
+          "mtime_epoch": 1784082902,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDplus.root",
+          "size_bytes": 14090319
+        },
+        {
+          "mtime_epoch": 1784083368,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDsminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDsminus.root",
+          "size_bytes": 18177228
+        },
+        {
+          "mtime_epoch": 1784083823,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDsplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDsplus.root",
+          "size_bytes": 11597983
+        },
+        {
+          "mtime_epoch": 1784084739,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDzero.root",
+          "size_bytes": 14098336
+        },
+        {
+          "mtime_epoch": 1784084291,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroDzerobar.root",
+          "size_bytes": 38256220
+        },
+        {
+          "mtime_epoch": 1784085648,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroLambdacplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroLambdacplus.root",
+          "size_bytes": 11409308
+        },
+        {
+          "mtime_epoch": 1784085191,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroLambdacplusbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/DzeroLambdacplusbar.root",
+          "size_bytes": 15146725
+        },
+        {
+          "mtime_epoch": 1784085695,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDminus.root",
+          "size_bytes": 14457558
+        },
+        {
+          "mtime_epoch": 1784085713,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDplus.root",
+          "size_bytes": 7883262
+        },
+        {
+          "mtime_epoch": 1784085731,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDsminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDsminus.root",
+          "size_bytes": 8417414
+        },
+        {
+          "mtime_epoch": 1784085749,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDsplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDsplus.root",
+          "size_bytes": 6688585
+        },
+        {
+          "mtime_epoch": 1784085802,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDzero.root",
+          "size_bytes": 7879791
+        },
+        {
+          "mtime_epoch": 1784085784,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusDzerobar.root",
+          "size_bytes": 14461515
+        },
+        {
+          "mtime_epoch": 1784085837,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusLambdacplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusLambdacplus.root",
+          "size_bytes": 6600173
+        },
+        {
+          "mtime_epoch": 1784085819,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusLambdacplusbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LambdacplusLambdacplusbar.root",
+          "size_bytes": 7809824
+        },
+        {
+          "mtime_epoch": 1784085845,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBcminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBcminus.root",
+          "size_bytes": 3122771
+        },
+        {
+          "mtime_epoch": 1784085853,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBcplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBcplus.root",
+          "size_bytes": 3120751
+        },
+        {
+          "mtime_epoch": 1784085862,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBminus.root",
+          "size_bytes": 3829524
+        },
+        {
+          "mtime_epoch": 1784085869,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBplus.root",
+          "size_bytes": 3137496
+        },
+        {
+          "mtime_epoch": 1784085885,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBszero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBszero.root",
+          "size_bytes": 3124883
+        },
+        {
+          "mtime_epoch": 1784085877,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBszerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBszerobar.root",
+          "size_bytes": 3285425
+        },
+        {
+          "mtime_epoch": 1784085900,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBzero.root",
+          "size_bytes": 3137486
+        },
+        {
+          "mtime_epoch": 1784085893,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarBzerobar.root",
+          "size_bytes": 3834637
+        },
+        {
+          "mtime_epoch": 1784085915,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarLb.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarLb.root",
+          "size_bytes": 3483377
+        },
+        {
+          "mtime_epoch": 1784085907,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarLbbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_CLOSEPACKING/LbbarLbbar.root",
+          "size_bytes": 3129902
+        }
+      ],
+      "central_root_file_count": 56,
+      "subsample_base": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING",
+      "subsample_base_resolved": "/data/alice/ipardoza/Hadronization/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING",
+      "subsamples": [
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_1",
+          "index": 1,
+          "job_ids": [
+            4,
+            7,
+            33,
+            44,
+            48,
+            50,
+            55,
+            57,
+            69,
+            89
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_1/jobs_used.txt",
+          "manifest_entries": [
+            "hf_CLOSEPACKING_cluster5024954_job48",
+            "hf_CLOSEPACKING_cluster5024954_job69",
+            "hf_CLOSEPACKING_cluster4862182_job4",
+            "hf_CLOSEPACKING_cluster5024954_job55",
+            "hf_CLOSEPACKING_cluster4862182_job89",
+            "hf_CLOSEPACKING_cluster4862182_job50",
+            "hf_CLOSEPACKING_cluster5024954_job57",
+            "hf_CLOSEPACKING_cluster4862182_job33",
+            "hf_CLOSEPACKING_cluster5024954_job7",
+            "hf_CLOSEPACKING_cluster4862182_job44"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_2",
+          "index": 2,
+          "job_ids": [
+            5,
+            14,
+            16,
+            26,
+            36,
+            38,
+            49,
+            54,
+            59,
+            93
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_2/jobs_used.txt",
+          "manifest_entries": [
+            "hf_CLOSEPACKING_cluster4862182_job26",
+            "hf_CLOSEPACKING_cluster4862182_job36",
+            "hf_CLOSEPACKING_cluster4862182_job54",
+            "hf_CLOSEPACKING_cluster4862182_job16",
+            "hf_CLOSEPACKING_cluster4862182_job49",
+            "hf_CLOSEPACKING_cluster4862182_job38",
+            "hf_CLOSEPACKING_cluster4862182_job14",
+            "hf_CLOSEPACKING_cluster4862182_job5",
+            "hf_CLOSEPACKING_cluster4862182_job59",
+            "hf_CLOSEPACKING_cluster4862182_job93"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_3",
+          "index": 3,
+          "job_ids": [
+            12,
+            18,
+            19,
+            29,
+            37,
+            46,
+            75,
+            81,
+            83,
+            92
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_3/jobs_used.txt",
+          "manifest_entries": [
+            "hf_CLOSEPACKING_cluster4862182_job46",
+            "hf_CLOSEPACKING_cluster4862182_job18",
+            "hf_CLOSEPACKING_cluster4862182_job37",
+            "hf_CLOSEPACKING_cluster4862182_job83",
+            "hf_CLOSEPACKING_cluster4862182_job75",
+            "hf_CLOSEPACKING_cluster4862182_job81",
+            "hf_CLOSEPACKING_cluster5024954_job19",
+            "hf_CLOSEPACKING_cluster4862182_job92",
+            "hf_CLOSEPACKING_cluster5024954_job12",
+            "hf_CLOSEPACKING_cluster4862182_job29"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_4",
+          "index": 4,
+          "job_ids": [
+            40,
+            52,
+            62,
+            64,
+            82,
+            85,
+            86,
+            94,
+            97,
+            99
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_4/jobs_used.txt",
+          "manifest_entries": [
+            "hf_CLOSEPACKING_cluster4862182_job52",
+            "hf_CLOSEPACKING_cluster4862182_job86",
+            "hf_CLOSEPACKING_cluster4862182_job94",
+            "hf_CLOSEPACKING_cluster4862182_job99",
+            "hf_CLOSEPACKING_cluster4862182_job97",
+            "hf_CLOSEPACKING_cluster4862182_job62",
+            "hf_CLOSEPACKING_cluster4862182_job82",
+            "hf_CLOSEPACKING_cluster4862182_job64",
+            "hf_CLOSEPACKING_cluster4862182_job85",
+            "hf_CLOSEPACKING_cluster4862182_job40"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_5",
+          "index": 5,
+          "job_ids": [
+            3,
+            6,
+            9,
+            13,
+            27,
+            39,
+            67,
+            70,
+            91,
+            98
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_5/jobs_used.txt",
+          "manifest_entries": [
+            "hf_CLOSEPACKING_cluster5024954_job3",
+            "hf_CLOSEPACKING_cluster4862182_job27",
+            "hf_CLOSEPACKING_cluster4862182_job13",
+            "hf_CLOSEPACKING_cluster4862182_job67",
+            "hf_CLOSEPACKING_cluster4862182_job39",
+            "hf_CLOSEPACKING_cluster4862182_job6",
+            "hf_CLOSEPACKING_cluster4862182_job9",
+            "hf_CLOSEPACKING_cluster4862182_job70",
+            "hf_CLOSEPACKING_cluster4862182_job91",
+            "hf_CLOSEPACKING_cluster4862182_job98"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_6",
+          "index": 6,
+          "job_ids": [
+            1,
+            32,
+            34,
+            42,
+            47,
+            73,
+            76,
+            80,
+            88,
+            96
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_6/jobs_used.txt",
+          "manifest_entries": [
+            "hf_CLOSEPACKING_cluster4862182_job88",
+            "hf_CLOSEPACKING_cluster4862182_job47",
+            "hf_CLOSEPACKING_cluster4862182_job1",
+            "hf_CLOSEPACKING_cluster4862182_job42",
+            "hf_CLOSEPACKING_cluster4862182_job34",
+            "hf_CLOSEPACKING_cluster4862182_job76",
+            "hf_CLOSEPACKING_cluster4862182_job32",
+            "hf_CLOSEPACKING_cluster4862182_job80",
+            "hf_CLOSEPACKING_cluster4862182_job73",
+            "hf_CLOSEPACKING_cluster5024954_job96"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_7",
+          "index": 7,
+          "job_ids": [
+            8,
+            10,
+            15,
+            25,
+            30,
+            35,
+            41,
+            58,
+            63,
+            84
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_7/jobs_used.txt",
+          "manifest_entries": [
+            "hf_CLOSEPACKING_cluster4862182_job8",
+            "hf_CLOSEPACKING_cluster4862182_job25",
+            "hf_CLOSEPACKING_cluster4862182_job35",
+            "hf_CLOSEPACKING_cluster4862182_job63",
+            "hf_CLOSEPACKING_cluster4862182_job30",
+            "hf_CLOSEPACKING_cluster4862182_job58",
+            "hf_CLOSEPACKING_cluster4862182_job84",
+            "hf_CLOSEPACKING_cluster4862182_job41",
+            "hf_CLOSEPACKING_cluster4862182_job10",
+            "hf_CLOSEPACKING_cluster4862182_job15"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_8",
+          "index": 8,
+          "job_ids": [
+            21,
+            22,
+            31,
+            43,
+            56,
+            61,
+            65,
+            66,
+            72,
+            74
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_8/jobs_used.txt",
+          "manifest_entries": [
+            "hf_CLOSEPACKING_cluster4862182_job72",
+            "hf_CLOSEPACKING_cluster4862182_job74",
+            "hf_CLOSEPACKING_cluster4862182_job21",
+            "hf_CLOSEPACKING_cluster4862182_job22",
+            "hf_CLOSEPACKING_cluster5024954_job61",
+            "hf_CLOSEPACKING_cluster4862182_job31",
+            "hf_CLOSEPACKING_cluster4862182_job66",
+            "hf_CLOSEPACKING_cluster4862182_job43",
+            "hf_CLOSEPACKING_cluster4862182_job65",
+            "hf_CLOSEPACKING_cluster4862182_job56"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_9",
+          "index": 9,
+          "job_ids": [
+            0,
+            11,
+            17,
+            20,
+            23,
+            24,
+            51,
+            60,
+            71,
+            87
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_9/jobs_used.txt",
+          "manifest_entries": [
+            "hf_CLOSEPACKING_cluster4862182_job24",
+            "hf_CLOSEPACKING_cluster4862182_job71",
+            "hf_CLOSEPACKING_cluster4862182_job23",
+            "hf_CLOSEPACKING_cluster4862182_job20",
+            "hf_CLOSEPACKING_cluster4862182_job11",
+            "hf_CLOSEPACKING_cluster4862182_job51",
+            "hf_CLOSEPACKING_cluster4862182_job87",
+            "hf_CLOSEPACKING_cluster4862182_job60",
+            "hf_CLOSEPACKING_cluster5024954_job0",
+            "hf_CLOSEPACKING_cluster4862182_job17"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_10",
+          "index": 10,
+          "job_ids": [
+            2,
+            28,
+            45,
+            53,
+            68,
+            77,
+            78,
+            79,
+            90,
+            95
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_CLOSEPACKING/combined_root_10/jobs_used.txt",
+          "manifest_entries": [
+            "hf_CLOSEPACKING_cluster4862182_job45",
+            "hf_CLOSEPACKING_cluster4862182_job68",
+            "hf_CLOSEPACKING_cluster4862182_job2",
+            "hf_CLOSEPACKING_cluster5024954_job90",
+            "hf_CLOSEPACKING_cluster4862182_job28",
+            "hf_CLOSEPACKING_cluster4862182_job79",
+            "hf_CLOSEPACKING_cluster4862182_job78",
+            "hf_CLOSEPACKING_cluster5024954_job77",
+            "hf_CLOSEPACKING_cluster4862182_job53",
+            "hf_CLOSEPACKING_cluster5024954_job95"
+          ],
+          "root_file_count": 56
+        }
+      ]
+    },
+    "JUNCTIONS": {
+      "aggregate_job_count": 100,
+      "aggregate_job_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99
+      ],
+      "central_directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS",
+      "central_directory_resolved": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS",
+      "central_fingerprints": [
+        {
+          "mtime_epoch": 1784079181,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBcminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBcminus.root",
+          "size_bytes": 6143609
+        },
+        {
+          "mtime_epoch": 1784079184,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBcplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBcplus.root",
+          "size_bytes": 6139770
+        },
+        {
+          "mtime_epoch": 1784079186,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBminus.root",
+          "size_bytes": 7811148
+        },
+        {
+          "mtime_epoch": 1784079188,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBplus.root",
+          "size_bytes": 6170006
+        },
+        {
+          "mtime_epoch": 1784079193,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBszero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBszero.root",
+          "size_bytes": 6146140
+        },
+        {
+          "mtime_epoch": 1784079191,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBszerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBszerobar.root",
+          "size_bytes": 6472327
+        },
+        {
+          "mtime_epoch": 1784079198,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBzero.root",
+          "size_bytes": 6170211
+        },
+        {
+          "mtime_epoch": 1784079195,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusBzerobar.root",
+          "size_bytes": 7803969
+        },
+        {
+          "mtime_epoch": 1784079202,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusLb.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusLb.root",
+          "size_bytes": 6854891
+        },
+        {
+          "mtime_epoch": 1784079200,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusLbbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusLbbar.root",
+          "size_bytes": 6155845
+        },
+        {
+          "mtime_epoch": 1784079207,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusSigmabzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusSigmabzero.root",
+          "size_bytes": 7211910
+        },
+        {
+          "mtime_epoch": 1784079205,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusSigmabzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BplusSigmabzerobar.root",
+          "size_bytes": 6165604
+        },
+        {
+          "mtime_epoch": 1784079209,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBcminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBcminus.root",
+          "size_bytes": 6132298
+        },
+        {
+          "mtime_epoch": 1784079211,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBcplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBcplus.root",
+          "size_bytes": 6128212
+        },
+        {
+          "mtime_epoch": 1784079214,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBminus.root",
+          "size_bytes": 7787385
+        },
+        {
+          "mtime_epoch": 1784079216,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBplus.root",
+          "size_bytes": 6158303
+        },
+        {
+          "mtime_epoch": 1784079221,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBszero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBszero.root",
+          "size_bytes": 6134348
+        },
+        {
+          "mtime_epoch": 1784079219,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBszerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBszerobar.root",
+          "size_bytes": 6459539
+        },
+        {
+          "mtime_epoch": 1784079226,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBzero.root",
+          "size_bytes": 6158783
+        },
+        {
+          "mtime_epoch": 1784079223,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroBzerobar.root",
+          "size_bytes": 7800512
+        },
+        {
+          "mtime_epoch": 1784079230,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroLb.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroLb.root",
+          "size_bytes": 6836034
+        },
+        {
+          "mtime_epoch": 1784079228,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroLbbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroLbbar.root",
+          "size_bytes": 6145192
+        },
+        {
+          "mtime_epoch": 1784079235,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroSigmabzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroSigmabzero.root",
+          "size_bytes": 7211910
+        },
+        {
+          "mtime_epoch": 1784079233,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroSigmabzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/BzeroSigmabzerobar.root",
+          "size_bytes": 6165604
+        },
+        {
+          "mtime_epoch": 1784079290,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusDminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusDminus.root",
+          "size_bytes": 23738974
+        },
+        {
+          "mtime_epoch": 1784079332,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusDplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusDplus.root",
+          "size_bytes": 10425038
+        },
+        {
+          "mtime_epoch": 1784079418,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusDzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusDzero.root",
+          "size_bytes": 10423507
+        },
+        {
+          "mtime_epoch": 1784079377,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusDzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusDzerobar.root",
+          "size_bytes": 23649927
+        },
+        {
+          "mtime_epoch": 1784079501,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusLambdacplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusLambdacplus.root",
+          "size_bytes": 8991730
+        },
+        {
+          "mtime_epoch": 1784079460,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusLambdacplusbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DplusLambdacplusbar.root",
+          "size_bytes": 11283029
+        },
+        {
+          "mtime_epoch": 1784079539,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDminus.root",
+          "size_bytes": 38069413
+        },
+        {
+          "mtime_epoch": 1784079568,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDplus.root",
+          "size_bytes": 14646829
+        },
+        {
+          "mtime_epoch": 1784079602,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDsminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDsminus.root",
+          "size_bytes": 17538088
+        },
+        {
+          "mtime_epoch": 1784079634,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDsplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDsplus.root",
+          "size_bytes": 11911403
+        },
+        {
+          "mtime_epoch": 1784079712,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDzero.root",
+          "size_bytes": 14642004
+        },
+        {
+          "mtime_epoch": 1784079679,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroDzerobar.root",
+          "size_bytes": 38158296
+        },
+        {
+          "mtime_epoch": 1784079779,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroLambdacplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroLambdacplus.root",
+          "size_bytes": 11969887
+        },
+        {
+          "mtime_epoch": 1784079747,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroLambdacplusbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/DzeroLambdacplusbar.root",
+          "size_bytes": 16141310
+        },
+        {
+          "mtime_epoch": 1784079882,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDminus.root",
+          "size_bytes": 15471959
+        },
+        {
+          "mtime_epoch": 1784079980,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDplus.root",
+          "size_bytes": 8563318
+        },
+        {
+          "mtime_epoch": 1784080078,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDsminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDsminus.root",
+          "size_bytes": 8697206
+        },
+        {
+          "mtime_epoch": 1784080176,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDsplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDsplus.root",
+          "size_bytes": 7157956
+        },
+        {
+          "mtime_epoch": 1784080382,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDzero.root",
+          "size_bytes": 8558682
+        },
+        {
+          "mtime_epoch": 1784080283,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusDzerobar.root",
+          "size_bytes": 15490923
+        },
+        {
+          "mtime_epoch": 1784080582,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusLambdacplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusLambdacplus.root",
+          "size_bytes": 7184492
+        },
+        {
+          "mtime_epoch": 1784080481,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusLambdacplusbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LambdacplusLambdacplusbar.root",
+          "size_bytes": 8651305
+        },
+        {
+          "mtime_epoch": 1784080585,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBcminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBcminus.root",
+          "size_bytes": 1602191
+        },
+        {
+          "mtime_epoch": 1784080588,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBcplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBcplus.root",
+          "size_bytes": 1601031
+        },
+        {
+          "mtime_epoch": 1784080591,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBminus.root",
+          "size_bytes": 1958663
+        },
+        {
+          "mtime_epoch": 1784080594,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBplus.root",
+          "size_bytes": 1609478
+        },
+        {
+          "mtime_epoch": 1784080599,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBszero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBszero.root",
+          "size_bytes": 1602757
+        },
+        {
+          "mtime_epoch": 1784080596,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBszerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBszerobar.root",
+          "size_bytes": 1670268
+        },
+        {
+          "mtime_epoch": 1784080605,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBzero.root",
+          "size_bytes": 1609831
+        },
+        {
+          "mtime_epoch": 1784080602,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarBzerobar.root",
+          "size_bytes": 1954384
+        },
+        {
+          "mtime_epoch": 1784080610,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarLb.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarLb.root",
+          "size_bytes": 1789223
+        },
+        {
+          "mtime_epoch": 1784080608,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarLbbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_JUNCTIONS/LbbarLbbar.root",
+          "size_bytes": 1605977
+        }
+      ],
+      "central_root_file_count": 56,
+      "subsample_base": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS",
+      "subsample_base_resolved": "/data/alice/ipardoza/Hadronization/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS",
+      "subsamples": [
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_1",
+          "index": 1,
+          "job_ids": [
+            4,
+            14,
+            20,
+            23,
+            32,
+            34,
+            41,
+            46,
+            51,
+            87
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_1/jobs_used.txt",
+          "manifest_entries": [
+            "hf_JUNCTIONS_cluster5024954_job14",
+            "hf_JUNCTIONS_cluster5024954_job32",
+            "hf_JUNCTIONS_cluster4862182_job41",
+            "hf_JUNCTIONS_cluster5024954_job20",
+            "hf_JUNCTIONS_cluster4862182_job87",
+            "hf_JUNCTIONS_cluster4862182_job51",
+            "hf_JUNCTIONS_cluster5024954_job23",
+            "hf_JUNCTIONS_cluster4862182_job34",
+            "hf_JUNCTIONS_cluster5024954_job4",
+            "hf_JUNCTIONS_cluster4862182_job46"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_2",
+          "index": 2,
+          "job_ids": [
+            5,
+            12,
+            15,
+            26,
+            37,
+            39,
+            50,
+            56,
+            59,
+            90
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_2/jobs_used.txt",
+          "manifest_entries": [
+            "hf_JUNCTIONS_cluster4862182_job26",
+            "hf_JUNCTIONS_cluster4862182_job37",
+            "hf_JUNCTIONS_cluster4862182_job56",
+            "hf_JUNCTIONS_cluster4862182_job15",
+            "hf_JUNCTIONS_cluster4862182_job5",
+            "hf_JUNCTIONS_cluster4862182_job39",
+            "hf_JUNCTIONS_cluster4862182_job12",
+            "hf_JUNCTIONS_cluster4862182_job50",
+            "hf_JUNCTIONS_cluster4862182_job59",
+            "hf_JUNCTIONS_cluster4862182_job90"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_3",
+          "index": 3,
+          "job_ids": [
+            3,
+            8,
+            9,
+            17,
+            38,
+            48,
+            73,
+            81,
+            97,
+            98
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_3/jobs_used.txt",
+          "manifest_entries": [
+            "hf_JUNCTIONS_cluster4862182_job48",
+            "hf_JUNCTIONS_cluster4862182_job17",
+            "hf_JUNCTIONS_cluster4862182_job38",
+            "hf_JUNCTIONS_cluster4862182_job81",
+            "hf_JUNCTIONS_cluster4862182_job73",
+            "hf_JUNCTIONS_cluster4862182_job8",
+            "hf_JUNCTIONS_cluster4862182_job98",
+            "hf_JUNCTIONS_cluster4862182_job9",
+            "hf_JUNCTIONS_cluster4862182_job97",
+            "hf_JUNCTIONS_cluster4862182_job3"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_4",
+          "index": 4,
+          "job_ids": [
+            42,
+            54,
+            61,
+            63,
+            80,
+            83,
+            84,
+            91,
+            92,
+            95
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_4/jobs_used.txt",
+          "manifest_entries": [
+            "hf_JUNCTIONS_cluster4862182_job54",
+            "hf_JUNCTIONS_cluster4862182_job84",
+            "hf_JUNCTIONS_cluster4862182_job91",
+            "hf_JUNCTIONS_cluster4862182_job95",
+            "hf_JUNCTIONS_cluster4862182_job92",
+            "hf_JUNCTIONS_cluster4862182_job61",
+            "hf_JUNCTIONS_cluster4862182_job80",
+            "hf_JUNCTIONS_cluster4862182_job63",
+            "hf_JUNCTIONS_cluster4862182_job83",
+            "hf_JUNCTIONS_cluster4862182_job42"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_5",
+          "index": 5,
+          "job_ids": [
+            6,
+            11,
+            27,
+            40,
+            66,
+            68,
+            88,
+            89,
+            94,
+            99
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_5/jobs_used.txt",
+          "manifest_entries": [
+            "hf_JUNCTIONS_cluster4862182_job99",
+            "hf_JUNCTIONS_cluster4862182_job27",
+            "hf_JUNCTIONS_cluster4862182_job11",
+            "hf_JUNCTIONS_cluster4862182_job66",
+            "hf_JUNCTIONS_cluster4862182_job40",
+            "hf_JUNCTIONS_cluster4862182_job6",
+            "hf_JUNCTIONS_cluster4862182_job88",
+            "hf_JUNCTIONS_cluster4862182_job68",
+            "hf_JUNCTIONS_cluster4862182_job89",
+            "hf_JUNCTIONS_cluster4862182_job94"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_6",
+          "index": 6,
+          "job_ids": [
+            0,
+            33,
+            35,
+            44,
+            49,
+            71,
+            74,
+            79,
+            86,
+            93
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_6/jobs_used.txt",
+          "manifest_entries": [
+            "hf_JUNCTIONS_cluster4862182_job86",
+            "hf_JUNCTIONS_cluster4862182_job49",
+            "hf_JUNCTIONS_cluster4862182_job0",
+            "hf_JUNCTIONS_cluster4862182_job44",
+            "hf_JUNCTIONS_cluster4862182_job35",
+            "hf_JUNCTIONS_cluster4862182_job74",
+            "hf_JUNCTIONS_cluster4862182_job33",
+            "hf_JUNCTIONS_cluster4862182_job79",
+            "hf_JUNCTIONS_cluster4862182_job71",
+            "hf_JUNCTIONS_cluster5024954_job93"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_7",
+          "index": 7,
+          "job_ids": [
+            1,
+            13,
+            25,
+            30,
+            36,
+            43,
+            58,
+            62,
+            78,
+            82
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_7/jobs_used.txt",
+          "manifest_entries": [
+            "hf_JUNCTIONS_cluster4862182_job78",
+            "hf_JUNCTIONS_cluster4862182_job25",
+            "hf_JUNCTIONS_cluster4862182_job36",
+            "hf_JUNCTIONS_cluster4862182_job62",
+            "hf_JUNCTIONS_cluster4862182_job30",
+            "hf_JUNCTIONS_cluster4862182_job58",
+            "hf_JUNCTIONS_cluster4862182_job82",
+            "hf_JUNCTIONS_cluster4862182_job43",
+            "hf_JUNCTIONS_cluster4862182_job1",
+            "hf_JUNCTIONS_cluster4862182_job13"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_8",
+          "index": 8,
+          "job_ids": [
+            2,
+            21,
+            28,
+            31,
+            45,
+            57,
+            64,
+            65,
+            70,
+            72
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_8/jobs_used.txt",
+          "manifest_entries": [
+            "hf_JUNCTIONS_cluster4862182_job70",
+            "hf_JUNCTIONS_cluster4862182_job72",
+            "hf_JUNCTIONS_cluster4862182_job2",
+            "hf_JUNCTIONS_cluster4862182_job21",
+            "hf_JUNCTIONS_cluster5024954_job28",
+            "hf_JUNCTIONS_cluster4862182_job31",
+            "hf_JUNCTIONS_cluster4862182_job65",
+            "hf_JUNCTIONS_cluster4862182_job45",
+            "hf_JUNCTIONS_cluster4862182_job64",
+            "hf_JUNCTIONS_cluster4862182_job57"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_9",
+          "index": 9,
+          "job_ids": [
+            7,
+            10,
+            16,
+            19,
+            22,
+            24,
+            53,
+            60,
+            85,
+            96
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_9/jobs_used.txt",
+          "manifest_entries": [
+            "hf_JUNCTIONS_cluster4862182_job24",
+            "hf_JUNCTIONS_cluster4862182_job7",
+            "hf_JUNCTIONS_cluster4862182_job22",
+            "hf_JUNCTIONS_cluster4862182_job19",
+            "hf_JUNCTIONS_cluster4862182_job10",
+            "hf_JUNCTIONS_cluster4862182_job53",
+            "hf_JUNCTIONS_cluster4862182_job85",
+            "hf_JUNCTIONS_cluster4862182_job60",
+            "hf_JUNCTIONS_cluster4862182_job96",
+            "hf_JUNCTIONS_cluster4862182_job16"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_10",
+          "index": 10,
+          "job_ids": [
+            18,
+            29,
+            47,
+            52,
+            55,
+            67,
+            69,
+            75,
+            76,
+            77
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_JUNCTIONS/combined_root_10/jobs_used.txt",
+          "manifest_entries": [
+            "hf_JUNCTIONS_cluster4862182_job47",
+            "hf_JUNCTIONS_cluster4862182_job67",
+            "hf_JUNCTIONS_cluster4862182_job18",
+            "hf_JUNCTIONS_cluster5024954_job69",
+            "hf_JUNCTIONS_cluster4862182_job29",
+            "hf_JUNCTIONS_cluster4862182_job76",
+            "hf_JUNCTIONS_cluster4862182_job75",
+            "hf_JUNCTIONS_cluster5024954_job52",
+            "hf_JUNCTIONS_cluster4862182_job55",
+            "hf_JUNCTIONS_cluster5024954_job77"
+          ],
+          "root_file_count": 56
+        }
+      ]
+    },
+    "MONASH": {
+      "aggregate_job_count": 100,
+      "aggregate_job_ids": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99
+      ],
+      "central_directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH",
+      "central_directory_resolved": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH",
+      "central_fingerprints": [
+        {
+          "mtime_epoch": 1784075519,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBcminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBcminus.root",
+          "size_bytes": 7724495
+        },
+        {
+          "mtime_epoch": 1784075524,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBcplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBcplus.root",
+          "size_bytes": 7716934
+        },
+        {
+          "mtime_epoch": 1784075529,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBminus.root",
+          "size_bytes": 10844672
+        },
+        {
+          "mtime_epoch": 1784075534,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBplus.root",
+          "size_bytes": 7778789
+        },
+        {
+          "mtime_epoch": 1784075544,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBszero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBszero.root",
+          "size_bytes": 7730934
+        },
+        {
+          "mtime_epoch": 1784075539,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBszerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBszerobar.root",
+          "size_bytes": 8425220
+        },
+        {
+          "mtime_epoch": 1784075553,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBzero.root",
+          "size_bytes": 7777800
+        },
+        {
+          "mtime_epoch": 1784075548,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusBzerobar.root",
+          "size_bytes": 10839643
+        },
+        {
+          "mtime_epoch": 1784075562,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusLb.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusLb.root",
+          "size_bytes": 8246677
+        },
+        {
+          "mtime_epoch": 1784075558,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusLbbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusLbbar.root",
+          "size_bytes": 7727247
+        },
+        {
+          "mtime_epoch": 1784075572,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusSigmabzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusSigmabzero.root",
+          "size_bytes": 7772038
+        },
+        {
+          "mtime_epoch": 1784075567,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BplusSigmabzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BplusSigmabzerobar.root",
+          "size_bytes": 7717708
+        },
+        {
+          "mtime_epoch": 1784075578,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBcminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBcminus.root",
+          "size_bytes": 7722681
+        },
+        {
+          "mtime_epoch": 1784075583,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBcplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBcplus.root",
+          "size_bytes": 7715327
+        },
+        {
+          "mtime_epoch": 1784075590,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBminus.root",
+          "size_bytes": 10840257
+        },
+        {
+          "mtime_epoch": 1784075596,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBplus.root",
+          "size_bytes": 7776314
+        },
+        {
+          "mtime_epoch": 1784075607,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBszero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBszero.root",
+          "size_bytes": 7729729
+        },
+        {
+          "mtime_epoch": 1784075602,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBszerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBszerobar.root",
+          "size_bytes": 8415935
+        },
+        {
+          "mtime_epoch": 1784075618,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBzero.root",
+          "size_bytes": 7776315
+        },
+        {
+          "mtime_epoch": 1784075613,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroBzerobar.root",
+          "size_bytes": 10846824
+        },
+        {
+          "mtime_epoch": 1784075630,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroLb.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroLb.root",
+          "size_bytes": 8243203
+        },
+        {
+          "mtime_epoch": 1784075624,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroLbbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroLbbar.root",
+          "size_bytes": 7725849
+        },
+        {
+          "mtime_epoch": 1784075639,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroSigmabzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroSigmabzero.root",
+          "size_bytes": 7772038
+        },
+        {
+          "mtime_epoch": 1784075635,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroSigmabzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/BzeroSigmabzerobar.root",
+          "size_bytes": 7717708
+        },
+        {
+          "mtime_epoch": 1784075671,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DplusDminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DplusDminus.root",
+          "size_bytes": 29449361
+        },
+        {
+          "mtime_epoch": 1784075719,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DplusDplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DplusDplus.root",
+          "size_bytes": 11836677
+        },
+        {
+          "mtime_epoch": 1784075780,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DplusDzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DplusDzero.root",
+          "size_bytes": 11843951
+        },
+        {
+          "mtime_epoch": 1784075753,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DplusDzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DplusDzerobar.root",
+          "size_bytes": 29399324
+        },
+        {
+          "mtime_epoch": 1784075829,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DplusLambdacplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DplusLambdacplus.root",
+          "size_bytes": 9207743
+        },
+        {
+          "mtime_epoch": 1784075805,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DplusLambdacplusbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DplusLambdacplusbar.root",
+          "size_bytes": 11391480
+        },
+        {
+          "mtime_epoch": 1784075887,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDminus.root",
+          "size_bytes": 48214851
+        },
+        {
+          "mtime_epoch": 1784075923,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDplus.root",
+          "size_bytes": 16975689
+        },
+        {
+          "mtime_epoch": 1784075961,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDsminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDsminus.root",
+          "size_bytes": 21008146
+        },
+        {
+          "mtime_epoch": 1784075996,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDsplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDsplus.root",
+          "size_bytes": 12795869
+        },
+        {
+          "mtime_epoch": 1784076101,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDzero.root",
+          "size_bytes": 16967899
+        },
+        {
+          "mtime_epoch": 1784076065,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroDzerobar.root",
+          "size_bytes": 48258217
+        },
+        {
+          "mtime_epoch": 1784076177,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroLambdacplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroLambdacplus.root",
+          "size_bytes": 12077937
+        },
+        {
+          "mtime_epoch": 1784076142,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroLambdacplusbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/DzeroLambdacplusbar.root",
+          "size_bytes": 16074891
+        },
+        {
+          "mtime_epoch": 1784076182,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDminus.root",
+          "size_bytes": 6318863
+        },
+        {
+          "mtime_epoch": 1784076187,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDplus.root",
+          "size_bytes": 3588276
+        },
+        {
+          "mtime_epoch": 1784076191,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDsminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDsminus.root",
+          "size_bytes": 3940688
+        },
+        {
+          "mtime_epoch": 1784076195,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDsplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDsplus.root",
+          "size_bytes": 3301459
+        },
+        {
+          "mtime_epoch": 1784076204,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDzero.root",
+          "size_bytes": 3588155
+        },
+        {
+          "mtime_epoch": 1784076200,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusDzerobar.root",
+          "size_bytes": 6315099
+        },
+        {
+          "mtime_epoch": 1784076212,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusLambdacplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusLambdacplus.root",
+          "size_bytes": 3253907
+        },
+        {
+          "mtime_epoch": 1784076208,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusLambdacplusbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LambdacplusLambdacplusbar.root",
+          "size_bytes": 3566354
+        },
+        {
+          "mtime_epoch": 1784076214,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBcminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBcminus.root",
+          "size_bytes": 727263
+        },
+        {
+          "mtime_epoch": 1784076217,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBcplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBcplus.root",
+          "size_bytes": 726495
+        },
+        {
+          "mtime_epoch": 1784076219,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBminus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBminus.root",
+          "size_bytes": 955432
+        },
+        {
+          "mtime_epoch": 1784076221,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBplus.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBplus.root",
+          "size_bytes": 731118
+        },
+        {
+          "mtime_epoch": 1784076226,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBszero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBszero.root",
+          "size_bytes": 727597
+        },
+        {
+          "mtime_epoch": 1784076224,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBszerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBszerobar.root",
+          "size_bytes": 778419
+        },
+        {
+          "mtime_epoch": 1784076231,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBzero.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBzero.root",
+          "size_bytes": 731347
+        },
+        {
+          "mtime_epoch": 1784076228,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBzerobar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarBzerobar.root",
+          "size_bytes": 957297
+        },
+        {
+          "mtime_epoch": 1784076235,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarLb.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarLb.root",
+          "size_bytes": 768156
+        },
+        {
+          "mtime_epoch": 1784076233,
+          "path": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarLbbar.root",
+          "resolved_path": "/data/alice/ipardoza/Hadronization/AnalyzedData/complete_root_21_06_2026_MONASH/LbbarLbbar.root",
+          "size_bytes": 727637
+        }
+      ],
+      "central_root_file_count": 56,
+      "subsample_base": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH",
+      "subsample_base_resolved": "/data/alice/ipardoza/Hadronization/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH",
+      "subsamples": [
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_1",
+          "index": 1,
+          "job_ids": [
+            3,
+            36,
+            40,
+            46,
+            79,
+            90,
+            91,
+            92,
+            94,
+            95
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_1/jobs_used.txt",
+          "manifest_entries": [
+            "hf_MONASH_cluster4862182_job90",
+            "hf_MONASH_cluster4862182_job94",
+            "hf_MONASH_cluster4862182_job36",
+            "hf_MONASH_cluster4862182_job91",
+            "hf_MONASH_cluster4862182_job79",
+            "hf_MONASH_cluster4862182_job46",
+            "hf_MONASH_cluster4862182_job92",
+            "hf_MONASH_cluster4862182_job3",
+            "hf_MONASH_cluster4862182_job95",
+            "hf_MONASH_cluster4862182_job40"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_2",
+          "index": 2,
+          "job_ids": [
+            5,
+            12,
+            14,
+            23,
+            32,
+            34,
+            44,
+            45,
+            52,
+            82
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_2/jobs_used.txt",
+          "manifest_entries": [
+            "hf_MONASH_cluster4862182_job23",
+            "hf_MONASH_cluster4862182_job32",
+            "hf_MONASH_cluster4862182_job5",
+            "hf_MONASH_cluster4862182_job14",
+            "hf_MONASH_cluster4862182_job44",
+            "hf_MONASH_cluster4862182_job34",
+            "hf_MONASH_cluster4862182_job12",
+            "hf_MONASH_cluster4862182_job45",
+            "hf_MONASH_cluster4862182_job52",
+            "hf_MONASH_cluster4862182_job82"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_3",
+          "index": 3,
+          "job_ids": [
+            16,
+            26,
+            33,
+            42,
+            66,
+            71,
+            73,
+            81,
+            88,
+            89
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_3/jobs_used.txt",
+          "manifest_entries": [
+            "hf_MONASH_cluster4862182_job42",
+            "hf_MONASH_cluster4862182_job16",
+            "hf_MONASH_cluster4862182_job33",
+            "hf_MONASH_cluster4862182_job73",
+            "hf_MONASH_cluster4862182_job66",
+            "hf_MONASH_cluster4862182_job71",
+            "hf_MONASH_cluster4862182_job89",
+            "hf_MONASH_cluster4862182_job81",
+            "hf_MONASH_cluster4862182_job88",
+            "hf_MONASH_cluster4862182_job26"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_4",
+          "index": 4,
+          "job_ids": [
+            37,
+            48,
+            55,
+            57,
+            72,
+            75,
+            76,
+            83,
+            84,
+            86
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_4/jobs_used.txt",
+          "manifest_entries": [
+            "hf_MONASH_cluster4862182_job48",
+            "hf_MONASH_cluster4862182_job76",
+            "hf_MONASH_cluster4862182_job83",
+            "hf_MONASH_cluster4862182_job86",
+            "hf_MONASH_cluster4862182_job84",
+            "hf_MONASH_cluster4862182_job55",
+            "hf_MONASH_cluster4862182_job72",
+            "hf_MONASH_cluster4862182_job57",
+            "hf_MONASH_cluster4862182_job75",
+            "hf_MONASH_cluster4862182_job37"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_5",
+          "index": 5,
+          "job_ids": [
+            6,
+            8,
+            9,
+            11,
+            24,
+            35,
+            53,
+            61,
+            80,
+            85
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_5/jobs_used.txt",
+          "manifest_entries": [
+            "hf_MONASH_cluster4862182_job9",
+            "hf_MONASH_cluster4862182_job24",
+            "hf_MONASH_cluster4862182_job11",
+            "hf_MONASH_cluster4862182_job6",
+            "hf_MONASH_cluster4862182_job35",
+            "hf_MONASH_cluster4862182_job53",
+            "hf_MONASH_cluster4862182_job8",
+            "hf_MONASH_cluster4862182_job61",
+            "hf_MONASH_cluster4862182_job80",
+            "hf_MONASH_cluster4862182_job85"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_6",
+          "index": 6,
+          "job_ids": [
+            0,
+            29,
+            30,
+            39,
+            43,
+            64,
+            67,
+            70,
+            78,
+            99
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_6/jobs_used.txt",
+          "manifest_entries": [
+            "hf_MONASH_cluster4862182_job78",
+            "hf_MONASH_cluster4862182_job43",
+            "hf_MONASH_cluster4862182_job0",
+            "hf_MONASH_cluster4862182_job39",
+            "hf_MONASH_cluster4862182_job30",
+            "hf_MONASH_cluster4862182_job67",
+            "hf_MONASH_cluster4862182_job29",
+            "hf_MONASH_cluster4862182_job70",
+            "hf_MONASH_cluster4862182_job64",
+            "hf_MONASH_cluster4862182_job99"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_7",
+          "index": 7,
+          "job_ids": [
+            1,
+            7,
+            13,
+            22,
+            27,
+            31,
+            38,
+            51,
+            56,
+            74
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_7/jobs_used.txt",
+          "manifest_entries": [
+            "hf_MONASH_cluster4862182_job7",
+            "hf_MONASH_cluster4862182_job22",
+            "hf_MONASH_cluster4862182_job31",
+            "hf_MONASH_cluster4862182_job56",
+            "hf_MONASH_cluster4862182_job27",
+            "hf_MONASH_cluster4862182_job51",
+            "hf_MONASH_cluster4862182_job74",
+            "hf_MONASH_cluster4862182_job38",
+            "hf_MONASH_cluster4862182_job1",
+            "hf_MONASH_cluster4862182_job13"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_8",
+          "index": 8,
+          "job_ids": [
+            2,
+            4,
+            19,
+            28,
+            50,
+            58,
+            59,
+            63,
+            65,
+            93
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_8/jobs_used.txt",
+          "manifest_entries": [
+            "hf_MONASH_cluster4862182_job63",
+            "hf_MONASH_cluster4862182_job65",
+            "hf_MONASH_cluster4862182_job19",
+            "hf_MONASH_cluster4862182_job2",
+            "hf_MONASH_cluster4862182_job93",
+            "hf_MONASH_cluster4862182_job28",
+            "hf_MONASH_cluster4862182_job59",
+            "hf_MONASH_cluster4862182_job4",
+            "hf_MONASH_cluster4862182_job58",
+            "hf_MONASH_cluster4862182_job50"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_9",
+          "index": 9,
+          "job_ids": [
+            10,
+            15,
+            18,
+            20,
+            21,
+            47,
+            54,
+            62,
+            77,
+            87
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_9/jobs_used.txt",
+          "manifest_entries": [
+            "hf_MONASH_cluster4862182_job21",
+            "hf_MONASH_cluster4862182_job62",
+            "hf_MONASH_cluster4862182_job20",
+            "hf_MONASH_cluster4862182_job18",
+            "hf_MONASH_cluster4862182_job10",
+            "hf_MONASH_cluster4862182_job47",
+            "hf_MONASH_cluster4862182_job77",
+            "hf_MONASH_cluster4862182_job54",
+            "hf_MONASH_cluster4862182_job87",
+            "hf_MONASH_cluster4862182_job15"
+          ],
+          "root_file_count": 56
+        },
+        {
+          "directory": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_10",
+          "index": 10,
+          "job_ids": [
+            17,
+            25,
+            41,
+            49,
+            60,
+            68,
+            69,
+            96,
+            97,
+            98
+          ],
+          "manifest": "/data/alice/ipardoza/Hadronization-final-paper-plots-20260729/AnalyzedData/SUBSAMPLES_700/combined_root_subSamples_MONASH/combined_root_10/jobs_used.txt",
+          "manifest_entries": [
+            "hf_MONASH_cluster4862182_job41",
+            "hf_MONASH_cluster4862182_job60",
+            "hf_MONASH_cluster4862182_job17",
+            "hf_MONASH_cluster4862182_job97",
+            "hf_MONASH_cluster4862182_job25",
+            "hf_MONASH_cluster4862182_job69",
+            "hf_MONASH_cluster4862182_job68",
+            "hf_MONASH_cluster4862182_job96",
+            "hf_MONASH_cluster4862182_job49",
+            "hf_MONASH_cluster4862182_job98"
+          ],
+          "root_file_count": 56
+        }
+      ]
+    }
+  },
+  "validated_at_utc": "2026-07-29T21:50:52Z",
+  "validation_host": "lvp036login.nikhef.nl"
+}

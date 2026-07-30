@@ -16,6 +16,10 @@
 #include <limits>
 #include <vector>
 
+#if defined(__GLIBC__)
+#include <malloc.h>
+#endif
+
 // ROOT headers
 #include "TFile.h"
 #include "TH1D.h"
@@ -105,6 +109,7 @@ struct YieldsAndErrorsMap {
     std::map<std::string, std::vector<std::vector<std::vector<Double_t>>>> mapYields;
     std::map<std::string, std::vector<std::vector<std::vector<Double_t>>>> mapYieldsErrors;
     std::map<std::string, std::vector<std::vector<std::vector<Double_t>>>> mapYieldsRatioErrors;
+    Int_t subsampleCoverageFailures = 0;
 };
 
 
@@ -122,7 +127,7 @@ struct canvasConfigs {
     std::vector<std::string> vCanvasTUNES; // tune to be drawn on given canvas
     std::string FLAVOUR; // just one allowed, but could implement with a new function
     std::string TriggerToUse; // which trigger to use in the yield plots?
-    std::vector<std::string> vBinsToIgnore; // which bins should be ignored in drawing (only relevant for baryon/meson ratio plots)
+    std::vector<std::string> vBinsToIgnore; // bins omitted from this canvas
     std::vector<Int_t> vIndexNominatorTUNES; // used for TUNE ratio plots, e.g. MONASH/JUNCTIONS to study enhancement explicitly
     Int_t indexDenominatorTUNE;
     std::vector<std::string> vBaryonNames; // baryons to be drawn (only for baryon/meson ratio plots!!!)
@@ -190,7 +195,9 @@ struct CONFIGS {
     bool CALCULATE_ERRORS;
     int nSubSamples;
     bool DRAW_CORRELATION_PLOTS;
+    bool SUBSAMPLE_COVERAGE_AUDIT;
     std::string base_dir;
+    std::vector<std::string> vSubsampleErrorBinsToExclude;
 
     // MONASH, JUNCTIONS, else...
     std::vector<std::string> vTUNES;
@@ -263,6 +270,15 @@ std::string ExpandPath(const std::string& path) {
 
 bool PathExists(const std::string& path) {
     return !path.empty() && !gSystem->AccessPathName(path.c_str());
+}
+
+void ReleaseUnusedHeap() {
+#if defined(__GLIBC__)
+    // Deletes release ROOT's sparse/projection buffers, but glibc may retain
+    // the freed multi-GB arenas. Return them to the OS between pair files so a
+    // multi-tune batch job remains within the worker memory limit.
+    malloc_trim(0);
+#endif
 }
 
 
@@ -386,6 +402,25 @@ TObjectType* GetObjectOrThrow(TFile* file, const char* objectName, const std::st
     return object;
 }
 
+void CloseAndDeleteInputFile(TFile*& file) {
+    if (!file) { return; }
+    // TFile::Close() does not necessarily destroy objects materialised by
+    // Get(). Delete the read-only in-memory object list explicitly so the
+    // large THnSparse buffers do not accumulate across pairs and tunes.
+    if (file->GetList()) { file->GetList()->Delete(); }
+    file->Close();
+    delete file;
+    file = nullptr;
+}
+
+template <typename TObjectType>
+void DeleteInputObject(TFile* file, TObjectType*& object) {
+    if (!object) { return; }
+    if (file && file->GetList()) { file->GetList()->Remove(object); }
+    delete object;
+    object = nullptr;
+}
+
 
 // Derive the histograms (delta phi and trigger pt) from the THnSparse, including user-defined cuts
 // Pay attention that the OS and SS histograms need to have the same amount of bins!
@@ -437,6 +472,7 @@ TH1D* GetCorrelationHistograms(THnSparseD* hCorrelations, const BinsFromTHnSpars
     );
 
     TH1D* hDPhi = (TH1D*)hCorrelations->Projection(0, "E");
+    hDPhi->SetDirectory(nullptr);
     hDPhi->SetName(Form("hDPhi%s", suffix.Data()));
 
     return hDPhi;
@@ -484,6 +520,7 @@ TH1D* GetTriggerPtHistograms(THnSparseD* hTrKinematics, const BinsFromTHnSparse&
     );
 
     TH1D* hTrPt = (TH1D*)hTrKinematics->Projection(2, "E");
+    hTrPt->SetDirectory(nullptr);
     hTrPt->SetName(Form("hTrPt%s", suffix.Data()));
 
     return hTrPt;
@@ -692,6 +729,10 @@ CONFIGS readConfig(const char* configurations) {
     std::string ccBarDir_sub_samples = ResolvePathFromBase(config["cc_bar_complete_root_dir_sub_samples"], hadronizationBase);
     int nSubSamples = config["nSubSamples"].get<int>();
     bool DRAW_CORRELATION_PLOTS = config["draw_correlation_plots"].get<bool>();
+    bool SUBSAMPLE_COVERAGE_AUDIT =
+        config.value("subsample_coverage_audit", false);
+    const std::vector<std::string> vSubsampleErrorBinsToExclude =
+        config.value("subsample_error_bins_to_exclude", std::vector<std::string>{});
 
     // RootFiles path ("base directory")
     std::string base_dir = ResolvePathFromBase(config["base_dir"], hadronizationBase);
@@ -986,7 +1027,9 @@ CONFIGS readConfig(const char* configurations) {
     configs_from_json.CALCULATE_ERRORS = CALCULATE_ERRORS;
     configs_from_json.nSubSamples = nSubSamples;
     configs_from_json.DRAW_CORRELATION_PLOTS = DRAW_CORRELATION_PLOTS;
+    configs_from_json.SUBSAMPLE_COVERAGE_AUDIT = SUBSAMPLE_COVERAGE_AUDIT;
     configs_from_json.base_dir = base_dir;
+    configs_from_json.vSubsampleErrorBinsToExclude = vSubsampleErrorBinsToExclude;
     configs_from_json.vTUNES = vTUNES;
     configs_from_json.bbBarDir = bbBarDir;
     configs_from_json.ccBarDir = ccBarDir;
@@ -1006,6 +1049,8 @@ CONFIGS readConfig(const char* configurations) {
     std::cout << "- CALCULATE_ERRORS = " << CALCULATE_ERRORS << std::endl;
     std::cout << "- nSubSamples = " << nSubSamples << std::endl;
     std::cout << "- DRAW_CORRELATION_PLOTS = " << DRAW_CORRELATION_PLOTS << std::endl;
+    std::cout << "- SUBSAMPLE_COVERAGE_AUDIT = "
+              << SUBSAMPLE_COVERAGE_AUDIT << std::endl;
     std::cout << "- base_dir = " << base_dir << std::endl;
     std::cout << "- vTUNES.size() = " << vTUNES.size() << std::endl;
     std::cout << "- bbBarDir = " << bbBarDir << std::endl;
@@ -1016,6 +1061,8 @@ CONFIGS readConfig(const char* configurations) {
     std::cout << "- vCharmTriggerAssociateOSandSS.size() = " << vCharmTriggerAssociateOSandSS.size() << std::endl;
     // std::cout << "- vHistogramAndTriggerPtHistogramNames.size() = " << vHistogramAndTriggerPtHistogramNames.size() << std::endl;
     std::cout << "- vBinsFromTHnSparse.size() = " << vBinsFromTHnSparse.size() << std::endl;
+    std::cout << "- vSubsampleErrorBinsToExclude.size() = "
+              << vSubsampleErrorBinsToExclude.size() << std::endl;
     // vCanvasConfigs
     // TODO: give overview of canvases to be drawn and their settings etc.
     // Check if specific trigger configurations are read correctly
@@ -1048,11 +1095,11 @@ Double_t propagateRatioError(Double_t valueA, Double_t valueB, Double_t errorA, 
     if (!std::isfinite(valueA) || !std::isfinite(valueB) ||
         !std::isfinite(errorA) || !std::isfinite(errorB) ||
         valueA == 0.0 || valueB == 0.0) {
-        return 0.0;
+        return std::numeric_limits<Double_t>::quiet_NaN();
     }
 
     Double_t relativeUncertainty = pow((errorA / valueA), 2) + pow((errorB / valueB), 2);
-    return ((valueA / valueB) * sqrt(relativeUncertainty));
+    return (std::abs(valueA / valueB) * sqrt(relativeUncertainty));
 } // propagateRatioError()
 
 
@@ -1061,6 +1108,48 @@ Double_t safeRatio(Double_t numerator, Double_t denominator) {
         return std::numeric_limits<Double_t>::quiet_NaN();
     }
     return numerator / denominator;
+}
+
+
+void SetPlotPointOrThrow(
+    TH1D* histogram,
+    Int_t bin,
+    Double_t value,
+    Double_t error,
+    Bool_t requirePositiveError,
+    const std::string& context
+) {
+    if (!histogram) {
+        throw std::runtime_error("Cannot set plot point on a null histogram: " + context);
+    }
+    if (!std::isfinite(value)) {
+        throw std::runtime_error("Non-finite plotted value: " + context);
+    }
+    if (!std::isfinite(error) || error < 0.0) {
+        throw std::runtime_error("Invalid plotted uncertainty: " + context);
+    }
+    if (requirePositiveError && error == 0.0) {
+        throw std::runtime_error("Zero uncertainty for a final plotted observable: " + context);
+    }
+    histogram->SetBinContent(bin, value);
+    histogram->SetBinError(bin, error);
+}
+
+void SetNestedYieldValue(
+    std::vector<std::vector<std::vector<Double_t>>>& values,
+    Int_t tune,
+    Int_t associate,
+    Int_t dependency,
+    Double_t value
+) {
+    if (static_cast<std::size_t>(tune) >= values.size()) { values.resize(tune + 1); }
+    if (static_cast<std::size_t>(associate) >= values[tune].size()) {
+        values[tune].resize(associate + 1);
+    }
+    if (static_cast<std::size_t>(dependency) >= values[tune][associate].size()) {
+        values[tune][associate].resize(dependency + 1);
+    }
+    values[tune][associate][dependency] = value;
 }
 
 
@@ -1124,6 +1213,7 @@ Double_t calculateOneYield(bool VERBOSE, TH1D *hDPhiOS, TH1D *hTrPtOS, TH1D *hDP
                   << ", hDPhiSS Integral: " << hDPhiSS->Integral() << std::endl;
     }
     TH1D *hCorr = (TH1D*)hDPhiOS->Clone();
+    hCorr->SetDirectory(nullptr);
     hCorr->Add(hDPhiSS, -1.);
 
     const Double_t yield = hCorr->Integral();
@@ -1146,6 +1236,8 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
     // Retrieve settings from configuration.json
     bool VERBOSE = configs_from_json.VERBOSE;
     bool CALCULATE_ERRORS = configs_from_json.CALCULATE_ERRORS;
+    bool SUBSAMPLE_COVERAGE_AUDIT =
+        configs_from_json.SUBSAMPLE_COVERAGE_AUDIT;
     int nSubSamples = configs_from_json.nSubSamples;
     bool DRAW_CORRELATION_PLOTS = configs_from_json.DRAW_CORRELATION_PLOTS;
     std::string base_dir = configs_from_json.base_dir;
@@ -1164,6 +1256,8 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
     if (strcmp(FLAVOUR, "CHARM")  == 0) { histConfigs = configs_from_json.charmConfigs; }
     std::vector<HistogramAndTriggerPtHistogramNames> vHistogramAndTriggerPtHistogramNames = configs_from_json.vHistogramAndTriggerPtHistogramNames; // remove this line later (toremove)
     std::vector<BinsFromTHnSparse> vBinsFromTHnSparse = configs_from_json.vBinsFromTHnSparse;
+    const std::vector<std::string> vSubsampleErrorBinsToExclude =
+        configs_from_json.vSubsampleErrorBinsToExclude;
     const Int_t nTUNES = static_cast<Int_t>(vTUNES.size());
     const Int_t nDependencies = static_cast<Int_t>(vBinsFromTHnSparse.size());
 
@@ -1176,8 +1270,14 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
 
     // TODO: make vTUNES.size into nTUNES, like in the plotting functions
 
-    TPad *pCharmMeson; TPad *pCharmBaryon; TPad *pCharmMesonSub; TPad *pCharmBaryonSub;
-    TPad *pBeautyMeson; TPad *pBeautyBaryon; TPad *pBeautyMesonSub; TPad *pBeautyBaryonSub;
+    TPad *pCharmMeson = nullptr;
+    TPad *pCharmBaryon = nullptr;
+    TPad *pCharmMesonSub = nullptr;
+    TPad *pCharmBaryonSub = nullptr;
+    TPad *pBeautyMeson = nullptr;
+    TPad *pBeautyBaryon = nullptr;
+    TPad *pBeautyMesonSub = nullptr;
+    TPad *pBeautyBaryonSub = nullptr;
     if (DRAW_CORRELATION_PLOTS) {
         if (strcmp(FLAVOUR, "CHARM") == 0) {
             cAngularCorrelations->cd();
@@ -1280,6 +1380,16 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     }
                 }
 
+                DeleteInputObject(OStree, hSummedMultiplicity);
+                THnSparseD *hCorrelationsOS =
+                    GetObjectOrThrow<THnSparseD>(OStree, "hCorrelations", osFilePath);
+                THnSparseD *hCorrelationsSS =
+                    GetObjectOrThrow<THnSparseD>(SStree, "hCorrelations", ssFilePath);
+                THnSparseD *hTrKinematicsOS =
+                    GetObjectOrThrow<THnSparseD>(OStree, "hTrKinematics", osFilePath);
+                THnSparseD *hTrKinematicsSS =
+                    GetObjectOrThrow<THnSparseD>(SStree, "hTrKinematics", ssFilePath);
+
                 // Loop over DEPENDENCIES
                 for (Int_t k=0; k<nDependencies; k++) {
 
@@ -1321,11 +1431,6 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
 
                     // Retreive the histograms from the correlations THnSparse (Δφ, Δη, TrPt, AsPt, multiplicity)
                     // THnSparseD *hAsKinematics = (THnSparseD*)OStree->Get("hAsKinematics");
-                    THnSparseD *hCorrelationsOS = GetObjectOrThrow<THnSparseD>(OStree, "hCorrelations", osFilePath);
-                    THnSparseD *hCorrelationsSS = GetObjectOrThrow<THnSparseD>(SStree, "hCorrelations", ssFilePath);
-                    THnSparseD *hTrKinematicsOS = GetObjectOrThrow<THnSparseD>(OStree, "hTrKinematics", osFilePath);
-                    THnSparseD *hTrKinematicsSS = GetObjectOrThrow<THnSparseD>(SStree, "hTrKinematics", ssFilePath); // in principle the same as OS...
-
                     // Apply cuts to THnSparses
                     // Retreive the TH1 hDPhiOS/SS and hTrPtOS/SS objects as before
                     // Maybe add one element 'binLabel' to the BinsFromTHnSparse struct?
@@ -1373,6 +1478,7 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             strcmp(fileNamesOSandSS.OS.c_str(), "LambdacplusDminus.root") == 0
                             )) {
                                 TH1D *hSub = (TH1D*)hDPhiOS->Clone(Form("%s_sub",fileNamesOSandSS.OS.c_str()));
+                                hSub->SetDirectory(nullptr);
                                 hSub->Add(hDPhiSS,-1);
                                 TPad *padOSSS = nullptr;
                                 TPad *padSub  = nullptr;
@@ -1409,21 +1515,22 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                                     hDPhiOS->GetYaxis()->SetRangeUser(1e-6, 1e-2);
                                     hDPhiOS->SetStats(0);
                                     hDPhiSS->SetStats(0);
-                                    hDPhiOS->Draw("hist");
-                                    hDPhiSS->Draw("hist same");
+                                    TH1D* drawnOS = static_cast<TH1D*>(hDPhiOS->DrawCopy("hist"));
+                                    TH1D* drawnSS = static_cast<TH1D*>(hDPhiSS->DrawCopy("hist same"));
 
                                     auto leg = new TLegend(0.60,0.75,0.88,0.88);
                                     leg->SetBorderSize(0);
                                     leg->SetFillStyle(0);
-                                    leg->AddEntry(hDPhiOS,"OS","l");
-                                    leg->AddEntry(hDPhiSS,"SS","l");
+                                    leg->AddEntry(drawnOS,"OS","l");
+                                    leg->AddEntry(drawnSS,"SS","l");
                                     leg->Draw();
 
                                     padSub->cd();
                                     hSub->SetLineColor(kBlue);
                                     hSub->SetTitle("");
-                                    hSub->Draw("hist");
+                                    hSub->DrawCopy("hist");
                                 }
+                                delete hSub;
 
                                 /*
                                 TCanvas *c_correlations_OS_SS = new TCanvas(Form("c_correlations_OS_SS %s for [%f, %f]", fileNamesOSandSS.OS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), Form("c_correlations_OS_SS %s for [%f, %f]", fileNamesOSandSS.OS.c_str(), binFromTHnSparse.multiplicityMin, binFromTHnSparse.multiplicityMax), 800, 600);
@@ -1483,7 +1590,23 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     // Calculate the error on the yield by subsampling with N samples
                     // Not the most efficient way, but it is straightforward and clear
                     // and anyways the files are quite small so it doesn't take too long
-                    if (CALCULATE_ERRORS) {
+                    const bool excludeSubsampleError =
+                        isInVector(binFromTHnSparse.hDPhi, vSubsampleErrorBinsToExclude);
+                    if (CALCULATE_ERRORS && excludeSubsampleError) {
+                        const Double_t unavailableError =
+                            std::numeric_limits<Double_t>::quiet_NaN();
+                        SetNestedYieldValue(vYieldsErrors, i, j, k, unavailableError);
+                        SetNestedYieldValue(vYieldsRatioErrors, i, j, k, unavailableError);
+                        std::cout
+                            << "subsample error coverage excluded"
+                            << " flavour=" << FLAVOUR
+                            << " tune=" << TUNE
+                            << " pair=" << fileNamesOSandSS.OS
+                            << " bin=" << binFromTHnSparse.hDPhi
+                            << " reason=configured-production-coverage"
+                            << std::endl;
+                    }
+                    if (CALCULATE_ERRORS && !excludeSubsampleError) {
                         std::vector<Double_t> subYieldValues;
                         std::vector<Double_t> subRatioValues;
                         subYieldValues.reserve(nSubSamples);
@@ -1540,10 +1663,16 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             subRatioValues.push_back(safeRatio(vSubYields[i][j][k][l - 1], vSubYields[i][0][k][l - 1]));
 
                             // Free memory
-                            OStree_subSamples->Close();
-                            SStree_subSamples->Close();
-                            // TODO: Close and delete more things? Memory issuse?
-                            // Seems to automatically close histograms too?
+                            delete hDPhiOS_subSamples;
+                            delete hDPhiSS_subSamples;
+                            delete hTrPtOS_subSamples;
+                            delete hTrPtSS_subSamples;
+                            DeleteInputObject(OStree_subSamples, hCorrelationsOS_subSamples);
+                            DeleteInputObject(SStree_subSamples, hCorrelationsSS_subSamples);
+                            DeleteInputObject(OStree_subSamples, hTrKinematicsOS_subSamples);
+                            DeleteInputObject(SStree_subSamples, hTrKinematicsSS_subSamples);
+                            CloseAndDeleteInputFile(OStree_subSamples);
+                            CloseAndDeleteInputFile(SStree_subSamples);
 
 
                         } // Loop over SUBSAMPLES
@@ -1551,8 +1680,44 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
 
                         const SubsampleStatistics yieldStats = calculateSubsampleStatistics(subYieldValues);
                         const SubsampleStatistics yieldRatioStats = calculateSubsampleStatistics(subRatioValues);
-                        Double_t yieldError = yieldStats.stdError;
-                        Double_t yieldRatioError = yieldRatioStats.stdError;
+                        const bool yieldCoverageComplete =
+                            yieldStats.nValues == nSubSamples;
+                        const bool ratioCoverageComplete =
+                            j == 0 || yieldRatioStats.nValues == nSubSamples;
+                        if (!yieldCoverageComplete) {
+                            const std::string message =
+                                Form("Expected %d finite yield subsamples for %s/%s (%s, %s), got %d",
+                                     nSubSamples, FLAVOUR, TUNE.c_str(),
+                                     fileNamesOSandSS.OS.c_str(),
+                                     binFromTHnSparse.hDPhi.c_str(),
+                                     yieldStats.nValues);
+                            if (!SUBSAMPLE_COVERAGE_AUDIT) {
+                                throw std::runtime_error(message);
+                            }
+                            ++mapYieldsAndErrors.subsampleCoverageFailures;
+                            std::cout << "SUBSAMPLE_COVERAGE_FAILURE kind=yield "
+                                      << message << std::endl;
+                        }
+                        if (!ratioCoverageComplete) {
+                            const std::string message =
+                                Form("Expected %d finite baryon/meson subsample ratios for %s/%s (%s, %s), got %d",
+                                     nSubSamples, FLAVOUR, TUNE.c_str(),
+                                     fileNamesOSandSS.OS.c_str(),
+                                     binFromTHnSparse.hDPhi.c_str(),
+                                     yieldRatioStats.nValues);
+                            if (!SUBSAMPLE_COVERAGE_AUDIT) {
+                                throw std::runtime_error(message);
+                            }
+                            ++mapYieldsAndErrors.subsampleCoverageFailures;
+                            std::cout << "SUBSAMPLE_COVERAGE_FAILURE kind=ratio "
+                                      << message << std::endl;
+                        }
+                        const Double_t unavailableError =
+                            std::numeric_limits<Double_t>::quiet_NaN();
+                        Double_t yieldError = yieldCoverageComplete
+                            ? yieldStats.stdError : unavailableError;
+                        Double_t yieldRatioError = ratioCoverageComplete
+                            ? yieldRatioStats.stdError : unavailableError;
                         if (VERBOSE) {
                             std::cout << "subsample yield stats n=" << yieldStats.nValues
                                       << " mean=" << yieldStats.mean
@@ -1584,14 +1749,22 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
 
                     } // calculate errors
 
+                    delete hDPhiOS;
+                    delete hDPhiSS;
+                    delete hTrPtOS;
+                    delete hTrPtSS;
+
 
                 } // Loop over DEPENDENCIES
 
 
-                // TODO: cannot seem to draw 'test' plots for the yields anymore when this is enabled?
-                // Free memory
-                // OStree->Close();
-                // SStree->Close();
+                DeleteInputObject(OStree, hCorrelationsOS);
+                DeleteInputObject(SStree, hCorrelationsSS);
+                DeleteInputObject(OStree, hTrKinematicsOS);
+                DeleteInputObject(SStree, hTrKinematicsSS);
+                CloseAndDeleteInputFile(OStree);
+                CloseAndDeleteInputFile(SStree);
+                ReleaseUnusedHeap();
 
 
             } // Loop over ASSOCIATES
@@ -1653,6 +1826,7 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
     if (strcmp(FLAVOUR, "CHARM") ==  0) { vTriggerAssociateOSandSS = configs_from_json.charmConfigs.at(canvasConfigs.TriggerToUse); }
     std::vector<HistogramAndTriggerPtHistogramNames> vHistogramAndTriggerPtHistogramNames = configs_from_json.vHistogramAndTriggerPtHistogramNames;
     std::vector<BinsFromTHnSparse> vBinsFromTHnSparse = configs_from_json.vBinsFromTHnSparse;
+    std::vector<std::string> vBinsToIgnore = canvasConfigs.vBinsToIgnore;
 
     // Function that transforms the map storing trigger and vYieldsAndErrors into just vYieldsAndErrors
     auto vYieldsAndErrors = YieldsAndErrorsForGivenTrigger(canvasConfigs.TriggerToUse, mapYieldsAndErrors, CALCULATE_ERRORS);
@@ -1691,7 +1865,7 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
     hYieldsTemplate->Draw("PE");
 
     // Draw mini pad for global canvas (only used if asked in configurations)
-    TPad* cMiniPad;
+    TPad* cMiniPad = nullptr;
     if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
         std::cout << "- Creating mini pad with dimensions x1(" << canvasConfigs.xMinPad << "," << canvasConfigs.yMinPad << ") and x2(" << canvasConfigs.xMaxPad << "," << canvasConfigs.yMaxPad << ")" << std::endl;
         cMiniPad = new TPad(Form("cMiniPad_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), Form("cMiniPad_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), canvasConfigs.xMinPad, canvasConfigs.yMinPad, canvasConfigs.xMaxPad, canvasConfigs.yMaxPad);
@@ -1710,10 +1884,9 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
         hYieldsTemplate->Draw("PE");
     }
 
-    std::map<std::string, Int_t> colourTUNEMap = canvasConfigs.colourTUNEMap;
     std::map<std::string, Int_t> lineStyleDependencyMap = canvasConfigs.lineStyleDependencyMap;
 
-    TLegend *legend;
+    TLegend *legend = nullptr;
     std::map<std::string, std::string> legendEntriesMap = canvasConfigs.legendEntriesMap;
     if (canvasConfigs.xMinLegend != -1 && canvasConfigs.xMaxLegend != -1 && canvasConfigs.yMinLegend != -1 && canvasConfigs.yMaxLegend != -1) {
         std::cout << "- Creating legend at positions x1(" << canvasConfigs.xMinLegend << "," << canvasConfigs.yMinLegend << ") and x2(" << canvasConfigs.xMaxLegend << "," << canvasConfigs.yMaxLegend << ")" << std::endl;
@@ -1776,6 +1949,14 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
                     std::cout << std::endl;
                 }
 
+                if (isInVector(binFromTHnSparse.hDPhi, vBinsToIgnore)) {
+                    if (VERBOSE) {
+                        std::cout << "Configured not to draw bin "
+                                  << binFromTHnSparse.hDPhi << std::endl;
+                    }
+                    continue;
+                }
+
                 // Check if this bin should be drawn or not
                 // use binFromTHnSparse.hDPhi
                 // TODO: allow also to use binLabel
@@ -1784,28 +1965,18 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
                 if (it == legendEntriesMap.end()) { continue; }
 
                 vHists[i][k] = new TH1D(Form("hYields_%s_%i_%i_%i_%s", FLAVOUR, i, j, k, (canvasConfigs.canvasName).c_str()), Form("hYields_%s_%i_%i_%i_%s", FLAVOUR, i, j, k, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
-                vHists[i][k]->SetBinContent(1+j, vYieldsAndErrors.vYields[i][j][k]);
-                if (CALCULATE_ERRORS) { 
-                    vHists[i][k]->SetBinError(1+j, vYieldsAndErrors.vYieldsErrors[i][j][k]);
-                }
-                else {
-                    vHists[i][k]->SetBinError(1+j, 1e-10);
-                }
-                ApplyTuneVisualStyle(vHists[i][k], TUNE);
+                const Double_t yield = vYieldsAndErrors.vYields[i][j][k];
+                const Double_t yieldError = CALCULATE_ERRORS ? vYieldsAndErrors.vYieldsErrors[i][j][k] : 0.0;
+                SetPlotPointOrThrow(
+                    vHists[i][k], 1+j, yield, yieldError, CALCULATE_ERRORS,
+                    Form("%s yield, tune=%s, associate=%s, bin=%s",
+                         FLAVOUR, TUNE.c_str(), associateName.c_str(), binFromTHnSparse.hDPhi.c_str()));
+                ApplyTuneVisualStyle(vHists[i][k], TUNE, true);
                 cYields->cd();
                 vHists[i][k]->Draw("same PE");
                 if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
                     cMiniPad->cd();
                     vHists[i][k]->Draw("same PE");
-                }
-
-                if (colourTUNEMap.find(TUNE) != colourTUNEMap.end()) {
-                    Int_t colour = colourTUNEMap[TUNE];
-                    vHists[i][k]->SetLineColor(colour);
-                    vHists[i][k]->SetMarkerColor(colour);
-                    if (VERBOSE) { std::cout << "Found colour: " << colour << std::endl; }
-                } else {
-                    if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
                 }
 
                 if (lineStyleDependencyMap.find(binFromTHnSparse.hDPhi) != lineStyleDependencyMap.end()) {
@@ -1818,15 +1989,17 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
 
                 // TODO: move this outside loop (also for the other ones below)
                 // Draw legend
-                if (legend != nullptr && alreadyInLegend.find(binFromTHnSparse.hDPhi) == alreadyInLegend.end()) {
+                const std::string legendKey = binFromTHnSparse.hDPhi + "::" + TUNE;
+                if (legend != nullptr && alreadyInLegend.find(legendKey) == alreadyInLegend.end()) {
                     if (legendEntriesMap.find(binFromTHnSparse.hDPhi) != legendEntriesMap.end()) {
                         std::string displayName = legendEntriesMap[binFromTHnSparse.hDPhi];
+                        if (vCanvasTUNES.size() > 1) { displayName += " (" + TUNE + ")"; }
                         if (VERBOSE) { std::cout << "Found displayName: " << displayName << std::endl; }
                         legend->AddEntry(vHists[i][k], displayName.c_str(), "lep");
                     } else {
                         if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
                     }
-                    alreadyInLegend.insert(binFromTHnSparse.hDPhi);
+                    alreadyInLegend.insert(legendKey);
                 }
 
                 if (VERBOSE) { std::cout << std::endl; }
@@ -1880,6 +2053,7 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
     if (strcmp(FLAVOUR, "CHARM") ==  0) { vTriggerAssociateOSandSS = configs_from_json.charmConfigs.at(canvasConfigs.TriggerToUse); }
     std::vector<HistogramAndTriggerPtHistogramNames> vHistogramAndTriggerPtHistogramNames = configs_from_json.vHistogramAndTriggerPtHistogramNames;
     std::vector<BinsFromTHnSparse> vBinsFromTHnSparse = configs_from_json.vBinsFromTHnSparse;
+    std::vector<std::string> vBinsToIgnore = canvasConfigs.vBinsToIgnore;
 
     for (const auto& indexNominatorTUNE : vIndexNominatorTUNES) { std::cout << " and TUNE = " << vTUNES[indexNominatorTUNE] << "/" << vTUNES[indexDenominatorTUNE] << " ***" << std::endl; }
     // Int_t indexNominatorTUNE = vIndexNominatorTUNES[0];
@@ -1920,7 +2094,7 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
     hYieldsTemplate->Draw("PE");
 
     // Draw mini pad for global canvas (only used if asked in configurations)
-    TPad* cMiniPad;
+    TPad* cMiniPad = nullptr;
     if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
         std::cout << "- Creating mini pad with dimensions x1(" << canvasConfigs.xMinPad << "," << canvasConfigs.yMinPad << ") and x2(" << canvasConfigs.xMaxPad << "," << canvasConfigs.yMaxPad << ")" << std::endl;
         cMiniPad = new TPad(Form("cMiniPad_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), Form("cMiniPad_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), canvasConfigs.xMinPad, canvasConfigs.yMinPad, canvasConfigs.xMaxPad, canvasConfigs.yMaxPad);
@@ -1939,7 +2113,6 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
         hYieldsTemplate->Draw("PE");
     }
 
-    std::map<std::string, Int_t> colourTUNEMap = canvasConfigs.colourTUNEMap;
     std::map<std::string, Int_t> lineStyleDependencyMap = canvasConfigs.lineStyleDependencyMap;
 
     TLegend *legend = nullptr;
@@ -1990,6 +2163,14 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
                 std::cout << std::endl;
             }
 
+            if (isInVector(binFromTHnSparse.hDPhi, vBinsToIgnore)) {
+                if (VERBOSE) {
+                    std::cout << "Configured not to draw bin "
+                              << binFromTHnSparse.hDPhi << std::endl;
+                }
+                continue;
+            }
+
             // Check if this bin should be drawn or not
             // use binFromTHnSparse.hDPhi
             // TODO: allow also to use binLabel
@@ -2006,26 +2187,23 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
 
 
                 vHists[k][iTUNE] = new TH1D(Form("hYields_%s_%i_%i_%i_%s", FLAVOUR, j, k, iTUNE, (canvasConfigs.canvasName).c_str()), Form("hYields_%s_%i_%i_%i_%s", FLAVOUR, j, k, iTUNE, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
-                vHists[k][iTUNE]->SetBinContent(1+j, vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k]);
-                if (CALCULATE_ERRORS) { 
-                    // TODO: implement ratio error in yield code
-                    // vHists[k]->SetBinError(1+j, vYieldsAndErrors.vYieldsErrors[i][j][k]);
-                    vHists[k][iTUNE]->SetBinError(1+j, propagateRatioError(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k], 
-                                                                    vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k],
-                                                                    vYieldsAndErrors.vYieldsErrors[indexNominatorTUNE][j][k],
-                                                                    vYieldsAndErrors.vYieldsErrors[indexDenominatorTUNE][j][k]));
-                }
-                else {
-                    vHists[k][iTUNE]->SetBinError(1+j, 1e-10);
-                }
+                const Double_t numerator = vYieldsAndErrors.vYields[indexNominatorTUNE][j][k];
+                const Double_t denominator = vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k];
+                const Double_t tuneRatio = safeRatio(numerator, denominator);
+                const Double_t tuneRatioError = CALCULATE_ERRORS
+                    ? propagateRatioError(
+                        numerator, denominator,
+                        vYieldsAndErrors.vYieldsErrors[indexNominatorTUNE][j][k],
+                        vYieldsAndErrors.vYieldsErrors[indexDenominatorTUNE][j][k])
+                    : 0.0;
+                SetPlotPointOrThrow(
+                    vHists[k][iTUNE], 1+j, tuneRatio, tuneRatioError, CALCULATE_ERRORS,
+                    Form("%s tune ratio %s/%s, associate=%s, bin=%s",
+                         FLAVOUR, vTUNES[indexNominatorTUNE].c_str(),
+                         vTUNES[indexDenominatorTUNE].c_str(), associateName.c_str(),
+                         binFromTHnSparse.hDPhi.c_str()));
                 cYields->cd();
-                
-                // TODO: THIS IS HARDCODED
-                Int_t colour;
-                if (indexNominatorTUNE == 0) { colour = 4; }
-                else if (indexNominatorTUNE == 1) { colour = 2; }
-                else if (indexNominatorTUNE == 2) { colour = 6; }
-                vHists[k][iTUNE]->SetLineColor(colour);
+                ApplyTuneVisualStyle(vHists[k][iTUNE], vTUNES[indexNominatorTUNE], true);
 
                 vHists[k][iTUNE]->Draw("same PE");
                 if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
@@ -2042,15 +2220,20 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
                 }
 
                 // Draw legend
-                if (legend != nullptr && alreadyInLegend.find(binFromTHnSparse.hDPhi) == alreadyInLegend.end()) {
+                const std::string numeratorTune = vTUNES[indexNominatorTUNE];
+                const std::string denominatorTune = vTUNES[indexDenominatorTUNE];
+                const std::string legendKey =
+                    binFromTHnSparse.hDPhi + "::" + numeratorTune + "/" + denominatorTune;
+                if (legend != nullptr && alreadyInLegend.find(legendKey) == alreadyInLegend.end()) {
                     if (legendEntriesMap.find(binFromTHnSparse.hDPhi) != legendEntriesMap.end()) {
                         std::string displayName = legendEntriesMap[binFromTHnSparse.hDPhi];
+                        displayName += " (" + numeratorTune + "/" + denominatorTune + ")";
                         if (VERBOSE) { std::cout << "Found displayName: " << displayName << std::endl; }
-                        legend->AddEntry(vHists[k][iTUNE], displayName.c_str(), "l");
+                        legend->AddEntry(vHists[k][iTUNE], displayName.c_str(), "lep");
                     } else {
                         if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
                     }
-                    alreadyInLegend.insert(binFromTHnSparse.hDPhi);
+                    alreadyInLegend.insert(legendKey);
                 }
 
                 if (VERBOSE) { std::cout << std::endl; }
@@ -2145,7 +2328,7 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
     hYieldsTemplate->Draw("PE");
 
     // Draw mini pad for global canvas (only used if asked in configurations)
-    TPad* cMiniPad;
+    TPad* cMiniPad = nullptr;
     if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
         std::cout << "- Creating mini pad with dimensions x1(" << canvasConfigs.xMinPad << "," << canvasConfigs.yMinPad << ") and x2(" << canvasConfigs.xMaxPad << "," << canvasConfigs.yMaxPad << ")" << std::endl;
         cMiniPad = new TPad(Form("cMiniPad_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), Form("cMiniPad_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), canvasConfigs.xMinPad, canvasConfigs.yMinPad, canvasConfigs.xMaxPad, canvasConfigs.yMaxPad);
@@ -2164,7 +2347,6 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
         hYieldsTemplate->Draw("PE");
     }
 
-    std::map<std::string, Int_t> colourTUNEMap = canvasConfigs.colourTUNEMap;
     std::map<std::string, Int_t> lineStyleBaryonMap = canvasConfigs.lineStyleBaryonMap;
 
     TLegend *legend = nullptr;
@@ -2233,24 +2415,17 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                 }
                 
                 vHists[i][j] = new TH1D(Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, i, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatio_%s_%i_%i_%i_%s", FLAVOUR, i, j, k-skippedBins, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
-                vHists[i][j]->SetBinContent(1+k-skippedBins, vYieldsAndErrors.vYields[i][j][k] / vYieldsAndErrors.vYields[i][0][k]);
-                if (CALCULATE_ERRORS) { 
-                    // Several options for error calculation/propagation
-                    // Ratio calculated seperately:
-                    vHists[i][j]->SetBinError(1+k-skippedBins, vYieldsAndErrors.vYieldsRatioErrors[i][j][k]);
-                    // Naive error propagation (assuming no correlation):
-                    /*
-                    vHists[i][j]->SetBinError(1+k, propagateRatioError(vYieldsAndErrors.vYields[i][j][k], 
-                                                                       vYieldsAndErrors.vYields[i][0][k],
-                                                                       vYieldsAndErrors.vYieldsErrors[i][j][k],
-                                                                       vYieldsAndErrors.vYieldsErrors[i][0][k]));
-                    */
-                    // Placeholder; same error as single yield:
-                    // vHists[i][j]->SetBinError(1+k, vYieldsAndErrors.vYieldsErrors[i][j][k]);
-                }
-                else {
-                    vHists[i][j]->SetBinError(1+k-skippedBins, 1e-10);
-                }
+                const Double_t baryonMesonRatio =
+                    safeRatio(vYieldsAndErrors.vYields[i][j][k], vYieldsAndErrors.vYields[i][0][k]);
+                const Double_t baryonMesonRatioError =
+                    CALCULATE_ERRORS ? vYieldsAndErrors.vYieldsRatioErrors[i][j][k] : 0.0;
+                SetPlotPointOrThrow(
+                    vHists[i][j], 1+k-skippedBins, baryonMesonRatio,
+                    baryonMesonRatioError, CALCULATE_ERRORS,
+                    Form("%s baryon/meson ratio, tune=%s, associate=%s, bin=%s",
+                         FLAVOUR, TUNE.c_str(), associateName.c_str(),
+                         binFromTHnSparse.hDPhi.c_str()));
+                ApplyTuneVisualStyle(vHists[i][j], TUNE, true);
                 cYields->cd();
                 vHists[i][j]->Draw("same PE");
                 if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
@@ -2259,14 +2434,6 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
                 }
 
                 hYieldsTemplate->GetXaxis()->SetBinLabel(1+k-skippedBins, (binFromTHnSparse.hDPhi).c_str());
-
-                if (colourTUNEMap.find(TUNE) != colourTUNEMap.end()) {
-                    Int_t colour = colourTUNEMap[TUNE];
-                    vHists[i][j]->SetLineColor(colour);
-                    if (VERBOSE) { std::cout << "Found colour: " << colour << std::endl; }
-                } else {
-                    if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
-                }
 
                 if (lineStyleBaryonMap.find(associateName) != lineStyleBaryonMap.end()) {
                     Int_t lineStyle = lineStyleBaryonMap[associateName];
@@ -2278,15 +2445,17 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
 
                 // Draw legend
                 // TODO: only do this once (but cannot put j==0)
-                if (legend != nullptr && alreadyInLegend.find(associateName) == alreadyInLegend.end()) {
+                const std::string legendKey = associateName + "::" + TUNE;
+                if (legend != nullptr && alreadyInLegend.find(legendKey) == alreadyInLegend.end()) {
                     if (legendEntriesMap.find(associateName) != legendEntriesMap.end()) {
                         std::string displayName = legendEntriesMap[associateName];
+                        if (nTUNES > 1) { displayName += " (" + TUNE + ")"; }
                         if (VERBOSE) { std::cout << "Found displayName: " << displayName << std::endl; }
-                        legend->AddEntry(vHists[i][j], displayName.c_str(), "t");
+                        legend->AddEntry(vHists[i][j], displayName.c_str(), "lep");
                     } else {
                         if (VERBOSE) { std::cout << "objectName not found in the map!" << std::endl; }
                     }
-                    alreadyInLegend.insert(associateName);
+                    alreadyInLegend.insert(legendKey);
                 }
 
 
@@ -2384,7 +2553,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
     hYieldsTemplate->Draw("PE");
 
     // Draw mini pad for global canvas (only used if asked in configurations)
-    TPad* cMiniPad;
+    TPad* cMiniPad = nullptr;
     if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
         std::cout << "- Creating mini pad with dimensions x1(" << canvasConfigs.xMinPad << "," << canvasConfigs.yMinPad << ") and x2(" << canvasConfigs.xMaxPad << "," << canvasConfigs.yMaxPad << ")" << std::endl;
         cMiniPad = new TPad(Form("cMiniPad_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), Form("cMiniPad_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), canvasConfigs.xMinPad, canvasConfigs.yMinPad, canvasConfigs.xMaxPad, canvasConfigs.yMaxPad);
@@ -2403,7 +2572,6 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
         hYieldsTemplate->Draw("PE");
     }
 
-    std::map<std::string, Int_t> colourTUNEMap = canvasConfigs.colourTUNEMap;
     std::map<std::string, Int_t> lineStyleBaryonMap = canvasConfigs.lineStyleBaryonMap;
 
     TLegend *legend = nullptr;
@@ -2473,46 +2641,23 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
                 const Double_t numeratorBaryonMesonRatio = safeRatio(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k], vYieldsAndErrors.vYields[indexNominatorTUNE][0][k]);
                 const Double_t denominatorBaryonMesonRatio = safeRatio(vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k], vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k]);
                 const Double_t tuneDoubleRatio = safeRatio(numeratorBaryonMesonRatio, denominatorBaryonMesonRatio);
-                vHists[j][iTUNE]->SetBinContent(1+k-skippedBins, std::isfinite(tuneDoubleRatio) ? tuneDoubleRatio : 0.0);
-
-                if (CALCULATE_ERRORS) { 
-                    // vHists[j][iTUNE]->SetBinError(1+k, vYieldsAndErrors.vYieldsRatioErrors[i][j][k]);
-                    // The baryon/meson ratio uncertainty is estimated within each tune
-                    // from the subsamples, preserving correlations between the two
-                    // species.  The tune-to-tune double ratio then treats the two
-                    // independently generated tune samples as uncorrelated.
-                    vHists[j][iTUNE]->SetBinError(1+k-skippedBins, propagateRatioError(numeratorBaryonMesonRatio, denominatorBaryonMesonRatio, vYieldsAndErrors.vYieldsRatioErrors[indexNominatorTUNE][j][k], vYieldsAndErrors.vYieldsRatioErrors[indexDenominatorTUNE][j][k]));
-
-                    /*
-                    vHists[j][iTUNE]->SetBinError(1+k-skippedBins, propagateRatioError(vYieldsAndErrors.vYields[indexNominatorTUNE][j][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][j][k], 
-                                                                    vYieldsAndErrors.vYields[indexNominatorTUNE][0][k]/vYieldsAndErrors.vYields[indexDenominatorTUNE][0][k],
-                                                                    vYieldsAndErrors.vYieldsRatioErrors[indexNominatorTUNE][j][k],
-                                                                    vYieldsAndErrors.vYieldsRatioErrors[indexDenominatorTUNE][0][k]));
-                    */
-                    // Naive error propagation (assuming no correlation):
-                    /*
-                    vHists[j][iTUNE]->SetBinError(1+k, propagateRatioError(vYieldsAndErrors.vYields[i][j][k], 
-                                                                        vYieldsAndErrors.vYields[i][0][k],
-                                                                        vYieldsAndErrors.vYieldsErrors[i][j][k],
-                                                                        vYieldsAndErrors.vYieldsErrors[i][0][k]));
-                    */
-                    // Placeholder; same error as single yield:
-                    // vHists[j][iTUNE]->SetBinError(1+k, vYieldsAndErrors.vYieldsErrors[i][j][k]);
-                }
-                else {
-                    vHists[j][iTUNE]->SetBinError(1+k-skippedBins, 1e-10);
-                }
+                const Double_t tuneDoubleRatioError = CALCULATE_ERRORS
+                    ? propagateRatioError(
+                        numeratorBaryonMesonRatio, denominatorBaryonMesonRatio,
+                        vYieldsAndErrors.vYieldsRatioErrors[indexNominatorTUNE][j][k],
+                        vYieldsAndErrors.vYieldsRatioErrors[indexDenominatorTUNE][j][k])
+                    : 0.0;
+                SetPlotPointOrThrow(
+                    vHists[j][iTUNE], 1+k-skippedBins, tuneDoubleRatio,
+                    tuneDoubleRatioError, CALCULATE_ERRORS,
+                    Form("%s baryon/meson tune double ratio %s/%s, associate=%s, bin=%s",
+                         FLAVOUR, vTUNES[indexNominatorTUNE].c_str(),
+                         vTUNES[indexDenominatorTUNE].c_str(), associateName.c_str(),
+                         binFromTHnSparse.hDPhi.c_str()));
     
                 cYields->cd();
 
-                // TODO: THIS IS HARDCODED
-                // Int_t colour;
-                std::string TUNE;
-                if (indexNominatorTUNE == 0) { TUNE = "MONASH"; }
-                else if (indexNominatorTUNE == 1) { TUNE = "JUNCTIONS"; }
-                else if (indexNominatorTUNE == 2) { TUNE = "CLOSEPACKING"; }
-                ApplyTuneVisualStyle(vHists[j][iTUNE], TUNE);
-                // vHists[j][iTUNE]->SetLineColor(colour);
+                ApplyTuneVisualStyle(vHists[j][iTUNE], vTUNES[indexNominatorTUNE], true);
 
                 vHists[j][iTUNE]->Draw("same PE");
                 if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
@@ -2543,19 +2688,20 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
         } // Loop over DEPENDENCIES
 
 
-        // Draw legend
-        // TODO: add nominator TUNE in vHists[j]
-        if (legend != nullptr && alreadyInLegend.find(associateName) == alreadyInLegend.end()) {
-            if (legendEntriesMap.find(associateName) != legendEntriesMap.end()) {
-                std::string displayName = legendEntriesMap[associateName];
-                // TODO: verbose
-                // std::cout << "Found displayName: " << displayName << std::endl;
-                legend->AddEntry(vHists[j][0], displayName.c_str(), "lep");
-            } else {
-                // TODO: verbose
-                // std::cout << "objectName not found in the map!" << std::endl;
+        // Draw one line-and-marker legend entry for every numerator tune.
+        for (Int_t iTUNE = 0; iTUNE < nTUNES; ++iTUNE) {
+            const std::string numeratorTune = vTUNES[vIndexNominatorTUNES[iTUNE]];
+            const std::string denominatorTune = vTUNES[indexDenominatorTUNE];
+            const std::string legendKey =
+                associateName + "::" + numeratorTune + "/" + denominatorTune;
+            if (legend != nullptr && alreadyInLegend.find(legendKey) == alreadyInLegend.end()) {
+                if (legendEntriesMap.find(associateName) != legendEntriesMap.end()) {
+                    std::string displayName = legendEntriesMap[associateName] +
+                        " (" + numeratorTune + "/" + denominatorTune + ")";
+                    legend->AddEntry(vHists[j][iTUNE], displayName.c_str(), "lep");
+                }
+                alreadyInLegend.insert(legendKey);
             }
-            alreadyInLegend.insert(associateName);
         }
 
 
@@ -2594,7 +2740,8 @@ int improvedPlotting_THnSparse(const char* configuration) {
     // Prepare the Delta Phi plots
     // TODO: this is still hardcoded
     // TODO: also this can be repeated in the loops
-    TCanvas *cCharm; TCanvas *cBeauty;
+    TCanvas *cCharm = nullptr;
+    TCanvas *cBeauty = nullptr;
     if (configs_from_json.DRAW_CORRELATION_PLOTS) {
         cCharm = new TCanvas("cCharmCorrelations","Charm correlations",1000,800);
         cBeauty = new TCanvas("cBeautyCorrelations","Beauty correlations",1000,800);
@@ -2607,6 +2754,24 @@ int improvedPlotting_THnSparse(const char* configuration) {
     YieldsAndErrorsMap mapYieldsCharm;
     mapYieldsBeauty = calculateYieldsVector(configs_from_json, "BEAUTY", cBeauty);
     mapYieldsCharm =  calculateYieldsVector(configs_from_json, "CHARM", cCharm);
+    if (configs_from_json.SUBSAMPLE_COVERAGE_AUDIT) {
+        const Int_t totalCoverageFailures =
+            mapYieldsBeauty.subsampleCoverageFailures +
+            mapYieldsCharm.subsampleCoverageFailures;
+        std::cout << "SUBSAMPLE_COVERAGE_AUDIT_SUMMARY"
+                  << " beauty_failures="
+                  << mapYieldsBeauty.subsampleCoverageFailures
+                  << " charm_failures="
+                  << mapYieldsCharm.subsampleCoverageFailures
+                  << " total_failures=" << totalCoverageFailures
+                  << std::endl;
+        if (totalCoverageFailures > 0) {
+            return 2;
+        }
+        std::cout << "Subsample coverage audit passed; no canvases were drawn."
+                  << std::endl;
+        return 0;
+    }
 
     // Draw the balancing plots using the 3D yield vector and configurations given
     std::vector<canvasConfigs> vCanvasConfigs = configs_from_json.vCanvasConfigs;
@@ -2656,12 +2821,13 @@ int improvedPlotting_THnSparse(const char* configuration) {
         for (const auto& cMiniCanvas : globalCanvasConfig.vMiniCanvases) {
             if (VERBOSE) { std::cout << "Using mini canvas with name = " << cMiniCanvas << std::endl; }
             // TODO: maybe add in global canvas settings an option to add a (custom) legend?
-            if (!cMiniCanvasMap[cMiniCanvas]) { 
+            const auto miniCanvasIt = cMiniCanvasMap.find(cMiniCanvas);
+            if (miniCanvasIt == cMiniCanvasMap.end() || miniCanvasIt->second == nullptr) {
                 std::cout << "- ERROR: did not find " << cMiniCanvas << " in global canvas settings" << std::endl;
                 continue; 
             }
             globalCanvas->cd();
-            cMiniCanvasMap[cMiniCanvas]->Draw(); 
+            miniCanvasIt->second->Draw();
         } // Loop over mini canvas names
         if (globalCanvasConfig.write) { 
             writeCanvasToFiles(VERBOSE, globalCanvas, globalCanvasConfig.writePath, globalCanvasConfig.writeName); 

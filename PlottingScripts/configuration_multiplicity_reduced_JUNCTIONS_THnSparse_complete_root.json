@@ -4,6 +4,18 @@
   "bb_bar_complete_root_dir_sub_samples": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
   "cc_bar_complete_root_dir_sub_samples": "AnalyzedData/SUBSAMPLES_700/combined_root_subSamples",
   "nSubSamples": 10,
+  "subsample_error_bins_to_exclude": [
+    "hDPhiM90_100",
+    "hDPhiM80_90",
+    "hDPhiM70_80",
+    "hDPhiM60_70",
+    "hDPhiM50_60",
+    "hDPhiM40_50",
+    "hDPhiM30_40",
+    "hDPhiM20_30",
+    "hDPhiM10_20",
+    "hDPhiM0_1"
+  ],
   "draw_correlation_plots": false,
   "base_dir": "AnalyzedData",
   "PYTHIA_TUNES": [
@@ -284,7 +296,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -359,20 +370,7 @@
           "display_name": "0-1%"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "MONASH",
-          "colour": 1
-        },
-        {
-          "TUNE_name": "JUNCTIONS",
-          "colour": 2
-        },
-        {
-          "TUNE_name": "CLOSEPACKING",
-          "colour": 6
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [
         {
           "dependency_name": "hDPhiM90_100",
@@ -419,7 +417,20 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "beauty_balancing_JUNCTIONS_over_MONASH",
@@ -430,7 +441,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "JUNCTIONS",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -552,7 +562,22 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "JUNCTIONS"
+      ]
     },
     {
       "canvas_name": "beauty_balancing_baryon_over_meson_ratio",
@@ -564,7 +589,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_b",
@@ -606,20 +630,7 @@
           "display_name": "B+ Sigma_b0"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "MONASH",
-          "colour": 1
-        },
-        {
-          "TUNE_name": "JUNCTIONS",
-          "colour": 2
-        },
-        {
-          "TUNE_name": "CLOSEPACKING",
-          "colour": 6
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [],
       "baryon_line_styles": [
         {
@@ -630,7 +641,20 @@
           "baryon_name": "Sigma_b0",
           "line_style": 2
         }
-      ]
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH",
@@ -641,7 +665,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "JUNCTIONS",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_b",
@@ -694,6 +717,21 @@
           "baryon_name": "Sigma_b0",
           "line_style": 2
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "JUNCTIONS"
       ]
     },
     {
@@ -706,7 +744,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -781,20 +818,7 @@
           "display_name": "0-1%"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "MONASH",
-          "colour": 1
-        },
-        {
-          "TUNE_name": "JUNCTIONS",
-          "colour": 2
-        },
-        {
-          "TUNE_name": "CLOSEPACKING",
-          "colour": 6
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [
         {
           "dependency_name": "hDPhiM90_100",
@@ -841,7 +865,20 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "charm_balancing_JUNCTIONS_over_MONASH",
@@ -852,7 +889,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "JUNCTIONS",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -974,7 +1010,22 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "JUNCTIONS"
+      ]
     },
     {
       "canvas_name": "charm_balancing_baryon_over_meson_ratio",
@@ -986,7 +1037,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_c(+)-bar"
@@ -1023,27 +1073,27 @@
           "display_name": "D+ Lambda_c(+)-bar"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "MONASH",
-          "colour": 1
-        },
-        {
-          "TUNE_name": "JUNCTIONS",
-          "colour": 2
-        },
-        {
-          "TUNE_name": "CLOSEPACKING",
-          "colour": 6
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [],
       "baryon_line_styles": [
         {
           "baryon_name": "Lambda_c(+)-bar",
           "line_style": 1
         }
-      ]
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH",
@@ -1054,7 +1104,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "JUNCTIONS",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_c(+)-bar"
@@ -1183,6 +1232,21 @@
           "baryon_name": "Lambda_c(+)-bar",
           "line_style": 1
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "JUNCTIONS"
       ]
     },
     {
@@ -1193,7 +1257,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -1268,12 +1331,7 @@
           "display_name": "0-1%"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "MONASH",
-          "colour": 2
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [
         {
           "dependency_name": "hDPhiM90_100",
@@ -1320,7 +1378,20 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "mini_beauty_balancing_JUNCTIONS",
@@ -1330,7 +1401,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -1405,12 +1475,7 @@
           "display_name": "0-1%"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "JUNCTIONS",
-          "colour": 2
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [
         {
           "dependency_name": "hDPhiM90_100",
@@ -1457,7 +1522,20 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "mini_beauty_balancing_JUNCTIONS_over_MONASH",
@@ -1468,7 +1546,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "JUNCTIONS",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -1590,7 +1667,22 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "JUNCTIONS"
+      ]
     },
     {
       "canvas_name": "mini_charm_balancing_MONASH",
@@ -1600,7 +1692,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -1675,12 +1766,7 @@
           "display_name": "0-1%"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "MONASH",
-          "colour": 4
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [
         {
           "dependency_name": "hDPhiM90_100",
@@ -1727,7 +1813,20 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "mini_charm_balancing_JUNCTIONS",
@@ -1737,7 +1836,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -1812,12 +1910,7 @@
           "display_name": "0-1%"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "JUNCTIONS",
-          "colour": 4
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [
         {
           "dependency_name": "hDPhiM90_100",
@@ -1864,7 +1957,20 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "mini_charm_balancing_JUNCTIONS_over_MONASH",
@@ -1875,7 +1981,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "JUNCTIONS",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -1997,7 +2102,22 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "JUNCTIONS"
+      ]
     },
     {
       "canvas_name": "mini_beauty_balancing_baryon_over_meson_ratio_lambda_only",
@@ -2009,7 +2129,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_b"
@@ -2046,20 +2165,7 @@
           "display_name": "B+ Lambda_b"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "MONASH",
-          "colour": 1
-        },
-        {
-          "TUNE_name": "JUNCTIONS",
-          "colour": 2
-        },
-        {
-          "TUNE_name": "CLOSEPACKING",
-          "colour": 6
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [],
       "baryon_line_styles": [
         {
@@ -2070,7 +2176,20 @@
           "baryon_name": "Sigma_b0",
           "line_style": 2
         }
-      ]
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "mini_beauty_balancing_baryon_over_meson_ratio_lambda_sigma",
@@ -2082,7 +2201,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_b",
@@ -2124,20 +2242,7 @@
           "display_name": "B+ Sigma_b0"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "MONASH",
-          "colour": 1
-        },
-        {
-          "TUNE_name": "JUNCTIONS",
-          "colour": 2
-        },
-        {
-          "TUNE_name": "CLOSEPACKING",
-          "colour": 6
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [],
       "baryon_line_styles": [
         {
@@ -2148,7 +2253,20 @@
           "baryon_name": "Sigma_b0",
           "line_style": 2
         }
-      ]
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "mini_beauty_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only",
@@ -2159,7 +2277,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "JUNCTIONS",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_b"
@@ -2207,6 +2324,21 @@
           "baryon_name": "Sigma_b0",
           "line_style": 2
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "JUNCTIONS"
       ]
     },
     {
@@ -2218,7 +2350,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "JUNCTIONS",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_b",
@@ -2271,6 +2402,21 @@
           "baryon_name": "Sigma_b0",
           "line_style": 2
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "JUNCTIONS"
       ]
     },
     {
@@ -2283,7 +2429,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_c(+)-bar"
@@ -2320,27 +2465,27 @@
           "display_name": "D+ Lambda_c(+)-bar"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "MONASH",
-          "colour": 1
-        },
-        {
-          "TUNE_name": "JUNCTIONS",
-          "colour": 4
-        },
-        {
-          "TUNE_name": "CLOSEPACKING",
-          "colour": 6
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [],
       "baryon_line_styles": [
         {
           "baryon_name": "Lambda_c(+)-bar",
           "line_style": 1
         }
-      ]
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "mini_charm_balancing_baryon_over_meson_ratio_lambda_sigma",
@@ -2352,7 +2497,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_c(+)-bar"
@@ -2389,27 +2533,27 @@
           "display_name": "D+ Lambda_c(+)-bar"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "MONASH",
-          "colour": 1
-        },
-        {
-          "TUNE_name": "JUNCTIONS",
-          "colour": 4
-        },
-        {
-          "TUNE_name": "CLOSEPACKING",
-          "colour": 6
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [],
       "baryon_line_styles": [
         {
           "baryon_name": "Lambda_c(+)-bar",
           "line_style": 1
         }
-      ]
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "mini_charm_balancing_baryon_over_meson_ratio_JUNCTIONS_over_MONASH_lambda_only",
@@ -2420,7 +2564,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "JUNCTIONS",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_c(+)-bar"
@@ -2464,6 +2607,21 @@
           "baryon_name": "Lambda_c(+)-bar",
           "line_style": 1
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "JUNCTIONS"
       ]
     },
     {
@@ -2475,7 +2633,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "JUNCTIONS",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_c(+)-bar"
@@ -2519,6 +2676,21 @@
           "baryon_name": "Lambda_c(+)-bar",
           "line_style": 1
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "JUNCTIONS"
       ]
     },
     {
@@ -2530,7 +2702,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "CLOSEPACKING",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -2652,7 +2823,22 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "CLOSEPACKING"
+      ]
     },
     {
       "canvas_name": "beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH",
@@ -2663,7 +2849,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "CLOSEPACKING",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_b",
@@ -2716,6 +2901,21 @@
           "baryon_name": "Sigma_b0",
           "line_style": 2
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "CLOSEPACKING"
       ]
     },
     {
@@ -2727,7 +2927,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "CLOSEPACKING",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -2849,7 +3048,22 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "CLOSEPACKING"
+      ]
     },
     {
       "canvas_name": "charm_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH",
@@ -2860,7 +3074,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "CLOSEPACKING",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_c(+)-bar"
@@ -2989,6 +3202,21 @@
           "baryon_name": "Lambda_c(+)-bar",
           "line_style": 1
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "CLOSEPACKING"
       ]
     },
     {
@@ -2999,7 +3227,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -3074,12 +3301,7 @@
           "display_name": "0-1%"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "CLOSEPACKING",
-          "colour": 6
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [
         {
           "dependency_name": "hDPhiM90_100",
@@ -3126,7 +3348,20 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "mini_beauty_balancing_CLOSEPACKING_over_MONASH",
@@ -3137,7 +3372,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "CLOSEPACKING",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -3259,7 +3493,22 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "CLOSEPACKING"
+      ]
     },
     {
       "canvas_name": "mini_charm_balancing_CLOSEPACKING",
@@ -3269,7 +3518,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "NONE",
       "denominator_TUNE": "NONE",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -3344,12 +3592,7 @@
           "display_name": "0-1%"
         }
       ],
-      "TUNE_colours": [
-        {
-          "TUNE_name": "CLOSEPACKING",
-          "colour": 6
-        }
-      ],
+      "TUNE_colours": [],
       "dependency_line_styles": [
         {
           "dependency_name": "hDPhiM90_100",
@@ -3396,7 +3639,20 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": []
     },
     {
       "canvas_name": "mini_charm_balancing_CLOSEPACKING_over_MONASH",
@@ -3407,7 +3663,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "CLOSEPACKING",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [],
       "use_hard_coded_settings": false,
@@ -3529,7 +3784,22 @@
           "line_style": 1
         }
       ],
-      "baryon_line_styles": []
+      "baryon_line_styles": [],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "CLOSEPACKING"
+      ]
     },
     {
       "canvas_name": "mini_beauty_balancing_baryon_over_meson_ratio_CLOSEPACKING_over_MONASH_lambda_only",
@@ -3540,7 +3810,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "CLOSEPACKING",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_b"
@@ -3588,6 +3857,21 @@
           "baryon_name": "Sigma_b0",
           "line_style": 2
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "CLOSEPACKING"
       ]
     },
     {
@@ -3599,7 +3883,6 @@
       ],
       "FLAVOUR": "BEAUTY",
       "TriggerToUse": "B^{+}",
-      "nominator_TUNE": "CLOSEPACKING",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_b",
@@ -3652,6 +3935,21 @@
           "baryon_name": "Sigma_b0",
           "line_style": 2
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "CLOSEPACKING"
       ]
     },
     {
@@ -3663,7 +3961,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "CLOSEPACKING",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_c(+)-bar"
@@ -3707,6 +4004,21 @@
           "baryon_name": "Lambda_c(+)-bar",
           "line_style": 1
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "CLOSEPACKING"
       ]
     },
     {
@@ -3718,7 +4030,6 @@
       ],
       "FLAVOUR": "CHARM",
       "TriggerToUse": "D^{+}",
-      "nominator_TUNE": "CLOSEPACKING",
       "denominator_TUNE": "MONASH",
       "baryons_to_plot_in_baryon/meson_ratio": [
         "Lambda_c(+)-bar"
@@ -3762,6 +4073,21 @@
           "baryon_name": "Lambda_c(+)-bar",
           "line_style": 1
         }
+      ],
+      "bins_to_ignore": [
+        "hDPhiM0_1",
+        "hDPhiM10_20",
+        "hDPhiM20_30",
+        "hDPhiM30_40",
+        "hDPhiM40_50",
+        "hDPhiM50_60",
+        "hDPhiM60_70",
+        "hDPhiM70_80",
+        "hDPhiM80_90",
+        "hDPhiM90_100"
+      ],
+      "nominator_TUNES": [
+        "CLOSEPACKING"
       ]
     }
   ],
@@ -3810,5 +4136,6 @@
       "x_size_canvas": 2200,
       "y_size_canvas": 2050
     }
-  ]
+  ],
+  "subsample_coverage_audit": false
 }
