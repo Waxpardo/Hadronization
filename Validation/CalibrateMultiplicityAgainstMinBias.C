@@ -65,7 +65,8 @@ bool IsInelGtZero(Pythia8::Pythia& pythia) {
 int CalibrateMultiplicityAgainstMinBias(int events = 20000,
                                         bool hardSample = false,
                                         double tau0MaxMm = 0.01,
-                                        bool disableHeavyDecays = true) {
+                                        bool disableHeavyDecays = true,
+                                        double pTHatMin = 1.0) {
   Pythia8::Pythia pythia;
   pythia.readString("Beams:idA = 2212");
   pythia.readString("Beams:idB = 2212");
@@ -74,7 +75,7 @@ int CalibrateMultiplicityAgainstMinBias(int events = 20000,
   if (hardSample) {
     pythia.readString("HardQCD:hardccbar = on");
     pythia.readString("HardQCD:hardbbbar = on");
-    pythia.readString("PhaseSpace:pTHatMin = 1.");
+    pythia.readString("PhaseSpace:pTHatMin = " + std::to_string(pTHatMin));
   } else {
     pythia.readString("SoftQCD:inelastic = on");
   }
@@ -131,7 +132,8 @@ int CalibrateMultiplicityAgainstMinBias(int events = 20000,
 
   std::printf("\n===== N_ch CALIBRATION =====\n");
   std::printf("sample            : %s\n",
-              hardSample ? "HardQCD ccbar+bbbar, pTHatMin=1" : "SoftQCD:inelastic (MB)");
+              hardSample ? "HardQCD ccbar+bbbar" : "SoftQCD:inelastic (MB)");
+  if (hardSample) std::printf("pTHatMin          : %.2f GeV\n", pTHatMin);
   std::printf("sqrt(s)           : 13.6 TeV\n");
   std::printf("tau0Max           : %.4g mm\n", tau0MaxMm);
   std::printf("heavy decays      : %s (%d entries)\n",
