@@ -105,6 +105,15 @@ struct TriggerAccumulator {
   int pdg = 0;
   std::string sector;
   THnSparseD* histogram = nullptr;
+  // Flavour-closure observable. Every final open-heavy hadron of the trigger's
+  // sector is an associate, weighted by -q_trig * q_assoc, so that opposite
+  // sign contributes +1 and same sign -1 per unit of heavy flavour. Because
+  // the producer guarantees sum(q) = 0 over final heavy hadrons, the integral
+  // over all associates equals q_trig^2 = 1 exactly. That is a genuine sum
+  // rule, unlike the ground-state-restricted OS-minus-SS integral.
+  THnSparseD* closure = nullptr;
+  double closureFullPhaseSpace = 0.0;   // must close to weightedTriggers
+  double closureInAcceptance = 0.0;     // the visible fraction
   double weightedTriggers = 0.0;
   unsigned long long triggers = 0;
 };
@@ -191,7 +200,8 @@ RawInputContract ValidateRawInputs(const std::vector<std::string>& inputs) {
   const std::vector<const char*> requiredIntegerVectors = {
       "heavyIndex",          "heavyPdg",
       "heavyStatus",         "heavyIsFinal",
-      "heavyCentral",        "heavyQc",
+      "heavyCentral",        "heavyStateCategory",
+      "heavyQc",
       "heavyQb",             "heavyOriginC",
       "heavyOriginB",        "heavyMatchResolutionC",
       "heavyMatchResolutionB", "heavyMatchedHardC",
@@ -355,6 +365,7 @@ RawInputContract ValidateRawInputs(const std::vector<std::string>& inputs) {
     std::vector<int>* heavyStatus = nullptr;
     std::vector<int>* heavyIsFinal = nullptr;
     std::vector<int>* heavyCentral = nullptr;
+    std::vector<int>* heavyStateCategory = nullptr;
     std::vector<int>* heavyQc = nullptr;
     std::vector<int>* heavyQb = nullptr;
     std::vector<int>* heavyOriginC = nullptr;
@@ -383,6 +394,7 @@ RawInputContract ValidateRawInputs(const std::vector<std::string>& inputs) {
     tree->SetBranchAddress("heavyStatus", &heavyStatus);
     tree->SetBranchAddress("heavyIsFinal", &heavyIsFinal);
     tree->SetBranchAddress("heavyCentral", &heavyCentral);
+    tree->SetBranchAddress("heavyStateCategory", &heavyStateCategory);
     tree->SetBranchAddress("heavyQc", &heavyQc);
     tree->SetBranchAddress("heavyQb", &heavyQb);
     tree->SetBranchAddress("heavyOriginC", &heavyOriginC);
@@ -422,7 +434,8 @@ RawInputContract ValidateRawInputs(const std::vector<std::string>& inputs) {
                                  input);
       }
       if (!heavyIndex || !heavyPdg || !heavyStatus || !heavyIsFinal ||
-          !heavyCentral || !heavyQc || !heavyQb || !heavyOriginC ||
+          !heavyCentral || !heavyStateCategory || !heavyQc || !heavyQb ||
+          !heavyOriginC ||
           !heavyOriginB || !heavyMatchResolutionC ||
           !heavyMatchResolutionB || !heavyMatchedHardC ||
           !heavyMatchedHardB || !heavyRejectedHardC ||
@@ -433,6 +446,7 @@ RawInputContract ValidateRawInputs(const std::vector<std::string>& inputs) {
       const std::size_t size = heavyPdg->size();
       if (heavyIndex->size() != size || heavyStatus->size() != size ||
           heavyIsFinal->size() != size || heavyCentral->size() != size ||
+          heavyStateCategory->size() != size ||
           heavyQc->size() != size || heavyQb->size() != size ||
           heavyOriginC->size() != size || heavyOriginB->size() != size ||
           heavyMatchResolutionC->size() != size ||
@@ -599,6 +613,33 @@ THnSparseD* MakeSingle(const char* name) {
   histogram->GetAxis(1)->SetTitle("#eta");
   histogram->GetAxis(2)->SetTitle("p_{T} (GeV/c)");
   histogram->GetAxis(3)->SetTitle("N_{ch}^{hadronisation}");
+  histogram->Sumw2();
+  return histogram;
+}
+
+// Closure sparse: (dphi, deta, assoc pT, Nch, heavy-state category). The
+// category axis is what makes the ground-state set a labelled SUBSET of the
+// closed sum rather than a separate, non-closing observable.
+THnSparseD* MakeClosure(const char* name) {
+  const std::vector<double> ptEdges = PtEdges();
+  const std::vector<double> deltaEtaEdges =
+      InclusiveUniformEdges(100, -8.0, 8.0);
+  int bins[5] = {100, 100, static_cast<int>(ptEdges.size()) - 1, 4096, 6};
+  double minimum[5] = {-M_PI / 2.0, -8.0, 0.0, -0.5, -0.5};
+  double maximum[5] = {
+      3.0 * M_PI / 2.0,
+      std::nextafter(8.0, std::numeric_limits<double>::infinity()),
+      7000.0, 4095.5, 5.5};
+  auto* histogram = new THnSparseD(
+      name, "(dphi,deta,asPt,Nch,heavyStateCategory)", 5, bins, minimum,
+      maximum);
+  histogram->GetAxis(1)->Set(bins[1], deltaEtaEdges.data());
+  histogram->GetAxis(2)->Set(bins[2], ptEdges.data());
+  histogram->GetAxis(0)->SetTitle("#Delta#phi");
+  histogram->GetAxis(1)->SetTitle("#Delta#eta");
+  histogram->GetAxis(2)->SetTitle("p_{T}^{assoc} (GeV/c)");
+  histogram->GetAxis(3)->SetTitle("N_{ch}");
+  histogram->GetAxis(4)->SetTitle("heavy state category");
   histogram->Sumw2();
   return histogram;
 }
@@ -795,6 +836,7 @@ int status_analysis_THnSparse_qq(
       trigger.pdg = definition.triggerPdg;
       trigger.sector = std::string(definition.sector);
       trigger.histogram = MakeSingle("hTrKinematics");
+      trigger.closure = MakeClosure("hFlavourClosure");
       triggers.emplace(trigger.pdg, trigger);
     }
 
@@ -807,6 +849,7 @@ int status_analysis_THnSparse_qq(
     std::vector<int>* heavyStatus = nullptr;
     std::vector<int>* heavyIsFinal = nullptr;
     std::vector<int>* heavyCentral = nullptr;
+    std::vector<int>* heavyStateCategory = nullptr;
     std::vector<int>* heavyQc = nullptr;
     std::vector<int>* heavyQb = nullptr;
     std::vector<int>* heavyOriginC = nullptr;
@@ -826,6 +869,7 @@ int status_analysis_THnSparse_qq(
     chain.SetBranchAddress("heavyStatus", &heavyStatus);
     chain.SetBranchAddress("heavyIsFinal", &heavyIsFinal);
     chain.SetBranchAddress("heavyCentral", &heavyCentral);
+    chain.SetBranchAddress("heavyStateCategory", &heavyStateCategory);
     chain.SetBranchAddress("heavyQc", &heavyQc);
     chain.SetBranchAddress("heavyQb", &heavyQb);
     chain.SetBranchAddress("heavyOriginC", &heavyOriginC);
@@ -926,6 +970,43 @@ int status_analysis_THnSparse_qq(
         trigger.histogram->Fill(triggerValues, eventWeight);
         trigger.weightedTriggers += eventWeight;
         ++trigger.triggers;
+
+        // ---- flavour-closure observable -------------------------------
+        // Every final open-heavy hadron of this sector is an associate,
+        // weighted by -q_trig * q_assoc. Summed over all of them the result
+        // is q_trig^2, because the producer guarantees sum(q) = 0 over final
+        // heavy hadrons. The full-phase-space sum is therefore an exact
+        // closure check; the in-acceptance sum is the physically visible
+        // fraction, and the category axis resolves which species carry it.
+        for (std::size_t closureIndex = 0; closureIndex < size;
+             ++closureIndex) {
+          if ((*heavyIndex)[closureIndex] == (*heavyIndex)[triggerIndex]) {
+            continue;
+          }
+          if (!(*heavyIsFinal)[closureIndex]) continue;
+          const int closureCharge =
+              SectorCharge(sector, (*heavyQc)[closureIndex],
+                           (*heavyQb)[closureIndex]);
+          if (closureCharge == 0) continue;
+          const double closureWeight =
+              -static_cast<double>(triggerCharge) *
+              static_cast<double>(closureCharge) * eventWeight;
+          trigger.closureFullPhaseSpace += closureWeight;
+          if (!Hadronization::IsCentralKinematic((*heavyPt)[closureIndex],
+                                                 (*heavyEta)[closureIndex],
+                                                 false)) {
+            continue;
+          }
+          trigger.closureInAcceptance += closureWeight;
+          const double closureValues[5] = {
+              Hadronization::WrapDeltaPhi((*heavyPhi)[triggerIndex],
+                                          (*heavyPhi)[closureIndex]),
+              (*heavyEta)[triggerIndex] - (*heavyEta)[closureIndex],
+              (*heavyPt)[closureIndex],
+              static_cast<double>(eventMultiplicity),
+              static_cast<double>((*heavyStateCategory)[closureIndex])};
+          trigger.closure->Fill(closureValues, closureWeight);
+        }
 
         for (std::size_t associateIndex = 0; associateIndex < size;
              ++associateIndex) {
@@ -1038,6 +1119,34 @@ int status_analysis_THnSparse_qq(
       multiplicity->Write("summed MULTIPLICITY");
       TriggerAccumulator& trigger = triggers.at(pair.definition->triggerPdg);
       trigger.histogram->Write("hTrKinematics");
+      trigger.closure->Write("hFlavourClosure");
+      // The sum rule is exact, so any deviation beyond rounding is a defect.
+      if (trigger.weightedTriggers > 0.0) {
+        const double closure =
+            trigger.closureFullPhaseSpace / trigger.weightedTriggers;
+        auto* summary = new TH1D("hFlavourClosureSummary",
+                                 "flavour closure;;value", 3, 0.5, 3.5);
+        summary->GetXaxis()->SetBinLabel(1, "weighted triggers");
+        summary->GetXaxis()->SetBinLabel(2, "closure sum, full phase space");
+        summary->GetXaxis()->SetBinLabel(3, "closure sum, in acceptance");
+        summary->SetBinContent(1, trigger.weightedTriggers);
+        summary->SetBinContent(2, trigger.closureFullPhaseSpace);
+        summary->SetBinContent(3, trigger.closureInAcceptance);
+        summary->Write("hFlavourClosureSummary");
+        delete summary;
+        std::cout << "FLAVOUR_CLOSURE pdg=" << trigger.pdg
+                  << " full_phase_space=" << closure
+                  << " in_acceptance="
+                  << trigger.closureInAcceptance / trigger.weightedTriggers
+                  << "\n";
+        if (std::abs(closure - 1.0) > 1e-9) {
+          throw std::runtime_error(
+              "flavour-closure sum rule violated for trigger " +
+              std::to_string(trigger.pdg) + ": " + std::to_string(closure) +
+              " (expected 1). Heavy flavour is not conserved over final "
+              "hadrons, or an associate was missed.");
+        }
+      }
       pair.associate->Write("hAsKinematics");
       pair.correlation->Write("hCorrelations");
       pair.correlationByOrigin->Write("hCorrelationsByOrigin");
