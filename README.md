@@ -29,15 +29,15 @@ contracts are:
 
 | Contract | Version |
 |---|---|
-| raw ROOT schema | `hf_primary_ground_raw_v5` |
+| raw ROOT schema | `hf_primary_ground_raw_v6` |
 | origin algorithm | `signed_heavy_constituent_complete_mothers_unique_v4` |
 | heavy-stability audit | `heavy_stability_audit_v2` |
 | exhaustive post-init settings snapshot | `effective_pythia_settings_exhaustive_v2` |
 | tune-difference allowlist | `pythia_tune_difference_allowlist_v2` |
 | all-primary-heavy constituent match | `primary_all_heavy_constituent_match_v1` |
-| central multiplicity | `NCH_HADRONISATION_V1` |
-| multiplicity cross-check | `NCH_FINAL_STRONG_EM_V1` |
-| weak-decay transition rule | `weak_decay_transition_pythia_status_v1` |
+| central multiplicity | `NCH_PRIMARY_CHARGED_ETA10_V1` |
+| multiplicity cross-check | `NCH_PRIMARY_CHARGED_ETA40_V1` |
+| multiplicity definition | `primary_charged_light_hadron_level_v1` |
 
 Triggers are signed, direct-primary, generator-stable ground-state heavy
 hadrons with `pT > 1 GeV/c`, `|eta| <= 4`, and a resolved match to the selected
@@ -46,6 +46,16 @@ with `pT > 0.15 GeV/c`, `|eta| <= 4`, but retain all resolved and unresolved
 origin categories. Pairs are ordered and conditional on the trigger; the
 canonical same-sign factor is 1, not 0.5. Particles and antiparticles remain
 separate.
+
+Event activity is classified by a genuine charged-particle multiplicity:
+final, charged, non-heavy-flavour particles with `pT > 0.15 GeV/c`. The
+central counter uses `|eta| < 1` and the cross-check uses `|eta| < 4`. This is
+the hadron-level analogue of the conventional primary-charged-particle
+definition (`c*tau0 > 1 cm`, or descended only from shorter-lived parents),
+which the tune cards enforce through `ParticleDecays:limitTau0`. Charm and
+beauty hadrons are excluded because their decays are disabled here, so an
+experiment would count their daughters instead; the exclusion also keeps the
+classifier from correlating with the observable it classifies.
 
 The observable is model-level and generator-stable. It is not a
 decay-inclusive experimental yield, a detector-level measurement, a

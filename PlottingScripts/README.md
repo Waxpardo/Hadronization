@@ -447,8 +447,9 @@ source manifest (`3*N` central rows, `3*N/10` block rows); merge provenance
 records the explicit selected-tune filter. The fixed 300 count in this stage
 is the generated pair-file registry, not the number of selected raw inputs.
 
-The shared multiplicity plot uses `NCH_HADRONISATION_V1`, not “prompt” or
-minimum-bias charged multiplicity. A display-axis limit is not an event
+The shared multiplicity plot uses `NCH_PRIMARY_CHARGED_ETA10_V1`. This is a
+real charged-particle multiplicity, but it is measured on a hard-heavy sample,
+so it is still not a minimum-bias multiplicity. Never label it “prompt”. A display-axis limit is not an event
 selection and must be distinguishable from ROOT overflow accounting.
 
 ## Optional pads and global canvases

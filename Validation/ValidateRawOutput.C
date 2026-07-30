@@ -47,98 +47,6 @@ struct ReconstructedOrigin {
   int depth = -1;
 };
 
-struct WeakTransitionAudit {
-  bool graphValid = true;
-  bool hasWeakDecayTransition = false;
-};
-
-// Deliberately independent of the producer's stored boolean and traversal
-// helper. This validator-side implementation uses only the generated parent
-// registry and the versioned PYTHIA event-record status rule.
-bool AuditIsKnownWeakParent(int pdg) {
-  const int id = std::abs(pdg);
-  if (std::find(Hadronization::kWeakLightParentAbsPdgs.begin(),
-                Hadronization::kWeakLightParentAbsPdgs.end(), id) !=
-      Hadronization::kWeakLightParentAbsPdgs.end()) {
-    return true;
-  }
-  return ((id / 10) % 10 == 4 || (id / 100) % 10 == 4 ||
-          (id / 1000) % 10 == 4 || (id / 10) % 10 == 5 ||
-          (id / 100) % 10 == 5 || (id / 1000) % 10 == 5);
-}
-
-bool AuditIsWeakDecayTransition(int parentPdg, int parentStatus,
-                                int childPdg, int childStatus) {
-  if (std::abs(parentPdg) == std::abs(childPdg)) return false;
-  const int childStatusAbs = std::abs(childStatus);
-  return parentStatus < 0 && childStatusAbs >= 91 &&
-         childStatusAbs <= 97 && AuditIsKnownWeakParent(parentPdg);
-}
-
-WeakTransitionAudit RecomputeWeakDecayTransition(
-    int particleIndex, const std::vector<int>& eventPdg,
-    const std::vector<int>& eventStatus,
-    const std::vector<int>& motherOffsets,
-    const std::vector<int>& mothers) {
-  WeakTransitionAudit result;
-  const std::size_t nodeCount = eventPdg.size();
-  if (eventStatus.size() != nodeCount ||
-      motherOffsets.size() != nodeCount + 1U ||
-      motherOffsets.empty() || motherOffsets.front() != 0 ||
-      motherOffsets.back() != static_cast<int>(mothers.size()) ||
-      particleIndex < 0 ||
-      static_cast<std::size_t>(particleIndex) >= nodeCount) {
-    result.graphValid = false;
-    return result;
-  }
-  for (std::size_t index = 1; index < motherOffsets.size(); ++index) {
-    if (motherOffsets[index] < motherOffsets[index - 1] ||
-        motherOffsets[index] < 0 ||
-        static_cast<std::size_t>(motherOffsets[index]) > mothers.size()) {
-      result.graphValid = false;
-      return result;
-    }
-  }
-  for (const int parent : mothers) {
-    if (parent <= 0 || static_cast<std::size_t>(parent) >= nodeCount) {
-      result.graphValid = false;
-      return result;
-    }
-  }
-
-  std::deque<std::pair<int, int>> queue;
-  std::set<std::pair<int, int>> visitedEdges;
-  const auto enqueueMothers = [&](int child) {
-    const std::size_t childSlot = static_cast<std::size_t>(child);
-    const int begin = motherOffsets[childSlot];
-    const int end = motherOffsets[childSlot + 1U];
-    for (int slot = begin; slot < end; ++slot) {
-      const int parent = mothers[static_cast<std::size_t>(slot)];
-      if (parent <= 0 ||
-          static_cast<std::size_t>(parent) >= nodeCount) {
-        result.graphValid = false;
-        continue;
-      }
-      queue.emplace_back(parent, child);
-    }
-  };
-  enqueueMothers(particleIndex);
-  while (result.graphValid && !queue.empty()) {
-    const auto [parent, child] = queue.front();
-    queue.pop_front();
-    if (!visitedEdges.insert({parent, child}).second) continue;
-    if (AuditIsWeakDecayTransition(
-            eventPdg[static_cast<std::size_t>(parent)],
-            eventStatus[static_cast<std::size_t>(parent)],
-            eventPdg[static_cast<std::size_t>(child)],
-            eventStatus[static_cast<std::size_t>(child)])) {
-      result.hasWeakDecayTransition = true;
-      return result;
-    }
-    enqueueMothers(parent);
-  }
-  return result;
-}
 
 bool CarriesSignedHeavyConstituent(int pdg, int flavour, int requiredSign) {
   if (pdg == requiredSign * flavour) return true;
@@ -384,8 +292,8 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   auto* effectiveSettings =
       dynamic_cast<TTree*>(file.Get("effective_settings"));
   auto* multiplicity = dynamic_cast<TH1*>(file.Get("hMULTIPLICITY"));
-  auto* multiplicityStrongEmHistogram =
-      dynamic_cast<TH1*>(file.Get("hMULTIPLICITY_FINAL_STRONG_EM_V1"));
+  auto* multiplicityWideHistogram =
+      dynamic_cast<TH1*>(file.Get("hMULTIPLICITY_ETA40"));
   auto* processHistogram = dynamic_cast<TH1*>(file.Get("hPROCESS_CODE"));
   auto* stabilityCanonical =
       dynamic_cast<TObjString*>(file.Get("heavy_stability_audit_canonical"));
@@ -397,8 +305,8 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
       dynamic_cast<TObjString*>(file.Get("effective_settings_sha256"));
   auto* primaryAllHeavyVersion = dynamic_cast<TObjString*>(
       file.Get("primary_all_heavy_match_version"));
-  auto* weakTransitionVersion = dynamic_cast<TObjString*>(
-      file.Get("weak_decay_transition_rule"));
+  auto* multiplicityDefinitionVersion = dynamic_cast<TObjString*>(
+      file.Get("multiplicity_definition"));
   if (!tree) fail("missing tree");
   if (!metadata || metadata->GetEntries() != 1) fail("missing/sized job_metadata");
   if (!stability || stability->GetEntries() == 0) fail("missing heavy_stability_audit");
@@ -407,8 +315,8 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
     fail("missing effective_settings");
   }
   if (!multiplicity) fail("missing hMULTIPLICITY");
-  if (!multiplicityStrongEmHistogram) {
-    fail("missing hMULTIPLICITY_FINAL_STRONG_EM_V1");
+  if (!multiplicityWideHistogram) {
+    fail("missing hMULTIPLICITY_ETA40");
   }
   if (!processHistogram) fail("missing hPROCESS_CODE");
   if (!stabilityCanonical || !stabilityShaObject) {
@@ -420,14 +328,14 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   if (!primaryAllHeavyVersion) {
     fail("missing primary-all-heavy match contract object");
   }
-  if (!weakTransitionVersion) {
-    fail("missing weak-decay transition contract object");
+  if (!multiplicityDefinitionVersion) {
+    fail("missing multiplicity-definition contract object");
   }
   if (errors) return errors;
 
   std::string campaign, tune, role, schema, selector, originAlgorithm;
   std::string speciesSchema, registrySha, configSha;
-  std::string weakParentSchema, weakParentSha, weakTransitionRule;
+  std::string multiplicityDefinition;
   std::string tuneAllowlistSchema, tuneAllowlistSha;
   std::string stabilityAuditSchema, stabilityAuditSha;
   std::string effectiveSettingsSchema, effectiveSettingsSha;
@@ -451,7 +359,7 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   unsigned long long primaryAllHeavyFailures = 0;
   unsigned long long effectiveSettingsEntries = 0;
   unsigned long long multiplicityOverflow = 0;
-  unsigned long long multiplicityStrongEmOverflow = 0;
+  unsigned long long multiplicityWideOverflow = 0;
   unsigned long long multiplicityAuditEvents = 0;
   unsigned long long peakRssKiB = 0;
   long long startUnixSeconds = 0;
@@ -471,12 +379,8 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
       !ReadString(metadata, "origin_algorithm", originAlgorithm) ||
       !ReadString(metadata, "species_registry_schema", speciesSchema) ||
       !ReadString(metadata, "species_registry_sha256", registrySha) ||
-      !ReadString(metadata, "weak_parent_registry_schema",
-                  weakParentSchema) ||
-      !ReadString(metadata, "weak_parent_registry_sha256",
-                  weakParentSha) ||
-      !ReadString(metadata, "weak_decay_transition_rule",
-                  weakTransitionRule) ||
+      !ReadString(metadata, "multiplicity_definition",
+                  multiplicityDefinition) ||
       !ReadString(metadata, "tune_difference_allowlist_schema",
                   tuneAllowlistSchema) ||
       !ReadString(metadata, "tune_difference_allowlist_sha256",
@@ -553,8 +457,8 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
     fail("missing origin-rejection metadata");
   }
   if (!ReadScalar(metadata, "multiplicity_overflow", multiplicityOverflow) ||
-      !ReadScalar(metadata, "multiplicity_strong_em_overflow",
-                  multiplicityStrongEmOverflow) ||
+      !ReadScalar(metadata, "multiplicity_wide_overflow",
+                  multiplicityWideOverflow) ||
       !ReadScalar(metadata, "multiplicity_audit_events",
                   multiplicityAuditEvents) ||
       !ReadScalar(metadata, "sum_weights", sumw) ||
@@ -586,12 +490,11 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
       registrySha != Hadronization::kSpeciesRegistrySha256) {
     fail("species-registry checksum mismatch");
   }
-  if (weakParentSchema != Hadronization::kWeakParentRegistrySchema ||
-      weakParentSha != Hadronization::kWeakParentRegistrySha256 ||
-      weakTransitionRule !=
-          Hadronization::kWeakDecayTransitionRuleVersion ||
-      weakTransitionVersion->GetString().Data() != weakTransitionRule) {
-    fail("weak-parent/transition contract mismatch");
+  if (multiplicityDefinition !=
+          Hadronization::kMultiplicityDefinitionVersion ||
+      multiplicityDefinitionVersion->GetString().Data() !=
+          multiplicityDefinition) {
+    fail("multiplicity-definition contract mismatch");
   }
   if (tuneAllowlistSchema !=
           Hadronization::kTuneDifferenceAllowlistSchema ||
@@ -714,13 +617,13 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
       rootCompressionAlgorithm < 0 || rootCompressionLevel < 0) {
     fail("ROOT compression metadata disagrees with the output file");
   }
-  if (multiplicityOverflow != 0 || multiplicityStrongEmOverflow != 0) {
+  if (multiplicityOverflow != 0 || multiplicityWideOverflow != 0) {
     fail("multiplicity overflow is nonzero");
   }
   if (static_cast<unsigned long long>(multiplicity->GetEntries()) !=
           expectedSuccesses ||
       static_cast<unsigned long long>(
-          multiplicityStrongEmHistogram->GetEntries()) !=
+          multiplicityWideHistogram->GetEntries()) !=
           expectedSuccesses) {
     fail("multiplicity histogram entries do not equal successful events");
   }
@@ -743,16 +646,16 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
     fail("weighted multiplicity histogram does not close to metadata");
   }
   const double strongHistogramSumWeights =
-      multiplicityStrongEmHistogram->Integral(
-          0, multiplicityStrongEmHistogram->GetNbinsX() + 1);
+      multiplicityWideHistogram->Integral(
+          0, multiplicityWideHistogram->GetNbinsX() + 1);
   double strongHistogramSumWeights2 = 0.0;
-  if (multiplicityStrongEmHistogram->GetSumw2N() <= 0) {
+  if (multiplicityWideHistogram->GetSumw2N() <= 0) {
     fail("strong/EM multiplicity histogram lacks Sumw2");
   } else {
     for (int bin = 0;
-         bin <= multiplicityStrongEmHistogram->GetNbinsX() + 1; ++bin) {
+         bin <= multiplicityWideHistogram->GetNbinsX() + 1; ++bin) {
       strongHistogramSumWeights2 +=
-          multiplicityStrongEmHistogram->GetSumw2()->At(bin);
+          multiplicityWideHistogram->GetSumw2()->At(bin);
     }
   }
   if (!approximatelyEqual(strongHistogramSumWeights, sumw) ||
@@ -1055,10 +958,9 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
           {"pthat", "Double_t", 1},
           {"hard_scale", "Double_t", 1},
           {"n_mpi", "Int_t", 1},
-          {"multiplicity_hadronisation_v1", "Int_t", 1},
-          {"multiplicity_final_strong_em_v1", "Int_t", 1},
-          {"multiplicity_direct_by_species", "Int_t", 5},
-          {"multiplicity_strong_em_by_species", "Int_t", 5},
+          {"multiplicity_primary_charged_eta10_v1", "Int_t", 1},
+          {"multiplicity_primary_charged_eta40_v1", "Int_t", 1},
+          {"multiplicity_central_by_species", "Int_t", 6},
           {"MULTIPLICITY", "Int_t", 1},
           {"PROCESSCODE", "Int_t", 1},
           {"NCHARM", "Int_t", 1},
@@ -1105,9 +1007,7 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
       "ancestryIndex", "ancestryPdg", "ancestryStatus", "ancestryMother1",
       "ancestryMother2", "ancestryMotherOffsets", "ancestryMothers",
       "multAuditParticleIndex", "multAuditPdg", "multAuditStatus",
-      "multAuditHasWeakDecayTransition", "multAuditEventPdg",
-      "multAuditEventStatus", "multAuditEventMotherOffsets",
-      "multAuditEventMothers"};
+      "multAuditIsHeavy"};
   for (const char* name : requiredIntegerVectors) {
     TBranch* branch = tree->GetBranch(name);
     if (!branch || std::string(branch->GetClassName()) != "vector<int>") {
@@ -1137,15 +1037,15 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   Double_t eventPthat = 0.0;
   Double_t eventHardScale = 0.0;
   Int_t eventNMpi = 0;
-  Int_t multiplicityDirect = 0;
-  Int_t multiplicityStrongEm = 0;
+  Int_t multiplicityCentral = 0;
+  Int_t multiplicityWide = 0;
   Int_t finalHeavyQcSumEvent = 0;
   Int_t finalHeavyQbSumEvent = 0;
   Int_t heavyFlavourConservationOkEvent = 0;
   Int_t originClassificationValidEvent = 0;
   Int_t primaryAllHeavyMatchValidEvent = 0;
-  Int_t multiplicityDirectBySpecies[5] = {0, 0, 0, 0, 0};
-  Int_t multiplicityStrongEmBySpecies[5] = {0, 0, 0, 0, 0};
+  Int_t multiplicityCentralBySpecies[
+      Hadronization::kMultiplicitySpeciesBuckets] = {0, 0, 0, 0, 0, 0};
   std::vector<int>* heavyPdg = nullptr;
   std::vector<int>* heavyIndex = nullptr;
   std::vector<int>* heavyStatus = nullptr;
@@ -1212,11 +1112,7 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   std::vector<int>* multAuditParticleIndex = nullptr;
   std::vector<int>* multAuditPdg = nullptr;
   std::vector<int>* multAuditStatus = nullptr;
-  std::vector<int>* multAuditHasWeakDecayTransition = nullptr;
-  std::vector<int>* multAuditEventPdg = nullptr;
-  std::vector<int>* multAuditEventStatus = nullptr;
-  std::vector<int>* multAuditEventMotherOffsets = nullptr;
-  std::vector<int>* multAuditEventMothers = nullptr;
+  std::vector<int>* multAuditIsHeavy = nullptr;
   std::vector<double>* multAuditPt = nullptr;
   std::vector<double>* multAuditEta = nullptr;
   std::vector<double>* heavyPt = nullptr;
@@ -1235,10 +1131,10 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   tree->SetBranchAddress("pthat", &eventPthat);
   tree->SetBranchAddress("hard_scale", &eventHardScale);
   tree->SetBranchAddress("n_mpi", &eventNMpi);
-  tree->SetBranchAddress("multiplicity_hadronisation_v1",
-                         &multiplicityDirect);
-  tree->SetBranchAddress("multiplicity_final_strong_em_v1",
-                         &multiplicityStrongEm);
+  tree->SetBranchAddress("multiplicity_primary_charged_eta10_v1",
+                         &multiplicityCentral);
+  tree->SetBranchAddress("multiplicity_primary_charged_eta40_v1",
+                         &multiplicityWide);
   tree->SetBranchAddress("final_heavy_qc_sum", &finalHeavyQcSumEvent);
   tree->SetBranchAddress("final_heavy_qb_sum", &finalHeavyQbSumEvent);
   tree->SetBranchAddress("heavy_flavour_conservation_ok",
@@ -1247,10 +1143,8 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
                          &originClassificationValidEvent);
   tree->SetBranchAddress("primary_all_heavy_match_valid",
                          &primaryAllHeavyMatchValidEvent);
-  tree->SetBranchAddress("multiplicity_direct_by_species",
-                         multiplicityDirectBySpecies);
-  tree->SetBranchAddress("multiplicity_strong_em_by_species",
-                         multiplicityStrongEmBySpecies);
+  tree->SetBranchAddress("multiplicity_central_by_species",
+                         multiplicityCentralBySpecies);
   tree->SetBranchAddress("heavyPdg", &heavyPdg);
   tree->SetBranchAddress("heavyIndex", &heavyIndex);
   tree->SetBranchAddress("heavyStatus", &heavyStatus);
@@ -1326,16 +1220,9 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
                          &multAuditParticleIndex);
   tree->SetBranchAddress("multAuditPdg", &multAuditPdg);
   tree->SetBranchAddress("multAuditStatus", &multAuditStatus);
-  tree->SetBranchAddress("multAuditHasWeakDecayTransition",
-                         &multAuditHasWeakDecayTransition);
+  tree->SetBranchAddress("multAuditIsHeavy", &multAuditIsHeavy);
   tree->SetBranchAddress("multAuditPt", &multAuditPt);
   tree->SetBranchAddress("multAuditEta", &multAuditEta);
-  tree->SetBranchAddress("multAuditEventPdg", &multAuditEventPdg);
-  tree->SetBranchAddress("multAuditEventStatus", &multAuditEventStatus);
-  tree->SetBranchAddress("multAuditEventMotherOffsets",
-                         &multAuditEventMotherOffsets);
-  tree->SetBranchAddress("multAuditEventMothers",
-                         &multAuditEventMothers);
   tree->SetBranchAddress("heavyPt", &heavyPt);
   tree->SetBranchAddress("heavyEta", &heavyEta);
   tree->SetBranchAddress("heavyPx", &heavyPx);
@@ -1363,29 +1250,29 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   unsigned long long observedPrimaryAllHeavyConflictGroups = 0;
   unsigned long long observedPrimaryAllHeavyDemotions = 0;
   unsigned long long observedMultiplicityOverflow = 0;
-  unsigned long long observedMultiplicityStrongEmOverflow = 0;
+  unsigned long long observedMultiplicityWideOverflow = 0;
   double observedSumWeights = 0.0;
   double observedSumWeights2 = 0.0;
   std::map<int, unsigned long long> observedProcessCounts;
-  const int directMultiplicityBins = multiplicity->GetNbinsX();
-  const int strongEmMultiplicityBins =
-      multiplicityStrongEmHistogram->GetNbinsX();
-  if (directMultiplicityBins < 1 || strongEmMultiplicityBins < 1) {
+  const int centralMultiplicityBins = multiplicity->GetNbinsX();
+  const int wideMultiplicityBins =
+      multiplicityWideHistogram->GetNbinsX();
+  if (centralMultiplicityBins < 1 || wideMultiplicityBins < 1) {
     fail("multiplicity histograms have no regular bins");
     return errors;
   }
-  const std::size_t directMultiplicityStorageSize =
-      static_cast<std::size_t>(directMultiplicityBins) + 2U;
-  const std::size_t strongEmMultiplicityStorageSize =
-      static_cast<std::size_t>(strongEmMultiplicityBins) + 2U;
+  const std::size_t centralMultiplicityStorageSize =
+      static_cast<std::size_t>(centralMultiplicityBins) + 2U;
+  const std::size_t wideMultiplicityStorageSize =
+      static_cast<std::size_t>(wideMultiplicityBins) + 2U;
   std::vector<double> observedMultiplicityBinSumW(
-      directMultiplicityStorageSize, 0.0);
+      centralMultiplicityStorageSize, 0.0);
   std::vector<double> observedMultiplicityBinSumW2(
-      directMultiplicityStorageSize, 0.0);
-  std::vector<double> observedStrongEmBinSumW(
-      strongEmMultiplicityStorageSize, 0.0);
-  std::vector<double> observedStrongEmBinSumW2(
-      strongEmMultiplicityStorageSize, 0.0);
+      centralMultiplicityStorageSize, 0.0);
+  std::vector<double> observedWideBinSumW(
+      wideMultiplicityStorageSize, 0.0);
+  std::vector<double> observedWideBinSumW2(
+      wideMultiplicityStorageSize, 0.0);
   for (Long64_t entry = 0; entry < tree->GetEntries(); ++entry) {
     tree->GetEntry(entry);
     if (!eventIds.insert(eventId).second) fail("duplicate event ID");
@@ -1413,13 +1300,13 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
       observedSumWeights += eventWeight;
       observedSumWeights2 += eventWeight * eventWeight;
       ++observedProcessCounts[processCodeEvent];
-      const int directBin = multiplicity->FindFixBin(multiplicityDirect);
+      const int directBin = multiplicity->FindFixBin(multiplicityCentral);
       const int strongBin =
-          multiplicityStrongEmHistogram->FindFixBin(multiplicityStrongEm);
+          multiplicityWideHistogram->FindFixBin(multiplicityWide);
       if (directBin < 0 ||
           directBin >= static_cast<int>(observedMultiplicityBinSumW.size()) ||
           strongBin < 0 ||
-          strongBin >= static_cast<int>(observedStrongEmBinSumW.size())) {
+          strongBin >= static_cast<int>(observedWideBinSumW.size())) {
         fail("ROOT multiplicity bin lookup returned an invalid bin");
       } else {
         const std::size_t directBinIndex =
@@ -1429,159 +1316,98 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
         observedMultiplicityBinSumW[directBinIndex] += eventWeight;
         observedMultiplicityBinSumW2[directBinIndex] +=
             eventWeight * eventWeight;
-        observedStrongEmBinSumW[strongBinIndex] += eventWeight;
-        observedStrongEmBinSumW2[strongBinIndex] +=
+        observedWideBinSumW[strongBinIndex] += eventWeight;
+        observedWideBinSumW2[strongBinIndex] +=
             eventWeight * eventWeight;
       }
-      if (multiplicityDirect < 0 ||
-          multiplicityDirect > multiplicity->GetNbinsX() - 1) {
+      if (multiplicityCentral < 0 ||
+          multiplicityCentral > multiplicity->GetNbinsX() - 1) {
         ++observedMultiplicityOverflow;
       }
-      if (multiplicityStrongEm < 0 ||
-          multiplicityStrongEm >
-              multiplicityStrongEmHistogram->GetNbinsX() - 1) {
-        ++observedMultiplicityStrongEmOverflow;
+      if (multiplicityWide < 0 ||
+          multiplicityWide >
+              multiplicityWideHistogram->GetNbinsX() - 1) {
+        ++observedMultiplicityWideOverflow;
       }
     }
     if (!std::isfinite(eventPthat) || !std::isfinite(eventHardScale) ||
         eventPthat + 1e-12 < phaseSpacePthatMin || eventNMpi < 0) {
       fail("invalid event hard-scale/pTHat/MPI metadata");
     }
-    int directComponentSum = 0;
-    int strongEmComponentSum = 0;
-    for (int species = 0; species < 5; ++species) {
-      directComponentSum += multiplicityDirectBySpecies[species];
-      strongEmComponentSum += multiplicityStrongEmBySpecies[species];
+    int centralComponentSum = 0;
+    for (int species = 0;
+         species < Hadronization::kMultiplicitySpeciesBuckets; ++species) {
+      centralComponentSum += multiplicityCentralBySpecies[species];
     }
-    if (directComponentSum != multiplicityDirect ||
-        strongEmComponentSum != multiplicityStrongEm) {
+    if (centralComponentSum != multiplicityCentral) {
       fail("multiplicity component sum mismatch");
     }
+    if (multiplicityCentral > multiplicityWide) {
+      fail("central multiplicity window exceeds the wider window");
+    }
+    // Pilot-only independent recomputation. The flat record lists every
+    // final charged particle, so both counters follow from it alone. The
+    // live-generator test Validation/TestPrimaryChargedDefinition.C proves
+    // separately that the record is complete.
     const std::size_t auditSize = multAuditPdg ? multAuditPdg->size() : 0;
     const bool auditSizesMatch =
         multAuditPdg && multAuditParticleIndex &&
         multAuditParticleIndex->size() == auditSize &&
         multAuditStatus && multAuditStatus->size() == auditSize &&
-        multAuditHasWeakDecayTransition &&
-        multAuditHasWeakDecayTransition->size() == auditSize &&
+        multAuditIsHeavy && multAuditIsHeavy->size() == auditSize &&
         multAuditPt && multAuditPt->size() == auditSize &&
         multAuditEta && multAuditEta->size() == auditSize;
     if (!auditSizesMatch) {
       fail("multiplicity audit vector-size mismatch");
     } else if (static_cast<unsigned long long>(entry) <
                multiplicityAuditEvents) {
-      int auditDirect = 0;
-      int auditStrongEm = 0;
-      std::array<int, 5> auditDirectBySpecies{{0, 0, 0, 0, 0}};
-      std::array<int, 5> auditStrongEmBySpecies{{0, 0, 0, 0, 0}};
-      const bool auditGraphAvailable =
-          multAuditEventPdg && multAuditEventStatus &&
-          multAuditEventMotherOffsets && multAuditEventMothers &&
-          multAuditEventPdg->size() == multAuditEventStatus->size();
-      if (!auditGraphAvailable) {
-        fail("multiplicity audit event graph is missing or malformed");
-      } else if (multAuditEventPdg->empty() ||
-                 !RecomputeWeakDecayTransition(
-                      0, *multAuditEventPdg, *multAuditEventStatus,
-                      *multAuditEventMotherOffsets,
-                      *multAuditEventMothers)
-                      .graphValid) {
-        fail("multiplicity audit event graph is structurally invalid");
-      }
-      std::vector<int> expectedAuditIndices;
-      if (multAuditEventPdg && multAuditEventStatus &&
-          multAuditEventPdg->size() == multAuditEventStatus->size()) {
-        for (std::size_t index = 1; index < multAuditEventPdg->size();
-             ++index) {
-          if ((*multAuditEventStatus)[index] > 0 &&
-              Hadronization::IsMultiplicitySpecies(
-                  std::abs((*multAuditEventPdg)[index]))) {
-            expectedAuditIndices.push_back(static_cast<int>(index));
-          }
-        }
-      }
-      if (multAuditParticleIndex &&
-          *multAuditParticleIndex != expectedAuditIndices) {
-        fail("multiplicity audit candidate index set is incomplete");
-      }
+      int auditCentral = 0;
+      int auditWide = 0;
+      std::array<int, Hadronization::kMultiplicitySpeciesBuckets>
+          auditCentralBySpecies{{0, 0, 0, 0, 0, 0}};
+      int previousIndex = -1;
       for (std::size_t row = 0; row < auditSize; ++row) {
-        if (!auditGraphAvailable) break;
         const int particleIndex = (*multAuditParticleIndex)[row];
-        if (!multAuditEventPdg || !multAuditEventStatus ||
-            particleIndex < 0 ||
-            static_cast<std::size_t>(particleIndex) >=
-                multAuditEventPdg->size() ||
-            static_cast<std::size_t>(particleIndex) >=
-                multAuditEventStatus->size()) {
-          fail("multiplicity audit particle index is invalid");
+        if (particleIndex <= previousIndex) {
+          fail("multiplicity audit rows are not strictly index-ordered");
+        }
+        previousIndex = particleIndex;
+        const int isHeavy = (*multAuditIsHeavy)[row];
+        if (isHeavy != 0 && isHeavy != 1) {
+          fail("multiplicity audit heavy flag is not boolean");
           continue;
         }
-        if ((*multAuditPdg)[row] !=
-                (*multAuditEventPdg)[static_cast<std::size_t>(
-                    particleIndex)] ||
-            (*multAuditStatus)[row] !=
-                (*multAuditEventStatus)[static_cast<std::size_t>(
-                    particleIndex)]) {
-          fail("multiplicity audit candidate differs from event graph");
-          continue;
+        if (Hadronization::CountsNchPrimaryChargedV1(
+                true, true, isHeavy != 0, (*multAuditPt)[row],
+                (*multAuditEta)[row],
+                Hadronization::kMultiplicityEtaCentral)) {
+          ++auditCentral;
+          ++auditCentralBySpecies[static_cast<std::size_t>(
+              Hadronization::MultiplicitySpeciesIndex(
+                  std::abs((*multAuditPdg)[row])))];
         }
-        const WeakTransitionAudit transition =
-            RecomputeWeakDecayTransition(
-                particleIndex, *multAuditEventPdg, *multAuditEventStatus,
-                *multAuditEventMotherOffsets, *multAuditEventMothers);
-        if (!transition.graphValid) {
-          fail("multiplicity audit ancestry graph is invalid");
-          continue;
-        }
-        const int storedTransition =
-            (*multAuditHasWeakDecayTransition)[row];
-        if ((storedTransition != 0 && storedTransition != 1) ||
-            storedTransition !=
-                (transition.hasWeakDecayTransition ? 1 : 0)) {
-          fail("stored weak-decay transition disagrees with independent "
-               "ancestry recomputation");
-        }
-        const int species = Hadronization::MultiplicitySpeciesIndex(
-            std::abs((*multAuditPdg)[row]));
-        if (species < 0) {
-          fail("multiplicity audit contains an unsupported species");
-          continue;
-        }
-        if (Hadronization::IsMultiplicityKinematic(
-                (*multAuditPt)[row], (*multAuditEta)[row])) {
-          if (Hadronization::IsDirectPrimaryStatus(
-                  (*multAuditStatus)[row])) {
-            ++auditDirect;
-            ++auditDirectBySpecies[static_cast<std::size_t>(species)];
-          }
-          if (!transition.hasWeakDecayTransition) {
-            ++auditStrongEm;
-            ++auditStrongEmBySpecies[static_cast<std::size_t>(species)];
-          }
+        if (Hadronization::CountsNchPrimaryChargedV1(
+                true, true, isHeavy != 0, (*multAuditPt)[row],
+                (*multAuditEta)[row],
+                Hadronization::kMultiplicityEtaWide)) {
+          ++auditWide;
         }
       }
-      if (auditDirect != multiplicityDirect ||
-          auditStrongEm != multiplicityStrongEm) {
+      if (auditCentral != multiplicityCentral ||
+          auditWide != multiplicityWide) {
         fail("independent pilot multiplicity recomputation mismatch");
       }
-      for (int species = 0; species < 5; ++species) {
-        if (auditDirectBySpecies[static_cast<std::size_t>(species)] !=
-                multiplicityDirectBySpecies[species] ||
-            auditStrongEmBySpecies[static_cast<std::size_t>(species)] !=
-                multiplicityStrongEmBySpecies[species]) {
+      for (int species = 0;
+           species < Hadronization::kMultiplicitySpeciesBuckets; ++species) {
+        if (auditCentralBySpecies[static_cast<std::size_t>(species)] !=
+            multiplicityCentralBySpecies[species]) {
           fail("independent pilot multiplicity species recomputation "
                "mismatch");
         }
       }
     } else if (auditSize != 0 ||
                (multAuditParticleIndex &&
-                !multAuditParticleIndex->empty()) ||
-               (multAuditEventPdg && !multAuditEventPdg->empty()) ||
-               (multAuditEventStatus && !multAuditEventStatus->empty()) ||
-               (multAuditEventMotherOffsets &&
-                !multAuditEventMotherOffsets->empty()) ||
-               (multAuditEventMothers &&
-                !multAuditEventMothers->empty())) {
+                !multAuditParticleIndex->empty())) {
       fail("multiplicity audit data present beyond declared pilot range");
     }
     std::map<int, int> hardByIndex;
@@ -2396,8 +2222,8 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
     fail("tree process counts do not match process_counts summary");
   }
   if (observedMultiplicityOverflow != multiplicityOverflow ||
-      observedMultiplicityStrongEmOverflow !=
-          multiplicityStrongEmOverflow) {
+      observedMultiplicityWideOverflow !=
+          multiplicityWideOverflow) {
     fail("tree multiplicity overflows do not match metadata");
   }
   const auto compareHistogramBins =
@@ -2432,9 +2258,9 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   compareHistogramBins(multiplicity, observedMultiplicityBinSumW,
                        observedMultiplicityBinSumW2,
                        "hadronisation multiplicity");
-  compareHistogramBins(multiplicityStrongEmHistogram,
-                       observedStrongEmBinSumW,
-                       observedStrongEmBinSumW2,
+  compareHistogramBins(multiplicityWideHistogram,
+                       observedWideBinSumW,
+                       observedWideBinSumW2,
                        "strong/EM multiplicity");
   if (static_cast<unsigned long long>(processHistogram->GetEntries()) !=
       expectedSuccesses) {

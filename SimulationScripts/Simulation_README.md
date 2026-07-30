@@ -145,8 +145,8 @@ promotes it only after success.
 | effective settings | `effective_pythia_settings_exhaustive_v2` |
 | tune allowlist | `pythia_tune_difference_allowlist_v2` |
 | all-primary-heavy match | `primary_all_heavy_constituent_match_v1` |
-| central multiplicity | `NCH_HADRONISATION_V1` |
-| cross-check multiplicity | `NCH_FINAL_STRONG_EM_V1` |
+| central multiplicity | `NCH_PRIMARY_CHARGED_ETA10_V1` |
+| cross-check multiplicity | `NCH_PRIMARY_CHARGED_ETA40_V1` |
 | weak-transition rule | `weak_decay_transition_pythia_status_v1` |
 
 The job metadata stores the schema/algorithm/checksum identities. A validator
@@ -280,33 +280,30 @@ superseding PASS before production.
 
 ## Multiplicity
 
-`NCH_HADRONISATION_V1` counts signed e, mu, pi, K, p/antiproton species with:
+`NCH_PRIMARY_CHARGED_ETA10_V1` counts every final, charged, non-heavy-flavour
+particle with:
 
-- positive PYTHIA status 81--89;
 - `pT > 0.15 GeV/c`;
-- `|eta| <= 4`.
+- `|eta| <= 1.0`.
 
-`NCH_FINAL_STRONG_EM_V1` counts the same species/acceptance after direct or
-strong/electromagnetic production. It excludes a final particle only when its
-explicit mother graph contains a transition satisfying
-`weak_decay_transition_pythia_status_v1`: the parent is a registered weak
-parent with negative PYTHIA status, the child has absolute PYTHIA
-decay-product status 91--97, and their absolute PDG IDs differ. Same-particle
-copy, recoil, oscillation, or status-99 Bose--Einstein links are traversed but
-do not themselves imply a weak decay. Therefore a primary muon, pion, or kaon
-is not excluded merely because its own species can decay weakly. The first
-configured pilot events store the complete event PDG/status/mother graph, and
-`Validation/ValidateRawOutput.C` independently recomputes every stored
-transition decision rather than trusting the producer boolean. This rule is
-specific to the pinned PYTHIA 8.315 event-record convention.
-The installed definition is in
-`${PYTHIA8}/share/Pythia8/xmldoc/ParticleProperties.xml`.
+`NCH_PRIMARY_CHARGED_ETA40_V1` is identical except `|eta| <= 4.0`.
 
-Because heavy hadrons are stabilized, this cross-check lacks their charged
-decay daughters. It is not the central multiplicity.
+Charge and heavy content come from PYTHIA ParticleData, not from a hand-written
+species list, so Sigma+-, Xi- and Omega- are counted as the conventional
+primary-charged definition requires. PYTHIA status is not used: with
+`ParticleDecays:limitTau0 = on` and `tau0Max = 0.01` mm every weakly decaying
+light hadron stays final, so `isFinal()` already means "primary". No light
+hadron has `0.01 mm < c*tau0 < 10 mm`, so this is exactly equivalent to the
+conventional 1 cm/c threshold; `Validation/TestPrimaryChargedDefinition.C`
+proves that against the installed ParticleData and recounts both windows from
+live events.
 
-Boundary conditions are strict and unit tested. Both counters, by-species
-audit fields, and overflow counters are stored.
+Charm and beauty hadrons are excluded: their decays are disabled, so they are
+final only as an artefact of the production policy, and counting them would
+correlate the event-activity classifier with the observable it classifies.
+
+A six-bucket species breakdown (e, mu, pi, K, p, other charged) is stored for
+the central window so the composition can be audited.
 
 ## Successful-event and resource accounting
 

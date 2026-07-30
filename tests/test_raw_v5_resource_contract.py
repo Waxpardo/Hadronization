@@ -69,31 +69,53 @@ def test_raw_v5_compatibility_status_and_indices_are_integer_typed() -> None:
         assert f'"{name}"' in VALIDATOR
 
 
-def test_weak_decay_transition_is_independently_auditable() -> None:
+def test_primary_charged_multiplicity_is_independently_auditable() -> None:
+    """The pilot record must let the validator recompute Nch from scratch."""
     for branch in (
         "multAuditParticleIndex",
-        "multAuditHasWeakDecayTransition",
-        "multAuditEventPdg",
-        "multAuditEventStatus",
-        "multAuditEventMotherOffsets",
-        "multAuditEventMothers",
+        "multAuditPdg",
+        "multAuditStatus",
+        "multAuditIsHeavy",
+        "multAuditPt",
+        "multAuditEta",
     ):
         assert f"BRANCH_VECTOR({branch})" in PRODUCER
         assert f'"{branch}"' in VALIDATOR
-    assert "HasWeakDecayTransition(pythia.event, index)" in PRODUCER
-    assert "RecomputeWeakDecayTransition(" in VALIDATOR
-    assert (
-        "stored weak-decay transition disagrees with independent "
-        in VALIDATOR
-    )
-    assert "multiplicity audit candidate index set is incomplete" in VALIDATOR
-    assert "multAuditHasWeakAncestor" not in PRODUCER
-    assert "multAuditHasWeakAncestor" not in VALIDATOR
-    for metadata_name in (
-        "weak_parent_registry_schema",
-        "weak_parent_registry_sha256",
-        "weak_decay_transition_rule",
+
+    # Both windows are stored, and the central one is the published classifier.
+    for branch in (
+        "multiplicity_primary_charged_eta10_v1",
+        "multiplicity_primary_charged_eta40_v1",
+        "multiplicity_central_by_species",
     ):
+        assert f'tree.Branch("{branch}"' in PRODUCER
+        assert f'"{branch}"' in VALIDATOR
+
+    # Charge and heavy content come from the generator, never from hand-rolled
+    # PDG digit arithmetic in the producer's multiplicity path.
+    assert "particle.isCharged()" in PRODUCER
+    assert 'pythia.particleData.nQuarksInCode(id, 4)' in PRODUCER
+    assert "CountsNchPrimaryChargedV1" in PRODUCER
+    assert "CountsNchPrimaryChargedV1" in VALIDATOR
+
+    # The superseded ancestry-based cross-check must be fully gone: with
+    # ParticleDecays:limitTau0 in force it reconstructed a condition the
+    # generator already guarantees.
+    for removed in (
+        "HasWeakDecayTransition",
+        "RecomputeWeakDecayTransition",
+        "multAuditHasWeakDecayTransition",
+        "multAuditEventMothers",
+        "weak_parent_registry_schema",
+        "multiplicity_final_strong_em_v1",
+    ):
+        assert removed not in PRODUCER, removed
+        assert removed not in VALIDATOR, removed
+
+    # The recomputation and the window-nesting invariant must be enforced.
+    assert "independent pilot multiplicity recomputation mismatch" in VALIDATOR
+    assert "central multiplicity window exceeds the wider window" in VALIDATOR
+    for metadata_name in ("multiplicity_definition",):
         assert f'metadata.Branch("{metadata_name}"' in PRODUCER
         assert f'ReadString(metadata, "{metadata_name}"' in VALIDATOR
 
@@ -104,7 +126,7 @@ def main() -> int:
     test_root_compression_contract_is_persisted_and_cross_checked()
     test_exact_signed_hard_pair_persists_root_and_bottom_copy_state()
     test_raw_v5_compatibility_status_and_indices_are_integer_typed()
-    test_weak_decay_transition_is_independently_auditable()
+    test_primary_charged_multiplicity_is_independently_auditable()
     print("raw-v5 resource-contract tests passed")
     return 0
 

@@ -82,7 +82,7 @@ def main() -> int:
                 {
                     "schema": "hf_gate_b_pilot_campaign_v1",
                     "campaign": "gate_b_render_test",
-                    "raw_schema": "hf_primary_ground_raw_v5",
+                    "raw_schema": "hf_primary_ground_raw_v6",
                     "origin_algorithm":
                         "signed_heavy_constituent_complete_mothers_unique_v4",
                 }

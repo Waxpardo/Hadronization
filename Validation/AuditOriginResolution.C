@@ -533,7 +533,7 @@ int AuditOriginResolution(const char* inputPath, const char* outputPath,
         "hard_indices",
         "hard_ids",
         "event_weight",
-        "multiplicity_hadronisation_v1",
+        "multiplicity_primary_charged_eta10_v1",
         "heavy_flavour_conservation_ok",
         "origin_classification_valid",
         "primary_all_heavy_match_valid",
@@ -594,7 +594,7 @@ int AuditOriginResolution(const char* inputPath, const char* outputPath,
     std::vector<double>* eta = nullptr;
     tree->SetBranchAddress("hard_channel", &hardChannel);
     tree->SetBranchAddress("event_weight", &eventWeight);
-    tree->SetBranchAddress("multiplicity_hadronisation_v1", &multiplicity);
+    tree->SetBranchAddress("multiplicity_primary_charged_eta10_v1", &multiplicity);
     tree->SetBranchAddress("heavy_flavour_conservation_ok", &conservationOk);
     tree->SetBranchAddress("origin_classification_valid",
                            &classificationValid);

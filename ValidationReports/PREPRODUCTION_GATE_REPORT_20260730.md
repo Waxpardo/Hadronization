@@ -38,7 +38,7 @@ The release candidate must use:
 
 | Contract | Version |
 |---|---|
-| raw schema | `hf_primary_ground_raw_v5` |
+| raw schema | `hf_primary_ground_raw_v6` |
 | central selector | `hard_trigger_primary_ground__primary_ground_associate_v1` |
 | origin algorithm | `signed_heavy_constituent_complete_mothers_unique_v4` |
 | heavy-stability audit | `heavy_stability_audit_v2` |
@@ -54,6 +54,39 @@ The release candidate must use:
 
 Any older raw-v3/v4 pilot is historical diagnostic evidence and cannot pass
 the current gates.
+
+## Amendment 2026-07-30b: charged-particle multiplicity redefinition
+
+The event-activity classifier was `NCH_HADRONISATION_V1`, which counted only
+`e, mu, pi, K, p` carrying PYTHIA hadronisation status 81--89. Measured on the
+existing `27-03-2026` reduction that counter has mean 13.8 over `|eta| <= 4`,
+roughly a quarter of the true charged-particle multiplicity over the same
+range, because every pion from rho, K*, Delta or omega decay was excluded. It
+was therefore not a charged-particle multiplicity and could not support the
+draft's claim of a connection to measured multiplicity-dependent hadronisation.
+
+It is replaced by `NCH_PRIMARY_CHARGED_ETA10_V1` (central, `|eta| < 1`) and
+`NCH_PRIMARY_CHARGED_ETA40_V1` (cross-check, `|eta| < 4`): final, charged,
+non-heavy-flavour particles above `pT > 0.15 GeV/c`, with charge and heavy
+content taken from PYTHIA ParticleData.
+
+The superseded `NCH_FINAL_STRONG_EM_V1` cross-check has been deleted with its
+weak-parent registry, generated header, ancestry traversal, per-event mother
+graph and validator reimplementation. Under `ParticleDecays:limitTau0` no
+weak-decay daughter is ever final, so that counter reconstructed a condition
+the generator already guarantees and was never independent. The two
+pseudorapidity windows replace it as a genuine systematic handle.
+
+Consequences that are not yet discharged:
+
+- the raw schema is now `hf_primary_ground_raw_v6`; every raw-v5 pilot is
+  historical evidence only and cannot satisfy any gate;
+- percentile boundaries, every multiplicity-differential figure, and every
+  associated caption must be regenerated;
+- `Validation/TestPrimaryChargedDefinition.C` must be run on Nikhef for all
+  three tunes as part of Gate A; it is the machine check that the card
+  lifetime threshold is equivalent to the conventional 1 cm/c primary
+  definition, and it cannot run where PYTHIA is unavailable.
 
 ## Gate status
 

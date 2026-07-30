@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <set>
 #include <vector>
@@ -52,7 +53,7 @@ void AssertOrigin(const HeavyOriginMatch& match, Origin origin,
 }  // namespace
 
 int main() {
-  assert(std::string(kRawSchema) == "hf_primary_ground_raw_v5");
+  assert(std::string(kRawSchema) == "hf_primary_ground_raw_v6");
   assert(std::string(kOriginAlgorithmVersion) ==
          "signed_heavy_constituent_complete_mothers_unique_v4");
   assert(std::string(kHeavyStabilityAuditSchema) ==
@@ -344,96 +345,53 @@ int main() {
   assert(IsCentralKinematic(std::nextafter(1.0, 2.0), 4.0, true));
   assert(!IsCentralKinematic(2.0, std::nextafter(4.0, 5.0), true));
   assert(!IsCentralKinematic(0.15, 0.0, false));
-  assert(CountsNchHadronisationV1(211, 81, true,
-                                  std::nextafter(0.15, 1.0), 4.0));
-  assert(!CountsNchHadronisationV1(211, 81, true, 0.15, 0.0));
-  assert(!CountsNchHadronisationV1(
-      211, 81, true, 1.0, std::nextafter(4.0, 5.0)));
-  assert(!CountsNchHadronisationV1(211, -81, true, 1.0, 0.0));
-  assert(!CountsNchHadronisationV1(211, 81, false, 1.0, 0.0));
-  assert(!CountsNchHadronisationV1(111, 81, true, 1.0, 0.0));
-  for (const int pdg : {11, -11, 13, -13, 211, -211, 321, -321, 2212,
-                        -2212}) {
-    assert(CountsNchHadronisationV1(pdg, 85, true, 1.0, 0.0));
-    assert(CountsNchFinalStrongEmV1(pdg, true, 1.0, 0.0, false));
-    assert(!CountsNchFinalStrongEmV1(pdg, true, 1.0, 0.0, true));
+  // NCH_PRIMARY_CHARGED_*_V1 is a charged-particle multiplicity, so it is
+  // driven by generator-supplied charge and heavy content, never by a
+  // hand-rolled species list.
+  const double etaC = kMultiplicityEtaCentral;
+  const double etaW = kMultiplicityEtaWide;
+  assert(CountsNchPrimaryChargedV1(true, true, false, 1.0, 0.0, etaC));
+  // Non-final, neutral, or heavy-flavour particles never count.
+  assert(!CountsNchPrimaryChargedV1(false, true, false, 1.0, 0.0, etaC));
+  assert(!CountsNchPrimaryChargedV1(true, false, false, 1.0, 0.0, etaC));
+  assert(!CountsNchPrimaryChargedV1(true, true, true, 1.0, 0.0, etaC));
+  // The pT threshold is exclusive and the eta bound inclusive.
+  assert(!CountsNchPrimaryChargedV1(true, true, false, kMultiplicityPtMin, 0.0,
+                                    etaC));
+  assert(CountsNchPrimaryChargedV1(
+      true, true, false, std::nextafter(kMultiplicityPtMin, 1.0), 0.0, etaC));
+  assert(CountsNchPrimaryChargedV1(true, true, false, 1.0, etaC, etaC));
+  assert(!CountsNchPrimaryChargedV1(true, true, false, 1.0,
+                                    std::nextafter(etaC, 9.0), etaC));
+  // The central window is strictly nested inside the cross-check window, so
+  // any particle counted centrally is counted in the wide window as well.
+  for (const double eta : {0.0, 0.5, 1.0, 2.0, 3.9}) {
+    if (CountsNchPrimaryChargedV1(true, true, false, 1.0, eta, etaC)) {
+      assert(CountsNchPrimaryChargedV1(true, true, false, 1.0, eta, etaW));
+    }
   }
-  for (const int weakParent : {13, 15, 211, 311, 310, 130, 321, 2112,
-                               3122, 3112, 3222, 3312, 3322, 3334,
-                               411, 511}) {
-    assert(IsKnownWeakParent(weakParent));
-    assert(IsKnownWeakParent(-weakParent));
+  assert(etaC < etaW);
+  // Non-finite kinematics are rejected rather than silently counted.
+  assert(!CountsNchPrimaryChargedV1(
+      true, true, false, std::numeric_limits<double>::quiet_NaN(), 0.0, etaC));
+  assert(!CountsNchPrimaryChargedV1(
+      true, true, false, 1.0, std::numeric_limits<double>::infinity(), etaC));
+  // Every charged species maps into a diagnostic bucket; unlisted species
+  // (Sigma+-, Xi-, Omega-) fall into the catch-all bucket instead of being
+  // dropped, as the conventional primary definition includes them.
+  assert(MultiplicitySpeciesIndex(11) == 0);
+  assert(MultiplicitySpeciesIndex(13) == 1);
+  assert(MultiplicitySpeciesIndex(211) == 2);
+  assert(MultiplicitySpeciesIndex(321) == 3);
+  assert(MultiplicitySpeciesIndex(2212) == 4);
+  for (const int other : {3222, 3112, 3312, 3334, 1000010020}) {
+    assert(MultiplicitySpeciesIndex(other) == kMultiplicitySpeciesBuckets - 1);
+    assert(MultiplicitySpeciesIndex(-other) == kMultiplicitySpeciesBuckets - 1);
   }
-  for (const int strongOrStableParent : {22, 111, 113, 221, 223, 2212}) {
-    assert(!IsKnownWeakParent(strongOrStableParent));
+  for (int pdg = -6000; pdg <= 6000; ++pdg) {
+    const int bucket = MultiplicitySpeciesIndex(pdg);
+    assert(bucket >= 0 && bucket < kMultiplicitySpeciesBuckets);
   }
-  assert(std::string(kWeakDecayTransitionRuleVersion) ==
-         "weak_decay_transition_pythia_status_v1");
-  assert(IsWeakDecayTransitionV1(211, -81, 13, 91));
-  assert(!IsWeakDecayTransitionV1(211, 81, 13, 91));
-  assert(!IsWeakDecayTransitionV1(211, -81, 13, 99));
-  assert(!IsWeakDecayTransitionV1(13, -81, 13, 91));
-  assert(!IsWeakDecayTransitionV1(113, -81, 211, 91));
-
-  const auto hasWeakTransition =
-      [](int finalIndex, const std::vector<int>& pdg,
-         const std::vector<int>& status,
-         const std::vector<std::vector<int>>& mothers) {
-        assert(pdg.size() == status.size());
-        assert(pdg.size() == mothers.size());
-        return HasWeakDecayTransitionV1(
-            finalIndex, static_cast<int>(pdg.size()),
-            [&pdg](int index) {
-              return pdg[static_cast<std::size_t>(index)];
-            },
-            [&status](int index) {
-              return status[static_cast<std::size_t>(index)];
-            },
-            [&mothers](int index) -> const std::vector<int>& {
-              return mothers[static_cast<std::size_t>(index)];
-            });
-      };
-
-  // A primary weak-capable species is not itself evidence of a decay.
-  for (const int primary : {13, 211, 321}) {
-    assert(!hasWeakTransition(
-        1, {0, primary}, {-11, 81}, {{}, {}}));
-  }
-  // Same-particle event-record links are traversed but never classified as
-  // weak transitions, even if the copy uses a decay-range status.
-  assert(!hasWeakTransition(
-      2, {0, 13, 13}, {-11, -81, 91}, {{}, {}, {1}}));
-  // A copy after a genuine pion decay retains that earlier weak transition.
-  assert(hasWeakTransition(
-      3, {0, 211, 13, 13}, {-11, -81, -91, 99},
-      {{}, {}, {1}, {2}}));
-  assert(hasWeakTransition(
-      2, {0, 211, 13}, {-11, -81, 91}, {{}, {}, {1}}));
-  // Kaon and hyperon cascades are excluded once any actual registered weak
-  // parent-to-decay-product edge occurs.
-  assert(hasWeakTransition(
-      3, {0, 321, 211, 13}, {-11, -81, -91, 91},
-      {{}, {}, {1}, {2}}));
-  assert(hasWeakTransition(
-      4, {0, 3312, 3122, 211, 13}, {-11, -81, -91, -91, 91},
-      {{}, {}, {1}, {2}, {3}}));
-  // A normal decay-product status does not make strong/EM resonance lineage
-  // weak when the actual parent is not in the weak-parent registry.
-  assert(!hasWeakTransition(
-      2, {0, 113, 211}, {-11, -81, 91}, {{}, {}, {1}}));
-  // Malformed and cyclic ancestry must be handled deterministically. Invalid
-  // mother indices are rejected, while a cycle with no qualifying transition
-  // terminates without inventing a weak-decay classification.
-  bool invalidMotherRejected = false;
-  try {
-    (void)hasWeakTransition(
-        2, {0, 113, 211}, {-11, -81, 91}, {{}, {}, {3}});
-  } catch (const std::invalid_argument&) {
-    invalidMotherRejected = true;
-  }
-  assert(invalidMotherRejected);
-  assert(!hasWeakTransition(
-      2, {0, 13, 13}, {-11, -81, 91}, {{}, {2}, {1}}));
 
   std::set<std::uint64_t> ids;
   for (int tune = 0; tune < 3; ++tune) {

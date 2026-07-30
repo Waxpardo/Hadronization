@@ -142,16 +142,6 @@ std::vector<int> ExplicitMotherIndices(const Event& event, int particleIndex) {
   return result;
 }
 
-bool HasWeakDecayTransition(const Event& event, int particleIndex) {
-  return HasWeakDecayTransitionV1(
-      particleIndex, event.size(),
-      [&event](int index) { return event[index].id(); },
-      [&event](int index) { return event[index].status(); },
-      [&event](int index) {
-        return ExplicitMotherIndices(event, index);
-      });
-}
-
 std::vector<HardParton> FindHardPartons(const Event& event) {
   std::vector<HardParton> result;
   for (int index = 0; index < event.size(); ++index) {
@@ -629,8 +619,8 @@ int main(int argc, char** argv) {
   Double_t pTHat = 0.0;
   Double_t hardScale = 0.0;
   Int_t nMPI = 0;
-  Int_t multiplicity = 0;
-  Int_t multiplicityStrongEm = 0;
+  Int_t multiplicityCentral = 0;
+  Int_t multiplicityWide = 0;
   Int_t nCharmOnly = 0;
   Int_t nBeautyOnly = 0;
   Int_t nBc = 0;
@@ -639,8 +629,8 @@ int main(int argc, char** argv) {
   Int_t heavyFlavourConservationOk = 0;
   Int_t originClassificationValid = 0;
   Int_t primaryAllHeavyMatchValid = 0;
-  Int_t multiplicityDirectBySpecies[5] = {0, 0, 0, 0, 0};
-  Int_t multiplicityStrongEmBySpecies[5] = {0, 0, 0, 0, 0};
+  Int_t multiplicityCentralBySpecies[kMultiplicitySpeciesBuckets] = {
+      0, 0, 0, 0, 0, 0};
 
   std::vector<int> hardIndices;
   std::vector<int> hardBottomIndices;
@@ -683,10 +673,10 @@ int main(int argc, char** argv) {
   std::vector<int> ancestryIndex, ancestryPdg, ancestryStatus;
   std::vector<int> ancestryMother1, ancestryMother2;
   std::vector<int> ancestryMotherOffsets, ancestryMothers;
+  // Pilot-only flat record of every final charged particle, so the raw
+  // validator can recompute both counters independently of the producer.
   std::vector<int> multAuditParticleIndex, multAuditPdg, multAuditStatus;
-  std::vector<int> multAuditHasWeakDecayTransition;
-  std::vector<int> multAuditEventPdg, multAuditEventStatus;
-  std::vector<int> multAuditEventMotherOffsets, multAuditEventMothers;
+  std::vector<int> multAuditIsHeavy;
   std::vector<double> multAuditPt, multAuditEta;
 
   tree.Branch("event_id", &eventId, "event_id/l");
@@ -696,16 +686,13 @@ int main(int argc, char** argv) {
   tree.Branch("pthat", &pTHat, "pthat/D");
   tree.Branch("hard_scale", &hardScale, "hard_scale/D");
   tree.Branch("n_mpi", &nMPI, "n_mpi/I");
-  tree.Branch("multiplicity_hadronisation_v1", &multiplicity,
-              "multiplicity_hadronisation_v1/I");
-  tree.Branch("multiplicity_final_strong_em_v1", &multiplicityStrongEm,
-              "multiplicity_final_strong_em_v1/I");
-  tree.Branch("multiplicity_direct_by_species",
-              multiplicityDirectBySpecies,
-              "multiplicity_direct_by_species[5]/I");
-  tree.Branch("multiplicity_strong_em_by_species",
-              multiplicityStrongEmBySpecies,
-              "multiplicity_strong_em_by_species[5]/I");
+  tree.Branch("multiplicity_primary_charged_eta10_v1", &multiplicityCentral,
+              "multiplicity_primary_charged_eta10_v1/I");
+  tree.Branch("multiplicity_primary_charged_eta40_v1", &multiplicityWide,
+              "multiplicity_primary_charged_eta40_v1/I");
+  tree.Branch("multiplicity_central_by_species",
+              multiplicityCentralBySpecies,
+              "multiplicity_central_by_species[6]/I");
   tree.Branch("hard_indices", &hardIndices);
   tree.Branch("hard_bottom_indices", &hardBottomIndices);
   tree.Branch("hard_ids", &hardIds);
@@ -727,7 +714,7 @@ int main(int argc, char** argv) {
   tree.Branch("STATUS", &legacyStatus);
   tree.Branch("MOTHER", &legacyMother);
   tree.Branch("MOTHERID", &legacyMotherId);
-  tree.Branch("MULTIPLICITY", &multiplicity, "MULTIPLICITY/I");
+  tree.Branch("MULTIPLICITY", &multiplicityCentral, "MULTIPLICITY/I");
   tree.Branch("PROCESSCODE", &processCode, "PROCESSCODE/I");
   tree.Branch("NCHARM", &nCharmOnly, "NCHARM/I");
   tree.Branch("NBEAUTY", &nBeautyOnly, "NBEAUTY/I");
@@ -810,23 +797,21 @@ int main(int argc, char** argv) {
   BRANCH_VECTOR(multAuditParticleIndex);
   BRANCH_VECTOR(multAuditPdg);
   BRANCH_VECTOR(multAuditStatus);
-  BRANCH_VECTOR(multAuditHasWeakDecayTransition);
+  BRANCH_VECTOR(multAuditIsHeavy);
   BRANCH_VECTOR(multAuditPt);
   BRANCH_VECTOR(multAuditEta);
-  BRANCH_VECTOR(multAuditEventPdg);
-  BRANCH_VECTOR(multAuditEventStatus);
-  BRANCH_VECTOR(multAuditEventMotherOffsets);
-  BRANCH_VECTOR(multAuditEventMothers);
 #undef BRANCH_VECTOR
 
-  TH1D hMultiplicity("hMULTIPLICITY",
-                     "NCH_HADRONISATION_V1;N_{ch};successful events",
-                     4096, -0.5, 4095.5);
+  TH1D hMultiplicity(
+      "hMULTIPLICITY",
+      "NCH_PRIMARY_CHARGED_ETA10_V1;N_{ch};successful events", 4096, -0.5,
+      4095.5);
   hMultiplicity.Sumw2();
-  TH1D hMultiplicityStrongEm(
-      "hMULTIPLICITY_FINAL_STRONG_EM_V1",
-      "NCH_FINAL_STRONG_EM_V1;N_{ch};successful events", 4096, -0.5, 4095.5);
-  hMultiplicityStrongEm.Sumw2();
+  TH1D hMultiplicityWide(
+      "hMULTIPLICITY_ETA40",
+      "NCH_PRIMARY_CHARGED_ETA40_V1;N_{ch};successful events", 4096, -0.5,
+      4095.5);
+  hMultiplicityWide.Sumw2();
   TH1I hProcessCode("hPROCESS_CODE", "hard process code;code;events", 1000, -0.5,
                     999.5);
 
@@ -837,7 +822,7 @@ int main(int argc, char** argv) {
   double sumWeights2 = 0.0;
   std::map<int, std::uint64_t> processCounts;
   std::uint64_t multiplicityOverflow = 0;
-  std::uint64_t multiplicityStrongEmOverflow = 0;
+  std::uint64_t multiplicityWideOverflow = 0;
   std::uint64_t contentDecodeFailures = 0;
   std::uint64_t duplicateHardCarrierConflictGroupsC = 0;
   std::uint64_t duplicateHardCarrierConflictGroupsB = 0;
@@ -943,8 +928,8 @@ int main(int argc, char** argv) {
       hardE.push_back(pythia.event[hard.rootIndex].e());
     }
 
-    multiplicity = 0;
-    multiplicityStrongEm = 0;
+    multiplicityCentral = 0;
+    multiplicityWide = 0;
     nCharmOnly = 0;
     nBeautyOnly = 0;
     nBc = 0;
@@ -953,10 +938,8 @@ int main(int argc, char** argv) {
     heavyFlavourConservationOk = 0;
     originClassificationValid = 1;
     primaryAllHeavyMatchValid = 1;
-    std::fill(std::begin(multiplicityDirectBySpecies),
-              std::end(multiplicityDirectBySpecies), 0);
-    std::fill(std::begin(multiplicityStrongEmBySpecies),
-              std::end(multiplicityStrongEmBySpecies), 0);
+    std::fill(std::begin(multiplicityCentralBySpecies),
+              std::end(multiplicityCentralBySpecies), 0);
 
 #define CLEAR_VECTOR(name) name.clear()
     CLEAR_VECTOR(legacyId); CLEAR_VECTOR(legacyClass); CLEAR_VECTOR(legacyPt);
@@ -999,66 +982,48 @@ int main(int argc, char** argv) {
     CLEAR_VECTOR(ancestryMother2); CLEAR_VECTOR(ancestryMotherOffsets);
     CLEAR_VECTOR(ancestryMothers);
     CLEAR_VECTOR(multAuditParticleIndex); CLEAR_VECTOR(multAuditPdg);
-    CLEAR_VECTOR(multAuditStatus);
-    CLEAR_VECTOR(multAuditHasWeakDecayTransition);
+    CLEAR_VECTOR(multAuditStatus); CLEAR_VECTOR(multAuditIsHeavy);
     CLEAR_VECTOR(multAuditPt); CLEAR_VECTOR(multAuditEta);
-    CLEAR_VECTOR(multAuditEventPdg); CLEAR_VECTOR(multAuditEventStatus);
-    CLEAR_VECTOR(multAuditEventMotherOffsets);
-    CLEAR_VECTOR(multAuditEventMothers);
 #undef CLEAR_VECTOR
     heavyMotherOffsets.push_back(0);
     heavyConstituentOffsets.push_back(0);
     std::set<int> ancestryNodes;
 
-    if (successes < multiplicityAuditEvents) {
-      multAuditEventMotherOffsets.push_back(0);
-      for (int index = 0; index < pythia.event.size(); ++index) {
-        multAuditEventPdg.push_back(pythia.event[index].id());
-        multAuditEventStatus.push_back(pythia.event[index].status());
-        for (const int mother :
-             ExplicitMotherIndices(pythia.event, index)) {
-          multAuditEventMothers.push_back(mother);
-        }
-        multAuditEventMotherOffsets.push_back(
-            static_cast<int>(multAuditEventMothers.size()));
-      }
-    }
-
     for (int index = 0; index < pythia.event.size(); ++index) {
       const Particle& particle = pythia.event[index];
       const int id = particle.id();
       const int absId = std::abs(id);
-      if (particle.isFinal() && IsMultiplicitySpecies(absId)) {
-        const bool hasWeakDecayTransition =
-            HasWeakDecayTransition(pythia.event, index);
+      // Charged-particle multiplicity. Heavy-flavour hadrons are excluded:
+      // they are final only because their decays were disabled, so an
+      // experiment would count their daughters instead, and including them
+      // would correlate the event-activity classifier with the observable it
+      // classifies.
+      const int pythiaCharm = pythia.particleData.nQuarksInCode(id, 4);
+      const int pythiaBeauty = pythia.particleData.nQuarksInCode(id, 5);
+      const bool hasHeavyConstituent = pythiaCharm != 0 || pythiaBeauty != 0;
+      if (particle.isFinal() && particle.isCharged()) {
         if (successes < multiplicityAuditEvents) {
           multAuditParticleIndex.push_back(index);
           multAuditPdg.push_back(id);
           multAuditStatus.push_back(particle.status());
-          multAuditHasWeakDecayTransition.push_back(
-              hasWeakDecayTransition ? 1 : 0);
+          multAuditIsHeavy.push_back(hasHeavyConstituent ? 1 : 0);
           multAuditPt.push_back(particle.pT());
           multAuditEta.push_back(particle.eta());
         }
-        const int speciesIndex = MultiplicitySpeciesIndex(absId);
-        if (CountsNchHadronisationV1(
-                id, particle.status(), particle.isFinal(), particle.pT(),
-                particle.eta())) {
-          ++multiplicity;
-          ++multiplicityDirectBySpecies[speciesIndex];
+        if (CountsNchPrimaryChargedV1(
+                particle.isFinal(), particle.isCharged(), hasHeavyConstituent,
+                particle.pT(), particle.eta(), kMultiplicityEtaCentral)) {
+          ++multiplicityCentral;
+          ++multiplicityCentralBySpecies[MultiplicitySpeciesIndex(absId)];
         }
-        if (CountsNchFinalStrongEmV1(
-                id, particle.isFinal(), particle.pT(), particle.eta(),
-                hasWeakDecayTransition)) {
-          ++multiplicityStrongEm;
-          ++multiplicityStrongEmBySpecies[speciesIndex];
+        if (CountsNchPrimaryChargedV1(
+                particle.isFinal(), particle.isCharged(), hasHeavyConstituent,
+                particle.pT(), particle.eta(), kMultiplicityEtaWide)) {
+          ++multiplicityWide;
         }
       }
 
-      if (!pythia.particleData.isHadron(id)) continue;
-      const int pythiaCharm = pythia.particleData.nQuarksInCode(id, 4);
-      const int pythiaBeauty = pythia.particleData.nQuarksInCode(id, 5);
-      if (pythiaCharm == 0 && pythiaBeauty == 0) continue;
+      if (!pythia.particleData.isHadron(id) || !hasHeavyConstituent) continue;
 
       const bool isMeson = pythia.particleData.isMeson(id);
       const bool isBaryon = pythia.particleData.isBaryon(id);
@@ -1383,10 +1348,10 @@ int main(int argc, char** argv) {
           static_cast<int>(ancestryMothers.size()));
     }
 
-    hMultiplicity.Fill(multiplicity, eventWeight);
-    hMultiplicityStrongEm.Fill(multiplicityStrongEm, eventWeight);
-    if (multiplicity > 4095) ++multiplicityOverflow;
-    if (multiplicityStrongEm > 4095) ++multiplicityStrongEmOverflow;
+    hMultiplicity.Fill(multiplicityCentral, eventWeight);
+    hMultiplicityWide.Fill(multiplicityWide, eventWeight);
+    if (multiplicityCentral > 4095) ++multiplicityOverflow;
+    if (multiplicityWide > 4095) ++multiplicityWideOverflow;
     hProcessCode.Fill(processCode);
     ++processCounts[processCode];
     sumWeights += eventWeight;
@@ -1420,7 +1385,7 @@ int main(int argc, char** argv) {
   output.cd();
   tree.Write();
   hMultiplicity.Write();
-  hMultiplicityStrongEm.Write();
+  hMultiplicityWide.Write();
   hProcessCode.Write();
 
   TTree stability("heavy_stability_audit",
@@ -1514,9 +1479,7 @@ int main(int argc, char** argv) {
   std::string originAlgorithm = kOriginAlgorithmVersion;
   std::string speciesSchema(kSpeciesRegistrySchema);
   std::string speciesSha(kSpeciesRegistrySha256);
-  std::string weakParentSchema(kWeakParentRegistrySchema);
-  std::string weakParentSha(kWeakParentRegistrySha256);
-  std::string weakTransitionRule(kWeakDecayTransitionRuleVersion);
+  std::string multiplicityDefinition(kMultiplicityDefinitionVersion);
   std::string tuneAllowlistSchema(kTuneDifferenceAllowlistSchema);
   std::string tuneAllowlistSha(kTuneDifferenceAllowlistSha256);
   std::string stabilityAuditSchema(kHeavyStabilityAuditSchema);
@@ -1542,7 +1505,7 @@ int main(int argc, char** argv) {
   ULong64_t failureCount = failures;
   ULong64_t entryCount = tree.GetEntries();
   ULong64_t multOverflow = multiplicityOverflow;
-  ULong64_t multStrongOverflow = multiplicityStrongEmOverflow;
+  ULong64_t multWideOverflow = multiplicityWideOverflow;
   ULong64_t decodeFailures = contentDecodeFailures;
   ULong64_t duplicateConflictGroupsC =
       duplicateHardCarrierConflictGroupsC;
@@ -1580,9 +1543,7 @@ int main(int argc, char** argv) {
   metadata.Branch("origin_algorithm", &originAlgorithm);
   metadata.Branch("species_registry_schema", &speciesSchema);
   metadata.Branch("species_registry_sha256", &speciesSha);
-  metadata.Branch("weak_parent_registry_schema", &weakParentSchema);
-  metadata.Branch("weak_parent_registry_sha256", &weakParentSha);
-  metadata.Branch("weak_decay_transition_rule", &weakTransitionRule);
+  metadata.Branch("multiplicity_definition", &multiplicityDefinition);
   metadata.Branch("tune_difference_allowlist_schema",
                   &tuneAllowlistSchema);
   metadata.Branch("tune_difference_allowlist_sha256",
@@ -1623,8 +1584,8 @@ int main(int argc, char** argv) {
                   "pythia_weight_sum/D");
   metadata.Branch("multiplicity_overflow", &multOverflow,
                   "multiplicity_overflow/l");
-  metadata.Branch("multiplicity_strong_em_overflow", &multStrongOverflow,
-                  "multiplicity_strong_em_overflow/l");
+  metadata.Branch("multiplicity_wide_overflow", &multWideOverflow,
+                  "multiplicity_wide_overflow/l");
   metadata.Branch("content_decode_failures", &decodeFailures,
                   "content_decode_failures/l");
   metadata.Branch("duplicate_hard_carrier_conflict_groups_charm",
@@ -1692,12 +1653,12 @@ int main(int argc, char** argv) {
   stabilityCanonicalObject.Write("heavy_stability_audit_canonical");
   TObjString stabilityShaObject(stabilityAuditSha256.c_str());
   stabilityShaObject.Write("heavy_stability_audit_sha256");
-  TObjString multiplicityCentral(kMultiplicityCentral);
-  multiplicityCentral.Write("multiplicity_central_version");
-  TObjString multiplicityCrossCheck(kMultiplicityCrossCheck);
-  multiplicityCrossCheck.Write("multiplicity_crosscheck_version");
-  TObjString weakTransitionContract(kWeakDecayTransitionRuleVersion.data());
-  weakTransitionContract.Write("weak_decay_transition_rule");
+  TObjString multiplicityCentralName(kMultiplicityCentral);
+  multiplicityCentralName.Write("multiplicity_central_version");
+  TObjString multiplicityCrossCheckName(kMultiplicityCrossCheck);
+  multiplicityCrossCheckName.Write("multiplicity_crosscheck_version");
+  TObjString multiplicityDefinitionContract(kMultiplicityDefinitionVersion);
+  multiplicityDefinitionContract.Write("multiplicity_definition");
   TObjString primaryAllHeavyMatchContract(kPrimaryAllHeavyMatchSchema);
   primaryAllHeavyMatchContract.Write("primary_all_heavy_match_version");
   output.Write();

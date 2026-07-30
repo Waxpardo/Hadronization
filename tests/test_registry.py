@@ -19,9 +19,6 @@ def main() -> int:
     )
     species = json.loads((ROOT / "config/heavy_flavour_species_v1.json").read_text())
     pairs = json.loads((ROOT / "config/heavy_flavour_pair_registry_v1.json").read_text())
-    weak_parents = json.loads(
-        (ROOT / "config/weak_decay_parent_registry_v1.json").read_text()
-    )
     states = {int(row["pdg"]): row for row in species["signed_states"]}
     definition = json.loads(
         (ROOT / "config/pair_registry_definition_v1.json").read_text()
@@ -36,14 +33,6 @@ def main() -> int:
     assert states[541]["qc"] == 1 and states[541]["qb"] == -1
     assert states[-541]["qc"] == -1 and states[-541]["qb"] == 1
     assert all(abs(row["spin2j1"]) in {1, 2} for row in states.values())
-    weak_pdgs = [int(row["pdg"]) for row in weak_parents["light_parent_abs_pdgs"]]
-    assert len(weak_pdgs) == len(set(weak_pdgs)) == 14
-    assert 311 in weak_pdgs
-    transition_rule = weak_parents["transition_rule"]
-    assert transition_rule["version"] == "weak_decay_transition_pythia_status_v1"
-    assert transition_rule["decay_product_status_abs_min"] == 91
-    assert transition_rule["decay_product_status_abs_max"] == 97
-    assert transition_rule["same_particle_comparison"] == "absolute_pdg"
 
     expanded = pairs["pairs"]
     assert pairs["pair_count"] == len(expanded) == 300

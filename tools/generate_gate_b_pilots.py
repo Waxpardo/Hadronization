@@ -98,7 +98,7 @@ def main() -> int:
         "repository_commit": commit,
         "repository_implementation_commit": commit,
         "repository_dirty_at_generation": False,
-        "raw_schema": "hf_primary_ground_raw_v5",
+        "raw_schema": "hf_primary_ground_raw_v6",
         "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
         "origin_algorithm": ORIGIN_ALGORITHM,
         "pthat_sensitivity_spec_sha256": sha256(

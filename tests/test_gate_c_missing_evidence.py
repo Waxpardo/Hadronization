@@ -103,7 +103,6 @@ def prepare_eviction_checkout(checkout: Path) -> None:
     )
     for name in (
         "HeavyFlavourUtils.h",
-        "GeneratedWeakParentRegistry.h",
         "GeneratedHeavyFlavourRegistry.h",
         "GeneratedTuneSettingRegistry.h",
         "Sha256.h",

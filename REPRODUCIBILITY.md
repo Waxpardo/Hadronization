@@ -35,27 +35,39 @@ The central selector is
   hard-origin resolved, `pT > 1 GeV/c`, `|eta| <= 4`;
 - associate: signed registry state, direct primary, generator stable, any
   origin, `pT > 0.15 GeV/c`, `|eta| <= 4`;
-- central multiplicity: `NCH_HADRONISATION_V1`;
-- cross-check multiplicity: `NCH_FINAL_STRONG_EM_V1`;
-- weak-decay transition rule:
-  `weak_decay_transition_pythia_status_v1`;
+- central multiplicity: `NCH_PRIMARY_CHARGED_ETA10_V1`;
+- cross-check multiplicity: `NCH_PRIMARY_CHARGED_ETA40_V1`;
+- multiplicity definition: `primary_charged_light_hadron_level_v1`;
 - pair construction: ordered conditional pairs, self-pairs excluded,
   `same_sign_pair_factor = 1.0`.
 
-The cross-check does not classify ancestry by particle species alone. It
-traverses explicit mother edges and marks a weak transition only when the
-parent is a registered weak parent with negative status, the child has
-absolute PYTHIA decay-product status 91--97, and the absolute PDG IDs differ.
-Same-particle links and status 99 are not decay transitions. Pilot raw files
-store the full PDG/status/mother graph for audited events; the raw validator
-independently reconstructs the decision and rejects a missing, malformed, or
-disagreeing graph. This operational definition is pinned to PYTHIA 8.315 and
-must be versioned again if generator status semantics change.
-The installed authoritative status description is
-`${PYTHIA8}/share/Pythia8/xmldoc/ParticleProperties.xml`: it defines a
-negative status as a disappeared/decayed/branched entry, statuses 91--97 as
-decay products, and status 99 as a non-decay Bose--Einstein momentum-shift
-copy.
+Both counters are genuine charged-particle multiplicities: final, charged,
+`pT > 0.15 GeV/c`, and inside the stated pseudorapidity window. They are the
+hadron-level analogue of the conventional experimental primary-charged-particle
+definition, in which a primary is a charged particle with `c*tau0 > 1 cm` that
+is produced directly or descends only from particles with `c*tau0 < 1 cm`.
+
+The lifetime condition is enforced by the generator, not reconstructed
+afterwards. All three cards set `ParticleDecays:limitTau0 = on` with
+`tau0Max = 0.01` mm, so every strong and electromagnetic decay proceeds while
+every weakly decaying light hadron stays final. No light hadron has
+`0.01 mm < c*tau0 < 10 mm`, so for light flavour the card value is exactly
+equivalent to the conventional 1 cm/c threshold;
+`Validation/TestPrimaryChargedDefinition.C` asserts that against the installed
+PYTHIA ParticleData rather than trusting it, and also recounts both windows
+from live events. Because `isFinal()` already means "primary" here, the earlier
+ancestry-traversal cross-check has been removed: it reconstructed a condition
+the generator already guarantees, so it was not an independent check. The two
+pseudorapidity windows are the independent handle instead.
+
+Charm- and beauty-containing hadrons are excluded from both counters. Their
+decays are disabled deliberately, so they are final only as an artefact of the
+production policy and an experiment would count their decay daughters instead.
+Excluding them also removes the autocorrelation that would otherwise exist
+between the event-activity classifier and the heavy-flavour observable being
+classified. The paper must state this exclusion, and must state that the
+central classifier is `|eta| < 1` while trigger and associate acceptance
+extends to `|eta| <= 4`.
 
 Each canonical logical output contains exactly 1,000,000 successful
 `pythia.next()` events and one tree entry per successful event, including

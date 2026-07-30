@@ -31,7 +31,7 @@ void WriteFixture(const std::string& path, Mutation mutation) {
 
   std::string campaign = "RAW_CONTRACT_TEST";
   std::string tune = "MONASH";
-  std::string rawSchema = "hf_primary_ground_raw_v5";
+  std::string rawSchema = "hf_primary_ground_raw_v6";
   std::string selector(Hadronization::kSelectorVersion);
   std::string originAlgorithm =
       "signed_heavy_constituent_complete_mothers_unique_v4";
@@ -112,9 +112,9 @@ void WriteFixture(const std::string& path, Mutation mutation) {
                   "primary_all_heavy_match_failures/l");
   metadata.Branch("multiplicity_overflow", &multiplicityOverflow,
                   "multiplicity_overflow/l");
-  metadata.Branch("multiplicity_strong_em_overflow",
+  metadata.Branch("multiplicity_wide_overflow",
                   &strongEmMultiplicityOverflow,
-                  "multiplicity_strong_em_overflow/l");
+                  "multiplicity_wide_overflow/l");
   metadata.Branch("sum_weights", &sumWeights, "sum_weights/D");
   metadata.Branch("sum_weights2", &sumWeights2, "sum_weights2/D");
   metadata.Fill();
@@ -140,8 +140,8 @@ void WriteFixture(const std::string& path, Mutation mutation) {
   } else {
     tree.Branch("event_weight", &eventWeight, "event_weight/D");
   }
-  tree.Branch("multiplicity_hadronisation_v1", &multiplicity,
-              "multiplicity_hadronisation_v1/I");
+  tree.Branch("multiplicity_primary_charged_eta10_v1", &multiplicity,
+              "multiplicity_primary_charged_eta10_v1/I");
   tree.Branch("heavy_flavour_conservation_ok", &conservationValid,
               "heavy_flavour_conservation_ok/I");
   tree.Branch("origin_classification_valid", &classificationValid,

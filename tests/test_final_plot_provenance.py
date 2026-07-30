@@ -422,7 +422,7 @@ def fixture(base: Path) -> dict[str, Path | str]:
                 "final": {
                     "status": "canonical",
                     "publication_eligible": True,
-                    "raw_schema": "hf_primary_ground_raw_v5",
+                    "raw_schema": "hf_primary_ground_raw_v6",
                     "selector":
                         "hard_trigger_primary_ground__primary_ground_associate_v1",
                     "campaign": "fixture",
@@ -567,7 +567,7 @@ def test_success_and_tamper(base: Path) -> None:
 def test_multiplicity_key_compatibility() -> None:
     tool = load_tool_module()
     dataset = {
-        "raw_schema": "hf_primary_ground_raw_v5",
+        "raw_schema": "hf_primary_ground_raw_v6",
         "selector": (
             "hard_trigger_primary_ground__primary_ground_associate_v1"
         ),

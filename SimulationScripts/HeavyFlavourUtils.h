@@ -1,8 +1,6 @@
 #ifndef HADRONIZATION_HEAVY_FLAVOUR_UTILS_H
 #define HADRONIZATION_HEAVY_FLAVOUR_UTILS_H
 
-#include "GeneratedWeakParentRegistry.h"
-
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -17,13 +15,17 @@
 
 namespace Hadronization {
 
-inline constexpr const char* kRawSchema = "hf_primary_ground_raw_v5";
+inline constexpr const char* kRawSchema = "hf_primary_ground_raw_v6";
 inline constexpr const char* kSelectorVersion =
     "hard_trigger_primary_ground__primary_ground_associate_v1";
 inline constexpr const char* kOriginAlgorithmVersion =
     "signed_heavy_constituent_complete_mothers_unique_v4";
-inline constexpr const char* kMultiplicityCentral = "NCH_HADRONISATION_V1";
-inline constexpr const char* kMultiplicityCrossCheck = "NCH_FINAL_STRONG_EM_V1";
+inline constexpr const char* kMultiplicityCentral =
+    "NCH_PRIMARY_CHARGED_ETA10_V1";
+inline constexpr const char* kMultiplicityCrossCheck =
+    "NCH_PRIMARY_CHARGED_ETA40_V1";
+inline constexpr const char* kMultiplicityDefinitionVersion =
+    "primary_charged_light_hadron_level_v1";
 inline constexpr const char* kHeavyStabilityAuditSchema =
     "heavy_stability_audit_v2";
 inline constexpr const char* kEffectiveSettingsSchema =
@@ -472,6 +474,44 @@ inline bool IsDirectPrimaryStatus(int status) {
   return status > 0 && absolute >= 81 && absolute <= 89;
 }
 
+// ---------------------------------------------------------------------------
+// Charged-particle multiplicity, NCH_PRIMARY_CHARGED_*_V1.
+//
+// This is a genuine charged-particle multiplicity, not a count of directly
+// produced hadronisation products. It is the hadron-level analogue of the
+// conventional experimental primary-charged-particle definition: a charged
+// particle with proper lifetime c*tau0 > 1 cm that is either produced
+// directly in the collision or descends only from particles with
+// c*tau0 < 1 cm.
+//
+// That lifetime condition is enforced at generation time, not here. All three
+// tune cards set `ParticleDecays:limitTau0 = on` with `tau0Max = 0.01` mm, so
+// every strong and electromagnetic decay proceeds while every weakly decaying
+// light hadron stays final. No light hadron has 0.01 mm < c*tau0 < 10 mm, so
+// for light flavour this card value is exactly equivalent to the conventional
+// 1 cm/c threshold; `Validation/TestPrimaryChargedDefinition.C` asserts that
+// equivalence against the installed PYTHIA ParticleData rather than trusting
+// it. Consequently `isFinal()` already means "primary" for light hadrons and
+// no ancestry traversal is required to exclude weak-decay products.
+//
+// Open- and hidden-heavy hadrons are excluded from the count. Their decays are
+// disabled deliberately, so they are final here purely as an artefact of the
+// production policy, and an experiment would instead count their decay
+// daughters. Excluding them also removes the autocorrelation that would
+// otherwise exist between the event-activity classifier and the heavy-flavour
+// observable it classifies. The paper must state this exclusion.
+// ---------------------------------------------------------------------------
+
+inline constexpr double kMultiplicityPtMin = 0.15;
+inline constexpr double kMultiplicityEtaCentral = 1.0;
+inline constexpr double kMultiplicityEtaWide = 4.0;
+
+// Diagnostic composition buckets. Index 5 collects every remaining charged
+// species (predominantly Sigma+-, Xi-, Omega-), which the conventional
+// primary definition includes and which a five-species list would silently
+// drop.
+inline constexpr int kMultiplicitySpeciesBuckets = 6;
+
 inline int MultiplicitySpeciesIndex(int absPdg) {
   switch (std::abs(absPdg)) {
     case 11:
@@ -485,30 +525,22 @@ inline int MultiplicitySpeciesIndex(int absPdg) {
     case 2212:
       return 4;
     default:
-      return -1;
+      return 5;
   }
 }
 
-inline bool IsMultiplicitySpecies(int absPdg) {
-  return MultiplicitySpeciesIndex(absPdg) >= 0;
+inline bool IsMultiplicityKinematic(double pt, double eta, double etaMax) {
+  return std::isfinite(pt) && std::isfinite(eta) && pt > kMultiplicityPtMin &&
+         std::abs(eta) <= etaMax;
 }
 
-inline bool IsMultiplicityKinematic(double pt, double eta) {
-  return std::isfinite(pt) && std::isfinite(eta) && pt > 0.15 &&
-         std::abs(eta) <= 4.0;
-}
-
-inline bool CountsNchHadronisationV1(int pdg, int status, bool isFinal,
-                                    double pt, double eta) {
-  return isFinal && IsMultiplicitySpecies(std::abs(pdg)) &&
-         IsDirectPrimaryStatus(status) && IsMultiplicityKinematic(pt, eta);
-}
-
-inline bool CountsNchFinalStrongEmV1(int pdg, bool isFinal, double pt,
-                                    double eta,
-                                    bool hasWeakDecayTransition) {
-  return isFinal && IsMultiplicitySpecies(std::abs(pdg)) &&
-         IsMultiplicityKinematic(pt, eta) && !hasWeakDecayTransition;
+// `isCharged` and `hasHeavyConstituent` come from the generator's
+// ParticleData, so this stays free of any hand-rolled PDG decoding.
+inline bool CountsNchPrimaryChargedV1(bool isFinal, bool isCharged,
+                                      bool hasHeavyConstituent, double pt,
+                                      double eta, double etaMax) {
+  return isFinal && isCharged && !hasHeavyConstituent &&
+         IsMultiplicityKinematic(pt, eta, etaMax);
 }
 
 inline double WrapAbsolutePhi(double phi) {
@@ -520,75 +552,6 @@ inline double WrapDeltaPhi(double triggerPhi, double associatePhi) {
   constexpr double pi = 3.14159265358979323846;
   return std::fmod(triggerPhi - associatePhi + 2.5 * pi, 2.0 * pi) -
          0.5 * pi;
-}
-
-inline bool IsKnownWeakParent(int absPdg) {
-  // NCH_FINAL_STRONG_EM_V1 light-parent exclusions are generated from the
-  // machine-readable weak-decay registry. Heavy parents are included below
-  // even though the central production disables their decays.
-  const int id = std::abs(absPdg);
-  if (std::find(kWeakLightParentAbsPdgs.begin(),
-                kWeakLightParentAbsPdgs.end(), id) !=
-      kWeakLightParentAbsPdgs.end()) {
-    return true;
-  }
-  // Conventional open-heavy PDG encodings contain a c/b quark digit.
-  return ((id / 10) % 10 == 4 || (id / 100) % 10 == 4 ||
-          (id / 1000) % 10 == 4 || (id / 10) % 10 == 5 ||
-          (id / 100) % 10 == 5 || (id / 1000) % 10 == 5);
-}
-
-// PYTHIA 8 documents absolute statuses 91--97 as particles produced in
-// decay processes. Status 99 is a Bose--Einstein momentum-shift copy and is
-// deliberately excluded. The parent must also be a disappeared event-record
-// entry; a positive parent with a decay-product child is not a valid
-// transition under this operational rule.
-inline bool IsWeakDecayTransitionV1(int parentPdg, int parentStatus,
-                                    int childPdg, int childStatus) {
-  if (std::abs(parentPdg) == std::abs(childPdg)) return false;
-  const int childStatusAbs = std::abs(childStatus);
-  return parentStatus < 0 &&
-         childStatusAbs >= kWeakDecayProductStatusAbsMin &&
-         childStatusAbs <= kWeakDecayProductStatusAbsMax &&
-         IsKnownWeakParent(parentPdg);
-}
-
-// Traverse explicit mother edges and classify transitions, not ancestor
-// species. Same-absolute-PDG copy/recoil/oscillation edges are followed but
-// never by themselves imply a weak decay. pdgAt/statusAt return node values;
-// mothersAt returns the explicit direct mothers of a node.
-template <typename PdgAt, typename StatusAt, typename MothersAt>
-inline bool HasWeakDecayTransitionV1(int particleIndex, int particleCount,
-                                     PdgAt pdgAt, StatusAt statusAt,
-                                     MothersAt mothersAt) {
-  if (particleCount <= 0 || particleIndex < 0 ||
-      particleIndex >= particleCount) {
-    throw std::invalid_argument(
-        "weak-transition ancestry start is outside the graph");
-  }
-  std::deque<std::pair<int, int>> queue;
-  std::set<std::pair<int, int>> visitedEdges;
-  const auto enqueueMothers = [&](int child) {
-    for (const int parent : mothersAt(child)) {
-      if (parent <= 0 || parent >= particleCount) {
-        throw std::invalid_argument(
-            "weak-transition ancestry contains an invalid mother index");
-      }
-      queue.emplace_back(parent, child);
-    }
-  };
-  enqueueMothers(particleIndex);
-  while (!queue.empty()) {
-    const auto [parent, child] = queue.front();
-    queue.pop_front();
-    if (!visitedEdges.insert({parent, child}).second) continue;
-    if (IsWeakDecayTransitionV1(pdgAt(parent), statusAt(parent),
-                                pdgAt(child), statusAt(child))) {
-      return true;
-    }
-    enqueueMothers(parent);
-  }
-  return false;
 }
 
 }  // namespace Hadronization

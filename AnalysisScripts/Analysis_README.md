@@ -310,8 +310,9 @@ It no longer offers random/bootstrap discovery for publication inputs.
 
 ## Multiplicity classes
 
-The central counter is `NCH_HADRONISATION_V1`: direct positive-status 81--89
-e, mu, pi, K, p/antiproton with `pT > 0.15 GeV/c` and `|eta| <= 4`.
+The central counter is `NCH_PRIMARY_CHARGED_ETA10_V1`: final charged
+non-heavy-flavour particles with `pT > 0.15 GeV/c` and `|eta| <= 1`.
+`NCH_PRIMARY_CHARGED_ETA40_V1` is the `|eta| <= 4` cross-check.
 Percentiles are derived separately for each tune from every event in the
 frozen canonical sample, before trigger selection. They are hard-heavy-sample
 percentiles, not minimum-bias centrality.

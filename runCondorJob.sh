@@ -177,12 +177,15 @@ validator_macro_source="${project_base}/Validation/ValidateRawOutput.C"
 validator_dependency_sources=(
   "${project_base}/setupEnv.sh"
   "${project_base}/SimulationScripts/HeavyFlavourUtils.h"
-  "${project_base}/SimulationScripts/GeneratedWeakParentRegistry.h"
   "${project_base}/SimulationScripts/GeneratedHeavyFlavourRegistry.h"
   "${project_base}/SimulationScripts/GeneratedTuneSettingRegistry.h"
   "${project_base}/SimulationScripts/Sha256.h"
   "${project_base}/AnalysisScripts/GeneratedPairRegistry.h"
 )
+validator_dependency_sources_args=()
+for dependency_path in "${validator_dependency_sources[@]}"; do
+  validator_dependency_sources_args+=(--dependency "${dependency_path}")
+done
 for required in \
   "${producer_source}" \
   "${card}" \
@@ -308,13 +311,7 @@ if [[ -s "${stable_output}" ]]; then
     "${validation_log}" \
     "${validator_source}" \
     "${validator_macro_source}" \
-    --dependency "${validator_dependency_sources[0]}" \
-    --dependency "${validator_dependency_sources[1]}" \
-    --dependency "${validator_dependency_sources[2]}" \
-    --dependency "${validator_dependency_sources[3]}" \
-    --dependency "${validator_dependency_sources[4]}" \
-    --dependency "${validator_dependency_sources[5]}" \
-    --dependency "${validator_dependency_sources[6]}" \
+    "${validator_dependency_sources_args[@]}" \
     "${raw_validation_provenance_args[@]}"
   then
     python3 "${project_base}/tools/campaign_manifest.py" \
@@ -370,12 +367,15 @@ validator_macro="${validator_root}/Validation/ValidateRawOutput.C"
 validator_dependencies=(
   "${validator_root}/setupEnv.sh"
   "${validator_root}/SimulationScripts/HeavyFlavourUtils.h"
-  "${validator_root}/SimulationScripts/GeneratedWeakParentRegistry.h"
   "${validator_root}/SimulationScripts/GeneratedHeavyFlavourRegistry.h"
   "${validator_root}/SimulationScripts/GeneratedTuneSettingRegistry.h"
   "${validator_root}/SimulationScripts/Sha256.h"
   "${validator_root}/AnalysisScripts/GeneratedPairRegistry.h"
 )
+validator_dependencies_args=()
+for dependency_path in "${validator_dependencies[@]}"; do
+  validator_dependencies_args+=(--dependency "${dependency_path}")
+done
 validator_source_sha256="$(
   python3 "${project_base}/tools/campaign_manifest.py" tracked-file-sha256 \
     "${project_base}" "${repository_commit}" \
@@ -512,13 +512,7 @@ python3 "${project_base}/tools/campaign_manifest.py" record-raw-validation \
   "${validation_log}" \
   "${validator}" \
   "${validator_macro}" \
-  --dependency "${validator_dependencies[0]}" \
-  --dependency "${validator_dependencies[1]}" \
-  --dependency "${validator_dependencies[2]}" \
-  --dependency "${validator_dependencies[3]}" \
-  --dependency "${validator_dependencies[4]}" \
-  --dependency "${validator_dependencies[5]}" \
-  --dependency "${validator_dependencies[6]}" \
+  "${validator_dependencies_args[@]}" \
   "${raw_validation_provenance_args[@]}" \
   --validator-status "${validator_status}"
 cat "${validation_log}"
@@ -533,13 +527,7 @@ if ! python3 "${project_base}/tools/campaign_manifest.py" verify-raw-validation 
   "${validation_log}" \
   "${validator}" \
   "${validator_macro}" \
-  --dependency "${validator_dependencies[0]}" \
-  --dependency "${validator_dependencies[1]}" \
-  --dependency "${validator_dependencies[2]}" \
-  --dependency "${validator_dependencies[3]}" \
-  --dependency "${validator_dependencies[4]}" \
-  --dependency "${validator_dependencies[5]}" \
-  --dependency "${validator_dependencies[6]}" \
+  "${validator_dependencies_args[@]}" \
   "${raw_validation_provenance_args[@]}"
 then
   echo "ERROR: validator output did not produce a matching immutable PASS receipt." >&2
@@ -559,13 +547,7 @@ python3 "${project_base}/tools/campaign_manifest.py" verify-raw-validation \
   "${validation_log}" \
   "${validator}" \
   "${validator_macro}" \
-  --dependency "${validator_dependencies[0]}" \
-  --dependency "${validator_dependencies[1]}" \
-  --dependency "${validator_dependencies[2]}" \
-  --dependency "${validator_dependencies[3]}" \
-  --dependency "${validator_dependencies[4]}" \
-  --dependency "${validator_dependencies[5]}" \
-  --dependency "${validator_dependencies[6]}" \
+  "${validator_dependencies_args[@]}" \
   "${raw_validation_provenance_args[@]}"
 python3 "${project_base}/tools/campaign_manifest.py" \
   write-checksum-sidecar "${stable_output}"

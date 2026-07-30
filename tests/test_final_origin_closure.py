@@ -26,7 +26,7 @@ SPEC.loader.exec_module(module)
 def payload(tune: str, slot: int, unresolved_triggers: int = 0) -> dict:
     metadata = {
         "audit_schema": module.EXPECTED_AUDIT_SCHEMA,
-        "raw_schema": "hf_primary_ground_raw_v5",
+        "raw_schema": "hf_primary_ground_raw_v6",
         "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
         "origin_algorithm":
             "signed_heavy_constituent_complete_mothers_unique_v4",

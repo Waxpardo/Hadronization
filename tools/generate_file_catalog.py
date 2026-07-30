@@ -28,7 +28,6 @@ AUTHORITATIVE_EXACT = {
     "SimulationScripts/Sha256.h",
     "SimulationScripts/GeneratedHeavyFlavourRegistry.h",
     "SimulationScripts/GeneratedTuneSettingRegistry.h",
-    "SimulationScripts/GeneratedWeakParentRegistry.h",
     "SimulationScripts/pythiasettings_Hard_Low_ccbb_MONASH.cmnd",
     "SimulationScripts/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd",
     "SimulationScripts/pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd",

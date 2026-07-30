@@ -37,7 +37,7 @@ BLOCKS = 10
 ROWS = len(TUNES) * CANONICAL_SLOTS
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
-RAW_SCHEMA = "hf_primary_ground_raw_v5"
+RAW_SCHEMA = "hf_primary_ground_raw_v6"
 ORIGIN_ALGORITHM = "signed_heavy_constituent_complete_mothers_unique_v4"
 SELECTOR = "hard_trigger_primary_ground__primary_ground_associate_v1"
 TUNE_ALLOWLIST_SCHEMA = "pythia_tune_difference_allowlist_v2"

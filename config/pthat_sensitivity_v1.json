@@ -12,7 +12,7 @@
   "margin_provenance": "Data-independent engineering targets introduced for this publication-readiness workflow, not values inherited from Paul or the paper. They may not be loosened after inspecting pilot results and require explicit Gate-B owner disposition.",
   "purpose": "Predeclared Gate-B test of whether PhaseSpace:pTHatMin materially sculpts the central paper observables",
   "raw_contract": {
-    "raw_schema": "hf_primary_ground_raw_v5",
+    "raw_schema": "hf_primary_ground_raw_v6",
     "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
     "origin_algorithm": "signed_heavy_constituent_complete_mothers_unique_v4",
     "species_registry": "config/heavy_flavour_species_v1.json",

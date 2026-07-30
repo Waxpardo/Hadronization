@@ -33,7 +33,7 @@ def test_source_contract() -> None:
         "origin_classification_failures",
         "primary_all_heavy_match_failures",
         "multiplicity_overflow",
-        "multiplicity_strong_em_overflow",
+        "multiplicity_wide_overflow",
     ):
         assert f'"{field}"' in macro
     assert "current.attempts !=" in macro

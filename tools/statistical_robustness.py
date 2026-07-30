@@ -168,7 +168,7 @@ def validate_spec(spec: dict[str, Any], checkout: Path) -> dict[tuple[int, int],
         "analysis_implementation": "one_pass_primary_ground_pair_analysis_v2",
         "analysis_version": "status_analysis_THnSparse_qq_v2",
         "analysis_profile": "central_primary_ground_v1",
-        "raw_schema": "hf_primary_ground_raw_v5",
+        "raw_schema": "hf_primary_ground_raw_v6",
         "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
         "origin_algorithm":
             "signed_heavy_constituent_complete_mothers_unique_v4",

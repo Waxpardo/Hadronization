@@ -502,7 +502,7 @@ int ExtractPTHatSensitivity(const char* inputFile, const char* configFile,
         "process_code",
         "hard_channel",
         "event_weight",
-        "multiplicity_hadronisation_v1",
+        "multiplicity_primary_charged_eta10_v1",
         "heavyIndex",
         "heavyPdg",
         "heavyStatus",
@@ -556,7 +556,7 @@ int ExtractPTHatSensitivity(const char* inputFile, const char* configFile,
     tree->SetBranchAddress("process_code", &processCode);
     tree->SetBranchAddress("hard_channel", &hardChannel);
     tree->SetBranchAddress("event_weight", &eventWeight);
-    tree->SetBranchAddress("multiplicity_hadronisation_v1", &multiplicity);
+    tree->SetBranchAddress("multiplicity_primary_charged_eta10_v1", &multiplicity);
     tree->SetBranchAddress("heavyIndex", &heavyIndex);
     tree->SetBranchAddress("heavyPdg", &heavyPdg);
     tree->SetBranchAddress("heavyStatus", &heavyStatus);

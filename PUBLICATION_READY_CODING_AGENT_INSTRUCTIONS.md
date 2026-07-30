@@ -995,58 +995,65 @@ graph alone cannot prove PYTHIA event-record coverage.
 
 Define and version:
 
-`NCH_HADRONISATION_V1`
+`NCH_PRIMARY_CHARGED_ETA10_V1`
 
-Count signed species:
+This is a genuine charged-particle multiplicity, not a count of directly
+produced hadronisation products. Count every particle that is:
 
-- e+/e-;
-- mu+/mu-;
-- pi+/pi-;
-- K+/K-;
-- p/antiproton;
-
-subject to:
-
-- positive status 81--89;
+- final;
+- electrically charged, as reported by the generator's ParticleData;
+- free of charm and beauty constituents, again from ParticleData;
 - `pT > 0.15 GeV/c`;
-- `|eta| <= 4`.
+- `|eta| <= 1.0`.
 
-This counts charged particles produced directly in hadronisation under a
-generator-status definition. It is not hard-origin restricted, not a
-minimum-bias multiplicity, and not the usual decay-inclusive experimental
-primary-charged definition.
+Do not use a hand-written species list and do not use PYTHIA status. Charge
+and heavy content must come from the generator so that species the
+conventional definition includes -- Sigma+-, Xi-, Omega- -- are neither
+silently dropped nor mis-signed.
 
-This definition is close to the legacy code but must be implemented once,
-unit tested at the exact boundaries, stored per event, and used identically in
-production, percentile construction, analysis, plots, captions, and paper.
+This is the hadron-level analogue of the conventional experimental
+primary-charged-particle definition: a charged particle with `c*tau0 > 1 cm`
+that is produced directly or descends only from particles with
+`c*tau0 < 1 cm`. That lifetime condition is enforced at generation time by
+`ParticleDecays:limitTau0 = on` with `tau0Max = 0.01` mm. No light hadron has
+`0.01 mm < c*tau0 < 10 mm`, so for light flavour the card threshold is exactly
+equivalent to 1 cm/c. `Validation/TestPrimaryChargedDefinition.C` must assert
+that equivalence against the installed PYTHIA ParticleData; it is not to be
+asserted by documentation alone.
+
+Charm and beauty hadrons are excluded because their decays are disabled
+deliberately, so they are final only as an artefact of the production policy
+and an experiment would count their decay daughters instead. The exclusion
+also removes the autocorrelation that would otherwise exist between the
+event-activity classifier and the heavy-flavour observable it classifies.
+
+The counter remains a hard-heavy-sample multiplicity, not a minimum-bias one,
+because the sample is generated with `HardQCD:hardccbar` and
+`HardQCD:hardbbbar` at `pTHatMin = 1 GeV`. The paper must say so. It must also
+state that the classifier window is `|eta| < 1` while trigger and associate
+acceptance extends to `|eta| <= 4`.
+
+Implement it once, unit test it at the exact boundaries, store it per event,
+and use it identically in production, percentile construction, analysis,
+plots, captions, and paper.
 
 ### 9.2 Required cross-check counter
 
 Also define and store:
 
-`NCH_FINAL_STRONG_EM_V1`
+`NCH_PRIMARY_CHARGED_ETA40_V1`
 
-For the same species and kinematic acceptance, count final particles produced
-directly or through strong/electromagnetic decays while excluding weak-decay
-daughters. The operational rule is
-`weak_decay_transition_pythia_status_v1`: traverse explicit mother edges and
-classify an edge as a weak decay only when the parent is a registered weak
-parent with negative PYTHIA status, the child has absolute PYTHIA
-decay-product status 91--97, and the absolute parent/child PDG IDs differ.
-Traverse same-particle copy/recoil/oscillation links without classifying them;
-status 99 is a Bose--Einstein copy, not a decay. A primary muon, pion, or
-kaon is never weak merely because its species is weak-capable. Store enough
-of each audited event's PDG/status/mother graph for the validator to recompute
-the decision independently; the validator must not trust a producer boolean.
-Bind the rule version and weak-parent-registry checksum in raw metadata. This
-rule is pinned to PYTHIA 8.315 and requires a new version if event-record
-semantics change; do not infer it from status 81--89 or an undocumented
-lifetime cut.
+Identical in every respect except `|eta| <= 4.0`. Because the generator card
+already guarantees that no weak-decay daughter is final, an ancestry-based
+"exclude weak daughters" counter would reconstruct a condition that already
+holds and would therefore not be an independent check. The pseudorapidity
+window is the independent handle instead: it probes how strongly the
+conclusions depend on the rapidity range used to classify event activity,
+which is a real and reviewable systematic.
 
-Because all heavy-hadron decays are disabled, this cross-check is evaluated
-under the same stable-heavy event definition and lacks charged daughters that
-would normally come from heavy decays. State this limitation. It is a
-robustness cross-check, not the central class definition.
+Report both counters. Every predeclared observable that is differential in
+multiplicity must be reproduced with the cross-check classifier, and any
+qualitative change must be reported, not suppressed.
 
 ### 9.3 Percentile construction
 

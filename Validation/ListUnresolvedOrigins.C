@@ -125,7 +125,7 @@ int ListUnresolvedOrigins(const char* path,
         "event_id",
         "hard_channel",
         "event_weight",
-        "multiplicity_hadronisation_v1",
+        "multiplicity_primary_charged_eta10_v1",
         "heavyIndex",
         "heavyPdg",
         "heavyStatus",
@@ -183,7 +183,7 @@ int ListUnresolvedOrigins(const char* path,
     tree->SetBranchAddress("event_id", &eventId);
     tree->SetBranchAddress("hard_channel", &hardChannel);
     tree->SetBranchAddress("event_weight", &eventWeight);
-    tree->SetBranchAddress("multiplicity_hadronisation_v1", &multiplicity);
+    tree->SetBranchAddress("multiplicity_primary_charged_eta10_v1", &multiplicity);
     tree->SetBranchAddress("heavyIndex", &heavyIndex);
     tree->SetBranchAddress("heavyPdg", &pdg);
     tree->SetBranchAddress("heavyStatus", &status);

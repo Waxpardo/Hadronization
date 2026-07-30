@@ -47,7 +47,6 @@ echo "RAW_VALIDATION_SUMMARY errors=0 entries=1 successes=$5"
     )
     for name in (
         "HeavyFlavourUtils.h",
-        "GeneratedWeakParentRegistry.h",
         "GeneratedHeavyFlavourRegistry.h",
         "GeneratedTuneSettingRegistry.h",
         "Sha256.h",

@@ -41,7 +41,7 @@ namespace {
 
 using Hadronization::Origin;
 
-constexpr const char* kRequiredRawSchema = "hf_primary_ground_raw_v5";
+constexpr const char* kRequiredRawSchema = "hf_primary_ground_raw_v6";
 constexpr const char* kRequiredOriginAlgorithm =
     "signed_heavy_constituent_complete_mothers_unique_v4";
 constexpr const char* kRequiredEffectiveSettingsSchema =
@@ -87,7 +87,7 @@ struct RawInputContract {
   unsigned long long originClassificationFailures = 0;
   unsigned long long primaryAllHeavyMatchFailures = 0;
   unsigned long long multiplicityOverflow = 0;
-  unsigned long long multiplicityStrongEmOverflow = 0;
+  unsigned long long multiplicityWideOverflow = 0;
   double sumWeights = 0.0;
   double sumWeights2 = 0.0;
 };
@@ -203,7 +203,7 @@ RawInputContract ValidateRawInputs(const std::vector<std::string>& inputs) {
       requiredEventScalars = {
           {"event_id", "ULong64_t"},
           {"event_weight", "Double_t"},
-          {"multiplicity_hadronisation_v1", "Int_t"},
+          {"multiplicity_primary_charged_eta10_v1", "Int_t"},
           {"heavy_flavour_conservation_ok", "Int_t"},
           {"origin_classification_valid", "Int_t"},
           {"primary_all_heavy_match_valid", "Int_t"}};
@@ -270,8 +270,8 @@ RawInputContract ValidateRawInputs(const std::vector<std::string>& inputs) {
                             current.primaryAllHeavyMatchFailures) ||
         !ReadMetadataScalar(metadata, "multiplicity_overflow",
                             current.multiplicityOverflow) ||
-        !ReadMetadataScalar(metadata, "multiplicity_strong_em_overflow",
-                            current.multiplicityStrongEmOverflow) ||
+        !ReadMetadataScalar(metadata, "multiplicity_wide_overflow",
+                            current.multiplicityWideOverflow) ||
         !ReadMetadataScalar(metadata, "sum_weights", current.sumWeights) ||
         !ReadMetadataScalar(metadata, "sum_weights2",
                             current.sumWeights2)) {
@@ -308,7 +308,7 @@ RawInputContract ValidateRawInputs(const std::vector<std::string>& inputs) {
         current.originClassificationFailures != 0 ||
         current.primaryAllHeavyMatchFailures != 0 ||
         current.multiplicityOverflow != 0 ||
-        current.multiplicityStrongEmOverflow != 0 ||
+        current.multiplicityWideOverflow != 0 ||
         !std::isfinite(current.sumWeights) ||
         !std::isfinite(current.sumWeights2) ||
         current.sumWeights2 < 0.0 ||
@@ -370,7 +370,7 @@ RawInputContract ValidateRawInputs(const std::vector<std::string>& inputs) {
     std::vector<double>* heavyPhi = nullptr;
     tree->SetBranchAddress("event_id", &eventId);
     tree->SetBranchAddress("event_weight", &eventWeight);
-    tree->SetBranchAddress("multiplicity_hadronisation_v1",
+    tree->SetBranchAddress("multiplicity_primary_charged_eta10_v1",
                            &eventMultiplicity);
     tree->SetBranchAddress("heavy_flavour_conservation_ok",
                            &conservationValid);
@@ -511,8 +511,8 @@ RawInputContract ValidateRawInputs(const std::vector<std::string>& inputs) {
                    common.primaryAllHeavyMatchFailures ||
                current.multiplicityOverflow !=
                    common.multiplicityOverflow ||
-               current.multiplicityStrongEmOverflow !=
-                   common.multiplicityStrongEmOverflow) {
+               current.multiplicityWideOverflow !=
+                   common.multiplicityWideOverflow) {
       throw std::runtime_error("mixed raw provenance is forbidden: " + input);
     }
   }
@@ -758,7 +758,7 @@ int status_analysis_THnSparse_qq(
       }
     }
     const std::vector<const char*> requiredBranches = {
-        "event_id", "event_weight", "multiplicity_hadronisation_v1",
+        "event_id", "event_weight", "multiplicity_primary_charged_eta10_v1",
         "primary_all_heavy_match_valid", "heavyIndex",
         "heavyPdg", "heavyStatus", "heavyIsFinal", "heavyCentral", "heavyQc",
         "heavyQb", "heavyOriginC", "heavyOriginB", "heavyMatchedHardC",
@@ -818,7 +818,7 @@ int status_analysis_THnSparse_qq(
     std::vector<double>* heavyPhi = nullptr;
     chain.SetBranchAddress("event_id", &eventId);
     chain.SetBranchAddress("event_weight", &eventWeight);
-    chain.SetBranchAddress("multiplicity_hadronisation_v1", &eventMultiplicity);
+    chain.SetBranchAddress("multiplicity_primary_charged_eta10_v1", &eventMultiplicity);
     chain.SetBranchAddress("primary_all_heavy_match_valid",
                            &primaryAllHeavyMatchValid);
     chain.SetBranchAddress("heavyIndex", &heavyIndex);
