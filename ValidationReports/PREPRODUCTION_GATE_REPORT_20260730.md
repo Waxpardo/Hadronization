@@ -14,8 +14,7 @@ were not modified.
   created;
 - Paul-compatible plotting hardening ancestor: `d8de9b6`;
 - first corrected pilot implementation: `9a8e92b`;
-- branch after machine-readable weak-parent registry and documentation:
-  `9b4a9b4`;
+- clean Gate A validation commit: `738df28`;
 - local implementation worktree:
   `/private/tmp/hadronization-full-production`;
 - Nikhef diagnostic/development checkout:
@@ -25,15 +24,16 @@ were not modified.
 
 ## Gate A
 
-Result: **pass for the pre-v5 implementation; must be rerun at the final
-commit**.
+Result: **pass at commit `738df28`; rerun only if implementation code changes**.
 
 Evidence on Nikhef:
 
 - `ValidationReports/GateA_20260730/producer_forced_build.log`;
 - `ValidationReports/GateA_20260730/compile_and_unit.log`;
 - `ValidationReports/GateA/species_registry_pythia_audit.csv`;
-- `ValidationReports/HF_DEV_settings_20260730x/effective_tune_differences.csv`.
+- `ValidationReports/HF_DEV_settings_20260730x/effective_tune_differences.csv`;
+- clean final-commit transcript:
+  `/data/alice/ipardoza/Hadronization-full-production-validate-v6/ValidationReports/GateA_20260730_final/compile_and_unit_738df28.log`.
 
 Observed environment:
 
@@ -45,6 +45,8 @@ Observed environment:
   28 allowlisted tune-bundle differences plus the per-job random seed;
 - no project-source compiler warning; external ROOT/PYTHIA headers emit
   conversion warnings under the intentionally strict flags.
+- final producer SHA-256:
+  `05aa60ab23b638286169ee16272f29aa193500fffed4d5b1c53d007da4e8853e`.
 
 Tests passed:
 
@@ -59,6 +61,12 @@ Tests passed:
   trigger denominator;
 - optional mini-pad null safety;
 - pair-directory object, overflow, integral, and inclusive/by-origin closure.
+
+All 15 ROOT validation, analysis, merge, and plotting macros loaded or
+compiled successfully in a clean detached worktree. The transcript was
+explicitly scanned for `fatal error`, `Error in <ACLiC>`, undefined
+references, segmentation faults, and cling JIT failures. This scan was added
+after ROOT returned status zero for an earlier ACLiC header failure.
 
 ## Gate B
 
