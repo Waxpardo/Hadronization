@@ -106,8 +106,8 @@ def main() -> int:
         campaign_dir.mkdir()
         profiles = {
             0: ("1.0", 1_000_000, "long", "one_million_central"),
-            1: ("0.5", 100_000, "medium", "pthat_sensitivity_low"),
-            2: ("2.0", 100_000, "medium", "pthat_sensitivity_high"),
+            1: ("0.5", 1_000_000, "long", "pthat_sensitivity_low"),
+            2: ("2.0", 1_000_000, "long", "pthat_sensitivity_high"),
         }
         rows = []
         for tune_index, tune in enumerate(TUNES):

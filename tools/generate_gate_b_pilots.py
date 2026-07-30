@@ -53,10 +53,17 @@ def main() -> int:
         raise SystemExit("refusing to generate Gate-B campaign from dirty repository")
     rows = []
     seeds = set()
+    # All three thresholds carry one million successful events. At the frozen
+    # Bonferroni critical value of 5.797 over 192 comparisons, a +-15%
+    # equivalence margin on the balancing yield needs roughly 2.6% per-block
+    # precision, which the former 100k sensitivity arms could not deliver for
+    # the rarer beauty trigger and multiplicity combinations; the pilot would
+    # most likely have returned INCONCLUSIVE. Raising statistics keeps the
+    # predeclared family, critical value and margins untouched.
     profiles = (
         (0, "1.0", 1_000_000, "long", "one_million_central"),
-        (1, "0.5", 100_000, "medium", "pthat_sensitivity_low"),
-        (2, "2.0", 100_000, "medium", "pthat_sensitivity_high"),
+        (1, "0.5", 1_000_000, "long", "pthat_sensitivity_low"),
+        (2, "2.0", 1_000_000, "long", "pthat_sensitivity_high"),
     )
     for tune_index, tune in enumerate(TUNES):
         for logical_id, pthat, events, category, purpose in profiles:

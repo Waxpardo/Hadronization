@@ -314,8 +314,16 @@ These must remain visible in the paper. Do not quietly resolve them.
    experimental multiplicity classes, until the pTHat sensitivity study
    (0.5 / 1.0 / 2.0 GeV) explains it.**
 
-2. **`pTHatMin` sensitivity is unmeasured.** It is a generator-level cut that
-   defines the sample. It must be reported, and the pilots must be run.
+2. **`pTHatMin` sensitivity is measured for multiplicity, pending for the
+   observables.** A 4000-event scan gives dN_ch/deta = 4.31, 4.55, 6.05, 9.74 at
+   0.5, 1.0, 2.0, 4.0 GeV against 6.91 for minimum bias, so the hard sample's
+   low activity is explained: at 1.0 GeV the 2->2 process is softer than a
+   typical multiparton interaction (`pT0Ref = 2.15`) and therefore selects
+   peripheral, low-activity collisions. Whether the *balance observable* moves
+   with the threshold is the Gate-B pilot question. All three arms carry one
+   million successful events per tune so the predeclared equivalence margins
+   are reachable; the family size (192), Bonferroni critical value
+   (5.797108070583989) and margin values are unchanged.
 
 3. **Ground-state restriction and closure.** With decays disabled, excited
    states (D*, Sigma_c, Sigma_b, Xi_c) never feed down, so a ground-state-only

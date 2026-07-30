@@ -91,8 +91,8 @@ def make_fixture(module, temporary: Path) -> dict[str, Path | str]:
     for tune in module.TUNES:
         for logical_id, purpose, successes in (
             (0, "one_million_central", 1_000_000),
-            (1, "pthat_sensitivity_low", 100_000),
-            (2, "pthat_sensitivity_high", 100_000),
+            (1, "pthat_sensitivity_low", 1_000_000),
+            (2, "pthat_sensitivity_high", 1_000_000),
         ):
             rows.append(
                 {

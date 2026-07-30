@@ -53,8 +53,8 @@ EXPANSION_LIVE_STORAGE_SCHEMA = (
 )
 GATE_B_PROFILES = {
     0: ("1.0", 1_000_000, "long", "one_million_central"),
-    1: ("0.5", 100_000, "medium", "pthat_sensitivity_low"),
-    2: ("2.0", 100_000, "medium", "pthat_sensitivity_high"),
+    1: ("0.5", 1_000_000, "long", "pthat_sensitivity_low"),
+    2: ("2.0", 1_000_000, "long", "pthat_sensitivity_high"),
 }
 SAFE_CAMPAIGN = re.compile(
     r"^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,126}[A-Za-z0-9])?$"
