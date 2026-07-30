@@ -182,12 +182,13 @@ def validate_seed_ledger(candidates: list[dict], ledger: list[dict]) -> set[int]
 
 def validate_gate_b_campaign(
     campaign_dir: Path,
+    checkout_root: Path,
     config: dict,
     candidates: list[dict],
     ledger: list[dict],
     implementation_policy: str,
 ) -> int:
-    root = campaign_dir.parents[1]
+    root = checkout_root.resolve()
     expected_contract = {
         "raw_schema": "hf_primary_ground_raw_v3",
         "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
@@ -322,8 +323,15 @@ def validate_full_campaign(
 
 
 def validate_campaign(
-    campaign_dir: Path, implementation_policy: str = "exact"
+    campaign_dir: Path,
+    implementation_policy: str = "exact",
+    checkout_root: Path | None = None,
 ) -> int:
+    checkout = (
+        checkout_root.resolve()
+        if checkout_root is not None
+        else campaign_dir.parents[1]
+    )
     config = json.loads((campaign_dir / "campaign.json").read_text())
     candidates = load_jsonl(campaign_dir / "candidate_manifest.jsonl")
     ledger = load_jsonl(campaign_dir / "seed_ledger.jsonl")
@@ -331,6 +339,7 @@ def validate_campaign(
     if schema == "hf_gate_b_pilot_campaign_v1":
         return validate_gate_b_campaign(
             campaign_dir,
+            checkout,
             config,
             candidates,
             ledger,
@@ -343,7 +352,9 @@ def validate_campaign(
 
 def validate(args: argparse.Namespace) -> int:
     return validate_campaign(
-        args.campaign_dir.resolve(), args.implementation_policy
+        args.campaign_dir.resolve(),
+        args.implementation_policy,
+        args.checkout_root,
     )
 
 
@@ -445,6 +456,14 @@ def main() -> int:
         help=(
             "Gate-B only: require the production implementation to equal "
             "HEAD, or allow it to be an ancestor for later analysis tooling"
+        ),
+    )
+    check.add_argument(
+        "--checkout-root",
+        type=Path,
+        help=(
+            "checkout whose contracts and commit are validated; defaults to "
+            "the campaign directory's repository"
         ),
     )
     check.set_defaults(function=validate)

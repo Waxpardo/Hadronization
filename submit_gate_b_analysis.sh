@@ -33,7 +33,8 @@ if [[ -n "$(git -C "${project_base}" status --porcelain --untracked-files=no)" ]
   exit 3
 fi
 python3 "${project_base}/tools/campaign_manifest.py" validate \
-  "${campaign_dir}" --implementation-policy ancestor
+  "${campaign_dir}" --implementation-policy ancestor \
+  --checkout-root "${project_base}"
 
 mkdir -p "${analysis_root}/validation/raw" \
   "${analysis_root}/condor_logs"/{MONASH,JUNCTIONS,CLOSEPACKING}
