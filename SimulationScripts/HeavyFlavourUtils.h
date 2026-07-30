@@ -7,8 +7,10 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <map>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace Hadronization {
 
@@ -16,7 +18,7 @@ inline constexpr const char* kRawSchema = "hf_primary_ground_raw_v3";
 inline constexpr const char* kSelectorVersion =
     "hard_trigger_primary_ground__primary_ground_associate_v1";
 inline constexpr const char* kOriginAlgorithmVersion =
-    "signed_heavy_carrier_explicit_parent_v1";
+    "signed_heavy_carrier_explicit_parent_event_unique_v2";
 inline constexpr const char* kMultiplicityCentral = "NCH_HADRONISATION_V1";
 inline constexpr const char* kMultiplicityCrossCheck = "NCH_FINAL_STRONG_EM_V1";
 
@@ -33,8 +35,57 @@ enum class MatchResolution : int {
   kUnique = 1,
   kAmbiguous = 2,
   kMissingCarrier = 3,
-  kBrokenLineage = 4
+  kBrokenLineage = 4,
+  kDuplicateHardCarrier = 5
 };
+
+struct CarrierUniquenessResult {
+  std::uint64_t conflictGroups = 0;
+  std::uint64_t demotedMatches = 0;
+};
+
+// A selected hard quark can be incorporated into at most one final open-heavy
+// hadron. PYTHIA may assign the same fragmenting string/junction mother range
+// to several final hadrons; independent ancestry walks can then appear unique
+// while claiming the same carrier. Such assignments are not distinguishable
+// from the event record and must all be marked unresolved rather than choosing
+// one hadron arbitrarily.
+inline CarrierUniquenessResult EnforceUniqueFinalHardCarrier(
+    const std::vector<int>& isFinal, const std::vector<int>& sectorCharge,
+    std::vector<int>& origin, std::vector<int>& resolution,
+    std::vector<int>& matchedHard) {
+  const std::size_t size = isFinal.size();
+  if (sectorCharge.size() != size || origin.size() != size ||
+      resolution.size() != size || matchedHard.size() != size) {
+    throw std::invalid_argument(
+        "hard-carrier uniqueness vectors have inconsistent sizes");
+  }
+
+  std::map<int, std::vector<std::size_t>> claims;
+  for (std::size_t index = 0; index < size; ++index) {
+    if (!isFinal[index] || sectorCharge[index] == 0 ||
+        origin[index] != static_cast<int>(Origin::kSelectedHard) ||
+        matchedHard[index] < 0) {
+      continue;
+    }
+    claims[matchedHard[index]].push_back(index);
+  }
+
+  CarrierUniquenessResult result;
+  for (const auto& [hardIndex, indices] : claims) {
+    (void)hardIndex;
+    if (indices.size() < 2) continue;
+    ++result.conflictGroups;
+    result.demotedMatches += indices.size();
+    for (const std::size_t index : indices) {
+      origin[index] = static_cast<int>(Origin::kUnresolved);
+      resolution[index] =
+          static_cast<int>(MatchResolution::kDuplicateHardCarrier);
+      matchedHard[index] = -1;
+    }
+  }
+  return result;
+}
 
 struct HeavyContent {
   int nc = 0;

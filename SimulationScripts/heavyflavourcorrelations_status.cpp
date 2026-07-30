@@ -578,6 +578,7 @@ int main(int argc, char** argv) {
   std::vector<int> heavyOriginC, heavyOriginB;
   std::vector<int> heavyMatchResolutionC, heavyMatchResolutionB;
   std::vector<int> heavyMatchedHardC, heavyMatchedHardB;
+  std::vector<int> heavyConflictingHardC, heavyConflictingHardB;
   std::vector<int> heavyOriginDepthC, heavyOriginDepthB;
   std::vector<double> heavyPx, heavyPy, heavyPz, heavyE, heavyPt, heavyEta;
   std::vector<double> heavyY, heavyPhi, heavyMass;
@@ -655,6 +656,8 @@ int main(int argc, char** argv) {
   BRANCH_VECTOR(heavyMatchResolutionB);
   BRANCH_VECTOR(heavyMatchedHardC);
   BRANCH_VECTOR(heavyMatchedHardB);
+  BRANCH_VECTOR(heavyConflictingHardC);
+  BRANCH_VECTOR(heavyConflictingHardB);
   BRANCH_VECTOR(heavyOriginDepthC);
   BRANCH_VECTOR(heavyOriginDepthB);
   BRANCH_VECTOR(heavyPx);
@@ -698,6 +701,10 @@ int main(int argc, char** argv) {
   std::uint64_t multiplicityOverflow = 0;
   std::uint64_t multiplicityStrongEmOverflow = 0;
   std::uint64_t contentDecodeFailures = 0;
+  std::uint64_t duplicateHardCarrierConflictGroupsC = 0;
+  std::uint64_t duplicateHardCarrierConflictGroupsB = 0;
+  std::uint64_t duplicateHardCarrierDemotionsC = 0;
+  std::uint64_t duplicateHardCarrierDemotionsB = 0;
 
   std::cout << "PRODUCTION_START campaign=" << campaign << " tune=" << tune
             << " logical_id=" << logicalId << " role=" << role
@@ -768,6 +775,7 @@ int main(int argc, char** argv) {
     CLEAR_VECTOR(heavyMatchResolutionC);
     CLEAR_VECTOR(heavyMatchResolutionB);
     CLEAR_VECTOR(heavyMatchedHardC); CLEAR_VECTOR(heavyMatchedHardB);
+    CLEAR_VECTOR(heavyConflictingHardC); CLEAR_VECTOR(heavyConflictingHardB);
     CLEAR_VECTOR(heavyOriginDepthC); CLEAR_VECTOR(heavyOriginDepthB);
     CLEAR_VECTOR(heavyPx); CLEAR_VECTOR(heavyPy); CLEAR_VECTOR(heavyPz);
     CLEAR_VECTOR(heavyE); CLEAR_VECTOR(heavyPt); CLEAR_VECTOR(heavyEta);
@@ -921,6 +929,33 @@ int main(int argc, char** argv) {
       heavyMass.push_back(particle.m());
     }
 
+    const std::vector<int> originalMatchedHardC = heavyMatchedHardC;
+    const std::vector<int> originalMatchedHardB = heavyMatchedHardB;
+    const CarrierUniquenessResult charmUniqueness =
+        EnforceUniqueFinalHardCarrier(
+            heavyIsFinal, heavyQc, heavyOriginC, heavyMatchResolutionC,
+            heavyMatchedHardC);
+    const CarrierUniquenessResult beautyUniqueness =
+        EnforceUniqueFinalHardCarrier(
+            heavyIsFinal, heavyQb, heavyOriginB, heavyMatchResolutionB,
+            heavyMatchedHardB);
+    duplicateHardCarrierConflictGroupsC += charmUniqueness.conflictGroups;
+    duplicateHardCarrierConflictGroupsB += beautyUniqueness.conflictGroups;
+    duplicateHardCarrierDemotionsC += charmUniqueness.demotedMatches;
+    duplicateHardCarrierDemotionsB += beautyUniqueness.demotedMatches;
+    heavyConflictingHardC.assign(heavyPdg.size(), -1);
+    heavyConflictingHardB.assign(heavyPdg.size(), -1);
+    for (std::size_t index = 0; index < heavyPdg.size(); ++index) {
+      if (heavyMatchResolutionC[index] ==
+          static_cast<int>(MatchResolution::kDuplicateHardCarrier)) {
+        heavyConflictingHardC[index] = originalMatchedHardC[index];
+      }
+      if (heavyMatchResolutionB[index] ==
+          static_cast<int>(MatchResolution::kDuplicateHardCarrier)) {
+        heavyConflictingHardB[index] = originalMatchedHardB[index];
+      }
+    }
+
     for (const int index : ancestryNodes) {
       const Particle& ancestor = pythia.event[index];
       ancestryIndex.push_back(index);
@@ -1043,6 +1078,12 @@ int main(int argc, char** argv) {
   ULong64_t multOverflow = multiplicityOverflow;
   ULong64_t multStrongOverflow = multiplicityStrongEmOverflow;
   ULong64_t decodeFailures = contentDecodeFailures;
+  ULong64_t duplicateConflictGroupsC =
+      duplicateHardCarrierConflictGroupsC;
+  ULong64_t duplicateConflictGroupsB =
+      duplicateHardCarrierConflictGroupsB;
+  ULong64_t duplicateDemotionsC = duplicateHardCarrierDemotionsC;
+  ULong64_t duplicateDemotionsB = duplicateHardCarrierDemotionsB;
   ULong64_t multiplicityAuditEventCount = multiplicityAuditEvents;
   Long64_t elapsed = elapsedSeconds;
   Int_t completeFlag = complete ? 1 : 0;
@@ -1081,6 +1122,18 @@ int main(int argc, char** argv) {
                   "multiplicity_strong_em_overflow/l");
   metadata.Branch("content_decode_failures", &decodeFailures,
                   "content_decode_failures/l");
+  metadata.Branch("duplicate_hard_carrier_conflict_groups_charm",
+                  &duplicateConflictGroupsC,
+                  "duplicate_hard_carrier_conflict_groups_charm/l");
+  metadata.Branch("duplicate_hard_carrier_conflict_groups_beauty",
+                  &duplicateConflictGroupsB,
+                  "duplicate_hard_carrier_conflict_groups_beauty/l");
+  metadata.Branch("duplicate_hard_carrier_demotions_charm",
+                  &duplicateDemotionsC,
+                  "duplicate_hard_carrier_demotions_charm/l");
+  metadata.Branch("duplicate_hard_carrier_demotions_beauty",
+                  &duplicateDemotionsB,
+                  "duplicate_hard_carrier_demotions_beauty/l");
   metadata.Branch("multiplicity_audit_events", &multiplicityAuditEventCount,
                   "multiplicity_audit_events/l");
   metadata.Branch("elapsed_seconds", &elapsed, "elapsed_seconds/L");

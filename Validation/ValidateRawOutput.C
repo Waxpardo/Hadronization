@@ -89,6 +89,10 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   int logicalId = -1, attempt = -1, seed = -1, complete = 0;
   unsigned long long requested = 0, attempts = 0, successes = 0, failures = 0;
   unsigned long long entries = 0, decodeFailures = 0;
+  unsigned long long duplicateConflictGroupsC = 0;
+  unsigned long long duplicateConflictGroupsB = 0;
+  unsigned long long duplicateDemotionsC = 0;
+  unsigned long long duplicateDemotionsB = 0;
   unsigned long long multiplicityOverflow = 0;
   unsigned long long multiplicityStrongEmOverflow = 0;
   unsigned long long multiplicityAuditEvents = 0;
@@ -116,6 +120,16 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   ReadScalar(metadata, "failed_attempts", failures);
   ReadScalar(metadata, "tree_entries", entries);
   ReadScalar(metadata, "content_decode_failures", decodeFailures);
+  if (!ReadScalar(metadata, "duplicate_hard_carrier_conflict_groups_charm",
+                  duplicateConflictGroupsC) ||
+      !ReadScalar(metadata, "duplicate_hard_carrier_conflict_groups_beauty",
+                  duplicateConflictGroupsB) ||
+      !ReadScalar(metadata, "duplicate_hard_carrier_demotions_charm",
+                  duplicateDemotionsC) ||
+      !ReadScalar(metadata, "duplicate_hard_carrier_demotions_beauty",
+                  duplicateDemotionsB)) {
+    fail("missing duplicate-hard-carrier metadata");
+  }
   ReadScalar(metadata, "multiplicity_overflow", multiplicityOverflow);
   ReadScalar(metadata, "multiplicity_strong_em_overflow",
              multiplicityStrongEmOverflow);
@@ -187,6 +201,7 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
       "heavyNb", "heavyNbbar", "heavyQc", "heavyQb", "heavyCentral",
       "heavyOriginC", "heavyOriginB", "heavyMatchResolutionC",
       "heavyMatchResolutionB", "heavyMatchedHardC", "heavyMatchedHardB",
+      "heavyConflictingHardC", "heavyConflictingHardB",
       "ancestryIndex", "ancestryPdg", "ancestryStatus", "ancestryMother1",
       "ancestryMother2", "multAuditPdg", "multAuditStatus",
       "multAuditHasWeakAncestor"};
@@ -218,6 +233,10 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   std::vector<int>* heavyOriginB = nullptr;
   std::vector<int>* heavyMatchResolutionC = nullptr;
   std::vector<int>* heavyMatchResolutionB = nullptr;
+  std::vector<int>* heavyMatchedHardC = nullptr;
+  std::vector<int>* heavyMatchedHardB = nullptr;
+  std::vector<int>* heavyConflictingHardC = nullptr;
+  std::vector<int>* heavyConflictingHardB = nullptr;
   std::vector<int>* heavyMotherOffsets = nullptr;
   std::vector<int>* heavyMothers = nullptr;
   std::vector<int>* ancestryIndex = nullptr;
@@ -253,6 +272,10 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   tree->SetBranchAddress("heavyOriginB", &heavyOriginB);
   tree->SetBranchAddress("heavyMatchResolutionC", &heavyMatchResolutionC);
   tree->SetBranchAddress("heavyMatchResolutionB", &heavyMatchResolutionB);
+  tree->SetBranchAddress("heavyMatchedHardC", &heavyMatchedHardC);
+  tree->SetBranchAddress("heavyMatchedHardB", &heavyMatchedHardB);
+  tree->SetBranchAddress("heavyConflictingHardC", &heavyConflictingHardC);
+  tree->SetBranchAddress("heavyConflictingHardB", &heavyConflictingHardB);
   tree->SetBranchAddress("heavyMotherOffsets", &heavyMotherOffsets);
   tree->SetBranchAddress("heavyMothers", &heavyMothers);
   tree->SetBranchAddress("ancestryIndex", &ancestryIndex);
@@ -275,6 +298,8 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
   unsigned long long unresolvedBeautyTriggerCandidates = 0;
   unsigned long long resolvedNonhardCharmTriggerCandidates = 0;
   unsigned long long resolvedNonhardBeautyTriggerCandidates = 0;
+  unsigned long long observedDuplicateDemotionsC = 0;
+  unsigned long long observedDuplicateDemotionsB = 0;
   for (Long64_t entry = 0; entry < tree->GetEntries(); ++entry) {
     tree->GetEntry(entry);
     if (!eventIds.insert(eventId).second) fail("duplicate event ID");
@@ -330,6 +355,10 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
         heavyOriginB && heavyOriginB->size() == size &&
         heavyMatchResolutionC && heavyMatchResolutionC->size() == size &&
         heavyMatchResolutionB && heavyMatchResolutionB->size() == size &&
+        heavyMatchedHardC && heavyMatchedHardC->size() == size &&
+        heavyMatchedHardB && heavyMatchedHardB->size() == size &&
+        heavyConflictingHardC && heavyConflictingHardC->size() == size &&
+        heavyConflictingHardB && heavyConflictingHardB->size() == size &&
         heavyPt && heavyPt->size() == size &&
         heavyEta && heavyEta->size() == size &&
         heavyPhi && heavyPhi->size() == size &&
@@ -347,12 +376,62 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
       fail("per-event heavy vector lengths are inconsistent");
       continue;
     }
+    std::set<int> selectedFinalHardC;
+    std::set<int> selectedFinalHardB;
     for (std::size_t index = 0; index < size; ++index) {
       if (!std::isfinite((*heavyPt)[index]) ||
           !std::isfinite((*heavyEta)[index]) ||
           !std::isfinite((*heavyPhi)[index])) {
         fail("non-finite heavy-hadron kinematics");
       }
+      const auto validateCarrier =
+          [&](int charge, int origin, int resolution, int matchedHard,
+              int conflictingHard,
+              std::set<int>& selectedFinalHard,
+              unsigned long long& observedDuplicateDemotions,
+              const char* sector) {
+            if (!(*heavyIsFinal)[index] || charge == 0) return;
+            if (resolution == static_cast<int>(
+                                  Hadronization::MatchResolution::
+                                      kDuplicateHardCarrier)) {
+              ++observedDuplicateDemotions;
+              if (origin !=
+                      static_cast<int>(Hadronization::Origin::kUnresolved) ||
+                  matchedHard != -1) {
+                fail(std::string("invalid duplicate-carrier demotion in ") +
+                     sector);
+              }
+              if (conflictingHard < 0) {
+                fail(std::string("missing conflicting hard carrier in ") +
+                     sector);
+              }
+            } else if (conflictingHard != -1) {
+              fail(std::string("spurious conflicting hard carrier in ") +
+                   sector);
+            }
+            if (origin ==
+                static_cast<int>(Hadronization::Origin::kSelectedHard)) {
+              if (resolution != static_cast<int>(
+                                    Hadronization::MatchResolution::kUnique) ||
+                  matchedHard < 0) {
+                fail(std::string("invalid selected-hard metadata in ") +
+                     sector);
+              } else if (!selectedFinalHard.insert(matchedHard).second) {
+                fail(std::string("duplicate surviving selected hard carrier in ") +
+                     sector);
+              }
+            }
+          };
+      validateCarrier((*heavyQc)[index], (*heavyOriginC)[index],
+                      (*heavyMatchResolutionC)[index],
+                      (*heavyMatchedHardC)[index],
+                      (*heavyConflictingHardC)[index], selectedFinalHardC,
+                      observedDuplicateDemotionsC, "charm");
+      validateCarrier((*heavyQb)[index], (*heavyOriginB)[index],
+                      (*heavyMatchResolutionB)[index],
+                      (*heavyMatchedHardB)[index],
+                      (*heavyConflictingHardB)[index], selectedFinalHardB,
+                      observedDuplicateDemotionsB, "beauty");
       if ((*heavyCentral)[index] && (*heavyIsFinal)[index] &&
           Hadronization::IsDirectPrimaryStatus((*heavyStatus)[index]) &&
           Hadronization::IsCentralKinematic((*heavyPt)[index],
@@ -395,6 +474,16 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
       }
     }
   }
+  if (observedDuplicateDemotionsC != duplicateDemotionsC ||
+      observedDuplicateDemotionsB != duplicateDemotionsB) {
+    fail("duplicate-carrier demotion metadata mismatch");
+  }
+  if ((duplicateDemotionsC == 0) != (duplicateConflictGroupsC == 0) ||
+      (duplicateDemotionsB == 0) != (duplicateConflictGroupsB == 0) ||
+      duplicateConflictGroupsC > duplicateDemotionsC / 2 ||
+      duplicateConflictGroupsB > duplicateDemotionsB / 2) {
+    fail("duplicate-carrier group/demotion accounting is inconsistent");
+  }
   std::cout << "RAW_ORIGIN_AUDIT unresolved_charm_trigger_candidates="
             << unresolvedCharmTriggerCandidates
             << " unresolved_beauty_trigger_candidates="
@@ -402,7 +491,15 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
             << " resolved_nonhard_charm_trigger_candidates="
             << resolvedNonhardCharmTriggerCandidates
             << " resolved_nonhard_beauty_trigger_candidates="
-            << resolvedNonhardBeautyTriggerCandidates << "\n";
+            << resolvedNonhardBeautyTriggerCandidates
+            << " duplicate_hard_carrier_groups_charm="
+            << duplicateConflictGroupsC
+            << " duplicate_hard_carrier_groups_beauty="
+            << duplicateConflictGroupsB
+            << " duplicate_hard_carrier_demotions_charm="
+            << duplicateDemotionsC
+            << " duplicate_hard_carrier_demotions_beauty="
+            << duplicateDemotionsB << "\n";
   std::cout << "RAW_VALIDATION_SUMMARY errors=" << errors
             << " entries=" << tree->GetEntries()
             << " process_codes=" << processCounts->GetEntries()
