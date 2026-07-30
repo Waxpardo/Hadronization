@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <array>
 #include <random>
 #include <cmath>
 #include <cstring>
@@ -425,6 +426,41 @@ void DeleteInputObject(TFile* file, TObjectType*& object) {
 
 // Derive the histograms (delta phi and trigger pt) from the THnSparse, including user-defined cuts
 // Pay attention that the OS and SS histograms need to have the same amount of bins!
+void ValidateProjectionCuts(const BinsFromTHnSparse& cuts) {
+    const std::array<Double_t, 12> values = {
+        cuts.triggerPhiMin, cuts.triggerPhiMax,
+        cuts.assocPhiMin, cuts.assocPhiMax,
+        cuts.triggerEtaMin, cuts.triggerEtaMax,
+        cuts.assocEtaMin, cuts.assocEtaMax,
+        cuts.triggerPtMin, cuts.triggerPtMax,
+        cuts.assocPtMin, cuts.assocPtMax
+    };
+    if (!std::all_of(values.begin(), values.end(),
+                     [](Double_t value) { return std::isfinite(value); })) {
+        throw std::runtime_error("non-finite kinematic projection cut");
+    }
+    if (cuts.triggerEtaMin > cuts.triggerEtaMax ||
+        cuts.assocEtaMin > cuts.assocEtaMax ||
+        cuts.triggerPtMin > cuts.triggerPtMax ||
+        cuts.assocPtMin > cuts.assocPtMax) {
+        throw std::runtime_error("inverted kinematic projection cut");
+    }
+    // Paul-compatible pair objects retain delta-phi but not the two
+    // individual azimuths. The checked-in paper configs use the full
+    // individual-phi range. Reject a narrower request instead of applying it
+    // only to the trigger denominator.
+    constexpr Double_t phiTolerance = 1e-6;
+    if (cuts.triggerPhiMin > -M_PI + phiTolerance ||
+        cuts.triggerPhiMax < M_PI - phiTolerance ||
+        cuts.assocPhiMin > -M_PI + phiTolerance ||
+        cuts.assocPhiMax < M_PI - phiTolerance) {
+        throw std::runtime_error(
+            "individual trigger/associate phi cuts are unsupported by the "
+            "current pair-object schema");
+    }
+}
+
+
 TH1D* GetCorrelationHistograms(THnSparseD* hCorrelations, const BinsFromTHnSparse& cuts, const TString& suffix = ""
 ) {
     // THnSparse hCorrelations: (careful: the 'trigger' and 'associate' refer to the pairs)
@@ -439,11 +475,14 @@ TH1D* GetCorrelationHistograms(THnSparseD* hCorrelations, const BinsFromTHnSpars
     if (!hCorrelations) {
         throw std::runtime_error("Cannot project correlations: hCorrelations is null");
     }
+    ValidateProjectionCuts(cuts);
 
     // Reset axes
     for (int i = 0; i < hCorrelations->GetNdimensions(); ++i) { hCorrelations->GetAxis(i)->SetRange(); }
 
-        /*
+        // These cuts must match the trigger-normalisation projection below.
+        // Leaving them inactive biases the conditional yield whenever the
+        // configured trigger range is narrower than the upstream pair object.
         hCorrelations->GetAxis(2)->SetRangeUser(
             cuts.triggerEtaMin,
             cuts.triggerEtaMax
@@ -463,7 +502,6 @@ TH1D* GetCorrelationHistograms(THnSparseD* hCorrelations, const BinsFromTHnSpars
             cuts.assocPtMin,
             cuts.assocPtMax
         );
-        */
 
         std::cout << "--> applying multiplicity cut from " << cuts.multiplicityMin << " to " << cuts.multiplicityMax << std::endl;
 
@@ -494,6 +532,7 @@ TH1D* GetTriggerPtHistograms(THnSparseD* hTrKinematics, const BinsFromTHnSparse&
     if (!hTrKinematics) {
         throw std::runtime_error("Cannot project trigger pT: hTrKinematics is null");
     }
+    ValidateProjectionCuts(cuts);
 
     // Reset axes
     for (int i = 0; i < hTrKinematics->GetNdimensions(); ++i) { hTrKinematics->GetAxis(i)->SetRange(); }
@@ -1243,6 +1282,14 @@ Double_t calculateOneYield(bool VERBOSE, TH1D *hDPhiOS, TH1D *hTrPtOS, TH1D *hDP
                   << ", SS triggers=" << nTriggersSS << ")" << std::endl;
         return std::numeric_limits<Double_t>::quiet_NaN();
     }
+    const Double_t triggerDifference = std::abs(nTriggersOS - nTriggersSS);
+    const Double_t triggerScale =
+        std::max({1.0, std::abs(nTriggersOS), std::abs(nTriggersSS)});
+    if (triggerDifference > 1e-10 * triggerScale) {
+        throw std::runtime_error(
+            Form("OS/SS trigger denominators differ: OS=%.17g SS=%.17g",
+                 nTriggersOS, nTriggersSS));
+    }
 	hDPhiOS->Scale(1.0 / nTriggersOS);
 	hDPhiSS->Scale(1.0 / nTriggersSS);
     if (VERBOSE) {
@@ -1462,7 +1509,15 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     }
 
                     // Add correct multiplicity cut to project out the relevant histograms from the THnSparse
-                    BinsFromTHnSparse cuts;
+                    BinsFromTHnSparse cuts{};
+                    cuts.triggerPhiMin = binFromTHnSparse.triggerPhiMin;
+                    cuts.triggerPhiMax = binFromTHnSparse.triggerPhiMax;
+                    cuts.assocPhiMin = binFromTHnSparse.assocPhiMin;
+                    cuts.assocPhiMax = binFromTHnSparse.assocPhiMax;
+                    cuts.triggerEtaMin = binFromTHnSparse.triggerEtaMin;
+                    cuts.triggerEtaMax = binFromTHnSparse.triggerEtaMax;
+                    cuts.assocEtaMin = binFromTHnSparse.assocEtaMin;
+                    cuts.assocEtaMax = binFromTHnSparse.assocEtaMax;
                     cuts.triggerPtMin = binFromTHnSparse.triggerPtMin;
                     cuts.triggerPtMax = binFromTHnSparse.triggerPtMax;
                     cuts.assocPtMin = binFromTHnSparse.assocPtMin;
@@ -1487,6 +1542,7 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     TH1D *hDPhiSS = GetCorrelationHistograms(hCorrelationsSS, cuts, "SS");
                     TH1D *hTrPtOS = GetTriggerPtHistograms(hTrKinematicsOS, cuts, "OS");
                     TH1D *hTrPtSS = GetTriggerPtHistograms(hTrKinematicsSS, cuts, "SS");
+                    const Double_t centralTriggerCount = hTrPtOS->Integral();
 
                     if (VERBOSE) {
                         std::cout << "hDPhiOS->GetEntries() = " << hDPhiOS->GetEntries() << std::endl;
@@ -1658,8 +1714,10 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                     if (CALCULATE_ERRORS && !excludeSubsampleError) {
                         std::vector<Double_t> subYieldValues;
                         std::vector<Double_t> subRatioValues;
+                        std::vector<Double_t> subTriggerCounts;
                         subYieldValues.reserve(nSubSamples);
                         subRatioValues.reserve(nSubSamples);
+                        subTriggerCounts.reserve(nSubSamples);
 
 
                         for (Int_t l = 1; l < nSubSamples+1; l++) {
@@ -1684,6 +1742,8 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             TH1D *hDPhiSS_subSamples = GetCorrelationHistograms(hCorrelationsSS_subSamples, cuts);
                             TH1D *hTrPtOS_subSamples = GetTriggerPtHistograms(hTrKinematicsOS_subSamples, cuts);
                             TH1D *hTrPtSS_subSamples = GetTriggerPtHistograms(hTrKinematicsSS_subSamples, cuts);
+                            subTriggerCounts.push_back(
+                                hTrPtOS_subSamples->Integral());
 
                             // Apply the same same-sign double-counting correction used for the central yield.
                             if (strcmp((fileNamesOSandSS.trigger).c_str(),
@@ -1768,6 +1828,45 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             ? yieldStats.stdError : unavailableError;
                         Double_t yieldRatioError = ratioCoverageComplete
                             ? yieldRatioStats.stdError : unavailableError;
+                        std::ostringstream blockTriggerCounts;
+                        for (std::size_t block = 0;
+                             block < subTriggerCounts.size(); ++block) {
+                            if (block != 0) blockTriggerCounts << ",";
+                            blockTriggerCounts << subTriggerCounts[block];
+                        }
+                        const Double_t referenceYield =
+                            vYields[i][0][k];
+                        std::cout
+                            << "UNCERTAINTY_MATRIX"
+                            << " flavour=" << FLAVOUR
+                            << " trigger=" << trigger
+                            << " tune=" << TUNE
+                            << " associate=" << fileNamesOSandSS.associateOS
+                            << " bin=" << binFromTHnSparse.hDPhi
+                            << " central_triggers=" << centralTriggerCount
+                            << " block_triggers=" << blockTriggerCounts.str()
+                            << " finite_yields=" << yieldStats.nValues
+                            << " finite_ratios="
+                            << (j == 0 ? nSubSamples
+                                       : yieldRatioStats.nValues)
+                            << " central_yield=" << yield
+                            << " yield_sem=" << yieldError
+                            << " reference_yield=" << referenceYield
+                            << " ratio_sem=" << yieldRatioError
+                            << " denominator_status="
+                            << (std::isfinite(referenceYield) &&
+                                        referenceYield != 0.0
+                                    ? "valid"
+                                    : "invalid")
+                            << " status="
+                            << (yieldCoverageComplete &&
+                                        ratioCoverageComplete &&
+                                        std::isfinite(yieldError) &&
+                                        (j == 0 ||
+                                         std::isfinite(yieldRatioError))
+                                    ? "PASS"
+                                    : "FAIL")
+                            << std::endl;
                         if (VERBOSE) {
                             std::cout << "subsample yield stats n=" << yieldStats.nValues
                                       << " mean=" << yieldStats.mean

@@ -97,20 +97,6 @@ std::string CanonicalTune(const std::string& mode) {
   return "";
 }
 
-bool IsMultiplicitySpecies(int absPdg) {
-  return absPdg == 11 || absPdg == 13 || absPdg == 211 ||
-         absPdg == 321 || absPdg == 2212;
-}
-
-int MultiplicitySpeciesIndex(int absPdg) {
-  if (absPdg == 11) return 0;
-  if (absPdg == 13) return 1;
-  if (absPdg == 211) return 2;
-  if (absPdg == 321) return 3;
-  if (absPdg == 2212) return 4;
-  return -1;
-}
-
 std::vector<int> ExplicitMotherIndices(const Event& event, int particleIndex) {
   std::vector<int> result = event[particleIndex].motherList();
   // Some junction/string-fragmentation statuses encode a physically relevant
@@ -809,16 +795,18 @@ int main(int argc, char** argv) {
           multAuditPt.push_back(particle.pT());
           multAuditEta.push_back(particle.eta());
         }
-        if (particle.pT() > 0.15 && std::abs(particle.eta()) <= 4.0) {
-          const int speciesIndex = MultiplicitySpeciesIndex(absId);
-          if (IsDirectPrimaryStatus(particle.status())) {
-            ++multiplicity;
-            ++multiplicityDirectBySpecies[speciesIndex];
-          }
-          if (!hasWeakAncestor) {
-            ++multiplicityStrongEm;
-            ++multiplicityStrongEmBySpecies[speciesIndex];
-          }
+        const int speciesIndex = MultiplicitySpeciesIndex(absId);
+        if (CountsNchHadronisationV1(
+                id, particle.status(), particle.isFinal(), particle.pT(),
+                particle.eta())) {
+          ++multiplicity;
+          ++multiplicityDirectBySpecies[speciesIndex];
+        }
+        if (CountsNchFinalStrongEmV1(
+                id, particle.isFinal(), particle.pT(), particle.eta(),
+                hasWeakAncestor)) {
+          ++multiplicityStrongEm;
+          ++multiplicityStrongEmBySpecies[speciesIndex];
         }
       }
 

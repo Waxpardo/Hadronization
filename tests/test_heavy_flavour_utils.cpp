@@ -26,6 +26,20 @@ int main() {
   assert(IsCentralKinematic(std::nextafter(1.0, 2.0), 4.0, true));
   assert(!IsCentralKinematic(2.0, std::nextafter(4.0, 5.0), true));
   assert(!IsCentralKinematic(0.15, 0.0, false));
+  assert(CountsNchHadronisationV1(211, 81, true,
+                                  std::nextafter(0.15, 1.0), 4.0));
+  assert(!CountsNchHadronisationV1(211, 81, true, 0.15, 0.0));
+  assert(!CountsNchHadronisationV1(
+      211, 81, true, 1.0, std::nextafter(4.0, 5.0)));
+  assert(!CountsNchHadronisationV1(211, -81, true, 1.0, 0.0));
+  assert(!CountsNchHadronisationV1(211, 81, false, 1.0, 0.0));
+  assert(!CountsNchHadronisationV1(111, 81, true, 1.0, 0.0));
+  for (const int pdg : {11, -11, 13, -13, 211, -211, 321, -321, 2212,
+                        -2212}) {
+    assert(CountsNchHadronisationV1(pdg, 85, true, 1.0, 0.0));
+    assert(CountsNchFinalStrongEmV1(pdg, true, 1.0, 0.0, false));
+    assert(!CountsNchFinalStrongEmV1(pdg, true, 1.0, 0.0, true));
+  }
 
   std::set<std::uint64_t> ids;
   for (int tune = 0; tune < 3; ++tune) {

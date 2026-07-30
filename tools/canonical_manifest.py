@@ -7,12 +7,15 @@ import argparse
 import hashlib
 import json
 import os
+import subprocess
 import tempfile
+from datetime import datetime, timezone
 from pathlib import Path
 
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 CANONICAL_SLOTS = 100
 BLOCKS = 10
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -49,6 +52,41 @@ def freeze(args: argparse.Namespace) -> int:
         raise SystemExit(f"refusing to alter nonempty freeze directory: {output_dir}")
 
     campaign = json.loads((campaign_dir / "campaign.json").read_text())
+    current_commit = subprocess.check_output(
+        ["git", "-C", str(REPOSITORY_ROOT), "rev-parse", "HEAD"], text=True
+    ).strip()
+    tracked_dirty = bool(
+        subprocess.check_output(
+            [
+                "git",
+                "-C",
+                str(REPOSITORY_ROOT),
+                "status",
+                "--porcelain",
+                "--untracked-files=no",
+            ],
+            text=True,
+        ).strip()
+    )
+    if tracked_dirty:
+        raise SystemExit("refusing to freeze from a tracked-dirty repository")
+    if campaign.get("repository_dirty_at_generation") is not False:
+        raise ValueError("campaign was not generated from a clean repository")
+    ancestry = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(REPOSITORY_ROOT),
+            "merge-base",
+            "--is-ancestor",
+            campaign["repository_commit"],
+            current_commit,
+        ]
+    )
+    if ancestry.returncode != 0:
+        raise ValueError(
+            "campaign implementation commit is not an ancestor of freeze checkout"
+        )
     candidates = read_jsonl(campaign_dir / "candidate_manifest.jsonl")
     ledger = read_jsonl(campaign_dir / "seed_ledger.jsonl")
     candidate_lookup = {
@@ -142,6 +180,14 @@ def freeze(args: argparse.Namespace) -> int:
         "block_count": BLOCKS,
         "jobs_per_tune_per_block": CANONICAL_SLOTS // BLOCKS,
         "selection_file": str(args.selection.resolve()) if args.selection else None,
+        "repository_commit_at_freeze": current_commit,
+        "repository_implementation_commit": campaign["repository_commit"],
+        "raw_schema": campaign["raw_schema"],
+        "selector": campaign["selector"],
+        "species_registry_sha256": campaign["species_registry_sha256"],
+        "pair_registry_sha256": campaign["pair_registry_sha256"],
+        "card_sha256": campaign["card_sha256"],
+        "created_utc": datetime.now(timezone.utc).isoformat(),
     }
     atomic_write(
         output_dir / "freeze_summary.json",

@@ -31,6 +31,9 @@ analysis_root="$(cd "$2" && pwd)"
 analyzed_data_base="$3"
 output_tag="${4:-$(basename "$(dirname "${freeze_dir}")")}"
 python3 "${project_base}/tools/canonical_manifest.py" validate "${freeze_dir}"
+python3 "${project_base}/tools/validate_analysis_outputs.py" \
+  "${freeze_dir}/canonical_manifest.jsonl" "${analysis_root}" \
+  --report "${analysis_root}/validation/analysis_output_manifest_validation.json"
 mkdir -p "${analyzed_data_base}"
 
 merge_one() {
@@ -38,9 +41,15 @@ merge_one() {
   local manifest="$2"
   local final_directory="$3"
   if [[ -e "${final_directory}" ]]; then
-    echo "ERROR: final merge directory exists; refusing overwrite: ${final_directory}" >&2
+    if "${project_base}/Validation/validate_pair_directory.sh" \
+        "${final_directory}"; then
+      echo "VALIDATED_EXISTING_MERGE ${final_directory}"
+      return 0
+    fi
+    echo "ERROR: existing merge directory is invalid; refusing overwrite: ${final_directory}" >&2
     return 4
   fi
+  mkdir -p "$(dirname "${final_directory}")"
   local stage
   stage="$(mktemp -d "${final_directory}.partial.XXXXXX")"
   local slot_list="${stage}/canonical_slots.txt"
@@ -67,6 +76,25 @@ for line in open(sys.argv[2]):
     return 5
   fi
   "${project_base}/Validation/validate_pair_directory.sh" "${stage}"
+  cp "${manifest}" "${stage}/source_manifest.jsonl"
+  python3 -c '
+import datetime,hashlib,json,pathlib,subprocess,sys
+manifest=pathlib.Path(sys.argv[1])
+stage=pathlib.Path(sys.argv[2])
+payload={
+  "schema":"hf_merged_pair_directory_provenance_v1",
+  "tune":sys.argv[3],
+  "source_manifest":manifest.name,
+  "source_manifest_sha256":hashlib.sha256(manifest.read_bytes()).hexdigest(),
+  "repository_commit":subprocess.check_output(
+      ["git","-C",sys.argv[4],"rev-parse","HEAD"],text=True).strip(),
+  "created_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),
+  "pair_files":300,
+  "status":"PASS",
+}
+(stage/"merge_provenance.json").write_text(
+    json.dumps(payload,indent=2,sort_keys=True)+"\n")
+' "${manifest}" "${stage}" "${tune}" "${project_base}"
   mv "${stage}" "${final_directory}"
   echo "PROMOTED_MERGE ${final_directory}"
 }

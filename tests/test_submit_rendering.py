@@ -59,6 +59,29 @@ def main() -> int:
         assert '+JobCategory = "$(CATEGORY)"' in text
         assert "+JobCategory = $(CATEGORY)" not in text
         assert text.count("render_test,999,") == 3
+
+        unsafe = subprocess.run(
+            [
+                str(ROOT / "runCondorJob.sh"),
+                "--campaign",
+                "unsafe/name",
+                "999",
+                "MONASH",
+                "0",
+                "pilot",
+                "0",
+                "880000001",
+                "10",
+            ],
+            text=True,
+            capture_output=True,
+        )
+        assert unsafe.returncode == 2
+        assert "campaign may contain only" in unsafe.stderr
+
+        for submitter in ("submit_gate_b_pilots.sh", "submit_full_production.sh"):
+            submitter_text = (ROOT / submitter).read_text()
+            assert 'tools/build_producer.sh" "${project_base}"' in submitter_text
     print("submit-rendering tests passed")
     return 0
 

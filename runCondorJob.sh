@@ -34,6 +34,18 @@ is_uint() {
   [[ "${1:-}" =~ ^[0-9]+$ ]]
 }
 
+if [[ ! "${campaign}" =~ ^[A-Za-z0-9._-]+$ ]]; then
+  echo "ERROR: campaign may contain only letters, digits, dot, underscore, and hyphen" >&2
+  exit 2
+fi
+for scheduler_value in cluster_id process_id; do
+  value="${!scheduler_value}"
+  if [[ ! "${value}" =~ ^[A-Za-z0-9._-]+$ ]]; then
+    echo "ERROR: ${scheduler_value} contains unsafe characters" >&2
+    exit 2
+  fi
+done
+
 for value_name in campaign_ordinal logical_id attempt seed requested_successes; do
   value="${!value_name}"
   if ! is_uint "${value}"; then
@@ -43,6 +55,10 @@ for value_name in campaign_ordinal logical_id attempt seed requested_successes; 
 done
 if (( seed < 1 || seed > 900000000 )); then
   echo "ERROR: seed outside verified PYTHIA domain [1,900000000]" >&2
+  exit 2
+fi
+if (( requested_successes < 1 )); then
+  echo "ERROR: requested_successes must be positive" >&2
   exit 2
 fi
 if [[ "${role}" != "primary" && "${role}" != "reserve" && "${role}" != "pilot" ]]; then

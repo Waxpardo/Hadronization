@@ -46,6 +46,7 @@ if [[ -n "$(git -C "${project_base}" status --porcelain --untracked-files=no)" ]
   echo "ERROR: canonical production requires no tracked worktree changes" >&2
   exit 3
 fi
+"${project_base}/tools/build_producer.sh" "${project_base}"
 
 mkdir -p "${project_base}/Production/${campaign_name}/condor_logs"/{MONASH,JUNCTIONS,CLOSEPACKING}
 submit_file="${project_base}/Production/${campaign_name}/submit_primary.sub"

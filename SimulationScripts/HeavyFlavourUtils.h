@@ -134,6 +134,44 @@ inline bool IsDirectPrimaryStatus(int status) {
   return status > 0 && absolute >= 81 && absolute <= 89;
 }
 
+inline int MultiplicitySpeciesIndex(int absPdg) {
+  switch (std::abs(absPdg)) {
+    case 11:
+      return 0;
+    case 13:
+      return 1;
+    case 211:
+      return 2;
+    case 321:
+      return 3;
+    case 2212:
+      return 4;
+    default:
+      return -1;
+  }
+}
+
+inline bool IsMultiplicitySpecies(int absPdg) {
+  return MultiplicitySpeciesIndex(absPdg) >= 0;
+}
+
+inline bool IsMultiplicityKinematic(double pt, double eta) {
+  return std::isfinite(pt) && std::isfinite(eta) && pt > 0.15 &&
+         std::abs(eta) <= 4.0;
+}
+
+inline bool CountsNchHadronisationV1(int pdg, int status, bool isFinal,
+                                    double pt, double eta) {
+  return isFinal && IsMultiplicitySpecies(std::abs(pdg)) &&
+         IsDirectPrimaryStatus(status) && IsMultiplicityKinematic(pt, eta);
+}
+
+inline bool CountsNchFinalStrongEmV1(int pdg, bool isFinal, double pt,
+                                    double eta, bool hasWeakAncestor) {
+  return isFinal && IsMultiplicitySpecies(std::abs(pdg)) &&
+         IsMultiplicityKinematic(pt, eta) && !hasWeakAncestor;
+}
+
 inline double WrapAbsolutePhi(double phi) {
   constexpr double pi = 3.14159265358979323846;
   return std::fmod(phi + 3.0 * pi, 2.0 * pi) - pi;
