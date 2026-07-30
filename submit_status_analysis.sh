@@ -28,7 +28,6 @@ esac
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 project_base="${HADRONIZATION_BASE:-${script_dir}}"
 project_base="${project_base%/}"
-python3 "${project_base}/tools/canonical_manifest.py" validate "${freeze_dir}"
 if [[ -n "$(git -C "${project_base}" status --porcelain --untracked-files=no)" ]]; then
   echo "ERROR: canonical analysis requires no tracked worktree changes" >&2
   exit 3
@@ -36,6 +35,11 @@ fi
 "${project_base}/Validation/validate_canonical_manifest.sh" \
   "${freeze_dir}" "${production_root}" \
   "${analysis_root}/validation/canonical_raw_validation.log"
+python3 "${project_base}/tools/canonical_manifest.py" validate "${freeze_dir}"
+python3 "${project_base}/tools/validate_analysis_outputs.py" \
+  "${freeze_dir}/canonical_manifest.jsonl" "${analysis_root}" \
+  --production-root "${production_root}" --checkout "${project_base}" \
+  --allow-missing
 mkdir -p "${analysis_root}"/condor_logs/{MONASH,JUNCTIONS,CLOSEPACKING}
 submit_file="${analysis_root}/submit_canonical_analysis.sub"
 python3 "${project_base}/tools/render_analysis_submit.py" \

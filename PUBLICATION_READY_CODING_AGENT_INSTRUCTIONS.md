@@ -76,18 +76,21 @@ decay-inclusive ground-state yield. The paper must say so.
 Perform all implementation on a dedicated branch created from the latest
 verified stable `origin/main`, named:
 
-`codex/full-production`
+`full-production`
 
 If that branch already exists, inspect its ancestry and worktree before
-deciding whether to continue it or create a dated `codex/full-production-*`
-successor. Never recreate it destructively.
+deciding whether to continue it or create a dated successor. Never recreate
+it destructively. This unprefixed name is intentional: the project owner
+explicitly requested `full-production`, overriding the default Codex branch
+prefix.
 
 Before editing:
 
 1. Fetch the live remote.
 2. Record the hashes of local `main`, live `origin/main`, Nikhef `main`, and
    every branch or worktree relevant to production or final plotting.
-3. Inspect existing local and remote `codex/full-production*` branches.
+3. Inspect existing local and remote `full-production` branches and any dated
+   successors.
 4. Create a separate clean worktree from the latest verified `origin/main`.
 5. Inspect `codex/final-paper-plotting-20260729` (audited at `7f17356`) or its
    merged successor. Port only its still-unmerged validated plotting,
@@ -140,8 +143,10 @@ implementation:
   bibliography and untracked paper work;
 - live plotting-hardening branch:
   `codex/final-paper-plotting-20260729` at `7f173565`;
-- no live remote `full-production` or `codex/full-production` branch was
-  present;
+- no live remote `full-production` branch was present at the instant of that
+  pre-implementation audit; the branch was subsequently created as required,
+  so this bullet is historical source-state evidence, not an instruction to
+  recreate it;
 - Nikhef `/data/alice/ipardoza/Hadronization`: clean `main` at `11884cf1`,
   while its local `origin/main` reference is stale;
 - Nikhef `/data/alice/ipardoza/Hadronization-main`:
@@ -176,7 +181,8 @@ Preserve these parts unless an executable regression proves they are wrong:
 - per-trigger normalization followed by OS-minus-SS;
 - full-DeltaPhi integrated balancing yields;
 - pair filenames and `summed MULTIPLICITY`, `hTrKinematics`,
-  `hAsKinematics`, and `hCorrelations`;
+  `hAsKinematics`, `hCorrelations`, and the versioned
+  `hCorrelationsByOrigin` decomposition;
 - central values from complete-root inputs and uncertainties from ten disjoint
   partitions of the same canonical files;
 - tune-ratio treatment for independent tune samples;
@@ -207,11 +213,17 @@ The currently known classification is:
 - associate `pT >= 1 GeV` in the legacy pair producer: approved definition
   change, not evidence that Paul’s old calculation was internally wrong; the
   new associate threshold is `pT > 0.15 GeV`;
-- pT/eta fields exist in Paul’s plotting JSON while the corresponding
-  `hCorrelations` projection cuts are commented out: standardization mismatch;
-  the legacy pair producer applied its effective pT cut upstream, so the new
-  pipeline must apply each cut exactly once and make the plotting config assert
-  rather than merely appear to impose it;
+- pT/eta fields exist in Paul’s plotting JSON and stable main applies the
+  corresponding trigger/associate recuts to `hCorrelations` as well as the
+  trigger recuts to `hTrKinematics` (for example
+  `improvedPlotting_THnSparse.C` at stable commit `39c9cf2`, lines 409--427 and
+  461--474): confirmed behavior, not a missing-cut defect. Preserve that
+  exact Paul-compatible projection path in `legacy-regression`. The canonical
+  v2 pair-analysis contract applies the approved role-dependent acceptance
+  once upstream and records it in metadata; canonical plotting must assert
+  the contract and must not recut it. Do not invent a second
+  “corrected-consistent legacy” mode: the premise for that distinction was
+  disproved by direct source inspection;
 - Paul’s THnSparse axes stop at `pT = 50 GeV` and `Nch = 400` while the paper
   declares no such upper selections: potential correctness defect only if
   accepted entries overflow; measure every under/overflow count and change the
@@ -297,12 +309,13 @@ readiness:
   charm, comprising 342 yields and 268 baryon/reference-meson ratios;
 - only 468 of 1152 expected final statistical records were emitted with
   `n=10`, and 1,781 zero-trigger-normalization warnings were observed;
-- the reduced 1--10% smoke selection produced 30 of 30 records with `n=10`
-  and finite positive SEM values and no missing inputs, non-finite values,
-  placeholder errors, or zero-normalization warnings;
-- that smoke run proves that error bars work for supported observables. It
-  does not prove full-paper coverage, and its one-bin global yield canvas has
-  empty/clipped pads that must never be promoted as a final figure;
+- the historical reduced 1--10% legacy-regression selection produced 30 of
+  30 records with `n=10` and finite positive SEM values and no missing inputs,
+  non-finite values, placeholder errors, or zero-normalization warnings;
+- that legacy-regression run proves that error bars work for supported dated
+  observables. It does not prove full-paper coverage, and its one-bin global
+  yield canvas has empty/clipped pads that must never be promoted as a final
+  figure. Canonical `smoke` must refuse the legacy selector;
 - 78 tracked generated plotting artifacts were stale. They may remain removed
   from version control and regenerated into ignored/provenance-controlled
   output locations; unrelated paper figures must remain untouched.
@@ -420,6 +433,27 @@ charge, hadron type, and quark content against an authoritative PDG source.
 Fail if an entry is missing or inconsistent. Do not silently substitute a
 starred state, daughter, family sum, or nearby PDG code.
 
+Implementation status (2026-07-30): independent corroboration now exists.
+`AuditSpeciesRegistry` writes the installed-PYTHIA comparison, while
+`tools/pdg_2025_species_audit.py` and the generated
+`config/pdg_2025_species_reference_v1.json` bind the exact official PDG 2025
+SQLite and mass/width URLs, their SHA-256 checksums, the extraction SQL, the
+fixed-width parse, and all 50 signed per-species comparisons. The result is
+44 `CORROBORATED` entries and six `NEEDS_PHYSICS_REVIEW` entries
+(`+/-5212`, `+/-5312`, `+/-5322`). The audit exits 2 by design and Gate A
+propagates that review-blocked state.
+
+This is not a physics approval. The official 2025 PDG database does not
+assign official MCIDs `5312`/`5322`; it does not directly list a measured
+Xi-prime-b-zero state/mass, and Sigma-b-zero remains an
+unmeasured/model-prediction state. The audit has not changed the operational
+registry, and no physics-review signoff exists. Do not describe those entries
+as experimentally established PDG states merely because PYTHIA provides
+them. Gate A must remain blocked until a reviewer explicitly documents the
+operational registry treatment and associated paper wording. The exact
+source bindings plus `extract --check` and combined audit commands are in
+`REPRODUCIBILITY.md`.
+
 Store all physically distinct Xi states separately. Family-level Xi summaries
 may be derived only in addition to the individual results, with their exact
 membership printed. Never combine Xi with Xi-prime or particle with
@@ -468,6 +502,13 @@ Verify the actual PYTHIA process-code mapping in the installed version.
 Record the hard process code and test the expected charm and beauty channels
 (historically 121/122 and 123/124) rather than treating those numbers as
 unverified constants.
+
+The noninteractive Nikhef environment must bind both the PYTHIA libraries and
+their XML data. When `alienv` falls back to a pinned CVMFS package, export
+`PYTHIA8DATA=<PYTHIA8>/share/Pythia8/xmldoc`, require
+`xmldoc/Index.xml` to exist, and instantiate PYTHIA in a runtime smoke test.
+Setting only `PYTHIA8`, `PATH`, and `LD_LIBRARY_PATH` is insufficient: PYTHIA
+8.315 may otherwise abort while resolving a stale build-time `xmldoc` path.
 
 The `pTHatMin` cut regulates and defines the generated hard-heavy sample. It is
 not a detector cut and must not be hidden. The paper must report it. Before
@@ -544,11 +585,14 @@ attempted events or submitted capacity as analyzed statistics.
 
 ## 6. New coverage-gated equal-statistics campaign
 
-Use the following tag for the first immutable 100M-per-tune stage:
-
-`HF_100M_primaryGround_ccbb_v1`
-
-Do not reuse or overwrite the existing legacy 100M production.
+The historical campaign tag `HF_100M_primaryGround_ccbb_v1` has already been
+created and reserved. Do not regenerate it, rely on it as a command default,
+or overwrite any production carrying that name. For the first immutable
+100M-per-tune stage under the corrected implementation, choose a new globally
+unused campaign name, campaign ordinal, seed interval, and output namespace
+after checking the shared submission registry. Record the chosen values in the
+release evidence. The event-count and equal-statistics contract below is
+unchanged by using a new tag.
 
 One hundred million successful events per tune is the approved minimum
 equal-statistics stage, not an a priori proof of sufficient precision. The
@@ -619,6 +663,86 @@ Compare valid primary and reserve cohorts before freezing. If missingness is
 not demonstrably technical and ignorable, increase resources or redesign the
 recovery procedure; do not select a convenient 100-file subset.
 
+#### Executable equal-tune expansion
+
+An expansion is a new immutable child campaign, not additional directory
+discovery beside the first-stage freeze and not an in-place edit. Let `P` be
+the sealed parent exposure per tune, choose an additional `A` that is a
+multiple of ten in `[10,100]`, and define `N=P+A`. Generate exactly `A`
+MONASH, `2A` JUNCTIONS, and `2A` CLOSEPACKING candidates. Freeze an equal
+technically selected extension of `A` files per tune; reserves do not add
+statistical weight.
+
+Before the child can be submitted, require all of the following:
+
+- a parent-bound `hf_final_coverage_precision_report_v1` with
+  `state=EXPANSION_REQUIRED`, `publication_promotion_allowed=false`, at least
+  one failing predeclared observable, and
+  `selection_rule=predeclared_coverage_and_precision_only_v1`;
+- a fresh child-bound `hf_equal_tune_expansion_storage_projection_v1` with
+  `state=PASS`, `gate_e_storage_authorized=true`, the exact parent hash,
+  `A`, `N`, `A/2A/2A` candidate counts, positive projected bytes, and a
+  passing final capacity recheck;
+- a new child-specific `PHYSICS_ORIGIN_SIGNOFF.json`;
+- a new child-specific `FULL_PRODUCTION_GATE_AUTHORIZATION.json`; and
+- a distinct owner-authored, single-link, mode-`0444`
+  `EQUAL_TUNE_EXPANSION_AUTHORIZATION.json` with schema
+  `hf_equal_tune_expansion_authorization_v1`, decision
+  `APPROVE_EQUAL_TUNE_EXPANSION`, `reviewer_role=project_owner`, a real UTC
+  decision, rationale, child campaign/ordinal/commit, exact `A`, `N`,
+  candidate and reserved-seed records, immutable parent identity, and
+  checksum bindings to the coverage and storage artifacts.
+
+Generate both machine artifacts with
+`tools/generate_expansion_evidence.py`; do not hand-author them. Its coverage
+path must bind a frozen specification, the complete parent-bound matrix, the
+sealed parent, and its own source checksum, and must recompute every
+predeclared criterion. Its storage path must inventory every parent raw file
+and the complete parent analysis/analyzed-data trees, project the exact
+`A/2A/2A` candidate scope, retained retry partials, full superseding derived
+outputs and merge staging, add the documented contingency, and probe live
+`statvfs` capacity. Authorization validation must recompute those semantics,
+verify every bound byte, and perform a fresh live capacity check; a
+handwritten look-alike report must fail.
+
+The parent's launch authorizations cannot be copied or reused. A coding agent
+may validate all three child owner decisions but must never author them.
+Generate, validate, and dry-run the child with:
+
+```bash
+python3 tools/campaign_manifest.py generate-expansion \
+  --root "$PWD" \
+  --campaign <NEW_EXPANSION_CAMPAIGN> \
+  --campaign-ordinal <UNUSED_ORDINAL> \
+  --seed-base <UNUSED_SEED_BASE> \
+  --parent-freeze Production/<PARENT_CAMPAIGN>/freeze \
+  --additional-jobs-per-tune <A>
+python3 tools/campaign_manifest.py validate \
+  campaigns/<NEW_EXPANSION_CAMPAIGN>
+./submit_full_production.sh \
+  campaigns/<NEW_EXPANSION_CAMPAIGN> --dry-run
+```
+
+After owner authorization, submission, validation, and technical selection,
+freeze and seal `Production/<NEW_EXPANSION_CAMPAIGN>/extension_freeze`.
+Create the new union with
+`tools/canonical_manifest.py supersede`, passing the parent freeze, extension
+freeze, the `Production` collection root, and the child `freeze` output. Never
+alter the parent. Revalidate and seal the union, rederive all ten blocks over
+the complete `P+A` sample, and rerun analysis, merging, robustness, plotting,
+coverage, and paper generation. Superseding rows can reference more than one
+source campaign, so downstream commands use the production collection root
+(`Production`), not only `Production/<NEW_EXPANSION_CAMPAIGN>`. The exact
+command sequence is maintained in `REPRODUCIBILITY.md`.
+
+The superseding manifest/summary/seal schemas are first-class downstream
+inputs, not an archival annotation. Analysis validation, canonical merging,
+raw-inclusive plots, final plot provenance, and every later expansion must
+accept both a sealed v2 leaf and a sealed v3 union, verify every leaf
+manifest/hash/source campaign, derive the exact final `N`, and support chained
+unions without a three-digit slot cap. Superseding promotion is atomic:
+failure may leave neither a partial final freeze nor an altered parent.
+
 ### 6.3 Seeds
 
 The producer receives one exact seed from the campaign manifest. Remove all
@@ -634,8 +758,19 @@ Before submission:
 6. Allocate retry seeds centrally and append-only under a file lock or other
    atomic mechanism.
 
-Suggested global candidate ordinals are MONASH `0`--`99`, JUNCTIONS
-`100`--`299`, and CLOSEPACKING `300`--`499`. The maximum attempts per logical
+An owner authorization must bind the immutable initial-allocation prefix of
+the seed ledger by exact byte count and SHA-256, not the hash of the whole
+mutable append-only file. Validation must prove that prefix is unchanged and
+that every suffix record is an authorized, injective retry inside the
+campaign's reserved intervals. Appending a valid retry must not invalidate
+the original owner decision; changing an initial byte or adding an invalid
+suffix must.
+
+For the first-stage 100/200/200 campaign, global candidate ordinals are MONASH
+`0`--`99`, JUNCTIONS `100`--`299`, and CLOSEPACKING `300`--`499`. An expansion
+derives nonoverlapping child-local offsets from its dynamic `A/2A/2A` slot
+counts and separately proves that its full reserved seed intervals do not
+overlap the sealed parent or shared registry. The maximum attempts per logical
 ID must be bounded so the mapping is provably injective and remains within the
 verified PYTHIA range.
 
@@ -656,10 +791,23 @@ corrupt or mismatched existing file.
 Do not skip a job because a file is merely nonempty. Validate it against
 Section 15 first.
 
-Benchmark all three tunes at Nikhef. Configure bounded retry/release behavior
-for nonzero exits, holds, evictions, and wall-time termination. Verify actual
-Nikhef policy rather than assuming generic HTCondor semantics. A killed
-partial output is invalid and a new attempt starts with a new seed.
+Benchmark all three tunes at Nikhef. Disable automatic retries. A submission
+wrapper may submit a new cluster held, record the immutable scheduler evidence,
+and release that never-started cluster once; manually releasing a held or
+evicted attempt that may already have started is forbidden. Nonzero exits,
+holds, evictions, and wall-time termination require reviewed failure evidence
+and an append-only retry allocation with a new seed. Verify actual Nikhef
+policy rather than assuming generic HTCondor semantics. A killed partial
+output is invalid.
+
+Do not trust only the rendered submit text or terse `condor_submit` output.
+Before release, read the held jobs' real ClassAds and require the exact cluster,
+complete process set/cardinality, arguments, campaign/logical/attempt identity,
+executable and manifest checksums, hold state, and `JobStatus=5`. Store
+immutable raw `condor_q -json` evidence. Later scheduler-loss reconciliation
+must bind exact `condor_q`/`condor_history` JSON and terminal identity/state;
+no attempt that may have started can be released or silently reclassified as
+never started.
 
 Resource requests must leave measured safety margin above the one-million
 successful-event pilot requirements. Record failure reason, completed
@@ -752,6 +900,12 @@ For each heavy hadron store:
 - signed net beauty `q_b = n_b - n_bbar`;
 - baryon number, strangeness, and electric charge where available.
 
+Store physical baryon number as exactly `0`, `+1`, or `-1`. In the installed
+PYTHIA 8.315 API, `baryonNumberType()` returns three times the physical baryon
+number (`+3` for a baryon and `-3` for an antibaryon); divide by three only
+after asserting exact divisibility and reject any other result. Test mesons,
+baryons, antibaryons, and antiparticles independently.
+
 Bc is not “charm only” or “beauty only.” Store and use both constituent
 contents and sector-specific matches.
 
@@ -782,6 +936,12 @@ one based on iteration order, species, pT, or tune. Preserve the conflicting
 hard index in a separate audit branch, clear the authoritative matched-hard
 field, record conflict-group and demotion totals in job metadata, and make the
 raw validator prove that no selected-hard duplicate survives.
+
+The uniqueness unit is the distinct final parent hadron, not an individual
+constituent row in the validation-only all-primary-heavy table. Repeated
+heavy-constituent rows belonging to one multiply-heavy final parent may share
+its carrier without self-conflict; claims made by two distinct final parents
+must be demoted together.
 
 For a central charm-sector trigger, require a resolved match of the hadron’s
 charm content to the selected hard c or cbar. For a central beauty-sector
@@ -822,6 +982,13 @@ direct-primary ground-state associate population.
 Test charm from beauty ancestry even though heavy decays are disabled, and
 prove that it cannot contaminate the central direct-charm selection.
 
+Extract the graph/matching decision into a behavior-preserving pure helper so
+tests do not merely repeat private producer logic. Cover hard-quark copy
+chains, shower and MPI contamination, junction/diquark multi-mother ranges,
+equal-depth ambiguity, duplicate ancestry endpoints, Bc in both sectors, and
+charm-from-beauty. Gate-B real-event audits remain required because a toy
+graph alone cannot prove PYTHIA event-record coverage.
+
 ## 9. Multiplicity
 
 ### 9.1 Central paper counter
@@ -861,9 +1028,20 @@ Also define and store:
 
 For the same species and kinematic acceptance, count final particles produced
 directly or through strong/electromagnetic decays while excluding weak-decay
-daughters. Implement the strong/EM-versus-weak ancestry classification from a
-versioned, documented ParticleData/PDG rule and validation table; do not infer
-it from status 81--89 or an undocumented lifetime cut.
+daughters. The operational rule is
+`weak_decay_transition_pythia_status_v1`: traverse explicit mother edges and
+classify an edge as a weak decay only when the parent is a registered weak
+parent with negative PYTHIA status, the child has absolute PYTHIA
+decay-product status 91--97, and the absolute parent/child PDG IDs differ.
+Traverse same-particle copy/recoil/oscillation links without classifying them;
+status 99 is a Bose--Einstein copy, not a decay. A primary muon, pion, or
+kaon is never weak merely because its species is weak-capable. Store enough
+of each audited event's PDG/status/mother graph for the validator to recompute
+the decision independently; the validator must not trust a producer boolean.
+Bind the rule version and weak-parent-registry checksum in raw metadata. This
+rule is pinned to PYTHIA 8.315 and requires a new version if event-record
+semantics change; do not infer it from status 81--89 or an undocumented
+lifetime cut.
 
 Because all heavy-hadron decays are disabled, this cross-check is evaluated
 under the same stable-heavy event definition and lacks charged daughters that
@@ -899,6 +1077,33 @@ Use those full-sample boundaries unchanged in all ten subsamples. Quantify
 boundary stability with leave-one-block-out or equivalent validation. Also
 produce fixed-Nch comparisons as a cross-check, because equal percentiles in
 different tunes need not mean equal absolute activity.
+
+Use one shared, fail-closed discrete-quantile implementation in the THnSparse
+analysis and standalone multiplicity plot. Reject non-finite/negative bins,
+nonconsecutive integer centers, nonzero underflow/overflow, a nonpositive
+regular-bin integral, and any failed threshold lookup; never fall back to the
+first or last bin. Persist a checksum-bound
+`multiplicity_boundary_receipt_v1.json` containing the configuration hash,
+per-tune histogram identity, central source path/checksum, thresholds,
+achieved fractions, and exhaustive/disjoint integer class ranges. Draw the
+boundary between integer bins at `threshold+0.5`; for every nonterminal class
+the higher-activity lower bound is `threshold+1`. Publication-mode standalone
+plots must consume and revalidate that receipt rather than recompute an
+unbound second definition.
+
+Receipt validation must reopen the checksum-bound source histogram and
+recompute every threshold, achieved before/through fraction, and class
+fraction; comparing only stored labels or hashes is insufficient. A named
+selection that spans multiple percentile classes (for example 0--10%) must be
+the exact contiguous, disjoint union of the frozen 0--1% and 1--10% classes,
+not a failed single-label lookup or an inclusive boundary overlap.
+
+Any fixed-Nch intervals used for the statistical-robustness cross-check are a
+predeclared scientific convention, not an implementation default. Bind the
+frozen specification hash in the final robustness report and require a named
+physics/statistics reviewer to approve that exact definition before it can
+support paper promotion. Until then, mark the checked-in candidate intervals
+as review-pending and descriptive only.
 
 The paper must call these percentiles of the generated hard-heavy-flavour
 sample, not minimum-bias pp percentiles or experimental centrality.
@@ -1103,6 +1308,7 @@ Preserve or provide a compatibility writer for:
 - `hTrKinematics`;
 - `hAsKinematics`;
 - `hCorrelations`;
+- `hCorrelationsByOrigin`;
 - established OS and SS filenames used by the plotting code.
 
 Preserve Paul’s object semantics:
@@ -1114,6 +1320,14 @@ Preserve Paul’s object semantics:
 - `hAsKinematics` is pair conditioned and is filled once per accepted
   trigger-associate pair;
 - `hCorrelations` is filled once per accepted ordered pair.
+
+`hCorrelationsByOrigin` must have the same first seven axes and entries as
+`hCorrelations`, plus one six-bin associate-origin axis. Store immutable
+`associate_origin_category_schema` and `associate_origin_category_labels`
+strings next to it, validate their exact values in every central and block
+file, and prove bin-by-bin closure to the inclusive histogram. No consumer may
+project integer category 6 as “unresolved” without first validating that
+mapping.
 
 Do not relabel `hAsKinematics` as an inclusive single-particle spectrum. A
 separate raw-tree consumer supplies genuinely inclusive spectra when the paper
@@ -1190,17 +1404,21 @@ make block event totals equal. Do not combine errors from the 100M stage and
 an extension as if they were independent published measurements; recompute
 every block estimator from the final union.
 
-Reuse `make_subsamples.sh` partition mode and its explicit seed if its
-regression tests pass. It already performs a deterministic, data-independent
-shuffle followed by non-overlapping blocks. The necessary change is to make
-its input the frozen canonical manifest rather than every discovered job.
-Store the partition seed, ordered input manifest, ten block manifests, and
-checksums. Do not use its overlapping bootstrap mode for the ten central
-blocks. The same blocks must be used for OS, SS, their difference, spectra,
+The sealed canonical freeze assigns blocks before analysis by
+`block = canonical_slot % 10`. This deterministic, data-independent rule
+creates equal-exposure blocks because the final equal-tune `N` is divisible
+by ten. Store the ordered central manifest, all ten block manifests, their
+checksums, and a proof that the blocks are disjoint and their union is exactly
+the central manifest. No partition seed applies to this modulo rule.
+`make_subsamples.sh` is a compatibility entry point to the same
+manifest-driven merge; it must not reshuffle, bootstrap, or rediscover files.
+The same frozen blocks must be used for OS, SS, their difference, spectra,
 yields, ratios, and all plots.
 
-The central estimator is calculated from the union of all 100 canonical
-files. Do not substitute the mean of nonlinear block estimators for the
+The central estimator is calculated from the union of all `N` files in the
+sealed final tune manifest (`N=100` only for the first stage). Require equal
+tune exposure, `N >= 100`, `N % 10 == 0`, and ten blocks of `N/10` files per
+tune. Do not substitute the mean of nonlinear block estimators for the
 full-sample estimator.
 
 For `K=10` block estimates `x_k`, estimate the standard error as:
@@ -1298,6 +1516,27 @@ A logical output is valid only if all of the following pass:
 - origin and heavy-flavour conservation diagnostics are present;
 - file checksum and validation report are recorded.
 
+The pair-analysis reader must not trust a raw file merely because it has the
+right name and a few provenance strings. Before filling any histogram it must
+independently require `complete=1`, requested successes = successful events =
+tree entries, attempts = successes + failures, all invariant-failure counters
+zero, exact required scalar/vector branch types, and finite event weights.
+Where a sealed raw-validation receipt is supplied, bind its path and SHA-256
+and still reject a changed raw file; do not use a receipt as a substitute for
+the in-process data-contract checks.
+
+The implemented canonical interface passes
+`CANONICAL_MANIFEST_SHA256 RAW_VALIDATION_RECEIPT
+RAW_VALIDATION_RECEIPT_SHA256` to `run_status_analysis.sh`. The renderer and
+worker both verify the `hf_raw_validation_receipt_v1` PASS semantics, bound
+validation log, raw bytes/checksum, and campaign/tune/logical identity. The
+worker records `hf_analysis_job_metadata_v3` with
+`raw_input_validation_contract=analysis_raw_input_fail_closed_v1` and
+`raw_validation_evidence_mode=immutable_receipt_plus_direct_preflight_v1`.
+Gate-B/Gate-D or manual diagnostics without a sealed canonical receipt must
+record `direct_preflight_only_v1` plus null receipt fields and must never be
+promoted as publication evidence.
+
 The canonical-manifest validator additionally proves:
 
 - the declared equal number of unique valid logical outputs per tune;
@@ -1324,7 +1563,10 @@ Do not advance past a failed gate.
 1. Build every changed producer, validator, analysis, merge, and plotting
    component with warnings treated seriously.
 2. Validate all PYTHIA settings and the tune-difference allowlist.
-3. Validate the signed species registry against PYTHIA and PDG data.
+3. Validate the signed species registry independently against PYTHIA and a
+   checksum-bound official PDG 2025 snapshot. Gate A must fail until the
+   `5312`/`5322`, Xi-prime-b-zero, and Sigma-b-zero discrepancies have an
+   explicit reviewed treatment.
 4. Unit-test heavy-content decoding, hidden/open separation, antiparticles,
    Bc, Xi versus Xi-prime, and starred-state exclusion.
 5. Unit-test exact kinematic boundaries and both multiplicity counters.
@@ -1335,6 +1577,15 @@ Do not advance past a failed gate.
 8. Validate deterministic, injective seed allocation.
 
 ### Gate B: deterministic tune pilots
+
+Do not generate or submit these pilots while the checked-in pTHat
+specification says `PENDING_GATE_B_OWNER_REVIEW`. Its numerical equivalence
+margins and aggregate family diagnostic are implementation proposals, not
+Paul/paper definitions. Before seeing pilot data, a named project owner or
+designated physics/statistics reviewer must approve the exact specification,
+role, rationale, and timezone-aware decision in a reviewed commit. Campaign
+generation, submission, evaluation, and Gate-B aggregation must all reject a
+pending/placeholder/future review and bind the approved spec SHA-256.
 
 For all three tunes:
 
@@ -1354,7 +1605,27 @@ For all three tunes:
 10. Run the pTHat-threshold sensitivity pilot.
 11. Benchmark time, peak memory, output size, and compression by tune.
 
+If the aggregate Gate-B report is `NEEDS_SIGNOFF` solely because unresolved
+publication-trigger candidates are nonzero, stop for the project owner. The
+owner—not the coding agent—may create the read-only
+`campaigns/<GATEB_CAMPAIGN>/GATE_B_PHYSICS_SIGNOFF.json` with schema
+`hf_gate_b_physics_signoff_v1`, bound to the original report SHA-256 and exact
+nine-sample unresolved table. The implementation must first support
+read-only verification and must then emit a separate immutable superseding
+`hf_publication_gate_b_report_v1`; it must never rewrite the original
+`NEEDS_SIGNOFF` tree. This narrow resolution cannot waive technical failures,
+an inconclusive pTHat result, or resolved-observable pTHat shifts. The
+Gate-B-specific sign-off is distinct from the mandatory full-launch
+`PHYSICS_ORIGIN_SIGNOFF.json`.
+
 ### Gate C: failure and workflow validation
+
+Machine gate authorization must validate the exact report schema, frozen
+command inventory, implementation-source hashes, command/log checksums,
+expected scientific outputs, and absence of unresolved findings. A JSON object
+whose state says `PASS`, a successful `/usr/bin/true`, or a checksummed
+handwritten report is not gate evidence. Gate A must also prove the release
+commit is reachable from freshly fetched live origin refs.
 
 1. Force a generation failure.
 2. Emulate eviction/wall-time termination.
@@ -1389,12 +1660,72 @@ For all three tunes:
 9. Validate SEM, covariance, nonlinear ratios, and independent-tune
    propagation.
 10. Run the `7f17356` strict input and exhaustive subsample-coverage
-    validators.
+    validators. Representative smoke points must pass. The exhaustive
+    full-paper pilot audit may return exit 2 only with the versioned state
+    `PILOT_INSUFFICIENT_FOR_FULL_PAPER` and
+    `publication_promotion_allowed=false`; preserve it as a production-sizing
+    result, not a coverage PASS. Any other audit failure fails Gate D.
 11. Regenerate representative plots and render/visually inspect every PDF.
+12. Produce `hf_gate_d_storage_projection_v1` from the measured raw,
+    simultaneous-partial, per-job analysis, merged-central, ten-block, plot,
+    log, and evidence footprints. Use `os.statvfs(...).f_bavail` per actual
+    filesystem. Require projected use to be no more than 70% of current
+    available bytes and projected remaining space to be at least
+    `max(5% of capacity, 500 GiB)`.
+13. At finalization, recompute the capacity snapshot and require both
+    preparation and final checks to pass with `state=PASS` and
+    `gate_e_storage_authorized=true`.
+
+Reprobe the same filesystem identities and policy at every production claim,
+retry claim, scheduler-evidence record, and held-cluster release. Include all
+retained `partial/` and `quarantine/` bytes and the declared staging
+contingency in the live requirement. Reject a stale timestamp, changed device
+or geometry, unsafe link, insufficient reserve, or report whose arithmetic
+cannot be reconstructed.
+
+The 2026-07-30 read-only snapshot was already below this reserve floor:
+capacity `36,688,187,162,624` bytes, `f_bavail`
+`1,730,683,666,432` bytes, required 5% reserve
+`1,834,409,358,131` bytes, and deficit `103,725,691,699` bytes
+(about 96.6 GiB) before any new allocation. Treat this as a volatile but
+explicit Gate-D/E blocker. Recompute it at execution time; do not reinterpret
+the approximate free-space display as authorization.
+
+A later live check at `2026-07-30T16:41:35+02:00` found only
+`1,678,909,767,680` bytes available on the same
+`36,688,187,162,624`-byte filesystem: about `155,499,590,451` bytes
+(144.8 GiB) below the 5% reserve before any new allocation. This worsened
+snapshot supersedes the earlier free-space number operationally but remains
+diagnostic rather than an authorization artifact.
+
+The most recent read-only check in this implementation audit, at
+`2026-07-30T17:39:21+02:00`, found `1,671,602,503,680` bytes available on the
+same filesystem, a `162,806,854,451`-byte (about 151.7 GiB) deficit relative
+to the 5% reserve before any new allocation. This latest diagnostic snapshot
+supersedes both earlier values operationally; it still does not substitute
+for the fresh checksum-bound Gate-D capacity artifact.
 
 ### Gate E: full campaign and publication outputs
 
 Only after an explicit go-ahead:
+
+Before first-stage submission, require two separate read-only owner artifacts.
+An expansion additionally requires the distinct third owner artifact specified
+in Section 6.2, and both of the ordinary launch artifacts must be newly bound
+to the child campaign; no parent authorization is reusable. The mandatory
+origin-decision file uses schema
+`hf_full_production_origin_signoff_v1`, decision
+`APPROVE_FULL_PRODUCTION`, `reviewer_role=project_owner`, and binds the exact
+Gate-B report plus its complete nine-sample unresolved-trigger table. A zero
+finding records the predeclared no-special-treatment decision; a nonzero
+finding records the predeclared trigger-exclusion/associate-retention policy
+and a superseding Gate-B PASS. The separate
+`hf_full_production_gate_authorization_v1` binds the canonical Gate A--D and
+pTHat reports at the exact campaign commit. Both files are single-link
+mode-`0444` regular files with real explicitly UTC, non-future owner
+timestamps. The bound Gate-D report must carry the passing storage projection
+and fresh final capacity recheck above. A coding agent may validate these
+files but must never author any of these approvals.
 
 1. Submit the first-stage 100/200/200 candidate strategy.
 2. Reconcile and validate every attempt.
@@ -1440,6 +1771,40 @@ subsamples, and output directory. Eliminate scattered absolute user paths.
 Keep the legacy dataset as the default until the new canonical manifest is
 validated, then switch through one documented selector.
 
+Its shell interface must null-safely export a machine-readable
+publication-eligibility flag, the canonical manifest, production root,
+analysis root, raw base, analyzed-data base, complete-root tag, and block
+base. Every active plotting consumer must use those same values. Legacy rows
+must set the flag false; canonical paper targets must fail closed rather than
+silently run canonical/factor-one configurations on a legacy/factor-one-half
+sample. In canonical mode, inclusive raw kinematics must consume only the
+checksum-bound sealed manifest and verify each selected raw file's size and
+SHA-256; recursive tune-directory discovery can remain only as an explicitly
+named legacy diagnostic and must never admit unlisted reserves into a paper
+result. Canonical consumers must derive the equal-tune raw count `N` from the
+sealed manifest/summary rather than hard-code 100 or 300.
+
+Use `status=canonical_candidate`, `publication_eligible=false`, and null
+authorization fields for the sealed sample while generating boundary,
+origin, robustness, candidate-plot, and human-review evidence. These outputs
+must carry ineligible canonical-validation provenance and must be regenerated
+after promotion. This explicit state breaks the evidence/authorization
+dependency without weakening final plotting.
+
+The selector's `publication_eligible=true` value is only a pointer, never an
+approval. A canonical row must also bind a single-link mode-`0444`
+`hf_publication_dataset_eligibility_v1` project-owner authorization. That
+authorization must checksum-bind the exact canonical manifest, freeze
+summary/seal and validation log/receipt, nonempty final origin/closure report,
+descriptive statistical-robustness report, and a separate single-link
+mode-`0444` `hf_final_scientific_review_v1`. The latter must bind the frozen
+statistical-specification hash and explicitly review the fixed-Nch
+definition, unresolved species-registry disposition, and paper claim scope.
+Reject extra/template fields, placeholder identities, changed evidence,
+empty coverage arrays, a different commit/campaign/sample, or a Boolean with
+no authorization. Coding agents may provide intentionally invalid templates
+and validators but may not author either approval.
+
 For regression against the real audited Nikhef production, resolve these
 checkout-relative paths under canonical
 `/data/alice/ipardoza/Hadronization`:
@@ -1467,12 +1832,24 @@ path in checked-in JSON. Preserve both the flat
 `AnalyzedData/complete_root_<tag>_<TUNE>` layout and the already supported
 nested tune layout.
 
-The central directories currently have no `jobs_used.txt`-style provenance.
-Create a non-destructive validation manifest that records every central file,
-the ten block source manifests, job IDs where recoverable, sizes, checksums,
-required object/type validation, and central-versus-block-union comparison.
+The legacy central directories currently have no `jobs_used.txt`-style
+provenance. Create a non-destructive validation manifest that records every
+central file, the ten block source manifests, job IDs where recoverable,
+sizes, checksums, required object/type validation, and
+central-versus-block-union comparison. New canonical merged directories must
+instead store an immutable byte-copy of the all-tune source manifest
+(`3*N` central rows and `3*N/10` rows per block), with provenance binding the
+full manifest hash and the explicit selected-tune filter/count. The fixed 300
+files per merged directory are the pair registry, not a fixed raw exposure.
 Do not imply that missing legacy seed metadata has been recovered, and do not
 regenerate central files from a different raw set under the same tag.
+
+Canonical merging must retain a machine-readable merge contract and one
+central-versus-ten-block closure log per tune. Require all 300 fixed pair
+identities, all five numeric pair objects, stored contents and `Sumw2`, the
+twelve metadata fields, and the all-tune source-manifest/explicit-tune-filter
+contract to close before promotion. The implemented closure tolerance is
+`2e-10`; a missing or differing closure artifact is a release blocker.
 
 Use Paul's plotting architecture on the latest stable `main` as the
 implementation baseline. Port or reuse the still-unmerged compatible
@@ -1564,9 +1941,24 @@ objects have explicit ownership and cleanup so the exhaustive full
 configuration completes without unbounded memory growth. A successful smoke
 run is not a substitute for a completed full run.
 
-Every final plot receives a provenance sidecar or embedded metadata containing
-input hashes, analysis and plotting commits, selection/cut versions,
-manifest/block hashes, command, timestamp, and output checksum.
+Before drawing on logarithmic axes, compute a finite positive envelope that
+includes central values and their complete error extents. Fail if configured
+limits clip any nondegenerate point/error bar or if no positive lower extent
+exists. Never hide an uncertainty by silently clipping it below a log-axis
+minimum.
+
+Every final canvas must be regenerated as a complete PDF, PNG, and ROOT-macro
+triplet. Each file receives an adjacent checksum-bound provenance sidecar, and
+the run receives a shared immutable receipt. The receipt must bind the exact
+input inventory and hashes, analysis and plotting commits, tracked-clean
+release state, generator and configuration payloads/hashes, selection/cut
+versions, sealed central manifest, all ten block manifests, multiplicity
+boundary receipt where applicable, exact command/target, UTC timestamp, and
+every output checksum. Canonical plotting must fail closed on a missing,
+stale, or tampered binding or incomplete triplet. Legacy and Gate-D pilot
+receipts must set `publication_eligible=false`; embedded metadata alone is not
+a substitute for these sidecars and receipt. Verify every proposed paper
+artifact with `tools/final_plot_provenance.py verify` before copying it.
 
 Before paper promotion:
 
@@ -1942,12 +2334,28 @@ Use this checklist during implementation. Every item is a release blocker.
   Sections 6.3, 7.1, 15.
 - Attempts counted instead of exact successful events:
   Sections 5.4 and 15.
+- Raw pair analysis previously checked only a subset of provenance/shape
+  fields and could accept an incomplete file, inconsistent
+  requested/success/tree counts, nonzero producer invariant failures, or a
+  non-finite event weight:
+  Sections 7, 13, and 15 require an independent fail-closed raw-to-analysis
+  contract.
 - Empty-heavy events omitted from the tree:
   Sections 5.4 and 15.
 - Floating status/mother/index branches:
   Section 7.
+- PYTHIA's noninteractive CVMFS fallback can bind the library while omitting
+  `PYTHIA8DATA`, causing a constructor to follow a stale build-time XML path:
+  Sections 5.1, 16, and 19 require `xmldoc/Index.xml` and a runtime
+  constructor smoke test.
+- PYTHIA 8.315 `baryonNumberType()` is three times physical baryon number:
+  Section 7.3 requires exact conversion and meson/baryon/antibaryon tests.
 - `mother1()`-only and status-only origin:
   Sections 8 and 16.
+- Parent-blind hard-carrier uniqueness can falsely demote repeated
+  constituents of one multiply-heavy final parent, while an unextracted
+  private matcher is only circularly tested:
+  Section 8 requires parent-aware grouping and independent pure-graph tests.
 - Trigger status selection is omitted while associate status is applied:
   Sections 10 and 16 require one common direct-primary base selector; the
   trigger-only hard-origin layer is intentional and separately tested.
@@ -1996,6 +2404,10 @@ Use this checklist during implementation. Every item is a release blocker.
   retroactively claiming provenance.
 - Central and subsample definitions diverge:
   Sections 9.3, 13, 14.
+- Integer associate-origin categories lacked an immutable label contract and
+  could be silently reinterpreted by downstream sensitivity projections:
+  Sections 12--15 require exact schema/label metadata and central/block
+  closure.
 - Block standard deviation was previously used as the final error, nonlinear
   ratio errors were inconsistent, and independent tunes were mishandled:
   these are resolved on `7f17356`; Sections 2.1, 3, 14, and 17 require reuse
@@ -2004,10 +2416,12 @@ Use this checklist during implementation. Every item is a release blocker.
   missing input checks, and placeholder/disabled errors:
   these are resolved on `7f17356`; Sections 2.1, 3, and 17 require integrating
   and preserving that work.
-- Paul’s plotting JSON exposes pT/eta fields that its correlation projection
-  does not currently apply:
-  Sections 2.1, 10, 13, and 17 require the new analysis to apply cuts exactly
-  once and the config to validate the upstream metadata.
+- Paul’s plotting JSON exposes pT/eta fields and stable main applies them to
+  both the correlation and trigger-normalization projections:
+  Sections 2.1, 10, 13, and 17 preserve that exact path in the sole
+  `legacy-regression` mode, prohibit an invented “corrected legacy” fork, and
+  require canonical v2 plotting to validate its upstream selection metadata
+  without recutting.
 - Paul’s finite THnSparse pT/multiplicity axes can create undocumented upper
   cuts if overflow is populated:
   Sections 2.1, 12, 15, and 16 require measured overflow accounting and a
@@ -2052,6 +2466,42 @@ Use this checklist during implementation. Every item is a release blocker.
   Sections 2, 3, 13.
 - Repository contains overlapping stale and legacy pipelines:
   Section 20.
+- A checksummed JSON `PASS` or `/usr/bin/true` command could previously satisfy
+  a launch gate:
+  Section 16 now requires exact implementation, command, log, result, and
+  finding semantics and live-origin reachability.
+- Rendered Condor text and a terse cluster ID could previously be trusted
+  without proving what was held:
+  Sections 6.4 and 16 require immutable raw ClassAds, exact process/argument
+  coverage, and verified held-state release.
+- A stale Gate-D storage report could authorize a later claim while retained
+  partials consumed the reserve:
+  Sections 6.4 and 16 require live filesystem/identity/arithmetic rechecks at
+  every claim, evidence record, retry, and release.
+- A selector Boolean could previously self-assert publication eligibility:
+  Section 17 requires separate exact-byte scientific-review and project-owner
+  authorizations and rejects template or empty evidence.
+- Whole-file hashing of an append-only seed ledger made a valid retry
+  invalidate an expansion authorization:
+  Sections 6.2--6.3 bind the immutable initial prefix and validate every retry
+  suffix instead.
+- Superseding v3 manifests were not accepted consistently by merge, analysis,
+  and final plot consumers, and arbitrary reserve selection or chained
+  expansion could alter the sample:
+  Sections 6.2, 13--17 require lowest-valid deterministic selection, atomic
+  chained union promotion, exact leaf hashes, dynamic `N`, and unbounded
+  decimal slot names.
+- Stored multiplicity fractions and a multi-class 0--10% request could pass
+  without recomputation or exact union:
+  Section 9.3 requires source-histogram recomputation and contiguous,
+  disjoint frozen-class unions.
+- Fixed-Nch and pTHat numerical margins were implementation proposals rather
+  than owner-approved scientific conventions:
+  Sections 9.3, 16, and 23 bind their frozen specifications and keep
+  publication promotion review-blocked until named scientific review.
+- A final log-axis range could clip the lower error extent while the point
+  remained visible:
+  Section 17 requires a finite positive error envelope and rejects clipping.
 - Thesis inconsistencies (prompt terminology, hard-origin assumption,
   status/multiplicity mismatch, 0.5 factor, and block-SD errors):
   Sections 1, 8, 9, 12, 14, and 18.

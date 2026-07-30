@@ -1,0 +1,47 @@
+{
+  "_template_notice": "TEMPLATE ONLY. The project owner must bind the exact final evidence bytes after independent scientific review. Replace every angle-bracketed value, compute payload_sha256 over all other fields using canonical sorted compact JSON, write once, make the file mode 0444, and record its SHA-256 in config/dataset_selector.json. This template is intentionally rejected by the validator.",
+  "schema": "hf_publication_dataset_eligibility_v1",
+  "state": "PASS",
+  "publication_eligible": true,
+  "dataset_id": "<dataset selector key>",
+  "campaign": "<final campaign id>",
+  "repository_commit": "<40 lowercase hexadecimal characters>",
+  "approved": true,
+  "approved_by": "<named project owner>",
+  "approver_role": "project_owner",
+  "approved_utc": "<ISO-8601 timestamp with timezone>",
+  "blocking_findings": [],
+  "canonical_manifest": {
+    "path": "<checkout-relative canonical manifest path>",
+    "sha256": "<64 lowercase hexadecimal characters>"
+  },
+  "freeze_summary": {
+    "path": "<checkout-relative freeze summary path>",
+    "sha256": "<64 lowercase hexadecimal characters>"
+  },
+  "freeze_seal": {
+    "path": "<checkout-relative freeze seal path>",
+    "sha256": "<64 lowercase hexadecimal characters>"
+  },
+  "canonical_validation_receipt": {
+    "path": "<checkout-relative validation receipt path>",
+    "sha256": "<64 lowercase hexadecimal characters>"
+  },
+  "canonical_validation_log": {
+    "path": "<checkout-relative validation log path>",
+    "sha256": "<64 lowercase hexadecimal characters>"
+  },
+  "final_origin_closure": {
+    "path": "<checkout-relative final origin closure report path>",
+    "sha256": "<64 lowercase hexadecimal characters>"
+  },
+  "statistical_robustness": {
+    "path": "<checkout-relative statistical robustness report path>",
+    "sha256": "<64 lowercase hexadecimal characters>"
+  },
+  "final_scientific_review": {
+    "path": "<checkout-relative completed scientific review path>",
+    "sha256": "<64 lowercase hexadecimal characters>"
+  },
+  "payload_sha256": "<canonical payload SHA-256>"
+}

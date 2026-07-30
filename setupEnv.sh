@@ -80,10 +80,32 @@ if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then
       echo "ERROR: pinned PYTHIA compiler runtime is unavailable: ${pythia_gcc_package}" >&2
       return 1 2>/dev/null || exit 1
     fi
+    if [[ ! -f "${pythia_package}/share/Pythia8/xmldoc/Index.xml" ]]; then
+      echo "ERROR: pinned PYTHIA data are unavailable: ${pythia_package}/share/Pythia8/xmldoc/Index.xml" >&2
+      return 1 2>/dev/null || exit 1
+    fi
     export PYTHIA8="${pythia_package}"
+    export PYTHIA8DATA="${pythia_package}/share/Pythia8/xmldoc"
     export PATH="${pythia_gcc_package}/bin:${pythia_package}/bin:${PATH}"
     export LD_LIBRARY_PATH="${pythia_gcc_package}/lib64:${pythia_package}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
     export ROOT_INCLUDE_PATH="${pythia_package}/include${ROOT_INCLUDE_PATH:+:${ROOT_INCLUDE_PATH}}"
+  fi
+
+  # alienv may provide a usable library/config executable without exporting
+  # the XML data directory. Never let PYTHIA fall back to a compiled-in path
+  # from the package build host.
+  if [[ -n "${PYTHIA8:-}" && -z "${PYTHIA8DATA:-}" ]]; then
+    pythia_data_candidate="${PYTHIA8%/}/share/Pythia8/xmldoc"
+    if [[ -f "${pythia_data_candidate}/Index.xml" ]]; then
+      export PYTHIA8DATA="${pythia_data_candidate}"
+    else
+      echo "ERROR: PYTHIA8DATA is unset and no runtime XML data exist under ${pythia_data_candidate}" >&2
+      return 1 2>/dev/null || exit 1
+    fi
+  fi
+  if [[ -n "${PYTHIA8DATA:-}" && ! -f "${PYTHIA8DATA%/}/Index.xml" ]]; then
+    echo "ERROR: PYTHIA8DATA does not contain Index.xml: ${PYTHIA8DATA}" >&2
+    return 1 2>/dev/null || exit 1
   fi
 else
   echo "WARNING: CVMFS not available — ROOT and PYTHIA not loaded via alienv."
@@ -95,6 +117,7 @@ if [[ "${SETUPENV_QUIET:-0}" -ne 1 ]]; then
   echo "  which root:        $(command -v root || echo 'not found')"
   echo "  which root-config: $(command -v root-config || echo 'not found')"
   echo "  PYTHIA8:           ${PYTHIA8:-'(not set)'}"
+  echo "  PYTHIA8DATA:       ${PYTHIA8DATA:-'(not set)'}"
 fi
 
 if [[ "${setupenv_restore_errexit}" -eq 1 ]]; then
