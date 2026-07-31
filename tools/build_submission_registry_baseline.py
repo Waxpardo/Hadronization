@@ -233,6 +233,39 @@ def main() -> int:
         ),
         "historical_reservations": reservations,
         "documented_historical_overlaps": overlaps,
+        "voided_campaigns": [
+
+            {
+
+                "campaign": name,
+
+                "disposition": "VOIDED_DATA_UNUSABLE_SEEDS_REMAIN_BURNED",
+
+                "reason": (
+
+                    "Historical seed collision: this campaign shares its "
+
+                    "entire seed set with another, so the two were never "
+
+                    "independent samples. Both are voided by project-owner "
+
+                    "decision. Their seeds remain permanently reserved "
+
+                    "because events were generated with them."
+
+                ),
+
+            }
+
+            for name in sorted(
+
+                {row["campaign_a"] for row in overlaps}
+
+                | {row["campaign_b"] for row in overlaps}
+
+            )
+
+        ],
     }
     output = args.output.expanduser().resolve()
     if output.exists() or output.is_symlink():

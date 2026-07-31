@@ -385,6 +385,40 @@ def claimed_global_registry(
     return registry
 
 
+def _documented_burned_overlap(
+    baseline: dict, first: str, second: str
+) -> bool:
+    """True when this overlap is an acknowledged, burned historical collision.
+
+    Both campaigns must additionally be listed as voided, so their data is
+    excluded from use while their seeds remain permanently reserved. Every
+    other overlap is rejected.
+    """
+    voided = baseline.get("voided_campaigns")
+    if not isinstance(voided, list):
+        return False
+    voided_names = {
+        row.get("campaign")
+        for row in voided
+        if isinstance(row, dict)
+    }
+    if first not in voided_names or second not in voided_names:
+        return False
+    documented = baseline.get("documented_historical_overlaps")
+    if not isinstance(documented, list):
+        return False
+    pair = {first, second}
+    for row in documented:
+        if (
+            isinstance(row, dict)
+            and {row.get("campaign_a"), row.get("campaign_b")} == pair
+            and row.get("disposition")
+            == "historical_collision_burn_all_overlapping_seeds"
+        ):
+            return True
+    return False
+
+
 def load_registry_baseline(registry: Path, identity: str) -> tuple[dict, Path]:
     require_existing_directory_chain_no_symlinks(registry)
     path = registry / "reservation_baseline.json"
@@ -446,10 +480,20 @@ def load_registry_baseline(registry: Path, identity: str) -> tuple[dict, Path]:
             normalized_intervals.append([int(interval[0]), int(interval[1])])
         for prior_campaign, prior_intervals in historical_intervals:
             if overlapping_seed_intervals(normalized_intervals, prior_intervals):
-                raise ValueError(
-                    "historical reservation baseline contains overlapping seed "
-                    f"intervals for {prior_campaign} and {campaign_name}"
-                )
+                # An overlap is a real historical seed collision: two campaigns
+                # generated statistically identical events. It cannot be undone
+                # and the seeds stay burned either way, so the baseline records
+                # it explicitly rather than hiding it. Accept it ONLY when it is
+                # documented with the burn-all disposition and both campaigns
+                # are voided; an undocumented overlap remains a hard failure.
+                if not _documented_burned_overlap(
+                    baseline, prior_campaign, campaign_name
+                ):
+                    raise ValueError(
+                        "historical reservation baseline contains overlapping "
+                        f"seed intervals for {prior_campaign} and "
+                        f"{campaign_name}"
+                    )
         historical_intervals.append((campaign_name, normalized_intervals))
     return baseline, path
 
