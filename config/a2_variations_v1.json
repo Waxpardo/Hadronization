@@ -1,0 +1,30 @@
+{
+  "schema": "a2_variations_v1",
+  "purpose": "The frozen, named set of A2 origin-rule variations whose output analysis/a2_block_shift.py is permitted to consume. Replaces the single pinned EXPECTED_VARIATION_SHA256. A variation that is not in this file cannot be analysed, and adding one is a reviewable commit -- there is deliberately no flag, no --force and no --skip-gate. Each variation still requires its OWN regression sentinel recording a PASS for its own sha; membership here is necessary, never sufficient.",
+  "preregistration": "docs/A2_PAIR_UNRESOLVED_PREREGISTRATION.md",
+  "variations": {
+    "permissive_smallest_index": {
+      "macro_sha256": "a4df31e6b6da5098d40b793a0c3616957457b326bcef48538bbe271b05f38553",
+      "role": "pre-registered",
+      "description": "Restores one claimant per contested hard index, winner = SMALLEST heavyIndex. The rule named in the pre-registration, chosen to be deterministic and uncorrelated with pT. This is the arm the quoted systematic is measured on.",
+      "scratch_tree": "/data/alice/ipardoza/a2_variation",
+      "registered": "2026-08-13"
+    },
+    "permissive_largest_index": {
+      "macro_sha256": "4e491134d8d3a2b4b6ed4cc2f5dba4c70115e6695de35baae159f080717240f1",
+      "role": "robustness",
+      "description": "Identical to permissive_smallest_index with the tie-break direction REVERSED: winner = LARGEST heavyIndex. Built by tools/a2_make_largest_index_variation.py, which asserts its source sha; the diff against the pre-registered arm is exactly one comparison operator and its comment. Answers whether the measured multiplicity dependence is a property of restoring one claimant or an artefact of which claimant the pre-registration named.",
+      "derived_from": "permissive_smallest_index",
+      "scratch_tree": "/data/alice/ipardoza/a2_variation_largest",
+      "registered": "2026-08-13"
+    }
+  },
+  "superseded": {
+    "permissive_smallest_index_guarded": {
+      "macro_sha256": "22120383b07eb3572660f9a2aa7c895dd260ee23c7bc349a5a2e4f76262256de",
+      "description": "The smallest-index rule as first submitted, carrying a per-job throw when a job restored nothing. The throw selected on the outcome variable and discarded 49 of 100 MONASH jobs (ERROR_RECORD E7). Guard-only diff against a4df31e6; the restored totals are identical. Outputs preserved at a2_runs/permissive_guarded_22120383, NOT deleted -- they are the evidence.",
+      "superseded_by": "permissive_smallest_index",
+      "note": "Listed here for provenance only. Entries under `superseded` are NOT admissible: the analyzer looks only at `variations`."
+    }
+  }
+}

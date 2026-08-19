@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="760.000" height="470.000" viewBox="0 0 760.000 470.000">
+<title>M7 inclusive unresolved-origin shift by tune</title>
+<rect width="760.000" height="470.000" fill="#ffffff"/>
+<text x="46.000" y="34.000" font-family="Helvetica, Arial, sans-serif" font-size="15.000" fill="#1a1a1a" text-anchor="start" font-weight="bold">Unresolved-origin shift in the baryon fraction — INCLUSIVE LEVEL</text>
+<text x="46.000" y="54.000" font-family="Helvetica, Arial, sans-serif" font-size="10.500" fill="#6b6b6b" text-anchor="start" font-weight="normal">Relative shift if unresolved-origin hadrons were recovered. Error bars are block SEM (dof 9).</text>
+<rect x="46.000" y="68.000" width="668.000" height="34.000" fill="#fdecea" stroke="#e0a9a2" stroke-width="1.000" opacity="1.000"/>
+<text x="56.000" y="82.000" font-family="Helvetica, Arial, sans-serif" font-size="10.000" fill="#1a1a1a" text-anchor="start" font-weight="bold">NOT a bound on the pair observable's systematic.</text>
+<text x="56.000" y="95.000" font-family="Helvetica, Arial, sans-serif" font-size="9.000" fill="#6b6b6b" text-anchor="start" font-weight="normal">Only cut is heavyIsFinal &amp;&amp; q_sector != 0 — no trigger, acceptance, pair or OS−SS selection. The pair-level measurement is separate.</text>
+<text x="90.000" y="128.000" font-family="Helvetica, Arial, sans-serif" font-size="11.500" fill="#1a1a1a" text-anchor="start" font-weight="bold">charm  —  axis 0 to 0.6 %</text>
+<line x1="90.000" y1="350.000" x2="380.000" y2="350.000" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="82.000" y="353.500" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0</text>
+<line x1="90.000" y1="315.000" x2="380.000" y2="315.000" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="82.000" y="318.500" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0.1</text>
+<line x1="90.000" y1="280.000" x2="380.000" y2="280.000" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="82.000" y="283.500" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0.2</text>
+<line x1="90.000" y1="245.000" x2="380.000" y2="245.000" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="82.000" y="248.500" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0.3</text>
+<line x1="90.000" y1="210.000" x2="380.000" y2="210.000" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="82.000" y="213.500" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0.4</text>
+<line x1="90.000" y1="175.000" x2="380.000" y2="175.000" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="82.000" y="178.500" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0.5</text>
+<line x1="90.000" y1="140.000" x2="380.000" y2="140.000" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="82.000" y="143.500" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0.6</text>
+<line x1="90.000" y1="350.000" x2="380.000" y2="350.000" stroke="#1a1a1a" stroke-width="1.200"/>
+<rect x="115.333" y="334.215" width="46.000" height="15.785" fill="#3b6fb0" stroke="none" stroke-width="0.000" opacity="1.000"/>
+<line x1="138.333" y1="334.495" x2="138.333" y2="333.935" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="134.333" y1="334.495" x2="142.333" y2="334.495" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="134.333" y1="333.935" x2="142.333" y2="333.935" stroke="#1a1a1a" stroke-width="1.200"/>
+<text x="138.333" y="325.935" font-family="Helvetica, Arial, sans-serif" font-size="9.000" fill="#1a1a1a" text-anchor="middle" font-weight="normal">0.0451</text>
+<rect x="212.000" y="157.605" width="46.000" height="192.395" fill="#d1712a" stroke="none" stroke-width="0.000" opacity="1.000"/>
+<line x1="235.000" y1="158.270" x2="235.000" y2="156.940" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="231.000" y1="158.270" x2="239.000" y2="158.270" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="231.000" y1="156.940" x2="239.000" y2="156.940" stroke="#1a1a1a" stroke-width="1.200"/>
+<text x="235.000" y="148.940" font-family="Helvetica, Arial, sans-serif" font-size="9.000" fill="#1a1a1a" text-anchor="middle" font-weight="normal">0.5497</text>
+<rect x="308.667" y="170.625" width="46.000" height="179.375" fill="#4f9a5f" stroke="none" stroke-width="0.000" opacity="1.000"/>
+<line x1="331.667" y1="171.465" x2="331.667" y2="169.785" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="327.667" y1="171.465" x2="335.667" y2="171.465" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="327.667" y1="169.785" x2="335.667" y2="169.785" stroke="#1a1a1a" stroke-width="1.200"/>
+<text x="331.667" y="161.785" font-family="Helvetica, Arial, sans-serif" font-size="9.000" fill="#1a1a1a" text-anchor="middle" font-weight="normal">0.5125</text>
+<text x="235.000" y="370.000" font-family="Helvetica, Arial, sans-serif" font-size="12.000" fill="#1a1a1a" text-anchor="middle" font-weight="bold">charm</text>
+<text x="440.000" y="128.000" font-family="Helvetica, Arial, sans-serif" font-size="11.500" fill="#1a1a1a" text-anchor="start" font-weight="bold">beauty  —  axis 0 to 0.02 %</text>
+<line x1="440.000" y1="350.000" x2="700.000" y2="350.000" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="432.000" y="353.500" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0</text>
+<line x1="440.000" y1="297.500" x2="700.000" y2="297.500" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="432.000" y="301.000" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0.005</text>
+<line x1="440.000" y1="245.000" x2="700.000" y2="245.000" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="432.000" y="248.500" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0.01</text>
+<line x1="440.000" y1="192.500" x2="700.000" y2="192.500" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="432.000" y="196.000" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0.015</text>
+<line x1="440.000" y1="140.000" x2="700.000" y2="140.000" stroke="#d8d8d8" stroke-width="0.800"/>
+<text x="432.000" y="143.500" font-family="Helvetica, Arial, sans-serif" font-size="9.500" fill="#6b6b6b" text-anchor="end" font-weight="normal">0.02</text>
+<line x1="440.000" y1="350.000" x2="700.000" y2="350.000" stroke="#1a1a1a" stroke-width="1.200"/>
+<rect x="460.333" y="201.950" width="46.000" height="148.050" fill="#3b6fb0" stroke="none" stroke-width="0.000" opacity="1.000"/>
+<line x1="483.333" y1="213.500" x2="483.333" y2="190.400" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="479.333" y1="213.500" x2="487.333" y2="213.500" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="479.333" y1="190.400" x2="487.333" y2="190.400" stroke="#1a1a1a" stroke-width="1.200"/>
+<text x="483.333" y="182.400" font-family="Helvetica, Arial, sans-serif" font-size="9.000" fill="#1a1a1a" text-anchor="middle" font-weight="normal">0.0141</text>
+<rect x="547.000" y="203.000" width="46.000" height="147.000" fill="#d1712a" stroke="none" stroke-width="0.000" opacity="1.000"/>
+<line x1="570.000" y1="211.400" x2="570.000" y2="194.600" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="566.000" y1="211.400" x2="574.000" y2="211.400" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="566.000" y1="194.600" x2="574.000" y2="194.600" stroke="#1a1a1a" stroke-width="1.200"/>
+<text x="570.000" y="186.600" font-family="Helvetica, Arial, sans-serif" font-size="9.000" fill="#1a1a1a" text-anchor="middle" font-weight="normal">0.0140</text>
+<rect x="633.667" y="199.850" width="46.000" height="150.150" fill="#4f9a5f" stroke="none" stroke-width="0.000" opacity="1.000"/>
+<line x1="656.667" y1="207.200" x2="656.667" y2="192.500" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="652.667" y1="207.200" x2="660.667" y2="207.200" stroke="#1a1a1a" stroke-width="1.200"/>
+<line x1="652.667" y1="192.500" x2="660.667" y2="192.500" stroke="#1a1a1a" stroke-width="1.200"/>
+<text x="656.667" y="184.500" font-family="Helvetica, Arial, sans-serif" font-size="9.000" fill="#1a1a1a" text-anchor="middle" font-weight="normal">0.0143</text>
+<text x="570.000" y="370.000" font-family="Helvetica, Arial, sans-serif" font-size="12.000" fill="#1a1a1a" text-anchor="middle" font-weight="bold">beauty</text>
+<text x="30.000" y="245.000" font-family="Helvetica, Arial, sans-serif" font-size="10.500" fill="#6b6b6b" text-anchor="middle" font-weight="normal" transform="rotate(-90.000 30.000 245.000)">relative shift (%)</text>
+<text x="390.000" y="370.000" font-family="Helvetica, Arial, sans-serif" font-size="9.000" fill="#b3261e" text-anchor="middle" font-weight="bold">⚠ different scales</text>
+<rect x="90.000" y="383.000" width="12.000" height="12.000" fill="#3b6fb0" stroke="none" stroke-width="0.000" opacity="1.000"/>
+<text x="109.000" y="392.000" font-family="Helvetica, Arial, sans-serif" font-size="10.000" fill="#1a1a1a" text-anchor="start" font-weight="normal">MONASH</text>
+<rect x="290.000" y="383.000" width="12.000" height="12.000" fill="#d1712a" stroke="none" stroke-width="0.000" opacity="1.000"/>
+<text x="309.000" y="392.000" font-family="Helvetica, Arial, sans-serif" font-size="10.000" fill="#1a1a1a" text-anchor="start" font-weight="normal">JUNCTIONS</text>
+<rect x="490.000" y="383.000" width="12.000" height="12.000" fill="#4f9a5f" stroke="none" stroke-width="0.000" opacity="1.000"/>
+<text x="509.000" y="392.000" font-family="Helvetica, Arial, sans-serif" font-size="10.000" fill="#1a1a1a" text-anchor="start" font-weight="normal">CLOSEPACKING</text>
+<text x="46.000" y="428.000" font-family="Helvetica, Arial, sans-serif" font-size="9.000" fill="#6b6b6b" text-anchor="start" font-weight="normal">Charm's inclusive shift is tune-dependent by an order of magnitude; beauty's is flat at ~0.014 % across all three.</text>
+<text x="46.000" y="442.000" font-family="Helvetica, Arial, sans-serif" font-size="9.000" fill="#6b6b6b" text-anchor="start" font-weight="normal">Source: AnalysisScripts/anchors/{m7_blocks,m7b_blocks}, via extraction/aggregate_m7.py (recipes R9b, R9).</text>
+</svg>

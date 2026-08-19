@@ -1,0 +1,328 @@
+{
+  "algorithm": "common_absolute_nch_class_boundaries_v1",
+  "boundary_source": {
+    "artifact_path": "/data/alice/ipardoza/hadronization_v3_plotting_run/config/multiplicity_class_boundaries_v1.json",
+    "artifact_sha256": "3b0554fe6c291a26ba03b0524975892754e9a0e75896b203c24d05e853d195b5",
+    "class_lower_edges_nch": [
+      -0.5,
+      2.5,
+      3.5,
+      5.5,
+      6.5,
+      8.5,
+      10.5,
+      13.5,
+      17.5,
+      23.5,
+      32.5
+    ],
+    "class_names": [
+      "c1",
+      "c2",
+      "c3",
+      "c4",
+      "c5",
+      "c6",
+      "c7",
+      "c8",
+      "c9",
+      "c10",
+      "c11"
+    ],
+    "definition": "Common absolute N_ch boundaries, one set shared by all three tunes and both sectors. Labels are percentiles of the MONASH minimum-bias distribution; the per-tune MB-percentile translation is PUBLISHED as a residual rather than hidden.",
+    "derived_from": "MONASH minimum-bias, 172429 events; AnalysisScripts/anchors/b4_multiplicity_mb",
+    "identical_across_tunes": "PASS",
+    "per_tune_derivation_removed_at": "33c9a8c30fa97c9281e26ecbd6d1becc1afb9c21",
+    "tunes_compared": 1
+  },
+  "boundary_utility_sha256": "ba67271cb6b80bc491eff8de52657e9c5f7922c3b06a9a992d9801a59deed5af",
+  "common_boundary_utility_sha256": "074a933b90cd18197f891c2d7c72fbfd6655ddb84dbe305854e9d797f2f613e9",
+  "completion_status": "PASS",
+  "configuration_path": "plotting/configuration_multiplicity_HF_RUN3_V1_MONASH_THnSparse_complete_root.json",
+  "configuration_sha256": "966ba46cbc560a138f0cc7d020ac3963c194c8e35791e47c9c2522b3f9df5038",
+  "payload_sha256": "82747a5816369215475b479ac0549dcbab1dc1c17c7f81059750f38d506d2943",
+  "plotter_source_sha256": "c7a36b6c77b7efa539d5f7b6acb93f99c3cc3af419193990cb3a4f745693fbef",
+  "policy": {
+    "class_bounds": "inclusive_integer_nch",
+    "integrated_0_100_observable": "excluded_from_mutually_exclusive_partition",
+    "normalization": "sum_of_regular_bins",
+    "overflow": "must_be_exactly_zero_and_is_excluded",
+    "percentile_label_provenance": "percentile labels are percentiles of the MONASH minimum-bias distribution, NOT of the labelled tune; the class boundaries are absolute N_ch and identical for every tune, and each tune's own realised fraction is published per class as achieved_weighted_fraction",
+    "threshold_rule": "common_absolute_nch_class_boundaries_read_from_the_committed_artifact_and_applied_identically_to_every_tune",
+    "tie_rule": "boundary_integer_belongs_to_lower_activity_class;_adjacent_higher_activity_class_starts_at_boundary_plus_one",
+    "underflow": "must_be_exactly_zero_and_is_excluded"
+  },
+  "schema": "hadronization_multiplicity_boundary_receipt_v1",
+  "schema_version": 1,
+  "tunes": {
+    "MONASH": {
+      "block_files_validated": 80,
+      "blocks": [
+        {
+          "block": 1,
+          "exact_comparisons": 7,
+          "files_validated": 8,
+          "histogram_identity_sha256": "cf8c8063a5d248ad7875cc54f8b720e1c2931eaf12fb0d0882008f3690e90f22",
+          "reference_path": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_MONASH/combined_root_1/BplusBminus.root"
+        },
+        {
+          "block": 2,
+          "exact_comparisons": 7,
+          "files_validated": 8,
+          "histogram_identity_sha256": "a967276f4d985a28bfe694415e9e1101e31d30765edc732c84575b509f5536aa",
+          "reference_path": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_MONASH/combined_root_2/BplusBminus.root"
+        },
+        {
+          "block": 3,
+          "exact_comparisons": 7,
+          "files_validated": 8,
+          "histogram_identity_sha256": "90aeef390a70398f17c1e7edc63c180d9aa4f36604dc5b5ae6568f351159f573",
+          "reference_path": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_MONASH/combined_root_3/BplusBminus.root"
+        },
+        {
+          "block": 4,
+          "exact_comparisons": 7,
+          "files_validated": 8,
+          "histogram_identity_sha256": "0eecfc63ad423ed89584017f2543b3489105d3a07868bbd634a9482e27e1e5b2",
+          "reference_path": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_MONASH/combined_root_4/BplusBminus.root"
+        },
+        {
+          "block": 5,
+          "exact_comparisons": 7,
+          "files_validated": 8,
+          "histogram_identity_sha256": "dbc5c1749e98578189a4f9660d86c5b4c964d0a1ff0b00484c68bbd9c7a08cf5",
+          "reference_path": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_MONASH/combined_root_5/BplusBminus.root"
+        },
+        {
+          "block": 6,
+          "exact_comparisons": 7,
+          "files_validated": 8,
+          "histogram_identity_sha256": "ff7e47c21977b5ce5419b3bfa0e5a424f3f1fb1fe7ebfc1bccf6703154b52a97",
+          "reference_path": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_MONASH/combined_root_6/BplusBminus.root"
+        },
+        {
+          "block": 7,
+          "exact_comparisons": 7,
+          "files_validated": 8,
+          "histogram_identity_sha256": "0e50720fe7d2bd9a470f7b0ff04cb0bc9c63343061705c641067c7c15efa7ce1",
+          "reference_path": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_MONASH/combined_root_7/BplusBminus.root"
+        },
+        {
+          "block": 8,
+          "exact_comparisons": 7,
+          "files_validated": 8,
+          "histogram_identity_sha256": "c7f0a82db2352f79bf2a71ecb379b854df2fd10e56317fc585f3fb11051d03c8",
+          "reference_path": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_MONASH/combined_root_8/BplusBminus.root"
+        },
+        {
+          "block": 9,
+          "exact_comparisons": 7,
+          "files_validated": 8,
+          "histogram_identity_sha256": "b173fb6c43087f0afd3568c0ba468956a2e1a10941c6d36a5423a03c85e58e12",
+          "reference_path": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_MONASH/combined_root_9/BplusBminus.root"
+        },
+        {
+          "block": 10,
+          "exact_comparisons": 7,
+          "files_validated": 8,
+          "histogram_identity_sha256": "94b9c4572b8148d1e9880a2818ccc086541fdbcd34031936dca0316a3416a5fe",
+          "reference_path": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_MONASH/combined_root_10/BplusBminus.root"
+        }
+      ],
+      "central_exact_comparisons": 7,
+      "central_files_validated": 8,
+      "central_merge_input_manifest_sha256": "fcd96eaebd4dc11f071a2c8db8849f6a4cc19b764622a796664e524b27d0fc80",
+      "central_reference_path": "/data/alice/ipardoza/hadronization_merged/complete_root_HF_RUN3_V1_MONASH/BplusBminus.root",
+      "central_source_file_sha256": "7e89b65ec045376654d9f74bf4548c23a35c2a08a443df053c8493bb6a142424",
+      "classes": [
+        {
+          "achieved_weighted_fraction": 0.117762,
+          "nch_max_inclusive": 2,
+          "nch_min_inclusive": 0,
+          "percentile_max": 100.0,
+          "percentile_min": 88.197,
+          "target_fraction": 0.11802999999999997
+        },
+        {
+          "achieved_weighted_fraction": 0.07800906,
+          "nch_max_inclusive": 3,
+          "nch_min_inclusive": 3,
+          "percentile_max": 88.197,
+          "percentile_min": 80.597,
+          "target_fraction": 0.07600000000000008
+        },
+        {
+          "achieved_weighted_fraction": 0.15282783,
+          "nch_max_inclusive": 5,
+          "nch_min_inclusive": 4,
+          "percentile_max": 80.597,
+          "percentile_min": 65.937,
+          "target_fraction": 0.14659999999999995
+        },
+        {
+          "achieved_weighted_fraction": 0.06492607,
+          "nch_max_inclusive": 6,
+          "nch_min_inclusive": 6,
+          "percentile_max": 65.937,
+          "percentile_min": 59.85,
+          "target_fraction": 0.06086999999999996
+        },
+        {
+          "achieved_weighted_fraction": 0.10836621,
+          "nch_max_inclusive": 8,
+          "nch_min_inclusive": 7,
+          "percentile_max": 59.85,
+          "percentile_min": 50.308,
+          "target_fraction": 0.09542000000000002
+        },
+        {
+          "achieved_weighted_fraction": 0.08731963,
+          "nch_max_inclusive": 10,
+          "nch_min_inclusive": 9,
+          "percentile_max": 50.308,
+          "percentile_min": 43.03,
+          "target_fraction": 0.07277999999999998
+        },
+        {
+          "achieved_weighted_fraction": 0.1005143,
+          "nch_max_inclusive": 13,
+          "nch_min_inclusive": 11,
+          "percentile_max": 43.03,
+          "percentile_min": 34.614,
+          "target_fraction": 0.08416000000000004
+        },
+        {
+          "achieved_weighted_fraction": 0.0922288,
+          "nch_max_inclusive": 17,
+          "nch_min_inclusive": 14,
+          "percentile_max": 34.614,
+          "percentile_min": 26.154,
+          "target_fraction": 0.08459999999999997
+        },
+        {
+          "achieved_weighted_fraction": 0.08568663,
+          "nch_max_inclusive": 23,
+          "nch_min_inclusive": 18,
+          "percentile_max": 26.154,
+          "percentile_min": 17.124,
+          "target_fraction": 0.0903
+        },
+        {
+          "achieved_weighted_fraction": 0.06763803,
+          "nch_max_inclusive": 32,
+          "nch_min_inclusive": 24,
+          "percentile_max": 17.124,
+          "percentile_min": 8.422,
+          "target_fraction": 0.08701999999999999
+        },
+        {
+          "achieved_weighted_fraction": 0.04472144,
+          "nch_max_inclusive": 4095,
+          "nch_min_inclusive": 33,
+          "percentile_max": 8.422,
+          "percentile_min": 0.0,
+          "target_fraction": 0.08422
+        }
+      ],
+      "histogram_identity_sha256": "dbdae57e2ca7a3967433913102bd1e6e6ef02a86a458bdfe2bdd9b20d1cbff06",
+      "histogram_name": "summed MULTIPLICITY",
+      "overflow": 0.0,
+      "pair_registry_sha256": "ea9b0232c1be84158446e559e23aebf3410b3c8a6e39a221d367f0d0c7ddee23",
+      "partition": {
+        "achieved_weighted_fraction": 1.0,
+        "coverage": "PASS",
+        "disjointness": "PASS",
+        "nch_max_inclusive": 4095,
+        "nch_min_inclusive": 0
+      },
+      "regular_bin_integral": 100000000.0,
+      "thresholds": [
+        {
+          "achieved_exclusive_fraction_before_threshold": 1.0,
+          "achieved_inclusive_fraction_through_threshold": 1.0,
+          "nch_threshold": 4095,
+          "percentile": 0.0,
+          "target_low_activity_fraction": 1.0
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.95012792,
+          "achieved_inclusive_fraction_through_threshold": 0.95527856,
+          "nch_threshold": 32,
+          "percentile": 8.422,
+          "target_low_activity_fraction": 0.91578
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.87635883,
+          "achieved_inclusive_fraction_through_threshold": 0.88764053,
+          "nch_threshold": 23,
+          "percentile": 17.124,
+          "target_low_activity_fraction": 0.82876
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.78235325,
+          "achieved_inclusive_fraction_through_threshold": 0.8019539,
+          "nch_threshold": 17,
+          "percentile": 26.154,
+          "target_low_activity_fraction": 0.73846
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.67979137,
+          "achieved_inclusive_fraction_through_threshold": 0.7097251,
+          "nch_threshold": 13,
+          "percentile": 34.614,
+          "target_low_activity_fraction": 0.65386
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.56781566,
+          "achieved_inclusive_fraction_through_threshold": 0.6092108,
+          "nch_threshold": 10,
+          "percentile": 43.03,
+          "target_low_activity_fraction": 0.5697
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.47082127,
+          "achieved_inclusive_fraction_through_threshold": 0.52189117,
+          "nch_threshold": 8,
+          "percentile": 50.308,
+          "target_low_activity_fraction": 0.49692000000000003
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.34859889,
+          "achieved_inclusive_fraction_through_threshold": 0.41352496,
+          "nch_threshold": 6,
+          "percentile": 59.85,
+          "target_low_activity_fraction": 0.40149999999999997
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.27524193,
+          "achieved_inclusive_fraction_through_threshold": 0.34859889,
+          "nch_threshold": 5,
+          "percentile": 65.937,
+          "target_low_activity_fraction": 0.34063000000000004
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.117762,
+          "achieved_inclusive_fraction_through_threshold": 0.19577106,
+          "nch_threshold": 3,
+          "percentile": 80.597,
+          "target_low_activity_fraction": 0.19403000000000006
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.05362382,
+          "achieved_inclusive_fraction_through_threshold": 0.117762,
+          "nch_threshold": 2,
+          "percentile": 88.197,
+          "target_low_activity_fraction": 0.11802999999999997
+        },
+        {
+          "achieved_exclusive_fraction_before_threshold": 0.0,
+          "achieved_inclusive_fraction_through_threshold": 0.01438719,
+          "nch_threshold": 0,
+          "percentile": 100.0,
+          "target_low_activity_fraction": 0.0
+        }
+      ],
+      "underflow": 0.0
+    }
+  }
+}

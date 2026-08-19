@@ -1,0 +1,17 @@
+GATE PASSED  variation=permissive_largest_index  sha=4e491134d8d3a2b4...  compared=/data/alice/ipardoza/hadronization_analysis/HF_RUN3_V1/per_job/MONASH/slot_000 vs /data/alice/ipardoza/a2_runs/regression_largest/MONASH/slot_000  recorded=2026-08-13T18:59:12Z
+CAMPAIGN_RESTORATION tune=MONASH jobs=100 restored_charm=60 restored_beauty=2 contested_seen=124 zero_restoration_jobs=49 per_Mevt=6.2 status=PASS
+TUNE MONASH   slots=100   blocks=10
+
+class  N_ch        Delta %      SEM  blocks  flag
+M1     1-9          0.0004   0.0002      10  
+M2     10-19        0.0011   0.0004      10  
+M3     20-29       -0.0003   0.0006      10  
+M4     30-39        0.0017   0.0012      10  
+M5     >=40         0.0037   0.0037      10  
+
+INTEGRATED          0.0006   0.0002
+
+VERDICT: MUST BE QUOTED PER MULTIPLICITY CLASS
+  classes off the integrated value by >2 SEM: none
+  spread across classes = 0.0040 pp (> 50% of |integrated|)
+  sign check (pre-registered: Delta >= 0): OK

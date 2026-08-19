@@ -1,0 +1,27 @@
+{
+  "schema": "hadronization_systematic_variation_settings_v1",
+  "purpose": "PYTHIA settings that a GENERATED systematics variation card may set and the nominal tune cards do not. Registered in docs/SYSTEMATICS_PREREGISTRATION.md S1 and S2.",
+  "why_this_file_and_not_the_tune_allowlist": "The producer throws on any card key outside kAuditedPythiaSettingKeys (heavyflavourcorrelations_status.cpp:311), so these keys must join that union. The obvious place was a new category inside config/tune_difference_allowlist_v1.json -- but that file's sha256 is pinned three ways: by the FROZEN Gate-B spec config/statistical_robustness_v1.json, by a suite test that asserts the spec pins the checked-out file, and by kTuneDifferenceAllowlistSha256, which every one of HF_RUN3_V1's 3000 raw files carries in its own metadata. Moving that digest would have made the frozen spec disagree with the campaign it governs and made the central files un-revalidatable by the rebuilt validator. Keeping these keys in a separate artifact leaves all three pins untouched: the central campaign stays cross-validatable with the variation campaigns, and the frozen spec keeps pinning the file it was frozen against.",
+  "not_a_licence_to_differ_across_tunes": "These keys are audited but are deliberately NOT added to allowed_tune_differences. The cross-tune audit therefore still requires them to be IDENTICAL across the three tunes -- which is exactly what a systematics variation is: one varied value, all three tunes. A card that varied the scale for JUNCTIONS only would still be rejected.",
+  "provenance_note": "Adding a key here changes GeneratedTuneSettingRegistry.h and therefore the producer and validator binaries. The producer executable sha256 is recorded per job, so the rebuild is visible in every job's provenance without any raw-metadata schema change. The exhaustive post-init effective_settings snapshot in every raw file records the resolved value of every PYTHIA setting, so what a job actually ran is recoverable from the file itself and not only from this list.",
+  "settings": [
+    {
+      "name": "SigmaProcess:renormMultFac",
+      "pythia_default": "1.",
+      "range": "0.1 .. 10.",
+      "source": "S1, renormalisation scale"
+    },
+    {
+      "name": "SigmaProcess:factorMultFac",
+      "pythia_default": "1.",
+      "range": "0.1 .. 10.",
+      "source": "S1, factorisation scale"
+    },
+    {
+      "name": "PDF:pSet",
+      "pythia_default": "13",
+      "range": "PYTHIA-internal sets only; no LHAPDF dependency is introduced",
+      "source": "S2, parton distribution"
+    }
+  ]
+}

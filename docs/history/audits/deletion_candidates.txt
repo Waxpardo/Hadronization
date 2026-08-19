@@ -1,0 +1,401 @@
+# Hadronization -- deletion candidates
+# Mapped commit: c1bb0d979e33e5893c1ab73ba391e17441429bd4 (physics-focus)
+# Generated: 2026-08-03. Read REPO_AUDIT_c1bb0d9.md section 6 before running anything.
+#
+# 291 paths: 10 LEGACY, 281 STALE.
+# Verified: 0 edges from any ACTIVE or ACTIVE-DORMANT file into this set.
+# NOT INCLUDED: everything classified UNSURE (296 files). See section 7 of the report.
+#
+# ---------------------------------------------------------------------------
+# GROUP 1 -- LEGACY: pre-campaign Condor submit stack (7 files)
+# Cannot run: runCondorJob.sh:27-31 requires $1 == '--campaign' and exactly 15 args;
+# these pass 4-5 positional args and hardcode /data/alice/ipardoza/Hadronization-main.
+# DEPENDENCY ORDER: delete update_submit_paths.sh in the SAME commit -- it is an
+# otherwise-live-looking script whose only function is rewriting the other six.
+# ---------------------------------------------------------------------------
+submitCondor_10M.sub
+submitCondor_hf_10M.sub
+submitCondor_hf_90M.sub
+submitCondor_hf_90M_resubmit_4181781_held38.sub
+submitCondor_hf_CLOSEPACKING_100M.sub
+submitCondor_hf_missing_4862182_resubmit.sub
+update_submit_paths.sh
+
+# ---------------------------------------------------------------------------
+# GROUP 2 -- LEGACY: gate/provenance-era leftovers (3 files)
+# Their consumers (tools/run_publication_gate_{a,b,c,d}.py) were deleted on
+# physics-focus. Zero code inbound; only mention is a gate-era audit doc.
+# ---------------------------------------------------------------------------
+Validation/ValidateGateDPilotAnalysis.C
+docs/templates/FINAL_SCIENTIFIC_REVIEW.template.json
+docs/templates/PUBLICATION_DATASET_AUTHORIZATION.template.json
+
+# ---------------------------------------------------------------------------
+# GROUP 3 -- STALE: editor backup files (13 files)
+# Tilde-suffixed editor backups committed in e2d18da7c (2026-02-24).
+# ---------------------------------------------------------------------------
+Balancing_and_Sampling/ATTENTION.txt~
+Balancing_and_Sampling/B_Balancing_CompareSimulationSettings.C~
+Balancing_and_Sampling/B_Balancing_MakeOutputYields.C~
+Balancing_and_Sampling/CalculateErrors/B_Balancing_MakeOutputYields.C~
+Balancing_and_Sampling/CalculateErrors/GenerateOutputs.sh~
+Balancing_and_Sampling/CalculateErrors/vRelYieldsErrBBMULTGENERAL.txt~
+Balancing_and_Sampling/CalculateErrors/vRelYieldsRatioErrBBMULTGENERAL.txt~
+Balancing_and_Sampling/CalculateErrors/vYieldsRatioErrBBMULTGENERAL.txt~
+Balancing_and_Sampling/CalculateErrors/yieldSampling.C~
+Balancing_and_Sampling/CalculateErrors/yieldSampling_BB.C~
+Balancing_and_Sampling/CalculateErrors/yieldSampling_CC.C~
+Balancing_and_Sampling/containsExcitedD.C~
+Balancing_and_Sampling/reproduceCanvasPadError.C~
+
+# ---------------------------------------------------------------------------
+# GROUP 4 -- STALE: misc one-off / superseded files (4 files)
+# ---------------------------------------------------------------------------
+Other/B_Balancing_GeneralPlotting_BEFORE_DOCUMENTATION.C
+SimulationScripts/Makefile.old
+SimulationScripts/test_bb
+SimulationScripts/test_cc
+
+# ---------------------------------------------------------------------------
+# GROUP 5 -- STALE: generated plot artifacts under **/Plots/ (264 files)
+# ROOT canvas output: .pdf + .png + .C files carrying the header
+#   //=========Macro generated from canvas: ... by ROOT version 6.30/01
+# .gitignore:53-55 ALREADY declares these directories ignored; the files predate
+# the rule, so the ignore never took effect on them.
+# PlottingScripts/validation/removed_tracked_plot_inventory.txt records 78 such
+# files already removed in d8de9b6da -- this is the unfinished remainder.
+# NOTE: this group is the only one where deletion is lossy in a real sense --
+# some of these figures were produced by UNSURE macros you may not be able to
+# re-run. Consider doing groups 1-4 first and this one separately.
+# ---------------------------------------------------------------------------
+Balancing_and_Sampling/CalculateErrors/Plots/canvasBpMonashErrors.pdf
+Balancing_and_Sampling/Plots/MACRO_cRelYields_Error_YieldsTree_BBMULTCONDENSED_beauty_Lb.C
+Balancing_and_Sampling/Plots/MACRO_cRelYields_Error_YieldsTree_BBMULTGENERAL_beauty_Lb.C
+Balancing_and_Sampling/Plots/MACRO_cRelYields_Error_YieldsTree_BBMULTGENERAL_beauty_LbSb.C
+Balancing_and_Sampling/Plots/MACRO_cRelYields_Error_YieldsTree_CCMULTCONDENSED_charm_Lc.C
+Balancing_and_Sampling/Plots/MACRO_cRelYields_Error_YieldsTree_CCMULTGENERAL_charm_Lc.C
+Balancing_and_Sampling/Plots/MACRO_cRelYields_Error_YieldsTree_CCMULTGENERAL_charm_LcSc.C
+Balancing_and_Sampling/Plots/MACRO_cYields_Error_YieldsTree_BBMULTCONDENSED.C
+Balancing_and_Sampling/Plots/MACRO_cYields_Error_YieldsTree_BBMULTGENERAL.C
+Balancing_and_Sampling/Plots/MACRO_cYields_Error_YieldsTree_CCMULTCONDENSED.C
+Balancing_and_Sampling/Plots/MACRO_cYields_Error_YieldsTree_CCMULTGENERAL.C
+Balancing_and_Sampling/Plots/PDF_cRelYields_Error_YieldsTree_BBMULTCONDENSED_beauty_Lb.pdf
+Balancing_and_Sampling/Plots/PDF_cRelYields_Error_YieldsTree_BBMULTGENERAL_beauty_Lb.pdf
+Balancing_and_Sampling/Plots/PDF_cRelYields_Error_YieldsTree_BBMULTGENERAL_beauty_LbSb.pdf
+Balancing_and_Sampling/Plots/PDF_cRelYields_Error_YieldsTree_CCMULTCONDENSED_charm_Lc.pdf
+Balancing_and_Sampling/Plots/PDF_cRelYields_Error_YieldsTree_CCMULTGENERAL_charm_Lc.pdf
+Balancing_and_Sampling/Plots/PDF_cRelYields_Error_YieldsTree_CCMULTGENERAL_charm_LcSc.pdf
+Balancing_and_Sampling/Plots/PDF_cYields_Error_YieldsTree_BBMULTCONDENSED.pdf
+Balancing_and_Sampling/Plots/PDF_cYields_Error_YieldsTree_BBMULTGENERAL.pdf
+Balancing_and_Sampling/Plots/PDF_cYields_Error_YieldsTree_CCMULTCONDENSED.pdf
+Balancing_and_Sampling/Plots/PDF_cYields_Error_YieldsTree_CCMULTGENERAL.pdf
+Balancing_and_Sampling/Plots/PNG_cRelYields_Error_YieldsTree_BBMULTCONDENSED_beauty_Lb.png
+Balancing_and_Sampling/Plots/PNG_cRelYields_Error_YieldsTree_BBMULTGENERAL_beauty_Lb.png
+Balancing_and_Sampling/Plots/PNG_cRelYields_Error_YieldsTree_BBMULTGENERAL_beauty_LbSb.png
+Balancing_and_Sampling/Plots/PNG_cRelYields_Error_YieldsTree_CCMULTCONDENSED_charm_Lc.png
+Balancing_and_Sampling/Plots/PNG_cRelYields_Error_YieldsTree_CCMULTGENERAL_charm_Lc.png
+Balancing_and_Sampling/Plots/PNG_cRelYields_Error_YieldsTree_CCMULTGENERAL_charm_LcSc.png
+Balancing_and_Sampling/Plots/PNG_cYields_Error_YieldsTree_BBMULTCONDENSED.png
+Balancing_and_Sampling/Plots/PNG_cYields_Error_YieldsTree_BBMULTGENERAL.png
+Balancing_and_Sampling/Plots/PNG_cYields_Error_YieldsTree_CCMULTCONDENSED.png
+Balancing_and_Sampling/Plots/PNG_cYields_Error_YieldsTree_CCMULTGENERAL.png
+Balancing_and_Sampling/Plots/globalCanvasRelativeYieldsMACRO.C
+Balancing_and_Sampling/Plots/globalCanvasRelativeYieldsMACRO_215.C
+Balancing_and_Sampling/Plots/globalCanvasRelativeYieldsPDF.pdf
+Balancing_and_Sampling/Plots/globalCanvasRelativeYieldsPDF_215.pdf
+Balancing_and_Sampling/Plots/globalCanvasRelativeYieldsPNG.png
+Balancing_and_Sampling/Plots/globalCanvasRelativeYieldsPNG_215.png
+Balancing_and_Sampling/Plots/globalCanvasYieldsMACRO.C
+Balancing_and_Sampling/Plots/globalCanvasYieldsMACRO_215.C
+Balancing_and_Sampling/Plots/globalCanvasYieldsPDF.pdf
+Balancing_and_Sampling/Plots/globalCanvasYieldsPNG.png
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscBMesonsAs_hDPhiHH_hDPhiAsMotherHH.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscBMesonsAs_hDPhiLL_hDPhiAsMotherLL.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscBMesonsTr_hDPhiHH_hDPhiTrMotherHH.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscBMesonsTr_hDPhiLL_hDPhiTrMotherLL.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscStackedAs_hDPhiHH_hDPhiAsMotherHH.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscStackedAs_hDPhiLL_hDPhiAsMotherLL.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscStackedSelectionAs_hDPhiHH_hDPhiAsMotherHH.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscStackedSelectionAs_hDPhiLL_hDPhiAsMotherLL.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscStackedSelectionTr_hDPhiHH_hDPhiTrMotherHH.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscStackedSelectionTr_hDPhiLL_hDPhiTrMotherLL.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscStackedTr_hDPhiHH_hDPhiTrMotherHH.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/MarkerscStackedTr_hDPhiLL_hDPhiTrMotherLL.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/cBMesonsAs_hDPhiHH_hDPhiAsMotherHH.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/cBMesonsAs_hDPhiLL_hDPhiAsMotherLL.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/cBMesonsTr_hDPhiHH_hDPhiTrMotherHH.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/cBMesonsTr_hDPhiLL_hDPhiTrMotherLL.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/cStackedAs_hDPhiHH_hDPhiAsMotherHH.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/cStackedAs_hDPhiLL_hDPhiAsMotherLL.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/cStackedTr_hDPhiHH_hDPhiTrMotherHH.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayAndHadronisation/cStackedTr_hDPhiLL_hDPhiTrMotherLL.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/MarkerscBMesonsAs_hDPhiAsDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/MarkerscBMesonsTr_hDPhiTrDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/MarkerscBMesonsTr_hDPhiTrSameMother_hTrPtSameMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/MarkerscStackedAs_hDPhiAsDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/MarkerscStackedSelectionAs_hDPhiAsDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/MarkerscStackedSelectionTr_hDPhiTrDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/MarkerscStackedSelectionTr_hDPhiTrSameMother_hTrPtSameMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/MarkerscStackedTr_hDPhiTrDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/MarkerscStackedTr_hDPhiTrSameMother_hTrPtSameMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/cBMesonsAs_hDPhiAsDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/cBMesonsTr_hDPhiTrDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/cBMesonsTr_hDPhiTrSameMother_hTrPtSameMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/cStackedAs_hDPhiAsDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/cStackedSelectionAs_hDPhiAsDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/cStackedSelectionTr_hDPhiTrDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/cStackedSelectionTr_hDPhiTrSameMother_hTrPtSameMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/cStackedTr_hDPhiTrDiffMother_hTrPtDiffMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/DecayOnly/cStackedTr_hDPhiTrSameMother_hTrPtSameMother.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/ToDecay_or_ToHadronise.pdf
+PlottingScripts/DpDmBpBm_ComparisonStudy/Plots/cMatching_DpDmBpBm_Comparison_B^{+}B^{-} and D^{+}D^{-} angular correlations.pdf
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Beauty_JUNCTIONS_12-01-2026_vs_27-03-2026.C
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Beauty_JUNCTIONS_12-01-2026_vs_27-03-2026.pdf
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Beauty_JUNCTIONS_12-01-2026_vs_27-03-2026.png
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Beauty_MONASH_12-01-2026_vs_27-03-2026.C
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Beauty_MONASH_12-01-2026_vs_27-03-2026.pdf
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Beauty_MONASH_12-01-2026_vs_27-03-2026.png
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Charm_JUNCTIONS_12-01-2026_vs_27-03-2026.C
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Charm_JUNCTIONS_12-01-2026_vs_27-03-2026.pdf
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Charm_JUNCTIONS_12-01-2026_vs_27-03-2026.png
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Charm_MONASH_12-01-2026_vs_27-03-2026.C
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Charm_MONASH_12-01-2026_vs_27-03-2026.pdf
+PlottingScripts/FinalAnalysis/Plots/MultiplicityComparison_Charm_MONASH_12-01-2026_vs_27-03-2026.png
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Beauty_JUNCTIONS_12-01-2026_vs_27-03-2026.C
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Beauty_JUNCTIONS_12-01-2026_vs_27-03-2026.pdf
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Beauty_JUNCTIONS_12-01-2026_vs_27-03-2026.png
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Beauty_MONASH_12-01-2026_vs_27-03-2026.C
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Beauty_MONASH_12-01-2026_vs_27-03-2026.pdf
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Beauty_MONASH_12-01-2026_vs_27-03-2026.png
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Charm_JUNCTIONS_12-01-2026_vs_27-03-2026.C
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Charm_JUNCTIONS_12-01-2026_vs_27-03-2026.pdf
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Charm_JUNCTIONS_12-01-2026_vs_27-03-2026.png
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Charm_MONASH_12-01-2026_vs_27-03-2026.C
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Charm_MONASH_12-01-2026_vs_27-03-2026.pdf
+PlottingScripts/FinalAnalysis/Plots/SelectedParticleYields_Charm_MONASH_12-01-2026_vs_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bcminus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bcminus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bcplus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bcplus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bminus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bminus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bplus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bplus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bs0_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bs0_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bzero_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Bzero_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dbar0_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dbar0_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dminus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dminus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dplus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dplus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dsminus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dsminus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dsplus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dsplus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dzero_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Dzero_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Lambdab_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Lambdab_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Lambdac_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_Lambdac_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_barB0_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_barB0_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_barBs0_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_barBs0_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_barLambdab_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_barLambdab_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_barLambdac_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSingleParticleSpectra_barLambdac_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSpeciesResolvedSpectraCompareTunes_Beauty_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSpeciesResolvedSpectraCompareTunes_Beauty_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSpeciesResolvedSpectraCompareTunes_Charm_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/MinimumBiasSpeciesResolvedSpectraCompareTunes_Charm_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_BaryonMeson_CharmBeauty_MONASH_vs_JUNCTIONS_0_20.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_BaryonMeson_CharmBeauty_MONASH_vs_JUNCTIONS_20_40.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_BaryonMeson_CharmBeauty_MONASH_vs_JUNCTIONS_40_60.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_BaryonMeson_CharmBeauty_MONASH_vs_JUNCTIONS_60_80.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_BaryonMeson_CharmBeauty_MONASH_vs_JUNCTIONS_80_100.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_BeautyBaryonMeson_MONASH_vs_JUNCTIONS_0_20.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_BeautyBaryonMeson_MONASH_vs_JUNCTIONS_20_40.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_BeautyBaryonMeson_MONASH_vs_JUNCTIONS_40_60.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_BeautyBaryonMeson_MONASH_vs_JUNCTIONS_60_80.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_BeautyBaryonMeson_MONASH_vs_JUNCTIONS_80_100.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_CharmBaryonMeson_MONASH_vs_JUNCTIONS_0_20.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_CharmBaryonMeson_MONASH_vs_JUNCTIONS_20_40.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_CharmBaryonMeson_MONASH_vs_JUNCTIONS_40_60.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_CharmBaryonMeson_MONASH_vs_JUNCTIONS_60_80.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_CharmBaryonMeson_MONASH_vs_JUNCTIONS_80_100.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_LambdabOverBplus_MONASH_vs_JUNCTIONS_0_20.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_LambdabOverBplus_MONASH_vs_JUNCTIONS_20_40.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_LambdabOverBplus_MONASH_vs_JUNCTIONS_40_60.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_LambdabOverBplus_MONASH_vs_JUNCTIONS_60_80.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_LambdabOverBplus_MONASH_vs_JUNCTIONS_80_100.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_Lambdab_over_Bplus_vsMult.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_LambdacOverDplus_MONASH_vs_JUNCTIONS_0_20.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_LambdacOverDplus_MONASH_vs_JUNCTIONS_20_40.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_LambdacOverDplus_MONASH_vs_JUNCTIONS_40_60.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_LambdacOverDplus_MONASH_vs_JUNCTIONS_60_80.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_LambdacOverDplus_MONASH_vs_JUNCTIONS_80_100.png
+PlottingScripts/PtMultiplicity/Plots/Ratio_Lambdac_over_Dplus_vsMult.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bcminus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bcminus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bcplus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bcplus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bminus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bminus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bplus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bplus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bs0_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bs0_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bzero_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Bzero_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dbar0_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dbar0_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dminus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dminus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dplus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dplus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dsminus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dsminus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dsplus_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dsplus_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dzero_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Dzero_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Lambdab_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Lambdab_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Lambdac_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_Lambdac_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_barB0_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_barB0_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_barBs0_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_barBs0_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_barLambdab_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_barLambdab_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_barLambdac_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SingleParticleSpectra_barLambdac_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Beauty_0_20_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Beauty_0_20_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Beauty_20_40_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Beauty_20_40_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Beauty_40_60_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Beauty_40_60_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Beauty_60_80_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Beauty_60_80_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Beauty_80_100_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Beauty_80_100_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Charm_0_20_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Charm_0_20_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Charm_20_40_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Charm_20_40_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Charm_40_60_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Charm_40_60_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Charm_60_80_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Charm_60_80_27-03-2026.png
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Charm_80_100_27-03-2026.pdf
+PlottingScripts/PtMultiplicity/Plots/SpeciesResolvedSpectraCompareTunes_Charm_80_100_27-03-2026.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusBminus_DPhiDEta_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusBminus_DPhiDEta_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusBminus_DPhiDEta_multiplicity_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusBminus_DPhiDEta_multiplicity_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusBminus_DPhi_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusBminus_DPhi_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusLb_DPhiDEta_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusLb_DPhiDEta_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusLb_DPhiDEta_multiplicity_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusLb_DPhiDEta_multiplicity_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusLb_DPhi_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusLb_DPhi_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusSigmabzero_DPhiDEta_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusSigmabzero_DPhiDEta_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusSigmabzero_DPhiDEta_multiplicity_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusSigmabzero_DPhiDEta_multiplicity_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusSigmabzero_DPhi_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/BplusSigmabzero_DPhi_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusDminus_DPhiDEta_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusDminus_DPhiDEta_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusDminus_DPhiDEta_multiplicity_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusDminus_DPhiDEta_multiplicity_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusDminus_DPhi_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusDminus_DPhi_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusLambdac_DPhiDEta_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusLambdac_DPhiDEta_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusLambdac_DPhiDEta_multiplicity_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusLambdac_DPhiDEta_multiplicity_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusLambdac_DPhi_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusLambdac_DPhi_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusSigmacplus_DPhiDEta_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusSigmacplus_DPhiDEta_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusSigmacplus_DPhiDEta_multiplicity_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusSigmacplus_DPhiDEta_multiplicity_OSminusSS.png
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusSigmacplus_DPhi_OSminusSS.pdf
+PlottingScripts/QQCorrelations/Plots/10-05-2026/DplusSigmacplus_DPhi_OSminusSS.png
+
+# ===========================================================================
+# VERIFICATION PROCEDURE -- run after deleting, BEFORE committing
+# ===========================================================================
+#
+# 0. Preconditions. Do this on the LOCAL physics-focus worktree only:
+#      /private/tmp/hadronization-full-production   (c1bb0d9)
+#    Do NOT touch /data/alice/ipardoza/Hadronization -- it is detached at
+#    7cf9f86f3 for cluster 5290145. As of this audit that cluster has drained
+#    (1 held, 0 running, 0 idle), but the checkout must still not move until
+#    you have decided about the held job.
+#
+# 1. Confirm nothing outside the intended set moved:
+#      git status --porcelain | grep -v '^D ' 
+#    Expect EMPTY. Anything else means you deleted something not on this list.
+#
+# 2. Confirm the count:
+#      git status --porcelain | grep -c '^D '
+#    Expect 291.
+#
+# 3. Static re-check that nothing live now dangles. For each deleted basename,
+#    grep the surviving tree across ALL file types (not just source):
+#      git ls-files -d | while read -r f; do
+#        b=$(basename "$f")
+#        git grep -n -F -- "$b" -- ':!*/Plots/*' | grep -v "^$f:"
+#      done
+#    Expect hits ONLY in: REPOSITORY_FILE_CATALOG.md, PlottingScripts/README.md,
+#    AnalysisScripts/Analysis_README.md, SimulationScripts/Simulation_README.md,
+#    docs/audits/*, PUBLICATION_READY_CODING_AGENT_INSTRUCTIONS.md, and
+#    PlottingScripts/validation/removed_tracked_plot_inventory.txt.
+#    Any hit in a .py/.sh/.C/.h/.cpp/.sub/Makefile is a STOP.
+#
+# 4. Makefile surface still resolves (no cluster, no ROOT needed):
+#      make help && make print-config && make doctor
+#    doctor never fails by design; read its summary line, do not trust exit code.
+#
+# 5. Contract tests -- the real gate. Must be run with HADRONIZATION_BASE unset;
+#    the Makefile already does this (Makefile:119):
+#      make test
+#    Expect 21/21 passed. (Makefile:117 globs tests/test_*.py = 21 files.
+#    tests/ holds 24 files; the other 3 are .cpp and are NOT run by make test.
+#    README.md's '21 contract tests' is accurate; the handoff's 'tests/ is 21
+#    files' is not -- it is 24 files, 21 of which run.)
+#
+# 6. Card + registry contracts:
+#      make cards && make cards-current && make registry
+#    make cards-current is what catches an accidentally deleted .cmnd card;
+#    JUNCTIONS_MATCHED is reached only by glob, so a plain grep would miss it.
+#
+# 7. Submit rendering, the highest-value dry run -- it exercises campaign.py,
+#    the seed ledger and the card checksums without queueing anything:
+#      make submit-smoke CAMPAIGN=AUDIT_DRYRUN SUBMIT_ATTEMPT=99 PRODUCER_SHA=$(python3 -c "print('0'*64)")
+#    Then DELETE the rendered submit_AUDIT_DRYRUN_smoke.sub. Note it is NOT
+#    gitignored (.gitignore:77-79 covers only _prelim/_full), so leaving it
+#    behind risks a 'git add -A' sweeping it in.
+#    Do NOT pass --burn-seeds semantics for real; submit-smoke burns seeds.
+#    If you want zero ledger risk, use 'make submit-prelim' instead, which does
+#    not pass --burn-seeds (Makefile:162-170).
+#
+# 8. On Nikhef ONLY after the queue is empty and you have re-attached the branch:
+#      make build      # producer must still compile; it embeds registry checksums
+#    A deletion in SimulationScripts/ that broke the build shows up only here.
+#
+# 9. Commit with an explicit pathspec. NEVER 'git add -A' -- a bare add has
+#    previously swept 25 MB of dev output into a commit:
+#      git rm --cached -r --  # not needed; use: git commit -a is also unsafe
+#      git add -u -- <the deleted paths only>

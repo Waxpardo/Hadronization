@@ -1,0 +1,24 @@
+{
+  "schema": "hadronization_dataset_selector_v1",
+  "active_dataset": "hf_pt2_candidate",
+  "datasets": {
+    "hf_pt2_candidate": {
+      "status": "canonical_candidate",
+      "campaign": "HF_PT2",
+      "raw_schema": "hf_primary_ground_raw_v7",
+      "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
+      "canonical_manifest": "campaigns/HF_PT2/freeze/canonical_manifest.jsonl",
+      "production_root": "/data/alice/ipardoza/hadronization_production/HF_PT2",
+      "analysis_root": "/data/alice/ipardoza/hadronization_analysis/HF_PT2",
+      "raw_base": "/data/alice/ipardoza/hadronization_production/HF_PT2/raw",
+      "analyzed_data_base": "/data/alice/ipardoza/hadronization_merged",
+      "complete_root_tag": "complete_root_HF_PT2",
+      "subsample_base": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_PT2/combined_root_subSamples",
+      "block_count": 10,
+      "publication_eligible": false,
+      "publication_authorization": null,
+      "publication_authorization_sha256": null,
+      "interpretation": "HF_PT2 is a 3M-event pipeline-validation campaign, not physics. It is a canonical_candidate so the merge-consuming plotting path can be exercised end to end; publication_eligible is forced false and outputs must be regenerated from HF_RUN3_V1 before any paper use. The four cluster-resident paths are absolute because the merged product lives outside the checkout; this row is therefore Nikhef-specific by construction. It is NOT the active dataset: select it with DATASET_SELECTOR=config/dataset_selector_hf_pt2.json so the legacy regression default and its diagnostic target stay intact."
+    }
+  }
+}

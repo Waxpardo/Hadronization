@@ -1,186 +1,281 @@
-# Hadronization
+# Hadronization — heavy-flavour baryon partnering across three PYTHIA tunes
 
-This repository is the working code base for heavy-flavour hadronization studies in proton-proton collisions with PYTHIA 8 and ROOT. We now use it as a complete local and Stoomboot workflow: it can generate MONASH, JUNCTIONS, and CLOSEPACKING samples, reduce the raw ROOT trees into subsampled analysis histograms, and make the present comparison plots for multiplicity, pT spectra, selected-particle yields, and baryon-to-meson ratios.
+**A study of whether a heavy baryon's flavour-balancing partner is itself a
+baryon**, compared across MONASH, JUNCTIONS and CLOSEPACKING — three PYTHIA
+8.317 tunes that differ in colour reconnection. pp at 13.6 TeV.
 
-The present chain is centered on a unified heavy-flavour production. In that production charm and beauty are allowed in the same PYTHIA run, and the output tree keeps charm hadrons, beauty hadrons, Bc hadrons, pions, event multiplicity, process code, and per-event heavy-flavour counters. The older split production, where bbbar and ccbar are generated and analyzed independently, is still kept because it is needed for reference samples and for comparisons to earlier productions. In practice, we now make new combined HF samples with `SimulationScripts/heavyflavourcorrelations_status.cpp`, analyze them with `AnalysisScripts/hf_mult_pt_analysis_multi.C`, and compare them to the independent samples through the plotting macros under `PlottingScripts`.
+**This README is a rebuild guide.** It is ordered by what you would actually do,
+starting from nothing. For *what the pipeline is and why*, read
+[`ARCHITECTURE.md`](ARCHITECTURE.md) — it assumes no ROOT or PYTHIA background.
+For *where the project stands right now*, read [`STATE.md`](STATE.md).
 
-## Repository Map
+---
 
-`SimulationScripts` contains the PYTHIA producers, settings cards, and Makefile. The important executable for current work is `heavyflavourcorrelations_status`, while `bbbarcorrelations_status`, `bbbarcorrelations_status_JUNCTIONS`, `ccbarcorrelations_status`, and `ccbarcorrelations_status_JUNCTIONS` are the split legacy producers. The `pythiasettings_Hard_Low_ccbb_MONASH.cmnd`, `pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd`, and `pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd` cards are the current combined-HF cards. The split cards remain available as `pythiasettings_Hard_Low_bb*.cmnd` and `pythiasettings_Hard_Low_cc*.cmnd`.
+## 1. PREREQUISITES
 
-`AnalysisScripts` contains the ROOT reduction macros and shell wrappers. The current macro `hf_mult_pt_analysis_multi.C` reads `RootFiles/HF/MONASH`, `RootFiles/HF/JUNCTIONS`, and `RootFiles/HF/CLOSEPACKING`, splits the events into subsamples, and writes charm and beauty histogram files into `AnalyzedData/<tag>/Charm` and `AnalyzedData/<tag>/Beauty`. The split macros `bb_mult_pt_analysis_multi.C` and `cc_mult_pt_analysis_multi.C` do the same for the independent old samples.
+| | |
+|---|---|
+| **PYTHIA** | **8.317**, stock upstream, built from the official pythia.org tarball (`sha256 1ae551d1…45adf`), unmodified, `-std=c++20` |
+| **ROOT** | **6.30/01** — the ALICE CVMFS build; `root-config --version` must report `6.30.01` |
+| **Python** | 3.9+; the tooling is standard-library only |
 
-`PlottingScripts/PtMultiplicity` contains the current physics plotting macros for pT spectra, multiplicity-dependent spectra, baryon-to-meson ratios, species-resolved spectra, single-particle spectra, and minimum-bias spectra. These macros read the reduced `AnalyzedData` files rather than the raw simulation trees. They prefer the `hf_` file naming scheme and fall back to `bbbar_` or `ccbar_` when an older split sample is being plotted.
-
-`PlottingScripts/FinalAnalysis` contains the final comparison layer. It now has two source macros. `Plot_MultiplicityDistributions_TwoSamples.C` compares multiplicity distributions between two analyzed samples. `Plot_SelectedParticleYields_IndependentVsCombined.C` compares selected charm and beauty yields and draws the independent-over-combined ratio inside the same output canvas.
-
-The top level of `PlottingScripts` contains the paper THnSparse plotting path. `improvedPlotting_THnSparse.C` reads `configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json` and treats MONASH, JUNCTIONS, and CLOSEPACKING as equal tunes. `Plot_MultiplicityDistribution_PercentileBoundaries.C` draws the charged-particle multiplicity distribution with the configured percentile boundaries, and `run_paper_plots.sh` is the preferred entry point for paper plotting targets. The older configurable plotting machinery is still present: `improvedPlotting.C` reads the older JSON configuration files, while `combinedCanvasPlots.C`, `B_Balancing_GeneralPlotting.C`, and `PlottingWizard.C` are earlier plotting macros for balancing and angular-correlation studies. `ListHistos.C` is the small inspection tool used to list objects inside a ROOT file. The `DpDmBpBm_ComparisonStudy` subdirectory keeps the D+/D- and B+/B- origin, same-mother, different-mother, decay-only, and decay-plus-hadronisation comparison macros.
-
-`Balancing_and_Sampling` keeps the older balancing, yield, sampling, and uncertainty machinery. This part of the repository is still useful for reproducing the earlier balancing plots and for batch-yield error studies, but it is not the primary entry point for the current combined-HF production. The scripts under `Balancing_and_Sampling/CalculateErrors` still use the sampling directories from the older `/data/alice/pveen/ProductionsPythia` layout unless those base paths are overridden in the environment.
-
-`RootFiles` is the intended place for raw simulation products. The current local checkout does not contain the large raw ROOT productions, except for descriptive text files and old-production notes. The actual raw ROOT files should be treated as external data and should not be forced into Git. `AnalyzedData`, in contrast, currently stores reduced ROOT outputs for dated samples such as `10-09-2025`, `12-01-2026`, `27-03-2026`, `08-04-2026_100M_Combined`, and `08-04-2026_100M_Separate`.
-
-`Jobs` and `logs` are the Condor work and log areas. They are produced by `runCondorJob.sh` and the submit files. They are not physics inputs by themselves, but they matter for diagnosing Stoomboot submissions.
-
-`Literature` stores the reference bibliography and thesis PDF used for context. It is not part of the executable workflow, but it keeps the project references close to the analysis code.
-
-## Environment
-
-The repository expects ROOT and PYTHIA 8 from the ALICE CVMFS environment. We now use `setupEnv.sh` as the shared entry point. It resolves `HADRONIZATION_BASE` from the environment first, then from `base_path.txt`, and otherwise from the repository location. It then loads `VO_ALICE@ROOT::v6-30-01-alice5-2` and `VO_ALICE@pythia::v8315-alice1-23`.
+**There is no container and nothing rebuilds PYTHIA for you.** The tarball
+checksum is recorded; a third party must build it themselves. This is the
+project's largest portability limitation and it is recorded as such in
+[`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) §4.
 
 ```bash
 source ./setupEnv.sh
 ```
 
-On the Nikhef/Stoomboot filesystem, `base_path.txt` currently points to:
+`setupEnv.sh` asserts both versions and **exports nothing on a mismatch** — so a
+silent environment drift cannot reach a number.
 
-```text
-/data/alice/ipardoza/Hadronization
-```
+---
 
-If the repository is moved, you update that file and then refresh the Condor submit paths:
-
-```bash
-echo "/new/absolute/path/to/Hadronization" > base_path.txt
-./update_submit_paths.sh
-```
-
-## Current Production Workflow
-
-You build the simulation executables from the repository base after loading the environment.
+## 2. CHECK THE CHECKOUT
 
 ```bash
-source ./setupEnv.sh
-make -C SimulationScripts
+make check
 ```
 
-For a local combined-HF test, you run the unified producer with a tune mode, an output file, and two seed modifiers.
+Runs `doctor` (environment), `cards` and `cards-current` (the tune cards match
+the shared configuration), `registry` (the generated headers are current), the
+**36 Python contract tests**, and finally `env-verdict`.
+
+> ### `make check` is a SOURCE-CONTRACT suite. Here is what it does NOT certify.
+>
+> It does **not** run: the 300-file merged product, the closure gate against
+> real data, the current plotting chain, the PYTHIA runtime, or the published
+> extraction. A green run says the committed source, generated headers, tune
+> cards and registry agree with each other and with their fixtures. **It says
+> nothing about any published number.**
+>
+> **This was a live defect, not a hypothetical** (`docs/ERROR_RECORD.md`,
+> review finding A7): on `f0e67dc` the suite reported 30/30 and exited 0 on a
+> host with Homebrew ROOT 6.38.04 against a pinned 6.30.01, no PYTHIA and no
+> CVMFS — while `doctor` in the *same run* reported two blocking findings.
+> Every part behaved as designed; the emergent result was a fully green check
+> on a machine that cannot run the pipeline at all.
+>
+> **So `check` now ends with an environment verdict and fails on an off-pin
+> runtime.** Laptop work is still expected — declare it:
+>
+> ```bash
+> HF_ALLOW_UNPINNED_ENV=1 make check
+> ```
+>
+> which prints, and records, that the run is not a pinned-runtime
+> certification.
+
+> ### ⚠ Without ROOT, `make check` is not green — it is *smaller*
+>
+> **Five of the tests compile or run a ROOT macro and raise rather than skip.**
+> A machine with no ROOT reports a pass over a reduced denominator, so the
+> machine that *cannot* run the pipeline is the one that looks healthiest.
+>
+> **A green run prints `ROOT: /path/to/root` at the top.** If it prints
+> `ROOT: not found`, the result is not a pass. `tools/run_tests.sh:13-15` says
+> so too.
+
+---
+
+## 3. THE SMOKE PATH — do this before anything long
+
+**Prove the chain end to end before committing to a 562-CPU-hour campaign.**
+Two stages: the first needs nothing but Python, the second needs a cluster hour.
+
+### 3a. Repo only — no ROOT, no PYTHIA, no cluster
+
+Every one of these reads committed inputs with committed tools and finishes in
+seconds.
+
+> **CORRECTED 2026-08-13 — this used to say "This is the entire extraction
+> chain." It is not** (review finding B2). These commands rebuild the decay
+> maps and re-aggregate committed logs. They do **not** project any ROOT input,
+> perform the block decomposition, produce the observable, or plot anything.
+> The real chain starts at a 300-file merged directory that this repository
+> does not commit. Call this what it is: **the map-and-aggregate smoke path.**
 
 ```bash
-./SimulationScripts/heavyflavourcorrelations_status monash RootFiles/HF/MONASH/hf_MONASH_test.root 123 456
-./SimulationScripts/heavyflavourcorrelations_status junctions RootFiles/HF/JUNCTIONS/hf_JUNCTIONS_test.root 123 456
-./SimulationScripts/heavyflavourcorrelations_status closepacking RootFiles/HF/CLOSEPACKING/hf_CLOSEPACKING_test.root 123 456
+# rebuild decay-parent map v1.1 from the committed probe output
+tools/build_decay_parent_map.py \
+  AnalysisScripts/anchors/f4_probe/f4_probe_v1.out \
+  --ordinals AnalysisScripts/species_ordinals_v2.json --out /tmp/v11.json
+
+# rebuild map v2 (the species-level splits) on top of v1.1
+tools/build_decay_parent_map_v2.py \
+  AnalysisScripts/anchors/f4_probe/f4b_probe.out \
+  --ordinals AnalysisScripts/species_ordinals_v2.json \
+  --v1 AnalysisScripts/decay_parent_map_v1_1.json \
+  --weights AnalysisScripts/anchors/extraction_dual/per_species.csv \
+  --out /tmp/v2.json
+
+# the M7 INCLUSIVE-LEVEL unresolved-origin diagnostic, both sectors, from the
+# committed block logs. NOT a bound on the pair observable -- see
+# docs/M7_UNRESOLVED_SYSTEMATIC.md's scope banner (review finding A2).
+extraction/aggregate_m7.py AnalysisScripts/anchors/m7_blocks/*.log
+extraction/aggregate_m7.py AnalysisScripts/anchors/m7b_blocks/*.log
+
+# the anchor-vs-parent bin comparison that found the E4 defect.
+# --null is REQUIRED and has no default: 'binomial' is the historical
+# computation behind "30 of 88"; 'mad' is the robust null used for integrity
+# work since 2026-08-13, under which the same comparison flags 0 of 88 -- a
+# blind spot for BROAD defects (docs/ERROR_RECORD.md E4), not a clearance.
+extraction/compare_subset_parent.py \
+  AnalysisScripts/anchors/extraction_dual/per_species.csv \
+  AnalysisScripts/anchors/merged_monash_central/per_species.csv \
+  --null binomial --expect-scale 9.9986
+
+# the three-tune table, both conventions on a COMMON row set. Each tune's own
+# top-8 differs -- MONASH's carries B+/B-, the CR tunes' carries Lambda_c -- so
+# three top-8 lists would not be comparable column to column. Run here on the
+# committed MONASH anchor alone, which reproduces docs/MONASH_CENTRAL_TABLE.md
+# section 0; add JUNCTIONS=<dir> CLOSEPACKING=<dir> for the full table.
+extraction/three_tune_table.py \
+  MONASH=AnalysisScripts/anchors/merged_monash_dedup
+
+# the per-tune b-baryon particle/antiparticle advisory -- step 2 of the ladder
+# in docs/B_BARYON_ADVISORY_DIAGNOSTIC.md. RAW weights, no map applied, which
+# is the basis step 1 used to exonerate the map. Advisory only: it reports a
+# direction and never fails, so do not read its exit status as a verdict.
+extraction/bbaryon_tune_advisory.py \
+  MONASH=AnalysisScripts/anchors/merged_monash_dedup
 ```
 
-The unified output tree is named `tree`. It writes `ID`, `HFCLASS`, `PT`, `ETA`, `Y`, `PHI`, `CHARGE`, `STATUS`, `MOTHER`, `MOTHERID`, `MULTIPLICITY`, `PROCESSCODE`, `NCHARM`, `NBEAUTY`, and `NBC`. The `HFCLASS` convention is simple: `5` means beauty, `4` means charm, `45` means Bc, and `0` means pion.
+**Check the named output line, never the exit status.** `rc=0` is not evidence —
+ROOT returns 0 when it cannot even find a macro's entry point. The expected
+lines are in [`docs/GOLDEN_OUTPUTS.md`](docs/GOLDEN_OUTPUTS.md) §4; the two that
+matter most are `map_sha256=dd502a10c5932fff` and
+`sha256=c9593c9c0a7c4ec2`.
 
-The current combined-HF cards use proton-proton collisions at 14 TeV, `Tune:pp = 14`, `PhaseSpace:pTHatMin = 1.`, and `ParticleDecays:tau0Max = 0.01`. The MONASH card enables `HardQCD:hardccbar` and `HardQCD:hardbbbar`. The JUNCTIONS card uses the same hard processes and adds the QCD-based color-reconnection, junction, fragmentation, and beam-remnant settings. The CLOSEPACKING card uses the same combined-HF output contract and adds the Close Packing T1 parameters.
+> **Get those two digests and 30 flagged bins, and you have independently
+> reproduced the decay-map conjugation fix and the anchor defect from scratch.**
 
-## Analysis Workflow
+### 3b. The pipeline in miniature — ten jobs, one tune
 
-The current analysis wrapper reads all raw combined-HF files for the current tunes and writes reduced subsample outputs. The default is ten subsamples and charge-conjugate-combined species histograms.
+**Ten jobs, because ten is the block count** — the smoke run then exercises the
+real statistical boundary rather than a degenerate one.
 
-```bash
-./AnalysisScripts/run_hf_analysis.sh 27-03-2026
+| step | command |
+|---|---|
+| render + submit 10 small jobs, MONASH | `make submit-smoke ORDINAL=<n>` |
+| watch | `make status` |
+| reduce each raw file | `analysis/run_status_analysis.sh` |
+| validate one pair directory | `Validation/validate_pair_directory.sh <dir>` |
+| merge central + blocks | `merging/merge_root_files.sh …` |
+| **closure** | `Validation/validate_pair_block_closure.sh <central> <block_base> v3` |
+| extract | `extraction/extract_species_decomposition.py <central> --decay-map AnalysisScripts/decay_parent_map_v1_1.json` |
+
+> **The closure step is why the smoke path is worth an hour.** Its counts are
+> `n_objects × 300 pair files`, and the 300 comes from the pair registry, **not
+> from statistics**. So a ten-job toy run returns the **same 2100 content /
+> 1500 invariant** verdict as the 3000-file production — including the trap that
+> **1800 / 600 is a failure that looks like a pass** (it means the run resolved
+> against the v2 schema and never checked the species objects at all).
+
+**Sizing is not pre-registered.** Whoever runs it first records the wall clock
+here.
+
+---
+
+## 4. REBUILDING A PUBLISHED NUMBER
+
+Every published number is either regenerable from committed inputs, or recorded
+as not regenerable with the reason. **There is no third category**, and the list
+is [`docs/GOLDEN_OUTPUTS.md`](docs/GOLDEN_OUTPUTS.md):
+
+- **§2** — every frozen artifact with its sha256 and its regeneration recipe;
+- **§4** — the recipes as one ordered list, each with its positive check;
+- **§5** — the seven things that **cannot** be regenerated, and why. The
+  extraction anchor's provenance is unrecoverable; the merge timing exists only
+  as filesystem mtimes; PYTHIA is a personal build.
+
+---
+
+## 5. THE FULL PIPELINE, AND WHAT IT COSTS
+
+```
+generation/  →  raw/        3000 files, 300M events, 3 tunes
+analysis/    →  per_job/    3000 directories × 300 pair files
+merging/     →  3 centrals (1000 inputs) + 30 blocks (100 each)
+Validation/  →  closure at scale: 2100 content / 1500 invariant
+extraction/  →  species decomposition + block SEMs  ← the paper's number
+plotting/    →  figures
 ```
 
-You can choose the number of subsamples and ask the analysis to write extra particle and antiparticle histograms while keeping the combined names for compatibility.
+| | |
+|---|---|
+| full production | **562.5 CPU-hours** (MONASH 104.7, JUNCTIONS 183.1, CLOSEPACKING 274.7) |
+| | **quote 562.5, not 390** — the 390 figure circulates verbally and descends from superseded medians |
+| retry overhead | ~2.7 % of jobs hit the hang guard and regenerate; budget a few percent |
+| merge | 33 objects; measured against a 65–77 h pre-registered band |
 
-```bash
-./AnalysisScripts/run_hf_analysis.sh 27-03-2026 20 separate
-```
+**Seeds are deterministic and ledgered.** `seed_for(campaign_ordinal, tune, job,
+attempt)` always renders the same submit file, and rendering **refuses** a seed
+the ledger has already burned — a real duplicate-seed collision once voided two
+pilot campaigns.
 
-The output layout is:
+---
 
-```text
-AnalyzedData/<tag>/Beauty/hf_MONASH_sub0.root
-AnalyzedData/<tag>/Beauty/hf_JUNCTIONS_sub0.root
-AnalyzedData/<tag>/Beauty/hf_CLOSEPACKING_sub0.root
-AnalyzedData/<tag>/Charm/hf_MONASH_sub0.root
-AnalyzedData/<tag>/Charm/hf_JUNCTIONS_sub0.root
-AnalyzedData/<tag>/Charm/hf_CLOSEPACKING_sub0.root
-```
+## 6. LAYOUT
 
-Each output file contains event-count histograms, tagged-event-count histograms, multiplicity histograms, tagged multiplicity histograms, PDG-versus-multiplicity histograms, aggregate charm or beauty meson and baryon histograms, species-resolved pT-versus-multiplicity histograms, and pion pT histograms. The macros enable `Sumw2` so the plotting layer can propagate statistical errors.
+| path | what |
+|---|---|
+| `generation/` | producer, tune cards, generated registries, Condor submission |
+| `analysis/` | the one-pass reduction, raw → 300 pair files |
+| `merging/` | merge driver and ROOT macros |
+| `extraction/` | species decomposition, decay maps, block SEMs, M7 aggregation |
+| `plotting/` | figure macros, configurations, `run_paper_plots.sh` |
+| `AnalysisScripts/` | **frozen artifacts** — species axis, decay maps, `anchors/` |
+| `Validation/` | ROOT audits, pair-directory and closure gates |
+| `tools/` | campaign management, renderers, guards, `doctor` |
+| `config/` | signed registries and contracts |
+| `tests/` | 37 Python contract tests, 5 C++ |
+| `docs/` | the active record; `docs/history/` the archaeology |
+| `attic/` | code with no live consumer, kept rather than deleted |
 
-The split analysis wrappers are still available for old independent samples.
+**The split bbbar/ccbar chain lives in `attic/split_chain/`.** It remains
+available for independent reference samples and comparisons to older
+productions; nothing in the current pipeline calls it.
 
-```bash
-./AnalysisScripts/run_bb_analysis.sh 12-01-2026 10 combined
-./AnalysisScripts/run_cc_analysis.sh 12-01-2026 10 combined
-```
+---
 
-## Plotting Workflow
+## 7. WHICH DOCUMENT OWNS WHAT
 
-The current paper THnSparse plotting workflow uses pair-named ROOT files produced by `AnalysisScripts/status_analysis_THnSparse_qq.C`. The root-level wrappers build the input layout expected by Paul's plotting macro for all three tunes:
+| Area | Owner |
+|---|---|
+| What the project is, for a non-specialist | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+| Where the project stands — frozen / pending / not planned | [`STATE.md`](STATE.md) |
+| Every published number, its digest and its recipe | [`docs/GOLDEN_OUTPUTS.md`](docs/GOLDEN_OUTPUTS.md) |
+| The physics contract — schemas, selectors, thresholds, pinned versions | [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) |
+| Why each choice is what it is, and the evidence | [`docs/DESIGN_AND_RATIONALE.md`](docs/DESIGN_AND_RATIONALE.md) |
+| What went wrong, who caught it, what now prevents it | [`docs/ERROR_RECORD.md`](docs/ERROR_RECORD.md) |
+| **What each executable is for, and how they connect** | [`docs/COMPONENTS.md`](docs/COMPONENTS.md) |
+| What was removed from `HEAD`, and why | [`docs/REMOVALS.md`](docs/REMOVALS.md) |
+| What was renamed or moved, and what was deliberately not | [`RENAMES.md`](RENAMES.md) |
+| Cluster operations — submitting, monitoring, the hang guard | [`generation/submit/Condor_README.md`](generation/submit/Condor_README.md) |
+| Machine setup, dependencies, storage | [`docs/WORKSPACE.md`](docs/WORKSPACE.md) |
+| A subsystem's own mechanics | that directory's `README.md` |
 
-```bash
-./submit_status_analysis.sh ALL 100 Job700
-./merge_root_files.sh ALL Job700 21_06_2026
-./make_subsamples.sh
-```
+**A code change and its documentation change land in the same commit.** The rule
+has teeth because it has failed before: `PhaseSpace:pTHatMin = 2.0` shipped with
+no design section, and the pair-file object contract behind a 900-error analysis
+failure lived only in a C++ comment. Both are written up now in
+`docs/DESIGN_AND_RATIONALE.md` §§3.12–3.13.
 
-For large THnSparse productions, the merge and subsample wrappers can use a hybrid ROOT merge backend. This keeps the object-preserving ROOT merger as the default path and uses chunked `hadd` for the heavy charm-trigger pair files:
+---
 
-```bash
-MERGE_BACKEND=hybrid HADD_JOBS=1 HADD_FINAL_JOBS=4 HADD_CHUNK_SIZE=10 ./merge_root_files.sh ALL Job700 21_06_2026
-MERGE_BACKEND=hybrid HADD_JOBS=1 HADD_FINAL_JOBS=4 HADD_CHUNK_SIZE=10 ./make_subsamples.sh
-```
+## 8. WHAT IS NOT EVIDENCE
 
-For a smaller validation pass, replace `100` with the number of available raw files to process per tune. The submit wrapper sorts available files by numeric job id and selects the first N completed files, so this works even if some low job ids are still running. For example, the planned three-tune test run uses:
+None of these is evidence that a result is sound, and each has been mistaken for
+it at least once:
 
-```bash
-./submit_status_analysis.sh ALL 50 Job700
-./merge_root_files.sh ALL Job700 21_06_2026_50job
-./make_subsamples.sh ALL 8 6 123 Job700 700_50job
-```
-
-When using non-default tags like these, copy one of the THnSparse JSON configs and update `bb_bar_complete_root_dir`, `cc_bar_complete_root_dir`, `bb_bar_complete_root_dir_sub_samples`, and `cc_bar_complete_root_dir_sub_samples` to the validation tags. Then pass that config through `THNSPARSE_CONFIG`, `THNSPARSE_COMPLETE_ROOT_CONFIG`, or `MULTIPLICITY_CONFIG` when running `PlottingScripts/run_paper_plots.sh`.
-
-`make_subsamples.sh` uses non-overlapping shuffled partitions by default. With no arguments, it runs the final paper default: all three tunes, ten independent 10-job subsamples per tune, `Job700` input, and `SUBSAMPLES_700` output. This covers all 100 jobs per tune.
-
-The resulting paper THnSparse inputs are:
-
-```text
-AnalyzedData/complete_root_<tag>_MONASH
-AnalyzedData/complete_root_<tag>_JUNCTIONS
-AnalyzedData/complete_root_<tag>_CLOSEPACKING
-AnalyzedData/SUBSAMPLES_<tag>/combined_root_subSamples_MONASH
-AnalyzedData/SUBSAMPLES_<tag>/combined_root_subSamples_JUNCTIONS
-AnalyzedData/SUBSAMPLES_<tag>/combined_root_subSamples_CLOSEPACKING
-```
-
-The paper plotting entry point is:
-
-```bash
-./PlottingScripts/run_paper_plots.sh smoke
-./PlottingScripts/run_paper_plots.sh
-```
-
-`smoke` runs the multiplicity-boundary plot, inclusive raw kinematic spectra, and the complete-root THnSparse config without subsampling. The default `all` target runs the multiplicity-boundary plot, inclusive raw kinematic spectra, and the full THnSparse config. Use `./PlottingScripts/run_paper_plots.sh multiplicity-spectrum` to regenerate only the shared raw `N_{ch}` spectrum with the tune/MONASH ratio panel, MONASH percentile-boundary inset, and short energy/acceptance annotation below the legend. Use `./PlottingScripts/run_paper_plots.sh multiplicity-compact` for the standalone compact MONASH percentile-boundary figure.
-
-Paper kinematic spectra are inclusive single-particle spectra drawn directly from `RootFiles/HF`, not from trigger/associate-conditioned THnSparse pair outputs. Exact PDG-ID matching is used, the raw producer acceptance is preserved, and absolute `phi` is displayed in `[-pi, pi)`. Correlation `Delta phi` plots in Paul's THnSparse macro keep the shifted `[-pi/2, 3pi/2]` convention. The charged multiplicity definition used for these figures is prompt charged primary `e`, `mu`, `pi`, `K`, and `p` species, including antiparticles, with PYTHIA status `81-89`, `pT >= 0.15 GeV/c`, `|eta| <= 4`, in pp at `sqrt(s)=14 TeV`; activity classes are read from low to high multiplicity as `90-100% -> ... -> 0-1%`.
-
-The current pT and multiplicity plots are made from `AnalyzedData`, not from `RootFiles`. If no date is passed, the plotting helpers search for the latest dated folder under `AnalyzedData`. In ordinary use, we pass the date explicitly so that no older production is selected by accident.
-
-```bash
-root -l -b -q 'PlottingScripts/PtMultiplicity/Plot_HF_Ratios_vsMultiplicityPercentile_subsamples.C("27-03-2026",10,0.0,-1.0)'
-root -l -b -q 'PlottingScripts/PtMultiplicity/Plot_HF_SpeciesResolvedPtSpectra_vsMultiplicity_subsamples.C("27-03-2026","Charm",10)'
-root -l -b -q 'PlottingScripts/PtMultiplicity/Plot_HF_MinimumBiasPtSpectra_MONASH_JUNCTIONS_subsamples.C("27-03-2026","Beauty",10)'
-```
-
-The final-analysis comparisons are similarly run from the repository base.
-
-```bash
-root -l -b -q 'PlottingScripts/FinalAnalysis/Plot_MultiplicityDistributions_TwoSamples.C("12-01-2026","27-03-2026",10,true)'
-root -l -b -q 'PlottingScripts/FinalAnalysis/Plot_SelectedParticleYields_IndependentVsCombined.C("12-01-2026","27-03-2026",10)'
-```
-
-The pT and multiplicity plots are written to `PlottingScripts/PtMultiplicity/Plots`. The final-analysis plots are written to `PlottingScripts/FinalAnalysis/Plots`. Several macros write both PNG and PDF, while older ratio macros still write only PNG.
-
-## Condor Workflow
-
-The Condor entry point is `runCondorJob.sh`. It supports both the current combined-HF workflow and the older split workflow. The submit files use the shared filesystem and do not transfer files through Condor.
-
-```bash
-./update_submit_paths.sh
-condor_submit submitCondor_hf_10M.sub
-```
-
-`submitCondor_hf_10M.sub` submits ten one-million-event jobs per MONASH/JUNCTIONS tune. `submitCondor_hf_90M.sub` submits ninety one-million-event jobs per MONASH/JUNCTIONS tune. `submitCondor_hf_CLOSEPACKING_100M.sub` submits one hundred one-million-event jobs for the Close Packing tune. `submitCondor_10M.sub` submits the old split bbbar and ccbar production for MONASH and JUNCTIONS. The wrapper names output files with the Condor cluster and job id, writes the ROOT file inside the job work directory, and moves the completed file to `RootFiles/...` only after a successful run.
-
-## Data and Versioning
-
-Raw ROOT files are large production artifacts. They belong under `RootFiles` on the machine that runs the production, but they should be excluded from ordinary source synchronization unless the task explicitly concerns data transfer. Reduced analysis ROOT files in `AnalyzedData` are tracked in this working branch because they are the compact products used by the plotting layer.
-
-The three-tune integration branch is `three-tunes`. When synchronizing with the Nikhef copy, the safe rule is that code, scripts, documentation, submit files, and reduced analysis outputs should match, while raw `.root` files under `RootFiles` may differ or remain only on the cluster. This keeps the branch reproducible without moving the heavy raw productions unnecessarily.
+- a dirty or `--development` report;
+- a validation receipt whose state is FAIL;
+- a nonempty ROOT file without its receipt;
+- a Condor queue reaching zero;
+- 500 submitted jobs described as 500M analysed events;
+- `rc=0` from a ROOT macro;
+- a `make check` pass with no ROOT;
+- an agent-authored physics sign-off.

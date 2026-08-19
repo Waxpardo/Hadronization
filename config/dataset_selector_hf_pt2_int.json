@@ -1,0 +1,24 @@
+{
+  "schema": "hadronization_dataset_selector_v1",
+  "active_dataset": "hf_pt2_int_candidate",
+  "datasets": {
+    "hf_pt2_int_candidate": {
+      "status": "canonical_candidate",
+      "campaign": "HF_PT2_INT",
+      "raw_schema": "hf_primary_ground_raw_v7",
+      "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
+      "canonical_manifest": "campaigns/HF_PT2_INT/freeze/canonical_manifest.jsonl",
+      "production_root": "/data/alice/ipardoza/hadronization_production/HF_PT2_INT",
+      "analysis_root": "/data/alice/ipardoza/hadronization_analysis/HF_PT2_INT",
+      "raw_base": "/data/alice/ipardoza/hadronization_production/HF_PT2_INT/raw",
+      "analyzed_data_base": "/data/alice/ipardoza/hadronization_merged",
+      "complete_root_tag": "complete_root_HF_PT2_INT",
+      "subsample_base": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_PT2_INT/combined_root_subSamples",
+      "block_count": 10,
+      "publication_eligible": false,
+      "publication_authorization": null,
+      "publication_authorization_sha256": null,
+      "interpretation": "HF_PT2_INT is the 10M-event intermediate pipeline-validation campaign, not physics. It exists as a dataset row to discharge B6: the thnsparse and audit-subsamples plotting targets could not run at all because no hf_pt2_int dataset existed in either selector. It is a canonical_candidate so the merge-consuming plotting path can be exercised against a larger sample than HF_PT2; publication_eligible is forced false and outputs must be regenerated from HF_RUN3_V1 before any paper use. The four cluster-resident paths are absolute because the merged product lives outside the checkout, so this row is Nikhef-specific by construction. It is NOT the active dataset in the default selector: select it with DATASET_SELECTOR=config/dataset_selector_hf_pt2_int.json so the legacy regression default and its diagnostic target stay intact. Its merged directories are the ones first contact validated read-only: complete_root_HF_PT2_INT_MONASH and SUBSAMPLES_HF_PT2_INT/combined_root_subSamples_MONASH."
+    }
+  }
+}

@@ -1,0 +1,518 @@
+# Systematic uncertainties — the living document
+
+**Status 2026-08-17.** The design is frozen in
+[`docs/SYSTEMATICS_PREREGISTRATION.md`](SYSTEMATICS_PREREGISTRATION.md), written
+and committed before any variation job was rendered. **This** document is where
+results land. Empty cells say `PENDING` and carry the cluster id of the jobs that
+will fill them, so a reader can tell "not measured yet" from "measured and
+small".
+
+**Two of six sources have numbers today: S6 (complete, 2026-08-13) and S5
+(complete, and an exact zero). Three are queued, all 2100 jobs released and their
+first outputs verified. One is deliberately not launched.**
+
+**The deployment gate is PASSED** — the rebuilt producer reproduces the nominal
+event tree value for value (§9), so variation numbers from it may be believed.
+
+---
+
+## 0. THE TABLE
+
+Per cent, per multiplicity class, per tune. Block SEMs over ten blocks
+(`slot % 10`, dof 9).
+
+| # | source | variation | status | verdict |
+|---|---|---|---|---|
+| **S1a** | renormalisation scale | `SigmaProcess:renormMultFac` ×2 / ×0.5 | **PENDING** — clusters `5519094` (up), `5519095` (down) | — |
+| **S1b** | factorisation scale | `SigmaProcess:factorMultFac` ×2 / ×0.5 | **PENDING** — clusters `5519096` (up), `5519097` (down) | — |
+| **S2** | parton distribution | `PDF:pSet` 13 → 8 (NNPDF2.3 LO → CTEQ6L1) | **PENDING** — cluster `5519098` | — |
+| **S3** | `PhaseSpace:pTHatMin` | 2.0 → 1.0 and → 4.0 | **PENDING** — clusters `5519099` (1.0), `5519100` (4.0) | — |
+| **S4** | event-activity counter | `\|η\| < 1` → `\|η\| < 4`, percentile-preserving | **NOT LAUNCHED, deliberately** (§5) | — |
+| **S5** | decay-daughter class migration | boundaries × 1/(1 ± 0.00767) | ✅ **DONE 2026-08-17** | **EXACTLY ZERO — structurally insensitive, every class** |
+| **S6** | pair-level unresolved origin | duplicate hard-carrier tie-break | ✅ **DONE 2026-08-13** | **MUST BE QUOTED PER CLASS** (CR tunes); MONASH negligible |
+
+**No total may be quoted yet.** The pre-registration §9 closing rule: a partial
+quadrature sum understates, and an understated systematic is worse than an absent
+one.
+
+---
+
+## 1. S6 — pair-level unresolved origin ✅
+
+**The measurement to quote is the LARGEST-`heavyIndex` arm, per class** (owner
+ruling 2026-08-13). Per cent, block SEMs, dof 9. Source of record:
+[`docs/a2_results_20260813/A2_TIEBREAK_ROBUSTNESS.md`](a2_results_20260813/A2_TIEBREAK_ROBUSTNESS.md)
+§4.
+
+| tune | M1 | M2 | M3 | M4 | M5 |
+|---|---|---|---|---|---|
+| MONASH | 0.0004 ± 0.0002 | 0.0011 ± 0.0004 | −0.0003 ± 0.0006 | 0.0017 ± 0.0012 | 0.0037 ± 0.0037 |
+| **JUNCTIONS** | 0.0255 ± 0.0024 | 0.0691 ± 0.0029 | 0.1007 ± 0.0094 | **0.1509 ± 0.0196** | 0.1369 ± 0.0215 |
+| **CLOSEPACKING** | 0.0377 ± 0.0019 | 0.1012 ± 0.0049 | 0.1571 ± 0.0130 | 0.1777 ± 0.0183 | **0.2293 ± 0.0319** |
+
+**MONASH is NEGLIGIBLE** — every class under 0.004 %, ~25× below the
+pre-registered 0.1 % threshold.
+
+**The cross-check arm** is the smallest-`heavyIndex` ordering
+([`A2_DELTA_RESULT.md`](a2_results_20260813/A2_DELTA_RESULT.md)). Its role is
+**not** to be a lower bound: it establishes that the result is **rule-dependent**,
+the two orderings differing by 2.0–5.5× in all ten CR classes at 2.7–21.6 σ. That
+rule dependence is what makes per-class quoting mandatory — an integrated number
+is wrong about the shape under either rule.
+
+> ### ⚠ Three things a reader must carry with this row
+>
+> 1. **It is NOT an envelope.** What is quoted is the larger of two extremal
+>    orderings of `heavyIndex`. A pT-ordered tie-break would give more, and the
+>    pre-registration rejected that rule as inflating by construction. "0.1509 %"
+>    means *the largest-index rule gives 0.1509 % in JUNCTIONS M4*, not *the
+>    systematic cannot exceed it*.
+> 2. **The integrated values must not be substituted.** JUNCTIONS 0.0583,
+>    CLOSEPACKING 0.0795 — they understate the worst class by **2.6×** and
+>    **2.9×**.
+> 3. **⚠ THIS ROW IS ON A DIFFERENT CLASS AXIS FROM THE REST OF THE TABLE.**
+>    S6's `M1…M5` are `N_ch` 1–9, 10–19, 20–29, 30–39, ≥ 40 — five classes.
+>    Every other source is on the production eleven, `c1…c11`, at half-integer
+>    boundaries −0.5 … 32.5. **They are not the same partition and S6 may not be
+>    added in quadrature to per-`c` values** until it is re-binned. §6 states the
+>    rule; re-binning it is known future work, not something to be assumed away.
+
+---
+
+## 2. S5 — decay-daughter class migration ✅ **EXACTLY ZERO**
+
+> **Every one of the eleven classes is STRUCTURALLY INSENSITIVE, in both arms,
+> for all three tunes. Δ(c) = 0 exactly — not "consistent with zero".**
+
+Machine-readable result:
+[`docs/systematics_results_20260817/s5_class_migration.json`](systematics_results_20260817/s5_class_migration.json).
+Tool: `tools/systematic_class_migration.py`.
+
+**The bias: 0.767 %, re-measured on the production generator this session.**
+`dN_ch/dη` = 7.040 under the experimental decay convention against 6.986 under
+the exact production policy — PYTHIA **8.317**, 200 000 events per arm, both arms
+**paired on one seed** so the shared event content cancels
+(`ValidationReports/NCH_DECAY_POLICY_BIAS_8317.md`). The production counter
+**undercounts** `N_ch` by that much, because the experimental primary definition
+counts charm/beauty decay daughters and production disables those decays.
+
+> **The 8.315 value was 1.327 % and it was carrying this entire source.** Against
+> the 1.538 % that moves `c11`'s edge it left a margin of only **1.16**, on a
+> superseded generator version. **Re-measured, the bias is 42 % smaller and the
+> margin is a factor of 2.01** — the null is comfortable rather than fragile. Both
+> arms rose from 8.315 (7.007 → 7.040 and 6.914 → 6.986), but the production-policy
+> arm rose four times as much, which is what closed the gap.
+>
+> **Consequence beyond S5:** `docs/DESIGN_AND_RATIONALE.md` §3.5 and
+> `NCH_CALIBRATION_20260730.md` both state the policy "costs 1.3 %", and the paper
+> is required to state it. **On the production generator it is 0.77 %.**
+
+**The transformation.** A relative bias δ on `N_ch` is equivalent, at fixed class
+definition, to dividing every boundary by (1 + δ). Both signs are run.
+
+**Why it is exactly zero.** `N_ch` is a count, so it is an integer; the committed
+boundaries sit at half-integers, which the boundary artifact states is deliberate
+("half-integer, so no integer `N_ch` is ambiguous about which class it falls
+in"). A per-class observable is therefore a sum over a set of integer `N_ch`
+bins, and a boundary move changes it **only if the move crosses an integer**. No
+boundary does:
+
+| class | nominal | ↓ arm | ↑ arm | move | shift needed to cross |
+|---|---|---|---|---|---|
+| c1 | -0.5 | -0.4962 | -0.5039 | 0.0039 | 100.00 % |
+| c2 | 2.5 | 2.4810 | 2.5193 | 0.0193 | 20.00 % |
+| c3 | 3.5 | 3.4734 | 3.5271 | 0.0271 | 14.29 % |
+| c4 | 5.5 | 5.4581 | 5.5425 | 0.0425 | 9.09 % |
+| c5 | 6.5 | 6.4505 | 6.5502 | 0.0502 | 7.69 % |
+| c6 | 8.5 | 8.4353 | 8.5657 | 0.0657 | 5.88 % |
+| c7 | 10.5 | 10.4201 | 10.5812 | 0.0812 | 4.76 % |
+| c8 | 13.5 | 13.3972 | 13.6044 | 0.1044 | 3.70 % |
+| c9 | 17.5 | 17.3668 | 17.6353 | 0.1353 | 2.86 % |
+| c10 | 23.5 | 23.3211 | 23.6816 | 0.1816 | 2.13 % |
+| **c11** | **32.5** | **32.2526** | **32.7512** | **0.2512** | **1.54 %** |
+
+**Checked on real data, not only argued.** Re-projecting the three committed
+minimum-bias samples (MONASH 172 429 events, JUNCTIONS 170 389, CLOSEPACKING
+170 261; integer `N_ch` 0–175) under both shifted boundary sets moves **zero**
+integers between classes and changes **zero** class populations, in all three
+tunes. Maximum |relative Δ| = 0.000e+00.
+
+**Block SEMs are exactly zero**, and that is the correct treatment rather than a
+missing number: the same projection operator is applied to the same events, so
+the per-block difference is identically zero for *any* block decomposition. An
+exact zero has no sampling uncertainty.
+
+> ### The null holds by a factor of 2.01 — after the input was re-measured
+>
+> `c11` needs a **1.538 %** shift to cross an integer; the bias is **0.767 %**.
+> Two things still travel with this row:
+>
+> 1. **Any boundary above 65.2 would be migrated by this bias**, so a future
+>    re-binning of the class axis does **not** inherit this null and must
+>    re-measure S5. `tests/test_systematic_class_migration.py` asserts the
+>    per-boundary margin exceeds the measured bias, so a re-binning that breaks the
+>    null fails the suite rather than leaving a stale "exactly zero" here.
+> 2. **The bias is measured on minimum bias, not on the production sample.** The
+>    hard-heavy-flavour sample has far more heavy-hadron content per event, so its
+>    bias is plausibly *larger*. Not measured. It is a real open edge rather than a
+>    conservative choice, and it would become material only if the axis were
+>    re-binned above `N_ch ≈ 65`.
+
+**What the zero does not cover.** The bias still shifts the *percentile labels*
+the classes carry — the MONASH-MB percentile of a fixed `N_ch` boundary changes
+when the distribution shifts — so the paper's classes correspond to slightly
+different experimental percentiles than their labels claim. **That is a labelling
+caveat for the paper text, and this source must not be presented as covering
+it.**
+
+---
+
+## 3. S1 — renormalisation and factorisation scale — PENDING
+
+**Method.** Four campaigns, `SigmaProcess:renormMultFac` and
+`SigmaProcess:factorMultFac` each at ×2 and ×0.5, varied **independently**. The
+factor-of-two two-point variation is the standard convention for a
+leading-order calculation, and this is LO 2→2 `HardQCD:hardccbar` + `hardbbbar`.
+Both settings default to `1.` with range `0.1 … 10.` in the installed 8.317, so
+both requested values are inside the sanctioned range, and the nominal cards set
+neither.
+
+**Why independently, when coherently would have been cheaper and given a bigger
+number.** `μ_F` and the PDF (S2) act through the same object: the initial-state
+parton flux. Folding `μ_F` into a combined scale number would entangle S1 with S2
+and leave §6's independence assumption uninspectable. Varying `μ_F` alone makes
+that correlation **measurable** — and §6 states in advance what to do in either
+outcome.
+
+**Sample size.** 100 jobs × 100 000 events per tune per campaign = 10 M events
+per tune, 300 files. The A2 precedent at exactly this scale resolved a
+0.02–0.23 % effect at 5–20 σ.
+
+**Registered expectations** (pre-registration §3, stated so they can be wrong):
+the two arms bracket the nominal with opposite signs in every class; the
+decomposition fractions are nearly inert (≲ 0.5 %, and a shift above 2 % would
+falsify the claim that the decomposition is a hadronisation observable);
+per-class OS−SS moves more but still modestly (≲ 5 %) **because conditioning on
+`N_ch` absorbs the activity change** — that is the falsifiable claim; and `μ_R`
+dominates `μ_F`.
+
+| deliverable | S1a ×2 | S1a ×0.5 | S1b ×2 | S1b ×0.5 |
+|---|---|---|---|---|
+| decomposition fractions | PENDING `5519094` | PENDING `5519095` | PENDING `5519096` | PENDING `5519097` |
+| per-class OS−SS | PENDING `5519094` | PENDING `5519095` | PENDING `5519096` | PENDING `5519097` |
+
+---
+
+## 4. S2 — parton distribution — PENDING
+
+**Method.** `PDF:pSet` 13 → 8, one alternate PYTHIA-internal set, no LHAPDF
+dependency. Both named from the installed generator's own
+`xmldoc/PDFSelection.xml`, not from memory:
+
+| | `PDF:pSet` | set | `α_s(M_Z)` |
+|---|---|---|---|
+| **nominal** | 13 (the PYTHIA default, which `Tune:pp = 14` resolves to) | NNPDF2.3 QCD+QED LO | 0.130 |
+| **alternate** | 8 | CTEQ6L1, LO | 0.1298 |
+
+**Why CTEQ6L1.** Because `α_s(M_Z)` differs by 0.15 %, so the variation isolates
+PDF **shape** and does not smuggle in an `α_s` change. `pSet = 14` — the same
+NNPDF2.3 fit at `α_s = 0.119` — was rejected for exactly that reason: an 8 %
+coupling change in a PDF costume, double-counting S1's `μ_R` arm. `pSet = 17`
+(NNPDF3.1 LO) probes fit vintage rather than methodology. CTEQ6L1 is a different
+collaboration, a different methodology, LO with an LO coupling, and a genuinely
+used tune baseline.
+
+**Registered expectation.** Smallest of the three generation-dependent sources
+(≲ 1 % on per-class OS−SS, ≲ 0.2 % on the fractions). **No sign is registered** —
+CTEQ6L1's gluon is harder than NNPDF2.3 LO's at some `x` and softer at others, so
+an honest prediction is not available and any sign found is not evidence of
+anything. **If S2 exceeds S1's `μ_R` arm, that is the headline**, and the paper's
+framing of these as hadronisation observables would need qualifying.
+
+| deliverable | status |
+|---|---|
+| decomposition fractions | PENDING `5519098` |
+| per-class OS−SS | PENDING `5519098` |
+
+---
+
+## 5. S3 — `PhaseSpace:pTHatMin` — PENDING
+
+**Nominal: 2.0**, read from
+`generation/cards/pythiasettings_Hard_Low_ccbb_MONASH.cmnd:47` and ratified in
+`ValidationReports/PTHAT_MULTIPLICITY_SCAN_8317.md`.
+
+**Variation points taken FROM that scan**, its own adjacent measured points, which
+are also the ×0.5 / ×2 pair matching S1's convention:
+
+| `pTHatMin` | `dN_ch/dη` | vs minimum bias | |
+|---|---|---|---|
+| 1.0 | 4.973 | −28.6 % | **down arm** |
+| **2.0** | **6.678** | **−4.2 %** | **NOMINAL** |
+| 4.0 | 10.492 | +50.6 % | **up arm** |
+
+0.5 was excluded: two steps away, and its −33.8 % is barely distinguishable from
+1.0's −28.6 %, so it buys almost no information for a whole campaign.
+
+**This closes a limitation the project wrote down for itself.** The scan's own
+*Limits* section: "This measures *what the sample is*. It does not answer whether
+the physics conclusion is robust to the threshold, which is a separate comparison
+of the balancing observables at different `pTHatMin` values." S3 is that
+comparison.
+
+**The asymmetry is registered in advance.** The arms are symmetric in `pTHatMin`
+and wildly asymmetric in what they do to the sample: 2.0 → 1.0 moves the MB
+comparison by −24.4 points, 2.0 → 4.0 by +54.8. So the larger-arm rule will very
+likely select 4.0, and the asymmetry is not a discovery.
+
+**Registered expectation, and it is the one that matters.** Expected to be the
+**largest** of the six. The falsifiable claim: **per-class OS−SS is invariant
+under the threshold once conditioned on `N_ch`, to within 10 %.** If it is not,
+`pTHatMin` is part of the **definition** of the paper's per-class observable and
+must be quoted as such, not folded into an uncertainty. Those are materially
+different papers, and this measurement decides which one is being written. A
+near-null would be the strongest outcome — it would retire a concern open since
+`NCH_CALIBRATION_20260730.md`.
+
+| deliverable | 1.0 arm | 4.0 arm |
+|---|---|---|
+| decomposition fractions | PENDING `5519099` | PENDING `5519100` |
+| per-class OS−SS | PENDING `5519099` | PENDING `5519100` |
+
+The 1.0 arm is the one at risk of `LOW-STAT` in the tail classes: the scan
+measured trigger yield per event *rising* with the threshold (charm +20.8 %,
+beauty +68.1 % from 1.0 to 2.0), so the low arm has fewer usable triggers per
+event. Registered as expected.
+
+---
+
+## 6. S4 — event-activity counter window — ⛔ REGISTERED, NOT LAUNCHED
+
+**Method.** Re-analyse with the classifier taken from the `|η| < 4` counter
+instead of the nominal `|η| < 1`. Both are already stored in every raw file
+(`docs/DESIGN_AND_RATIONALE.md` §3.5), so **no generation is needed** — this is a
+re-analysis of the existing 3000 files at full statistics.
+
+**Boundary convention, fixed now: percentile-preserving.** Each boundary is
+recomputed as the wide-counter value at the same MONASH-minimum-bias percentile
+the narrow boundary sits at, from the committed MB samples, keeping the
+half-integer convention. Reusing the absolute numbers would compare class `c7` of
+one axis against a different percentile of the other, and the shift would be
+dominated by relabelling rather than physics.
+
+**Registered expectation.** A wider window measures the same activity with less
+relative fluctuation, so at fixed percentile the per-class observable should shift
+only slightly (≲ 3 %), growing toward the tail classes where the narrow counter's
+population is most fluctuation-contaminated. A flat shift would mean the two
+counters are interchangeable — a clean simplification. A large shift would indict
+the **narrow** counter and mean the paper's multiplicity axis is
+fluctuation-dominated.
+
+> **Why it is not queued.** An analysis job pins the repository commit it was
+> rendered against. The Nikhef analysis checkout is frozen at `43e35be8`, read
+> live by the running merge, and `STATE.md` PENDING #5 records the checkout
+> advance as still blocked. Queuing S4 now would pin the old head and re-block
+> the advance the moment it becomes possible.
+>
+> **Launch condition:** after the merge exits, the campaign is recorded COMPLETE,
+> and the `STATE.md` PENDING #5 checkout advance has happened. Then render S4
+> against the new head.
+
+---
+
+## 7. COMBINATION — and the assumptions that make it valid
+
+Quadrature, per class, per tune, over the sources that are not NEGLIGIBLE, using
+the larger arm per source:
+
+```
+σ_sys(c, tune) = sqrt( Σ_s Δ_s(c, tune)² )
+```
+
+**Quadrature is only valid if these hold, so they are stated rather than
+assumed:**
+
+1. **S1b (`μ_F`) and S2 (PDF) are NOT independent** — both act on the
+   initial-state parton flux. **Rule: if both are non-negligible, quote the
+   larger and drop the other from the sum.** If one is negligible the question
+   does not arise. §3's measurement decides which case applies, and it must be
+   reported either way.
+2. **S1a (`μ_R`) and S1b (`μ_F`) are treated as independent** and both enter.
+   They act through different objects — the coupling and the parton density — and
+   running them separately is what lets this be said rather than assumed.
+3. **S3 and S1 are treated as independent, and this is the weakest assumption.**
+   A threshold cut and a scale choice both change the hard-parton `pT` mix.
+   Flagged, not resolved. If S3 is large, the right response is not quadrature
+   but reconsidering whether it is an uncertainty at all.
+4. **S4 is independent of everything** — identical events, different classifier,
+   no shared generation-level input.
+5. **S5 contributes exactly zero**, so it drops out arithmetically. It stays in
+   the table because a zero that was *measured* is a different object from a
+   source never examined.
+6. **S6 is not added in quadrature to per-`c` values** — different class axis
+   (§1). It is quoted as a separate line with its own `M1…M5` axis named, until
+   re-binned.
+
+**No total until every non-negligible source in a tune's column has a measured
+value.**
+
+### Two-sided sources: which arm
+
+**The larger `|Δ(c)|`, per class**, with the other reported beside it as the
+cross-check — the A2 owner ruling applied to new cases. **Not half the spread**
+(which understates whenever the response is one-sided) and **never called an
+envelope** (the two-point diagonal is a convention; a 7- or 9-point variation
+reaches further).
+
+---
+
+## 8. WHAT IS DELIBERATELY NOT HERE
+
+**The tune bundle is the measurement, not a systematic.** MONASH / JUNCTIONS /
+CLOSEPACKING is the comparison the paper is *about*; the spread between them is
+the result. Folding it into an uncertainty band would destroy the quantity being
+reported. The known confound inside it — JUNCTIONS re-tunes the fragmentation
+parameters that set baryon production, so a MONASH-vs-JUNCTIONS baryon difference
+cannot be attributed to junctions alone — is a **limit on interpretation**,
+documented in `STATE.md`, and `JUNCTIONS_MATCHED` exists to address it. It is not
+a systematic either.
+
+**Detector response is out of scope.** This is a generator-level study: no
+unfolding, no efficiency, no resolution model, no acceptance beyond the stated
+`|η| ≤ 4` and `pT` cuts. **No combination of these six sources may be presented
+as a total uncertainty on a measurable quantity.**
+
+---
+
+## 9. PROVENANCE OF THE QUEUED CAMPAIGNS
+
+| | |
+|---|---|
+| deploy | `/data/alice/ipardoza/systematics_deploy/Hadronization`, a real git clone, **tracked-clean** |
+| deploy commit | `72ca4e3913da25be675dc2f968151ea68f9b8b87` |
+| producer | rebuilt in the deploy, sha256 `379b449d56f8b3837c3ead142e33a814e6a350b1bdc5e93592368f358052f19b`, **zero warnings** |
+| PYTHIA / ROOT | 8.317 (`pythia_stock_8317`) / 6.30.01 on pin, both asserted by `doctor` |
+| seeds | `tools/campaign.py`, ordinals **4–10**, burned at render into `/data/alice/ipardoza/Hadronization/config/burned_seeds.txt` (untracked, git-ignored, so the frozen checkout stays clean) — 3557 → 5657 |
+| card shas | 21 distinct effective card sha256, **none equal to any nominal** |
+| submission | all seven `hold = True`, one pilot released per campaign before bulk release |
+
+### First-output verification — passed, from the generator's own mouth
+
+**The strongest available form of pre-registration §10.2**: not the card, the
+value PYTHIA resolved. Each pilot's own settings dump, current value against
+PYTHIA's default:
+
+```
+HF_SYS_MUR_UP        SigmaProcess:renormMultFac   2.00000  (default 1.00000)
+HF_SYS_MUR_DOWN      SigmaProcess:renormMultFac   0.50000  (default 1.00000)
+HF_SYS_MUF_UP        SigmaProcess:factorMultFac   2.00000  (default 1.00000)
+HF_SYS_MUF_DOWN      SigmaProcess:factorMultFac   0.50000  (default 1.00000)
+HF_SYS_PDF_CTEQ6L1   PDF:pSet                     8        (default 13)
+HF_SYS_PTHAT_1       PhaseSpace:pTHatMin          1.00000  (nominal 2.00000)
+HF_SYS_PTHAT_4       PhaseSpace:pTHatMin          4.00000  (nominal 2.00000)
+```
+
+**All seven pilots promoted `state = PASS`, `validator_status = 0`,
+`errors=0 entries=100000 process_codes=4 stability_rows=219`, and all 2100 jobs
+are released.** Seeds `140000001 … 200000001` — ordinal × 10⁷ + base, as
+`seed_derivation_v2` requires.
+
+The PDF line confirms **both** ends of S2 at once — the alternate is 8 and
+PYTHIA's own default is 13, exactly as pre-registered.
+
+First promoted outputs: `state = PASS`, `validator_status = 0`,
+`RAW_VALIDATION_SUMMARY errors=0 entries=100000 process_codes=4
+stability_rows=219`, with the full chain in the receipt — the **variant's** card
+sha, the **rebuild's** producer sha, the **deploy's** commit. **The rebuilt raw
+validator accepts output from the rebuilt producer**, which is the first
+end-to-end evidence that the 46 → 49 audited-key change is self-consistent.
+
+**The release was staged on the real risk, not uniformly.** The five
+nominal-pTHat campaigns were bulk-released once two had promoted PASS; the pTHat
+campaigns were held beyond their pilots because `ValidateRawOutput.C:603` fails
+closed on "PhaseSpace:pTHatMin does not match authorization" — the one check that
+could reject a whole campaign, and it had never been exercised away from 2.0.
+**Both arms have since cleared it** (`phase_space_pthat_min` 1.0 and 4.0, PASS)
+and were released. The 299 jobs held per arm in the meantime carried
+`HoldReason = "submitted on hold at user's request"` — no faults anywhere in the
+2100.
+
+### ⛔ THE DEPLOY MUST NOT MOVE
+
+`/data/alice/ipardoza/systematics_deploy/Hadronization` is pinned at
+`72ca4e39` and **every one of the 2100 jobs verifies that commit at startup and
+refuses to run if the tree has tracked modifications.** Do not check out, pull,
+or edit tracked files there until the campaigns finish. Later commits on
+`physics-focus` are fine — they are simply not in this deploy, which is the
+point. A standalone macro needed during the campaign was copied to
+`/data/alice/ipardoza/systematics_regression/` rather than added to the deploy,
+for exactly this reason.
+
+### Pre-registration §10.1 — the nominal-reproduction gate
+
+**Required before any variation number is reported**: the rebuilt producer must
+reproduce a committed **nominal** raw output's physics content. "A deployment
+that cannot reproduce the nominal is not a variation of it."
+
+**The bar is not byte identity, and choosing that bar would fail for legitimate
+reasons** — the two files carry different `executable_sha256` and
+`repository_commit`, and the audited-settings snapshot has three more rows. What
+must match is the physics. **The nominal MONASH card and the producer translation
+unit are byte-identical between the campaign commit `61fe978f` and the deploy
+commit `72ca4e39`** (verified in git), so any difference in the event tree would
+mean the registry-header change reached the event loop, which it must not.
+
+> ## ✅ PASS — 2026-08-17. The event tree is identical, value for value.
+>
+> ```
+> event tree entries: reference 100000, candidate 100000
+> event tree leaves:  reference 110, candidate 110
+> values compared:    36900000 vs 36900000
+> event tree digest:  a6683ddd8ccae257 vs a6683ddd8ccae257
+> EVENT TREE IDENTICAL -- every value, every entry
+> NOMINAL_REPRODUCTION PASS metadata_fields_differing=7
+> ```
+>
+> **36.9 million values across 110 leaves and 100 000 events, one digest.** The
+> registry-header change did not reach the event loop.
+>
+> **All seven metadata differences are expected, and nothing else differs:**
+>
+> | field | reference → candidate | why |
+> |---|---|---|
+> | `executable_sha256` | `e54b27bb…` → `379b449d…` | the rebuild |
+> | `repository_commit` | `e6429b77…` → `72ca4e39…` | the deploy |
+> | `condor_cluster` | `5390385` → `0` | run by hand, not under Condor |
+> | `elapsed_seconds` | 352 → 370 | timing |
+> | `start_unix_seconds`, `end_unix_seconds` | — | timing |
+> | `peak_rss_kib` | 543 580 → 548 348 | memory |
+>
+> **`tune_difference_allowlist_sha256` is NOT in that list, and that is the
+> point.** The decision to put the three varied keys in a separate config file
+> instead of the tune allowlist (§ the pre-registration's §11 annotation) is
+> confirmed end to end: the variation campaigns' raw files carry the **same**
+> allowlist digest as the central campaign's 3000, so the two sets remain
+> cross-validatable. Neither `effective_settings_sha256` nor
+> `effective_settings_entries` differs either — the exhaustive post-init snapshot
+> is over PYTHIA's own settings, not over the audited-key list, so the 46 → 49
+> change writes nothing into the raw metadata at all.
+>
+> Method: `Validation/CompareNominalReproduction.C`, leaf by leaf, entry by entry,
+> on a job at campaign `HF_RUN3_V1`, ordinal 3, `MONASH` slot 0, its original seed
+> `130000001`, with `HF_PRODUCTION_ROOT` pointed at a throwaway root so nothing
+> was overwritten. **The two files are NOT byte-identical** — 92 200 277 against
+> 92 200 782 bytes — which is exactly why the bar is content and not a checksum:
+> the differing strings alone move the file size.
+
+**Why a git clone and not an archive with the commit injected by environment.**
+The A2 analysis deploy was an archive with no `.git`, which is why it needed
+`HADRONIZATION_DEPLOYED_ANALYSIS_COMMIT`. The production worker's commit check is
+a **verification**, not a label — it compares `git rev-parse HEAD` against the
+value the submit file recorded and refuses a tree with tracked modifications. A
+clone keeps that guard doing its job; env injection would have reduced it to an
+assertion. Nothing was weakened to run these campaigns.
+
+**The merge was not touched.** It ran throughout on `stbc-i3` from
+`/data/alice/ipardoza/Hadronization` at `43e35be8`; every step of this program
+ran on `stbc-i1` against a separate deploy. The only write anywhere near the
+frozen checkout is the append-only, git-ignored seed ledger.

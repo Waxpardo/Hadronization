@@ -1,0 +1,35 @@
+# Machine-specific dependency overrides.
+#
+# Copy to config/dependencies.local.conf (untracked) and edit.  setupEnv.sh
+# sources the local file BEFORE config/dependencies.conf, so anything set here
+# wins over the tracked defaults, while a variable already exported in the
+# environment still wins over both.
+#
+# Keep the ": ${NAME:=value}" form so that precedence holds.
+
+# Example: a PYTHIA built somewhere other than the shared /data/alice location.
+#: "${HF_PYTHIA8_PREFIX:=/home/me/pythia8317/install}"
+#: "${HF_PYTHIA8_VERSION:=8.317}"
+
+# Example: a system ROOT rather than the pinned CVMFS package.  Setting
+# HF_ROOT_ALIENV_PACKAGE empty skips the alienv lookup entirely.
+#: "${HF_ROOT_PREFIX:=/usr/local/root}"
+#: "${HF_ROOT_VERSION:=6.30.01}"
+#: "${HF_ROOT_ALIENV_PACKAGE:=}"
+
+# Example: a non-CVMFS compiler runtime.
+#: "${HF_PYTHIA8_GCC_PREFIX:=/usr}"
+#: "${HF_ROOT_GCC_PREFIX:=/usr}"
+#HF_ROOT_RUNTIME_LIB_DIRS=(/usr/lib64)
+
+# ---------------------------------------------------------------------------
+# Storage
+# ---------------------------------------------------------------------------
+# Where production output is written.  This is the single most important entry
+# on a machine that will actually run jobs: raw output for four tunes at 100M
+# events each runs to roughly 360 GB, which must not sit inside the git
+# checkout.  Defaults to <checkout>/Production, which is only suitable for a
+# smoke test.
+#
+# On Nikhef this is typically a directory under /data/alice.
+#: "${HF_PRODUCTION_ROOT:=/data/alice/<user>/hadronization_production}"

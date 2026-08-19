@@ -1,0 +1,79 @@
+{
+  "schema": "hadronization_systematics_variations_v1",
+  "purpose": "The generation-dependent systematics variations. Each is the nominal tune card with EXACTLY ONE setting changed. Cards are generated from this file by tools/make_systematic_cards.py and are never hand-edited.",
+  "preregistration": "docs/SYSTEMATICS_PREREGISTRATION.md",
+  "campaign_ordinals_claimed": [4, 5, 6, 7, 8, 9, 10],
+  "ordinal_note": "The authoritative burned-seed ledger is /data/alice/ipardoza/Hadronization/config/burned_seeds.txt (untracked and git-ignored, so appending to it does not dirty the frozen checkout). It carried 3557 seeds at ordinals 0 and 3 when these were claimed on 2026-08-17.",
+  "variations": [
+    {
+      "name": "mur_up",
+      "campaign": "HF_SYS_MUR_UP",
+      "campaign_ordinal": 4,
+      "source": "S1",
+      "setting": "SigmaProcess:renormMultFac",
+      "value": "2.0",
+      "nominal_value": "1. (PYTHIA default; the nominal cards do not set it)",
+      "rationale": "Factor-two two-point variation, the standard convention for a leading-order calculation."
+    },
+    {
+      "name": "mur_down",
+      "campaign": "HF_SYS_MUR_DOWN",
+      "campaign_ordinal": 5,
+      "source": "S1",
+      "setting": "SigmaProcess:renormMultFac",
+      "value": "0.5",
+      "nominal_value": "1. (PYTHIA default; the nominal cards do not set it)",
+      "rationale": "Factor-two two-point variation, the standard convention for a leading-order calculation."
+    },
+    {
+      "name": "muf_up",
+      "campaign": "HF_SYS_MUF_UP",
+      "campaign_ordinal": 6,
+      "source": "S1",
+      "setting": "SigmaProcess:factorMultFac",
+      "value": "2.0",
+      "nominal_value": "1. (PYTHIA default; the nominal cards do not set it)",
+      "rationale": "Varied independently of the renormalisation scale, not coherently with it, so that S1 and S2 do not entangle: mu_F and the PDF act on the same object, the initial-state parton flux. See the pre-registration S1."
+    },
+    {
+      "name": "muf_down",
+      "campaign": "HF_SYS_MUF_DOWN",
+      "campaign_ordinal": 7,
+      "source": "S1",
+      "setting": "SigmaProcess:factorMultFac",
+      "value": "0.5",
+      "nominal_value": "1. (PYTHIA default; the nominal cards do not set it)",
+      "rationale": "Varied independently of the renormalisation scale, not coherently with it, so that S1 and S2 do not entangle: mu_F and the PDF act on the same object, the initial-state parton flux. See the pre-registration S1."
+    },
+    {
+      "name": "pdf_cteq6l1",
+      "campaign": "HF_SYS_PDF_CTEQ6L1",
+      "campaign_ordinal": 8,
+      "source": "S2",
+      "setting": "PDF:pSet",
+      "value": "8",
+      "nominal_value": "13 (NNPDF2.3 QCD+QED LO, alpha_s(M_Z) = 0.130; the PYTHIA default, which Tune:pp = 14 resolves to)",
+      "rationale": "CTEQ6L1, LO, alpha_s(M_Z) = 0.1298. Chosen because alpha_s is within 0.15% of the nominal, so the variation isolates PDF SHAPE instead of smuggling in an alpha_s change; pSet 14 is the same NNPDF2.3 fit at alpha_s = 0.119 and would double-count the mu_R arm. Different collaboration and fit methodology, and a genuinely used tune baseline. PYTHIA-internal, so no LHAPDF dependency."
+    },
+    {
+      "name": "pthat_1p0",
+      "campaign": "HF_SYS_PTHAT_1",
+      "campaign_ordinal": 9,
+      "source": "S3",
+      "setting": "PhaseSpace:pTHatMin",
+      "value": "1.0",
+      "nominal_value": "2.",
+      "rationale": "The scan's own measured point below nominal (ValidationReports/PTHAT_MULTIPLICITY_SCAN_8317.md): dN_ch/deta 4.973, 28.6% below minimum bias. Not routed through campaign.py's --pthat-min override, which is restricted to role=pilot and to {0.5,1.0,2.0}, so both arms share one code path."
+    },
+    {
+      "name": "pthat_4p0",
+      "campaign": "HF_SYS_PTHAT_4",
+      "campaign_ordinal": 10,
+      "source": "S3",
+      "setting": "PhaseSpace:pTHatMin",
+      "value": "4.0",
+      "nominal_value": "2.",
+      "rationale": "The scan's own measured point above nominal: dN_ch/deta 10.492, 50.6% above minimum bias. Outside campaign.py's PTHAT_OVERRIDES, which is one reason both arms go through the generated-card mechanism."
+    }
+  ]
+}
