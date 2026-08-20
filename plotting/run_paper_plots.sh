@@ -31,6 +31,8 @@ Targets:
   validate-inputs             Validate central/subsample ROOT objects, manifests, and union consistency
   final-multiplicity          NONCANONICAL legacy-unsealed two-sample comparison
   final-yields                NONCANONICAL legacy-unsealed selected-yield comparison
+  measure-balancing           MEASUREMENT, not publication: same macro over a systematic
+                              variation; writes only under HADRONIZATION_MEASUREMENT_ROOT
   list                        Print this target list without running ROOT
 
 Every output-producing target snapshots its output directory before ROOT
@@ -42,7 +44,13 @@ plot must be regenerated after exact dataset authorization.
 
 Useful environment overrides:
   DATASET_SELECTOR
-      default: config/dataset_selector.json; selects raw, central, and block roots
+      default: config/dataset_selector.json; selects raw, central, and block roots.
+      That combined file declares NO active dataset, so it does not by itself
+      name one -- either set HADRONIZATION_DATASET, or point this at a
+      per-campaign selector, which carries its own active_dataset.
+  HADRONIZATION_DATASET
+      no default. Names the dataset row to use. Required whenever the selector
+      file declares no active_dataset; the run refuses before ROOT starts.
   USE_DATASET_SELECTOR
       default: true; set false only for an explicitly documented diagnostic
   THNSPARSE_CONFIG
@@ -128,6 +136,30 @@ if [[ "${dataset_selector_path}" != /* ]]; then
   dataset_selector_path="${project_base}/${dataset_selector_path}"
 fi
 if [[ "${USE_DATASET_SELECTOR:-true}" == "true" ]]; then
+  # The combined selector declares no active_dataset on purpose. A silent
+  # default is what let five variation renders read the central campaign, so
+  # the dataset is named or the run does not start. The selector refuses on its
+  # own account too, but its message would surface from inside the `eval` below,
+  # after `validate` has already spoken; stating it here keeps the refusal at
+  # minute zero and next to the two ways of answering it.
+  if [[ -z "${HADRONIZATION_DATASET:-}" ]] && ! python3 -c \
+      'import json,sys; sys.exit(0 if json.load(open(sys.argv[1])).get("active_dataset") else 1)' \
+      "${dataset_selector_path}"; then
+    {
+      printf '%s\n' \
+        "run_paper_plots.sh: no dataset named, and ${DATASET_SELECTOR} declares no default." \
+        "" \
+        "Name one, either way:" \
+        "  HADRONIZATION_DATASET=<key> bash plotting/run_paper_plots.sh <target>" \
+        "  DATASET_SELECTOR=config/dataset_selector_<campaign>.json bash plotting/run_paper_plots.sh <target>" \
+        "" \
+        "Keys in ${DATASET_SELECTOR}:"
+      python3 -c \
+        'import json,sys; [print("  "+k) for k in sorted(json.load(open(sys.argv[1]))["datasets"])]' \
+        "${dataset_selector_path}"
+    } >&2
+    exit 2
+  fi
   python3 "${project_base}/tools/dataset_selector.py" validate \
     --selector "${dataset_selector_path}" \
     --checkout "${project_base}"
@@ -190,7 +222,7 @@ for target in "$@"; do
     smoke|quick)
       expanded_targets+=("freeze-boundaries-smoke" "thnsparse-complete-root" "multiplicity-boundaries-smoke")
       ;;
-    multiplicity-boundaries|multiplicity-compact|multiplicity-spectrum|kinematic-spectra|thnsparse|thnsparse-complete-root|freeze-boundaries|freeze-boundaries-smoke|audit-subsamples|legacy-regression|validate-inputs|final-multiplicity|final-yields)
+    multiplicity-boundaries|multiplicity-compact|multiplicity-spectrum|kinematic-spectra|thnsparse|thnsparse-complete-root|freeze-boundaries|freeze-boundaries-smoke|audit-subsamples|legacy-regression|validate-inputs|final-multiplicity|final-yields|measure-balancing)
       expanded_targets+=("${target}")
       ;;
     *)
@@ -204,6 +236,7 @@ done
 
 publication_target_requested=false
 legacy_diagnostic_requested=false
+measurement_target_requested=false
 for target in "${expanded_targets[@]}"; do
   case "${target}" in
     multiplicity-boundaries|multiplicity-boundaries-smoke|multiplicity-compact|multiplicity-spectrum|kinematic-spectra|thnsparse|thnsparse-complete-root|freeze-boundaries|freeze-boundaries-smoke|audit-subsamples)
@@ -212,8 +245,61 @@ for target in "${expanded_targets[@]}"; do
     legacy-regression)
       legacy_diagnostic_requested=true
       ;;
+    measure-balancing)
+      measurement_target_requested=true
+      ;;
   esac
 done
+
+# ---------------------------------------------------------------------------
+# THE MEASUREMENT TARGET, added 2026-08-19.
+#
+# The publication gate below admits `canonical` and `canonical_candidate` only,
+# and that is correct: a paper figure must not be drawn from unsealed data. A
+# systematic variation is honestly neither, so the two requirements collided --
+# the row that describes the dataset truthfully is the row the publication
+# plotter refuses.
+#
+# The resolution separates the two rather than weakening either. This target
+# runs the SAME macro over the SAME inputs and admits a variation, and every
+# artifact it writes is stamped `purpose=measurement` and lands under a
+# measurement root. The protection moved to the output side: nothing this
+# target writes may be promoted into a publication figure.
+# ---------------------------------------------------------------------------
+if [[ "${measurement_target_requested}" == "true" &&
+      "${publication_target_requested}" == "true" ]]; then
+  echo "ERROR: a measurement target and a publication target cannot run together." >&2
+  echo "       Their outputs would share a run, and the point of the split is" >&2
+  echo "       that a measurement artifact never becomes a publication one." >&2
+  exit 1
+fi
+if [[ "${measurement_target_requested}" == "true" ]]; then
+  case "${HADRONIZATION_DATASET_STATUS:-}" in
+    canonical|canonical_candidate|systematic_variation) ;;
+    *)
+      echo "ERROR: the measurement target accepts canonical, canonical_candidate" >&2
+      echo "       or systematic_variation; got '${HADRONIZATION_DATASET_STATUS:-}'." >&2
+      exit 1
+      ;;
+  esac
+  if [[ -z "${HADRONIZATION_MEASUREMENT_ROOT:-}" ]]; then
+    echo "ERROR: HADRONIZATION_MEASUREMENT_ROOT is required and has no default." >&2
+    echo "       A measurement must not be able to land in a publication path" >&2
+    echo "       by omission." >&2
+    exit 1
+  fi
+  case "${HADRONIZATION_MEASUREMENT_ROOT}" in
+    *plotting/Plots/*)
+      echo "ERROR: HADRONIZATION_MEASUREMENT_ROOT points inside the publication" >&2
+      echo "       output tree: ${HADRONIZATION_MEASUREMENT_ROOT}" >&2
+      exit 1
+      ;;
+  esac
+  export HADRONIZATION_ARTIFACT_PURPOSE=measurement
+  mkdir -p "${HADRONIZATION_MEASUREMENT_ROOT}"
+  echo "MEASUREMENT_TARGET purpose=measurement root=${HADRONIZATION_MEASUREMENT_ROOT}" \
+       "dataset_status=${HADRONIZATION_DATASET_STATUS:-}"
+fi
 
 if [[ "${legacy_diagnostic_requested}" == "true" &&
       "${#expanded_targets[@]}" -ne 1 ]]; then
@@ -532,6 +618,13 @@ for target in "${expanded_targets[@]}"; do
       provenance_config="${THNSPARSE_COMPLETE_ROOT_CONFIG}"
       provenance_boundary=true
       ;;
+    measure-balancing)
+      provenance_enabled=true
+      provenance_mode="${canonical_pair_provenance_mode}"
+      provenance_config="${THNSPARSE_COMPLETE_ROOT_CONFIG}"
+      provenance_boundary=true
+      provenance_output_roots+=("${HADRONIZATION_MEASUREMENT_ROOT}")
+      ;;
     multiplicity-boundaries|multiplicity-compact)
       provenance_enabled=true
       provenance_mode="${canonical_pair_provenance_mode}"
@@ -613,6 +706,9 @@ for target in "${expanded_targets[@]}"; do
       ;;
     thnsparse-complete-root)
       run_thnsparse "${THNSPARSE_COMPLETE_ROOT_CONFIG}" "thnsparse-complete-root"
+      ;;
+    measure-balancing)
+      run_thnsparse "${THNSPARSE_COMPLETE_ROOT_CONFIG}" "measure-balancing"
       ;;
     freeze-boundaries)
       run_boundary_freeze "${THNSPARSE_CONFIG}" "full-paper"

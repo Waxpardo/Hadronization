@@ -1,7 +1,13 @@
 # Proposal — excited-state recording, ground-state mapping, and the observable's definition
 
-**Written 2026-08-08. Nothing implemented.** Responds to the physics review and
-to the category measurement made in answer to it.
+**Written 2026-08-08. Nothing implemented.** Responds to a question about how
+excited states are recorded and how they map to ground states, and to the
+category measurement made in answer to it.
+
+> **Provenance note, 2026-08-20.** This line previously cited "the physics
+> review". That review is **unavailable** and no copy exists in the repository
+> or the Projects tree, so the citation was replaced by the substance of what it
+> asked. `RELEASE_BLOCKERS.md` carries the ruling and the reason.
 
 **Status of numbers:** every count below is measured, with its method beside it.
 **The category fractions carry no block SEM yet and must not be quoted

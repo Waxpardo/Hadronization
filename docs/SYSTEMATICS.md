@@ -1,5 +1,25 @@
 # Systematic uncertainties — the living document
 
+> ## HARVEST IN PROGRESS — 2026-08-18
+>
+> The seven variation campaigns are **complete at 2100/2100 raw files**, preflighted
+> at full rigour (exact-filename presence, sidecar↔receipt cross-check, byte
+> re-hash — all 2100 clean), and the analysis stage is running.
+> **Run record: [`docs/SYSTEMATICS_HARVEST_RUN_RECORD.md`](SYSTEMATICS_HARVEST_RUN_RECORD.md).**
+>
+> **The PENDING cells below are still PENDING** — the chain from raw to per-class
+> numbers is a multi-day pipeline whose cost is measured in that record §6. **Two
+> combination-stage decisions are blocked on the owner** (§7 there): how an
+> unresolved per-class Δ enters the quadrature (the pre-registration is silent,
+> and the three options differ by 20 % on a worked example), and whether S6/A2
+> enters the per-class sum at all (the brief says yes; pre-registration §9.6
+> registers a rule that it does not, because it is on a five-class axis).
+>
+> **One thing that could have invalidated every Δ was checked and is clean:** the
+> analysis macro's sha differs from the central campaign's, and the difference is
+> six `#include` path rewrites from the restructure move, with the one changed
+> header symbol not referenced by the macro. Details in that record §4.1.
+
 **Status 2026-08-17.** The design is frozen in
 [`docs/SYSTEMATICS_PREREGISTRATION.md`](SYSTEMATICS_PREREGISTRATION.md), written
 and committed before any variation job was rendered. **This** document is where
@@ -21,19 +41,29 @@ event tree value for value (§9), so variation numbers from it may be believed.
 Per cent, per multiplicity class, per tune. Block SEMs over ten blocks
 (`slot % 10`, dof 9).
 
-| # | source | variation | status | verdict |
-|---|---|---|---|---|
-| **S1a** | renormalisation scale | `SigmaProcess:renormMultFac` ×2 / ×0.5 | **PENDING** — clusters `5519094` (up), `5519095` (down) | — |
-| **S1b** | factorisation scale | `SigmaProcess:factorMultFac` ×2 / ×0.5 | **PENDING** — clusters `5519096` (up), `5519097` (down) | — |
-| **S2** | parton distribution | `PDF:pSet` 13 → 8 (NNPDF2.3 LO → CTEQ6L1) | **PENDING** — cluster `5519098` | — |
-| **S3** | `PhaseSpace:pTHatMin` | 2.0 → 1.0 and → 4.0 | **PENDING** — clusters `5519099` (1.0), `5519100` (4.0) | — |
-| **S4** | event-activity counter | `\|η\| < 1` → `\|η\| < 4`, percentile-preserving | **NOT LAUNCHED, deliberately** (§5) | — |
-| **S5** | decay-daughter class migration | boundaries × 1/(1 ± 0.00767) | ✅ **DONE 2026-08-17** | **EXACTLY ZERO — structurally insensitive, every class** |
-| **S6** | pair-level unresolved origin | duplicate hard-carrier tie-break | ✅ **DONE 2026-08-13** | **MUST BE QUOTED PER CLASS** (CR tunes); MONASH negligible |
+| # | source | variation | method | status | verdict |
+|---|---|---|---|---|---|
+| **S1a** | renormalisation scale | `SigmaProcess:renormMultFac` ×2 / ×0.5 | D1 per-block relative (§2.2); D2 absolute Δ, SEMs in quadrature | ✅ **BOTH ARMS DONE, BOTH DELIVERABLES 2026-08-19** | §7, §9 |
+| **S1b** | factorisation scale | `SigmaProcess:factorMultFac` ×2 / ×0.5 | as S1a | ✅ **BOTH ARMS DONE, BOTH DELIVERABLES 2026-08-20** | §7, §9, §12 |
+| **S2** | parton distribution | `PDF:pSet` 13 → 8 (NNPDF2.3 LO → CTEQ6L1) | as S1a, one-sided | ✅ **DONE, BOTH DELIVERABLES 2026-08-20** | §9, §12 |
+| **S3** | `PhaseSpace:pTHatMin` | 2.0 → 1.0 and → 4.0 | as S1a | ✅ **BOTH ARMS DONE, BOTH DELIVERABLES 2026-08-19** | §7, §9 |
+| **S4** | event-activity counter | `\|η\| < 1` → `\|η\| < 4`, percentile-preserving | not applicable, never launched | **NOT LAUNCHED, deliberately** (§5) | — |
+| **S5** | decay-daughter class migration | boundaries × 1/(1 ± 0.00767) | structural, boundary shift applied to the sealed sample | ✅ **DONE 2026-08-17** | **EXACTLY ZERO — structurally insensitive, every class** |
+| **S6** | pair-level unresolved origin | duplicate hard-carrier tie-break | tie-break flip on the `M1…M5` axis, never summed into `c1…c11` (A2) | ✅ **DONE 2026-08-13** | **MUST BE QUOTED PER CLASS** (CR tunes); MONASH negligible |
 
-**No total may be quoted yet.** The pre-registration §9 closing rule: a partial
-quadrature sum understates, and an understated systematic is worse than an absent
-one.
+**Deliverable 1 (D1)** is the diquark-structure decomposition, §7. **Deliverable
+2 (D2)** is the per-class and integrated balancing yield, §9. The two use
+different estimators for the reason §9 gives, and they agree on the ordering of
+the sources.
+
+**THE COMBINATION IS DONE.** All seven campaigns closed on 2026-08-20 and
+`extraction/combine_per_class.py`, which had refused since it was written, ran.
+The combined systematic per class per tune is §12 and
+[`COMBINED_SYSTEMATICS.md`](systematics_results_20260820/COMBINED_SYSTEMATICS.md).
+
+**S4 is the only source with no measurement, and that is deliberate** (§5). The
+pre-registration §9 rule that a partial quadrature sum understates is satisfied
+for the six live sources; S4 was never launched and is quoted nowhere.
 
 ---
 
@@ -286,7 +316,51 @@ event. Registered as expected.
 
 ---
 
-## 6. S4 — event-activity counter window — ⛔ REGISTERED, NOT LAUNCHED
+## 6. S4 — event-activity counter window — ⚠ BOUNDED RUN LAUNCHED, STAGE 1 OF 4 DONE
+
+> ### STATUS 2026-08-20
+>
+> **Owner ruling: bound S4, do not run it at full campaign scale.** The subset
+> is declared in advance in `SYSTEMATICS_HARVEST_RUN_RECORD.md` §25 — all three
+> tunes, 100 of 1000 files each, named by logical id, with a narrow-classifier
+> control arm on the same files. §25.2 gives the argument that a 10 % subset
+> **bounds** rather than estimates: ruling A1 makes each source contribute
+> `max(|Δ|, SEM(Δ))`, and at 10 % of the events `SEM` is about **√10 ≈ 3.2×**
+> larger, so the subset can only inflate S4's contribution.
+>
+> **Recorded as a DEVIATION, not an amendment** (§25.4). The registered method
+> was a full evaluation; this is a bound, and the registration below stands as
+> written.
+>
+> **Stage 1 of 4 is done — the wide axis exists** (§26.4). Every control is
+> exact: the fresh MB run reproduces the committed narrow anchor **bin for bin**
+> in all three tunes, the two counters agree on `dN_ch/dη` to 0.6 %, and the
+> narrow per-tune residual recomputes to the published 2.91 pp.
+> Artifact: `systematics_results_20260820/s4/s4_wide_boundaries_v1.json`.
+>
+> **Stages 2 to 4 are not run**, so **S4's bound does not exist yet and S4 is
+> not in the combination.** `systematics_results_20260820/COMBINED_SYSTEMATICS.md`
+> and `VERDICT.md` both name the omission, under §9.5's rule *"listed rather
+> than omitted"*.
+>
+> **⚠ The registration named a boundary source that cannot supply one** (§25.5).
+> It derives the wide boundaries *"from the committed MB samples in
+> `AnalysisScripts/anchors/b4_multiplicity_mb`"*, and those samples hold the
+> narrow counter only — their producer,
+> `Validation/CalibrateMultiplicityAgainstMinBias.C:177`, refuses any other
+> counter and generates its own events. So the registration's *"no new
+> generation"* does not hold for the boundary derivation. That is deviation D2,
+> and it is a defect in the registration rather than a choice.
+>
+> **⚠ An unregistered finding, against the expected direction** (§26.5). Both
+> axes recomputed through one code path: the per-tune MB residual is **2.912 pp**
+> on the narrow axis — reproducing the published 2.91 exactly — and **3.537 pp**
+> on the wide one. **The wide axis is 1.21× worse**, and every JUNCTIONS class is
+> further from its label on it. The wide counter separates the tunes' activity
+> distributions *more*, not less. This is the MB residual and not the per-class
+> observable shift, so it does not settle expectation 1 below — but the reasoning
+> behind that expectation does not hold for the one axis property now measured on
+> both counters.
 
 **Method.** Re-analyse with the classifier taken from the `|η| < 4` counter
 instead of the nominal `|η| < 1`. Both are already stored in every raw file
@@ -516,3 +590,285 @@ assertion. Nothing was weakened to run these campaigns.
 `/data/alice/ipardoza/Hadronization` at `43e35be8`; every step of this program
 ran on `stbc-i1` against a separate deploy. The only write anywhere near the
 frozen checkout is the append-only, git-ignored seed ledger.
+
+---
+
+## 7. S1a, S1b-down and S3 — the decomposition deltas ✅ (deliverable 1 only)
+
+**2026-08-19.** Diquark-structure partition, per cent, against the sealed
+`HF_RUN3_V1` nominal. Method: the registered estimator of
+pre-registration 2.2. It forms the relative shift inside each block, then
+averages over ten blocks, with the SEM over those ten and dof 9. Blocks are `canonical_slot % 10`.
+
+**Full tables, all 60 cells:**
+[`docs/systematics_results_20260819/PER_CATEGORY_DELTAS.md`](systematics_results_20260819/PER_CATEGORY_DELTAS.md).
+Run record: [`SYSTEMATICS_HARVEST_RUN_RECORD.md`](SYSTEMATICS_HARVEST_RUN_RECORD.md) §15.
+
+The largest shift per campaign and tune, in per cent:
+
+| campaign | source | MONASH | JUNCTIONS | CLOSEPACKING |
+|---|---|---|---|---|
+| `HF_SYS_MUR_UP` | S1a up | 0.2854 ± 0.0565 | 0.1654 ± 0.4682 | 0.5870 ± 0.1774 |
+| `HF_SYS_MUR_DOWN` | S1a down | −0.2181 ± 0.0845 | −0.5148 ± 0.1276 | −0.5875 ± 0.2155 |
+| `HF_SYS_MUF_DOWN` | S1b down | 1.4540 ± 0.0719 | −7.0113 ± 0.4200 | −13.0501 ± 0.2818 |
+| `HF_SYS_PTHAT_1` | S3 → 1.0 | −1.0648 ± 0.0581 | −5.0172 ± 0.3729 | −8.5373 ± 0.2810 |
+| `HF_SYS_PTHAT_4` | S3 → 4.0 | 4.1877 ± 0.0447 | 5.4002 ± 0.3180 | 6.8655 ± 0.1624 |
+
+Each cell is the largest `|Δ|` among the four categories, excluding
+`kMultiplyHeavy`, whose blocks are LOW-STAT in every campaign.
+
+**55 deltas quoted, 12 unresolved at 2 sigma, 5 not quotable.** The five are
+every campaign's MONASH `kMultiplyHeavy`: the sealed nominal holds 8 counts in
+total and individual blocks hold zero, so a relative shift has no meaning.
+
+**No verdict on the 2.4 ladder appears here.** That ladder compares per-class
+values against the multiplicity-integrated shift, and these numbers are on the
+category partition rather than the class axis. §8 says why the class axis is
+missing.
+
+**No total, and no quadrature.** The combination needs all seven campaigns and
+the pre-registration's closing rule forbids a partial sum.
+
+---
+
+## 8. What is still missing, and why
+
+**Deliverable 2 is DELIVERED for the five closed campaigns, 2026-08-19.** See
+§9. The paragraph below records why it was blocked and what unblocked it, because
+the block was real and the reasoning that lifted it matters more than the fact.
+
+**The blocked route, and why it stayed blocked.** The deduplicated reader writes
+`per_species.csv`, `per_category.csv` and `per_observable.csv`, and none of them
+carries the multiplicity class axis. Earlier sessions took the per-class observable to come
+from `tools/statistical_robustness.py`. That tool needs a PASS boundary receipt
+and a PASS final-origin closure report **for the same sealed manifest**. No variation
+campaign has either, and neither does the sealed central. That route is still
+shut, and `COMPONENTS.md` still marks the tool SUPERSEDED. Run record §15.6, §16.
+
+**The route that works needs no certificate.** The plotter emits the per-class
+balancing yield itself, on the `UNCERTAINTY_MATRIX` line, with the class encoded
+in the bin name (run record §17.4 as corrected by §18.1). One render of the
+eleven-class configuration emits every class at once. It reads the merged
+products and their ten subsample directories, and asks for no closure report.
+The instrument was in the tree the whole time; §17.4 named it and §18 settled
+its class axis.
+
+**And neither has the sealed central campaign.** Investigated 2026-08-19 under
+an owner ruling to open the boundary requirement. This session did not apply
+the ruling, because relaxation would not have opened the chain.
+
+The final-origin closure report is a second, independent requirement, and **no
+such report exists for `HF_RUN3_V1` or for any variation**.
+`tools/statistical_robustness.py` has therefore never run on any campaign here.
+`COMPONENTS.md` now marks it and `final_origin_closure.py` **SUPERSEDED**.
+
+The gate they rest on is unreachable by construction. Production demotes every
+duplicate hard-carrier claimant to `Origin::kUnresolved`.
+
+A2 measured 124 / 24,411 / 24,590 such contested rows in MONASH / JUNCTIONS /
+CLOSEPACKING, over 100 of the sealed campaign's 1000 slots. The project measures
+unresolved origin as a systematic, not as a gate. Run record §17.
+The certificate costs an `AuditOriginResolution.C` pass over every canonical
+raw file, 4500 audits for the five closed campaigns alone. Run record §16.
+
+> ✅ **CLOSED 2026-08-20.** Both campaigns finished. `HF_SYS_MUF_UP` closed at
+> 22:00:56 on 2026-08-19 and `HF_SYS_PDF_CTEQ6L1` at 03:08:39 on 2026-08-20,
+> each 3/3 markers with every leg `errors=0`. Both are extracted, and §12 holds
+> the combination they unblocked. The paragraph below is the state at the time it
+> was written.
+
+**Two campaigns are still merging.** At 16:48:11 CEST on 2026-08-19,
+`HF_SYS_MUF_UP` (S1b up) holds **33 of 33 products** and is running the first of
+its three closure passes. `HF_SYS_PDF_CTEQ6L1` (S2) holds 22 of 33 and is still
+merging. **Both hold 0 of 3 closure markers. Neither has closed.** Both merge
+processes are alive on their own launch hosts at 24 h 47 m elapsed. PID
+3953522 runs on `stbc-i3` and PID 642060 on `stbc-i2`.
+
+**Closure costs 2 h 04 m to 2 h 22 m per tune**, measured (run record §14.2), so
+`MUF_UP` needs about six more hours from 16:24 and `PDF_CTEQ6L1` longer still. Each is about a day into a
+CLOSEPACKING leg that the five closed campaigns
+finished in 7 to 40 minutes. The cause is open. Both burn CPU in user space, the storage
+benchmarks clean, and a filled-bin census puts them within 1.28x of the closed
+campaigns. Run record §15.7 and §15.8.
+
+---
+
+## 9. S1a, S1b-down and S3 — the per-class and integrated balancing yields ✅ (deliverable 2)
+
+**2026-08-19.** Per-class and multiplicity-integrated OS−SS balancing yield,
+against the sealed `HF_RUN3_V1` nominal, for the five closed campaigns.
+
+**Full tables, all 720 cells:**
+[`docs/systematics_results_20260819/PER_CLASS_DELTAS.md`](systematics_results_20260819/PER_CLASS_DELTAS.md).
+Run record: [`SYSTEMATICS_HARVEST_RUN_RECORD.md`](SYSTEMATICS_HARVEST_RUN_RECORD.md) §20.
+
+**The estimator is the 2026-08-19 brief's, and it is absolute.** Δ = variation −
+nominal, SEM(Δ) = √(SEM_var² + SEM_central²), flagged below 2 SEM. The log gives
+one mean and one SEM per row and no block yields, so the per-block relative
+estimator of pre-registration 2.2 cannot be formed from it. §7 above uses that
+registered estimator on the category partition; this section cannot, and says so
+rather than implying the two are the same arithmetic.
+
+**The control licenses the arithmetic.** The measurement target re-rendering the
+sealed central reproduces the nominal on **all 144 rows**, no disagreement in
+any compared field, at the precision the logs record and with no tolerance.
+
+### The integrated arm, charm D⁺–D⁻, absolute Δ ± SEM(Δ)
+
+| campaign | MONASH | JUNCTIONS | CLOSEPACKING |
+|---|---|---|---|
+| `HF_SYS_MUR_UP` | −0.000160 ± 0.000271 | −0.000123 ± 0.000396 | −0.000583 ± 0.000355 |
+| `HF_SYS_MUR_DOWN` | −0.000245 ± 0.000414 | −0.000424 ± 0.000327 | **−0.001034 ± 0.000239** |
+| `HF_SYS_MUF_DOWN` | **−0.002308 ± 0.000322** | **+0.002498 ± 0.000428** | **+0.002607 ± 0.000229** |
+| `HF_SYS_PTHAT_1` | **−0.007380 ± 0.000365** | **−0.006413 ± 0.000274** | **−0.004855 ± 0.000344** |
+| `HF_SYS_PTHAT_4` | **+0.009600 ± 0.000358** | **+0.010396 ± 0.000498** | **+0.009153 ± 0.000423** |
+
+Bold clears 2 SEM. The same table for the other three series is in the results
+document.
+
+### Resolved cells per campaign, per-class arm
+
+| campaign | source | resolved / 132 |
+|---|---|---|
+| `HF_SYS_MUR_DOWN` | S1a down | 7 |
+| `HF_SYS_MUR_UP` | S1a up | 13 |
+| `HF_SYS_PTHAT_1` | S3 → 1.0 | 34 |
+| `HF_SYS_MUF_DOWN` | S1b down | 42 |
+| `HF_SYS_PTHAT_4` | S3 → 4.0 | 59 |
+
+**The ordering agrees with §7 on the category axis.** The two scale arms are the
+quietest and the two `pTHatMin` arms the loudest, on both axes, from two
+different instruments and two different estimators.
+
+**182 of 720 cells clear 2 SEM.** The per-class arm is statistics-limited: each
+variation carries a tenth of the nominal's exposure and each class a fraction of
+that campaign again.
+
+**Every cell carries a relative shift.** The smallest nominal yield among the 720
+is 0.0180359 and none is zero, so no cell is named in place of a number. Two
+cells exceed 25 per cent relative, both in the B⁺–Λ_b series, and there the large
+fraction is the small denominator.
+
+**No verdict on the 2.4 ladder appears here.** The ladder compares per-class
+values against the integrated shift, and both arms now exist on one axis for the
+first time. A verdict on it needs its own pass and its own pre-registered rule.
+
+**No total, and no quadrature.** The combination needs all seven campaigns.
+
+---
+
+## 10. THE TUNE SEPARATION — the half of the headline comparison that needs no variation
+
+**2026-08-19.** Full tables:
+[`docs/systematics_results_20260819/TUNE_SEPARATION.md`](systematics_results_20260819/TUNE_SEPARATION.md).
+Machine-readable `tune_separation.json`, sha256 `37aae5bd…`.
+
+**No systematic appears in that document, and no row in it is a verdict.** The
+separation between two tunes is a property of the sealed nominal alone, so it is
+available while the combination is not.
+
+**`c1` is the LOWEST multiplicity class and `c11` the highest.** The window label
+is a top percentile, so a high percentile is a low `N_ch`. This inverts every
+per-class trend if read the other way, and §10 of the results document carries
+the render log's own mapping.
+
+| observable | c1, stat. σ | c11, stat. σ | c1, % of MONASH to erase | c11, % of MONASH to erase |
+|---|---|---|---|---|
+| B⁺–B⁻ balancing yield | 2.2 | 39.7 | 4.5 | 31.9 |
+| B⁺–Λ_b balancing yield | 2.2 | 49.4 | 9.7 | 128.4 |
+| Λ_b/B⁻ ratio | 2.5 | 59.2 | 14.8 | 235.5 |
+
+**The separation grows monotonically from low to high multiplicity in all three
+observables.** MONASH's Λ_b/B⁻ ratio is flat across the axis, 0.1609 to 0.1865,
+while JUNCTIONS rises from 0.2141 at `c1` to 0.5432 at `c11`. That is the shape
+a junction-driven baryon enhancement would produce, and this document does not
+claim more than the shape until the systematic is in the denominator.
+
+**The verdict is deferred, deliberately.** It needs the combined systematic per
+class, which needs all seven campaigns.
+
+---
+
+## 11. THE TREND — the paper's central claim, measured on the nominal
+
+**2026-08-19.** Full tables:
+[`docs/systematics_results_20260819/RATIO_TREND.md`](systematics_results_20260819/RATIO_TREND.md).
+Machine-readable `ratio_trend.json`, sha256 `b1b59548…`.
+
+**The claim is a trend, and per-class gaps do not establish one.** §10 says the
+tunes differ in a given class. This section says the Λ_b/B⁻ ratio **rises with
+multiplicity** under colour reconnection and does not under MONASH.
+
+**The model-free number, R(c11) − R(c1):**
+
+| tune | contrast | stat. σ | difference vs MONASH | stat. σ |
+|---|---|---|---|---|
+| MONASH | −0.02453 ± 0.00739 | 3.3 | — | — |
+| JUNCTIONS | +0.32909 ± 0.01053 | 31.2 | +0.35362 ± 0.01287 | 27.5 |
+| CLOSEPACKING | +0.28719 ± 0.01364 | 21.1 | +0.31172 ± 0.01551 | 20.1 |
+
+**MONASH declines gently rather than sitting flat**, at 3.3 σ. The word "flat"
+overstates what was measured.
+
+**A straight line in class index summarises but does not fit the reconnection
+tunes**: χ²/ndf is 8.18 and 6.49 against MONASH's 1.41. The slopes are
++0.034804 ± 0.000709 and +0.032760 ± 0.000741 against −0.001210 ± 0.000369, so
+the slope difference is 45.1 σ and 41.0 σ. **Quote the endpoint contrast as the
+measurement and the slope as shorthand.**
+
+**Statistical uncertainty only.** The verdict needs the combined systematic,
+which needs all seven campaigns. To erase the JUNCTIONS trend the systematic
+would have to reach 0.354 in the endpoint contrast, the whole of the effect.
+
+---
+
+## 12. THE COMBINATION AND THE VERDICT ✅ — all seven sources
+
+**2026-08-20.** Full tables:
+[`COMBINED_SYSTEMATICS.md`](systematics_results_20260820/COMBINED_SYSTEMATICS.md)
+and [`VERDICT.md`](systematics_results_20260820/VERDICT.md). Machine-readable
+`per_class_combination.json` sha256 `8a8a26b8…`, `verdict.json` `7f6e9c65…`.
+
+**The rules are the pre-registration's and the dated amendment's**, and the
+driver adds none of its own: A1's `max(|Δ|, SEM(Δ))` applied continuously, A2
+keeping S6 on its own `M1…M5` partition and out of the sum, §9.1's
+μ_F-against-PDF choice, §2.5's larger arm, and S5's measured zero. The
+tune-bundle spread is not a systematic and is not in it.
+
+### The trend — the central claim
+
+| quantity | value | stat | syst | total | σ | holds? |
+|---|---|---|---|---|---|---|
+| trend JUNCTIONS − MONASH | **+0.35362** | 0.01287 | 0.15999 | 0.16051 | **2.2** | **yes** |
+| trend CLOSEPACKING − MONASH | **+0.31172** | 0.01551 | 0.15434 | 0.15512 | **2.0** | **yes** |
+
+**The claim holds, at about 2 σ.** The erase threshold was 0.354, the whole of
+the effect; the combined systematic reaches 0.160, 45 per cent of it.
+
+**Statistically the trend difference is 27.5 σ. With systematics it is 2.2 σ.**
+Quoting the statistical figure alone would overstate the result by an order of
+magnitude.
+
+**The result does not depend on the combination rule.** The trend difference is
+positive in every one of the seven variation renders, from +0.233 (`MUF_DOWN`,
+the largest excursion) to +0.445 (`MUR_UP`), against a nominal of +0.354.
+
+### The per-class verdict
+
+**49 of 72 cells exceed their total uncertainty. The boundary falls at `c5`** in
+five of six series and at `c3` in the sixth. Below it, `c1`–`c4` at N_ch 0 to
+about 6, the separation is **not established**; above it, and in the integrated
+bin, it is.
+
+Two effects push the same way there: the separation is smallest at low
+multiplicity, and the combined systematic is largest — 23 to 46 per cent in
+`c1`–`c4` against 6 to 13 per cent integrated.
+
+### S1b's shape, which the UP arm settled
+
+**Two-sided and opposite-signed in all eleven comparable cells, and
+systematically asymmetric**, the DOWN arm larger by 1.245 to 1.829 in every
+resolved category. §2.5 quotes the larger arm, so S1b is governed by DOWN
+throughout and the budget is unchanged from what `MUF_DOWN` alone implied. The
+UP arm established the shape rather than enlarging the total. See
+[`PER_CATEGORY_FINAL_TWO.md`](systematics_results_20260820/PER_CATEGORY_FINAL_TWO.md).

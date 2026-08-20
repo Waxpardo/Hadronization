@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""The measurement target, and the three things it must refuse.
+
+WHY IT EXISTS. The publication gate admits `canonical` and `canonical_candidate`
+only, which is right: a paper figure must not be drawn from unsealed data. A
+systematic variation is honestly neither, so the row that describes the dataset
+truthfully was the row the publication plotter refused. The resolution separates
+measurement from publication instead of weakening either.
+
+Every assertion below is a MUTATION: it changes one thing and requires the
+refusal to appear. A gate never seen to fail is not known to be a gate.
+"""
+
+from __future__ import annotations
+
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DRIVER = ROOT / "plotting" / "run_paper_plots.sh"
+WRAPPER = ROOT / "tools" / "render_measurement.sh"
+
+
+# The gate reads the dataset STATUS from the selector, not from the
+# environment -- an env var cannot spoof it, which is the right design and is
+# why these tests drive real selector files.
+SEL_CANONICAL = "config/dataset_selector_hf_run3_v1.json"
+SEL_VARIATION = "config/dataset_selector_hf_sys_mur_up.json"
+SEL_LEGACY = "config/dataset_selector.json"
+
+
+def _run(target: str, selector: str, env_extra: dict | None = None,
+         extra_targets: list[str] | None = None) -> subprocess.CompletedProcess:
+    env = dict(os.environ)
+    env.update(HADRONIZATION_BASE=str(ROOT), DATASET_SELECTOR=selector)
+    env.pop("HADRONIZATION_MEASUREMENT_ROOT", None)
+    env.update(env_extra or {})
+    return subprocess.run(["bash", str(DRIVER), target, *(extra_targets or [])],
+                          env=env, text=True, capture_output=True, check=False)
+
+
+def test_a_publication_target_still_refuses_a_variation() -> None:
+    """THE MUTATION THAT MATTERS. The publication gate must not have moved."""
+    r = _run("thnsparse-complete-root", SEL_VARIATION)
+    assert r.returncode != 0, r.stdout
+    assert "canonical plotting/validation is fail-closed" in r.stderr, r.stderr
+
+
+def test_the_publication_gate_predicate_is_unchanged() -> None:
+    """Asserted on the source: the ruling was that this predicate stays put."""
+    text = DRIVER.read_text()
+    assert ('[[ "${HADRONIZATION_DATASET_STATUS:-}" != "canonical" ]] &&\n'
+            '   [[ "${HADRONIZATION_DATASET_STATUS:-}" != "canonical_candidate" ]]'
+            ) in text, "the publication gate predicate was modified"
+
+
+def test_the_measurement_target_accepts_a_variation() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        r = _run("measure-balancing", SEL_VARIATION,
+                 {"HADRONIZATION_MEASUREMENT_ROOT": f"{tmp}/measurements"})
+    assert "MEASUREMENT_TARGET purpose=measurement" in r.stdout, r.stdout + r.stderr
+    assert "fail-closed" not in r.stderr, r.stderr
+
+
+def test_the_measurement_target_refuses_an_unknown_status() -> None:
+    # The legacy row must be NAMED since 2026-08-20: the combined selector
+    # declares no default (docs/NIKHEF_CLEANUP_PLAN.md 11.2). What this test
+    # asserts is unchanged -- the measurement target refuses a legacy status --
+    # and naming the row is what gets the resolver far enough to check it.
+    with tempfile.TemporaryDirectory() as tmp:
+        r = _run("measure-balancing", SEL_LEGACY,
+                 {"HADRONIZATION_MEASUREMENT_ROOT": f"{tmp}/m",
+                  "HADRONIZATION_DATASET": "legacy_21_06_2026"})
+    assert r.returncode != 0, r.stdout
+    assert "accepts canonical, canonical_candidate" in r.stderr, r.stderr
+
+
+def test_a_measurement_may_not_land_in_the_publication_tree() -> None:
+    """THE OUTPUT-SIDE PROTECTION. This is where the ruling put the guard."""
+    r = _run("measure-balancing", SEL_VARIATION,
+             {"HADRONIZATION_MEASUREMENT_ROOT": "plotting/Plots/Sneaky"})
+    assert r.returncode != 0, r.stdout
+    assert "inside the publication" in r.stderr, r.stderr
+
+
+def test_the_measurement_root_has_no_default() -> None:
+    r = _run("measure-balancing", SEL_VARIATION)
+    assert r.returncode != 0, r.stdout
+    assert "required and has no default" in r.stderr, r.stderr
+
+
+def test_measurement_and_publication_cannot_share_a_run() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        r = _run("measure-balancing", SEL_CANONICAL,
+                 {"HADRONIZATION_MEASUREMENT_ROOT": f"{tmp}/m"})
+        assert "MEASUREMENT_TARGET" in r.stdout, r.stdout + r.stderr
+        both = _run("measure-balancing", SEL_CANONICAL,
+                    {"HADRONIZATION_MEASUREMENT_ROOT": f"{tmp}/m"},
+                    extra_targets=["audit-subsamples"])
+    assert both.returncode != 0, both.stdout
+    assert "cannot run together" in both.stderr, both.stderr
+
+
+def test_the_wrapper_captures_the_render_status_with_nothing_in_between() -> None:
+    """The rc lesson, asserted on the source rather than trusted.
+
+    Three times in this project a zero exit status has been read from the wrong
+    command. Here the assignment must be the statement IMMEDIATELY after the
+    render.
+    """
+    lines = [l.strip() for l in WRAPPER.read_text().splitlines()]
+    render = next(i for i, l in enumerate(lines)
+                  if l.startswith("bash \"$BASE/plotting/run_paper_plots.sh\""))
+    assert lines[render + 1].startswith("RC=$?"), (
+        "a statement was inserted between the render and its status capture: "
+        f"{lines[render + 1]!r}")
+
+
+def test_the_receipt_declares_its_purpose() -> None:
+    text = WRAPPER.read_text()
+    assert '"purpose": "measurement"' in text, text[:200]
+    assert '"publication_eligible": False' in text
+    assert '"render_exit_status": int(rc)' in text
+
+
+def main() -> int:
+    tests = [v for n, v in sorted(globals().items())
+             if n.startswith("test_") and callable(v)]
+    for t in tests:
+        t()
+    print(f"measurement target: {len(tests)} checks passed")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

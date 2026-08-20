@@ -126,7 +126,9 @@ while true; do
   say "RESTART        #${restarts} -> ${newlog}"
   (
     cd "${CHECKOUT}" || exit 1
-    setsid nohup ./merge_root_files.sh \
+    setsid nohup env \
+      HADRONIZATION_EXPECTED_PAIR_SCHEMA="${HADRONIZATION_EXPECTED_PAIR_SCHEMA:?required; the merge refuses without it}" \
+      ./merge_root_files.sh \
       "${FREEZE}" \
       "${BASE}/hadronization_production/HF_RUN3_V1" \
       "${BASE}/hadronization_analysis/HF_RUN3_V1" \

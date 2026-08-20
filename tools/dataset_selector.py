@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import sys
 from pathlib import Path
@@ -35,7 +36,24 @@ REQUIRED = {
 }
 
 
-def load(path: Path, checkout: Path | None = None) -> tuple[str, dict]:
+def load(
+    path: Path,
+    checkout: Path | None = None,
+    dataset: str | None = None,
+) -> tuple[str, dict]:
+    """Resolve one dataset row. A dataset must be NAMED, not defaulted.
+
+    A resolver that answers a question nobody asked will answer it wrongly, and
+    the wrong answer looks exactly like a right one: the render succeeds, emits
+    all its rows, and reports the wrong dataset. That is not hypothetical -- a
+    silent `active_dataset` default is what let five variation renders read the
+    central campaign.
+
+    So `active_dataset: null` means REFUSE, and the refusal names every key it
+    would have accepted. Per-campaign selector files carry exactly one row and
+    keep their own `active_dataset`, so naming the file names the dataset and
+    those callers are unaffected.
+    """
     checkout = (
         checkout.resolve()
         if checkout is not None
@@ -44,12 +62,26 @@ def load(path: Path, checkout: Path | None = None) -> tuple[str, dict]:
     payload = json.loads(path.read_text())
     if payload.get("schema") != "hadronization_dataset_selector_v1":
         raise ValueError("unsupported dataset-selector schema")
-    active = payload.get("active_dataset")
     datasets = payload.get("datasets")
-    if not isinstance(active, str) or not isinstance(datasets, dict):
-        raise ValueError("dataset selector requires active_dataset and datasets")
+    if not isinstance(datasets, dict) or not datasets:
+        raise ValueError("dataset selector requires a nonempty datasets map")
+
+    declared = payload.get("active_dataset")
+    if dataset is not None:
+        active = dataset
+    elif isinstance(declared, str) and declared:
+        active = declared
+    else:
+        raise ValueError(
+            "no dataset named and this selector declares no default; "
+            "name one with --dataset or HADRONIZATION_DATASET. "
+            f"accepted keys: {sorted(datasets)}"
+        )
     if active not in datasets:
-        raise ValueError(f"active dataset is absent: {active}")
+        raise ValueError(
+            f"dataset is absent: {active}. "
+            f"accepted keys: {sorted(datasets)}"
+        )
     row = datasets[active]
     missing = REQUIRED - row.keys()
     if missing:
@@ -114,6 +146,44 @@ def load(path: Path, checkout: Path | None = None) -> tuple[str, dict]:
             raise ValueError("legacy regression dataset has wrong raw schema")
         if row["selector"] != "legacy_status":
             raise ValueError("legacy regression dataset has wrong selector")
+    elif status == "systematic_variation":
+        # ADDED 2026-08-19. A variation campaign is a real dataset the resolver
+        # must be able to point at, and the selector is the only thing that can
+        # point it: the plotting configuration is a request, and the selector's
+        # exported tag is what the macro actually reads. Before this arm
+        # existed, the only way to render a variation was to override
+        # HADRONIZATION_COMPLETE_ROOT_TAG by hand, which is disabling the guard
+        # rather than satisfying it.
+        #
+        # It carries the same contract as a canonical dataset -- same raw
+        # schema, same selector, same eight paths -- because it is the same
+        # instrument at one tenth the exposure. The one thing it may NOT be is
+        # publishable, and that is enforced here rather than left to a field
+        # nobody checks.
+        if row["publication_eligible"]:
+            raise ValueError(
+                "a systematic variation is an input to an uncertainty, not a "
+                "publication dataset; publication_eligible must be false"
+            )
+        for key in (
+            "campaign",
+            "canonical_manifest",
+            "production_root",
+            "analysis_root",
+            "raw_base",
+            "analyzed_data_base",
+            "complete_root_tag",
+            "subsample_base",
+        ):
+            if not isinstance(row[key], str) or not row[key]:
+                raise ValueError(f"systematic variation requires {key}")
+        if row["raw_schema"] != "hf_primary_ground_raw_v7":
+            raise ValueError("systematic variation has wrong raw schema")
+        if (
+            row["selector"]
+            != "hard_trigger_primary_ground__primary_ground_associate_v1"
+        ):
+            raise ValueError("systematic variation has wrong selector")
     else:
         raise ValueError(f"unsupported dataset status: {status!r}")
     return active, row
@@ -135,8 +205,18 @@ def main() -> int:
         type=Path,
         default=Path(__file__).resolve().parents[1],
     )
+    parser.add_argument(
+        "--dataset",
+        default=os.environ.get("HADRONIZATION_DATASET") or None,
+        help=(
+            "the dataset key to resolve. Required when the selector declares "
+            "no active_dataset. Defaults to $HADRONIZATION_DATASET."
+        ),
+    )
     args = parser.parse_args()
-    active, row = load(args.selector.resolve(), args.checkout.resolve())
+    active, row = load(
+        args.selector.resolve(), args.checkout.resolve(), args.dataset
+    )
     if args.command == "validate":
         print(
             f"DATASET_SELECTOR_VALID active={active} "

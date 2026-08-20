@@ -13,14 +13,18 @@ SELECTOR = ROOT / "config/dataset_selector.json"
 
 def main() -> int:
     result = subprocess.run(
-        [sys.executable, str(TOOL), "validate", "--selector", str(SELECTOR)],
+        # The combined selector declares no active_dataset by design, so the
+        # dataset must be named. See tests/test_dataset_selector_requires_a_named_dataset.py.
+        [sys.executable, str(TOOL), "validate", "--selector", str(SELECTOR),
+         "--dataset", "legacy_21_06_2026"],
         check=True,
         text=True,
         capture_output=True,
     )
     assert "active=legacy_21_06_2026" in result.stdout
     shell = subprocess.run(
-        [sys.executable, str(TOOL), "shell", "--selector", str(SELECTOR)],
+        [sys.executable, str(TOOL), "shell", "--selector", str(SELECTOR),
+         "--dataset", "legacy_21_06_2026"],
         check=True,
         text=True,
         capture_output=True,

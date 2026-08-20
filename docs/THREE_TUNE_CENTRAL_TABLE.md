@@ -17,17 +17,36 @@
 > record `docs/MONASH_CENTRAL_TABLE.md` §0 — and is **reused, not re-run**. The
 > reproduction below is a control on the instrument.
 >
-> ### ⚠ One pre-registered expectation is still unmet, and it is not the closure
+> ### ✅ RULED 2026-08-20 — the I2 flags are a DEVIATION, not an amendment
 >
 > `docs/PER_TUNE_PROCESSING_PREREGISTRATION.md` step 2 registers **I2 = zero
 > flagged bins**, and says a step-2 failure stops that tune's step 3.
-> **JUNCTIONS has 3 flags and CLOSEPACKING 1** (§3d). They are diagnosed,
-> bounded, and jackknifed immaterial — **no row moves by more than 1.19 SEM** —
-> and all four sit in bins the pre-registration's own I2 framing predates.
-> **This promotion rests on the closure verdicts**, which is what the
-> 2026-08-16 brief gated it on. **The owner's ruling on §3d is still
-> outstanding**, and §7 records it as the one open item. It is recorded here at
-> the top rather than left to be discovered in §3d.
+> **JUNCTIONS has 3 flags and CLOSEPACKING 1** (§3d).
+>
+> **Owner ruling: record the departure, do not edit the registration.** The
+> registered expectation of zero flagged bins stands exactly as written, and the
+> four flags are reported against it as a deviation. The pre-registration is
+> **not** amended, because a registration edited after the result is no longer a
+> registration.
+>
+> **The measured basis, unchanged by the ruling** (§3d, §3e):
+>
+> - all three JUNCTIONS flags sit in `kMultiplyHeavy`, a category contributing
+>   **12 of 116** testable bins where MONASH contributed **0 of 88**;
+> - that subpopulation's block scatter is **1.60×** binomial against ~1.0
+>   elsewhere, so a pooled single-σ̂ null tests those bins against a scale ~1.4×
+>   too small; rescaled, the three flags are **|z| ≈ 2.5, 2.5, 2.7**;
+> - the CLOSEPACKING flag is **1 in ~2 960 comparisons** against ~0.19 expected,
+>   p ≈ 0.17, and is isolated in block, conjugate and neighbourhood;
+> - jackknifing the flagged blocks moves **no quoted row by more than 1.19 SEM
+>   or 0.006 pp**.
+>
+> **What is still not established** is *why* `kMultiplyHeavy` is overdispersed.
+> A category-aware null is the obvious follow-up and is deliberately not made
+> here: retuning a null until it stops flagging is how a real defect gets
+> normalised away.
+>
+> **The table's FINAL status stands on this ruling plus the closure verdicts.**
 
 ---
 
@@ -99,6 +118,42 @@ directories** — reached `CANONICAL_PAIR_BLOCK_CLOSURE_PASS tune=MONASH` at
 pass was still running at the time of writing.
 
 ---
+
+> ## ✅ RULED 2026-08-20 — THE PAPER QUOTES BOTH, AND EXPERIMENT-COMPARABLE IS PRIMARY
+>
+> **The observable definition adopts the experiment-comparable convention.** The
+> diquark-structure partition is quoted beside it, as the mechanism-level
+> decomposition that explains the primary number.
+>
+> **The reasoning.** The experiment-comparable convention is the number a
+> measurement can confront. That is what makes this work a **proposed
+> observable** rather than a model-internal comparison between three tunes — a
+> quantity nobody can measure cannot be a proposal, however clean its
+> decomposition. The diquark-structure partition answers a different and
+> necessary question, *what the generator made*, and it is what turns the primary
+> number from a result into an explanation. Neither is dropped, and the order is
+> the claim.
+>
+> **What follows from the order.** The excluded-fraction problem is severe in the
+> structural framing and largely dissolves in the experiment-comparable one,
+> because the vectors' weight is reassigned to the ground states they decay into
+> rather than left in a category the analysis does not count. Making the
+> experiment-comparable table primary therefore means the paper's headline
+> quantity does **not** carry a large unexplained residual — and the structural
+> table, quoted beside it, is where that residual is shown and accounted for.
+>
+> **What travels with the ruling.** The primary number now depends on
+> decay-parent map **v2**, and inherits its provenance: residual misassignment
+> **0.0018 %** (`docs/MAP_V2_RESULT.md` §1), built on the v1.1 conjugation fix.
+> **The experiment-comparable table is a SELECTION, not a partition** — it sums
+> to ~91 % deliberately, and must never be normalised.
+
+> **Note on the section headings below.** §1 is headed "(primary)" because it was
+> written before this ruling and its heading is left as it stands rather than
+> silently rewritten. **The ruling above governs**: §2, experiment-comparable, is
+> the paper's primary convention, and §1 is the mechanism-level decomposition
+> quoted beside it. `docs/EXTRACTION_CONVENTIONS.md` §3 carries the same ruling
+> and the reasoning in full.
 
 ## 1. DIQUARK-STRUCTURE (primary) — a PARTITION, sums to 100 %
 
@@ -345,6 +400,42 @@ should carry at least MONASH's asymmetry).
 > advisory, and the confound above is the reason it cannot be read as a result
 > about colour reconnection.
 
+### ✅ RULED 2026-08-20 — REPORT it, as a short subsection, not a headline
+
+**The paper reports this measurement.** It is a real, sharp and unexpected
+result: the pre-registration expected CR ≥ MONASH and got the reverse in **0 of
+13** species, in both reconnection tunes.
+
+**Placement: a short subsection or an appendix, and not a headline claim.** The
+reason is the confound, and the ruling requires it stated in the same paragraph
+as the result rather than in a footnote.
+
+**The paragraph the manuscript must carry**, recorded here as the ruling and
+**not executed against `Paper/**`**:
+
+> MONASH — the tune with neither colour reconnection nor junctions — carries a
+> particle/antiparticle asymmetry in the b-baryons, with Σ_b and Ξ'_b at
+> **1.59–1.78**, tens of SEM from unity. Both reconnection tunes are consistent
+> with symmetric, at **0.98–1.05**. **Two things prevent reading this as an
+> effect of colour reconnection.** First, the reconnection tunes also re-tune
+> `StringFlav` and `StringZ`, so what is established is that *these tune bundles*
+> do not show the asymmetry, and not that colour reconnection removes it.
+> Second, the samples differ roughly **twenty-fold** in b-baryon statistics —
+> Σ_b⁺ at 130 011 and 68 419 entries against MONASH's 6 402 — so the near-unity
+> values are the better-measured ones and the asymmetry sits in the sparsest
+> sample.
+
+**Why report it despite the confound.** The confound limits the *attribution*,
+not the *observation*. That MONASH shows the asymmetry and the two CR tunes do
+not is measured, reproducible from the committed anchors, and would be found by
+anyone repeating the analysis. Withholding it because its cause is ambiguous
+would leave a reader to rediscover it and wonder why it went unmentioned.
+
+**What must not appear:** any sentence of the form "colour reconnection removes
+the b-baryon asymmetry". `STATE.md` records the tune-bundle confound under NOT
+PLANNED as *"Documented, not resolved"*, and resolving it needs a tune that
+varies reconnection alone — a production no plan in this repository contains.
+
 ---
 
 ## 6. Provenance
@@ -384,9 +475,15 @@ should carry at least MONASH's asymmetry).
    **done, both PASS**, §0b.
 2. ~~A FAIL stops that tune~~ — **did not arise.**
 
-**Still open — the only one:**
+**Closed 2026-08-20 — the last one:**
 
-3. **The owner's ruling on §3d.** `PER_TUNE_PROCESSING_PREREGISTRATION.md` step 2
+3. ~~**The owner's ruling on §3d.**~~ **RULED: a deviation, not an amendment.**
+   The registration stands as written and the four flags are reported against
+   it. See the ruling box in §0. The paragraph below is the state as it stood
+   before the ruling, kept because the reasoning it records is what the ruling
+   rests on.
+
+   **The owner's ruling on §3d.** `PER_TUNE_PROCESSING_PREREGISTRATION.md` step 2
    registers **I2 = zero flagged bins** and states that a step-2 failure stops
    that tune's step 3. **Four flags exist across the two new tunes** and this
    document was promoted on the closure verdicts regardless, because that is
@@ -401,6 +498,10 @@ should carry at least MONASH's asymmetry).
    The obvious follow-up is a category-aware null — and it is **not** a change
    to make quietly, because retuning a null until it stops flagging is how a
    real defect gets normalised away.
+
+> **Every item in §7 is now closed.** The table is FINAL on the closure verdicts
+> and on the 2026-08-20 deviation ruling, and nothing in this document waits on
+> a decision.
 
 ### The regeneration recipe
 

@@ -6,8 +6,8 @@
 closures have PASSED, and the three-tune central table — the resubmission's
 central number — is **FINAL** in
 [`docs/THREE_TUNE_CENTRAL_TABLE.md`](docs/THREE_TUNE_CENTRAL_TABLE.md). What
-remains is the figure set, the consolidation phase, and one open ruling (the I2
-flags, PENDING #2).
+remains is the figure set and the consolidation phase. The I2 flags are **RULED
+2026-08-20: a DEVIATION, not an amendment** (PENDING #2).
 
 > ### ✅ THE FREEZE IS LIFTED — 2026-08-17 20:12 CEST
 >
@@ -29,6 +29,42 @@ the pinfile is intact and the Nikhef checkout is unmoved at `43e35be8`.")*
 
 Full measurement discipline applies only to results the paper quotes; operations
 get ordinary engineering care.
+
+---
+
+## MERGE READINESS — `systematics-harvest`, assessed 2026-08-20
+
+**The branch is ready to merge, with five open items named below.** None of the
+five is a defect in the branch, and none is made worse by merging. Four are
+owner decisions with no ruling yet; one is a measurement in flight.
+
+| check | state |
+|---|---|
+| tree clean | ✅ **yes**, except `INSTALL.md` — untracked since 2026-08-18, an install note for the writing-standard kit, not this session's to commit |
+| suite | ✅ **67/67**, with `ROOT: /opt/homebrew/bin/root` resolved. Up from 63 by four test files added 2026-08-20 |
+| every ruling recorded | ✅ **yes** — fifteen rulings, each in the document that owns its question, none executed against `Paper/**` |
+| ahead of `main` | 444 commits |
+| `restructure-prep` | ✅ deleted; containment re-verified at this HEAD, zero unique commits |
+
+### What a merge WOULD carry across, and why each is open
+
+| # | open item | why, and what it blocks |
+|---|---|---|
+| **1** | **The freeze contract's shape rule.** No ruling. `docs/FIGURE_INVENTORY.md` §6.3b | The macro requires `jobs_per_tune == 100` and 1 M events per job; `HF_RUN3_V1` is 1000 × 100 000. **33 figure files stay blocked** — figure 4 and the two §7 kinematic families. Also holds three of the nine §5.3 retirement families, which retire in favour of §7 |
+| **2** | **B8 — which tree the reproducibility statement resolves to, and whether the manuscript is in it.** No ruling | `REPRODUCIBILITY.md` and the methods code statement cannot be written. `RELEASE_BLOCKERS.md:709` says it must not be left until submission, and merging does not resolve it |
+| **3** | **S4's bound.** Ruled and launched; stage 1 of 4 delivered and **complete for all three tunes** | The wide axis exists and every control is exact — three narrow distributions reproduced bin for bin, and the narrow per-tune residual recomputed to the published 2.91 pp (run record §26). Stages 2 to 4 are a Condor pass over 300 files in two arms plus a merge and a render. **S4 is not in the combination**, and `COMBINED_SYSTEMATICS.md` and `VERDICT.md` both say so |
+| **4** | **The Nikhef cleanup commands.** The two code changes are applied and tested; running `§9` is a separate authorization | 18.8 G stays unreclaimed on a volume at 98 %. Nothing published depends on it |
+| **5** | **§5.3's nine retirement families.** Put to the owner in answerable form, `FIGURE_INVENTORY.md` §5.3a | The manuscript keeps pointing at dead-dataset figures until answered. Three of the nine wait on item 1 rather than on a judgement |
+
+### Two things a reader of the merged branch must not mistake
+
+1. **The verdict is provisional against S4.** The trend difference clears its
+   total by about a factor of two, on four measured sources plus a measured
+   zero. A sixth source enters in quadrature and can only reduce that factor.
+2. **Eleven manuscript edits are RULED and NOT APPLIED.** `Paper/**` is
+   read-only in this work. The rulings name the edit and the file; the
+   manuscript session applies them. `docs/OWNER_DECISIONS_OPEN.md` indexes all
+   fifteen rulings and the five open items.
 
 ---
 
@@ -213,11 +249,11 @@ queue empty, zero held. **The harvest is a separate session and has not begun.**
 | # | item |
 |---|---|
 | 1 | ✅ **DONE 2026-08-16 — the three-tune cross-tune table with block SEMs, the resubmission's central number.** All three tunes FINAL, both conventions, common row set, block SEMs dof = 9. `docs/THREE_TUNE_CENTRAL_TABLE.md` |
-| 2 | ✅ **DONE 2026-08-16 — the JUNCTIONS and CLOSEPACKING harvests.** Closure PASS both, I3 exact both, decomposition delivered. **One item still open: the owner's ruling on the I2 flags** (3 JUNCTIONS, 1 CLOSEPACKING) against step 2's registered zero — diagnosed, bounded, jackknifed immaterial at < 1.19 SEM, but the pre-registration's expectation is unmet and the promotion was scoped to the closure verdicts. `THREE_TUNE_CENTRAL_TABLE.md` §3d and §7 |
+| 2 | ✅ **DONE 2026-08-16 — the JUNCTIONS and CLOSEPACKING harvests.** Closure PASS both, I3 exact both, decomposition delivered. **The I2 flags are RULED, 2026-08-20: a DEVIATION, not an amendment.** 3 JUNCTIONS and 1 CLOSEPACKING against step 2's registered zero. The registered expectation stands exactly as written and the flags are reported against it; `PER_TUNE_PROCESSING_PREREGISTRATION.md` is **not** edited, because a registration changed after the result stops being one. Measured basis: all three JUNCTIONS flags sit in `kMultiplyHeavy`, 12 of 116 testable bins where MONASH contributed 0 of 88, whose block scatter is 1.60x binomial so rescaled |z| ~ 2.5-2.7; the CLOSEPACKING flag is 1 in ~2960 comparisons at p ~ 0.17; the jackknife moves no quoted row by more than 1.19 SEM or 0.006 pp. **Nothing in `THREE_TUNE_CENTRAL_TABLE.md` is open.** §0, §3d and §7 |
 | 3 | ✅ **DONE 2026-08-13** — the I2 null recalibration. The null is a required argument, I2 uses MAD, the pinned E4 test names binomial explicitly. **The ruling's predicted numbers did not survive measurement and the measurement is recorded instead** (`GOLDEN_OUTPUTS.md` §2.11a) |
 | 4 | ✅ **SCORED 2026-08-13 — MISS, closed.** 15 legs in 48.6 h (8.35 h one-time gate + 40.25 h merge work, ~2.68 h/leg) projects to ~97 h against a 65–77 h ceiling; cause closure/merge CPU contention; additionally interrupted by the reboot at 15/33. `docs/MERGE_V3_BAND_VALIDATION.md` |
 | 5 | ✅ **DONE 2026-08-17 20:12 CEST — the Nikhef checkout advance is TAKEN.** `43e35be8` → **`8650a047`**, 153 commits, fast-forward, **`make can-advance` passed CLEAN with no override** (`CHECKOUT_ADVANCE_ALLOWED queue verified empty`). The guard hook logged the allow itself, after three recorded refusals. **Nikhef is at `8650a047` — all code identical; local carries only the trailing session record, which syncs next.** Post-advance: suite **49/49 on Nikhef** — the first green run ever from the restructured tree there — guard suite 7/7, and the installer fix passed its first real test (below). Procedure: `docs/CHECKOUT_SYNC_PROCEDURE.md` |
-| 6 | **Advisory step 2** — per-tune b-baryon ratios, one table |
+| 6 | ✅ **DONE 2026-08-16, and RULED 2026-08-20.** Advisory step 2 — per-tune b-baryon ratios — **is delivered**: `THREE_TUNE_CENTRAL_TABLE.md` §5 carries the table for all 13 species in all three tunes. This row read as outstanding until 2026-08-20 and was stale in the wrong direction. **Ruling: REPORT it in the paper**, as a short subsection or appendix, with the tune-bundle confound and the twenty-fold b-baryon statistics gap in the same paragraph as the result. The pre-registration failed in the opposite direction, 0 of 13 in both CR tunes. §5 carries the ruling and the paragraph the manuscript must carry |
 | 7b | **A9 — the stale paper table.** ANSWERED 2026-08-13: **not** regenerable from existing artifacts. Receipts, `attempt_metadata`, validator logs and M7 logs carry provenance, origin accounting and a baryon/meson split — no per-species yields and no valence sums. Needs a counting pass over all 3000 raw files, ~10 Condor jobs of ~15 min (M7 pattern). **Deliberately not submitted**: A2 is ahead of it in a full queue. `docs/A9_PAPER_TABLE_REGENERATION.md` |
 | 7 | **Disk consolidation** on Nikhef — reshaped to a mapping exercise, not a move: `docs/NIKHEF_DISK_INVENTORY.md` §7 |
 | 8 | **The pair-level unresolved-origin systematic** — the real one. **RUN 2026-08-13.** Regression gate **PASSED**: 300 files, 300 diffs, every one the single allowed `analysis_macro_sha256` field, zero unexpected. Campaign re-run as `5486752` after ERROR_RECORD **E7** removed a per-job guard that was selecting on the outcome variable in one arm. **Exposure measured** over 10 M events per tune: MONASH **6.2**, JUNCTIONS **1 219.4**, CLOSEPACKING **1 228.7** restorations per M events — a **≈197×** CR/MONASH ratio against M7's **13.6×** inclusive ratio, which is direct evidence M7 is not a proxy for this. **Δ MEASURED**, and the **TIE-BREAK ROBUSTNESS CHECK RUN** (variation `4e491134…`, regression **PASS**, campaign `5489612`, 300/300 promoted). **LEAD WITH THE SHAPE: Δ rises 5.9–9.7× across the multiplicity classes under BOTH tie-break rules.** That robustness is what makes per-class quoting mandatory — an integrated number is wrong about the shape no matter which rule is chosen — and it means the flat outcome named in advance as legitimate did NOT occur, so **A2's concern is confirmed, not retired**. **THE SYSTEMATIC TO QUOTE (owner ruling): the LARGEST-index arm, PER CLASS**, per cent — JUNCTIONS 0.0255 (M1), 0.0691, 0.1007, **0.1509** (M4), 0.1369 (M5); CLOSEPACKING 0.0377 (M1), 0.1012, 0.1571, 0.1777, **0.2293** (M5); **MONASH NEGLIGIBLE** (≤ 0.004). Integrated values (0.0583 / 0.0795) understate the worst class by 2.6× / 2.9× and must not be substituted. **The smallest-index arm is the cross-check, not a lower bound**: it establishes **rule dependence**, the two orderings differing by **2.0–5.5×** in all ten CR classes at 2.7–21.6 σ. **NOT an envelope** — what is quoted is *the larger of two extremal orderings of `heavyIndex`*, and **neither bounds the space of resolutions**: a pT-ordered rule would give more, which is exactly why the pre-registration rejected it as inflating by construction. **METHOD FINDING** (a result, not a scoring footnote): smallest-index was chosen on the reasoned assumption that `heavyIndex` is uncorrelated with trigger survival; both arms restore an **identical** number of rows, so 2–5× different Δ falsifies it. Registered text unedited; the annotation carries it. "< 0.07 % everywhere" is **RETIRED**; max is **0.23 %**. MONASH's exact zero is *explained, not contradicted* — same 62 restorations, different winners, Δ = 0.0006 ± 0.0002 %. `docs/a2_results_20260813/A2_TIEBREAK_ROBUSTNESS.md` and `A2_DELTA_RESULT.md`; `docs/A2_PAIR_UNRESOLVED_{PREREGISTRATION,RUN_RECORD}.md` |
@@ -338,5 +374,5 @@ replacement once the data was found to be gone.
 
 | # | question |
 |---|---|
-| **Q1** | `docs/history/studies/Balancing_and_Sampling/ATTENTION.txt` records that double-counting is *not* implemented from 23 December onwards, that results "will have to be divided by 2 manually", and ends *"remains to be checked"*. **Nothing in the tree says it was checked.** Does it affect anything published? |
-| **Q2** | **Are the paper figures digest-pinned anywhere?** `plotting/PAPER_FIGURE_PROVENANCE.md` exists; whether any figure *output* carries a recorded digest was not established. If not, the freeze contract has a hole on the figure side |
+| **Q1** | ✅ **RULED 2026-08-20 — out of scope, CONDITIONAL.** `ATTENTION.txt` records that double-counting is *not* implemented from 23 December onwards, that results "will have to be divided by 2 manually", and ends *"remains to be checked"*; nothing in the tree says it was checked. **The condition:** the manuscript's only dependence on that directory is the two `_215` canvases, and `FIGURE_INVENTORY.md` §4.2 rules both dropped. When that edit is applied, nothing published derives from the directory. **Until it is applied, the caveat is live.** `docs/REPO_FILE_CENSUS.md` §5 carries the ruling and the three things that reopen it |
+| **Q2** | ✅ **ANSWERED 2026-08-20 — mostly yes, with one measured gap.** Five of six committed figure outputs carry a recorded digest and **all five were recomputed from the committed bytes and match**: the three `plotting/paper/` SVGs in `GOLDEN_OUTPUTS.md` §2.12, and the two three-tune canvases in their run record. **The MONASH canvas is committed with its sha256 recorded nowhere** — `e13fceba…` appears in no file. Also measured: `PAPER_FIGURE_PROVENANCE.md` carries **zero** digests, and **no `.provenance.json` sidecar is committed**, which is how the gap was possible. `GOLDEN_OUTPUTS.md` §8.1. **The fix is a re-render, not writing the number down**, and it waits on §6.3b |

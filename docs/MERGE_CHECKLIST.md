@@ -190,3 +190,87 @@ once the tree moves.
 **Deliberately not merge-gated:** the merge pipeline is live in another session
 and this file is on its path. Touching it now would be changing a script under a
 running job. **Queue it for after the harvest completes.**
+
+---
+
+## H. ✅ EXECUTED 2026-08-20 — the squash merge
+
+`systematics-harvest` (`9f2ce46`) squashed onto `main` (`0fa14de`) as
+**`5018703`**. Merge base `11884cf`. The suite is **74/74** on the result.
+
+### What the merge decided
+
+Both branches re-added most of the tree after the directory restructure, so the
+two histories meet as **1278 overlapping paths, of which 37 differ**. All 37
+arrived as add/add conflicts. **Content decided each one**, not dates. `git log`
+cannot arbitrate here: main's side is itself a squash, so it reports one date for
+every path it carries.
+
+**Directory ownership does not decide an add/add conflict.** Three paths would
+have lost committed work under a rule that gave a programme its own directory:
+
+| path | what a directory rule would have done |
+|---|---|
+| `generation/producer/HeavyFlavourUtils.h` | restored the pre-E10 literals over the named selection constants |
+| `tools/prose_check.py` | dropped `ING_START_STOPLIST` and `starts_with_gerund` |
+| `tests/test_plot_dataset_integration.py` | restored the retired 1 M-event contract over the narrowed one |
+
+Two paths needed hand work rather than a side:
+
+- **`tools/dataset_selector.py`** — variation support from the harvest side,
+  with `HADRONIZATION_CAMPAIGN` carried forward. The harvest side had dropped
+  it; `plotting/Plot_InclusiveKinematicSpectra_Raw.C:728` requires it and
+  refuses without it.
+- **`plotting/run_paper_plots.sh`** — the styled driver from `main`, with the
+  measurement target grafted back on from the harvest side. `main`'s driver had
+  no `measure-balancing` target, and `tests/test_measurement_target.py` pins its
+  resolver and output-side guards. The suite caught this: 73/74 before the graft.
+
+### The behaviour change the merge introduced, and the ruling on it
+
+The selector no longer declares an `active_dataset`. `run_paper_plots.sh` named
+no dataset, so it would have stopped inside the selector. **Accept the refusal;
+do not restore a default.** A silent default is what let five variation renders
+read the central campaign. The driver now refuses
+before ROOT starts and names both ways to supply a dataset. Proven by running:
+exit **2** with nothing named, and `DATASET_SELECTOR_VALID
+active=hf_run3_v1_candidate status=canonical blocks=10` when pointed at
+`config/dataset_selector_hf_run3_v1.json`.
+
+The same commit corrects one stale line. `STATE.md`'s summary called the I2
+ruling open while its own PENDING #2 row recorded it as ruled.
+
+### What this merge did NOT do
+
+It did not push, delete or rename a branch, rewrite history, touch the Nikhef
+checkout, or run any queued fix below.
+
+## I. Queued for the next session
+
+1. **S4 stages 2–4** — the bounded run over the declared 300 files.
+   `COMBINED_SYSTEMATICS.md` and `VERDICT.md` both carry S4 as registered and
+   not yet in the budget; the verdict stays provisional until the bound lands.
+2. **The seed-band ordinal fix** — specified, not implemented.
+3. **`b4_mapping/run_b4.sh`** — still names the moved `SimulationScripts/`.
+4. **A re-render** to close the MONASH canvas digest gap.
+5. **The Nikhef cleanup** — separately authorised, not started here.
+
+## J. The pattern the last four defects share
+
+**A directory move updates the files that moved and misses the callers that
+named them.** Four instances, and the fourth is still open:
+
+| # | caller | named a path that had moved |
+|---|---|---|
+| 1 | the production worker | ✅ fixed |
+| 2 | the producer `Makefile` | ✅ fixed |
+| 3 | `extraction/pipeline/tune_chain.sh` | ✅ fixed; it now asserts every callee exists before it starts |
+| 4 | `b4_mapping/run_b4.sh` | ⛔ open, item I.3 above |
+
+**What generalises.** The moved file is the easy half, and the tests that cover
+it keep passing, because the file still exists and still works. The caller is a
+string in another directory that no compiler and no import graph connects to the
+move. `tests/test_invoked_script_paths_exist.py` is the structural answer: it
+enumerates invoked script paths and asserts each resolves, so a fifth instance
+fails the suite rather than a campaign. **Before any future move lands, grep the
+tree for the old path — not for the moved file's name.**

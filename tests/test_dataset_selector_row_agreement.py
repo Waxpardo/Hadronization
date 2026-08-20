@@ -52,6 +52,14 @@ def test_active_dataset_of_each_file_is_one_it_defines() -> None:
     for path in [COMBINED, *per_campaign_selectors()]:
         doc = json.loads(path.read_text())
         active = doc["active_dataset"]
+        if active is None:
+            # A declared null is the refusal contract, not a dangling pointer:
+            # the resolver raises and lists its keys rather than picking one.
+            # Only the combined file may do this -- a per-campaign file carries
+            # one row, so naming the file already names the dataset.
+            assert path == COMBINED, \
+                f"{path.name} declares no active_dataset; only the combined file may"
+            continue
         assert active in doc["datasets"], \
             f"{path.name} points active_dataset at {active!r}, which it does not define"
 

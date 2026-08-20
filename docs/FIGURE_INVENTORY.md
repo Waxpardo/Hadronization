@@ -486,9 +486,30 @@ multiplicity-dependent canvases. **The current workflow produces one combined
 canvas** (`global_balancing_plots_multiplicity_PDF.pdf`); there is no current
 generator output with the two draft names.
 
-**Question for the owner:** keep two per-flavour panels (needs a config change to
-emit them) or move the manuscript to the single combined canvas (needs two
-`\includegraphics` lines and their captions replaced by one)?
+**✅ RULED 2026-08-20 — move the manuscript to the single combined canvas.**
+
+**The manuscript edit:** the two `\includegraphics` lines at `Results.tex:105`
+and `:139`, and their two captions, are replaced by one of each, pointing at
+`global_balancing_plots_multiplicity_PDF.pdf`. **Not executed here** — `Paper/**`
+is read-only in this work, and this is recorded as the ruling the manuscript
+session applies.
+
+**The reasoning.** The combined canvas is the output the pipeline actually
+produces and has already validated: its three-tune render came back
+**byte-identical** on an independent re-render, in a different session and a
+different deploy tree (`docs/SUPERVISOR_CHANGE_REPORT.md` §9.3). The alternative
+adds a configuration variant whose only purpose is to match a draft layout, and
+every new render owes its own receipt, determinism check and visual review. The
+manuscript edit is two lines; the plotting change is a new artifact with a new
+provenance chain.
+
+**No configuration change is needed, and that was checked rather than assumed.**
+Every multiplicity configuration in `plotting/` emits one canvas:
+`configuration_multiplicity.json:2069` and
+`configuration_multiplicity_HF_RUN3_V1_THREETUNE_THnSparse_complete_root.json:1661`
+each carry a single `write_name` of the form
+`global_balancing_plots_multiplicity*`, and no per-flavour variant exists
+anywhere in the directory.
 
 **This must not be resolved silently** — the reduced smoke output *does* produce
 similarly-named files and is **validation-only**; substituting it would put a
@@ -500,14 +521,79 @@ one-activity-class plot where the paper claims a full multiplicity dependence.
 `globalCanvasRelativeYieldsPDF_215.pdf`, which are **legacy
 `Balancing_and_Sampling` products**. No current generator emits them.
 
-**Question:** are these summary canvases still wanted? If yes they need a
-generator written against merged v3; if no, the two figures and their captions
-come out. **Named replacement if dropped:** the per-flavour canvases of §3.3
-carry the same content in current form.
+**✅ RULED 2026-08-20 — DROP both. §3.3 carries the content.**
+
+**The manuscript edit:** the two `\includegraphics` lines at `Results.tex:170`
+and `:182` and their captions come out. **Not executed here** — recorded as the
+ruling the manuscript session applies.
+
+**The reasoning.** The replacement already exists and already carries the same
+content in current form: the per-flavour balancing-yield canvases of §3.3. The
+alternative pays for a new generator, written against merged v3, to reproduce a
+summary view of numbers the paper shows elsewhere.
+
+**The legacy files cannot be refreshed, so "keep" never meant "re-run".** Their
+inputs are gone: the v2 plotting configuration points at
+`AnalyzedData/complete_root_21_06_2026` and
+`AnalyzedData/SUBSAMPLES_700/combined_root_subSamples`, and **both are absent
+locally and on Nikhef**, measured 2026-08-13 (`docs/PLOTTING_V3_DELTA.md` §2b).
+`STATE.md` records the whole family under *PERMANENTLY NOT REGENERABLE*.
+
+**One consequence travels with this ruling.** Dropping these two figures ends the
+manuscript's only dependence on `Balancing_and_Sampling`, which is what makes
+the `ATTENTION.txt` double-counting caveat out of scope — see
+`docs/REPO_FILE_CENSUS.md` §5, where that conditional is recorded.
 
 ---
 
 ## 5. SUPERSEDED and RETIRE
+
+> ### ✅ RULED 2026-08-20 — §5.1 and §5.2 are ACCEPTED as a block; §5.3 goes back to the owner
+>
+> **§5.1, the six supersessions: ACCEPTED.** Each names a specific current
+> replacement, so the disposition is checkable rather than a judgement.
+>
+> **§5.2, the ten AVFD `.eps` files: ACCEPTED.** This is a factual claim, not a
+> judgement — they belong to a chiral-magnetic-effect analysis, no
+> `\includegraphics` names them, and no observable in this paper corresponds to
+> them.
+>
+> **§5.3, the ninety-five superseded exploratory plots: NOT accepted as a
+> block.** These are the retirements that could be wrong, because each retires a
+> figure on the grounds that a superseding view exists. §5.3a puts the nine
+> families to the owner, one line each.
+>
+> **§5.4 is ruled separately** — drop the line.
+
+### 5.3a THE NINE FAMILIES — one line each, for the owner to answer
+
+**Answer each row `retire` or `keep`.** The reason column is what the census
+recorded; the question column is the only thing at issue. Nothing here is
+executed against `Paper/**`.
+
+| # | family | count | why it was retired | the question |
+|---|---|---|---|---|
+| **F1** | `Iñaki plots/MinimumBiasSingleParticleSpectra_*` | 18 | minimum-bias single-species spectra from the **pre-v3 dataset**; the role passes to the §7 inclusive panels | §7 is **blocked** behind the freeze contract (§6.3b). Retire now and carry a gap until §7 lands, or keep until it does? |
+| **F2** | `Iñaki plots/SingleParticleSpectra_*` | 18 | as F1, non-MB variant | same question as F1, and the same answer should serve both |
+| **F3** | `Iñaki plots/Ratio_*_MONASH_vs_JUNCTIONS_*` | 30 | **two-tune** ratios in 20 %-wide multiplicity slices; the analysis is now three-tune and the axis is the 11-class common-absolute partition | Both grounds are structural and neither can be repaired. Retire? |
+| **F4** | `Iñaki plots/SpeciesResolvedSpectraCompareTunes_*_{0_20…80_100}` | 10 | same two-tune / wrong-axis grounds as F3 | Retire with F3, or is the species-resolved view wanted rebuilt on the current axis? |
+| **F5** | `Iñaki plots/Ratio_{Lambdac_over_Dplus,Lambdab_over_Bplus}_vsMult` | 2 | superseded by the §3.3 baryon/meson ratio canvas, which uses the signed registry definition | The replacement exists and is current. Retire? |
+| **F6** | `AngularCorrelations/` legacy — `c1x2_DPhi_214`, `c2x3_DPhi_Mult_214`, and two `c_correlations_OS_SS *.root for [0.000000, 100.000000]_PDF.pdf` | 4 | pre-THnSparse numbered-canvas products, replaced by §3.2; the two long names also embed a `.root` name and a float range | Retire? The filenames alone disqualify the last two from publication |
+| **F7** | `YieldsBalancing/PDF_cYields_Error_YieldsTree_*_215` + `balancing-yield.png` | 5 | legacy `YieldsTree` era | Retires with the `_215` ruling in §4.2. Confirm? |
+| **F8** | `BaryonMesonRelativeYieldsBalancing/PDF_cRelYields_Error_YieldsTree_*_215` + `balancing-baron-meson-ratio.png` | 7 | legacy `YieldsTree` era; the filename also misspells "baryon" | Retires with F7. Confirm? |
+| **F9** | paper root `Trigger_phi_{CHARM,BEAUTY}_shape.pdf` | 2 | the φ role is **promoted** to a validation panel and rebuilt (§7), so superseded rather than dropped | §7 is blocked. Same timing question as F1 |
+
+**Total 96 across the nine rows against §5.3's stated 95.** The one-file
+difference is `balancing-baron-meson-ratio.png`, which §5.3 counts inside F8's
+seven and the family table also lists at the paper root. **Flagged, not
+silently reconciled** — the census owns the count and this table quotes it.
+
+> **Three of the nine turn on one timing question, not on the figures.** F1, F2
+> and F9 are retired in favour of the §7 kinematic panels, and §7 cannot be built
+> until the freeze contract is amended (§6.3b). Answering "retire" for those
+> three accepts a gap in the paper until §7 lands. **That is a scheduling
+> decision about §6.3b, and answering it there answers these three.**
+
 
 ### 5.1 SUPERSEDED (6) — the role is served by a named new-era figure
 
@@ -544,9 +630,15 @@ no observable in this paper corresponds to them. **No replacement needed.**
 
 ### 5.4 RETIRE ⚑ — `runningCouplingQCD.png`
 
-Already commented out at `Introduction.tex:20`. **Owner question:** restore a
-running-coupling illustration in the introduction, or drop the line? Nothing in
-the current analysis depends on it.
+Already commented out at `Introduction.tex:20`.
+
+**✅ RULED 2026-08-20 — DROP the line.** Nothing in the current analysis depends
+on it, and the line is already commented out, so this finishes a decision that
+was left half-made rather than reversing one. If the introduction later wants a
+running-coupling illustration, that is a writing decision taken while writing the
+introduction, with a current source and its attribution — not a figure-inventory
+row. **Not executed here**; recorded as the ruling the manuscript session
+applies.
 
 ---
 

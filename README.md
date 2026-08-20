@@ -163,9 +163,10 @@ real statistical boundary rather than a degenerate one.
 | watch | `make status` |
 | reduce each raw file | `analysis/run_status_analysis.sh` |
 | validate one pair directory | `Validation/validate_pair_directory.sh <dir>` |
-| merge central + blocks | `merging/merge_root_files.sh …` |
+| merge central + blocks | `HADRONIZATION_EXPECTED_PAIR_SCHEMA=v3 merging/merge_root_files.sh …` — the schema is required and has no default; the merge refuses at minute zero without it |
 | **closure** | `Validation/validate_pair_block_closure.sh <central> <block_base> v3` |
 | extract | `extraction/extract_species_decomposition.py <central> --decay-map AnalysisScripts/decay_parent_map_v1_1.json` |
+| plot | `HADRONIZATION_DATASET=<key> plotting/run_paper_plots.sh <target>` — the combined selector declares no default dataset, so the run refuses until one is named, either by this variable or by pointing `DATASET_SELECTOR` at a per-campaign file |
 
 > **The closure step is why the smoke path is worth an hour.** Its counts are
 > `n_objects × 300 pair files`, and the 300 comes from the pair registry, **not

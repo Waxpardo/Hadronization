@@ -239,6 +239,46 @@ one caption position, and it does not move.
 > instrument's validity condition was never written down: it holds only while
 > every panel places its caption identically. The ladder broke that condition,
 > and nothing in the tool noticed.
+---
+
+**Correction 7 — silence is not success: a check that prints nothing on the
+happy path cannot be distinguished from a check that never ran.** Measured
+2026-08-18 while verifying 2100 raw files against their sidecars. The first pass
+used
+
+```bash
+sha256sum -c --quiet "$sidecar"          # prints ONLY on failure
+```
+
+and its log came back holding a single completion marker and no failures — which
+reads as a clean 2100/2100 and is in fact **compatible with zero files having
+been hashed**. The `xargs` could have matched nothing, the paths could have been
+malformed, the loop could have exited early; every one of those produces exactly
+the same empty log as a perfect run.
+
+The timing was the only thing that made it checkable at all (192 GB in 2 m 34 s
+is plausible at ~1.25 GB/s across four readers, so it probably *had* run) — but
+"probably, from a side channel" is not verification of a paper-facing input.
+
+**The fix is positive per-item evidence.** Emit `OK <path>` per file as well as
+`FAIL <path>`, then count both and assert the count:
+
+```
+OK 2100   FAIL 0   ABSENT 0
+```
+
+**2100 is now a count of verifications performed**, not an absence of complaints.
+
+> **This is the same defect as `rc = 0` is not evidence, one layer down.** That
+> rule says an exit status is not a result; this one says **an empty result set is
+> not a result either**. Both have the same remedy — require the check to say what
+> it *did*, not merely fail to say that something went wrong — and both have the
+> same tell: ask "if this had not run at all, would the output look different?" If
+> the answer is no, the check is not a check.
+>
+> It generalises past checksums. `grep -c` returning 0, a `diff` printing
+> nothing, a validator whose only output is on error, and a test that silently
+> skips are all the same shape.
 
 ---
 
@@ -384,3 +424,129 @@ two-state form would have declared that render finished five times over.
 > **Absence of an answer is not an answer.** This is E8's shape one level out —
 > the earlier instances conflated *process absent* with *work finished*; this one
 > conflates *no reply* with *process absent*.
+## Correction 8 — an unbounded session is a probe that can stop reporting without failing
+
+**2026-08-19.** A watcher polled the six merge campaigns every fifteen minutes
+over SSH. Its log runs to 04:03:27 and resumes at 08:57:23. **It reported
+nothing for 4 hours 53 minutes and never failed.**
+
+Nothing was wrong with the loop. One `ssh` invocation hung inside an
+established session, and `ConnectTimeout` does not bound that: it bounds the
+connect, not the session that follows it. The loop sat in `read`, so the
+watcher looked alive to every check anyone could make of it.
+
+**The damage is the reporting gap, not the delay.** Five campaigns closed
+during those five hours. A reader of the watcher log at 08:00 would have seen a
+pipeline apparently frozen at 8 of 18 closures. The silence looked like state,
+and the probe never announced it as silence.
+
+**The fix, and it is one line:**
+
+```
+ssh -o ConnectTimeout=25 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 ...
+```
+
+`ServerAliveInterval` makes the client send keepalives inside the session, and
+`ServerAliveCountMax` bounds how many may go unanswered. Together they cap a
+wedged session at about a minute, after which the poll fails, prints
+`COULDNT-ASK`, and the loop continues.
+
+**The general rule, and it is Correction 7's rule applied to the probe itself:
+silence is not success.** A probe must be able to say "I could not ask". A
+probe that can only say "here is the state" or nothing at all reports its own
+failure as a quiet, plausible-looking steady state. `COULDNT-ASK` is a
+three-state answer and it belongs in every waiter this project runs.
+
+---
+
+## Correction 9 — a zero exit status read from the wrong command, three times
+
+**2026-08-19.** `render_v2.sh` reported `rc=0` for five renders that all failed
+in under one second. The line was:
+
+```
+  bash plotting/run_paper_plots.sh ... > "$L" 2>&1
+  echo "=== $c end $(date -Is) rc=$? rows=$(grep -c ... ) ==="
+```
+
+`$?` inside that `echo` is not the render's status. Command substitution runs
+first, so `$?` had already been overwritten by `date` before the shell read it.
+Every failed render reported success.
+
+**This is the third instance in this project.** ERROR_RECORD E7 recorded a
+count read from a stale variable, Correction 7 recorded silence mistaken for
+success, and this one reads a status from a command nobody meant to ask about.
+The family is the same: **a value was taken from a place that happens to hold a
+value.**
+
+**The rule, and it is one line of discipline:** capture an exit status in the
+statement IMMEDIATELY after the command, with nothing in between.
+
+```
+  bash "$BASE/plotting/run_paper_plots.sh" measure-balancing > "$LOG" 2>&1
+RC=$?          # THE RENDER'S OWN STATUS. Nothing may run before this line.
+```
+
+`tests/test_measurement_target.py` asserts that on the source: it finds the
+render line and requires the next statement to begin `RC=$?`. A comment saying
+"nothing may run before this line" is an intention; the test is what keeps it
+true.
+
+**What caught the failure was not the status.** It was the row count and the
+resolver assertion — two facts read from the artifact rather than from the
+shell. Where a status is cheap to get wrong, prefer a fact the work itself
+produced.
+
+---
+
+## Correction 10 — a gate on the request cannot certify the result
+
+**2026-08-19.** Three defects in this pipeline share one shape. Each one checks
+the instruction the step receives. None of them reads what the step did.
+
+| where | the request that was checked | the result nobody read |
+|---|---|---|
+| the resolver line | the configuration named the variation, and its sha was echoed | the first twenty lines of every log said the render resolved `complete_root_HF_RUN3_V1` |
+| the exit status | the render command was correct | `$?` came from the `date` inside the following `echo` |
+| the output path | the measurement root was refused inside `plotting/Plots`, the staged copy set `write_path`, and nine mutation tests passed | three canvases were in a publication path, stamped 15:14:02 |
+
+**The configuration is a request. The resolver line is the answer.** A render
+loads the file it is given, echoes its sha, and still reads another campaign's
+data. The dataset selector exports `HADRONIZATION_COMPLETE_ROOT_TAG`, and the
+macro prefers that tag over the configuration's own directories.
+
+**A status is a value read from a place that happens to hold one.** Correction 9
+records that at length.
+
+**Nine mutation tests ran before the render and not one looked at a file.** They
+gated a dataset status, a measurement root, a target combination and a source
+pattern. Every one of them passed while the requirement failed. **A suite that
+only tests refusals certifies a locked door, not an empty room.**
+
+The top-level `write_path` key is the sharpest form of the error. It was set, it
+was read back, it was correct — and `writeCanvasToFiles` takes its path from a
+NESTED field, one per canvas entry
+(`plotting/improvedPlotting_THnSparse.C:215,265`). Nothing reads the top-level
+key. A gate can be right about a value the program never consults.
+
+### The rule
+
+**Assert on the artifact the step produced, in the units the step produced it.**
+
+| step | what to read |
+|---|---|
+| a render | which dataset the resolver named, how many rows it emitted, and where the files landed |
+| a merge | the closure markers and the product directories, by exact filename |
+| a shell command | the status captured in the statement immediately after it |
+
+`tools/assert_measurement_outputs.py` does this for a render. No file under any
+directory named `Plots` may carry an mtime inside the render window. Every
+expected artifact must exist under the measurement root. The tool finds
+publication trees by walking rather than by a list, so it covers a path the
+driver never named.
+
+**The window is inclusive at both ends, and the real case is why.** The three
+canvases of 2026-08-19 carry the render window's own end stamp, `1787145242`, to
+the second. An exclusive upper bound would have called the defect clean.
+`tests/test_measurement_outputs.py` replays that render from mtimes read off the
+cluster and requires it to fail.

@@ -221,10 +221,39 @@ stored quantity; class boundaries are a downstream choice.
 producer or registry change; pair count stays 300. **Stage-2 is deferred and
 rides a future campaign generation in full.**
 
-**Two open design gaps remain owner questions**, both stated in the proposal and
-neither resolved: the **§0a/§4B eligibility conflict** (dissolved in stage-1 by
-construction, live again in stage-2) and the **`ValidateRawInputs` contract
-transition** (~56 CPU-h now against 562.5 later).
+**✅ RULED 2026-08-20 — stage-1 is DEFERRED past this paper, and the two design
+gaps go with it.**
+
+The two gaps stay unresolved and stated: the **§0a/§4B eligibility conflict**
+(dissolved in stage-1 by construction, live again in stage-2) and the
+**`ValidateRawInputs` contract transition**.
+
+**The reason is that the argument for acting has inverted, and the inversion is
+measured rather than judged.** The proposal's case for implementing stage-1 was
+a cost window:
+
+> **This is the standing argument for implementing before full production.**
+> Doing it after means regenerating the full campaign (562.5 CPU-h) instead of
+> the 10 % one, a **10x** difference — or living with versioned acceptance
+> permanently.
+
+**That window is closed.** `HF_RUN3_V1` is generated, merged, sealed and
+promoted to `canonical` with `publication_eligible: true`
+(`docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md`). The cheap side of the 10×
+comparison no longer exists. Any registry change now faces the **562.5 CPU-h**
+figure or permanent versioned acceptance, which is the outcome the proposal
+named as the thing to avoid.
+
+**And nothing waits on it.** No figure, table or blocker in this release depends
+on excited-state recording. `ValidateRawInputs` pins the current registry to
+compiled constants, so leaving the registry alone is also what keeps every
+existing raw file acceptable.
+
+**Recorded as deferred, not dropped.** The proposal stays staged and its two
+gaps stay written down, so a future campaign inherits the analysis rather than
+re-deriving it. **What must not happen is that stage-1 is implemented against
+the sealed campaign** — that would reject every raw file the paper's numbers
+come from.
 
 ### B15b. Seed derivation ignored the campaign — CLOSED 2026-08-09, `12b1f1a`
 
@@ -321,14 +350,47 @@ were signed together.
 
 **No longer on G1.**
 
-### OWNER ACTION — the review document is not in the tree
+### CLOSED 2026-08-20 — the review document is UNAVAILABLE, and the citations are gone
 
-**The M1–M10 physics review exists nowhere in the repository.** Entries in this
-file and in `POST_SUBMISSION.md` cite it as a source, so they currently **cite an
-unarchived document**.
+**Owner ruling: no such document exists.** The physics review that earlier
+entries cited as `M1`–`M10` was never written down in a form that can be filed.
+A search of the Projects tree on 2026-08-20 found none, which agrees with the
+owner.
 
-> **When the review is provided, it goes into `docs/review/`.** Until then, every
-> citation of M1–M10 is a pointer to something a cold reader cannot open.
+**So the citations were removed rather than left pointing at nothing.** Three
+lines in this file and one in `docs/REGISTRY_AND_MAPPING_PROPOSAL.md` cited the
+review **as a document**. Each now states the finding it was carrying, so a cold
+reader gets the substance instead of a reference they cannot follow.
+
+> **The findings survive the source's absence.** B15 lists four that this
+> repository recorded independently — B1, B5, B8 and the Σ_b naming requirement
+> — and each is measured and cited in-tree. Losing the review loses the
+> provenance of the prompting, not the evidence.
+
+> ### ⚠ THE `M` PREFIX MEANS THREE DIFFERENT THINGS — a finding for the documentation pass
+>
+> This sweep had to be done by hand, and the reason is a naming collision that
+> is still live:
+>
+> | token | meaning | example |
+> |---|---|---|
+> | `M1`–`M5` | **the A2 multiplicity classes** | `STATE.md` PENDING 8, "JUNCTIONS 0.0255 (M1) … 0.1509 (M4)" |
+> | `M7` | **the unresolved-origin measurement and its macro** | `docs/M7_UNRESOLVED_SYSTEMATIC.md` |
+> | `M1`–`M10` | **the physics review's findings** | the three lines this entry replaces |
+>
+> **`M2` alone carries two of the three.** It is an A2 class *and* a review
+> finding with its own document, `docs/M2_PROBQQ1TOQQ0JOIN.md`.
+>
+> **A mechanical sweep of `M<digit>` would have corrupted working documents**, so
+> only the four lines that cite the review *as a document* were rewritten.
+> `POST_SUBMISSION.md:426` mentions "M2's open half" and was **deliberately left
+> alone**: it resolves to `docs/M2_PROBQQ1TOQQ0JOIN.md`, which a reader can open,
+> so it is not a dangling citation.
+>
+> **Recommendation for the documentation pass:** if the review ever arrives, file
+> its findings under a **distinct prefix** — `R1`–`R10` or similar — rather than
+> reusing `M`. One prefix with three meanings is a trap for exactly the kind of
+> sweep this entry describes.
 
 ---
 
@@ -1342,12 +1404,17 @@ for a tune-contrast paper and an indefensible one to discover at referee stage.
 match what the pipeline computes, which is currently nothing beyond the
 ten-block SEM.
 
-### B15. The review's manuscript findings — SUBMISSION-BLOCKING, owner-action
+### B15. Four manuscript findings, and the review that prompted them is gone — SUBMISSION-BLOCKING, owner-action
 
-**Not production-blocking.** The M1–M10 physics review returned findings that
-bear on manuscript text rather than on the pipeline. **They are owner-action in
-the same class as B1**, and they cannot be actioned from this repository while
-the review itself is unarchived — see the OWNER ACTION note above.
+**Not production-blocking, and CLOSED as a blocker 2026-08-20.** The physics
+review that prompted this entry is **unavailable** — owner ruling, and a search
+of the Projects tree found no such document. A blocker cannot wait on a source
+that does not exist, so B15 no longer waits on one.
+
+**What B15 reduces to is its four independently recorded findings**, listed
+below. Each was measured in this repository, each cites its own evidence, and
+none depends on the review. They stay open as owner-action on the manuscript,
+in the same class as B1.
 
 **Known manuscript-side items already recorded elsewhere in this file:** B1 (the
 methods section describes a different study), B5 (tune-difference counts, both

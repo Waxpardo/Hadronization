@@ -26,10 +26,16 @@ def main() -> int:
     main_payload = json.loads(MAIN.read_text())
     override_payload = json.loads(OVERRIDE.read_text())
 
-    # The main selector must keep the legacy regression default active, or the
-    # legacy-regression diagnostic stops being runnable.
-    assert main_payload["active_dataset"] == "legacy_21_06_2026", (
-        "the main selector must keep legacy_21_06_2026 active"
+    # CHANGED 2026-08-20. The main selector no longer declares a default: a
+    # silent one is what let five variation renders read the central campaign
+    # (docs/NIKHEF_CLEANUP_PLAN.md 11.2). What this test protects is unchanged
+    # in substance -- the legacy-regression diagnostic must stay runnable --
+    # but it is now runnable BY NAME rather than by default.
+    assert main_payload["active_dataset"] is None, (
+        "the main selector must declare no default; name the dataset instead"
+    )
+    assert "legacy_21_06_2026" in main_payload["datasets"], (
+        "the legacy regression row was removed; only the default was meant to go"
     )
     assert override_payload["active_dataset"] == ROW
 

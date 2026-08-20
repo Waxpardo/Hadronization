@@ -134,7 +134,36 @@ decay products.
 > experiment-comparable one says what an experiment would see. **The
 > excluded-fraction problem is severe in the first framing and largely dissolves
 > in the second** — and which framing the paper's observable definition adopts is
-> the decision this table exists to inform. **That decision is the owner's.**
+> the decision this table exists to inform.
+
+> ## ✅ RULED 2026-08-20 — THE PAPER QUOTES BOTH, AND EXPERIMENT-COMPARABLE IS PRIMARY
+>
+> **The observable definition adopts the experiment-comparable convention.** The
+> diquark-structure partition is quoted beside it, as the mechanism-level
+> decomposition that explains the primary number.
+>
+> **The reasoning.** The experiment-comparable convention is the number a
+> measurement can confront. That is what makes this work a **proposed
+> observable** rather than a model-internal comparison between three tunes — a
+> quantity nobody can measure cannot be a proposal, however clean its
+> decomposition. The diquark-structure partition answers a different and
+> necessary question, *what the generator made*, and it is what turns the primary
+> number from a result into an explanation. Neither is dropped, and the order is
+> the claim.
+>
+> **What follows from the order.** The excluded-fraction problem is severe in the
+> structural framing and largely dissolves in the experiment-comparable one,
+> because the vectors' weight is reassigned to the ground states they decay into
+> rather than left in a category the analysis does not count. Making the
+> experiment-comparable table primary therefore means the paper's headline
+> quantity does **not** carry a large unexplained residual — and the structural
+> table, quoted beside it, is where that residual is shown and accounted for.
+>
+> **What travels with the ruling.** The primary number now depends on
+> decay-parent map **v2**, and inherits its provenance: residual misassignment
+> **0.0018 %** (`docs/MAP_V2_RESULT.md` §1), built on the v1.1 conjugation fix.
+> **The experiment-comparable table is a SELECTION, not a partition** — it sums
+> to ~91 % deliberately, and must never be normalised.
 
 ---
 

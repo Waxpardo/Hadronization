@@ -204,6 +204,34 @@ directory**, and the ruling is quoted rather than re-derived:
 > restructure.** Either the double-counting factor is irrelevant here (the note
 > guesses the trigger normalisation cancels it) or it is a live factor-of-two on
 > anything derived from this directory. **The file says nobody checked.**
+>
+> ### ✅ RULED 2026-08-20 — OUT OF SCOPE, **conditional** on the `_215` ruling
+>
+> **The condition, stated as a condition and not assumed.** The caveat is out of
+> scope **if and only if** no published number descends from
+> `Balancing_and_Sampling`. On 2026-08-20 the manuscript's only dependence on
+> that directory is the two `_215` global canvases at `Results.tex:170` and
+> `:182`, and `docs/FIGURE_INVENTORY.md` §4.2 rules that **both are dropped**.
+>
+> **So the ruling has a precondition and it is named:** when the §4.2 edit is
+> applied to `Paper/**`, nothing published derives from this directory and the
+> factor of two becomes history rather than exposure. **Until that edit is
+> applied, it is not.**
+>
+> **What reopens it.** Any of these three, and each is a real path:
+>
+> 1. the §4.2 ruling is reversed and either `_215` canvas stays;
+> 2. a new figure or table is built from `Balancing_and_Sampling`;
+> 3. a reviewer asks where the legacy balancing numbers came from.
+>
+> **In any of those cases the check is owed before the number is quoted**, and it
+> is a bounded one: read the double-counting logic in
+> `docs/history/studies/Balancing_and_Sampling/doubleCounting.C` against what the
+> quoted numbers used, and record the verdict.
+>
+> **This is recorded as conditional rather than closed** because the manuscript
+> edit that discharges it has not been made. A ruling whose precondition is
+> pending is not the same as a closed question.
 
 ---
 

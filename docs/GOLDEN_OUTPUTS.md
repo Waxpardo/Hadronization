@@ -651,9 +651,15 @@ Totals **53,662,416 / 46,311,148 / 46,678,201**; per event **0.5366 / 0.4631 /
 > **⚠ I2 is NOT clean, and the document says so.** JUNCTIONS carries **3 flagged
 > bins** and CLOSEPACKING **1**, against step 2's registered **zero**
 > (`PER_TUNE_PROCESSING_PREREGISTRATION.md`). All four are diagnosed and
-> jackknifed immaterial — **no row moves by more than 1.19 SEM** — and the
-> promotion was scoped to the closure verdicts. **The owner's ruling is open.**
-> This entry records the table as FINAL *with* that caveat, not without it.
+> jackknifed immaterial — **no row moves by more than 1.19 SEM**.
+>
+> **✅ RULED 2026-08-20: this is a DEVIATION, not an amendment.** The registered
+> expectation of zero flagged bins stands exactly as written, and the four flags
+> are reported against it. `PER_TUNE_PROCESSING_PREREGISTRATION.md` is **not**
+> edited, because a registration changed after the result stops being one.
+> **This entry records the table as FINAL on the closure verdicts plus that
+> ruling**, with the caveat, not without it.
+> `THREE_TUNE_CENTRAL_TABLE.md` §0 carries the ruling and its measured basis.
 
 **Regeneration recipe** — the table's stdout is the regenerable object:
 
@@ -1106,6 +1112,16 @@ the new paths; the right-hand column must be unchanged.
 
 ```
 ccec0dbc70f6452d1f4a5c22a37e76ce55b357046094da207469f08534d0e4ce  species_ordinals_v2.json
+cac0a757ec7bdca04f2390668334733488d95bba14b3f22be2e0216980ad86c2  systematics_results_20260819/per_class_deltas.json
+37aae5bdad84dc6652399b2c77ddc6ae9c6c91df5073df6af1510d560315befd  systematics_results_20260819/tune_separation.json
+b1b5954812398d748297111ab64375d2abecfb4d04b3e98ff3ccdf8d9890087e  systematics_results_20260819/ratio_trend.json
+e8fe560f378161c8d8ee45f5919cc1ff9ca3984b4a109ce02763968067ade023  systematics_results_20260820/per_class_deltas_seven.json
+8a8a26b8e676145a210cddd6952b23fc69c57cebfc3733fac0d1d810870cfc57  systematics_results_20260820/per_class_combination.json
+7f6e9c652bd6793108742ede55cc2a2cdfde9616f37af0895c27a49842d4e739  systematics_results_20260820/verdict.json
+db34411a3fd06b6c6eaecdfb253e3ffe9dfa13bbfb65163bd3d61e1a8d9e1bb1  systematics_results_20260820/per_category_final_two.json
+70e07e49d8feeeda9cef5738b2cfaab4ef467a25db511e95e80caf2e38e4bb78  systematics_results_20260819/per_class_deltas.csv
+f507f6250e63d82c9c34e088abe4ec16b17359e3b0a54fcdb54e17cd67653d7b  vintegrated_closure.log (nominal arm, figure_deploy_20260817)
+690f2dc5694fa8639582e7ff2a5dd42f392c66ab2ccdf1268e9e5974e65afe68  render_HF_RUN3_V1.log (per-class control)
 ca33c2ee9693fd91e228ff11660ee726aac4cd29c821adf34bd5b827dfc4be7d  GeneratedSpeciesOrdinals.h
 7d5e7bfdab80163f20f407fccfaad7543099d93a07609614b09eb6d626e985ff  GeneratedPairRegistry.h
 f2a8c8ebb2cbbac9bd269b161cdcf05a13ae0f83679e81ee133647f80310ea10  GeneratedPairObjectContract.h
@@ -2650,3 +2666,313 @@ the frame height. The macro preserves those fractions.
 | `Inclusive/phi/Inclusive_phi_Sigmabzero_shape.png` | `84f753dbba205b77d8642a73c8d3e908c5df8b7fe3ee29aece605ac62a44b016` |
 | `Inclusive/phi/Inclusive_phi_Sigmabzerobar_shape.pdf` | `4cbc7da7a5987c66664603a33e2bfbe31bdce847b9e7b9fd58c36f01b33fb86b` |
 | `Inclusive/phi/Inclusive_phi_Sigmabzerobar_shape.png` | `3840ca14ab55bd45a4cfcde6ee189d7f9dd7aaa60e64a5779c76eb60b737ed81` |
+3. ~~**Plotting outputs.** … **UNKNOWN**~~ — **ANSWERED 2026-08-20. Five of six
+   committed figure outputs are digest-pinned and verified; one is not.** §8.1
+   below carries the measurement. The UNKNOWN is closed.
+4. **Any claim that a recipe was run.** None were, this session, by instruction.
+
+### 8.1 Figure digest pinning — MEASURED 2026-08-20, and one gap found
+
+**The question `STATE.md` Q2 asked was whether any figure *output* carries a
+recorded digest.** Five of six do, and every recorded digest was recomputed from
+the committed bytes rather than read.
+
+| output | where its digest is recorded | verified |
+|---|---|---|
+| `fig1_species_decomposition.svg` | §2.12 of this document | ✅ **match** |
+| `fig2_m7_inclusive_shift.svg` | §2.12 | ✅ **match** |
+| `fig3_multiplicity_classes.svg` | §2.12 | ✅ **match** |
+| `…_THREETUNE_PNG.png` | `docs/plotting_validation/hf_run3_v1_threetune_20260816/RUN_RECORD.md:37` | ✅ **match** |
+| `…_THREETUNE_POLISHED_PNG.png` | the same record, `:230` | ✅ **match** |
+| **`…_MONASH_PNG.png`** | **nowhere** | ⛔ **unrecorded** |
+
+**The gap, stated exactly.**
+`docs/plotting_validation/hf_run3_v1_monash_20260813/global_balancing_plots_multiplicity_HF_RUN3_V1_MONASH_PNG.png`
+is committed and its sha256 is
+`e13fceba1776e26a0a85df60c7cf163b7b4e309265e480b4f3b0acb17e997053`. **That
+string appears in no file in this repository.** Its run record pins the plotting
+configuration, the class-boundary artifact and the pair registry — every
+**input** — and does not pin the **output**.
+
+**So the freeze contract's figure-side hole is real but small, and it is one
+file rather than a class.** The later three-tune record pins its canvases; the
+earlier MONASH record predates that practice.
+
+**Two things this measurement does not claim.**
+
+1. **`plotting/PAPER_FIGURE_PROVENANCE.md` carries no digest at all** — zero
+   64-hex strings in the file. It is a provenance narrative, not a pin, and it
+   should not be read as one.
+2. **No `.provenance.json` sidecar is committed anywhere.**
+   `tools/final_plot_provenance.py` writes one beside every PDF, PNG and
+   generated ROOT macro, and binds every output checksum into a run receipt, but
+   **none of those sidecars or receipts is in the repository.** The mechanism
+   pins outputs at render time; what reaches `HEAD` is the digest a human copied
+   into a run record. That is why the MONASH gap was possible.
+
+**The remedy, and it is deliberately not applied here.** Recording the MONASH
+digest now would pin a byte string to a figure nobody re-rendered to check, which
+records agreement with itself. **The honest fix is to re-render that canvas and
+record the receipt**, and it belongs with the figure work that §6.3b currently
+blocks. Recorded as a gap rather than closed by writing the number down.
+
+
+### 2.10 The five closed variation campaigns — decomposition, 2026-08-19
+
+| | |
+|---|---|
+| product | `docs/systematics_results_20260819/per_category_deltas.json` |
+| sha256 | `06bb639200ff01ae150baada8c86e737848da6888592a1b5aeddb7a3d3054981` |
+| rendered | `docs/systematics_results_20260819/PER_CATEGORY_DELTAS.md` |
+| inputs | `/data/alice/ipardoza/sys_runs/HF_SYS_*/` on Nikhef, 165 directories |
+| instrument | the four shas of §2.4, unchanged: reader `4cd8b6fa…`, artifact `ccec0dbc…`, map v2 `58081aa2…`, registry `ea9b0232…` |
+| nominal arm | the committed anchors `AnalysisScripts/anchors/merged_{monash,junctions,closepacking}_dedup`, central and ten blocks |
+
+**Regeneration, from the repository plus the Nikhef run root:**
+
+```bash
+extraction/harvest_deltas.py \
+  --sys-runs /data/alice/ipardoza/sys_runs \
+  --anchors AnalysisScripts/anchors \
+  --campaigns HF_SYS_MUR_UP HF_SYS_MUR_DOWN HF_SYS_MUF_DOWN \
+              HF_SYS_PTHAT_1 HF_SYS_PTHAT_4 \
+  --json-out docs/systematics_results_20260819/per_category_deltas.json
+```
+
+**Status: DETERMINISTIC-BY-CONSTRUCTION from the run root.** The nominal half
+is committed, so the control in `tests/test_harvest_deltas.py` runs from the
+repository alone and reproduces `THREE_TUNE_CENTRAL_TABLE.md` §1 to the last
+digit.
+
+---
+
+### 2.13 The five closed variation campaigns — per-class and integrated balancing yields, 2026-08-19
+
+| | |
+|---|---|
+| product | `docs/systematics_results_20260819/per_class_deltas.json` |
+| sha256 | `cac0a757ec7bdca04f2390668334733488d95bba14b3f22be2e0216980ad86c2` |
+| flat form | `docs/systematics_results_20260819/per_class_deltas.csv`, sha256 `70e07e49d8feeeda9cef5738b2cfaab4ef467a25db511e95e80caf2e38e4bb78` |
+| rendered | `docs/systematics_results_20260819/PER_CLASS_DELTAS.md` |
+| instrument | `plotting/improvedPlotting_THnSparse.C` sha256 `6dace2025d1edf37…`, through the `measure-balancing` target |
+| nominal arm | `figure_deploy_20260817/vintegrated_closure.log`, sha256 `f507f6250e63d82c9c34e088abe4ec16b17359e3b0a54fcdb54e17cd67653d7b`, 144 rows, 2026-08-18 10:18 |
+| control | `sys_runs_plot5/render_HF_RUN3_V1.log`, sha256 `690f2dc5694fa8639582e7ff2a5dd42f392c66ab2ccdf1268e9e5974e65afe68` |
+| integrated bin | `config/integrated_multiplicity_bin_v1.json`, copied from the closure configuration `793344f36257e72f…` |
+| inputs | `complete_root_HF_SYS_*_<TUNE>` and their ten `combined_root_subSamples_<TUNE>` directories, in `/data/alice/ipardoza/hadronization_merged` |
+
+**Regeneration, in two stages.** The renders need Nikhef; the arithmetic does
+not.
+
+```bash
+# 1. On stbc-i1, six renders through the measurement target.
+export HADRONIZATION_BASE=/data/alice/ipardoza/sys_plot_deploy
+export MEASUREMENT_WIDEN_AXES=1
+export MEASUREMENT_INTEGRATED_BIN=$HADRONIZATION_BASE/config/integrated_multiplicity_bin_v1.json
+export MEASUREMENT_PUBLICATION_TREES=$(find /data/alice/ipardoza -maxdepth 4 -type d -name Plots | paste -sd:)
+tools/render_measurement.sh HF_RUN3_V1 \
+  plotting/configuration_multiplicity_HF_RUN3_V1_THREETUNE_THnSparse_complete_root.json \
+  config/dataset_selector_hf_run3_v1.json /data/alice/ipardoza/measurements_v3 render.log
+# then once per campaign with its harvest_configs/ configuration and selector row
+```
+
+```bash
+# 2. Anywhere, from the six logs.
+extraction/harvest_class_report.py \
+  --nominal vintegrated_closure.log --control render_HF_RUN3_V1.log \
+  --variation HF_SYS_MUR_UP=render_HF_SYS_MUR_UP.log \
+  --variation HF_SYS_MUR_DOWN=render_HF_SYS_MUR_DOWN.log \
+  --variation HF_SYS_MUF_DOWN=render_HF_SYS_MUF_DOWN.log \
+  --variation HF_SYS_PTHAT_1=render_HF_SYS_PTHAT_1.log \
+  --variation HF_SYS_PTHAT_4=render_HF_SYS_PTHAT_4.log \
+  --out docs/systematics_results_20260819/per_class_deltas.json
+extraction/write_per_class_report.py \
+  --report docs/systematics_results_20260819/per_class_deltas.json \
+  --out-markdown tables.md \
+  --out-csv docs/systematics_results_20260819/per_class_deltas.csv
+```
+
+**Status: REPRODUCIBLE FROM THE LOGS, RE-RENDERABLE ONLY ON NIKHEF.** Stage 2 is
+deterministic from the six logs. Stage 1 needs the merged products, which §5 of
+this document already lists as not regenerable.
+
+**The control runs in the suite, on real rows.** `tests/fixtures/` carries the
+twelve integrated `UNCERTAINTY_MATRIX` rows and the twelve resolver lines from
+the nominal, the control and `HF_SYS_PTHAT_4`.
+`tests/test_per_class_control.py` reproduces the control agreement and one real
+delta from them, so the check runs every suite rather than once.
+
+**Two renders print different digit counts for the same count.** The
+figure-branch plotter writes `13656517` and this branch's writes `1.36565e+07`.
+The comparison uses agreement at the recorded precision, which is the figure
+branch's own method. A string comparison would report a difference that is not
+there.
+
+**F4 — GOLDEN_OUTPUTS carries two sections numbered 2.10.** The one at "Closure
+at v3 scale" and the one at "The five closed variation campaigns —
+decomposition". This entry takes 2.13 to avoid a third collision. Renumbering is
+left alone here because the references to these sections live in other
+documents.
+
+---
+
+### 2.14 The MONASH-to-JUNCTIONS tune separation, 2026-08-19
+
+| | |
+|---|---|
+| product | `docs/systematics_results_20260819/tune_separation.json` |
+| sha256 | `37aae5bdad84dc6652399b2c77ddc6ae9c6c91df5073df6af1510d560315befd` |
+| rendered | `docs/systematics_results_20260819/TUNE_SEPARATION.md` |
+| input | `figure_deploy_20260817/vintegrated_closure.log`, sha256 `f507f6250e63d82c9c34e088abe4ec16b17359e3b0a54fcdb54e17cd67653d7b` |
+| instrument | `extraction/write_tune_separation.py` |
+
+**Regeneration, from the one log:**
+
+```bash
+extraction/write_tune_separation.py \
+  --nominal vintegrated_closure.log \
+  --out-json docs/systematics_results_20260819/tune_separation.json \
+  --out-markdown TUNE_SEPARATION_tables.md
+```
+
+**Status: DETERMINISTIC FROM ONE LOG.** It reads the sealed nominal and nothing
+else. No variation campaign enters it, which is why it exists while the
+combination does not.
+
+**Three observables, twelve classes: the B⁺–B⁻ and B⁺–Λ_b balancing yields and
+the Λ_b/B⁻ ratio.** The ratio takes the plotter's `ratio_sem` rather than
+propagating the two yield SEMs, because numerator and denominator share their
+triggers and their events.
+
+**The class axis runs opposite to its label.** `c1` is `N_ch` 0 to 2 and `c11`
+is `N_ch` 32 and above, because the window label is a top percentile.
+`tests/test_harvest_class_axis.py` holds that against
+`config/multiplicity_class_boundaries_v1.json`.
+
+### 2.15 The per-class combination — BUILT, NOT RUN
+
+| | |
+|---|---|
+| instrument | `extraction/combine_per_class.py` |
+| product | **none. It refuses.** |
+| refusal | `COMBINATION_REFUSED missing=HF_SYS_MUF_UP,HF_SYS_PDF_CTEQ6L1` |
+| tests | `tests/test_combine_per_class.py`, 25 hand-computed checks |
+
+**Recorded here as an absence on purpose.** A tool that exists and produces
+nothing is easy to mistake for a tool that was never written, and the next
+session needs to know the wiring is done and tested.
+
+**To run it once all seven campaigns hold deltas:**
+
+```bash
+extraction/harvest_class_report.py --nominal … --control … \
+  --variation HF_SYS_MUF_UP=… --variation HF_SYS_PDF_CTEQ6L1=… \
+  … --out per_class_deltas.json
+extraction/combine_per_class.py \
+  --report per_class_deltas.json \
+  --out docs/systematics_results_20260819/per_class_combination.json
+```
+
+It applies owner amendment A1 and A2, pre-registration §9.1 and §2.5, and S5's
+measured zero. It adds no rule of its own.
+
+---
+
+### 2.16 The Λ_b/B⁻ multiplicity trend, 2026-08-19
+
+| | |
+|---|---|
+| product | `docs/systematics_results_20260819/ratio_trend.json` |
+| sha256 | `b1b5954812398d748297111ab64375d2abecfb4d04b3e98ff3ccdf8d9890087e` |
+| rendered | `docs/systematics_results_20260819/RATIO_TREND.md` |
+| input | `figure_deploy_20260817/vintegrated_closure.log`, sha256 `f507f6250e63d82c9c34e088abe4ec16b17359e3b0a54fcdb54e17cd67653d7b` |
+| instrument | `extraction/write_ratio_trend.py` over `extraction/ratio_trend.py` |
+| tests | `tests/test_ratio_trend.py`, 22 hand-computed checks |
+
+**Regeneration, from the one log:**
+
+```bash
+extraction/write_ratio_trend.py \
+  --nominal vintegrated_closure.log \
+  --out-json docs/systematics_results_20260819/ratio_trend.json \
+  --out-markdown RATIO_TREND_tables.md
+```
+
+**Status: DETERMINISTIC FROM ONE LOG.** No variation campaign enters it, which
+is why it exists while the combination does not.
+
+**Two estimators, and the model-free one is the measurement.** `R(c11) − R(c1)`
+subtracts two rows and needs no fit and no x-axis convention. The weighted
+straight line in class index is a summary, and its χ²/ndf of 8.18 for JUNCTIONS
+records that a line does not describe that tune.
+
+**The fit's x-axis is the class index**, which is not equally spaced in `N_ch`:
+`c1` spans three units and `c11` is open above 32. A slope "per class" is
+therefore not a physical `d(ratio)/dN_ch`.
+
+---
+
+### 2.17 All seven campaigns — combination and verdict, 2026-08-20
+
+| product | sha256 |
+|---|---|
+| `systematics_results_20260820/per_class_deltas_seven.json` | `e8fe560f378161c8d8ee45f5919cc1ff9ca3984b4a109ce02763968067ade023` |
+| `systematics_results_20260820/per_class_deltas_seven.csv` | `94ca520244e8d2f7f8a609bcead9eea1b83ca5da04ebb27e5a51acab761c6437` |
+| `systematics_results_20260820/per_class_combination.json` | `8a8a26b8e676145a210cddd6952b23fc69c57cebfc3733fac0d1d810870cfc57` |
+| `systematics_results_20260820/per_class_combination.csv` | `0f51596de6567346dc408dbd4cacae170cc548a2a545a3d6e741af198d70214d` |
+| `systematics_results_20260820/verdict.json` | `7f6e9c652bd6793108742ede55cc2a2cdfde9616f37af0895c27a49842d4e739` |
+| `systematics_results_20260820/per_category_final_two.json` | `db34411a3fd06b6c6eaecdfb253e3ffe9dfa13bbfb65163bd3d61e1a8d9e1bb1` |
+
+**Inputs — the render logs.** The nominal is unchanged at
+`f507f6250e63d82c…`. The five variation logs of 2026-08-19 are unchanged. The
+three rendered 2026-08-20:
+
+| log | sha256 |
+|---|---|
+| control `render_HF_RUN3_V1.log` | `5cdcbfbba2474dfb9cf87730f882459176e0be2ecc14d32126e89637cd908906` |
+| `render_HF_SYS_MUF_UP.log` | `eed5be6e5e67c94604eee0a29d38dbe3498183347dafeb10a3848e86aabcd74e` |
+| `render_HF_SYS_PDF_CTEQ6L1.log` | `f9439e9e0a4e97da156741957cc9c0e009be2cf2610876085228c155b064cf88` |
+
+**Regeneration, in three stages.** Only the first needs Nikhef.
+
+```bash
+# 1. On stbc-i1: extraction and renders for the two campaigns, plus the control.
+SYS_EXTRACT_PARALLEL=6 bash systematics_harvest/sys_extract.sh HF_SYS_MUF_UP
+SYS_EXTRACT_PARALLEL=6 bash systematics_harvest/sys_extract.sh HF_SYS_PDF_CTEQ6L1
+# renders: MEASUREMENT_WIDEN_AXES=1, MEASUREMENT_INTEGRATED_BIN set, per GOLDEN_OUTPUTS 2.13
+```
+
+```bash
+# 2. Anywhere, from the eight logs.
+extraction/harvest_class_report.py --nominal vintegrated_closure.log \
+  --control render_HF_RUN3_V1.log --variation <CAMPAIGN>=<LOG> x7 \
+  --out per_class_deltas_seven.json
+extraction/combine_per_class.py --report per_class_deltas_seven.json \
+  --out per_class_combination.json
+extraction/write_verdict.py --nominal vintegrated_closure.log \
+  --variation <CAMPAIGN>=<LOG> x7 --out-json verdict.json --out-markdown VERDICT_tables.md
+```
+
+```bash
+# 3. The renderers.
+extraction/write_combination_report.py --combination per_class_combination.json \
+  --out-markdown COMBINED_tables.md --out-csv per_class_combination.csv
+extraction/write_per_class_report.py --report per_class_deltas_seven.json \
+  --out-markdown tables.md --out-csv per_class_deltas_seven.csv
+```
+
+**Status: STAGES 2 AND 3 ARE DETERMINISTIC FROM THE EIGHT LOGS.** Stage 1 needs
+the merged products, which §5 lists as not regenerable.
+
+**The systematic on a difference is computed ON the difference.** For every
+source the quantity is recomputed from that source's own render and differenced
+against the nominal, so whatever cancels inside it has cancelled before the
+combination. Borrowing a single tune's per-class systematic would double-count
+the part that cancels.
+
+**Two controls, not one.** The control render reproduces the sealed nominal on
+all 144 rows, and it is **byte-identical to the 2026-08-19 control**, so the
+five logs rendered then and the three rendered now come from one instrument.
+
+**The campaign configurations are generated.** `tools/make_harvest_configs.py`
+derives all seven from the central by six field substitutions, and reproduces the
+five pre-existing files byte-for-byte.

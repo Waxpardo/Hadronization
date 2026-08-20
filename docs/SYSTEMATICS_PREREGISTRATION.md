@@ -22,6 +22,79 @@ unedited; the annotation carries it."
 
 ---
 
+## ✅ OWNER AMENDMENT — 2026-08-18, ruled BEFORE any variation Δ existed
+
+**Two questions this document left open were put to the owner and answered. Both
+answers are recorded here, dated, and neither is retrofitted to a result.**
+
+> ### The precondition, checked at commit time rather than asserted
+>
+> **No Δ from any variation source existed anywhere in the repository when this
+> amendment was committed.** Verified, not claimed: the four variation cells in
+> `docs/SYSTEMATICS.md` (S1a, S1b, S2, S3) all read `PENDING`; the only file under
+> `docs/systematics_results_*` is `s5_class_migration.json`, which is **S5's
+> structural zero measured 2026-08-17** — a different source, exactly zero by
+> construction, published before this ruling and unaffected by it; and
+> `config/systematics_variations_v1.json` is the variation *declaration*, not
+> results. The analysis stage had completed 2100/2100 jobs but **no extraction, no
+> merge product, and therefore no per-class number of any kind** had been produced.
+>
+> This matters because both rulings change what the eventual numbers mean, and a
+> rule chosen with the answers visible is not a rule.
+
+### A1 — how an UNRESOLVED per-class Δ enters the combination
+
+**This document was silent** (§2.4's ladder is an all-or-nothing verdict over a
+whole source; §9 then sums every class with no provision for one whose Δ is
+noise). **Ruled:**
+
+> **Each variation source contributes `max( |Δ(c)| , SEM(Δ(c)) )` per class,
+> applied continuously — no threshold cliff.**
+
+- **Both `|Δ|` and `SEM(Δ)` are tabulated for every class**, always.
+- The **`|Δ| < 2·SEM` flag is presentational only.** It marks a class for the
+  reader; it does not gate, clip, or zero anything, and it must never be used as a
+  branch in the arithmetic.
+
+**The rationale, on record:** *a systematic cannot be claimed below the resolution
+of the measurement, and a potentially real shift cannot be zeroed.* The rule takes
+whichever of those two floors binds. Continuity is the point — a threshold rule
+would make the quoted systematic jump discontinuously as a Δ drifts across
+2 σ, which is an artefact of the sample size and not of the physics.
+
+**Superseded by this:** nothing in the registered text, which was silent. The
+three options this gap generated — *as-is*, *zero*, *SEM* — are recorded in
+`docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` §7.1 with the worked example that
+motivated the ruling. **`max(|Δ|, SEM)` is none of those three**: it is *as-is*
+where the measurement resolves and *SEM* where it does not, with no discontinuity
+between.
+
+### A2 — the A2/S6 partition conflict
+
+**§9.6 STANDS, unchanged.** A session brief instructed that the A2 term be summed
+in quadrature into the per-class total; **that instruction is overruled, and the
+owner has recorded it as their own error.**
+
+> **A2/S6 remains a separate systematic on its own five-class partition
+> (`M1…M5`). Nothing is summed across incompatible partitions, and no mapping
+> between them is invented.**
+
+The reason is the one §9.6 already gave: `M1…M5` (`N_ch` 1–9, 10–19, 20–29,
+30–39, ≥ 40) and `c1…c11` (half-integer boundaries −0.5 … 32.5) are different
+partitions of the same axis, so there is no class-by-class correspondence to add
+along.
+
+**How a total is presented in the manuscript is an owner decision at writing
+time**, not a computation this pipeline performs.
+
+### What this changes in the tooling
+
+Both rulings are encoded as **explicit required policy flags** on
+`extraction/systematics_delta.py::combine_quadrature`, which refuses to run
+without them, so neither can be silently re-decided by a caller.
+
+---
+
 ## 1. THE SIX SOURCES
 
 | # | source | probes | needs generation? | this session |
@@ -127,6 +200,11 @@ per-class values, each with block SEM `σ(c)`.
 | **NEGLIGIBLE** — need not be quoted | \|Δ(c)\| < **0.1 %** in every non-`LOW-STAT` class **and** every Δ(c) within **2 σ(c)** of zero |
 | **QUOTABLE AS ONE NUMBER** | not negligible, **and** every non-`LOW-STAT` Δ(c) within **2 σ(c)** of Δ_int |
 | **MUST BE QUOTED PER MULTIPLICITY CLASS** | any non-`LOW-STAT` Δ(c) differs from Δ_int by **> 2 σ(c)**, **or** max Δ(c) − min Δ(c) exceeds **50 % of Δ_int** |
+
+> **See the 2026-08-18 OWNER AMENDMENT A1 above.** This ladder remains the
+> per-SOURCE reporting verdict. It does **not** govern how an individual
+> unresolved class enters the combination; that is `max(|Δ|, SEM)`, applied
+> continuously, and the 2 σ flag here is presentational only.
 
 **This threshold ladder is reused unchanged and that is a deliberate choice, not
 laziness.** It was fixed before A2 measured anything, it produced a verdict that

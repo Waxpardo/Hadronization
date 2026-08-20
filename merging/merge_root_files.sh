@@ -24,7 +24,13 @@ if [[ "$#" -lt 4 || "$#" -gt 5 || "${1:-}" == "-h" || "${1:-}" == "--help" ]]; t
 fi
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-project_base="${HADRONIZATION_BASE:-${script_dir}}"
+# The fallback is the script's PARENT, not the script's own directory. This
+# file lives in merging/, so ${script_dir} is merging/ and the `source
+# "${project_base}/setupEnv.sh"` below looked for merging/setupEnv.sh, which
+# does not exist. Every merge that has ever run survived only because
+# HADRONIZATION_BASE was exported in its environment; the fallback itself was
+# never exercised and was wrong when it was.
+project_base="${HADRONIZATION_BASE:-$(cd "${script_dir}/.." && pwd)}"
 project_base="${project_base%/}"
 export HADRONIZATION_BASE="${project_base}"
 source "${project_base}/setupEnv.sh"
@@ -42,6 +48,56 @@ if [[ -n "$(git -C "${project_base}" status --porcelain --untracked-files=no)" ]
   echo "ERROR: canonical merge requires a tracked-clean checkout" >&2
   exit 3
 fi
+
+# ---------------------------------------------------------------------------
+# THE CLOSURE GATE'S EXPECTED SCHEMA IS AN INPUT, AND IT HAS NO DEFAULT.
+#
+# validate_pair_block_closure.sh takes the schema the CAMPAIGN demands as its
+# third argument and refuses to derive it from the data, because a gate whose
+# expectations come from the thing under test cannot fail it (review finding
+# A4). This driver is one of its callers, so the requirement lands here: the
+# caller states it, and there is nothing sensible to default to. A default of
+# `v3` would silently pass a v2 campaign the moment one existed, which is the
+# defect A4 removed from the wrapper and would merely have relocated to here.
+#
+# CHECKED AT MINUTE ZERO, DELIBERATELY. The closure loop runs after all 33
+# merges, roughly eleven hours in. Between 2026-08-13 and 2026-08-18 the call
+# site passed ${canonical_events_per_tune} into the schema slot, so every run
+# was going to die at that point having done all of the work and recorded none
+# of it -- and one did (HF_SYS_MUR_UP). A required input that is only consulted
+# at the end is a trap; validate it before anything expensive starts.
+# ---------------------------------------------------------------------------
+expected_pair_schema="${HADRONIZATION_EXPECTED_PAIR_SCHEMA:-}"
+if [[ -z "${expected_pair_schema}" ]]; then
+  cat >&2 <<'SCHEMA'
+ERROR: HADRONIZATION_EXPECTED_PAIR_SCHEMA is required and has no default.
+       It is the schema THIS CAMPAIGN demands of its merged pair files, and it
+       is passed to the closure gate as its EXPECTED_SCHEMA argument.
+       Set it to a known tag -- `v3` for the Run-3 production and the systematic
+       variations, `v2` only for a deliberately re-run legacy campaign:
+         HADRONIZATION_EXPECTED_PAIR_SCHEMA=v3 ./merging/merge_root_files.sh ...
+SCHEMA
+  exit 2
+fi
+# Resolve it here as well as in the wrapper. This is not the wrapper's check
+# duplicated for its own sake: the wrapper cannot run until hour eleven, and an
+# unknown tag must be refused now.
+expected_pair_schema_tag="$(python3 -c '
+import json, sys
+tags = json.load(open(sys.argv[1]))["schema_version_tags"]
+requested = sys.argv[2]
+if requested in tags:
+    print(tags[requested])
+elif requested in tags.values():
+    print(requested)
+else:
+    raise SystemExit(
+        f"unknown HADRONIZATION_EXPECTED_PAIR_SCHEMA {requested!r}; known: "
+        + ", ".join(f"{k} ({v})" for k, v in tags.items()))
+' "${project_base}/config/pair_file_object_contract_v1.json" \
+  "${expected_pair_schema}")" || exit 2
+echo "CLOSURE_EXPECTED_SCHEMA requested=${expected_pair_schema}" \
+     "resolved=${expected_pair_schema_tag}"
 
 mkdir -p "${analysis_root}/validation"
 # Merge shape, derived from the manifest rather than from a sealed contract
@@ -304,6 +360,7 @@ for tune in MONASH JUNCTIONS CLOSEPACKING; do
   if ! "${project_base}/Validation/validate_pair_block_closure.sh" \
        "${analyzed_data_base}/complete_root_${output_tag}_${tune}" \
        "${analyzed_data_base}/SUBSAMPLES_${output_tag}/combined_root_subSamples_${tune}" \
+       "${expected_pair_schema}" \
        "${canonical_events_per_tune}" >"${closure_stage}" 2>&1; then
     cat "${closure_stage}"
     echo "ERROR: canonical central/ten-block closure failed; retained report ${closure_stage}" >&2

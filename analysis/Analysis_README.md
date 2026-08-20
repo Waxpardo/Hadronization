@@ -267,6 +267,7 @@ physics observable.
 Merge both central and block products:
 
 ```bash
+HADRONIZATION_EXPECTED_PAIR_SCHEMA=v3 \
 ./merging/merge_root_files.sh \
   Production/<CAMPAIGN>/freeze \
   <PRODUCTION_ROOT> \
@@ -277,6 +278,16 @@ Merge both central and block products:
 
 Arguments are, in order: freeze directory, production root, analysis root,
 analyzed-data base, and optional output tag. Do not omit the production root.
+
+`HADRONIZATION_EXPECTED_PAIR_SCHEMA` is **required and has no default**. It is
+the schema this campaign demands of its merged pair files, and the driver hands
+it to the closure gate as `EXPECTED_SCHEMA` (review finding A4: a gate whose
+expectations come from the thing under test cannot fail it). Use `v3` for the
+Run-3 production and for every systematic variation; `v2` only for a
+deliberately re-run legacy campaign. The driver resolves the tag against
+`config/pair_file_object_contract_v1.json` before it starts work, so a missing
+or unknown value is refused in the first seconds rather than eleven hours later
+at the gate.
 Use `Production/<CAMPAIGN>` for a first-stage freeze and the `Production`
 collection root for a superseding union whose manifest rows carry their source
 campaign prefixes.

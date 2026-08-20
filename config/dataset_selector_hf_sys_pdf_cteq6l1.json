@@ -1,0 +1,24 @@
+{
+  "schema": "hadronization_dataset_selector_v1",
+  "active_dataset": "hf_sys_pdf_cteq6l1_variation",
+  "datasets": {
+    "hf_sys_pdf_cteq6l1_variation": {
+      "campaign": "HF_SYS_PDF_CTEQ6L1",
+      "status": "systematic_variation",
+      "publication_eligible": false,
+      "complete_root_tag": "complete_root_HF_SYS_PDF_CTEQ6L1",
+      "subsample_base": "/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_SYS_PDF_CTEQ6L1/combined_root_subSamples",
+      "analyzed_data_base": "/data/alice/ipardoza/hadronization_merged",
+      "production_root": "/data/alice/ipardoza/hadronization_production/HF_SYS_PDF_CTEQ6L1",
+      "analysis_root": "/data/alice/ipardoza/hadronization_analysis/HF_SYS_PDF_CTEQ6L1",
+      "raw_base": "/data/alice/ipardoza/hadronization_production/HF_SYS_PDF_CTEQ6L1/raw",
+      "canonical_manifest": "/data/alice/ipardoza/systematics_harvest/manifests/HF_SYS_PDF_CTEQ6L1/canonical_manifest.jsonl",
+      "publication_authorization": "docs/SYSTEMATICS_PREREGISTRATION.md",
+      "publication_authorization_sha256": "11de8d83b78aacceca7a105a9c56a28332459812e5ad137e651bb3d99e08919c",
+      "block_count": 10,
+      "raw_schema": "hf_primary_ground_raw_v7",
+      "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
+      "interpretation": "HF_SYS_PDF_CTEQ6L1 is a systematic variation of the sealed HF_RUN3_V1 physics campaign, at one tenth its exposure (10 M events per tune against 100 M). It exists to measure a systematic shift and is NOT a publication dataset: publication_eligible is false and no authorization is cited, deliberately. Its merged products carry three closure PASSes and 33 promoted legs. Added 2026-08-19 because the dataset selector, not the plotting configuration, is what the resolver reads -- see the run record's plumbing entry."
+    }
+  }
+}

@@ -403,9 +403,9 @@ prints `*_STALE` on drift, and `make check` runs it.
 
 | tool | status | why |
 |---|---|---|
-| `statistical_robustness.py` | measurement-provenance | independent partition-sensitivity audit; pins the plotter, boundary utilities and configuration by sha and rejects a receipt not bound to the frozen configuration |
+| `statistical_robustness.py` | measurement-provenance | **SUPERSEDED 2026-08-19, not deleted.** Independent partition-sensitivity audit; pins the plotter, boundary utilities and configuration by sha. **It has never run on any campaign in this project.** It requires a PASS final-origin closure report, and that report requires `unresolved_trigger_candidate_count == 0`. Production demotes every duplicate hard-carrier claimant to `Origin::kUnresolved` and the analysis never tie-breaks ambiguous ancestry, so that count is structurally non-zero: A2 measured 124 / 24,411 / 24,590 contested rows in MONASH / JUNCTIONS / CLOSEPACKING over 100 of the sealed campaign's 1000 slots. **The project measures unresolved origin as a systematic (A2, `docs/a2_results_20260813/`), not as a gate.** Run record §17. |
 | `dataset_selector.py` | pipeline | the single publication dataset selector, fail-closed |
-| `final_origin_closure.py` | measurement-provenance | aggregates origin resolution over an exact **sealed** final manifest |
+| `final_origin_closure.py` | measurement-provenance | **SUPERSEDED 2026-08-19, not deleted.** Aggregates origin resolution over an exact **sealed** final manifest. Its publication gate sets `publication_readiness=READY` only when `unresolved_trigger_candidate_count == 0`. **That state is unreachable for this analysis by construction**, because ambiguous ancestry is `kUnresolved` and never tie-broken. No report has ever been produced for any campaign. See A2, and run record §17. |
 | `pdg_2025_species_audit.py` | measurement-provenance | the signed registry against PDG 2025 |
 | `evaluate_pthat_sensitivity.py` | measurement-provenance | extracts and **decides** the predeclared Gate-B test — the decision rule was written before the data |
 | `anchor_width_control.py` | measurement-provenance | **the control E4 never had.** Every E4 statement compares the anchor to its parent and stops; none compares it to a *genuine* 1/10 subset processed the same way. The ten canonical blocks were that control and were available the whole time. Running it moved the quarantine's basis from bin-level statistics to provenance — recorded in `GOLDEN_OUTPUTS.md` §2.11a and `ERROR_RECORD.md` E4 |
@@ -513,14 +513,105 @@ the reason each remains:
 question; five are location or disposition, one is a fold that may never have
 happened.
 
-| # | question |
+**All six are RULED or ANSWERED as of 2026-08-20.** The table records each
+question, its disposition and the reason. Q4 was an action rather than a ruling
+and its measurement is below.
+
+| # | question | disposition |
+|---|---|---|
+| **Q1** | `analysis/status_analysis_qq.C` is functionally a member of the split chain — its only consumer, `qq_draw_2D_correlations.C`, is in `attic/split_chain/`. Should it move there? | ✅ **MOVE to `attic/split_chain/`.** §10's rule is that `attic/` means no live consumer, and this file has none outside the attic. Keeping it in `analysis/` leaves one file there that the next census re-raises |
+| **Q2** | `plotting/FinalAnalysis/` — retire now and drop the two `run_paper_plots.sh` targets, or leave as scheduled? | ✅ **LEAVE as scheduled.** `POST_SUBMISSION.md` already schedules both macros for retirement after submission, with a trigger. Moving it earlier changes a runner during a live figure campaign, and the directory's misleading "Final" is a naming cost the schedule already prices |
+| **Q3** | `generated_heavy_flavor_summary.C` is measurement-provenance for a published table, sitting in `attic/`. Move it? | ✅ **MOVE beside `docs/A9_PAPER_TABLE_REGENERATION.md`.** It is provenance for one specific published table, `Paper/Tables/generated_heavy_flavor_summary.tex`, not a validator — so it belongs with the document that explains it, not in `Validation/` |
+| **Q4** | Was `attic/plotting/plotting_documentation.md` folded into `plotting/README.md`, or is unique documentation sitting in the attic? | ✅ **MEASURED 2026-08-20: the fold happened. Nothing unique and live is in the attic copy.** §11.1 below |
+| **Q5** | `plotting/improvedPlotting_THnSparse.C` — the one convention violation | ✅ **RENAME after the figure set freezes, with a re-render.** §11.2 below |
+| **Q6** | `docs/history/**` publication disposition | ✅ **EXCLUDED from the publication export**, ruled 2026-08-20. The entry, its mechanism and its unmet dependency are in `docs/PUBLICATION_EXPORT_EXCLUSIONS.md` |
+
+**Q1 and Q3 are file moves and are NOT executed by this session.** Both change
+paths that `RENAMES.md` tracks, and the merge is the next session. They are
+recorded as rulings with their destinations named.
+
+### 11.1 Q4 — the fold happened, measured token by token
+
+**The question was whether 485 lines of plotting documentation are reachable
+only through `attic/`.** They are not.
+
+**Method.** Every backticked code span in both documents was extracted and
+differenced, then each token unique to the attic copy was searched across the
+whole tree, excluding `attic/` and `docs/history/`.
+
+| | count |
 |---|---|
-| **Q1** | `analysis/status_analysis_qq.C` is functionally a member of the split chain — its only consumer, `qq_draw_2D_correlations.C`, is in `attic/split_chain/`. Should it move there, or is it kept in `analysis/` on purpose? |
-| **Q2** | `plotting/FinalAnalysis/` — `POST_SUBMISSION.md` schedules both macros for retirement *after* submission. Retire now and drop the two `run_paper_plots.sh` targets, or leave as scheduled? **The name's "Final" survives only as long as the directory does.** |
-| **Q3** | `generated_heavy_flavor_summary.C` is measurement-provenance for a published table, sitting in `attic/`. Should it move to `Validation/` or beside the A9 document, so "attic" keeps meaning "no live consumer"? |
-| **Q4** | `attic/plotting/plotting_documentation.md` (485 lines) — plan **D5** ruled *"fold into `plotting/README.md`, attic the root copy"*. `RENAMES.md` records the attic move; **nothing records the fold**, and `plotting/README.md` (536 lines) never mentions it. Was the content folded, or is unique plotting documentation sitting in the attic? *For the deep-documentation session.* |
-| **Q5** | `plotting/improvedPlotting_THnSparse.C` — the one convention violation the pass could not fix. §12 states the cost; the owner rules. |
-| **Q6** | `docs/history/**` publication disposition — sized in the session record, flagged as an owner decision, not acted on. |
+| backticked tokens, attic copy | 74 |
+| backticked tokens, `plotting/README.md` | 109 |
+| unique to the attic copy | 36 |
+| **of those, found nowhere else in the live tree** | **2** |
+
+**The 34 that resolve.** Most are pre-restructure paths the README carries under
+current names (`PlottingScripts/improvedPlotting_THnSparse.C`), or live tokens
+the README does not backtick but the code does: `nominator_TUNES` and
+`legend_entries` are in `tests/test_three_tune_plot_config.py` and the shipped
+three-tune configuration, `charm_correlations_to_analyse` is in
+`tests/test_plot_reference_multiplicity_contract.py` and
+`plotting/Plot_MultiplicityDistribution_PercentileBoundaries.C`, and
+`canonical_slot % 10` is in `ARCHITECTURE.md`, `REPRODUCIBILITY.md` and
+`analysis/Analysis_README.md`.
+
+**The substance was folded, not merely the tokens.** The attic copy's
+"Complete root identifies the full-union central-value source. It does not mean
+'without subsampling errors'" is carried by the README's *Full and reduced
+configs*, at greater length and in current wording — the 16 mini canvases, the
+two global canvases, all 11 ordered activity definitions, the excluded Σ_b, and
+*"It is not a no-error target."*
+
+**The two that resolve nowhere are stale, not lost.**
+
+| token | what it names | why it is stale |
+|---|---|---|
+| `hf_gate_d_visual_review_v1` | a gate-D visual-review report schema, gating a `finalize` step | **no live code implements it.** `gate_d` survives only in `ValidationReports/PREPRODUCTION_GATE_REPORT_20260730.md` and `docs/history/`. The role passed to `tools/final_plot_provenance.py`, which the README documents under *Final-plot provenance* |
+| `NOT_AVAILABLE_FOR_LEGACY_INPUT` | a receipt field value for legacy-regression central/block manifests | **no live code writes or reads it.** The README's `publication_eligible=false` treatment of `canonical_candidate` is the current mechanism |
+
+> **Verdict: Q4 is closed and the attic copy stays where it is.** It documents a
+> `prepare`/`finalize` gate stage that no longer exists. Folding a description of
+> a removed stage into the live README would add two stale identifiers to a
+> current document, which is worse than leaving them in the attic. **Plan D5's
+> ruling was carried out**, and the two residues are evidence of that rather than
+> of an omission — they are exactly what a fold correctly declines to carry
+> across.
+
+### 11.2 Q5 — rename after the figure set freezes, with a re-render
+
+**✅ RULED 2026-08-20: rename to `plotting/Plot_PairBalancing_THnSparse.C`, in a
+dedicated commit after the figure set is frozen and the campaign is recorded
+COMPLETE, re-rendering the canvas so the receipt and the run record are
+regenerated rather than patched.** This is the recommendation §12.2 already
+priced, and the ruling adopts it.
+
+**Not now, and the reason is a number.** `tools/statistical_robustness.py:669`
+checks every `multiplicity_boundary_receipt_v1.json` against
+`sha256(plotting/improvedPlotting_THnSparse.C)`, and the shipped three-tune
+canvas's receipt records `6dace202…`. Renaming forces a byte change, because
+ROOT ties the entry point to the basename and the macro embeds its own filename
+at `:385` and `:1334`. **Changing the bytes does not re-pin a digest; it
+invalidates a committed receipt for a figure rendered on 2026-08-16.**
+
+**The trigger, stated so nobody has to re-derive it:** the figure set is frozen
+and the campaign is recorded COMPLETE. `docs/FIGURE_INVENTORY.md` §6.3b still
+blocks two figure families, so the set is not frozen today.
+
+**What the rename commit must do**, in one commit and nothing else:
+
+1. `git mv` to `plotting/Plot_PairBalancing_THnSparse.C`;
+2. rename the entry-point function to match the basename;
+3. update the two embedded filename references at `:385` and `:1334`;
+4. update the two pins — `config/multiplicity_class_boundaries_v1.json`'s
+   `single_definition_note`, and
+   `docs/plotting_validation/hf_run3_v1_threetune_20260816/RUN_RECORD.md`;
+5. **re-render the three-tune canvas**, so its receipt and run record are
+   regenerated against the new bytes.
+
+**Step 5 is the one that must not be skipped.** Without it the rename patches a
+provenance record to accommodate a cosmetic change, which §12.2 names as *"the
+one thing this repository's contract is built to prevent."*
 
 *Census Q5 (`docs_check.sh`) and census D6 (`B_Balancing_GeneralPlotting.C`) are
 both **closed** by this pass — see §8.3 and §10.*
