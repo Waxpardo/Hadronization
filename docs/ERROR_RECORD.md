@@ -290,7 +290,7 @@ sector**, and skips associates whose charge in that sector is zero
 (`:1026-1032`). A charm trigger therefore only ever fills charm-carrying
 species, and a beauty trigger only beauty-carrying ones. Under replication every
 charm-only species total must be divisible by 24 and every beauty-only one by
-26. In `anchors/merged_monash_central/per_species.csv`:
+26. In `anchors/merged_monash_replicated/per_species.csv`:
 
 | test | result |
 |---|---|

@@ -5,7 +5,7 @@ extracted from the merged pair files with the **trigger-deduplicating**
 extractor on 2026-08-13. This supersedes the arithmetic reconstruction that
 stood between 2026-08-13 morning and this run.
 
-## What makes it different from `merged_monash_central/`
+## What makes it different from `merged_monash_replicated/`
 
 That anchor is the **replicated** extraction: the trigger-owned closure
 histograms were summed once per pair file, so each charm trigger entered 24

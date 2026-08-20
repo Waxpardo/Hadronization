@@ -113,7 +113,7 @@ triggers appears in **24** pair files and each of the six beauty triggers in
 **The published product carries the defect, not merely the code.** Under
 replication every charm-only species total must divide by 24 and every
 beauty-only one by 26. Measured in
-`anchors/merged_monash_central/per_species.csv`: **45 of 45** charm-only
+`anchors/merged_monash_replicated/per_species.csv`: **45 of 45** charm-only
 species divide by 24, and **42 of 42** beauty-only ones divide by 26. The gcd
 of all 94 nonzero totals is **exactly 2** = gcd(24, 26). The two negative
 controls do not reproduce it. Only 5 of 45 charm-only totals also divide by 26,

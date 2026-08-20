@@ -47,7 +47,7 @@ sys.path.insert(0, str(REPO / "extraction"))
 from compare_subset_parent import compare  # noqa: E402
 
 ANCHOR = REPO / "AnalysisScripts/anchors/extraction_dual/per_species.csv"
-PARENT = REPO / "AnalysisScripts/anchors/merged_monash_central/per_species.csv"
+PARENT = REPO / "AnalysisScripts/anchors/merged_monash_replicated/per_species.csv"
 MAP = REPO / "AnalysisScripts/decay_parent_map_v1_1.json"
 
 # The bin the anchor incident is named for: Sigma_b-bar-minus, pdg -5222.

@@ -36,7 +36,7 @@
 > Charm rows move up and beauty rows down, by the 26/24 ratio — the beauty
 > sector was over-weighted relative to charm by 8.3 %.
 >
-> Corrected artifact: `anchors/merged_monash_central/per_category_deduplicated.csv`,
+> Corrected artifact: `anchors/merged_monash_replicated/per_category_deduplicated.csv`,
 > regenerable with `tools/reconstruct_deduplicated_decomposition.py`.
 > **A live re-extraction against the merged product is still outstanding**
 > (`STATE.md` pending).
@@ -46,7 +46,7 @@ After this document, **no published number traces to the anchor**.
 
 | | |
 |---|---|
-| weights | `AnalysisScripts/anchors/merged_monash_central/per_species.csv` (sha256 `74ecfb6ee659e737…`) |
+| weights | `AnalysisScripts/anchors/merged_monash_replicated/per_species.csv` (sha256 `74ecfb6ee659e737…`) |
 | source | merged MONASH central, **1000 inputs**, 300 pair files, promoted by the v3 merge |
 | total | **1,298,655,240** |
 | tune | **MONASH only** — the three-tune table is Task 4 and needs the other two tunes' merges |

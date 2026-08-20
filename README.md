@@ -124,7 +124,7 @@ extraction/aggregate_m7.py AnalysisScripts/anchors/m7b_blocks/*.log
 # blind spot for BROAD defects (docs/ERROR_RECORD.md E4), not a clearance.
 extraction/compare_subset_parent.py \
   AnalysisScripts/anchors/extraction_dual/per_species.csv \
-  AnalysisScripts/anchors/merged_monash_central/per_species.csv \
+  AnalysisScripts/anchors/merged_monash_replicated/per_species.csv \
   --null binomial --expect-scale 9.9986
 
 # the three-tune table, both conventions on a COMMON row set. Each tune's own

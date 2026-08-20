@@ -262,10 +262,10 @@ changed. Any restructure that rewrites line endings on these files breaks C7.
 | **G11** | `anchors/extraction_dual/per_species.csv` | `6137f6bc1f661ffdf26167a440091229f1466c87e2a8e4b50d096d66c3f45ac1` | 91 | **129,883,844** |
 | **G12** | `anchors/extraction_dual/per_category.csv` | `fe8d7dc577c56fd3e4ef9d090ee37b120b578d8fb2e08cdf8a5b08cd2f48db12` | 6 | **129,883,844** |
 | **G13** | `anchors/extraction_dual/per_observable.csv` (**SUPERSEDED**) | `46bca45240ffb49662de3b9ab49be157ce2f0a0b08043e67bbe6f70f1d3f6303` | 30 | **129,883,844** |
-| **G14** | `anchors/merged_monash_central/per_species.csv` (**REPLICATED — see E5**) | `74ecfb6ee659e737caa45822592000f143c4a9e0f0b6365f12f273d33898ce76` | — | **1,298,655,240** |
-| **G15** | `anchors/merged_monash_central/per_category.csv` (**REPLICATED — see E5**) | `f162686c24b488c6cbd2c37085899be5df139b2e678c8109faeb8c263076e024` | — | — |
-| **G14d** | `anchors/merged_monash_central/per_species_deduplicated.csv` | regenerable, see R12 | 95 | **53,662,414 … 53,662,828** |
-| **G15d** | `anchors/merged_monash_central/per_category_deduplicated.csv` | regenerable, see R12 | 4 | — |
+| **G14** | `anchors/merged_monash_replicated/per_species.csv` (**REPLICATED — see E5**) | `74ecfb6ee659e737caa45822592000f143c4a9e0f0b6365f12f273d33898ce76` | — | **1,298,655,240** |
+| **G15** | `anchors/merged_monash_replicated/per_category.csv` (**REPLICATED — see E5**) | `f162686c24b488c6cbd2c37085899be5df139b2e678c8109faeb8c263076e024` | — | — |
+| **G14d** | `anchors/merged_monash_replicated/per_species_deduplicated.csv` | regenerable, see R12 | 95 | **53,662,414 … 53,662,828** |
+| **G15d** | `anchors/merged_monash_replicated/per_category_deduplicated.csv` | regenerable, see R12 | 4 | — |
 
 > **G14/G15 are the REPLICATED product and are retained as the historical
 > record, not as the published decomposition.** `docs/ERROR_RECORD.md` **E5**:
@@ -1004,12 +1004,12 @@ Run from the repository root, tree clean. **Check the named output line, never
 | R4 | `make cards && make cards-current` | both exit 0 |
 | R5 | `tools/build_decay_parent_map.py AnalysisScripts/anchors/f4_probe/f4_probe_v1.out --ordinals AnalysisScripts/species_ordinals_v2.json --out /tmp/v11.json` | `map_sha256=dd502a10c5932fff`, `I1=PASS I2=PASS`, `artifact_rows_changed=101 table_affecting_rows=60` |
 | R6 | `tools/build_decay_parent_map_v2.py AnalysisScripts/anchors/f4_probe/f4b_probe.out --ordinals AnalysisScripts/species_ordinals_v2.json --v1 AnalysisScripts/decay_parent_map_v1_1.json --weights AnalysisScripts/anchors/extraction_dual/per_species.csv --out /tmp/v2.json` | `sha256=c9593c9c0a7c4ec2`, `split=2`, exactly two `SPLIT` lines |
-| R7 | `extraction/apply_decay_map.py --map AnalysisScripts/decay_parent_map_v2.json --weights AnalysisScripts/anchors/merged_monash_central/per_species.csv --mode split` | `TOTAL 1298655240 INVARIANCE CONSERVED`; D⁰ **25.2435**, D̄⁰ 25.1707, D⁺ 13.1408, D⁻ 13.1129 |
-| R8 | `extraction/second_branch_weight.py --per-species AnalysisScripts/anchors/merged_monash_central/per_species.csv` | `SECOND_BRANCH_DONE at_risk_pct=12.8396 concentration_top4=97.81%` — the **(C) chained history** row of §2.6, **not** "THE NUMBER" |
+| R7 | `extraction/apply_decay_map.py --map AnalysisScripts/decay_parent_map_v2.json --weights AnalysisScripts/anchors/merged_monash_replicated/per_species.csv --mode split` | `TOTAL 1298655240 INVARIANCE CONSERVED`; D⁰ **25.2435**, D̄⁰ 25.1707, D⁺ 13.1408, D⁻ 13.1129 |
+| R8 | `extraction/second_branch_weight.py --per-species AnalysisScripts/anchors/merged_monash_replicated/per_species.csv` | `SECOND_BRANCH_DONE at_risk_pct=12.8396 concentration_top4=97.81%` — the **(C) chained history** row of §2.6, **not** "THE NUMBER" |
 | **R8b** | same, plus `--v2-map AnalysisScripts/decay_parent_map_v2.json` | `SECOND_BRANCH_V2 presplit_pct=5.7644 postsplit_residual_pct=0.0018 residual_species=2` — **THE NUMBER**, with B_c⁻/B_c⁺ named as the whole residual. (Pre-split reads 5.7644 not 5.7737 because it is recomputed on the *merged* weights, not the anchor's baked-in ones — that is the tool working, not disagreeing.) |
 | R9 | `extraction/aggregate_m7.py AnalysisScripts/anchors/m7b_blocks/*.log` | reproduces §2.8 (beauty); fail-closes below 10 blocks |
 | **R9b** | `extraction/aggregate_m7.py AnalysisScripts/anchors/m7_blocks/*.log` | reproduces §2.7 (charm) — **new: the charm logs were anchored in `b74e588`** |
-| R10 | `extraction/compare_subset_parent.py AnalysisScripts/anchors/extraction_dual/per_species.csv AnalysisScripts/anchors/merged_monash_central/per_species.csv --null binomial --expect-scale 9.9986` | **30** bins flagged, `rc=1` by design |
+| R10 | `extraction/compare_subset_parent.py AnalysisScripts/anchors/extraction_dual/per_species.csv AnalysisScripts/anchors/merged_monash_replicated/per_species.csv --null binomial --expect-scale 9.9986` | **30** bins flagged, `rc=1` by design |
 | **R10b** | same, `--null mad` instead | **0** bins flagged, `sigma^ = 4.3990`, `rc=0` — the recalibrated null of 2026-08-13. **rc=0 here is NOT a clean bill of health**: see §2.11a |
 | R11 | `make test` | **45/45**, ROOT present *(was 39/39 when this row was written; the denominator moves as tests are added — what is pinned is that every test passes and ROOT is present)* |
 | **R13** | `plotting/paper/make_paper_figures.py` | two SVGs, digests in §2.12, `FIGURES_DONE`. Byte-deterministic: re-running and comparing digests IS the check |
@@ -1134,8 +1134,8 @@ f2d30a345bd8bed278062296d007f2dc5a4f101cf54f54b719e8caccd7d7cd76  f4_probe/f4_pr
 6137f6bc1f661ffdf26167a440091229f1466c87e2a8e4b50d096d66c3f45ac1  extraction_dual/per_species.csv
 fe8d7dc577c56fd3e4ef9d090ee37b120b578d8fb2e08cdf8a5b08cd2f48db12  extraction_dual/per_category.csv
 46bca45240ffb49662de3b9ab49be157ce2f0a0b08043e67bbe6f70f1d3f6303  extraction_dual/per_observable.csv
-74ecfb6ee659e737caa45822592000f143c4a9e0f0b6365f12f273d33898ce76  merged_monash_central/per_species.csv
-f162686c24b488c6cbd2c37085899be5df139b2e678c8109faeb8c263076e024  merged_monash_central/per_category.csv
+74ecfb6ee659e737caa45822592000f143c4a9e0f0b6365f12f273d33898ce76  merged_monash_replicated/per_species.csv
+f162686c24b488c6cbd2c37085899be5df139b2e678c8109faeb8c263076e024  merged_monash_replicated/per_category.csv
 5a75aa882853b9368ce065f1ce5b32a32eaff61180c8dbe65a2a006712f487e9  m7b_blocks/m7b_block_01.log
 740c8f1ab51386c6907f8e6e15e127b4c6bab2be0ab077b0441fb9d1431ace74  m7b_blocks/m7b_block_02.log
 5544e62f1f850acf382b7b1e1c6fb833972be9c268b87bf0cfa1e792fc94e50e  m7b_blocks/m7b_block_03.log

@@ -28,7 +28,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 TOOL = REPO / "extraction/decompose_with_block_sems.py"
-SOURCE = REPO / "AnalysisScripts/anchors/merged_monash_central/per_species.csv"
+SOURCE = REPO / "AnalysisScripts/anchors/merged_monash_replicated/per_species.csv"
 
 failures = []
 

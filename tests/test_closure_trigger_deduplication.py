@@ -39,7 +39,7 @@ from extract_species_decomposition import (  # noqa: E402
 
 REGISTRY = REPO / "config/heavy_flavour_pair_registry_v1.json"
 ORDINALS = REPO / "AnalysisScripts/species_ordinals_v2.json"
-PUBLISHED = REPO / "AnalysisScripts/anchors/merged_monash_central/per_species.csv"
+PUBLISHED = REPO / "AnalysisScripts/anchors/merged_monash_replicated/per_species.csv"
 
 # Measured from the committed 300-pair registry on 2026-08-13. Pinned so that a
 # registry change that alters the replication factors fails loudly here rather

@@ -214,3 +214,121 @@ is frozen, re-rendering so the receipt is regenerated rather than patched.
 > that was right 119 times out of 120 was caught by a recorded digest. Here the
 > digest is doing the same job *before* the edit: it prices the rename honestly,
 > and the price is higher than the tidiness is worth while the campaign is open.
+
+---
+
+## 8. THE 2026-08-20 RENAME PASS — R5 executed, R1 BLOCKED, R2 refused
+
+**Executed on branch `renames`, against `9a99b42`.** The five candidates and
+their evidence are `docs/REPO_AUDIT_FINDINGS.md` §2; the owner ruled all five.
+The pin inventory the pass was built on is `docs/RENAME_PATH_PINS.md`.
+
+**§2 of the findings says renaming belongs to the export. That reasoning is
+superseded.** The documentation rewrite happens in this repository first and will
+author documents that cite paths, so the paths have to be final before the prose
+is written.
+
+### 8.1 What executed
+
+| # | old | new | paths moved |
+|---|---|---|---|
+| **R5** | `AnalysisScripts/anchors/merged_monash_central/` | `AnalysisScripts/anchors/merged_monash_replicated/` | 4 |
+
+**4 paths moved by `git mv`, history preserved** —
+`git log --follow AnalysisScripts/anchors/merged_monash_replicated/per_species.csv`
+reaches the original. The pass rewrote twelve documents and tools to match.
+
+**R5 was the correctness item, not the cosmetic one.**
+`merged_monash_central/` held the **replicated, pre-E5** extraction while
+`merged_monash_dedup/central/` held the corrected one. Both are PUBLIC, a reader
+meets them side by side, and "central" meant the merge product in one name and
+the E5 state in the other. `merged_monash_replicated/` pairs with the
+`merged_monash_replicated_blocks/` that already existed.
+
+**Why it was safe, stated as a measurement.** None of the twelve rewritten files
+has a digest pinned anywhere in the tree, and a `git mv` does not change content
+— so **G14 `74ecfb6e…` and G15 `f162686c…` still hold after the move**.
+
+### 8.2 R1 is BLOCKED — `AnalysisScripts/` stays
+
+**`AnalysisScripts/` → `artifacts/` was attempted, measured, and reverted.** The
+rename is right and the tree cannot take it yet.
+
+**The measured cost first.** `RENAMES.md` §2 priced this row at 63 files and 138
+occurrences under override D4. Measured on 2026-08-20: **116 files and 283
+occurrences** to rewrite, with 200 more in `docs/history/` that must not move and
+259 in audit artifacts that regenerate. The tree has roughly doubled since.
+
+**The blocker is not the count.** It is that `AnalysisScripts/` cannot move
+without changing the bytes of files whose digests other artifacts pin:
+
+| pinned file | must change because | who checks it |
+|---|---|---|
+| `plotting/improvedPlotting_THnSparse.C` | three `#include "../AnalysisScripts/*.h"` lines. **It will not compile otherwise** | `tools/statistical_robustness.py:668` against `receipt["plotter_source_sha256"]` |
+| `config/multiplicity_class_boundaries_v1.json` | `"derived_from"` names the anchor directory | `tools/make_harvest_plot_configs.py:25` `FROZEN_BOUNDARY_SHA`, and all three boundary receipts |
+| `docs/SYSTEMATICS_PREREGISTRATION.md` | it cites the minimum-bias anchor path | `tests/test_dataset_selector_row_agreement.py:88`, over 14 selector rows |
+| `docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md` | it cites the closure-verdict anchor path | the same test, plus `docs/GOLDEN_OUTPUTS.md` |
+| `analysis/status_analysis_THnSparse_qq.C` | three `#include` lines | recorded sha in `docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` §4.1 |
+| `extraction/extract_species_decomposition.py` | its artifact constant | recorded sha `4cd8b6fa…` in three anchor MANIFESTs and two result tables |
+
+> **`tests/test_dataset_selector_row_agreement.py` caught this within one run of
+> `tools/run_tests.sh`**, on the authorization document rather than on any of the
+> harder-to-see ones. That is `RENAMES.md` §5.1 working exactly as designed: a
+> recorded digest stopped a mechanical rewrite that was right in 114 files out of
+> 116.
+>
+> **Two of the pins are owner grants, and re-pinning them defeats their purpose.**
+> `HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md` and `SYSTEMATICS_PREREGISTRATION.md`
+> carry digests **so that they cannot change after the fact**. Editing the
+> document and updating the recorded digest is not a fix; it is the thing the
+> digest exists to detect.
+
+**What would unblock R1.** The same event that unblocks R2: a re-render that
+regenerates the boundary receipts, taken together with a re-issue of the two
+grants at their new digests. **Neither is a rename cost — both are campaign
+costs**, and the rename should ride along with a re-render that some other need
+already requires.
+
+### 8.3 R2 is REFUSED — the same wall, reached independently
+
+`plotting/improvedPlotting_THnSparse.C` **stays.** §7 deferred it pending the
+figure freeze. The figure set is now frozen and the answer did not change,
+because three bindings tie the macro to its own filename:
+
+1. **`tools/statistical_robustness.py:668`** raises `ValueError` when
+   `receipt["plotter_source_sha256"] != sha256(checkout/"plotting/improvedPlotting_THnSparse.C")`.
+2. **The macro hashes itself by path** at `:1357`, inside the code that writes
+   that same field, and it finds the project root by looking for its own
+   basename at `:395`.
+3. **ROOT ties the entry-point function to the basename** — `:5310` declares
+   `int improvedPlotting_THnSparse(const char* configuration)`.
+
+**The pin is live right now.** The polished receipt records
+`plotter_source_sha256 = 684555300d2144ba…`, which is the macro's digest at
+`HEAD`. The recommendation in §7 stands: rename in a dedicated commit, with the
+re-render, when something else already requires one.
+
+### 8.4 R3 and R4 declined
+
+**`plotting/FinalAnalysis/`** stays: `docs/COMPONENTS.md` Q2 rules it left as
+scheduled and prices the naming cost deliberately. Both macros already await
+retirement after submission, and a runner moved during a live figure campaign
+trades a real risk for a cosmetic gain.
+
+**`analysis/status_analysis_qq.C`** stays: it is INTERNAL, superseded, and its
+only consumer is INTERNAL too. It never reaches the published tree, so its name
+misleads nobody there.
+
+### 8.5 ⚠ THE NIKHEF CHECKOUT MUST ADVANCE BEFORE S4 RUNS
+
+**This pass did not touch the Nikhef checkout, and that rule stands.** This
+section records the consequence, so nobody meets it mid-campaign.
+
+**S4 stages 2 to 4 still have to run there, and `merged_monash_central/` has
+moved.** The checkout was already behind. Any extraction or comparison that
+resolves that anchor path now resolves a name the checkout does not have.
+
+**Advance the checkout before S4 runs.** The procedure is
+`docs/CHECKOUT_SYNC_PROCEDURE.md`, and `tools/checkout_advance_guard.py` refuses
+the advance while jobs are in flight — which is the reason to do it between
+stages rather than during one.

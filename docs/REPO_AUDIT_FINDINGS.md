@@ -105,10 +105,19 @@ once under the option's own name. **The ROOT version that wrote it is
 
 ---
 
-## 2. RENAME CANDIDATES — none executed
+## 2. RENAME CANDIDATES — ruled and acted on 2026-08-20
 
-**Renaming belongs to the export**, which builds a new tree and therefore pays
-none of the path-rewrite cost that struck three rows from the restructure plan.
+> **This section's original reasoning is superseded, and the record of what
+> happened is `RENAMES.md` §8.** It said renaming belongs to the export. It does
+> not: the documentation rewrite happens here first and will author documents
+> that cite paths, so the paths have to be final before the prose is written.
+>
+> **R5 executed. R1 attempted, measured and BLOCKED** — it cannot move without
+> changing files whose digests two owner grants and three receipts pin. **R2
+> refused**, **R3 and R4 declined.** The pin inventory that decided all five is
+> `docs/RENAME_PATH_PINS.md`.
+
+The candidates as first recorded, with the evidence behind each ruling:
 
 | # | path | why the name misleads | note |
 |---|---|---|---|
@@ -116,7 +125,7 @@ none of the path-rewrite cost that struck three rows from the restructure plan.
 | **R2** | `plotting/improvedPlotting_THnSparse.C` | "improved" names a comparison with a predecessor that is now in `attic/` | COMPONENTS Q5 already rules **rename after the figure set freezes, with a re-render** |
 | **R3** | `plotting/FinalAnalysis/` | "Final" describes neither the stage nor the product; it is one directory of two macros already scheduled for retirement | COMPONENTS Q2 rules **leave as scheduled** and prices the naming cost deliberately |
 | **R4** | `analysis/status_analysis_qq.C` vs `analysis/status_analysis_THnSparse_qq.C` | two names one token apart, on different chains — the first is superseded and its only consumer sits in `attic/split_chain/` | the same file is an **OWNER** row in the manifest |
-| **R5** | `AnalysisScripts/anchors/merged_monash_central/` | holds the **replicated** (pre-E5) extraction, while `merged_monash_dedup/central/` holds the corrected one. "central" means the merge product in one name and the E5 state in the other | both are PUBLIC and a reader meets them side by side |
+| **R5** | `AnalysisScripts/anchors/merged_monash_replicated/` | holds the **replicated** (pre-E5) extraction, while `merged_monash_dedup/central/` holds the corrected one. "central" means the merge product in one name and the E5 state in the other | both are PUBLIC and a reader meets them side by side |
 
 **R1 is the only one that changes how the published tree reads at a glance**,
 and it is the only one whose blocking reason expires at export.

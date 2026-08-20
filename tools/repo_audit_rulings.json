@@ -555,34 +555,6 @@
    "what": "The manifest of the JUNCTIONS deduplicated extraction, recording the run, its inputs and the E5 checks it was made to settle.",
    "why": "It states what the tune's committed tables mean and which prediction they were scored against."
   },
-  "AnalysisScripts/anchors/merged_monash_central/per_category.csv": {
-   "class": "PUBLIC",
-   "dead": "n/a",
-   "voice": "clean",
-   "what": "The MONASH central per-category table from the replicated extraction.",
-   "why": "It is the category-level parent for the same published comparison."
-  },
-  "AnalysisScripts/anchors/merged_monash_central/per_category_deduplicated.csv": {
-   "class": "PUBLIC",
-   "dead": "n/a",
-   "voice": "clean",
-   "what": "The MONASH central per-category table after the E5 trigger deduplication.",
-   "why": "Same role at category level: it is how the published correction is verified."
-  },
-  "AnalysisScripts/anchors/merged_monash_central/per_species.csv": {
-   "class": "PUBLIC",
-   "dead": "n/a",
-   "voice": "clean",
-   "what": "The MONASH central per-species table from the replicated extraction, the parent that the anchor comparison is run against.",
-   "why": "README section 3a names it as the parent input to the E4 anchor-versus-parent comparison."
-  },
-  "AnalysisScripts/anchors/merged_monash_central/per_species_deduplicated.csv": {
-   "class": "PUBLIC",
-   "dead": "n/a",
-   "voice": "clean",
-   "what": "The MONASH central per-species table after the E5 trigger deduplication was applied by arithmetic inversion.",
-   "why": "It is the bridge between the replicated anchor and the final table, and the E5 correction is checked against it."
-  },
   "AnalysisScripts/anchors/merged_monash_dedup/MANIFEST.md": {
    "class": "PUBLIC",
    "dead": "n/a",
@@ -590,6 +562,34 @@
    "voice": "clean",
    "what": "The manifest of the MONASH deduplicated extraction, recording the run, its inputs and the E5 checks it was made to settle.",
    "why": "It states what the tune's committed tables mean and which prediction they were scored against."
+  },
+  "AnalysisScripts/anchors/merged_monash_replicated/per_category.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The MONASH per-category table from the same replicated, pre-E5 extraction.",
+   "why": "It is the category-level parent for that published comparison."
+  },
+  "AnalysisScripts/anchors/merged_monash_replicated/per_category_deduplicated.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The same MONASH per-category table after the E5 trigger deduplication.",
+   "why": "Same role at category level: it is how the published correction is verified."
+  },
+  "AnalysisScripts/anchors/merged_monash_replicated/per_species.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The MONASH per-species table from the REPLICATED, pre-E5 extraction, the parent the anchor comparison is run against.",
+   "why": "README section 3a names it as the parent input to the E4 anchor-versus-parent comparison, which is a published finding."
+  },
+  "AnalysisScripts/anchors/merged_monash_replicated/per_species_deduplicated.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The same MONASH per-species table after the E5 trigger deduplication was applied by arithmetic inversion.",
+   "why": "It bridges the replicated anchor to the final table, and the published E5 correction is checked against it."
   },
   "AnalysisScripts/decay_parent_map_v1.json": {
    "class": "INTERNAL",
@@ -1451,6 +1451,13 @@
    "voice": "clean",
    "what": "Records what left the working tree, when and on what evidence, as the companion to the rename log.",
    "why": "A fresh-history export has no prior tree for a removal record to refer to."
+  },
+  "docs/RENAME_PATH_PINS.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The inventory of every place a path is pinned, split by whether the pin is generated, recorded in prose, or checked by machine against a live file.",
+   "why": "It reasons about which internal artifacts constrain a repository operation, which is deliberation the export does not carry."
   },
   "docs/REPO_AUDIT.csv": {
    "class": "INTERNAL",

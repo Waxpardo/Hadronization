@@ -41,7 +41,7 @@ from compare_subset_parent import compare  # noqa: E402
 
 A = REPO / "AnalysisScripts/anchors"
 DEDUP = A / "merged_monash_dedup"
-REPL_CENTRAL = A / "merged_monash_central/per_species.csv"
+REPL_CENTRAL = A / "merged_monash_replicated/per_species.csv"
 REPL_BLOCKS = A / "merged_monash_replicated_blocks"
 ANCHOR = A / "extraction_dual/per_species.csv"
 
