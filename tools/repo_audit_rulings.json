@@ -1225,6 +1225,13 @@
    "what": "The internal execution map for the nine-document documentation rebuild.",
    "why": "It inventories internal and superseded documents, so the published repository must not carry it."
   },
+  "docs/EXPORT_ARCHITECTURE.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The proposed public-tree layout, its measured path-edit surface and the specification for a later fresh-history export.",
+   "why": "It inventories INTERNAL paths and operational rewrite costs, so the published repository must not carry it."
+  },
   "docs/DESIGN_AND_RATIONALE.md": {
    "class": "PUBLIC",
    "dead": "n/a",
