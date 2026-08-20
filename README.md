@@ -236,10 +236,6 @@ pilot campaigns.
 | `docs/` | the active record; `docs/history/` the archaeology |
 | `attic/` | code with no live consumer, kept rather than deleted |
 
-**The split bbbar/ccbar chain lives in `attic/split_chain/`.** It remains
-available for independent reference samples and comparisons to older
-productions; nothing in the current pipeline calls it.
-
 ---
 
 ## 7. WHICH DOCUMENT OWNS WHAT

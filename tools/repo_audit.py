@@ -46,6 +46,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 RULINGS = REPO / "tools" / "repo_audit_rulings.json"
 MANIFEST = REPO / "docs" / "REPO_AUDIT.csv"
+CITATIONS = REPO / "docs" / "REPO_AUDIT_CITATIONS.tsv"
 
 COLUMNS = [
     "path", "class", "what", "why", "refs",
@@ -66,7 +67,10 @@ CODE_SUFFIXES = {".py", ".sh", ".C", ".cpp", ".h", ".cc"}
 # those counts, writing it would change them, which would change the manifest.
 # The count would never reach a fixed point and --check could never pass.
 # An inventory is not a consumer: nothing in it reads the file it lists.
-SCAN_EXCLUDE = {"docs/REPO_AUDIT.csv", "tools/repo_audit_rulings.json"}
+SCAN_EXCLUDE = {"docs/REPO_AUDIT.csv", "tools/repo_audit_rulings.json",
+                "docs/REPO_AUDIT_CITATIONS.tsv"}
+
+CITATION_COLUMNS = ["citing", "cited", "token", "count", "lines"]
 VALID_VOICE = {"clean", "needs-rewrite", ""}
 VALID_DEAD = {"yes", "no", "n/a", ""}
 
@@ -208,6 +212,67 @@ def entrypoint_map(paths: list[str]) -> dict[str, str]:
     return {p: ";".join(sorted(d)) for p, d in found.items()}
 
 
+def citation_hits(rows: list[dict]) -> list[dict]:
+    """Every place a PUBLIC file names an INTERNAL path.
+
+    THIS IS THE EXPORT'S CENTRAL PROMISE, and until now nothing measured it. A
+    published file that cites an excluded one sends its reader to a 404 in the
+    best case and, in the worst, quotes a superseded number by reference.
+
+    Two needles per INTERNAL path. The full repo-relative path always. The bare
+    basename only when exactly one tracked file carries it -- twelve files
+    carry the name MANIFEST.md, and matching that would flag every anchor
+    directory for naming its own manifest. Uniqueness is the whole test for
+    "distinctive", and it runs against the WHOLE tree rather than against the
+    internal set, so a basename a PUBLIC file shares never becomes a needle.
+
+    Longest-first alternation, for the same reason reference_counts uses it:
+    text naming docs/PRODUCTION_SHAPE_DECISION.md refers to that path, not
+    separately to its basename.
+    """
+    cls = {r["path"]: r["class"] for r in rows}
+    owners: dict[str, int] = {}
+    for p in cls:
+        owners[os.path.basename(p)] = owners.get(os.path.basename(p), 0) + 1
+    needles: dict[str, str] = {}
+    for p in sorted(cls):
+        if cls[p] != "INTERNAL":
+            continue
+        needles[p] = p
+        base = os.path.basename(p)
+        if owners[base] == 1:
+            needles.setdefault(base, p)
+    if not needles:
+        return []
+    ordered = sorted(needles, key=lambda n: (-len(n), n))
+    scan = re.compile("|".join(re.escape(n) for n in ordered))
+
+    found: dict[tuple[str, str, str], list[int]] = {}
+    for p in sorted(cls):
+        if cls[p] != "PUBLIC" or p in SCAN_EXCLUDE:
+            continue
+        text = read_text(REPO / p)
+        if text is None:
+            continue
+        for lineno, line in enumerate(text.splitlines(), 1):
+            for token in set(scan.findall(line)):
+                found.setdefault((p, needles[token], token), []).append(lineno)
+    return [
+        {"citing": c, "cited": t, "token": tok,
+         "count": str(len(lines)), "lines": ",".join(str(n) for n in sorted(lines))}
+        for (c, t, tok), lines in sorted(found.items())
+    ]
+
+
+def render_citations(hits: list[dict]) -> str:
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=CITATION_COLUMNS,
+                            delimiter="\t", lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(hits)
+    return buf.getvalue()
+
+
 def load_rulings() -> dict:
     if not RULINGS.exists():
         return {"groups": {}, "paths": {}}
@@ -301,6 +366,8 @@ def main() -> int:
                     help="exit 1 if the committed CSV differs from a fresh build")
     ap.add_argument("--evidence", action="store_true",
                     help="print the measured columns as JSON and write nothing")
+    ap.add_argument("--citations", action="store_true",
+                    help="rewrite docs/REPO_AUDIT_CITATIONS.tsv and exit")
     args = ap.parse_args()
 
     rows = build_rows()
@@ -328,13 +395,27 @@ def main() -> int:
         print()
         return 0
 
+    if args.citations:
+        hits = citation_hits(rows)
+        CITATIONS.write_text(render_citations(hits), encoding="utf-8")
+        total = sum(int(h["count"]) for h in hits)
+        print(f"wrote {CITATIONS.relative_to(REPO)} -- "
+              f"{total} reference(s) from {len({h['citing'] for h in hits})} file(s)")
+        return 0
+
     text = render(rows)
     if args.check:
         current = MANIFEST.read_text(encoding="utf-8") if MANIFEST.exists() else ""
         if current != text:
             print("STALE docs/REPO_AUDIT.csv -- rerun tools/repo_audit.py", file=sys.stderr)
             return 1
-        print(f"CURRENT docs/REPO_AUDIT.csv ({len(rows)} rows)")
+        cit = render_citations(citation_hits(rows))
+        have = CITATIONS.read_text(encoding="utf-8") if CITATIONS.exists() else ""
+        if have != cit:
+            print("STALE docs/REPO_AUDIT_CITATIONS.tsv -- rerun with --citations",
+                  file=sys.stderr)
+            return 1
+        print(f"CURRENT docs/REPO_AUDIT.csv ({len(rows)} rows) and its citation ledger")
         return 0
 
     MANIFEST.write_text(text, encoding="utf-8")

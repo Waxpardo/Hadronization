@@ -63,14 +63,14 @@
    "why": "The Sigma_b ordering result is published and these logs are the only committed record of the counts behind it."
   },
   "attic-split-chain": {
-   "class": "OWNER",
+   "class": "INTERNAL",
    "dead": "yes",
    "match": [
     "attic/split_chain/*"
    ],
    "voice": "clean",
    "what": "One file of the separate bbbar, ccbar and qqbar production and reduction chain: its producers, its six PYTHIA cards, its reductions and wrappers.",
-   "why": "README section 6 tells readers this chain remains available for independent reference samples, yet nothing in the published pipeline calls it, so does the export carry it or does README drop the sentence?"
+   "why": "Owner-ruled 2026-08-20: the export does not carry it, and README section 6 loses the sentence that offered it."
   },
   "dataset-selectors-systematics": {
    "class": "PUBLIC",
@@ -156,6 +156,16 @@
    "voice": "clean",
    "what": "A superseded standalone study: its macros, its committed numeric outputs and the descriptions of the ROOT files it read.",
    "why": "These studies ran on older productions and no published number descends from them, so they record how the project got here."
+  },
+  "nikhef-cleanup-evidence": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "match": [
+    "docs/nikhef_cleanup_20260820/*"
+   ],
+   "voice": "clean",
+   "what": "One record of the executed cluster cleanup: the target list, the pre-removal digests, the per-path manifest or the removal log.",
+   "why": "Owner-ruled 2026-08-20: cluster operations evidence, not a reproduction input."
   },
   "plotting-configs": {
    "class": "PUBLIC",
@@ -582,11 +592,11 @@
    "why": "It states what the tune's committed tables mean and which prediction they were scored against."
   },
   "AnalysisScripts/decay_parent_map_v1.json": {
-   "class": "OWNER",
+   "class": "INTERNAL",
    "dead": "n/a",
    "voice": "clean",
    "what": "The original decay-parent map, which does not conjugate antiparticle decays and is the artifact behind the conjugation bug.",
-   "why": "It is the evidence for a published correction but also a live reproduction hazard if a reader passes it to the extractor, so does the export carry it?"
+   "why": "Owner-ruled 2026-08-20: a known-defective artifact is a reproduction hazard in a reader's hands, and MAP_V1_CONJUGATION_BUG carries the evidence without shipping the file."
   },
   "AnalysisScripts/decay_parent_map_v1_1.json": {
    "class": "PUBLIC",
@@ -617,11 +627,11 @@
    "why": "A reader following the physics needs the citations, and a bibliography carries no third-party content."
   },
   "Literature/pveen_14443260_msc_thesis-1_mwa2azwk.pdf": {
-   "class": "OWNER",
+   "class": "INTERNAL",
    "dead": "n/a",
    "voice": "clean",
    "what": "A 2 MB PDF of another author's MSc thesis, the predecessor work this project builds on.",
-   "why": "Does the export redistribute a third-party thesis PDF, or cite it and drop the file as the ASD-STE100 exclusion does?"
+   "why": "Owner-ruled 2026-08-20: the export cites the thesis and drops the file, on the same reasoning as the ASD-STE100 exclusion."
   },
   "Makefile": {
    "class": "PUBLIC",
@@ -638,11 +648,11 @@
    "why": "It is a work queue for the authors and states itself that no paper claim depends on any of it."
   },
   "Paper/Tables/generated_heavy_flavor_summary.tex": {
-   "class": "OWNER",
+   "class": "INTERNAL",
    "dead": "n/a",
    "voice": "clean",
    "what": "The generated LaTeX table of per-tune event counts and inclusive species yields that the manuscript includes.",
-   "why": "The manuscript itself is untracked and A9 records this table's numbers as descending from a superseded production, so does the export carry it?"
+   "why": "Owner-ruled 2026-08-20: the manuscript is untracked and A9 records these numbers as descending from a superseded production."
   },
   "README.md": {
    "class": "PUBLIC",
@@ -939,18 +949,18 @@
    "why": "It is the stage that turns generated events into the published observable."
   },
   "analysis/status_analysis_qq.C": {
-   "class": "OWNER",
-   "dead": "no",
-   "voice": "clean",
-   "what": "The non-THnSparse azimuthal-correlation reduction, superseded by the THnSparse one-pass analysis.",
-   "why": "Its only consumer sits in attic/split_chain and COMPONENTS Q1 already rules it should move there, so does it follow the split chain's class?"
-  },
-  "attic/count_events/CountEvents/generated_heavy_flavor_summary.C": {
-   "class": "PUBLIC",
+   "class": "INTERNAL",
    "dead": "yes",
    "voice": "clean",
-   "what": "Counts per-tune events and inclusive species yields from generated trees into the summary table.",
-   "why": "It is the recorded provenance of a table the manuscript publishes right now, which A9 cites and shows cannot be re-pointed."
+   "what": "The non-THnSparse azimuthal-correlation reduction, superseded by the THnSparse one-pass analysis.",
+   "why": "Owner-ruled 2026-08-20: it follows the split chain, whose only consumer of this file sits in attic and which the export does not carry."
+  },
+  "attic/count_events/CountEvents/generated_heavy_flavor_summary.C": {
+   "class": "INTERNAL",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "Counts per-tune events and inclusive species yields from generated trees into the summary table, whose path it hard-codes.",
+   "why": "Its class rested entirely on the table being published; the owner ruled that table INTERNAL on 2026-08-20, so the macro's reason to travel is gone."
   },
   "attic/plotting/B_Balancing_GeneralPlotting.C": {
    "class": "INTERNAL",
@@ -981,11 +991,11 @@
    "why": "The figures it configured are recorded as permanently not regenerable, so it is a record of an old state rather than a recipe."
   },
   "attic/plotting/improvedPlotting.C": {
-   "class": "OWNER",
+   "class": "INTERNAL",
    "dead": "yes",
    "voice": "clean",
    "what": "The predecessor balancing-canvas macro, which reads the same merged product the live path consumes.",
-   "why": "It survived the deletion sweep as an independent cross-check of a published figure rather than as dead code, so does a cross-check nothing invokes travel with the export?"
+   "why": "Owner-ruled 2026-08-20: a cross-check that nothing invokes does not travel, and the live macro is the one a reader runs."
   },
   "attic/plotting/plotting_documentation.md": {
    "class": "INTERNAL",
@@ -1408,11 +1418,11 @@
    "why": "It is change-control for one editing pass: the resulting code is what a reader runs."
   },
   "docs/PRODUCTION_SHAPE_DECISION.md": {
-   "class": "INTERNAL",
+   "class": "PUBLIC",
    "dead": "n/a",
-   "voice": "clean",
-   "what": "Lays out combined versus split charm and beauty production for an owner decision, with the recommendation field left blank.",
-   "why": "It states plainly that nothing in it is a paper number."
+   "voice": "needs-rewrite",
+   "what": "Weighs combined against split charm and beauty production, and carries at section 4.19 THE RULING that fixes common absolute N_ch class boundaries labelled as MONASH minimum-bias percentiles.",
+   "why": "Its class was wrong: config/multiplicity_class_boundaries_v1.json names it as the ruling and two live plotting headers cite it as the authority for the published axis."
   },
   "docs/PROGRESS_PROBE_METHOD.md": {
    "class": "PUBLIC",
@@ -1448,6 +1458,13 @@
    "voice": "clean",
    "what": "The per-path publication audit manifest: class, what, why and the measured evidence for all 786 tracked paths.",
    "why": "It records which internal files exist and why each was excluded, which is the one thing the export must not carry."
+  },
+  "docs/REPO_AUDIT_CITATIONS.tsv": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The recorded debt: every place a PUBLIC file names an INTERNAL path, keyed by citing file, cited file and matched token with an exact count.",
+   "why": "It is a worklist for the rewrite phase and it enumerates the excluded paths by name, which is the one thing the export must not carry."
   },
   "docs/REPO_AUDIT_FINDINGS.md": {
    "class": "INTERNAL",
@@ -1634,11 +1651,11 @@
    "why": "It is the file to read if the caveat reopens, and the census names it for exactly that, but no current figure depends on it."
   },
   "docs/writing_standard/STANDARD.md": {
-   "class": "OWNER",
+   "class": "INTERNAL",
    "dead": "n/a",
    "voice": "clean",
    "what": "The repository's writing standard: the Simplified Technical English and Orwell rules every tracked document is written against.",
-   "why": "Does the export carry the writing standard, given that tools/prose_check.py implements it and the PUBLIC test suite exercises it?"
+   "why": "Owner-ruled 2026-08-20: the writing standard does not travel."
   },
   "docs/writing_standard/pdf-page-map.md": {
    "class": "INTERNAL",
@@ -1648,11 +1665,11 @@
    "why": "It indexes into a copyrighted document that the export cannot carry, and the exclusions list already forbids redistributing it."
   },
   "docs/writing_standard/ste-rules.md": {
-   "class": "OWNER",
+   "class": "INTERNAL",
    "dead": "n/a",
    "voice": "clean",
    "what": "The rule-by-rule reference behind that standard, in the repository's own wording.",
-   "why": "Same question as STANDARD.md: it travels or stays with it, and the rule does not settle whether a house style is reader-facing."
+   "why": "Owner-ruled 2026-08-20: it stays with the standard it expands."
   },
   "extraction/aggregate_m7.py": {
    "class": "PUBLIC",
@@ -1934,13 +1951,29 @@
    "what": "Asserts the pinned ROOT and PYTHIA versions and exports nothing on a mismatch, so environment drift cannot reach a number.",
    "why": "Every documented command sources it first."
   },
+  "tests/test_prose_check_ing_start.py": {
+   "class": "INTERNAL",
+   "dead": "no",
+   "grouped": "tests-python-contract",
+   "voice": "clean",
+   "what": "Pins the writing checker's -ing-start stoplist so a bare imperative verb whose stem ends in -ing does not flag.",
+   "why": "Owner-ruled 2026-08-20: it tests a tool the export does not carry, so shipping it would leave the suite naming a file that is not there."
+  },
+  "tests/test_public_never_cites_internal.py": {
+   "class": "INTERNAL",
+   "dead": "no",
+   "grouped": "tests-python-contract",
+   "voice": "clean",
+   "what": "Rebuilds the PUBLIC-cites-INTERNAL scan and fails on any reference the committed citation ledger does not already record.",
+   "why": "It reads the manifest and the ledger, both INTERNAL, and it enforces a rule about an export that has not been built yet."
+  },
   "tests/test_repo_audit_manifest.py": {
-   "class": "PUBLIC",
+   "class": "INTERNAL",
    "dead": "no",
    "grouped": "tests-python-contract",
    "voice": "clean",
    "what": "Asserts the manifest covers exactly the tracked path set, round-trips through the csv module and carries no invalid class.",
-   "why": "It is a contract test in the PUBLIC suite."
+   "why": "Its class was wrong: it opens docs/REPO_AUDIT.csv, so publishing it would ship a test that names a file the export excludes."
   },
   "tools/GenerateSpeciesOrdinals.C": {
    "class": "PUBLIC",
@@ -2020,18 +2053,18 @@
    "why": "The merge is the longest stage in the chain and this is how a rerun survives it."
   },
   "tools/prose_check.py": {
-   "class": "PUBLIC",
+   "class": "INTERNAL",
    "dead": "no",
    "voice": "clean",
    "what": "Applies the mechanical subset of the repository's writing rules to a document and flags sentences to look at.",
-   "why": "A test in the PUBLIC suite pins one of its checks, so the suite does not run without it."
+   "why": "Owner-ruled 2026-08-20: the standard does not travel and that covers its checker, so the tool leaves with the rules it enforces."
   },
   "tools/repo_audit.py": {
-   "class": "PUBLIC",
+   "class": "INTERNAL",
    "dead": "no",
    "voice": "clean",
-   "what": "Measures size, last-commit date, reference count and entry-point membership for every tracked path and writes the audit manifest.",
-   "why": "It is ordinary repository tooling and its completeness check is one of the suite's tests."
+   "what": "Measures size, last-commit date, reference count and entry-point membership for every tracked path, then writes the audit manifest and its citation ledger.",
+   "why": "Its class was wrong: it reads the rulings file and writes the manifest, both INTERNAL, so it exists to serve a decision the export does not carry."
   },
   "tools/repo_audit_rulings.json": {
    "class": "INTERNAL",
@@ -2058,6 +2091,8 @@
  "voice_rewrite": [
   ".gitignore",
   "ARCHITECTURE.md",
+  "AnalysisScripts/anchors/MANIFEST.md",
+  "AnalysisScripts/anchors/b4_multiplicity_mb/MANIFEST.md",
   "AnalysisScripts/anchors/closure_v3_verdicts/MANIFEST.md",
   "AnalysisScripts/anchors/closure_v3_verdicts/closure_waiter.sh",
   "AnalysisScripts/anchors/e5fix_drivers/MANIFEST.md",
@@ -2139,8 +2174,12 @@
   "extraction/pipeline/tune_chain.sh",
   "extraction/second_branch_weight.py",
   "extraction/systematics_delta.py",
+  "generation/Simulation_README.md",
+  "generation/producer/Makefile",
   "generation/submit/Condor_README.md",
+  "generation/submit/runCondorJob.sh",
   "merging/merge_root_files.sh",
+  "plotting/PAPER_FIGURE_PROVENANCE.md",
   "plotting/Plot_InclusiveKinematicSpectra_Raw.C",
   "plotting/PtMultiplicity/Build_HF_AllHistogramSubsampleFile.C",
   "plotting/PtMultiplicity/Build_HF_CombinedSubsamplesFile.C",
@@ -2155,6 +2194,8 @@
   "tests/test_a2_campaign_restoration.py",
   "tests/test_closure_schema_requirement.py",
   "tests/test_compare_subset_parent.py",
+  "tests/test_dataset_selector_hf_pt2.py",
+  "tests/test_dataset_selector_requires_a_named_dataset.py",
   "tests/test_decompose_exit_status.py",
   "tests/test_environment_verdict.py",
   "tests/test_extraction_preflight.py",
@@ -2162,7 +2203,10 @@
   "tests/test_harvest_launcher.py",
   "tests/test_harvest_tune.py",
   "tests/test_heavy_sign_production_convention.py",
+  "tests/test_invoked_script_paths_exist.py",
+  "tests/test_measurement_target.py",
   "tests/test_no_source_directory_is_ignored.py",
+  "tests/test_pair_contract_schema_prefix.py",
   "tests/test_plot_dataset_integration.py",
   "tests/test_prose_check_ing_start.py",
   "tests/test_queue_probe.py",

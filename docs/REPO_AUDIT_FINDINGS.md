@@ -123,20 +123,45 @@ and it is the only one whose blocking reason expires at export.
 
 ---
 
-## 3. WHAT THE MANIFEST FOUND THAT THE RULE DID NOT SETTLE
+## 3. THE OWNER RULINGS — 2026-08-20
 
-Eight questions, 25 files, listed in `docs/REPO_AUDIT.csv` as `class=OWNER`.
-Each row states its question in the `why` column. The session report collects
-them rather than restating them here.
+**All eight OWNER questions are closed and every one went INTERNAL.** No row in
+`docs/REPO_AUDIT.csv` carries `class=OWNER` any more; each `why` records the
+ruling and its date.
+
+| ruled | files |
+|---|---|
+| `AnalysisScripts/decay_parent_map_v1.json` | 1 |
+| `Literature/pveen_…msc_thesis.pdf` | 1 |
+| `Paper/Tables/generated_heavy_flavor_summary.tex` | 1 |
+| `analysis/status_analysis_qq.C` | 1 |
+| `attic/plotting/improvedPlotting.C` | 1 |
+| `attic/split_chain/**` | 18 |
+| `docs/writing_standard/STANDARD.md`, `ste-rules.md` | 2 |
+
+**Two consequences the rulings carry with them.** The writing standard does not
+travel, so `tools/prose_check.py` and `tests/test_prose_check_ing_start.py`
+leave with the rules they enforce. And `README.md` §6 no longer promises that
+the split chain remains available: **the published repository must not offer
+code it does not ship.** That sentence is deleted.
 
 ## 4. TWO STRUCTURAL NOTES FOR THE EXPORT SESSION
 
-**4.1 The PUBLIC test suite pins three tools that read as internal.**
-`tools/checkout_advance_guard.py`, `tools/install_checkout_guard_hook.sh` and
-`tools/prose_check.py` are cluster-checkout and house-style tooling. A test in `tests/` exercises each one, and the brief rules tests PUBLIC. **Excluding any
-of them turns `make check` red in the exported tree**, so all three are PUBLIC
-in the manifest. The alternative — dropping their tests — shrinks the
-denominator, which is the failure `tools/run_tests.sh:36-40` exists to prevent.
+**4.1 A tool and its test leave together, or the suite names a missing file.**
+`tools/checkout_advance_guard.py` and `tools/install_checkout_guard_hook.sh`
+read as cluster operations, and a test in `tests/` exercises each. They stay
+PUBLIC: the invariant they protect applies to any cluster the chain runs on,
+and **dropping a tool while keeping its test turns `make check` red in the
+exported tree**.
+
+`tools/prose_check.py` went the other way on 2026-08-20, and the pairing is why
+`tests/test_prose_check_ing_start.py` went with it. The owner ruled that the
+writing standard does not travel. A checker without its rules is not a contract
+a reader can act on. A test naming an absent tool is worse than no test.
+**The rule this settles: a tool and the test that pins it always share a
+class.** `tests/test_public_never_cites_internal.py` enforces half of it
+mechanically. A PUBLIC test that names an INTERNAL tool becomes a recorded
+reference, and it fails until someone records or removes it.
 
 **4.2 Live configuration carries cluster-absolute paths.**
 `config/dataset_selector.json` names `/data/alice/ipardoza` on 57 lines and
@@ -145,3 +170,47 @@ cites `docs/history/CAMPAIGN_SEAL_SESSION_20260817c.md`, which is INTERNAL.
 paths a reader cannot reach and at a document the export does not carry. The
 manifest marks them `needs-rewrite`. The rewrite is a later phase; this note
 records why they are on the list.
+
+---
+
+## 5. THE PUBLIC-CITES-INTERNAL LEDGER
+
+`docs/REPO_AUDIT_CITATIONS.tsv` records **181 references from 57 PUBLIC files
+to INTERNAL paths**, and `tests/test_public_never_cites_internal.py` fails on
+any reference the ledger does not already hold.
+
+**The ledger is a worklist, not an exemption.** It keys on citing file, cited
+file and matched token with an exact count, so one reference more or one fewer
+breaks the comparison in either direction. A file that already carries recorded
+references gets no allowance for a new one.
+
+**The check found two class errors that the per-path pass missed.** The
+manifest now carries both corrections:
+
+| path | was | is | why the citation exposed it |
+|---|---|---|---|
+| `docs/PRODUCTION_SHAPE_DECISION.md` | INTERNAL | **PUBLIC** | its own opening says no number in it is a paper number, and §4.19 **THE RULING** then fixes the published multiplicity axis. `config/multiplicity_class_boundaries_v1.json` names it as `"ruling"`, and two live plotting headers cite it as the authority |
+| `attic/count_events/CountEvents/generated_heavy_flavor_summary.C` | PUBLIC | **INTERNAL** | it hard-codes `Paper/Tables/generated_heavy_flavor_summary.tex`, and its whole justification was that the table is published. The owner ruled that table INTERNAL on the same day |
+
+**The audit's own machinery is INTERNAL for the same reason.**
+`tools/repo_audit.py`, `tests/test_repo_audit_manifest.py`,
+`tests/test_public_never_cites_internal.py`, `docs/REPO_AUDIT.csv`,
+`docs/REPO_AUDIT_CITATIONS.tsv` and `tools/repo_audit_rulings.json` exist to
+decide what the export carries. A tool that names every excluded path
+publishes the exclusion list along with itself.
+
+> **One document is PUBLIC on a reason worth stating plainly.**
+> `docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` is 3200 lines of session log, and it
+> is PUBLIC only because three of its sections are load-bearing for published
+> results: `docs/SYSTEMATICS.md` cites §15 and §20 as the record behind
+> per-class numbers, and both `systematics_results_20260820/VERDICT.md` and
+> `COMBINED_SYSTEMATICS.md` cite **§25 as the pre-declaration of the S4
+> subset** — the evidence that S4's scope was fixed before its run.
+>
+> **That is a thin reason to publish 3200 lines.** Sections 11 to 13 coordinate
+> two executors, §19 and §27 are handoffs, and §7 lists decisions for the
+> owner. The document is a session record with three pre-registrations buried
+> in it. **The clean resolution is to lift §15, §20 and §25 into a
+> pre-registration document and rule the remainder INTERNAL**, which would drop
+> ten recorded citations at once. That is a content change, so this session
+> records it rather than doing it.
