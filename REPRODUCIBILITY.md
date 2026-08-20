@@ -221,3 +221,16 @@ None of the following is evidence that a result is sound:
 - a smoke-only plot;
 - the legacy `21_06_2026` full-config failure;
 - an agent-authored physics sign-off.
+
+## 8. Nikhef path consolidation
+
+On 2026-08-20 the project's Nikhef trees moved from
+`/data/alice/ipardoza/<name>` to `/data/alice/ipardoza/hf/<name>` (with run,
+deploy, scratch, and archive material grouped below `hf/project/`). Runtime
+selectors and unpinned plotting configurations use the new roots.
+
+Receipts, anchors, and history artifacts deliberately retain the absolute paths
+that were true when their inputs were read. Those pre-move paths are provenance,
+not runtime resolvers. A same-filesystem move does not change file content, so
+their recorded content digests remain valid. In particular, do not rewrite an
+old receipt merely because its recorded path no longer exists.

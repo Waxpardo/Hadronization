@@ -167,6 +167,17 @@
    "what": "One record of the executed cluster cleanup: the target list, the pre-removal digests, the per-path manifest or the removal log.",
    "why": "Owner-ruled 2026-08-20: cluster operations evidence, not a reproduction input."
   },
+  "nikhef-consolidation-records": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "match": [
+    "docs/NIKHEF_DELETION_PROPOSAL.md",
+    "docs/nikhef_consolidation_20260820/*"
+   ],
+   "voice": "clean",
+   "what": "One record of the Nikhef home-directory consolidation: its census, reverse map, resolver pin check or post-acceptance deletion proposal.",
+   "why": "These files make a cluster administration pass reviewable and reversible; they are not inputs to the physics result."
+  },
   "plotting-configs": {
    "class": "PUBLIC",
    "dead": "n/a",
