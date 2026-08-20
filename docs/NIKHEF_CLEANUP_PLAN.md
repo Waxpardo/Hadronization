@@ -928,3 +928,164 @@ scoped with `ps -u ipardoza`.
 
 **Left alive and not this session's to touch:** the two merges, PIDs 3953522 on
 `stbc-i3` and 642060 on `stbc-i2`.
+
+---
+
+## 13. EXECUTED RECORD — 2026-08-20
+
+**The execution session ran §7.2 on 2026-08-20 from `stbc-i1.nikhef.nl`.** It
+removed 46 paths and 19 952 443 392 bytes, or 18.58 GiB. It ran no git command
+on the Nikhef checkout. Records:
+[`removal_manifest_20260820.tsv`](nikhef_cleanup_20260820/removal_manifest_20260820.tsv),
+[`removal_log_20260820.tsv`](nikhef_cleanup_20260820/removal_log_20260820.tsv),
+[`premove_sha256_20260820.txt`](nikhef_cleanup_20260820/premove_sha256_20260820.txt),
+[`targets.txt`](nikhef_cleanup_20260820/targets.txt). The same four files are on
+the cluster in `hadronization/archive/cleanup_20260820/`.
+
+### 13.1 The preconditions, measured
+
+| precondition | check | result |
+|---|---|---|
+| 1 — both campaigns closed | the §9.1 probe on `stbc-i1` | `HF_SYS_MUF_UP products=33/33 markers=3`; `HF_SYS_PDF_CTEQ6L1 products=33/33 markers=3` |
+| 2 — the combination is complete | re-ran `extraction/combine_per_class.py` against `docs/systematics_results_20260820/per_class_deltas_seven.json` | exit 0, `COMBINED cells=144 separation_exceeds_systematic=113/144`. The output reproduces sha256 `8a8a26b8e676…0cfc57`, which is §12's recorded digest. All seven campaigns present |
+| 3 — no live process holds the path | `ps -u ipardoza` on `stbc-i1`, `stbc-i2`, `stbc-i3`; `condor_q` | no match on any node. Zero condor jobs for `ipardoza` |
+| 4 — the seed question | discharged by §10.4 on 2026-08-20 | not re-opened |
+
+**Both merges of §6 have finished.** The marker count is 3 of 3 for each
+campaign, so each merge completed rather than died. `Hadronization/` is no
+longer BLOCKED, and this session removed its `logs/` and `Logs/` on that basis.
+
+### 13.2 What went, by group
+
+Sizes are `du -sB1` in bytes, measured before the removal.
+
+| group | paths | bytes | GiB | §7.2 predicted | removed |
+|---|---|---|---|---|---|
+| `Hadronization/RootFiles/Previous` | 1 | 15 558 979 584 | 14.49 | 14.5 G | yes |
+| `hadronization_production/{HF_SMOKE,HF_SMOKE2,PTHAT2}` | 3 | 2 813 153 280 | 2.62 | 2.6 G | yes |
+| `.vscodium-server` | 1 | 1 163 640 832 | 1.08 | 1.08 G | yes |
+| the 3 `systematics_*.bundle` | 3 | 175 775 744 | 0.164 | 0.17 G | yes |
+| `Hadronization/{logs,Logs}` | 2 | 196 960 256 | 0.183 | 0.18 G | yes |
+| `nikhef_stale_fullprod_20260730`, `Hadronization-Tune-Integration`, `HRP_clean` | 3 | 30 076 928 | 0.028 | 0.03 G | yes |
+| superseded `measurements`, `measurements_v2`, `sys_runs_plot`…`plot4` | 6 | 10 981 376 | 0.0102 | 0.01 G | yes |
+| loose `.tgz`, `.bundle`, `.sh`, `.out` | 23 | 2 850 816 | 0.0027 | 0.01 G | yes |
+| `__pycache__`, `tmp`, `lib`, `pthat_scan_8317` | 4 | 24 576 | 0.00002 | 0 G | yes |
+| `ipardoza` | 1 | 0 | 0 | 0 G | **no — absent before the session started** |
+| **30 scratch investigation directories** | 0 | — | — | 0.19 G | **no — §13.4** |
+| **total** | **46** | **19 952 443 392** | **18.58** | 18.8 G | |
+
+**18.58 GiB removed plus 0.19 G not removed equals 18.77 G**, which is §7.2's
+18.8 G headline. Every group matches its §7.2 figure.
+
+### 13.3 The loose files, and the count §3.6 got wrong
+
+**§3.6 counts 9 `*.tgz` transfer bundles. The disk held 10.** §3.6's own total
+of 28 loose files proves 10 is right. Its other groups account for 18:
+
+- 1 history bundle;
+- 3 `systematics_*` bundles;
+- 3 tip bundles;
+- 4 `render_*.sh`;
+- 6 `sys_runs_plot4_*.out`;
+- 1 campaign `.tar.gz`.
+
+28 minus 18 is 10. The session removed all 10.
+
+**Three loose files postdate the 2026-08-19 walk and stayed.**
+`campaign_closure_status.py`, `extract_final_two.out` and
+`render_measure_v4.sh` carry 2026-08-20 mtimes. They are not in §7.2. A
+wildcard sweep of `render_*.sh` would have destroyed `render_measure_v4.sh`,
+which is work from the day of execution.
+
+### 13.4 The 30 scratch directories were not removed
+
+**§7.2 asks for 30 scratch investigation directories at 0.19 G, and no document
+names them.** §3.5 defines the set as every scratch investigation except five,
+but it does not list the members. The superseded
+[`NIKHEF_DISK_INVENTORY.md`](NIKHEF_DISK_INVENTORY.md) §3 names 24 scratch
+directories that total about 0.029 G, of which 20 fall outside §3.5's five
+keeps. **Neither document yields 30 directories or 0.19 G.**
+
+**Building the list needs a judgement this session was not authorised to make.**
+The unclassified candidates include `tune_runs_e5fix/` and `tune_runs_three/`,
+which §5.1 identifies as the run roots behind the published per-tune tables, and
+`seed_ledger_archive/`. The session left all of them and reports the gap.
+
+**To close this, name the 30 directories in §7.2.** A later session can then
+remove them without re-deriving the set.
+
+### 13.5 The space did not come back
+
+**The volume reported no reclaim.** `df -B1 /data/alice` read
+1 035 838 947 328 bytes available at 12:29 CEST, before the first removal. It
+read 1 035 647 909 888 bytes at 12:52 CEST, after the last. **Available space
+fell by 191 037 440 bytes. It did not rise by 18.58 GiB.**
+
+**Other users' writes explain the fall, and they do not explain the missing
+18.58 GiB.** Eight `df` samples at 45-second spacing between 12:45 and 12:50
+show available space falling at about 9 MB per minute, with no step. Over the
+23 minutes of the session that drift is about 200 MB, which matches the observed
+191 MB. **No sample shows the 18.58 GiB returning.**
+
+**The removal is verified in the namespace.** All 46 targets read absent after
+the session. `Hadronization/RootFiles/` now measures 422 971 912 192 bytes, or
+393.9 GiB, which is exactly §3.3's `HF` plus `bbbar` plus `ccbar` and no
+`Previous`.
+
+**Three client-side causes were tested and eliminated:**
+
+- `/data/alice` exposes no `.snapshot` directory;
+- `find -name '.nfs*'` returns nothing, so no silly-renamed file stays open;
+- no `ipardoza` process runs on any login node, so nothing holds a deleted
+  inode.
+
+**The most likely cause is server-side deferred reclaim on the `data-02` filer**,
+either through snapshots that hide their directory from clients or through
+asynchronous accounting. **This session could not confirm it from the client.**
+**Re-read `df` after 24 to 48 hours. If the 18.58 GiB has not appeared, ask the
+Nikhef storage administrators whether a snapshot holds it.**
+
+### 13.6 The guards held
+
+| guard | before | after |
+|---|---|---|
+| `hadronization-history-20260819.bundle` | 418 360 432 bytes, sha256 `483ac5e9dc7a685b32c65ee05a71c8cceab2846e2e982f15783486e767d7525a` | **identical, both** |
+| `b-hadron-fractions/` | 1 251 767 451 648 bytes | **1 251 767 451 648 — unchanged** |
+| `HRP/` | 78 076 895 232 bytes | **78 076 895 232 — unchanged** |
+| `Axions/` | 34 386 669 568 bytes | **34 386 669 568 — unchanged** |
+
+**`HRP_clean/` went and `HRP/` stayed.** The two names differ by one token. The
+session named every target literally and expanded no wildcard across either
+name. The tripwire group reclaimed 30 076 928 bytes, or 0.028 G, against a limit
+of 1 G.
+
+**Every KEEP class survives.** `Hadronization/RootFiles/{HF,bbbar,ccbar}`,
+`measurements_v3`, `measurements_v4`, `sys_runs_plot5`, `sys_runs_plot6`,
+`m7_runs`, `sigmab_runs`, `species_axis_fixture`, `f3_runs`,
+`fixcheck_20260818` and all ten remaining `hadronization_production/` campaigns
+read present after the session.
+
+### 13.7 Dead and out of scope — reported, not touched
+
+**The session removed none of the following.** Each is a candidate for a later
+§7.2 revision. §7.2 authorises none of them now.
+
+| path | why it looks dead | why it stayed |
+|---|---|---|
+| the 30 scratch investigation directories | §3.5 classes them ARCHIVE-THEN-REMOVE | §13.4 — no document names them |
+| `figure_deploy_20260817/plotting/Plots/…/.prelabelfix_20260819T182643` | §5.2 classes the pre-label-fix render ARCHIVE-THEN-REMOVE | §7.2 does not list it |
+| `measurements_v3/`, `sys_runs_plot5/` | `measurements_v4/` and `sys_runs_plot6/` appeared on 2026-08-20 and supersede them | §7.2 lists them as the current roots. The plan predates them |
+| `extract_final_two.out` | zero bytes, the same shape as the six `sys_runs_plot4_*.out` files | written 2026-08-20, after the walk. Not in §7.2 |
+| `Axions_pre_update_conflicts_20260607_5cfe918/` | a conflict backup from 2026-06-07 | §10.5 puts the Axions trees out of scope |
+
+### 13.8 What this session did not do
+
+**Did not:** remove the 30 scratch directories. Archive anything — the brief
+selected §9.3's manifest branch, so the session recorded every removed file
+instead of writing tarballs. Run §9.2, which copies `m7_runs/` into git; the
+directory is a §3.5 keep and no removal touched it. Run §9.4, which needs
+acceptance. Apply §11.1, §11.2 or §11.3. Run any git command on the Nikhef
+checkout. Touch `b-hadron-fractions/`, `HRP/` or `Axions/`.
+
+**Processes started on the cluster: none beyond the reads, removals and `df`
+samples above. Terminated: none.**
