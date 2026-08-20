@@ -108,3 +108,6 @@ config/burned_seeds.txt
 # Git history is permanent, so this rule fails closed rather than relying on a
 # later export step to strip the file.
 /docs/writing_standard/ASD-STE100_ISSUE9.pdf
+
+# Third-party literature. Never committed.
+Sources/
