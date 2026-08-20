@@ -25,7 +25,7 @@ The render log states the mapping outright:
     MULTIPLICITY_BOUNDARY percentile=0       nch=4095
 
 So `c1`, labelled `MB88p197_100`, is N_ch 0 to 2, the LOWEST multiplicity, and
-`c11`, labelled `MB0_8p422`, is N_ch 32 and above, the HIGHEST. That agrees with
+`c11`, labelled `MB0_8p422`, is N_ch 33 and above, the HIGHEST. That agrees with
 `config/multiplicity_class_boundaries_v1.json`, where `c1` spans [-0.5, 2.5) and
 `c11` is open-ended above 32.5. Reading the label as an ordinary percentile
 inverts every per-class trend in the tables.

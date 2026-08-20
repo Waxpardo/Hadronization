@@ -26,10 +26,17 @@ if [[ -f "${project_base}/setupEnv.sh" ]]; then
   SETUPENV_QUIET=1 source "${project_base}/setupEnv.sh" >/dev/null 2>&1 || true
 fi
 
+# Count the declarations rather than printing a remembered total. Off-cluster a
+# reader sees red tests against this number, and the number is the only thing
+# that separates "expected, no ROOT here" from "the merge broke something". A
+# hardcoded count goes stale the moment a test declares the dependency, and
+# recovering the separation then costs a per-test trace by hand.
+root_dependent=$(grep -rl 'ROOT is required for' "${project_base}/tests" \
+                 2>/dev/null | wc -l | tr -d ' ')
 if command -v root >/dev/null 2>&1; then
   echo "  ROOT: $(command -v root)"
 else
-  echo "  ROOT: not found -- the 5 ROOT-dependent tests will fail, not skip."
+  echo "  ROOT: not found -- the ${root_dependent} ROOT-dependent tests will fail, not skip."
   echo "        This is expected off-cluster; it is NOT a green run."
 fi
 

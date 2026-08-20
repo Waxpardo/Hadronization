@@ -779,8 +779,9 @@ the render log's own mapping.
 | Λ_b/B⁻ ratio | 2.5 | 59.2 | 14.8 | 235.5 |
 
 **The separation grows monotonically from low to high multiplicity in all three
-observables.** MONASH's Λ_b/B⁻ ratio is flat across the axis, 0.1609 to 0.1865,
-while JUNCTIONS rises from 0.2141 at `c1` to 0.5432 at `c11`. That is the shape
+observables.** MONASH's Λ_b/B⁻ ratio declines gently, from 0.1865 at `c1` to
+0.1619 at `c11`: a contrast of −0.02453 ± 0.00739, 3.3 σ from zero. JUNCTIONS
+rises over the same axis, from 0.2141 at `c1` to 0.5432 at `c11`. That is the shape
 a junction-driven baryon enhancement would produce, and this document does not
 claim more than the shape until the systematic is in the denominator.
 

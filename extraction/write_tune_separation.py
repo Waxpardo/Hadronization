@@ -18,7 +18,7 @@ wrong. The plotter forms the ratio inside each block and reports `ratio_sem`
 over the ten.
 
 THE CLASS AXIS RUNS OPPOSITE TO ITS LABEL: `c1` is N_ch 0 to 2 and `c11` is
-N_ch 32 and above. See `harvest_class_axis`.
+N_ch 33 and above. See `harvest_class_axis`.
 """
 
 from __future__ import annotations
@@ -81,7 +81,7 @@ def main() -> int:
     add("## The reconnection tunes against MONASH, the sealed nominal\n")
     add("**Statistical uncertainty only.** The combined systematic is not in "
         "these tables, so no column here is a verdict on whether the tunes "
-        "separate. `c1` is N_ch 0 to 2 and `c11` is N_ch 32 and above.\n")
+        "separate. `c1` is N_ch 0 to 2 and `c11` is N_ch 33 and above.\n")
 
     for other in ("JUNCTIONS", "CLOSEPACKING"):
       for label, associate, kind in OBSERVABLES:

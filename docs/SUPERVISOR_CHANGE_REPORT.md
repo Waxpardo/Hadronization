@@ -987,7 +987,7 @@ sealed nominal alone (`docs/systematics_results_20260819/TUNE_SEPARATION.md`,
 row in it is a verdict.**
 
 **Read the class axis in the stated direction.** `c1` is the **lowest**
-multiplicity, `N_ch` 0 to 2; `c11` is the **highest**, `N_ch` 32 and above. The
+multiplicity, `N_ch` 0 to 2; `c11` is the **highest**, `N_ch` 33 and above. The
 window label is a *top* percentile and runs the other way. A reader who takes
 the label as an ordinary percentile inverts every trend, and
 `tests/test_harvest_class_axis.py` holds the two statements together.
@@ -999,8 +999,9 @@ the label as an ordinary percentile inverts every trend, and
 | Λ_b/B⁻ ratio | 2.5 | 59.2 | 14.8 | 235.5 |
 
 **The separation grows monotonically from low to high multiplicity in all three
-observables.** MONASH's Λ_b/B⁻ ratio is flat across the axis, 0.1619 to 0.1865,
-while JUNCTIONS rises from **0.2141 at `c1` to 0.5432 at `c11`**. At minimum
+observables.** MONASH's Λ_b/B⁻ ratio declines gently, from 0.1865 at `c1` to
+0.1619 at `c11`, a contrast of −0.02453 ± 0.00739 at 3.3 σ. JUNCTIONS rises over
+the same axis, from **0.2141 at `c1` to 0.5432 at `c11`**. At minimum
 bias the MONASH−JUNCTIONS ratio difference is **−0.251378 ± 0.00395, 63.6 σ**,
 which is 150.5 % of the MONASH value. **That is the shape a junction-driven
 baryon enhancement would produce, and this is a statement about shape and
@@ -1034,7 +1035,8 @@ therefore a summary rather than a model.** The weighted straight line in class
 index gives χ²/ndf of **1.41 for MONASH, 8.18 for JUNCTIONS and 6.49 for
 CLOSEPACKING**. Two further conventions travel with it. The x-axis is the class
 *index*, which is not equally spaced in `N_ch`: `c1` spans three units and
-`c11` is open above 32. A slope "per class" is therefore not a physical
+`c11` is open above its 32.5 edge, so it holds `N_ch` 33 and above. A slope
+"per class" is therefore not a physical
 `d(ratio)/dN_ch`. **A referee should read the endpoint contrast as the
 measurement and the slope as shorthand.**
 

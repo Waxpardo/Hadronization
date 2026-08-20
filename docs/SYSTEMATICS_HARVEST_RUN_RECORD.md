@@ -2202,7 +2202,7 @@ MULTIPLICITY_BOUNDARY percentile=0       nch=4095
 ```
 
 So `c1`, labelled `MB88p197_100`, holds `N_ch` 0 to 2 and is the **lowest**
-multiplicity class. `c11`, labelled `MB0_8p422`, holds `N_ch` 32 and above.
+multiplicity class. `c11`, labelled `MB0_8p422`, holds `N_ch` 33 and above.
 
 **The plotting configuration and the boundary artifact agree**, and the label is
 the only thing that misleads: `config/multiplicity_class_boundaries_v1.json`
@@ -2239,9 +2239,10 @@ files and seeds, so the SEM of a difference is the two SEMs in quadrature. The
 Λ_b/B⁻ ratio takes the plotter's `ratio_sem`, formed inside each block, because
 numerator and denominator share their triggers and their events.
 
-**MONASH's Λ_b/B⁻ ratio is flat across the axis, 0.1609 to 0.1865. JUNCTIONS
-rises from 0.2141 at `c1` to 0.5432 at `c11`.** The separation grows
-monotonically with multiplicity in all three observables.
+**MONASH's Λ_b/B⁻ ratio declines gently, from 0.1865 at `c1` to 0.1619 at
+`c11`: a contrast of −0.02453 ± 0.00739, 3.3 σ from zero. JUNCTIONS rises over
+the same axis, from 0.2141 to 0.5432.** The separation grows monotonically with
+multiplicity in all three observables.
 
 **No verdict is given.** The verdict is whether the separation exceeds its
 uncertainty, and the uncertainty is the combined systematic, which does not

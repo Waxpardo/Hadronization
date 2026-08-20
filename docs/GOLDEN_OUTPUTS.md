@@ -2110,9 +2110,10 @@ Sigma_c counterpart. See `FIGURE_INVENTORY.md` §3.3b.
 
 ### 9.8.1 What the figure shows
 
-MONASH sits flat across the class axis while both CR tunes rise with activity:
-beauty **Lambda_b / B-** climbs from ~0.22 in the lowest class to ~0.55 in the
-highest against MONASH's flat ~0.17; the double ratio reaches **~3.4**
+MONASH is near-level across the class axis while both CR tunes rise with
+activity. Beauty **Lambda_b / B-** climbs from ~0.22 in the lowest class to ~0.55
+in the highest, against MONASH's ~0.17. MONASH itself declines gently rather than
+sitting flat, by −0.02453 ± 0.00739 at 3.3 σ; the double ratio reaches **~3.4**
 (JUNCTIONS/MONASH) and **~3.1** (CLOSEPACKING/MONASH). Charm is the same shape,
 smaller: **~1.7** and **~1.4**. Baryon enhancement growing with multiplicity is
 the paper's claim, and this is the figure that states it per class.
@@ -2844,7 +2845,7 @@ propagating the two yield SEMs, because numerator and denominator share their
 triggers and their events.
 
 **The class axis runs opposite to its label.** `c1` is `N_ch` 0 to 2 and `c11`
-is `N_ch` 32 and above, because the window label is a top percentile.
+is `N_ch` 33 and above, because the window label is a top percentile.
 `tests/test_harvest_class_axis.py` holds that against
 `config/multiplicity_class_boundaries_v1.json`.
 
@@ -2906,8 +2907,8 @@ straight line in class index is a summary, and its χ²/ndf of 8.18 for JUNCTION
 records that a line does not describe that tune.
 
 **The fit's x-axis is the class index**, which is not equally spaced in `N_ch`:
-`c1` spans three units and `c11` is open above 32. A slope "per class" is
-therefore not a physical `d(ratio)/dN_ch`.
+`c1` spans three units and `c11` is open above its 32.5 edge, so it holds N_ch
+33 and above. A slope "per class" is therefore not a physical `d(ratio)/dN_ch`.
 
 ---
 

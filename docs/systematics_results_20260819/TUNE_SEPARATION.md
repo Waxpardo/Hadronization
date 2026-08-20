@@ -30,7 +30,7 @@ MULTIPLICITY_BOUNDARY percentile=0       nch=4095
 ```
 
 The label `MB88p197_100` belongs to `c1`, which holds `N_ch` 0 to 2. The label
-`MB0_8p422` belongs to `c11`, which holds `N_ch` 32 and above. That agrees with
+`MB0_8p422` belongs to `c11`, which holds `N_ch` 33 and above. That agrees with
 `config/multiplicity_class_boundaries_v1.json`, where `c1` spans `[-0.5, 2.5)`
 and `c11` is open-ended above 32.5. **Reading the label as an ordinary
 percentile inverts every trend below**, and

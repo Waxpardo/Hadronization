@@ -16,7 +16,7 @@ answer the trend question, and the model-free one leads.
 | **R(c11) − R(c1)** | nothing. Two rows, subtracted, SEMs in quadrature. |
 | weighted straight line in class index | that a line is a fair summary. The χ²/ndf below says how fair. |
 
-**`c1` is the LOWEST multiplicity, N_ch 0 to 2. `c11` is the highest, N_ch 32
+**`c1` is the LOWEST multiplicity, N_ch 0 to 2. `c11` is the highest, N_ch 33
 and above.** The window label is a top percentile and runs the other way.
 
 **The x-axis of the fit is the class INDEX, and that is a convention.** The
@@ -73,7 +73,7 @@ block, because Λ_b and B⁻ share their triggers and their events.
 
 ## What these numbers say, and what they do not
 
-**MONASH is flat and slightly falling.** Its ratio moves from 0.1865 at `c1` to
+**MONASH declines gently.** Its ratio moves from 0.1865 at `c1` to
 0.1619 at `c11`, a contrast of −0.02453 ± 0.00739. That is 3.3 σ from zero, so
 MONASH is not perfectly flat; it declines gently.
 

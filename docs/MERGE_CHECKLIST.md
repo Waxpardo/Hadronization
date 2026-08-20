@@ -196,7 +196,14 @@ running job. **Queue it for after the harvest completes.**
 ## H. ✅ EXECUTED 2026-08-20 — the squash merge
 
 `systematics-harvest` (`9f2ce46`) squashed onto `main` (`0fa14de`) as
-**`5018703`**. Merge base `11884cf`. The suite is **74/74** on the result.
+**`5eace21`**. Merge base `11884cf`. The suite is **74/74** on the result.
+
+**The 74/74 names an environment, and it has to.** That result holds on a host
+with `root` on `PATH` and with name resolution available. Off-cluster, subtract
+the ROOT-dependent count from the total. Those tests **fail rather than skip**,
+by design. `tools/run_tests.sh` prints that count when it cannot find ROOT, and
+it counts the tests that declare the dependency. Read the printed count rather
+than a remembered one.
 
 ### What the merge decided
 

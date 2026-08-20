@@ -56,7 +56,7 @@ block. Λ_b and B⁻ share their triggers and their events, so combining the two
 yield SEMs would be wrong.
 
 **`c1` is the LOWEST multiplicity class, N_ch 0 to 2. `c11` is the highest,
-N_ch 32 and above.** The window label is a top percentile and runs the other way.
+N_ch 33 and above.** The window label is a top percentile and runs the other way.
 
 ## 2. The trend — the paper's central claim
 

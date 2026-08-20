@@ -26,6 +26,24 @@ LOCK="$W/pipeline.lock"
 LOG="$W/merge_runs/merge_${C}.log"
 ID="$W/merge_runs/identity_${C}.txt"
 
+# Resolve the host ONCE. The lock writes this value and the lock check compares
+# against it, so they agree by construction rather than by two calls agreeing.
+#
+# The fallback chain exists because `hostname -f` needs name resolution, and a
+# host without it answers on stderr instead of stdout. That made the lock refuse
+# a lock it had taken itself, and it made the launcher test depend on DNS.
+# THE BOUND, STATED: every branch after the host comparison ends in `exit 3`, so
+# a resolution failure could only ever cause a FALSE REFUSAL. It could not let
+# two executors share the lock. This removes a false refusal, not a race.
+#
+# `uname -n` comes BEFORE `hostname -s` because it is the project's own spelling
+# of "this host": tests/test_harvest_launcher.py writes its lock fixtures with
+# os.uname().nodename. On a host where the two differ -- macOS gives
+# Inakis-MacBook-Air.local against Inakis-MacBook-Air -- a short-name fallback
+# reintroduces the same false refusal from the other direction.
+HOSTNAME_FQDN="$(hostname -f 2>/dev/null || uname -n 2>/dev/null \
+                 || hostname -s 2>/dev/null || echo unknown-host)"
+
 # ---------------------------------------------------------------------------
 # REFUSAL 1. The schema is required and has NO default.
 # A `:-v3` default passes a v2 campaign silently on the day one exists. That is
@@ -53,11 +71,11 @@ lock_report() {
 }
 if ! ( set -o noclobber
        printf 'pid=%s\npgid=%s\nhost=%s\nstarted_utc=%s\ncampaign=%s\n' \
-         "$$" "$(ps -o pgid= -p $$ | tr -d ' ')" "$(hostname -f)" \
+         "$$" "$(ps -o pgid= -p $$ | tr -d ' ')" "$HOSTNAME_FQDN" \
          "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$C" > "$LOCK" ) 2>/dev/null; then
   lock_host="$(sed -n 's/^host=//p' "$LOCK" 2>/dev/null)"
   lock_pid="$(sed -n 's/^pid=//p' "$LOCK" 2>/dev/null)"
-  if [ "$lock_host" != "$(hostname -f)" ]; then
+  if [ "$lock_host" != "$HOSTNAME_FQDN" ]; then
     # E8: a PID checked on the wrong host is indistinguishable from one that
     # exited. We cannot ask, so we refuse.
     echo "REFUSING: a pipeline lock exists and was taken on ${lock_host:-an unknown host}." >&2
@@ -120,7 +138,7 @@ PGID=$(ps -o pgid= -p "$PID" 2>/dev/null | tr -d ' ' || echo GONE)
   echo "campaign          = $C"
   echo "pid               = $PID"
   echo "pgid              = $PGID"
-  echo "host              = $(hostname -f)"
+  echo "host              = $HOSTNAME_FQDN"
   echo "log               = $LOG"
   echo "checkout_commit   = $(git -C "$H" rev-parse HEAD)"
   echo "expected_schema   = $SCHEMA"

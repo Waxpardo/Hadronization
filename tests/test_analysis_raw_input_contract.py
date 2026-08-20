@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -51,8 +52,11 @@ def test_source_contract() -> None:
 
 def test_root_failure_injections() -> None:
     macro = ROOT / "Validation/TestAnalysisRawInputContract.C"
+    root = shutil.which("root")
+    if root is None:
+        raise RuntimeError("ROOT is required for the raw-input contract test")
     result = subprocess.run(
-        ["root", "-l", "-b", "-q", f"{macro}()"],
+        [root, "-l", "-b", "-q", f"{macro}()"],
         cwd=ROOT,
         text=True,
         capture_output=True,

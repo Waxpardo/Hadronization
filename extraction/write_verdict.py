@@ -20,7 +20,7 @@ Three observables: the two balancing yields, and the Lambda_b/B- ratio whose
 uncertainty comes from the plotter's own `ratio_sem` because numerator and
 denominator share triggers and events.
 
-`c1` is N_ch 0 to 2 and `c11` is N_ch 32 and above: the window label is a top
+`c1` is N_ch 0 to 2 and `c11` is N_ch 33 and above: the window label is a top
 percentile and runs the other way.
 """
 
