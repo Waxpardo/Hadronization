@@ -1,0 +1,2186 @@
+{
+ "groups": {
+  "a2-results": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "docs/a2_results_20260813/*",
+    "docs/a2_results_20260813/**"
+   ],
+   "voice": "clean",
+   "what": "A measured delta, tie-break robustness table or regression sentinel from the A2 pair-level unresolved-origin systematic.",
+   "why": "A2 is a published systematic with a committed pre-registration, and these are the numbers it produced."
+  },
+  "anchors-dedup-blocks": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "AnalysisScripts/anchors/merged_*_dedup/block_*/*.csv",
+    "AnalysisScripts/anchors/merged_*_dedup/central/*.csv"
+   ],
+   "voice": "clean",
+   "what": "One directory's species, category and observable tables from the trigger-deduplicating extraction of one tune, central or one canonical block.",
+   "why": "These eleven directories per tune are the measured input behind the final three-tune table, so a reader checks the published number against them."
+  },
+  "anchors-m7-beauty": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "AnalysisScripts/anchors/m7b_blocks/*"
+   ],
+   "voice": "clean",
+   "what": "One canonical block's MeasureUnresolvedSystematic log carrying the beauty unresolved and resolved baryon and meson counts.",
+   "why": "It is the committed input that regenerates the published beauty M7 table, the same reproducibility claim the charm blocks carry."
+  },
+  "anchors-m7-charm": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "AnalysisScripts/anchors/m7_blocks/*"
+   ],
+   "voice": "clean",
+   "what": "One canonical block's MeasureUnresolvedSystematic log carrying the charm unresolved and resolved baryon and meson counts.",
+   "why": "README section 3a rebuilds the published charm M7 table from these logs with extraction/aggregate_m7.py, so they are the check itself."
+  },
+  "anchors-replicated-blocks": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "AnalysisScripts/anchors/merged_monash_replicated_blocks/*"
+   ],
+   "voice": "clean",
+   "what": "One canonical block's MONASH species table from the pre-E5 replicated extraction, or that set's manifest.",
+   "why": "The published deduplicated number is defined as the correction of these, so verifying the E5 arithmetic needs both sides."
+  },
+  "anchors-sigmab-raw": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "AnalysisScripts/anchors/sigmab_raw/*"
+   ],
+   "voice": "clean",
+   "what": "One canonical block's raw Sigma_b ordering log, listing the per-pair counts the asymmetry test consumed.",
+   "why": "The Sigma_b ordering result is published and these logs are the only committed record of the counts behind it."
+  },
+  "attic-split-chain": {
+   "class": "OWNER",
+   "dead": "yes",
+   "match": [
+    "attic/split_chain/*"
+   ],
+   "voice": "clean",
+   "what": "One file of the separate bbbar, ccbar and qqbar production and reduction chain: its producers, its six PYTHIA cards, its reductions and wrappers.",
+   "why": "README section 6 tells readers this chain remains available for independent reference samples, yet nothing in the published pipeline calls it, so does the export carry it or does README drop the sentence?"
+  },
+  "dataset-selectors-systematics": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "config/dataset_selector_hf_sys_*.json"
+   ],
+   "voice": "clean",
+   "what": "The signed dataset selector naming one variation campaign's merged inputs and its publication eligibility.",
+   "why": "The plotting and harvest chain refuses to run until a dataset is named, and these are the names for the variation campaigns."
+  },
+  "extraction-chain": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "match": [
+    "extraction/*.py",
+    "extraction/pipeline/*"
+   ],
+   "voice": "clean",
+   "what": "One stage of the extraction and systematics chain that turns merged pair output into the published tables and their uncertainties.",
+   "why": "This is the code that produces the paper's numbers, so a reader cannot check any of them without it."
+  },
+  "harvest-plot-configs": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "plotting/harvest_configs/*.json"
+   ],
+   "voice": "clean",
+   "what": "The eleven-class three-tune plotting configuration for one variation campaign, generated from the central configuration.",
+   "why": "It reproduces one variation's rendered uncertainty matrix, which the systematics combination consumes."
+  },
+  "history-audits": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "match": [
+    "docs/history/audits/*"
+   ],
+   "voice": "clean",
+   "what": "A previous repository audit or change-justification pass, with its inventory and deletion-candidate lists.",
+   "why": "It is the archaeology of earlier cleanups, and this manifest supersedes it as the current inventory."
+  },
+  "history-handoffs": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "match": [
+    "docs/history/handoffs/*"
+   ],
+   "voice": "clean",
+   "what": "One dated handoff in the session chain, written to carry state from one working session to the next.",
+   "why": "A handoff records how the work proceeded and nothing a reader needs to rerun the analysis, and the export exclusion names the chain explicitly."
+  },
+  "history-other": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "match": [
+    "docs/history/transcripts/*",
+    "docs/history/cleanups/*",
+    "docs/history/agent_instructions/*",
+    "docs/history/plotting_validation/*"
+   ],
+   "voice": "clean",
+   "what": "A session transcript, cleanup report, agent working-instruction pack or superseded plotting handoff kept under the history tree.",
+   "why": "Each records process rather than method or result, and the export exclusion covers the whole tree."
+  },
+  "history-session-records": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "match": [
+    "docs/history/*.md"
+   ],
+   "voice": "clean",
+   "what": "One session's own record of what it did, what it found and what it left open, filed under a dated session name.",
+   "why": "docs/PUBLICATION_EXPORT_EXCLUSIONS.md excludes docs/history in full: these quote superseded intermediate numbers a reader cannot tell from current ones."
+  },
+  "history-studies": {
+   "class": "INTERNAL",
+   "dead": "yes",
+   "match": [
+    "docs/history/studies/*",
+    "docs/history/studies/**"
+   ],
+   "voice": "clean",
+   "what": "A superseded standalone study: its macros, its committed numeric outputs and the descriptions of the ROOT files it read.",
+   "why": "These studies ran on older productions and no published number descends from them, so they record how the project got here."
+  },
+  "plotting-configs": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "plotting/configuration_*.json"
+   ],
+   "voice": "clean",
+   "what": "One plotting configuration naming the objects, classes and display settings for a figure family.",
+   "why": "A figure cannot be reproduced without the configuration it was rendered from."
+  },
+  "plotting-figure-path": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "match": [
+    "plotting/*.C",
+    "plotting/*.h",
+    "plotting/*.py",
+    "plotting/*.sh",
+    "plotting/FinalAnalysis/*.C",
+    "plotting/PtMultiplicity/*.C",
+    "plotting/PtMultiplicity/*.h"
+   ],
+   "voice": "clean",
+   "what": "One macro, header or helper on the publication figure path, from input validation through projection and styling to the rendered canvas.",
+   "why": "Every published figure is produced by this code, so a reader checking a figure needs it."
+  },
+  "plotting-validation-receipts": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "docs/plotting_validation/*/*"
+   ],
+   "voice": "clean",
+   "what": "A figure-render receipt, run record or rendered canvas from one dated plotting validation run, including the variants that were rejected.",
+   "why": "The brief rules boundary receipts PUBLIC: these are how a reader knows a published figure came from the named inputs and command."
+  },
+  "systematics-results-final": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "docs/systematics_results_20260820/*",
+    "docs/systematics_results_20260820/**"
+   ],
+   "voice": "clean",
+   "what": "A table, report or machine-readable record from the final systematics combination over the seven variation sources.",
+   "why": "The brief rules docs/systematics_results_* PUBLIC: this is the published uncertainty and the arithmetic behind it."
+  },
+  "systematics-results-wave": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "docs/systematics_results_20260819/*",
+    "docs/systematics_results_20260817/*"
+   ],
+   "voice": "clean",
+   "what": "A per-class, per-category, ratio-trend or tune-separation result from an earlier wave of the systematics harvest.",
+   "why": "The brief rules docs/systematics_results_* PUBLIC, and the final combination is defined relative to these waves."
+  },
+  "tests-cpp-contract": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "match": [
+    "tests/*.cpp"
+   ],
+   "voice": "clean",
+   "what": "One compiled C++ contract test asserting a producer or pair-schema invariant that only the real headers can express.",
+   "why": "It is part of the same acceptance gate and cannot be dropped without shrinking the denominator make check reports."
+  },
+  "tests-fixtures": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "tests/fixtures/*"
+   ],
+   "voice": "clean",
+   "what": "A committed integrated-rows log fixture that a systematics test parses instead of reaching for campaign output.",
+   "why": "Without the fixture its test cannot run, and the test is PUBLIC."
+  },
+  "tests-python-contract": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "match": [
+    "tests/test_*.py"
+   ],
+   "voice": "clean",
+   "what": "One standard-library contract test asserting an invariant of the committed source, generated headers, configuration or extraction arithmetic.",
+   "why": "The brief rules tests PUBLIC: the suite is how a reader confirms the checkout is internally consistent before running anything."
+  },
+  "tools-chain": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "match": [
+    "tools/*.py",
+    "tools/*.sh",
+    "tools/*.C",
+    "tools/*.cc"
+   ],
+   "voice": "clean",
+   "what": "One campaign-management, generation, validation or rendering tool on the live path between the cards and the published figures.",
+   "why": "Each is invoked by a documented workflow, a Makefile target or the contract test suite, so rerunning the analysis needs it."
+  },
+  "tune-cards-systematics": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "match": [
+    "generation/cards/systematics/*.cmnd"
+   ],
+   "voice": "clean",
+   "what": "One PYTHIA card for one systematic variation: the nominal tune card with exactly one setting changed.",
+   "why": "The published systematic uncertainty is the spread across these cards, so the variation campaigns cannot be regenerated without them."
+  }
+ },
+ "paths": {
+  ".gitignore": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "The ignore rules, each annotated with the incident that motivated it, including the rule that keeps the third-party writing standard out of history.",
+   "why": "A clone needs it to keep build products and campaign scratch out of the tree."
+  },
+  ".mailmap": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Maps seven author identities, including personal and cluster host addresses, onto one canonical contributor.",
+   "why": "The export is one initial commit with no ancestry, so a mailmap has no history to fold and would only publish the address list."
+  },
+  "ARCHITECTURE.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Explains what the repository measures and how the stages connect, written for a physicist who has never used ROOT or PYTHIA.",
+   "why": "It is the conceptual entry point a reader needs before rerunning anything."
+  },
+  "AnalysisScripts/AssociateOriginCategoryContract.h": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Declares the associate-origin category contract the pair objects are written against.",
+   "why": "The category axis of every published decomposition is defined by it."
+  },
+  "AnalysisScripts/GeneratedPairObjectContract.h": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The generated C++ view of the pair-file object contract, replacing three hand-maintained lists that had drifted apart.",
+   "why": "It is a golden output and the closure counts derive from it."
+  },
+  "AnalysisScripts/GeneratedPairRegistry.h": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The generated C++ view of the expanded pair registry, carrying its source digest.",
+   "why": "It is a golden output the analysis, merge and closure all compile against."
+  },
+  "AnalysisScripts/GeneratedSpeciesOrdinals.h": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The generated C++ view of the species ordinal table, so the ROOT-only analysis needs no JSON parser.",
+   "why": "It is a golden output that puts the species axis into the compiled chain."
+  },
+  "AnalysisScripts/anchors/MANIFEST.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The index of every anchor directory, naming what each one anchors and whether its provenance is complete or incomplete.",
+   "why": "It is the entry point to the provenance chain and states, per anchor, what can be verified and what cannot."
+  },
+  "AnalysisScripts/anchors/b4_multiplicity_mb/MANIFEST.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The manifest of the per-tune minimum-bias N_ch anchor, the evidence behind the multiplicity class definition and figure 3.",
+   "why": "The paper-facing class translation table is recomputed from it rather than transcribed, which is a reproducibility claim."
+  },
+  "AnalysisScripts/anchors/b4_multiplicity_mb/dump_nch.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The ROOT macro that dumps the minimum-bias N_ch distribution per tune into the committed CSV and ROOT pair.",
+   "why": "It is the committed consumer of the anchor, so the class boundaries can be rederived rather than trusted."
+  },
+  "AnalysisScripts/anchors/b4_multiplicity_mb/nch_mb_CLOSEPACKING.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The CLOSEPACKING minimum-bias charged-multiplicity distribution as text.",
+   "why": "The published multiplicity class boundaries are derived from these distributions, so checking a boundary needs them."
+  },
+  "AnalysisScripts/anchors/b4_multiplicity_mb/nch_mb_CLOSEPACKING.root": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The CLOSEPACKING minimum-bias charged-multiplicity histogram in ROOT form.",
+   "why": "It is the binary the dump macro reads, and the CSV alone loses the binning the boundaries were cut on."
+  },
+  "AnalysisScripts/anchors/b4_multiplicity_mb/nch_mb_JUNCTIONS.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The JUNCTIONS minimum-bias charged-multiplicity distribution as text.",
+   "why": "The published multiplicity class boundaries are derived from these distributions, so checking a boundary needs them."
+  },
+  "AnalysisScripts/anchors/b4_multiplicity_mb/nch_mb_JUNCTIONS.root": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The JUNCTIONS minimum-bias charged-multiplicity histogram in ROOT form.",
+   "why": "It is the binary the dump macro reads, and the CSV alone loses the binning the boundaries were cut on."
+  },
+  "AnalysisScripts/anchors/b4_multiplicity_mb/nch_mb_MONASH.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The MONASH minimum-bias charged-multiplicity distribution as text.",
+   "why": "The published multiplicity class boundaries are derived from these distributions, so checking a boundary needs them."
+  },
+  "AnalysisScripts/anchors/b4_multiplicity_mb/nch_mb_MONASH.root": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The MONASH minimum-bias charged-multiplicity histogram in ROOT form.",
+   "why": "It is the binary the dump macro reads, and the CSV alone loses the binning the boundaries were cut on."
+  },
+  "AnalysisScripts/anchors/b4_multiplicity_mb/run_meta.txt": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The run metadata of the minimum-bias generation: card, seed, event count and where it ran.",
+   "why": "It is the provenance line that ties the committed distributions to a specific generator run."
+  },
+  "AnalysisScripts/anchors/closure_v3_verdicts/MANIFEST.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The manifest of the two closure verdicts that gate the three-tune central table, and where their logs came from.",
+   "why": "The brief rules boundary receipts PUBLIC: this is the record that the published table passed its gate."
+  },
+  "AnalysisScripts/anchors/closure_v3_verdicts/closure_HF_RUN3_V1_CLOSEPACKING_20260815_220842.log": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The full CLOSEPACKING pair-block closure run log ending in its CANONICAL_PAIR_BLOCK_CLOSURE_PASS verdict.",
+   "why": "Same role for the third tune's published column."
+  },
+  "AnalysisScripts/anchors/closure_v3_verdicts/closure_HF_RUN3_V1_JUNCTIONS_20260815_220840.log": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The full JUNCTIONS pair-block closure run log ending in the CANONICAL_PAIR_BLOCK_CLOSURE_PASS verdict.",
+   "why": "It is the receipt behind a published column, and it existed only in cluster scratch before it was committed."
+  },
+  "AnalysisScripts/anchors/closure_v3_verdicts/closure_waiter.log": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The waiter's own log, showing when each tune's blocks appeared and when each closure started.",
+   "why": "It timestamps the gate runs whose verdicts the published table depends on."
+  },
+  "AnalysisScripts/anchors/closure_v3_verdicts/closure_waiter.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "needs-rewrite",
+   "what": "The polling script that waited for both tunes' blocks to be promoted and then ran the closure gate on each.",
+   "why": "It records how the two committed verdicts were actually produced, which is the invocation half of the receipt."
+  },
+  "AnalysisScripts/anchors/closure_v3_verdicts/verdict_line_CLOSEPACKING.txt": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The single extracted CLOSEPACKING verdict line, separated from its log.",
+   "why": "Same role for the third tune."
+  },
+  "AnalysisScripts/anchors/closure_v3_verdicts/verdict_line_JUNCTIONS.txt": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The single extracted JUNCTIONS verdict line, separated from its log.",
+   "why": "It is the quotable form of the gate result the central table cites."
+  },
+  "AnalysisScripts/anchors/e5fix_drivers/MANIFEST.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The manifest of the drivers that produced the JUNCTIONS and CLOSEPACKING columns and the MONASH E5 re-extraction.",
+   "why": "It names the exact invocation behind published columns, which the tracked extractor alone does not record."
+  },
+  "AnalysisScripts/anchors/e5fix_drivers/run_blocks.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "needs-rewrite",
+   "what": "The driver that ran the deduplicating extractor over all ten canonical blocks of one tune.",
+   "why": "It is the recorded invocation behind the committed per-block tables."
+  },
+  "AnalysisScripts/anchors/e5fix_drivers/run_extract.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "needs-rewrite",
+   "what": "The driver that ran the deduplicating extractor over one tune's central merged directory.",
+   "why": "Same reason: the central column's invocation is part of its provenance."
+  },
+  "AnalysisScripts/anchors/e5fix_drivers/run_three_tune.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "needs-rewrite",
+   "what": "The driver that assembled the three-tune table from the per-tune extractions.",
+   "why": "It is how the published table was generated, and the table is the resubmission's central number."
+  },
+  "AnalysisScripts/anchors/e5fix_drivers/verify_e5.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The check that the deduplicated extraction reproduces the predicted E5 totals rather than merely differing from the replicated one.",
+   "why": "It is the positive check that turned the E5 correction from an assertion into a measurement."
+  },
+  "AnalysisScripts/anchors/extraction_dual/MANIFEST.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The manifest of the first anchor extraction, carrying the quarantine notice that forbids its weights for charge-resolved use.",
+   "why": "The quarantine is a correctness warning attached to numbers that several published documents were computed from, so it travels with them."
+  },
+  "AnalysisScripts/anchors/extraction_dual/per_category.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The per-category weights of the quarantined first anchor extraction.",
+   "why": "It is the category-level half of the anchor whose defect the published E4 comparison reports."
+  },
+  "AnalysisScripts/anchors/extraction_dual/per_observable.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The per-observable weights of the quarantined first anchor extraction.",
+   "why": "It completes the anchor that decay-map v2 weighting and the E4 comparison both read."
+  },
+  "AnalysisScripts/anchors/extraction_dual/per_species.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The per-species weights of the quarantined first anchor extraction.",
+   "why": "README section 3a feeds it to compare_subset_parent.py to reproduce the E4 anchor defect, which is a published finding."
+  },
+  "AnalysisScripts/anchors/f4_probe/build_run.log": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The build and run manifest of the extended probe, with the digests of the binary and its inputs.",
+   "why": "It is how a reader ties the committed probe output to the code that produced it."
+  },
+  "AnalysisScripts/anchors/f4_probe/f4_probe_v1.out": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The original PYTHIA-linked decay probe output: 202 species, dominant channel only.",
+   "why": "README section 3a rebuilds decay map v1.1 from this file and checks the digest, which is one of the two headline reproduction checks."
+  },
+  "AnalysisScripts/anchors/f4_probe/f4b_probe.out": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The extended decay probe output carrying 5,576 F4_CHANNEL lines, every channel rather than the dominant one.",
+   "why": "Decay map v2 rebuilds from it, and its byte-identical F4_SPECIES lines are the evidence that the probe was extended rather than changed."
+  },
+  "AnalysisScripts/anchors/f4_probe/pdgs.txt": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The list of 202 species codes the decay probe was asked to resolve.",
+   "why": "It is the probe's input, so the map rebuild is not reproducible without it."
+  },
+  "AnalysisScripts/anchors/merged_closepacking_dedup/MANIFEST.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "grouped": "anchors-dedup-blocks",
+   "voice": "clean",
+   "what": "The manifest of the CLOSEPACKING deduplicated extraction, recording the run, its inputs and the E5 checks it was made to settle.",
+   "why": "It states what the tune's committed tables mean and which prediction they were scored against."
+  },
+  "AnalysisScripts/anchors/merged_junctions_dedup/MANIFEST.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "grouped": "anchors-dedup-blocks",
+   "voice": "clean",
+   "what": "The manifest of the JUNCTIONS deduplicated extraction, recording the run, its inputs and the E5 checks it was made to settle.",
+   "why": "It states what the tune's committed tables mean and which prediction they were scored against."
+  },
+  "AnalysisScripts/anchors/merged_monash_central/per_category.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The MONASH central per-category table from the replicated extraction.",
+   "why": "It is the category-level parent for the same published comparison."
+  },
+  "AnalysisScripts/anchors/merged_monash_central/per_category_deduplicated.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The MONASH central per-category table after the E5 trigger deduplication.",
+   "why": "Same role at category level: it is how the published correction is verified."
+  },
+  "AnalysisScripts/anchors/merged_monash_central/per_species.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The MONASH central per-species table from the replicated extraction, the parent that the anchor comparison is run against.",
+   "why": "README section 3a names it as the parent input to the E4 anchor-versus-parent comparison."
+  },
+  "AnalysisScripts/anchors/merged_monash_central/per_species_deduplicated.csv": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The MONASH central per-species table after the E5 trigger deduplication was applied by arithmetic inversion.",
+   "why": "It is the bridge between the replicated anchor and the final table, and the E5 correction is checked against it."
+  },
+  "AnalysisScripts/anchors/merged_monash_dedup/MANIFEST.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "grouped": "anchors-dedup-blocks",
+   "voice": "clean",
+   "what": "The manifest of the MONASH deduplicated extraction, recording the run, its inputs and the E5 checks it was made to settle.",
+   "why": "It states what the tune's committed tables mean and which prediction they were scored against."
+  },
+  "AnalysisScripts/decay_parent_map_v1.json": {
+   "class": "OWNER",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The original decay-parent map, which does not conjugate antiparticle decays and is the artifact behind the conjugation bug.",
+   "why": "It is the evidence for a published correction but also a live reproduction hazard if a reader passes it to the extractor, so does the export carry it?"
+  },
+  "AnalysisScripts/decay_parent_map_v1_1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The decay-parent map with the conjugation fix applied, chaining each species through its dominant channel.",
+   "why": "It is a golden output, README rebuilds it from committed inputs, and the published extraction names it explicitly."
+  },
+  "AnalysisScripts/decay_parent_map_v2.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The species-level decay-parent map with fractional branching-ratio splits.",
+   "why": "It is a golden output and the experiment-comparable convention uses it."
+  },
+  "AnalysisScripts/species_ordinals_v2.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The derived 202-entry sector-charged species ordinal table, the spine the species axis is indexed by.",
+   "why": "It is a golden output and every per-species number is addressed through it."
+  },
+  "Literature/References.bib": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The BibTeX database of works the project cites.",
+   "why": "A reader following the physics needs the citations, and a bibliography carries no third-party content."
+  },
+  "Literature/pveen_14443260_msc_thesis-1_mwa2azwk.pdf": {
+   "class": "OWNER",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "A 2 MB PDF of another author's MSc thesis, the predecessor work this project builds on.",
+   "why": "Does the export redistribute a third-party thesis PDF, or cite it and drop the file as the ASD-STE100 exclusion does?"
+  },
+  "Makefile": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The top-level driver: setup, doctor, build, card and registry checks, the test suite, submission targets and the environment verdict.",
+   "why": "It is the entry point every documented workflow starts from."
+  },
+  "POST_SUBMISSION.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The parked-work list: everything deliberately deferred until after submission, with the rule that nothing on it blocks the paper.",
+   "why": "It is a work queue for the authors and states itself that no paper claim depends on any of it."
+  },
+  "Paper/Tables/generated_heavy_flavor_summary.tex": {
+   "class": "OWNER",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The generated LaTeX table of per-tune event counts and inclusive species yields that the manuscript includes.",
+   "why": "The manuscript itself is untracked and A9 records this table's numbers as descending from a superseded production, so does the export carry it?"
+  },
+  "README.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "The rebuild guide, ordered by what a reader would actually do from nothing, with the smoke path and the list of what is not evidence.",
+   "why": "It is the primary instruction for rerunning the analysis."
+  },
+  "RELEASE_BLOCKERS.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The closed list of remaining scope before release, every row citing a path, line or digest and its run status.",
+   "why": "It is project management for the authors: it tracks what is left to do, not how to rerun or check anything."
+  },
+  "RENAMES.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Records what the 2026-08-12 restructure moved, what it deliberately did not move, and the owner overrides that struck rows.",
+   "why": "The export is a fresh single commit with no prior paths, so a record of moves out of an older layout has nothing to refer to."
+  },
+  "REPRODUCIBILITY.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "States what must be true for a number from this repository to be reproducible, and how each contract, selector, threshold and pin is enforced.",
+   "why": "It is the physics contract a reader checks a published number against."
+  },
+  "STATE.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "The one-screen answer to where the project stands: what is frozen, what is pending, what is written but unrun, and what is not planned.",
+   "why": "It tells a reader which numbers are final and which are provisional, which is a precondition for checking any of them."
+  },
+  "Validation/AuditOriginResolution.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Audits how heavy-flavour origins resolved in a raw file: unresolved, resolved, demoted and rejected candidates.",
+   "why": "The unresolved-origin systematic is computed from exactly this accounting."
+  },
+  "Validation/AuditSpeciesRegistry.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Audits the signed species registry against the linked PYTHIA's own particle data.",
+   "why": "It is how the registry is shown to agree with the generator that produced the data."
+  },
+  "Validation/AuditTuneSettings.C": {
+   "class": "PUBLIC",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "Audits a produced file's recorded tune settings against the generated tune registry.",
+   "why": "It is how a reader confirms a data file was made with the card it claims."
+  },
+  "Validation/CalibrateBothCountersAgainstMinBias.C": {
+   "class": "PUBLIC",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "The two-counter variant of that calibration, comparing both charged-multiplicity definitions against the same reference.",
+   "why": "It answers which counter definition a class boundary refers to, which a reader comparing to data needs."
+  },
+  "Validation/CalibrateMultiplicityAgainstMinBias.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Calibrates the charged-multiplicity counter against a published minimum-bias reference.",
+   "why": "Three validation reports are its recorded output and the multiplicity classes are cut on the counter it calibrates."
+  },
+  "Validation/CompareNominalReproduction.C": {
+   "class": "PUBLIC",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "Asks whether a rebuilt producer reproduces the nominal output file, as pre-registered.",
+   "why": "It is the check a third party runs after building PYTHIA themselves, which README names as the project's largest portability limitation."
+  },
+  "Validation/ListUnresolvedOrigins.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Lists the individual unresolved-origin candidates rather than counting them.",
+   "why": "It is how a reader inspects the cases behind the published systematic."
+  },
+  "Validation/MeasureUnresolvedSystematic.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Measures the systematic from dropping unresolved candidates, per sector.",
+   "why": "It produced the committed M7 charm and beauty block logs the published tables aggregate."
+  },
+  "Validation/PTHatSensitivity.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Extracts the predeclared pTHat sensitivity test from its immutable manifest and decides it.",
+   "why": "The published pTHat threshold rests on this test's verdict."
+  },
+  "Validation/TestAnalysisRawInputContract.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Compiles the reduction against a raw file and asserts the input contract holds.",
+   "why": "A test in the PUBLIC suite compiles it, so the suite needs it."
+  },
+  "Validation/TestHardCarrierUniqueness.C": {
+   "class": "PUBLIC",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "Asserts that a hard carrier resolves uniquely under the shared helper.",
+   "why": "Hard-carrier uniqueness is an assumption of the observable, and this is the only file that tests it."
+  },
+  "Validation/TestInclusiveRawKinematics.C": {
+   "class": "PUBLIC",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "Compiles the inclusive kinematic spectra macro and asserts its raw-level kinematics.",
+   "why": "It bears on the inclusive spectra blocker, so it answers a question a referee can ask."
+  },
+  "Validation/TestPlotProjectionCuts.C": {
+   "class": "PUBLIC",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "Asserts that the plotting macro's projection cuts select the intended sparse ranges.",
+   "why": "It checks the cuts behind every published figure, and the census argues explicitly against sweeping unrun validators away."
+  },
+  "Validation/TestPlotReferenceMultiplicityContracts.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Asserts the plotting macro's reference-multiplicity contracts inside a memory file.",
+   "why": "A test in the PUBLIC suite compiles it."
+  },
+  "Validation/TestPrimaryChargedDefinition.C": {
+   "class": "PUBLIC",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "Asserts two claims about the primary-charged definition against the installed PYTHIA rather than against fixtures.",
+   "why": "The primary-charged definition is what the multiplicity classes count, so its live-generator check is reader-facing."
+  },
+  "Validation/ValidateCanonicalRawManifest.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Validates every raw file named by a canonical manifest, reusing the raw validator.",
+   "why": "It is how a whole campaign's inputs are certified before the merge."
+  },
+  "Validation/ValidatePairBlockClosure.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The closure gate: checks the central against its blocks and returns the content and invariant counts.",
+   "why": "It is the check that a merge is complete, and the brief rules boundary receipts PUBLIC."
+  },
+  "Validation/ValidatePairDirectory.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Checks a completed pair directory against the pair registry and the object contract, name by name.",
+   "why": "The reduction promotes a directory only if this passes, so it defines a valid analysis output."
+  },
+  "Validation/ValidateRawOutput.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Validates one produced raw file against the canonical schema and emits the origin audit the receipt records.",
+   "why": "It is the gate every raw file passes before it may be analysed."
+  },
+  "Validation/ValidateSpeciesAxisClosure.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Checks the 202-ordinal species axis against the six-bin category axis it refines, exactly.",
+   "why": "SPECIES_AXIS_VALIDATION is its record and the species axis carries the published decomposition."
+  },
+  "Validation/validate_canonical_manifest.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Drives that manifest validation over a campaign.",
+   "why": "It is the entry point for the campaign-scale input gate."
+  },
+  "Validation/validate_pair_block_closure.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Resolves the requested schema tag and runs the closure gate, rejecting an unknown schema before ROOT starts.",
+   "why": "The published three-tune table is gated on this script's verdict."
+  },
+  "Validation/validate_pair_directory.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The wrapper the reduction calls to validate a staged pair directory.",
+   "why": "README's smoke path names it as the validation step."
+  },
+  "Validation/validate_raw_output.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Runs that raw validator and writes the receipt beside the file.",
+   "why": "The receipt is the evidence a raw file is usable, and this writes it."
+  },
+  "ValidationReports/NCH_CALIBRATION_20260730.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Calibrates the charged-multiplicity counter against a published minimum-bias reference under PYTHIA 8.315.",
+   "why": "It is the first calibration of the counter the multiplicity classes are cut on, and later reports are stated as supersessions of it."
+  },
+  "ValidationReports/NCH_CALIBRATION_PYTHIA8317_20260801.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Repeats that calibration under the pinned stock PYTHIA 8.317 and supersedes the 8.315 result.",
+   "why": "It is the calibration at the version the published production actually ran."
+  },
+  "ValidationReports/NCH_DECAY_POLICY_BIAS_8317.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Re-measures the bias the decay policy puts on the charged-multiplicity count at the pinned version.",
+   "why": "It corrects a figure quoted in the design rationale, so a reader checking the class definition needs it."
+  },
+  "ValidationReports/PREPRODUCTION_GATE_REPORT_20260730.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The human-readable evidence ledger for the pre-production gate, concluding that full production was not authorized at that date.",
+   "why": "It is an authorization decision at a superseded state of the project."
+  },
+  "ValidationReports/PTHAT_MULTIPLICITY_SCAN_8317.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Scans the hard sample's charged multiplicity against the pTHat minimum at the pinned version.",
+   "why": "REPRODUCIBILITY section 1 cites it as the evidence for the pTHat threshold the production uses."
+  },
+  "ValidationReports/PYTHIA_JUNCTION_HANG_20260731.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Records the PYTHIA junction-splitting infinite loop found in a pilot campaign, with the configuration that triggers it.",
+   "why": "The hang guard and the non-random event loss it causes are stated in README, and this is the measurement behind that statement."
+  },
+  "analysis/Analysis_README.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Explains the one-pass reduction, its output contract and how the canonical slot numbering works.",
+   "why": "It is the subsystem guide for the stage between raw files and pair files."
+  },
+  "analysis/a2_block_shift.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Turns the A2 per-slot yields into the per-block shift, refusing any variation not in the frozen list.",
+   "why": "It produces the published A2 delta."
+  },
+  "analysis/a2_pair_yield.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Computes multiplicity-binned pair yields for one slot of the A2 pair-level unresolved systematic.",
+   "why": "It is the measurement code behind a published systematic and its pre-registration names it."
+  },
+  "analysis/hf_mult_pt_analysis_multi.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The unified heavy-flavour multiplicity and transverse-momentum analysis over produced files.",
+   "why": "It is the reduction behind the subsample transverse-momentum figures."
+  },
+  "analysis/run_hf_analysis.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Drives that unified analysis over a set of produced files.",
+   "why": "It is its documented entry point."
+  },
+  "analysis/run_status_analysis.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The canonical reduction wrapper: writes 300 signed pair files to staging, validates the directory, and promotes it atomically only on success.",
+   "why": "It is the documented reduction entry point and the fail-closed promotion is part of the contract."
+  },
+  "analysis/status_analysis_THnSparse_qq.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The one-pass central publication analysis: reads the canonical raw schema once and emits the pair objects the merge consumes.",
+   "why": "It is the stage that turns generated events into the published observable."
+  },
+  "analysis/status_analysis_qq.C": {
+   "class": "OWNER",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The non-THnSparse azimuthal-correlation reduction, superseded by the THnSparse one-pass analysis.",
+   "why": "Its only consumer sits in attic/split_chain and COMPONENTS Q1 already rules it should move there, so does it follow the split chain's class?"
+  },
+  "attic/count_events/CountEvents/generated_heavy_flavor_summary.C": {
+   "class": "PUBLIC",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "Counts per-tune events and inclusive species yields from generated trees into the summary table.",
+   "why": "It is the recorded provenance of a table the manuscript publishes right now, which A9 cites and shows cannot be re-pointed."
+  },
+  "attic/plotting/B_Balancing_GeneralPlotting.C": {
+   "class": "INTERNAL",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "The original 2217-line balancing plotting macro, carrying its author's explanatory header, from the legacy balancing study.",
+   "why": "No published number descends from the legacy balancing study once the two global canvases are dropped, and nothing in the chain calls it."
+  },
+  "attic/plotting/configuration_pT.json": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The v2-era single-axis plotting configuration for the pT figures.",
+   "why": "The figures it configured are recorded as permanently not regenerable, so it is a record of an old state rather than a recipe."
+  },
+  "attic/plotting/configuration_pseudorapidity.json": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The v2-era single-axis plotting configuration for the pseudorapidity figures.",
+   "why": "The figures it configured are recorded as permanently not regenerable, so it is a record of an old state rather than a recipe."
+  },
+  "attic/plotting/configuration_rapidity.json": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The v2-era single-axis plotting configuration for the rapidity figures.",
+   "why": "The figures it configured are recorded as permanently not regenerable, so it is a record of an old state rather than a recipe."
+  },
+  "attic/plotting/improvedPlotting.C": {
+   "class": "OWNER",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "The predecessor balancing-canvas macro, which reads the same merged product the live path consumes.",
+   "why": "It survived the deletion sweep as an independent cross-check of a published figure rather than as dead code, so does a cross-check nothing invokes travel with the export?"
+  },
+  "attic/plotting/plotting_documentation.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Documents a prepare and finalize gate stage of the plotting chain that no longer exists.",
+   "why": "Its substance was measured to have been folded into the live plotting README, and the two tokens left behind name removed machinery."
+  },
+  "config/a2_variations_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The frozen named set of A2 origin-rule variations the block-shift analyzer is permitted to consume.",
+   "why": "The published A2 systematic is defined over exactly this set, and the analyzer refuses a variation outside it."
+  },
+  "config/dataset_selector.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The master selector carrying every dataset row and its publication eligibility, with no default active dataset.",
+   "why": "The plotting and measurement chain refuses to run until a dataset is named from this file."
+  },
+  "config/dataset_selector_hf_pt2.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The selector row for the HF_PT2 pilot dataset.",
+   "why": "It names a dataset the chain and its tests resolve against."
+  },
+  "config/dataset_selector_hf_pt2_int.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The selector row for the multiplicity-integrated HF_PT2 variant.",
+   "why": "The integrated observable is rendered through this selector."
+  },
+  "config/dataset_selector_hf_run3_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The selector row for the HF_RUN3_V1 publication dataset, carrying the digest of its authorization document.",
+   "why": "It is the dataset every published number is rendered from."
+  },
+  "config/dependencies.conf": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The pinned dependency locations and versions that setupEnv.sh sources, each overridable from the environment.",
+   "why": "Nothing runs without it and it holds the version pins REPRODUCIBILITY enforces."
+  },
+  "config/dependencies.local.conf.example": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The template a new machine copies to declare its own dependency paths.",
+   "why": "It is how the documented rule that no tracked file carries a single-machine path is actually satisfied."
+  },
+  "config/heavy_flavour_pair_registry_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The expanded signed pair registry: every trigger and associate pair the analysis records, generated from the definition.",
+   "why": "The 300 pair files and the closure counts are derived from it."
+  },
+  "config/heavy_flavour_species_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The signed species registry with the ground-state rule and each state's central eligibility.",
+   "why": "It decides which states may appear in a central published result."
+  },
+  "config/integrated_multiplicity_bin_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Declares the multiplicity-integrated histogram entry that measurement renders need and the eleven-class configuration lacks.",
+   "why": "The integrated arm of the published observable cannot be rendered without it."
+  },
+  "config/multiplicity_class_boundaries_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The single source of the eleven multiplicity class boundaries.",
+   "why": "Every class label, inset and cut in the published figures is generated from this one file."
+  },
+  "config/pair_file_object_contract_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The versioned contract naming every object a pair file must contain, per schema version.",
+   "why": "The closure counts a reader checks a merge against are derived from it rather than restated."
+  },
+  "config/pair_registry_definition_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The hand-maintained definition of central triggers and associates that the expanded pair registry is generated from.",
+   "why": "It is the only editable registry source, so a reader tracing a pair back ends here."
+  },
+  "config/pdg_2025_species_reference_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The reproducibly extracted PDG 2025 reference for the registry's species, with the source files' URLs and digests.",
+   "why": "It is the external authority the species audit test checks the registry against."
+  },
+  "config/pthat_sensitivity_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The predeclared specification of the pTHat sensitivity test: its ratios, thresholds and block structure.",
+   "why": "The test is predeclared, so the published sensitivity result is only meaningful together with this file."
+  },
+  "config/statistical_robustness_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The frozen specification for the partition-sensitivity audit, with its predeclared absolute-activity intervals.",
+   "why": "The audit's verdicts are defined against these frozen boundaries."
+  },
+  "config/systematic_variation_settings_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The PYTHIA settings a generated systematics variation card may set that the nominal cards do not.",
+   "why": "It is the allowlist that keeps a variation to exactly one changed setting."
+  },
+  "config/systematics_variations_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The generation-dependent systematic variations, one changed setting each, from which the variation cards are generated.",
+   "why": "The published systematic uncertainty is the spread over exactly this list."
+  },
+  "config/tune_difference_allowlist_v1.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Lists which card settings may differ between tunes and between jobs, and which must be identical everywhere.",
+   "why": "It is what make cards checks, and it is how a reader knows the three tunes differ only in colour reconnection."
+  },
+  "docs/A2_PAIR_UNRESOLVED_PREREGISTRATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Pre-registers the pair-level unresolved-origin systematic: the variation, the tie-break rule and the positive checks, before any job ran.",
+   "why": "A pre-registration is the evidence that the method was fixed before the result, which is what makes the published systematic checkable."
+  },
+  "docs/A2_PAIR_UNRESOLVED_RUN_RECORD.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Records the A2 run against that pre-registration, on both tie-break directions, with the measured deltas.",
+   "why": "It is the result the pre-registration was written to score, and the systematic it reports is published."
+  },
+  "docs/A9_PAPER_TABLE_REGENERATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Answers whether the published generated-summary table can be rebuilt without compute, and records that it cannot and why.",
+   "why": "It is the honest provenance statement for a table that is in the paper right now, which a reader checking that table needs."
+  },
+  "docs/B6_STATUS.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Tracks the B6 release blocker to its owner-ruled closure on a characterised residual.",
+   "why": "It is blocker bookkeeping: the physics conclusion it reaches is carried by the validation documents, not by this status page."
+  },
+  "docs/B_BARYON_ADVISORY_DIAGNOSTIC.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "Sets out the diagnostic ladder for the b-baryon particle and antiparticle advisory, its numbers superseded and its conclusion confirmed.",
+   "why": "README section 3a runs the advisory tool against this ladder, so the document is the method behind a committed command."
+  },
+  "docs/CHECKOUT_SYNC_PROCEDURE.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The procedure for advancing the analysis checkout on the cluster while jobs may be in flight, and the reason for each step.",
+   "why": "It is operations for one institution's checkout and bears on no published number."
+  },
+  "docs/CLOSURE_V3_PREREGISTRATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Derives the v3 closure count table from the pair-object contract before the run, including the failing count that looks like a pass.",
+   "why": "The closure gate is how a reader confirms a merge is complete, and this is the table the gate is read against."
+  },
+  "docs/COMPONENTS.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "Names every executable in the repository, what it reads and writes, and why it exists, including the kept-not-live files.",
+   "why": "It is the navigable map a reader needs to find the code behind a number."
+  },
+  "docs/CONTENTION_RECURRENCE_PREREGISTRATION.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "A pre-registration, marked superseded and never scored, predicting that a closure and merge scheduling collision would recur.",
+   "why": "It registered a cluster scheduling effect and gated no number, so nothing published turns on it."
+  },
+  "docs/DATA_LAYOUT.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Maps which path on the cluster volume holds code, live data, frozen evidence or another project.",
+   "why": "It is a filesystem map of one machine and does not travel with the code."
+  },
+  "docs/DESIGN_AND_RATIONALE.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The authoritative explanation of every physics and engineering choice, with the evidence behind it, written so the study can be rebuilt independently.",
+   "why": "It is the reasoning a reader needs to judge whether a published choice was the right one."
+  },
+  "docs/ERROR_RECORD.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The bidirectional record of what went wrong, who caught it and what changed in response, across the whole project.",
+   "why": "The brief rules it INTERNAL: it records the working relationship and the route to the result rather than the result."
+  },
+  "docs/EXTRACTION_CONVENTIONS.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "Defines the two grouping conventions side by side, ground-state and experiment-comparable, with tables now superseded by merged data.",
+   "why": "The convention definitions are what extraction/three_tune_table.py implements, so a reader needs them to read a published column."
+  },
+  "docs/F3_VIRTUAL_TRIGGER_CLOSURE.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Establishes that the closure-only virtual-trigger validation can be run, specifies exactly how, and records the passed commensurability gate.",
+   "why": "It is the method behind the observable-definition sentence and its first gate result."
+  },
+  "docs/FIGURE_INVENTORY.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "Gives every plot the paper has carried exactly one disposition, sourced from the manuscript's own include list and the figure provenance map.",
+   "why": "It is the provenance ledger for the published figures, so a reader can tell which generator made which figure."
+  },
+  "docs/GATE_3000.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Pre-registers the validation gate over the full 3000-directory analysis set, recorded before launch.",
+   "why": "The gate is a precondition of the merge that produced every published number, and this states what it had to return."
+  },
+  "docs/GOLDEN_OUTPUTS.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The behaviour-freeze contract: every frozen artifact with its digest and regeneration recipe, and the seven things that cannot be regenerated.",
+   "why": "The brief rules it PUBLIC: it is the reproducibility claim and the only answer to how a reader knows a figure came from that data."
+  },
+  "docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The owner's authorization for the HF_RUN3_V1 dataset to carry publication numbers.",
+   "why": "Its digest is recorded inside the dataset selectors, which refuse to resolve without it, so the plotting chain does not run without this file."
+  },
+  "docs/LITERATURE_POSITIONING.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Positions the closest prior work against this study from a full-text read, feeding the manuscript introduction.",
+   "why": "It is manuscript drafting material and no method, figure or number depends on it."
+  },
+  "docs/M2_PROBQQ1TOQQ0JOIN.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Settles which quark indexes the probQQ1toQQ0join parameter by reading the pinned PYTHIA 8.317 source.",
+   "why": "It documents the meaning of a tune parameter the published cards set, which a reader has to know to interpret the comparison."
+  },
+  "docs/M7_BEAUTY_PREREGISTRATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Pre-registers the beauty-sector unresolved-origin measurement before the macro was deployed or any job submitted.",
+   "why": "It is what the published beauty M7 number is scored against."
+  },
+  "docs/M7_BEAUTY_UNRESOLVED_SYSTEMATIC.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Reports the measured beauty unresolved-origin systematic, under a scope banner marking it inclusive-level and not a bound on the pair observable.",
+   "why": "It is a published result and its scope banner is part of reading it correctly."
+  },
+  "docs/M7_UNRESOLVED_SYSTEMATIC.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Reports the measured charm unresolved-origin systematic under the same inclusive-level scope banner.",
+   "why": "README section 3a regenerates its table from committed logs, which makes it a reproduction target."
+  },
+  "docs/MAP_V1_1_PREREGISTRATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Pre-registers the exact diff the decay-map conjugation fix must produce, committed before the builder change existed.",
+   "why": "README calls reproducing this fix one of the two headline checks, and the pre-registered counts are what a rebuild is scored against."
+  },
+  "docs/MAP_V1_CONJUGATION_BUG.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Records that the v1 decay-parent map does not conjugate antiparticle decays, found by a check that refused to build the artifact.",
+   "why": "It is the defect behind a published correction, and the golden-output recipes are written against it."
+  },
+  "docs/MAP_V2_PREREGISTRATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Pre-registers the branching-ratio-split decay map before the channel probe was written, compiled or run.",
+   "why": "The v2 map is a committed golden artifact and this is the falsifiable statement it was built against."
+  },
+  "docs/MAP_V2_RESULT.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Reports that the species-level splits drop the misassignment to 0.0018 per cent, built on v1.1 and never on v1.",
+   "why": "It is the measured result that justifies the map version the published extraction uses."
+  },
+  "docs/MERGED_CONVENTION_TABLES.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The convention tables rebuilt from merged weights, every absolute and cross-sector number in them inflated by the E5 replication.",
+   "why": "Its numbers are superseded and its definitions live in EXTRACTION_CONVENTIONS, so nothing published needs it."
+  },
+  "docs/MERGE_CHECKLIST.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Collects the items gated on the merge that had been accumulating in owner briefs, with how each is verified.",
+   "why": "The brief rules it INTERNAL: it is a session worklist."
+  },
+  "docs/MERGE_V3_BAND_VALIDATION.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Scores the first merged block against the pre-registered wall-clock and RSS band and decomposes the one apparent excess.",
+   "why": "It validates a resource forecast, not a physics quantity."
+  },
+  "docs/MERGE_V3_PREREGISTRATION.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Pre-registers the full-scale merge run and its go condition on the gate returning a pass.",
+   "why": "It registers an operational forecast for one run; the physics gate it depends on is pre-registered separately in GATE_3000."
+  },
+  "docs/MODEL_TEX_REWRITE_PACK.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Assembles the numbers and provenance the owner needs to rewrite the manuscript's multiplicity-classes section.",
+   "why": "It is drafting material for a specific manuscript edit; its numbers are published through the documents that own them."
+  },
+  "docs/MONASH_CENTRAL_TABLE.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "The MONASH central decomposition, marked superseded by E5 but carrying the section 0 values the smoke path and four tests reproduce.",
+   "why": "README section 3a names it as the reproduction target for the committed MONASH anchor, so a reader checks against it."
+  },
+  "docs/NIKHEF_BRINGUP.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The order of operations for bringing the pipeline up on the Nikhef cluster after the shell rewiring.",
+   "why": "It is a bring-up checklist for one site's machines and paths."
+  },
+  "docs/NIKHEF_CLEANUP_PLAN.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The plan for cleaning the cluster data volume, with owner rulings and the seed-collision check applied.",
+   "why": "It is disk housekeeping on one filesystem."
+  },
+  "docs/NIKHEF_DISK_INVENTORY.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "A metadata-only walk of the cluster data volume, taken as evidence for the restructure plan.",
+   "why": "It inventories one machine's storage and names no method or result."
+  },
+  "docs/OWNER_DECISIONS_OPEN.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The whole docket of open owner decisions in one place, deciding and executing nothing.",
+   "why": "The brief rules it INTERNAL: it is the decision queue, not the decisions' effects."
+  },
+  "docs/PER_TUNE_PROCESSING_PREREGISTRATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Pre-registers the per-tune processing steps and fixes the block SEM estimator identically for all three tunes.",
+   "why": "The published uncertainties are computed by exactly this estimator and the extraction code cites this document as its authority."
+  },
+  "docs/PHASE4_SUBMISSION_CHECKLIST.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The pre-submission checklist for the full production, each item verified with evidence or pending with what would close it.",
+   "why": "It gates a job submission decision that has already been taken."
+  },
+  "docs/PLOTTING_V3_DELTA.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Enumerates, read-only and before any edit, every change the inherited plotting stack needed for v3 input.",
+   "why": "It is change-control for one editing pass: the resulting code is what a reader runs."
+  },
+  "docs/PRODUCTION_SHAPE_DECISION.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Lays out combined versus split charm and beauty production for an owner decision, with the recommendation field left blank.",
+   "why": "It states plainly that nothing in it is a paper number."
+  },
+  "docs/PROGRESS_PROBE_METHOD.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The consolidated method for measuring how far a long silent job has got, used for the gate, the merge and the per-tune closures.",
+   "why": "Anyone rerunning a 562 CPU-hour campaign needs a way to tell progress from a hang, and this is that method."
+  },
+  "docs/PUBLICATION_EXPORT_EXCLUSIONS.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The list of paths that must not leave the private tree, with the mechanism enforcing each and whether it is already in history.",
+   "why": "It describes the boundary of the export rather than anything inside it, and it names internal paths in full."
+  },
+  "docs/REGISTRY_AND_MAPPING_PROPOSAL.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Proposes how excited states are recorded and mapped to ground states, and what that means for the observable's definition.",
+   "why": "The species axis and ground-state mapping it proposes are what the published extraction implements."
+  },
+  "docs/REMOVALS.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Records what left the working tree, when and on what evidence, as the companion to the rename log.",
+   "why": "A fresh-history export has no prior tree for a removal record to refer to."
+  },
+  "docs/REPO_AUDIT.csv": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The per-path publication audit manifest: class, what, why and the measured evidence for all 786 tracked paths.",
+   "why": "It records which internal files exist and why each was excluded, which is the one thing the export must not carry."
+  },
+  "docs/REPO_AUDIT_FINDINGS.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The audit's findings beyond the per-path manifest: the untracked working tree, the rename candidates and two structural notes for the export.",
+   "why": "It reasons about which internal files exist and how the export should treat them, which is the deliberation the export must not publish."
+  },
+  "docs/REPO_FILE_CENSUS.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The 2026-08-12 census classifying about 75 paths as live, history or owner-decides, taken before the restructure and both merges.",
+   "why": "It is an earlier inventory of this repository, superseded as coverage by docs/REPO_AUDIT.csv."
+  },
+  "docs/RESTRUCTURE_PLAN.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The single-approval-pass plan for the directory restructure, marked as awaiting approval and executing nothing.",
+   "why": "It plans a change to this repository's layout, which the export does not inherit."
+  },
+  "docs/SCALING_V3_MEASUREMENT.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Pre-registers and harvests the v3 species scaling measurement that gates the merge.",
+   "why": "It fixes the scale factor relating anchor weights to merged weights, which published comparisons are read against."
+  },
+  "docs/SCRATCH_RECONCILIATION.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Compares every deployed and scratch copy on the cluster against tracked content by digest and disposes of each.",
+   "why": "It reconciles one machine's working copies with git."
+  },
+  "docs/SECOND_BRANCH_WEIGHT.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Measures how much weight the dominant-only decay mapping puts at risk, and fires the decision rule for the branching-ratio split.",
+   "why": "It is the measurement that justifies the published map convention, and a golden recipe regenerates it."
+  },
+  "docs/SIGMA_B_ORDERING_AND_ADJUDICATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "The Sigma_b asymmetry ordering test and the adjudication pre-registration, annotated that every sigma computed on extraction weights is about five times too large.",
+   "why": "The ordering result is published and the committed block logs anchor it."
+  },
+  "docs/SPECIES_AXIS_VALIDATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The evidence record for the 202-ordinal species axis across all three tunes: what was run, on what, and what came back.",
+   "why": "The species axis is the spine of the published decomposition and this is its validation."
+  },
+  "docs/SUPERVISOR_CHANGE_REPORT.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Reports to the supervisors what changed since the incoming pull request, measured from that commit.",
+   "why": "The brief rules it INTERNAL: it addresses named readers about this repository's history."
+  },
+  "docs/SYSTEMATICS.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "The living systematics document: every source, its status, and the per-class numbers as they close.",
+   "why": "It is where the published systematic uncertainty is stated and defined."
+  },
+  "docs/SYSTEMATICS_HARVEST_RUN_RECORD.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "The command-by-command record of the seven-campaign harvest, with every input digest, intermediate number and provenance note.",
+   "why": "It is the provenance for the published systematics results, which the brief rules PUBLIC."
+  },
+  "docs/SYSTEMATICS_PREREGISTRATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Pre-registers the six systematic sources and their combination rule, committed before any variation job was rendered or queued.",
+   "why": "The published uncertainty is scored against it, and its wall clock is the evidence it preceded the runs."
+  },
+  "docs/THREE_TUNE_CENTRAL_TABLE.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The three-tune central table, promoted to final once both outstanding closures passed.",
+   "why": "It is the resubmission's central number."
+  },
+  "docs/V2_PIN_SWEEP.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Enumerates every site that treated the analysis pair schema as a constant, now that the contract is version-aware.",
+   "why": "A reader running the chain on either schema needs to know which sites accept both and which pin one."
+  },
+  "docs/VALIDATION_INVENTORY.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Lists what is in the validation directory and what has actually run, including the macros written but never run.",
+   "why": "It tells a reader which validators back a published claim and which are available but unexercised."
+  },
+  "docs/V_INTEGRATED_PREREGISTRATION.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Pre-registers the multiplicity-integrated balancing yield before the observable is built.",
+   "why": "It fixes the method for a paper-facing quantity in advance, which is what makes it checkable."
+  },
+  "docs/WORKSPACE.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Everything a machine needs and every path that works on only one machine, with the rule that no tracked file carries a single-machine path.",
+   "why": "It is the dependency and setup reference a reader needs before the first command."
+  },
+  "docs/a2_evidence_20260813/hold_reasons_unique.txt": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The distinct scheduler hold reasons seen while the A2 campaign was queued.",
+   "why": "It diagnoses cluster scheduling during one run and bears on no number."
+  },
+  "docs/a2_evidence_20260813/regression_sentinel.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The A2 regression sentinel written by the comparison tool itself rather than transcribed.",
+   "why": "It is the machine-checkable evidence that the A2 variation reproduced its baseline before its delta was used."
+  },
+  "docs/a2_evidence_20260813/slot_0_5478114_0.err": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "One A2 job slot's standard error stream, kept from the queued run.",
+   "why": "It is a single job's error log from one campaign, not evidence for a published quantity."
+  },
+  "docs/a2_regression_pass_permissive_largest_index.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The machine-readable A2 regression verdict for the largest-index tie-break variation.",
+   "why": "It is the sentinel that records whether the A2 variation reproduced its baseline, which the published systematic depends on."
+  },
+  "docs/a2_regression_pass_permissive_smallest_index.json": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The same regression verdict for the pre-registered smallest-index tie-break.",
+   "why": "It is the sentinel for the tie-break the A2 pre-registration actually selected."
+  },
+  "docs/campaigns/HF_RUN3_V1_PARTIALS_ARCHIVE.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The manifest of 34 partial staging directories moved out of the gate's scan root, recorded so the move is reversible.",
+   "why": "It documents a reversible housekeeping action on cluster storage."
+  },
+  "docs/campaigns/HF_RUN3_V1_RECORD.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "The campaign record for the production behind the published dataset: what was rendered, when it was submitted and when it was released.",
+   "why": "It is the provenance of the events every published number is computed from."
+  },
+  "docs/history/studies/Balancing_and_Sampling/ATTENTION.txt": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "grouped": "history-studies",
+   "voice": "clean",
+   "what": "Warns that double-counting is not implemented from 23 December onward and that results from this directory need dividing by two, ending with the note that this remains to be checked.",
+   "why": "It is an unresolved caveat on a superseded study, ruled out of scope only while no published number descends from that directory."
+  },
+  "docs/history/studies/Balancing_and_Sampling/doubleCounting.C": {
+   "class": "INTERNAL",
+   "dead": "yes",
+   "grouped": "history-studies",
+   "voice": "clean",
+   "what": "The macro whose double-counting logic decides whether the factor of two in ATTENTION.txt applies to any quoted number.",
+   "why": "It is the file to read if the caveat reopens, and the census names it for exactly that, but no current figure depends on it."
+  },
+  "docs/writing_standard/STANDARD.md": {
+   "class": "OWNER",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The repository's writing standard: the Simplified Technical English and Orwell rules every tracked document is written against.",
+   "why": "Does the export carry the writing standard, given that tools/prose_check.py implements it and the PUBLIC test suite exercises it?"
+  },
+  "docs/writing_standard/pdf-page-map.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Maps the repository's rule numbering onto pages of the third-party ASD-STE100 specification, which is deliberately untracked.",
+   "why": "It indexes into a copyrighted document that the export cannot carry, and the exclusions list already forbids redistributing it."
+  },
+  "docs/writing_standard/ste-rules.md": {
+   "class": "OWNER",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The rule-by-rule reference behind that standard, in the repository's own wording.",
+   "why": "Same question as STANDARD.md: it travels or stays with it, and the rule does not settle whether a house style is reader-facing."
+  },
+  "extraction/aggregate_m7.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "grouped": "extraction-chain",
+   "voice": "clean",
+   "what": "Aggregates the unresolved-origin systematic across the ten canonical blocks, per sector.",
+   "why": "README section 3a runs it on committed logs to reproduce a published table."
+  },
+  "extraction/compare_subset_parent.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "grouped": "extraction-chain",
+   "voice": "clean",
+   "what": "Compares a per-species subset table against the parent it was drawn from, under an explicitly named null.",
+   "why": "It is the mechanism behind the published anchor defect, and the null has no default because the choice changes the verdict."
+  },
+  "extraction/decompose_with_block_sems.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "grouped": "extraction-chain",
+   "voice": "clean",
+   "what": "Produces the species decomposition with block standard errors in both conventions, using the pre-registered estimator.",
+   "why": "The published central values and their uncertainties come from it."
+  },
+  "extraction/extract_species_decomposition.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "grouped": "extraction-chain",
+   "voice": "clean",
+   "what": "Projects a merged directory's 202-bin species closure and groups it by category, with the decay map named explicitly.",
+   "why": "It is the first extraction layer over merged output and the source of every per-species table."
+  },
+  "extraction/three_tune_table.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "grouped": "extraction-chain",
+   "voice": "clean",
+   "what": "Builds the three-tune table on a common row set so the columns are comparable, in both conventions.",
+   "why": "It generates the resubmission's central table."
+  },
+  "extraction/write_verdict.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "grouped": "extraction-chain",
+   "voice": "clean",
+   "what": "Decides whether the tune separation exceeds its total uncertainty, computing the systematic on the separation rather than borrowing one.",
+   "why": "It renders the paper's headline verdict."
+  },
+  "generation/Simulation_README.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Explains the producer, its cards and how a generation job is run.",
+   "why": "It is the subsystem guide for the first pipeline stage."
+  },
+  "generation/cards/pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The CLOSEPACKING PYTHIA card, one of the three published tunes.",
+   "why": "The published comparison is between exactly these three cards."
+  },
+  "generation/cards/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The JUNCTIONS PYTHIA card, one of the three published tunes.",
+   "why": "The published comparison is between exactly these three cards."
+  },
+  "generation/cards/pythiasettings_Hard_Low_ccbb_JUNCTIONS_MATCHED.cmnd": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "A fourth JUNCTIONS card with matched settings, deliberately outside the published tune set.",
+   "why": "It is a documented reference point, and its exclusion from the published set is itself a recorded contract the registry depends on."
+  },
+  "generation/cards/pythiasettings_Hard_Low_ccbb_MONASH.cmnd": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The MONASH PYTHIA card, one of the three published tunes.",
+   "why": "The published comparison is between exactly these three cards."
+  },
+  "generation/producer/HeavyFlavourUtils.h": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The shared heavy-flavour helpers: species classification, hard-carrier resolution and the charged-multiplicity counter.",
+   "why": "Producer, validators and analysis all include it, so its definitions are the observable's definitions."
+  },
+  "generation/producer/Makefile": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Builds the producer against the pinned PYTHIA and ROOT.",
+   "why": "It is the documented build path for the generation stage."
+  },
+  "generation/producer/Sha256.h": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "A self-contained SHA-256 implementation used to stamp inputs and outputs inside ROOT and PYTHIA code.",
+   "why": "The provenance digests a reader verifies are computed with it."
+  },
+  "generation/producer/heavyflavourcorrelations_status.cpp": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The PYTHIA producer: generates events and writes the canonical raw schema with its heavy-flavour audit trees.",
+   "why": "It is the stage that makes the data, so nothing can be rerun without it."
+  },
+  "generation/registries/GeneratedHeavyFlavourRegistry.h": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The generated C++ view of the signed species registry, carrying the source digest.",
+   "why": "It is a golden output and the compiled code reads the registry only through it."
+  },
+  "generation/registries/GeneratedTuneSettingRegistry.h": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The generated C++ view of the tune settings the producer records per run.",
+   "why": "It is a golden output that ties a produced file to the card that made it."
+  },
+  "generation/run_hf.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Runs the producer for one tune and job outside the batch system.",
+   "why": "It is the local entry point for generating events."
+  },
+  "generation/submit/Condor_README.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The cluster operations guide: submitting, monitoring, the hang guard and the retry path.",
+   "why": "README names it as the owner of cluster operations, which rerunning the production requires."
+  },
+  "generation/submit/runCondorJob.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The worker script each production job runs: sets up the environment, runs the producer under the wall-clock guard, and writes the sidecar.",
+   "why": "It is the job body behind all 3000 production files."
+  },
+  "generation/submit/submit_status_analysis.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Submits the analysis stage over a rendered manifest.",
+   "why": "It is the documented entry point to the reduction stage on a cluster."
+  },
+  "merging/MergeAnalysisObjects.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Object-level merger for status-analysis outputs, safer than a blind file merge because it merges known objects only.",
+   "why": "The canonical merge includes it, and the object list is part of the closure contract."
+  },
+  "merging/MergeCanonicalAnalysis.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Merges a canonical set of per-job pair directories into one directory, registry-aware.",
+   "why": "It is the macro the merge driver calls, so the merged product is defined by it."
+  },
+  "merging/make_subsamples.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Builds the subsample files the transverse-momentum figures are drawn from.",
+   "why": "Those figures cannot be regenerated without their subsample inputs."
+  },
+  "merging/merge_root_files.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The merge driver: builds the three centrals and the thirty blocks, refusing to start without an explicit pair schema.",
+   "why": "It is the stage that produces the merged product every published number is extracted from."
+  },
+  "plotting/FinalAnalysis/README.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Explains the two remaining macros in the FinalAnalysis directory and their scheduled retirement.",
+   "why": "Both macros are still invoked by the figure driver, so a reader running it meets them."
+  },
+  "plotting/GeneratedClassLabelPrecision.h": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The generated header carrying the multiplicity class label precision, derived from the single boundary source.",
+   "why": "It is a generated artifact the figures compile against, so the labels cannot drift from the boundaries."
+  },
+  "plotting/PAPER_FIGURE_PROVENANCE.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "needs-rewrite",
+   "what": "Maps the manuscript's figures to the generators that reproduce them.",
+   "why": "It is the figure-to-code provenance a reader follows from a published figure back to its command."
+  },
+  "plotting/PtMultiplicity/README.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Explains the subsample transverse-momentum and ratio figures and how their combined input file is built.",
+   "why": "It is the guide to a published figure family."
+  },
+  "plotting/README.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Explains the publication plotting path, its fail-closed input selection and the full and reduced configurations.",
+   "why": "It is the subsystem guide for the figure stage."
+  },
+  "plotting/improvedPlotting_THnSparse.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "grouped": "plotting-figure-path",
+   "voice": "clean",
+   "what": "The main sparse-histogram plotting macro: reads the merged product, projects the selected ranges and emits the balancing canvases.",
+   "why": "It renders the paper's central figures and its uncertainty matrix feeds the systematics harvest."
+  },
+  "plotting/paper/README.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "States that every paper figure is generated from committed tables by script, with no hand steps.",
+   "why": "It is the guide to the figure layer that carries the strongest reproducibility claim in the repository."
+  },
+  "plotting/paper/figures/fig1_species_decomposition.svg": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The committed rendered figure for the species decomposition.",
+   "why": "It is a published figure and its committed bytes are what the generator is checked to reproduce."
+  },
+  "plotting/paper/figures/fig2_m7_inclusive_shift.svg": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The committed rendered figure for the inclusive unresolved-origin shift.",
+   "why": "It is a published figure and its committed bytes are what the generator is checked to reproduce."
+  },
+  "plotting/paper/figures/fig3_multiplicity_classes.svg": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The committed rendered figure for the multiplicity class definition.",
+   "why": "It is a published figure and its committed bytes are what the generator is checked to reproduce."
+  },
+  "plotting/paper/make_paper_figures.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Generates the paper figures from committed tables, with no hand step and no number that exists only inside a figure.",
+   "why": "It is how the published figures are rebuilt from committed inputs."
+  },
+  "plotting/paper/svgkit.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "A dependency-free byte-deterministic SVG writer used by the figure generator.",
+   "why": "Byte determinism is what lets the committed figures carry digests."
+  },
+  "plotting/run_paper_plots.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The figure driver: names the five paper macros and refuses to run until a dataset is named.",
+   "why": "It is the entry point that turns merged output into the published figures."
+  },
+  "setupEnv.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Asserts the pinned ROOT and PYTHIA versions and exports nothing on a mismatch, so environment drift cannot reach a number.",
+   "why": "Every documented command sources it first."
+  },
+  "tests/test_repo_audit_manifest.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "grouped": "tests-python-contract",
+   "voice": "clean",
+   "what": "Asserts the manifest covers exactly the tracked path set, round-trips through the csv module and carries no invalid class.",
+   "why": "It is a contract test in the PUBLIC suite."
+  },
+  "tools/GenerateSpeciesOrdinals.C": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Derives the sector-charged species ordinal table from a produced file's stability audit tree.",
+   "why": "It generates the species ordinal artifact that the whole decomposition is indexed by."
+  },
+  "tools/archive_breach_partials.sh": {
+   "class": "INTERNAL",
+   "dead": "yes",
+   "voice": "clean",
+   "what": "Moves provably superseded partial staging directories out of the gate's scan root and writes a manifest of what moved.",
+   "why": "It is a one-shot housekeeping action on cluster storage whose single run is already recorded in a campaign manifest."
+  },
+  "tools/build_producer.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Builds the producer through the Makefile with the pinned toolchain.",
+   "why": "It is the documented build step."
+  },
+  "tools/checkout_advance_guard.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Refuses to advance the analysis checkout while jobs pinned to the current commit are still in flight.",
+   "why": "A test in the PUBLIC suite exercises it, and the invariant it protects applies to any cluster the chain runs on."
+  },
+  "tools/docs_check.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Prints which owning document corresponds to the paths changed since the last commit, advisory only and never failing.",
+   "why": "It supports the documented rule that a code change and its documentation change land together."
+  },
+  "tools/doctor.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Reports what the current machine can and cannot do, without ever failing.",
+   "why": "It is the first command a new machine runs."
+  },
+  "tools/environment_verdict.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Ends make check with an explicit environment verdict and fails on an off-pin runtime unless the run is declared unpinned.",
+   "why": "It closes the defect where a machine that cannot run the pipeline reported the greenest check."
+  },
+  "tools/f4_probe.cc": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "The decay-parent probe, compiled against the pinned PYTHIA, whose output the decay maps are built from.",
+   "why": "The committed probe output is a golden input and this is the only code that can regenerate it."
+  },
+  "tools/harvest_launch_merge.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Launches one variation merge behind six refusals, a pipeline lock and a full identity record.",
+   "why": "Every published systematic variation was merged through it."
+  },
+  "tools/install_checkout_guard_hook.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Installs that guard as a git hook on a clone that runs jobs.",
+   "why": "It is how the guard is actually put in force on a running checkout."
+  },
+  "tools/merge_supervisor.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Supervises the canonical merge: detects death, re-runs the pre-checks and restarts it.",
+   "why": "The merge is the longest stage in the chain and this is how a rerun survives it."
+  },
+  "tools/prose_check.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Applies the mechanical subset of the repository's writing rules to a document and flags sentences to look at.",
+   "why": "A test in the PUBLIC suite pins one of its checks, so the suite does not run without it."
+  },
+  "tools/repo_audit.py": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Measures size, last-commit date, reference count and entry-point membership for every tracked path and writes the audit manifest.",
+   "why": "It is ordinary repository tooling and its completeness check is one of the suite's tests."
+  },
+  "tools/repo_audit_rulings.json": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The hand-written publication rulings the manifest is built from, keyed by path and by group.",
+   "why": "It is the working input to an internal decision about what to publish."
+  },
+  "tools/run_tests.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Runs the Python contract tests by glob and states plainly that a run without ROOT is smaller rather than green.",
+   "why": "It is the suite's entry point and the warning it prints is part of reading a result correctly."
+  },
+  "tools/supervisor_eol_watch.sh": {
+   "class": "PUBLIC",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Stops the merge supervisor only once the merge has completed cleanly.",
+   "why": "It closes the supervisor loop the merge stage depends on."
+  }
+ },
+ "voice_rewrite": [
+  ".gitignore",
+  "ARCHITECTURE.md",
+  "AnalysisScripts/anchors/closure_v3_verdicts/MANIFEST.md",
+  "AnalysisScripts/anchors/closure_v3_verdicts/closure_waiter.sh",
+  "AnalysisScripts/anchors/e5fix_drivers/MANIFEST.md",
+  "AnalysisScripts/anchors/extraction_dual/MANIFEST.md",
+  "AnalysisScripts/anchors/merged_monash_dedup/MANIFEST.md",
+  "Literature/References.bib",
+  "Makefile",
+  "README.md",
+  "REPRODUCIBILITY.md",
+  "STATE.md",
+  "Validation/ValidatePairBlockClosure.C",
+  "Validation/validate_canonical_manifest.sh",
+  "Validation/validate_pair_block_closure.sh",
+  "Validation/validate_pair_directory.sh",
+  "ValidationReports/NCH_CALIBRATION_PYTHIA8317_20260801.md",
+  "analysis/Analysis_README.md",
+  "analysis/a2_block_shift.py",
+  "analysis/run_status_analysis.sh",
+  "attic/plotting/improvedPlotting.C",
+  "config/a2_variations_v1.json",
+  "config/dataset_selector.json",
+  "config/dataset_selector_hf_run3_v1.json",
+  "docs/A2_PAIR_UNRESOLVED_PREREGISTRATION.md",
+  "docs/A2_PAIR_UNRESOLVED_RUN_RECORD.md",
+  "docs/A9_PAPER_TABLE_REGENERATION.md",
+  "docs/B_BARYON_ADVISORY_DIAGNOSTIC.md",
+  "docs/CLOSURE_V3_PREREGISTRATION.md",
+  "docs/COMPONENTS.md",
+  "docs/DESIGN_AND_RATIONALE.md",
+  "docs/EXTRACTION_CONVENTIONS.md",
+  "docs/F3_VIRTUAL_TRIGGER_CLOSURE.md",
+  "docs/FIGURE_INVENTORY.md",
+  "docs/GATE_3000.md",
+  "docs/GOLDEN_OUTPUTS.md",
+  "docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md",
+  "docs/M2_PROBQQ1TOQQ0JOIN.md",
+  "docs/M7_BEAUTY_PREREGISTRATION.md",
+  "docs/M7_BEAUTY_UNRESOLVED_SYSTEMATIC.md",
+  "docs/M7_UNRESOLVED_SYSTEMATIC.md",
+  "docs/MAP_V1_1_PREREGISTRATION.md",
+  "docs/MAP_V1_CONJUGATION_BUG.md",
+  "docs/MAP_V2_PREREGISTRATION.md",
+  "docs/MAP_V2_RESULT.md",
+  "docs/MONASH_CENTRAL_TABLE.md",
+  "docs/PER_TUNE_PROCESSING_PREREGISTRATION.md",
+  "docs/PROGRESS_PROBE_METHOD.md",
+  "docs/REGISTRY_AND_MAPPING_PROPOSAL.md",
+  "docs/SCALING_V3_MEASUREMENT.md",
+  "docs/SECOND_BRANCH_WEIGHT.md",
+  "docs/SIGMA_B_ORDERING_AND_ADJUDICATION.md",
+  "docs/SPECIES_AXIS_VALIDATION.md",
+  "docs/SYSTEMATICS.md",
+  "docs/SYSTEMATICS_HARVEST_RUN_RECORD.md",
+  "docs/SYSTEMATICS_PREREGISTRATION.md",
+  "docs/THREE_TUNE_CENTRAL_TABLE.md",
+  "docs/V2_PIN_SWEEP.md",
+  "docs/VALIDATION_INVENTORY.md",
+  "docs/V_INTEGRATED_PREREGISTRATION.md",
+  "docs/WORKSPACE.md",
+  "docs/a2_results_20260813/A2_DELTA_RESULT.md",
+  "docs/a2_results_20260813/A2_TIEBREAK_ROBUSTNESS.md",
+  "docs/campaigns/HF_RUN3_V1_RECORD.md",
+  "docs/plotting_validation/hf_run3_v1_kinematics_20260817/RUN_RECORD.md",
+  "docs/plotting_validation/hf_run3_v1_threetune_20260816/RUN_RECORD.md",
+  "docs/systematics_results_20260819/PER_CATEGORY_DELTAS.md",
+  "docs/systematics_results_20260819/PER_CLASS_DELTAS.md",
+  "docs/systematics_results_20260819/RATIO_TREND.md",
+  "docs/systematics_results_20260819/TUNE_SEPARATION.md",
+  "docs/systematics_results_20260820/COMBINED_SYSTEMATICS.md",
+  "docs/systematics_results_20260820/PER_CLASS_DELTAS_SEVEN.md",
+  "docs/systematics_results_20260820/VERDICT.md",
+  "docs/writing_standard/STANDARD.md",
+  "docs/writing_standard/ste-rules.md",
+  "extraction/compare_subset_parent.py",
+  "extraction/decompose_with_block_sems.py",
+  "extraction/extract_species_decomposition.py",
+  "extraction/harvest_class_axis.py",
+  "extraction/pipeline/harvest_tune.py",
+  "extraction/pipeline/tune_chain.sh",
+  "extraction/second_branch_weight.py",
+  "extraction/systematics_delta.py",
+  "generation/submit/Condor_README.md",
+  "merging/merge_root_files.sh",
+  "plotting/Plot_InclusiveKinematicSpectra_Raw.C",
+  "plotting/PtMultiplicity/Build_HF_AllHistogramSubsampleFile.C",
+  "plotting/PtMultiplicity/Build_HF_CombinedSubsamplesFile.C",
+  "plotting/README.md",
+  "plotting/TunePlotStyle.h",
+  "plotting/configuration_multiplicity_HF_RUN3_V1_VBARYONMESON.json",
+  "plotting/improvedPlotting_THnSparse.C",
+  "plotting/make_hf_run3_v1_three_tune_config.py",
+  "plotting/paper/README.md",
+  "plotting/paper/figures/fig1_species_decomposition.svg",
+  "plotting/paper/make_paper_figures.py",
+  "tests/test_a2_campaign_restoration.py",
+  "tests/test_closure_schema_requirement.py",
+  "tests/test_compare_subset_parent.py",
+  "tests/test_decompose_exit_status.py",
+  "tests/test_environment_verdict.py",
+  "tests/test_extraction_preflight.py",
+  "tests/test_harvest_deltas.py",
+  "tests/test_harvest_launcher.py",
+  "tests/test_harvest_tune.py",
+  "tests/test_heavy_sign_production_convention.py",
+  "tests/test_no_source_directory_is_ignored.py",
+  "tests/test_plot_dataset_integration.py",
+  "tests/test_prose_check_ing_start.py",
+  "tests/test_queue_probe.py",
+  "tests/test_recipe_scripts_executable.py",
+  "tests/test_species_ordinals_contract.py",
+  "tests/test_systematics_delta.py",
+  "tests/test_three_tune_plot_config.py",
+  "tools/anchor_width_control.py",
+  "tools/build_decay_parent_map.py",
+  "tools/build_decay_parent_map_v2.py",
+  "tools/campaign_closure_status.py",
+  "tools/checkout_advance_guard.py",
+  "tools/environment_verdict.sh",
+  "tools/evaluate_pthat_sensitivity.py",
+  "tools/harvest_launch_merge.sh",
+  "tools/make_variant_configs.py",
+  "tools/merged_pair_provenance.py",
+  "tools/prose_check.py",
+  "tools/validate_analysis_outputs.py"
+ ]
+}
