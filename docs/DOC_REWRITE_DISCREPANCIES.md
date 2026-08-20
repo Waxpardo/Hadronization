@@ -1,5 +1,7 @@
 # Documentation rewrite discrepancies
 
+## Verified discrepancies
+
 This table records disagreements found by deriving current claims from code, configuration, and committed artifacts.
 The verdict column states which source controls the replacement document.
 
@@ -15,3 +17,12 @@ Version 1's unconjugated antiparticle products were also cross-checked.
 The v1 artifact yields D0 and anti-D0 weights of 59,678,352 and 13,298,376.
 Version 1.1 yields 36,539,688 and 36,437,040 with the same anchor weights.
 This is a confirmed historical defect, not an unresolved disagreement.
+
+## COULD NOT DERIVE
+
+These rows record inherited claims that current repository artifacts cannot reproduce.
+They are debts, not discrepancies or verifications.
+
+| target document | inherited claim | derivation blocker | inherited from |
+|---|---|---|---|
+| `docs/PHYSICS.md` | The 202-species axis mapped all sector-charged hadrons across 900 pair files, with zero absent species and exact category closure. | The all-tune raw fixtures do not travel with the repository. The validator cannot reproduce the outputs without those ROOT files. | `docs/SPECIES_AXIS_VALIDATION.md` |

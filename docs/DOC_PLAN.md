@@ -421,6 +421,12 @@ invent an answer where the required measurement or owner decision is absent.
 9. **`README.md`** is last because it summarizes and links every other spine
    document without creating new authority.
 
+10. **Run the phase-close reclassification sweep** after document nine.
+    Re-evaluate every Section 3 trigger after the new spine removes obsolete
+    PUBLIC citations. Reclass eligible absorbed documents INTERNAL, regenerate
+    both audit artifacts, and update the terms baseline. Do not treat an
+    unchanged baseline before this sweep as a failure.
+
 ## Hardest placements
 
 | Document | Why placement was difficult | Ruling |
