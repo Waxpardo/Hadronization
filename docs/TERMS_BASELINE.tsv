@@ -1,0 +1,92 @@
+path	term	canonical	count	lines
+ARCHITECTURE.md	checksum	digest	5	61,98,99,257
+ARCHITECTURE.md	hadronisation	hadronization	2	18,20
+AnalysisScripts/anchors/e5fix_drivers/MANIFEST.md	merged directory	merged product	1	18
+README.md	analysed	analyzed	1	275
+README.md	checksum	digest	1	23
+README.md	frozen artifact	anchor	1	189
+README.md	merged directory	merged product	1	97
+REPRODUCIBILITY.md	checksum	digest	1	146
+REPRODUCIBILITY.md	production run	campaign	1	178
+STATE.md	multiplicity bin	multiplicity class	1	281
+ValidationReports/PTHAT_MULTIPLICITY_SCAN_8317.md	checksum	digest	1	159
+ValidationReports/PYTHIA_JUNCTION_HANG_20260731.md	hash	digest	1	247
+analysis/Analysis_README.md	checksum	digest	5	34,101,126,142,223
+analysis/Analysis_README.md	merged directory	merged product	1	306
+docs/A2_PAIR_UNRESOLVED_RUN_RECORD.md	bundle	tune	2	130,132
+docs/A2_PAIR_UNRESOLVED_RUN_RECORD.md	checksum	digest	1	146
+docs/COMPONENTS.md	analysed	analyzed	1	98
+docs/COMPONENTS.md	checksum	digest	1	385
+docs/COMPONENTS.md	fingerprint	digest	1	371
+docs/COMPONENTS.md	merge product	merged product	1	498
+docs/COMPONENTS.md	merged directory	merged product	1	137
+docs/COMPONENTS.md	pair set	pair directory	1	384
+docs/DESIGN_AND_RATIONALE.md	checksum	digest	2	554,758
+docs/DESIGN_AND_RATIONALE.md	config	configuration	1	562
+docs/DESIGN_AND_RATIONALE.md	hadronisation	hadronization	9	30,32,107,139,194,269,691,694,718
+docs/EXTRACTION_CONVENTIONS.md	merged directory	merged product	1	21
+docs/F3_VIRTUAL_TRIGGER_CLOSURE.md	hash	digest	1	60
+docs/FIGURE_INVENTORY.md	analysed	analyzed	2	357,361
+docs/FIGURE_INVENTORY.md	committed artifact	anchor	2	221,700
+docs/FIGURE_INVENTORY.md	config	configuration	7	254,313,372,376,446,450,1074
+docs/FIGURE_INVENTORY.md	hadronisation	hadronization	1	883
+docs/FIGURE_INVENTORY.md	multiplicity bin	multiplicity class	1	342
+docs/FIGURE_INVENTORY.md	pair set	pair directory	1	361
+docs/GATE_3000.md	checksum	digest	1	298
+docs/GOLDEN_OUTPUTS.md	analysed	analyzed	1	2161
+docs/GOLDEN_OUTPUTS.md	checksum	digest	2	1033,2709
+docs/GOLDEN_OUTPUTS.md	config	configuration	1	2104
+docs/GOLDEN_OUTPUTS.md	fingerprint	digest	1	279
+docs/GOLDEN_OUTPUTS.md	hadronisation	hadronization	2	1413,1423
+docs/GOLDEN_OUTPUTS.md	pair set	pair directory	1	2161
+docs/M7_BEAUTY_PREREGISTRATION.md	hadronisation	hadronization	1	31
+docs/PRODUCTION_SHAPE_DECISION.md	analysed	analyzed	1	512
+docs/PRODUCTION_SHAPE_DECISION.md	hadronisation	hadronization	1	128
+docs/REGISTRY_AND_MAPPING_PROPOSAL.md	analysed	analyzed	1	474
+docs/REGISTRY_AND_MAPPING_PROPOSAL.md	analysis pass	reduction	1	260
+docs/REGISTRY_AND_MAPPING_PROPOSAL.md	hadronisation	hadronization	3	155,580,611
+docs/REGISTRY_AND_MAPPING_PROPOSAL.md	hash	digest	2	214,544
+docs/REGISTRY_AND_MAPPING_PROPOSAL.md	production run	campaign	1	203
+docs/SCALING_V3_MEASUREMENT.md	normalisation	normalization	3	44,55,212
+docs/SPECIES_AXIS_VALIDATION.md	analysed	analyzed	1	25
+docs/SPECIES_AXIS_VALIDATION.md	hash	digest	1	48
+docs/SYSTEMATICS.md	bundle	tune	1	445
+docs/SYSTEMATICS.md	certificate	receipt	2	648,671
+docs/SYSTEMATICS.md	checksum	digest	1	578
+docs/SYSTEMATICS.md	config	configuration	1	565
+docs/SYSTEMATICS.md	hadronisation	hadronization	2	224,260
+docs/SYSTEMATICS_HARVEST_RUN_RECORD.md	bundle	tune	9	551,559,786,790,792,804,806,993
+docs/SYSTEMATICS_HARVEST_RUN_RECORD.md	certificate	receipt	2	1459,1734
+docs/SYSTEMATICS_HARVEST_RUN_RECORD.md	committed artifact	anchor	1	1707
+docs/SYSTEMATICS_HARVEST_RUN_RECORD.md	config	configuration	2	38,219
+docs/SYSTEMATICS_HARVEST_RUN_RECORD.md	merge product	merged product	1	511
+docs/SYSTEMATICS_PREREGISTRATION.md	bundle	tune	1	111
+docs/SYSTEMATICS_PREREGISTRATION.md	checksum	digest	1	753
+docs/SYSTEMATICS_PREREGISTRATION.md	hadronisation	hadronization	6	143,290,293,371,378,380
+docs/SYSTEMATICS_PREREGISTRATION.md	merge product	merged product	1	40
+docs/SYSTEMATICS_PREREGISTRATION.md	normalisation	normalization	1	135
+docs/V2_PIN_SWEEP.md	config	configuration	5	19,60,62,78,120
+docs/V_INTEGRATED_PREREGISTRATION.md	config	configuration	2	201,225
+docs/WORKSPACE.md	bundle	tune	1	255
+docs/WORKSPACE.md	checksum	digest	1	67
+docs/WORKSPACE.md	config	configuration	1	250
+docs/campaigns/HF_RUN3_V1_RECORD.md	checksum	digest	2	965,982
+docs/campaigns/HF_RUN3_V1_RECORD.md	hash	digest	2	968,1025
+docs/plotting_validation/hf_run3_v1_kinematics_20260817/RUN_RECORD.md	hadronisation	hadronization	2	61,70
+docs/plotting_validation/hf_run3_v1_monash_20260813/RUN_RECORD.md	committed artifact	anchor	1	44
+docs/plotting_validation/hf_run3_v1_threetune_20260816/RUN_RECORD.md	committed artifact	anchor	1	58
+generation/Simulation_README.md	checksum	digest	1	154
+generation/Simulation_README.md	config	configuration	1	326
+generation/submit/Condor_README.md	config	configuration	1	17
+plotting/FinalAnalysis/README.md	flavor	flavour	1	114
+plotting/PAPER_FIGURE_PROVENANCE.md	activity class	multiplicity class	1	52
+plotting/PAPER_FIGURE_PROVENANCE.md	checksum	digest	1	13
+plotting/PAPER_FIGURE_PROVENANCE.md	config	configuration	9	13,16,18,19,20,21,22,23,52
+plotting/PAPER_FIGURE_PROVENANCE.md	hadronisation	hadronization	2	100,106
+plotting/PtMultiplicity/README.md	behavior	behaviour	1	94
+plotting/PtMultiplicity/README.md	flavor	flavour	3	136,154,170
+plotting/PtMultiplicity/README.md	multiplicity percentile	multiplicity class	4	68,108,123,154
+plotting/README.md	activity class	multiplicity class	1	208
+plotting/README.md	checksum	digest	3	239,241,518
+plotting/README.md	config	configuration	7	183,195,206,211,214,278,517
+plotting/README.md	hash	digest	4	237,238,239,278

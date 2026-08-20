@@ -1557,6 +1557,20 @@
    "what": "Pre-registers the six systematic sources and their combination rule, committed before any variation job was rendered or queued.",
    "why": "The published uncertainty is scored against it, and its wall clock is the evidence it preceded the runs."
   },
+  "docs/TERMS.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The project glossary: one canonical name per thing, what each means, the names not to use, and the identifier that fixes each one.",
+   "why": "A reader meeting associate, block and canonical slot for the first time needs it, and it carries the c1-to-c11 direction every quoted trend depends on."
+  },
+  "docs/TERMS_BASELINE.tsv": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The recorded debt: every place PUBLIC prose still uses a ruled-out term, keyed by file, term and canonical term with an exact count.",
+   "why": "It is a worklist for the documentation rewrite, not a statement about the analysis."
+  },
   "docs/THREE_TUNE_CENTRAL_TABLE.md": {
    "class": "PUBLIC",
    "dead": "n/a",
@@ -1982,6 +1996,14 @@
    "what": "Asserts the manifest covers exactly the tracked path set, round-trips through the csv module and carries no invalid class.",
    "why": "Its class was wrong: it opens docs/REPO_AUDIT.csv, so publishing it would ship a test that names a file the export excludes."
   },
+  "tests/test_terms_registry.py": {
+   "class": "INTERNAL",
+   "dead": "no",
+   "grouped": "tests-python-contract",
+   "voice": "clean",
+   "what": "Fails on any ruled-out term the committed baseline does not already record, and checks that every registry row is complete.",
+   "why": "It reads the baseline and the registry parser, both INTERNAL, so shipping it would leave the suite naming files the export excludes."
+  },
   "tools/GenerateSpeciesOrdinals.C": {
    "class": "PUBLIC",
    "dead": "no",
@@ -2093,6 +2115,13 @@
    "voice": "clean",
    "what": "Stops the merge supervisor only once the merge has completed cleanly.",
    "why": "It closes the supervisor loop the merge stage depends on."
+  },
+  "tools/terms_check.py": {
+   "class": "INTERNAL",
+   "dead": "no",
+   "voice": "clean",
+   "what": "Scans PUBLIC prose for the terms the registry rules out and maintains the baseline of violations that already exist.",
+   "why": "It reads the audit manifest to find PUBLIC files and writes an INTERNAL baseline, so it serves a decision the export does not carry."
   }
  },
  "voice_rewrite": [
