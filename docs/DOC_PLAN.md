@@ -7,14 +7,19 @@ The nine-document prose set is sound. The set needs no tenth prose document.
 `LICENSE` and `CITATION.cff` remain necessary release metadata, but they sit
 outside the prose spine. A later release session must add them.
 
-The inventory has four dispositions:
+The inventory has five dispositions:
 
 - **SPINE** means rewrite the current file in place.
-- **ABSORB** means move durable substance into the named spine section.
-- **RETAIN EVIDENCE** means keep the record, its tables, and its identity.
+- **ABSORB — PROCESS PROSE** means move durable substance into the named spine
+  section because the current file is an after-the-fact measurement or decision.
+- **KEEP — DATED EVIDENCE** preserves a record whose chronology or separate
+  tables would be lost. It covers registrations, paired run records,
+  authorizations, and directed evidence-set records.
+- **KEEP — MACHINERY** means preserve a path named by a digest registry,
+  configuration field, or other operational contract.
 - **DROP** means no current claim should descend from the file.
 
-For retained evidence, the spine owns interpretation and citation. It does not
+For both keep classes, the spine owns interpretation and citation. It does not
 copy the record's tables or replace its provenance.
 
 ## 1. Section outlines
@@ -163,7 +168,7 @@ when an identifier or a directed spine section requires a new ruling.
 ## 2. Complete content map
 
 The denominator is every tracked `.md` path whose audit class is PUBLIC. It has
-78 members at commit `b994650`.
+78 members at commit `42930d6`.
 
 The map uses one primary destination. A row can cite other spine sections, but
 the named destination owns the rewrite decision.
@@ -171,84 +176,84 @@ the named destination owns the rewrite decision.
 <!-- CONTENT_MAP_BEGIN -->
 | Current PUBLIC document | Disposition | Spine destination | Treatment |
 |---|---|---|---|
-| `ARCHITECTURE.md` | ABSORB | `README.md` — End-to-end reproduction | Preserve the accessible five-stage explanation; move detailed mechanics to `PIPELINE.md`. |
-| `AnalysisScripts/anchors/MANIFEST.md` | RETAIN EVIDENCE | `docs/REPRODUCIBILITY.md` — Anchors, golden outputs, and digests | Keep the anchor index and provenance gaps; the spine explains how to use it. |
-| `AnalysisScripts/anchors/b4_multiplicity_mb/MANIFEST.md` | RETAIN EVIDENCE | `docs/PHYSICS.md` — Event activity and multiplicity classes | Keep provenance, the bin-centre warning, and the recomputation receipt. |
-| `AnalysisScripts/anchors/closure_v3_verdicts/MANIFEST.md` | RETAIN EVIDENCE | `docs/REPRODUCIBILITY.md` — Gates, receipts, and expected verdicts | Keep both closure verdicts and the waiter provenance. |
-| `AnalysisScripts/anchors/e5fix_drivers/MANIFEST.md` | RETAIN EVIDENCE | `docs/PIPELINE.md` — Extraction and result products | Keep the exact drivers behind deduplicated extraction. |
-| `AnalysisScripts/anchors/extraction_dual/MANIFEST.md` | RETAIN EVIDENCE | `docs/REPRODUCIBILITY.md` — Anchors, golden outputs, and digests | Keep the quarantine and missing-provenance warning beside the old anchor. |
-| `AnalysisScripts/anchors/merged_closepacking_dedup/MANIFEST.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Three-tune species decomposition | Keep CLOSEPACKING values, integrity flags, closure, and regeneration details. |
-| `AnalysisScripts/anchors/merged_junctions_dedup/MANIFEST.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Three-tune species decomposition | Keep JUNCTIONS values, integrity flags, closure, and regeneration details. |
-| `AnalysisScripts/anchors/merged_monash_dedup/MANIFEST.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Three-tune species decomposition | Keep the MONASH E5 correction, integrity data, and regeneration details. |
+| `ARCHITECTURE.md` | ABSORB — PROCESS PROSE | `README.md` — End-to-end reproduction | Preserve the accessible five-stage explanation; move detailed mechanics to `PIPELINE.md`. |
+| `AnalysisScripts/anchors/MANIFEST.md` | KEEP — MACHINERY | `docs/REPRODUCIBILITY.md` — Anchors, golden outputs, and digests | Keep its identity because the golden-output contract points to this internal anchor index and its provenance gaps. |
+| `AnalysisScripts/anchors/b4_multiplicity_mb/MANIFEST.md` | KEEP — MACHINERY | `docs/PHYSICS.md` — Event activity and multiplicity classes | Keep it beside the named multiplicity anchor because the recomputation receipt and bin-centre warning qualify those bytes. |
+| `AnalysisScripts/anchors/closure_v3_verdicts/MANIFEST.md` | KEEP — MACHINERY | `docs/REPRODUCIBILITY.md` — Gates, receipts, and expected verdicts | Keep it beside the contracted verdict anchors because it fixes their waiter provenance and registered counts. |
+| `AnalysisScripts/anchors/e5fix_drivers/MANIFEST.md` | KEEP — MACHINERY | `docs/PIPELINE.md` — Extraction and result products | Keep it because the exact anchored drivers, rather than a prose summary, identify the deduplicated extraction inputs. |
+| `AnalysisScripts/anchors/extraction_dual/MANIFEST.md` | KEEP — MACHINERY | `docs/REPRODUCIBILITY.md` — Anchors, golden outputs, and digests | Keep it with the old named anchor because its quarantine status and missing provenance determine whether those bytes may be used. |
+| `AnalysisScripts/anchors/merged_closepacking_dedup/MANIFEST.md` | KEEP — MACHINERY | `docs/RESULTS.md` — Three-tune species decomposition | Keep it beside the contracted CLOSEPACKING product because it binds values, integrity flags, closure, and regeneration details to that anchor. |
+| `AnalysisScripts/anchors/merged_junctions_dedup/MANIFEST.md` | KEEP — MACHINERY | `docs/RESULTS.md` — Three-tune species decomposition | Keep it beside the contracted JUNCTIONS product because it binds values, integrity flags, closure, and regeneration details to that anchor. |
+| `AnalysisScripts/anchors/merged_monash_dedup/MANIFEST.md` | KEEP — MACHINERY | `docs/RESULTS.md` — Three-tune species decomposition | Keep it beside the contracted MONASH product because it binds the E5 correction and integrity data to that anchor. |
 | `README.md` | SPINE | `README.md` — all sections | Rebuild in place as the comprehensive front door. |
 | `REPRODUCIBILITY.md` | SPINE | `docs/REPRODUCIBILITY.md` — all sections | Move to `docs/` and rebuild from contracts, tools, and receipts. |
 | `STATE.md` | DROP | None | Drop transient branch state; derive any durable result from its assigned evidence instead. |
-| `ValidationReports/NCH_CALIBRATION_20260730.md` | RETAIN EVIDENCE | `docs/PHYSICS.md` — Event activity and multiplicity classes | Keep the superseded 8.315 calibration as a labelled historical measurement. |
-| `ValidationReports/NCH_CALIBRATION_PYTHIA8317_20260801.md` | RETAIN EVIDENCE | `docs/PHYSICS.md` — Event activity and multiplicity classes | Keep the calibration at the published PYTHIA version. |
-| `ValidationReports/NCH_DECAY_POLICY_BIAS_8317.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — S5: decay-daughter class migration | Keep the paired counter measurement and its limits. |
-| `ValidationReports/PTHAT_MULTIPLICITY_SCAN_8317.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — S3: hard-process threshold | Keep the scan values, method, and decision point. |
-| `ValidationReports/PYTHIA_JUNCTION_HANG_20260731.md` | RETAIN EVIDENCE | `docs/REPRODUCIBILITY.md` — Seeds, attempts, and discard accounting | Keep the measured wedge evidence and bounded-retry rationale. |
-| `analysis/Analysis_README.md` | ABSORB | `docs/PIPELINE.md` — Reduction to pair directories | Preserve input contracts, canonical slots, promotion, blocks, and estimator links. |
-| `docs/A2_PAIR_UNRESOLVED_PREREGISTRATION.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — S6: pair-level unresolved origin | Keep the pre-registered variation, thresholds, and positive checks. |
-| `docs/A2_PAIR_UNRESOLVED_RUN_RECORD.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — S6: pair-level unresolved origin | Keep provenance failures, executed variations, and run-specific checks. |
-| `docs/A9_PAPER_TABLE_REGENERATION.md` | ABSORB | `docs/REPRODUCIBILITY.md` — Known irreproducibility and recovery boundaries | Preserve why the legacy table cannot be rebuilt from current inputs. |
-| `docs/B_BARYON_ADVISORY_DIAGNOSTIC.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Auxiliary validation results | Keep the diagnostic ladder, corrected values, and advisory scope. |
-| `docs/CLOSURE_V3_PREREGISTRATION.md` | RETAIN EVIDENCE | `docs/REPRODUCIBILITY.md` — Gates, receipts, and expected verdicts | Keep the derived counts and the pre-run failure condition. |
+| `ValidationReports/NCH_CALIBRATION_20260730.md` | ABSORB — PROCESS PROSE | `docs/PHYSICS.md` — Event activity and multiplicity classes | Preserve the superseded 8.315 calibration only as provenance for why the published-version calibration replaced it. |
+| `ValidationReports/NCH_CALIBRATION_PYTHIA8317_20260801.md` | ABSORB — PROCESS PROSE | `docs/PHYSICS.md` — Event activity and multiplicity classes | Preserve the published-version calibration values, method, and resulting class-boundary claim. |
+| `ValidationReports/NCH_DECAY_POLICY_BIAS_8317.md` | ABSORB — PROCESS PROSE | `docs/SYSTEMATICS.md` — S5: decay-daughter class migration | Preserve the paired-counter measurement, null result, and limits without retaining the after-the-fact report. |
+| `ValidationReports/PTHAT_MULTIPLICITY_SCAN_8317.md` | ABSORB — PROCESS PROSE | `docs/SYSTEMATICS.md` — S3: hard-process threshold | Preserve the scan values, method, and decision point without retaining the after-the-fact report. |
+| `ValidationReports/PYTHIA_JUNCTION_HANG_20260731.md` | ABSORB — PROCESS PROSE | `docs/REPRODUCIBILITY.md` — Seeds, attempts, and discard accounting | Preserve the measured wedge evidence and bounded-retry rationale; its date does not confer a separate evidentiary role. |
+| `analysis/Analysis_README.md` | ABSORB — PROCESS PROSE | `docs/PIPELINE.md` — Reduction to pair directories | Preserve input contracts, canonical slots, promotion, blocks, and estimator links. |
+| `docs/A2_PAIR_UNRESOLVED_PREREGISTRATION.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — S6: pair-level unresolved origin | Keep its committed-before-results identity; absorption would destroy evidence that the variation, thresholds, and positive checks were fixed in advance. |
+| `docs/A2_PAIR_UNRESOLVED_RUN_RECORD.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — S6: pair-level unresolved origin | Keep the paired run record because its chronology ties provenance failures, executed variations, and checks to that registration. |
+| `docs/A9_PAPER_TABLE_REGENERATION.md` | ABSORB — PROCESS PROSE | `docs/REPRODUCIBILITY.md` — Known irreproducibility and recovery boundaries | Preserve why the legacy table cannot be rebuilt from current inputs. |
+| `docs/B_BARYON_ADVISORY_DIAGNOSTIC.md` | ABSORB — PROCESS PROSE | `docs/RESULTS.md` — Auxiliary validation results | Preserve the diagnostic ladder, corrected values, and advisory scope; it is an after-the-fact measurement, not a separately dated contract. |
+| `docs/CLOSURE_V3_PREREGISTRATION.md` | KEEP — DATED EVIDENCE | `docs/REPRODUCIBILITY.md` — Gates, receipts, and expected verdicts | Keep its pre-run identity because the closure counts and failure condition derive value from having been fixed before the verdicts. |
 | `docs/COMPONENTS.md` | SPINE | `docs/COMPONENTS.md` — all sections | Rebuild the catalog against current callers and PUBLIC components. |
-| `docs/DESIGN_AND_RATIONALE.md` | ABSORB | `docs/PHYSICS.md` — all sections | Preserve implemented physics choices; remove session history and superseded decisions. |
-| `docs/EXTRACTION_CONVENTIONS.md` | ABSORB | `docs/PHYSICS.md` — Structural and experiment-comparable decompositions | Preserve definitions and invariants; leave superseded numeric tables in evidence. |
-| `docs/F3_VIRTUAL_TRIGGER_CLOSURE.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Auxiliary validation results | Keep the pre-registration, exact closure, table, and scope limits. |
-| `docs/FIGURE_INVENTORY.md` | ABSORB | `docs/RESULTS.md` — Published figures and machine-readable tables | Preserve final dispositions and provenance; drop the chronological deliberation. |
-| `docs/GATE_3000.md` | RETAIN EVIDENCE | `docs/REPRODUCIBILITY.md` — Gates, receipts, and expected verdicts | Keep the pre-registration, harvest, resource observations, and corrections. |
-| `docs/GOLDEN_OUTPUTS.md` | RETAIN EVIDENCE | `docs/REPRODUCIBILITY.md` — Anchors, golden outputs, and digests | Keep every contracted artifact, digest, recipe, and non-regenerable item. |
-| `docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md` | RETAIN EVIDENCE | `docs/REPRODUCIBILITY.md` — Dataset identity and campaign provenance | Keep the signed publication boundary and its exclusions. |
-| `docs/M2_PROBQQ1TOQQ0JOIN.md` | ABSORB | `docs/PHYSICS.md` — Interpretation of tune differences | Preserve the source-derived parameter meaning and its interpretive limit. |
-| `docs/M7_BEAUTY_PREREGISTRATION.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Auxiliary validation results | Keep the beauty measurement design and pre-run checks. |
-| `docs/M7_BEAUTY_UNRESOLVED_SYSTEMATIC.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Auxiliary validation results | Keep the measured beauty table and inclusive-level scope. |
-| `docs/M7_UNRESOLVED_SYSTEMATIC.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Auxiliary validation results | Keep the measured charm table and inclusive-level scope. |
-| `docs/MAP_V1_1_PREREGISTRATION.md` | RETAIN EVIDENCE | `docs/PHYSICS.md` — Decay maps and ground-state mapping | Keep the predicted diff and fail-closed checks for v1.1. |
-| `docs/MAP_V1_CONJUGATION_BUG.md` | RETAIN EVIDENCE | `docs/PHYSICS.md` — Decay maps and ground-state mapping | Keep the arithmetic proof, impact boundary, and supersession record. |
-| `docs/MAP_V2_PREREGISTRATION.md` | RETAIN EVIDENCE | `docs/PHYSICS.md` — Decay maps and ground-state mapping | Keep registered branching splits, thresholds, and mandatory checks. |
-| `docs/MAP_V2_RESULT.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Auxiliary validation results | Keep the measured residual, exact splits, and scorecard. |
-| `docs/MONASH_CENTRAL_TABLE.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Three-tune species decomposition | Keep the corrected MONASH table, closure, integrity, and provenance. |
-| `docs/PER_TUNE_PROCESSING_PREREGISTRATION.md` | RETAIN EVIDENCE | `docs/STATISTICS.md` — Ten-block uncertainty design | Keep the common estimator and processing checks fixed before other tunes. |
-| `docs/PRODUCTION_SHAPE_DECISION.md` | RETAIN EVIDENCE | `docs/PHYSICS.md` — Event activity and multiplicity classes | Keep mixture, beauty projection, boundary translation, and binding axis ruling. |
-| `docs/PROGRESS_PROBE_METHOD.md` | ABSORB | `docs/REPRODUCIBILITY.md` — Regenerate the full chain | Preserve validated liveness rules and remove session-specific corrections. |
-| `docs/REGISTRY_AND_MAPPING_PROPOSAL.md` | ABSORB | `docs/PHYSICS.md` — Heavy-flavour signs, species, and roles | Preserve implemented registry and mapping rules; drop rejected options and open design history. |
-| `docs/SCALING_V3_MEASUREMENT.md` | RETAIN EVIDENCE | `docs/REPRODUCIBILITY.md` — Gates, receipts, and expected verdicts | Keep the scaling pre-registration, measured points, and resource bounds. |
-| `docs/SECOND_BRANCH_WEIGHT.md` | RETAIN EVIDENCE | `docs/PHYSICS.md` — Decay maps and ground-state mapping | Keep both definitions, affected species, measured bound, and invocation. |
-| `docs/SIGMA_B_ORDERING_AND_ADJUDICATION.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Auxiliary validation results | Keep the retraction, raw-count result, and final ten-block table. |
-| `docs/SPECIES_AXIS_VALIDATION.md` | RETAIN EVIDENCE | `docs/PHYSICS.md` — Heavy-flavour signs, species, and roles | Keep all-tune ordinal and tune-independence measurements. |
+| `docs/DESIGN_AND_RATIONALE.md` | ABSORB — PROCESS PROSE | `docs/PHYSICS.md` — all sections | Preserve implemented physics choices; remove session history and superseded decisions. |
+| `docs/EXTRACTION_CONVENTIONS.md` | ABSORB — PROCESS PROSE | `docs/PHYSICS.md` — Structural and experiment-comparable decompositions | Preserve definitions and invariants; leave superseded numeric tables in evidence. |
+| `docs/F3_VIRTUAL_TRIGGER_CLOSURE.md` | ABSORB — PROCESS PROSE | `docs/RESULTS.md` — Auxiliary validation results | Preserve the exact closure, table values, and scope limits; the combined setup-and-result write-up has no independent machinery or dated-record role. |
+| `docs/FIGURE_INVENTORY.md` | ABSORB — PROCESS PROSE | `docs/RESULTS.md` — Published figures and machine-readable tables | Preserve final dispositions and provenance; drop the chronological deliberation. |
+| `docs/GATE_3000.md` | ABSORB — PROCESS PROSE | `docs/REPRODUCIBILITY.md` — Gates, receipts, and expected verdicts | Preserve the gate definition, harvest result, resource observations, and corrections; the combined process narrative does not retain pre-registration value as a separate record. |
+| `docs/GOLDEN_OUTPUTS.md` | KEEP — MACHINERY | `docs/REPRODUCIBILITY.md` — Anchors, golden outputs, and digests | Keep its exact path and identity because it is the digest registry and recipe contract for named artifacts, including non-regenerable items. |
+| `docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md` | KEEP — DATED EVIDENCE | `docs/REPRODUCIBILITY.md` — Dataset identity and campaign provenance | Keep the signed authorization because its dated identity fixes the publication boundary and exclusions and is named by dataset selectors. |
+| `docs/M2_PROBQQ1TOQQ0JOIN.md` | ABSORB — PROCESS PROSE | `docs/PHYSICS.md` — Interpretation of tune differences | Preserve the source-derived parameter meaning and its interpretive limit. |
+| `docs/M7_BEAUTY_PREREGISTRATION.md` | KEEP — DATED EVIDENCE | `docs/RESULTS.md` — Auxiliary validation results | Keep its committed-before-run identity because it proves the beauty measurement design and checks preceded the result. |
+| `docs/M7_BEAUTY_UNRESOLVED_SYSTEMATIC.md` | ABSORB — PROCESS PROSE | `docs/RESULTS.md` — Auxiliary validation results | Preserve the measured beauty table and inclusive-level scope; this is the after-the-fact result paired with the retained pre-registration. |
+| `docs/M7_UNRESOLVED_SYSTEMATIC.md` | ABSORB — PROCESS PROSE | `docs/RESULTS.md` — Auxiliary validation results | Preserve the measured charm table and inclusive-level scope; its separateness carries no additional contract or chronology. |
+| `docs/MAP_V1_1_PREREGISTRATION.md` | KEEP — DATED EVIDENCE | `docs/PHYSICS.md` — Decay maps and ground-state mapping | Keep its committed-before-builder-change identity because it proves the predicted diff and fail-closed checks were fixed in advance. |
+| `docs/MAP_V1_CONJUGATION_BUG.md` | ABSORB — PROCESS PROSE | `docs/PHYSICS.md` — Decay maps and ground-state mapping | Preserve the arithmetic proof, impact boundary, and supersession ruling; this retrospective bug account has no continuing separate contract. |
+| `docs/MAP_V2_PREREGISTRATION.md` | KEEP — DATED EVIDENCE | `docs/PHYSICS.md` — Decay maps and ground-state mapping | Keep its pre-probe identity because it fixes branching splits, thresholds, and mandatory checks before the v2 result. |
+| `docs/MAP_V2_RESULT.md` | ABSORB — PROCESS PROSE | `docs/RESULTS.md` — Auxiliary validation results | Preserve the measured residual, exact splits, and scorecard; this is the after-the-fact result paired with the retained registration. |
+| `docs/MONASH_CENTRAL_TABLE.md` | ABSORB — PROCESS PROSE | `docs/RESULTS.md` — Three-tune species decomposition | Preserve the corrected MONASH values, closure, integrity, and provenance in the consolidated three-tune result. |
+| `docs/PER_TUNE_PROCESSING_PREREGISTRATION.md` | KEEP — DATED EVIDENCE | `docs/STATISTICS.md` — Ten-block uncertainty design | Keep its committed-before-other-tunes identity because it proves the common estimator and checks were fixed before processing. |
+| `docs/PRODUCTION_SHAPE_DECISION.md` | KEEP — MACHINERY | `docs/PHYSICS.md` — Event activity and multiplicity classes | Keep its exact path because `config/multiplicity_class_boundaries_v1.json` names it in `ruling`, and that configuration is pinned by three receipts. |
+| `docs/PROGRESS_PROBE_METHOD.md` | ABSORB — PROCESS PROSE | `docs/REPRODUCIBILITY.md` — Regenerate the full chain | Preserve validated liveness rules and remove session-specific corrections. |
+| `docs/REGISTRY_AND_MAPPING_PROPOSAL.md` | ABSORB — PROCESS PROSE | `docs/PHYSICS.md` — Heavy-flavour signs, species, and roles | Preserve implemented registry and mapping rules; drop rejected options and open design history. |
+| `docs/SCALING_V3_MEASUREMENT.md` | ABSORB — PROCESS PROSE | `docs/REPRODUCIBILITY.md` — Gates, receipts, and expected verdicts | Preserve the measured scaling points, gate implication, and resource bounds; the combined registration-and-harvest narrative is process prose. |
+| `docs/SECOND_BRANCH_WEIGHT.md` | ABSORB — PROCESS PROSE | `docs/PHYSICS.md` — Decay maps and ground-state mapping | Preserve both definitions, affected species, measured bound, and chosen invocation; the post hoc ruling needs no separate identity. |
+| `docs/SIGMA_B_ORDERING_AND_ADJUDICATION.md` | ABSORB — PROCESS PROSE | `docs/RESULTS.md` — Auxiliary validation results | Preserve the retraction, raw-count ordering, and final ten-block values; the adjudication is an after-the-fact decision. |
+| `docs/SPECIES_AXIS_VALIDATION.md` | ABSORB — PROCESS PROSE | `docs/PHYSICS.md` — Heavy-flavour signs, species, and roles | Preserve the all-tune ordinal and tune-independence measurements; their date and separateness add no evidentiary information. |
 | `docs/SYSTEMATICS.md` | SPINE | `docs/SYSTEMATICS.md` — all sections | Rebuild in place from variation code and result artifacts. |
-| `docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — Coverage limits and evidence index | Keep command provenance and measurements; later rewrite its chronological prose. |
-| `docs/SYSTEMATICS_PREREGISTRATION.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — Common variation and control design | Keep registered sources, estimators, checks, and combination rulings. |
+| `docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — Coverage limits and evidence index | Keep the paired run record because its chronology binds command provenance, deviations, and coverage to the retained systematics registration. |
+| `docs/SYSTEMATICS_PREREGISTRATION.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — Common variation and control design | Keep its committed-before-campaign identity because the registered sources, estimators, checks, and combination rulings derive value from precedence. |
 | `docs/TERMS.md` | SPINE | `docs/TERMS.md` — all sections | Keep the existing registry and validate future prose against it. |
-| `docs/THREE_TUNE_CENTRAL_TABLE.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Three-tune species decomposition | Keep final tables, closure, integrity, advisory, and regeneration recipe. |
-| `docs/V2_PIN_SWEEP.md` | ABSORB | `docs/PIPELINE.md` — Promotion, failure, and schema evolution | Preserve version-aware consumers and negative tests; drop migration-session detail. |
-| `docs/VALIDATION_INVENTORY.md` | ABSORB | `docs/COMPONENTS.md` — Validation components | Preserve which validators run, which have measured runs, and which remain unrun. |
-| `docs/V_INTEGRATED_PREREGISTRATION.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Multiplicity-integrated balancing yields | Keep estimator choice, exact closure, values, and plotting limitation. |
-| `docs/WORKSPACE.md` | ABSORB | `docs/REPRODUCIBILITY.md` — Runtime and build inputs | Preserve portable setup, local overrides, site roles, and non-portable limits. |
-| `docs/a2_results_20260813/A2_DELTA_RESULT.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — S6: pair-level unresolved origin | Keep the first measured delta, scorecard, and supersession warning. |
-| `docs/a2_results_20260813/A2_TIEBREAK_ROBUSTNESS.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — S6: pair-level unresolved origin | Keep the robust shape, unstable magnitude, owner ruling, and limits. |
-| `docs/campaigns/HF_RUN3_V1_RECORD.md` | RETAIN EVIDENCE | `docs/REPRODUCIBILITY.md` — Dataset identity and campaign provenance | Keep release, retries, seeds, hangs, recovery, and final campaign closure. |
-| `docs/plotting_validation/hf_run3_v1_kinematics_20260817/RUN_RECORD.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Published figures and machine-readable tables | Keep selections, boundary closed loop, and energy-label receipt. |
-| `docs/plotting_validation/hf_run3_v1_monash_20260813/RUN_RECORD.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Published figures and machine-readable tables | Keep the first MONASH render command, checks, warning, and figure identity. |
-| `docs/plotting_validation/hf_run3_v1_threetune_20260816/RUN_RECORD.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Published figures and machine-readable tables | Keep the three-tune render, bug finding, receipt guard, and polish decisions. |
-| `docs/systematics_results_20260819/PER_CATEGORY_DELTAS.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — S1 and S3 sections | Keep five-campaign category deltas and unresolved rows. |
-| `docs/systematics_results_20260819/PER_CLASS_DELTAS.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — Effect on tune separations and trend | Keep integrated and per-class deltas, controls, coverage, and largest effects. |
-| `docs/systematics_results_20260819/RATIO_TREND.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Baryon-to-meson ratio trend | Keep class values, endpoint contrasts, fit diagnostics, and limits. |
-| `docs/systematics_results_20260819/TUNE_SEPARATION.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Tune separations | Keep both reconnection comparisons for all three observables. |
-| `docs/systematics_results_20260820/COMBINED_SYSTEMATICS.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — Source selection and combination | Keep source inventory, rules, per-class totals, and integrated breakdown. |
-| `docs/systematics_results_20260820/PER_CATEGORY_FINAL_TWO.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — S1 and S2 sections | Keep controls, factorization-scale shape, and parton-distribution result. |
-| `docs/systematics_results_20260820/PER_CLASS_DELTAS_SEVEN.md` | RETAIN EVIDENCE | `docs/SYSTEMATICS.md` — Effect on tune separations and trend | Keep all-campaign integrated and per-class deltas. |
-| `docs/systematics_results_20260820/VERDICT.md` | RETAIN EVIDENCE | `docs/RESULTS.md` — Result after systematic uncertainties | Keep separation arithmetic, trend result, per-class verdicts, and full tables. |
-| `generation/Simulation_README.md` | ABSORB | `docs/PIPELINE.md` — Event generation and raw schema | Preserve build, producer interface, contracts, event content, matching, and accounting. |
-| `generation/submit/Condor_README.md` | ABSORB | `docs/REPRODUCIBILITY.md` — Regenerate the full chain | Preserve release, monitoring, hang guard, retry, and storage rules. |
-| `plotting/FinalAnalysis/README.md` | ABSORB | `docs/COMPONENTS.md` — Diagnostic and non-entrypoint components | Preserve inputs, outputs, and practical checks for the two retained macros. |
-| `plotting/PAPER_FIGURE_PROVENANCE.md` | ABSORB | `docs/RESULTS.md` — Published figures and machine-readable tables | Preserve the final figure-to-generator map and uncertainty provenance. |
-| `plotting/PtMultiplicity/README.md` | ABSORB | `docs/COMPONENTS.md` — Diagnostic and non-entrypoint components | Preserve macro families, path resolution, error rules, and combined inputs. |
-| `plotting/README.md` | ABSORB | `docs/PIPELINE.md` — Plotting and figure production | Preserve selector, cut, statistics, style, runner, validation, and output contracts. |
-| `plotting/paper/README.md` | ABSORB | `docs/PIPELINE.md` — Plotting and figure production | Preserve deterministic SVG rationale, final figure list, and mandatory labels. |
+| `docs/THREE_TUNE_CENTRAL_TABLE.md` | ABSORB — PROCESS PROSE | `docs/RESULTS.md` — Three-tune species decomposition | Preserve the final tables, closure, integrity, advisory, and regeneration provenance in the consolidated result; this post-harvest compilation has no separate contract. |
+| `docs/V2_PIN_SWEEP.md` | ABSORB — PROCESS PROSE | `docs/PIPELINE.md` — Promotion, failure, and schema evolution | Preserve version-aware consumers and negative tests; drop migration-session detail. |
+| `docs/VALIDATION_INVENTORY.md` | ABSORB — PROCESS PROSE | `docs/COMPONENTS.md` — Validation components | Preserve which validators run, which have measured runs, and which remain unrun. |
+| `docs/V_INTEGRATED_PREREGISTRATION.md` | KEEP — DATED EVIDENCE | `docs/RESULTS.md` — Multiplicity-integrated balancing yields | Keep the document because its registered estimator predates the appended result; splitting or absorbing it would destroy that chronology. |
+| `docs/WORKSPACE.md` | ABSORB — PROCESS PROSE | `docs/REPRODUCIBILITY.md` — Runtime and build inputs | Preserve portable setup, local overrides, site roles, and non-portable limits. |
+| `docs/a2_results_20260813/A2_DELTA_RESULT.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — S6: pair-level unresolved origin | Keep it in the directed dated evidence set because its separate first-result table and supersession warning would be flattened by absorption. |
+| `docs/a2_results_20260813/A2_TIEBREAK_ROBUSTNESS.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — S6: pair-level unresolved origin | Keep it in the directed dated evidence set because its separate robustness table, owner ruling, and limits qualify the A2 measurement. |
+| `docs/campaigns/HF_RUN3_V1_RECORD.md` | KEEP — DATED EVIDENCE | `docs/REPRODUCIBILITY.md` — Dataset identity and campaign provenance | Keep this paired campaign run record because its chronology preserves releases, retries, seeds, hangs, recovery, and final closure behind the authorization. |
+| `docs/plotting_validation/hf_run3_v1_kinematics_20260817/RUN_RECORD.md` | KEEP — DATED EVIDENCE | `docs/RESULTS.md` — Published figures and machine-readable tables | Keep the dated plotting receipt because its separate identity binds selections, the boundary closed loop, and the energy label to the rendered artifact. |
+| `docs/plotting_validation/hf_run3_v1_monash_20260813/RUN_RECORD.md` | KEEP — DATED EVIDENCE | `docs/RESULTS.md` — Published figures and machine-readable tables | Keep the dated plotting receipt because its separate identity binds the first MONASH render command, checks, warning, and figure. |
+| `docs/plotting_validation/hf_run3_v1_threetune_20260816/RUN_RECORD.md` | KEEP — DATED EVIDENCE | `docs/RESULTS.md` — Published figures and machine-readable tables | Keep the dated plotting receipt because its separate identity binds the three-tune render, bug finding, guard, and polish decisions. |
+| `docs/systematics_results_20260819/PER_CATEGORY_DELTAS.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — S1 and S3 sections | Keep it in the directed dated evidence set because its separate five-campaign table and unresolved rows are the measurement record. |
+| `docs/systematics_results_20260819/PER_CLASS_DELTAS.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — Effect on tune separations and trend | Keep it in the directed dated evidence set because its integrated and per-class tables preserve the 2026-08-19 measurement state. |
+| `docs/systematics_results_20260819/RATIO_TREND.md` | KEEP — DATED EVIDENCE | `docs/RESULTS.md` — Baryon-to-meson ratio trend | Keep it in the directed dated evidence set because the class values, contrasts, and diagnostics form a separate measured table. |
+| `docs/systematics_results_20260819/TUNE_SEPARATION.md` | KEEP — DATED EVIDENCE | `docs/RESULTS.md` — Tune separations | Keep it in the directed dated evidence set because its two reconnection-comparison tables are the dated measurement record. |
+| `docs/systematics_results_20260820/COMBINED_SYSTEMATICS.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — Source selection and combination | Keep it in the directed dated evidence set because its source inventory and per-class totals record the final combination separately from interpretation. |
+| `docs/systematics_results_20260820/PER_CATEGORY_FINAL_TWO.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — S1 and S2 sections | Keep it in the directed dated evidence set because its control and final-two source tables preserve the measured inputs to combination. |
+| `docs/systematics_results_20260820/PER_CLASS_DELTAS_SEVEN.md` | KEEP — DATED EVIDENCE | `docs/SYSTEMATICS.md` — Effect on tune separations and trend | Keep it in the directed dated evidence set because the seven-campaign tables preserve the final per-class harvest. |
+| `docs/systematics_results_20260820/VERDICT.md` | KEEP — DATED EVIDENCE | `docs/RESULTS.md` — Result after systematic uncertainties | Keep it in the directed dated evidence set because its full verdict tables and separation arithmetic are the dated final measurement record. |
+| `generation/Simulation_README.md` | ABSORB — PROCESS PROSE | `docs/PIPELINE.md` — Event generation and raw schema | Preserve build, producer interface, contracts, event content, matching, and accounting. |
+| `generation/submit/Condor_README.md` | ABSORB — PROCESS PROSE | `docs/REPRODUCIBILITY.md` — Regenerate the full chain | Preserve release, monitoring, hang guard, retry, and storage rules. |
+| `plotting/FinalAnalysis/README.md` | ABSORB — PROCESS PROSE | `docs/COMPONENTS.md` — Diagnostic and non-entrypoint components | Preserve inputs, outputs, and practical checks for the two retained macros. |
+| `plotting/PAPER_FIGURE_PROVENANCE.md` | ABSORB — PROCESS PROSE | `docs/RESULTS.md` — Published figures and machine-readable tables | Preserve the final figure-to-generator map and uncertainty provenance. |
+| `plotting/PtMultiplicity/README.md` | ABSORB — PROCESS PROSE | `docs/COMPONENTS.md` — Diagnostic and non-entrypoint components | Preserve macro families, path resolution, error rules, and combined inputs. |
+| `plotting/README.md` | ABSORB — PROCESS PROSE | `docs/PIPELINE.md` — Plotting and figure production | Preserve selector, cut, statistics, style, runner, validation, and output contracts. |
+| `plotting/paper/README.md` | ABSORB — PROCESS PROSE | `docs/PIPELINE.md` — Plotting and figure production | Preserve deterministic SVG rationale, final figure list, and mandatory labels. |
 <!-- CONTENT_MAP_END -->
 
 ### Coverage proof
@@ -298,10 +303,29 @@ PY
 
 | Disposition | Count | Meaning |
 |---|---:|---|
-| absorbed into the spine | 24 | Five current spine files plus nineteen legacy prose files |
-| retained as evidence | 53 | Measurement records, pre-registrations, manifests, receipts, and result tables |
+| absorbed process prose | 37 | Durable substance moves to a named spine section; the current identity carries no unique contract or chronology |
+| kept dated evidence | 25 | Twelve pre-registrations, paired run records, or authorizations outside the directed evidence families, plus thirteen dated records inside those families |
+| kept machinery | 10 | `GOLDEN_OUTPUTS.md`, `PRODUCTION_SHAPE_DECISION.md`, and eight anchor manifests whose exact paths qualify contracted artifacts |
+| current spine files | 5 | Current members of the directed nine-document set |
 | dropped | 1 | `STATE.md` |
-| later reclassified INTERNAL | 20 | Nineteen absorbed files plus the dropped transient file |
+| later reclassified INTERNAL | 38 | Thirty-seven absorbed files plus the dropped transient file |
+
+This lands on twelve dated records in the top-level record set: eleven direct
+`docs/*.md` files plus `docs/campaigns/HF_RUN3_V1_RECORD.md`. The thirteen
+additional dated records remain only because the mandate separately preserves
+`docs/a2_results_*/`, `docs/plotting_validation/`, and
+`docs/systematics_results_*/`. The two top-level machinery documents are also
+mandated exceptions, while the other eight machinery documents live beside
+anchors. The result is therefore not materially above the target of nine spine
+documents plus about a dozen dated records at top level.
+
+No mapped document resists the three categories.
+
+The mixed registration/result files ordered into the spine are process prose:
+their identity is neither advance-only nor named by machinery.
+
+`V_INTEGRATED_PREREGISTRATION.md` is the exception because its registered
+estimator predates the result appended to that record.
 
 ## 3. Reclass list
 
@@ -312,14 +336,32 @@ named destination lands and the content-map row passes its check.
 |---|---|
 | `ARCHITECTURE.md` | `README.md` and `docs/PIPELINE.md` carry its accessible architecture. |
 | `STATE.md` | The spine derives current status from evidence and no PUBLIC file cites this snapshot. |
+| `ValidationReports/NCH_CALIBRATION_20260730.md` | `docs/PHYSICS.md` carries the superseded calibration only as provenance for the published-version result. |
+| `ValidationReports/NCH_CALIBRATION_PYTHIA8317_20260801.md` | `docs/PHYSICS.md` carries the published-version calibration and class-boundary claim. |
+| `ValidationReports/NCH_DECAY_POLICY_BIAS_8317.md` | `docs/SYSTEMATICS.md` carries the S5 measurement and its limits. |
+| `ValidationReports/PTHAT_MULTIPLICITY_SCAN_8317.md` | `docs/SYSTEMATICS.md` carries the S3 scan and decision point. |
+| `ValidationReports/PYTHIA_JUNCTION_HANG_20260731.md` | `docs/REPRODUCIBILITY.md` carries the measured wedge and bounded-retry rationale. |
 | `analysis/Analysis_README.md` | `docs/PIPELINE.md` owns reduction and block mechanics. |
 | `docs/A9_PAPER_TABLE_REGENERATION.md` | `docs/REPRODUCIBILITY.md` states the non-regenerable boundary and evidence. |
+| `docs/B_BARYON_ADVISORY_DIAGNOSTIC.md` | `docs/RESULTS.md` carries the diagnostic ladder, corrected values, and advisory scope. |
 | `docs/DESIGN_AND_RATIONALE.md` | `docs/PHYSICS.md`, `docs/STATISTICS.md`, and `docs/PIPELINE.md` own all implemented choices. |
 | `docs/EXTRACTION_CONVENTIONS.md` | `docs/PHYSICS.md` defines both decomposition conventions from artifacts. |
+| `docs/F3_VIRTUAL_TRIGGER_CLOSURE.md` | `docs/RESULTS.md` carries the exact auxiliary closure and its scope. |
 | `docs/FIGURE_INVENTORY.md` | `docs/RESULTS.md` indexes only final figures and retained receipts. |
+| `docs/GATE_3000.md` | `docs/REPRODUCIBILITY.md` carries the gate, harvest outcome, resource observations, and corrections. |
 | `docs/M2_PROBQQ1TOQQ0JOIN.md` | `docs/PHYSICS.md` derives the parameter meaning from pinned PYTHIA source. |
+| `docs/M7_BEAUTY_UNRESOLVED_SYSTEMATIC.md` | `docs/RESULTS.md` carries the measured beauty table and its inclusive-level scope. |
+| `docs/M7_UNRESOLVED_SYSTEMATIC.md` | `docs/RESULTS.md` carries the measured charm table and its inclusive-level scope. |
+| `docs/MAP_V1_CONJUGATION_BUG.md` | `docs/PHYSICS.md` carries the arithmetic proof, impact boundary, and supersession ruling. |
+| `docs/MAP_V2_RESULT.md` | `docs/RESULTS.md` carries the measured residual, splits, and scorecard. |
+| `docs/MONASH_CENTRAL_TABLE.md` | `docs/RESULTS.md` carries the corrected MONASH values within the three-tune decomposition. |
 | `docs/PROGRESS_PROBE_METHOD.md` | `docs/REPRODUCIBILITY.md` carries the validated liveness method. |
 | `docs/REGISTRY_AND_MAPPING_PROPOSAL.md` | `docs/PHYSICS.md` and `docs/PIPELINE.md` describe only the implemented design. |
+| `docs/SCALING_V3_MEASUREMENT.md` | `docs/REPRODUCIBILITY.md` carries the measured scaling law, gate implication, and resource bounds. |
+| `docs/SECOND_BRANCH_WEIGHT.md` | `docs/PHYSICS.md` carries the two definitions, affected species, measured bound, and ruling. |
+| `docs/SIGMA_B_ORDERING_AND_ADJUDICATION.md` | `docs/RESULTS.md` carries the retraction, raw-count ordering, and final ten-block values. |
+| `docs/SPECIES_AXIS_VALIDATION.md` | `docs/PHYSICS.md` carries the all-tune ordinal and tune-independence measurements. |
+| `docs/THREE_TUNE_CENTRAL_TABLE.md` | `docs/RESULTS.md` carries the consolidated final tables, closure, integrity, and advisory. |
 | `docs/V2_PIN_SWEEP.md` | `docs/PIPELINE.md` states current schema negotiation and its tests. |
 | `docs/VALIDATION_INVENTORY.md` | `docs/COMPONENTS.md` classifies every validator by invocation and evidence. |
 | `docs/WORKSPACE.md` | `docs/REPRODUCIBILITY.md` owns setup, site roles, storage, and portability. |
@@ -331,8 +373,9 @@ named destination lands and the content-map row passes its check.
 | `plotting/README.md` | `docs/PIPELINE.md` owns the plotting input and output contracts. |
 | `plotting/paper/README.md` | `docs/PIPELINE.md` owns deterministic paper-figure generation. |
 
-The 53 retained evidence documents do not enter this list. Later sessions may
-rewrite their prose, but they remain PUBLIC records with stable identities.
+The 25 dated evidence documents and ten machinery documents do not enter this
+list. Later sessions may rewrite their prose, but they remain PUBLIC records
+with stable identities.
 
 ## 4. Gap list
 
@@ -345,9 +388,9 @@ invent an answer where the required measurement or owner decision is absent.
 | Software license and citation metadata | `README.md` — Data availability, citation, and license | Add `LICENSE` and `CITATION.cff` later, then link them; neither belongs in the nine-document prose set. |
 | Portable PYTHIA build bootstrap | `docs/REPRODUCIBILITY.md` — Runtime and build inputs | Supply a tested build recipe or container for the pinned source, compiler, flags, and patches; until then, state the unsupported boundary. |
 | Final S4 wide-counter measurement | `docs/SYSTEMATICS.md` — S4: event-activity counter window; `docs/RESULTS.md` — Result after systematic uncertainties | Complete the declared subset analysis and delta harvest, or state that the final uncertainty excludes S4. |
-| Cross-class and cross-observable covariance | `docs/STATISTICS.md` — Nonlinear observables and covariance | Measure or bound covariance beyond within-block ratios, then state the effect on endpoint contrasts and combined plots. |
-| Inferential status and multiple comparisons | `docs/STATISTICS.md` — Combination, reporting, and inferential limits; `docs/RESULTS.md` — Scope and claim hierarchy | State whether quoted sigma values are descriptive Monte Carlo precision, and explain the absence or presence of a trial correction. |
-| Systematic-source correlation sensitivity | `docs/SYSTEMATICS.md` — Source selection and combination | Test alternatives to quadrature beyond the S1b/S2 rule, or mark source independence as an unvalidated assumption. |
+| Cross-class and cross-observable covariance | `docs/STATISTICS.md` — Nonlinear observables and covariance; `docs/RESULTS.md` — Scope and claim hierarchy | This is a physics limitation. A writer may not invent covariance: measure or bound it, or state plainly that cross-class and cross-observable covariance is unknown and limits endpoint contrasts and combined plots. |
+| Inferential status and multiple comparisons | `docs/STATISTICS.md` — Combination, reporting, and inferential limits; `docs/RESULTS.md` — Scope and claim hierarchy | This is a physics limitation. Unless a correction is computed, both sections must state that quoted sigma values are per-cell and uncorrected across 72 comparisons; a writer may not invent a global significance or trial correction. |
+| Systematic-source correlation sensitivity | `docs/SYSTEMATICS.md` — Source selection and combination | This is a physics limitation. A writer may not invent source independence: test alternatives to quadrature beyond the S1b/S2 rule, or name the unmeasured correlation sensitivity and the quadrature assumption explicitly. |
 
 ## Writing order
 
@@ -382,6 +425,6 @@ invent an answer where the required measurement or owner decision is absent.
 
 | Document | Why placement was difficult | Ruling |
 |---|---|---|
-| `docs/GOLDEN_OUTPUTS.md` | It mixes artifact contracts, result tables, figure history, correction records, and non-regenerable limits. | Retain it as evidence; `docs/REPRODUCIBILITY.md` owns the contract explanation. |
+| `docs/GOLDEN_OUTPUTS.md` | It mixes artifact contracts, result tables, figure history, correction records, and non-regenerable limits. | Keep it as machinery because it is the digest registry; `docs/REPRODUCIBILITY.md` owns the contract explanation. |
 | `docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` | It interleaves commands, concurrency incidents, tool defects, intermediate results, final results, and an unfinished S4 handoff. | Retain the run record; `docs/SYSTEMATICS.md` owns method and interpretation. |
-| `docs/PRODUCTION_SHAPE_DECISION.md` | It combines campaign shape, beauty statistics, class-boundary measurements, and the binding event-activity ruling. | Retain the measurements; `docs/PHYSICS.md` owns the final scientific design. |
+| `docs/PRODUCTION_SHAPE_DECISION.md` | It combines campaign shape, beauty statistics, class-boundary measurements, and the binding event-activity ruling. | Keep it as machinery because the boundary configuration names it and three receipts pin that configuration; `docs/PHYSICS.md` owns the final scientific design. |
