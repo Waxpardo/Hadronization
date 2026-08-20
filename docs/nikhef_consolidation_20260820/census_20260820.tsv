@@ -1,0 +1,76 @@
+name	allocated_bytes	regular_file_count	newest_mtime_utc	type	live_path_references	what_it_is
+.vscode	16384	3	2026-03-27T22:17:03.788Z	directory	0	Editor workspace settings.
+.vscodium-server	346640384	2364	2026-08-20T13:54:24.434Z	directory	0	Regenerating VSCodium server cache.
+AnalysisScripts	188416	2	2026-08-13T07:23:07.318Z	directory	0	Stray deployment copies of two checkout AnalysisScripts JSON files; byte-identical, not a symlink.
+Axions	34386669568	299115	2026-06-08T10:52:55.816Z	directory	0	Out-of-scope Axions project tree.
+Axions_pre_update_conflicts_20260607_5cfe918	102400	5	2026-06-07T16:41:17.663Z	directory	0	Out-of-scope Axions conflict backup.
+EDMs	4096	0	2025-10-02T11:23:00.141Z	directory	0	Out-of-scope EDM project directory; currently no regular files.
+HRP	78076895232	1574	2025-12-01T12:17:16.383Z	directory	0	Out-of-scope HRP project tree.
+Hadronization	461661495296	28668	2026-08-20T10:39:44.110Z	directory	5	Live frozen Git checkout plus large legacy ROOT and analysis data held inside it.
+Hadronization-full-production	5935620096	3005	2026-08-01T18:58:25.237Z	directory	0	Earlier full-production workspace holding irreplaceable seed ledgers.
+a2_config	4096	0	2026-08-13T18:30:34.497Z	directory	0	Empty A2 scratch configuration directory.
+a2_multiplicity	77824	17	2026-08-04T19:05:58.533Z	directory	0	A2 multiplicity investigation outputs.
+a2_runs	26426851328	260738	2026-08-13T19:32:52.592Z	directory	0	A2 re-analysis evidence behind a published systematic.
+a2_tools	225280	11	2026-08-15T20:09:42.365Z	directory	0	Deployed A2 helper scripts and configuration.
+a2_variation	9068544	281	2026-08-13T16:48:33.942Z	directory	1	A2 variation scratch tree named by config/a2_variations_v1.json.
+a2_variation_largest	9068544	281	2026-08-13T18:29:08.869Z	directory	1	Largest-index A2 variation scratch tree named by config/a2_variations_v1.json.
+archive	1098432512	10234	2026-08-09T18:18:06.717Z	directory	0	Archive of the 34 campaign-breach partials.
+attic_e5_replicating_extractor_20260813	45056	4	2026-08-13T07:26:17.782Z	directory	0	Superseded E5 replicating extractor retained as provenance.
+b-hadron-fractions	1289404444672	42175	2026-06-04T00:07:12.272Z	directory	0	Out-of-scope b-hadron-fractions project tree.
+b4_mapping	151552	17	2026-08-09T05:13:04.690Z	directory	0	One-off B4 mapping investigation.
+b6_run	4468736	5	2026-08-09T16:16:08.420Z	directory	0	One-off B6 run output.
+campaign_closure_status.py	4096	1	2026-08-20T06:33:02.362Z	file	0	Loose campaign-closure status helper from the completed systematics pass.
+chain_path_proof	20480	3	2026-08-13T07:25:04.899Z	directory	0	One-off tune-chain path proof.
+closure_runs	28672	6	2026-08-16T09:58:21.053Z	directory	0	Closure-check run logs.
+config	139264	2	2026-08-13T18:30:58.686Z	directory	0	Stray deployment copies of two checkout config JSON files; byte-identical, not a symlink.
+contract_compile_check	479232	12	2026-08-09T12:54:42.170Z	directory	0	One-off contract compilation check.
+determinism_control	8736768	250	2026-08-09T15:28:12.914Z	directory	0	One-off determinism control investigation.
+docs	8192	1	2026-08-13T18:59:12.757Z	directory	0	Stray deployment copy of one checkout result JSON file; byte-identical, not a symlink.
+extract_final_two.out	0	1	2026-08-20T06:29:45.209Z	file	0	Zero-byte loose output from the completed final-two extraction.
+extractor_e5fix	413696	11	2026-08-15T20:12:38.994Z	directory	0	E5 extractor-fix investigation output.
+f3_runs	65953792	660	2026-08-09T23:21:42.004Z	directory	0	F3 virtual-trigger closure evidence.
+f4_runs	229376	7	2026-08-09T23:21:00.541Z	directory	0	F4 investigation run.
+f4b_runs	499712	8	2026-08-10T21:16:34.770Z	directory	0	F4b follow-up investigation run.
+figure_deploy_20260817	55742464	1104	2026-08-19T16:32:22.210Z	directory	1	Unpacked reference-figure deploy named by config/integrated_multiplicity_bin_v1.json.
+first_contact	294912	18	2026-08-09T15:16:35.407Z	directory	0	One-off first-contact investigation.
+fixcheck_20260818	80252928	748	2026-08-19T08:23:28.174Z	directory	0	Recent fix-check evidence.
+gate_runs	2760704	147	2026-08-10T13:26:31.670Z	directory	0	Campaign gate test runs.
+guard_hook_src	28672	4	2026-08-10T21:07:28.163Z	directory	0	Checkout-guard hook source fixture.
+guard_hook_test	196608	36	2026-08-10T21:06:35.159Z	directory	0	Checkout-guard hook test fixture.
+hadronization	7221248	87	2026-08-20T10:52:35.867Z	directory	1	Lowercase 2026-08-17 consolidation store; not a checkout, but its scratch deploy contains a live tune extractor.
+hadronization-campaign-HF_100M_primaryGround_ccbb_v1-20260819.tar.gz	12288	1	2026-08-19T18:00:50.551Z	file	0	Archived legacy campaign metadata and seed ledger.
+hadronization-history-20260819.bundle	420012032	1	2026-08-19T17:07:49.566Z	file	0	Only off-Mac pre-cleanup Git history bundle; permanent guard artifact.
+hadronization_analysis	166101106688	1656197	2026-08-20T01:08:39.842Z	directory	22	Campaign analysis tree; absolute runtime root in selectors and operational scripts.
+hadronization_merged	173156982784	100624	2026-08-19T18:09:13.492Z	directory	89	Merged campaign products; absolute runtime root in selectors, plotting configs, and operational scripts.
+hadronization_production	529109778432	44471	2026-08-20T10:38:57.061Z	directory	43	Raw campaign production tree; absolute runtime root in selectors and operational scripts.
+hadronization_v3_plotting_run	28237824	657	2026-08-16T20:28:27.098Z	directory	0	Pinned plotting run named by boundary receipts; path references are historical and excluded from live count.
+m7_runs	860160	74	2026-08-09T23:21:49.576Z	directory	0	Only copy of the charm-M7 block logs.
+m7b_runs	884736	79	2026-08-10T20:47:26.320Z	directory	0	Beauty-M7 block run outputs already anchored in Git.
+measurements_v3	4001792	48	2026-08-19T14:09:51.382Z	directory	0	Superseded v3 measurement output root.
+measurements_v4	1998848	24	2026-08-20T06:36:54.040Z	directory	0	Current v4 measurement output root.
+merge_runs	4609507328	1587	2026-08-17T14:16:32.044Z	directory	2	Canonical merge timing evidence; its mtimes are the evidence.
+poolrss_run01	16384	4	2026-08-09T02:56:29.379Z	directory	0	One-off pool RSS run.
+poolsweep_run01	16384	5	2026-08-08T22:22:13.926Z	directory	0	One-off pool sweep run.
+proj6iii_run01	20480	4	2026-08-09T03:03:28.197Z	directory	0	One-off projection run.
+proj6iii_v2	24576	4	2026-08-09T05:31:55.782Z	directory	0	Projection v2 investigation output.
+pythia_hang_repro	569344	16	2026-08-01T19:36:37.234Z	directory	0	One-off Pythia hang reproducer.
+pythia_stock_8317	332103680	2653	2026-08-01T18:50:55.660Z	directory	1	Installed Pythia dependency prefix named by config/dependencies.conf.
+quarantine	12288	2	2026-08-05T00:08:38.007Z	directory	0	Quarantined superseded artifacts.
+registry_baseline_build	327680	21	2026-07-30T23:36:40.548Z	directory	0	One-off registry baseline build.
+rehash_run	9822208	15	2026-08-09T15:47:48.875Z	directory	0	One-off rehash investigation.
+render_measure_v4.sh	4096	1	2026-08-20T06:31:21.752Z	file	0	Loose command wrapper for the current v4 render.
+s4_run	147456	12	2026-08-20T08:15:34.353Z	directory	0	S4 investigation run created during the final systematics pass.
+seed_ledger_archive	303104	22	2026-07-30T19:28:50.950Z	directory	0	Archive of legacy seed-ledger material.
+sigmab_runs	6881280	61	2026-08-13T07:23:07.335Z	directory	1	Sigma-b run outputs; task22 holds the deployed species reader named by tune_extract.sh.
+species_axis_fixture	92672000	914	2026-08-09T13:03:20.551Z	directory	0	Nine-hundred-file species-axis validation fixture.
+species_ordinals_build	110592	4	2026-08-09T07:55:55.367Z	directory	0	One-off species-ordinal build workspace.
+sys_plot_deploy	84770816	788	2026-08-20T06:32:28.880Z	directory	0	Systematics plotting deploy; documentation references are historical and excluded from live count.
+sys_runs	4849664	938	2026-08-20T06:37:09.465Z	directory	0	Current systematics extraction run outputs.
+sys_runs_plot5	3891200	13	2026-08-19T14:09:51.452Z	directory	0	Superseded systematics plot-v5 outputs.
+sys_runs_plot6	1949696	7	2026-08-20T06:36:54.092Z	directory	0	Current systematics plot-v6 outputs.
+systematics_deploy	138240000	706	2026-08-17T18:16:56.625Z	directory	0	Pinned systematics producer deploy.
+systematics_harvest	69390336	134	2026-08-20T06:37:09.472Z	directory	15	Systematics manifests and harvest workspace named by selectors and operational scripts.
+systematics_regression	92676096	7	2026-08-17T09:52:59.879Z	directory	0	Only artifact proving the rebuilt producer reproduced nominal slot zero.
+tune_runs	253952	49	2026-08-12T15:48:48.808Z	directory	2	Earlier tune extraction run root named by the tracked tune pipeline.
+tune_runs_e5fix	258048	48	2026-08-13T06:43:28.535Z	directory	0	Published MONASH per-tune table origin; provenance-critical despite scratch-like name.
+tune_runs_three	462848	88	2026-08-15T20:32:01.616Z	directory	0	Published JUNCTIONS/CLOSEPACKING per-tune table origins; provenance-critical despite scratch-like name.
