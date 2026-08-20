@@ -111,3 +111,7 @@ config/burned_seeds.txt
 
 # Third-party literature. Never committed.
 Sources/
+
+# Built producer. The SimulationScripts rules above are stale since the
+# 2026-08-12 restructure; this is where the binary lands now.
+generation/producer/heavyflavourcorrelations_status
