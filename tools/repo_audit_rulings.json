@@ -876,11 +876,11 @@
    "why": "It is the first calibration of the counter the multiplicity classes are cut on, and later reports are stated as supersessions of it."
   },
   "ValidationReports/NCH_CALIBRATION_PYTHIA8317_20260801.md": {
-   "class": "PUBLIC",
+   "class": "INTERNAL",
    "dead": "n/a",
    "voice": "clean",
    "what": "Repeats that calibration under the pinned stock PYTHIA 8.317 and supersedes the 8.315 result.",
-   "why": "It is the calibration at the version the published production actually ran."
+   "why": "docs/PHYSICS.md now carries the current generator version, measured counter value, and class-boundary source."
   },
   "ValidationReports/NCH_DECAY_POLICY_BIAS_8317.md": {
    "class": "PUBLIC",
@@ -1225,6 +1225,13 @@
    "what": "The internal execution map for the nine-document documentation rebuild.",
    "why": "It inventories internal and superseded documents, so the published repository must not carry it."
   },
+  "docs/DOC_REWRITE_DISCREPANCIES.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Records disagreements between replaced prose and claims derived from current artifacts.",
+   "why": "It audits the rewrite process and names absorbed internal documents; published physics prose carries only the resolved claims."
+  },
   "docs/EXPORT_ARCHITECTURE.md": {
    "class": "INTERNAL",
    "dead": "n/a",
@@ -1296,11 +1303,11 @@
    "why": "It is manuscript drafting material and no method, figure or number depends on it."
   },
   "docs/M2_PROBQQ1TOQQ0JOIN.md": {
-   "class": "PUBLIC",
+   "class": "INTERNAL",
    "dead": "n/a",
    "voice": "clean",
    "what": "Settles which quark indexes the probQQ1toQQ0join parameter by reading the pinned PYTHIA 8.317 source.",
-   "why": "It documents the meaning of a tune parameter the published cards set, which a reader has to know to interpret the comparison."
+   "why": "docs/PHYSICS.md now derives the parameter meaning from the exact PYTHIA 8.317 source."
   },
   "docs/M7_BEAUTY_PREREGISTRATION.md": {
    "class": "PUBLIC",
@@ -1434,6 +1441,13 @@
    "voice": "clean",
    "what": "The pre-submission checklist for the full production, each item verified with evidence or pending with what would close it.",
    "why": "It gates a job submission decision that has already been taken."
+  },
+  "docs/PHYSICS.md": {
+   "class": "PUBLIC",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "Defines the heavy-flavour balancing observable, selections, class axis, decompositions, and interpretation limits.",
+   "why": "A reader needs this contract to run the analysis or check a published physics quantity."
   },
   "docs/PLOTTING_V3_DELTA.md": {
    "class": "INTERNAL",
@@ -2168,7 +2182,6 @@
   "Validation/validate_canonical_manifest.sh",
   "Validation/validate_pair_block_closure.sh",
   "Validation/validate_pair_directory.sh",
-  "ValidationReports/NCH_CALIBRATION_PYTHIA8317_20260801.md",
   "analysis/Analysis_README.md",
   "analysis/a2_block_shift.py",
   "analysis/run_status_analysis.sh",
@@ -2189,7 +2202,6 @@
   "docs/GATE_3000.md",
   "docs/GOLDEN_OUTPUTS.md",
   "docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md",
-  "docs/M2_PROBQQ1TOQQ0JOIN.md",
   "docs/M7_BEAUTY_PREREGISTRATION.md",
   "docs/M7_BEAUTY_UNRESOLVED_SYSTEMATIC.md",
   "docs/M7_UNRESOLVED_SYSTEMATIC.md",
