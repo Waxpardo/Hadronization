@@ -1207,6 +1207,13 @@
    "what": "Maps which path on the cluster volume holds code, live data, frozen evidence or another project.",
    "why": "It is a filesystem map of one machine and does not travel with the code."
   },
+  "docs/DOC_PLAN.md": {
+   "class": "INTERNAL",
+   "dead": "n/a",
+   "voice": "clean",
+   "what": "The internal execution map for the nine-document documentation rebuild.",
+   "why": "It inventories internal and superseded documents, so the published repository must not carry it."
+  },
   "docs/DESIGN_AND_RATIONALE.md": {
    "class": "PUBLIC",
    "dead": "n/a",
