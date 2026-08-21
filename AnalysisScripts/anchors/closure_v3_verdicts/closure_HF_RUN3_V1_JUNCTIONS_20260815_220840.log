@@ -1,0 +1,12 @@
+Environment set:
+  which root:        /cvmfs/alice.cern.ch/el9-x86_64/Packages/ROOT/v6-30-01-alice5-2/bin/root
+  which root-config: /cvmfs/alice.cern.ch/el9-x86_64/Packages/ROOT/v6-30-01-alice5-2/bin/root-config
+  PYTHIA8:           /data/alice/ipardoza/pythia_stock_8317/install
+  PYTHIA8DATA:       /data/alice/ipardoza/pythia_stock_8317/install/share/Pythia8/xmldoc
+  PYTHIA8 version:   8.317
+  ROOT version:      6.30.01
+  production root:   /data/alice/ipardoza/hadronization_production
+
+Processing /data/alice/ipardoza/Hadronization/Validation/ValidatePairBlockClosure.C("/data/alice/ipardoza/hadronization_merged/complete_root_HF_RUN3_V1_JUNCTIONS","/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples_JUNCTIONS",100000000)...
+PAIR_BLOCK_CLOSURE errors=0 analysis_schema=paul_pair_objects_primary_ground_v3 central_pair_files=300 block_pair_files=3000 object_content_sumw2_closure_checks=2100 additive_metadata_closure_checks=3600 invariant_metadata_checks=1500 source_filter_contract_checks=300 expected_central_events=100000000 relative_tolerance=2e-10
+(int) 0

@@ -1,0 +1,76 @@
+\section{Heavy-flavour balancing observables}
+\label{sec:observables}
+
+\subsection{Signed species and ordered pairs}
+
+Heavy-flavour sign follows quark content rather than electric charge,
+\begin{equation}
+ q_c=n_c-n_{\bar c}, \qquad q_b=n_b-n_{\bar b}.
+\end{equation}
+Thus a $B^+$ meson has $q_b=-1$, whereas a $\Lambda_b^0$ baryon has
+$q_b=+1$. The signed species and pair registries enumerate particles and
+antiparticles separately and define 300 ordered trigger--associate
+combinations.\claim{O1}
+
+Triggers are final, direct-primary, central-ground heavy hadrons with
+$p_{\mathrm{T}}>1.0$~GeV/$c$ and $|\eta|\leq4$. Their heavy quark must resolve
+to the selected hard process. Associates obey the same final-state,
+direct-primary, central-ground, and pseudorapidity requirements, with
+$p_{\mathrm{T}}>0.15$~GeV/$c$, but no selected-hard origin requirement is
+imposed.\claim{O2} The reduction excludes self-pairs and pairs whose two
+hadrons claim the same selected hard parton. This trigger--associate asymmetry
+is necessary: demanding selected-hard ancestry for both particles would remove
+the same-sign term by construction.
+
+\subsection{Correlation and balancing yield}
+
+For a fixed ordered species pair and multiplicity class, the per-trigger
+angular observable is
+\begin{equation}
+ B(\dphi)=\frac{1}{N_{\mathrm{trig}}}
+ \left(\frac{\mathrm{d}N_{\mathrm{OS}}}{\mathrm{d}\dphi}
+       -\frac{\mathrm{d}N_{\mathrm{SS}}}{\mathrm{d}\dphi}\right).
+ \label{eq:balance}
+\end{equation}
+OS and SS refer to opposite and equal heavy-flavour sign. The same-sign factor
+is exactly one. Both terms use the same $N_{\mathrm{trig}}$, obtained from the
+dedicated \pathcode{hTrKinematics} object. A trigger-momentum projection of the
+pair object counts trigger--associate pairs and is not an admissible trigger
+denominator.\claim{O3}
+
+The stored angular axis is $-\pi/2\leq\dphi<3\pi/2$. The integrated balancing
+yield currently supported by implementation and evidence is the full-axis
+integral,
+\begin{equation}
+ Y_{\mathrm{bal}}=
+ \frac{N_{\mathrm{OS}}-N_{\mathrm{SS}}}{N_{\mathrm{trig}}}.
+ \label{eq:integrated}
+\end{equation}
+No reviewed contract defines near-side or away-side integration boundaries,
+so this manuscript makes no regional-integral claim. A dated 21 August 2026
+scope ruling confirms the full $\dphi$ axis as the only currently supported
+integrated observable. Regional observables require a later signed decision
+and a new contract; the ruling does not rewrite any earlier
+preregistration.\claim{O4}
+
+A baryon/reference-meson ratio divides two signed balancing yields. For the
+paper-facing beauty quantity this is the $\Lambda_b/B^-$ balancing-yield ratio
+for a $B^+$ trigger. The charm analogue uses the registry-resolved
+$\bar\Lambda_c^-/D^-$ definition for a $D^+$ trigger. These are not inclusive
+baryon-to-meson production ratios.\claim{O5}
+
+\subsection{Central values and statistical uncertainty}
+
+The central value is calculated from the complete pooled union of selected
+files. It is not the mean of block values. Statistical uncertainties are the
+standard errors of the complete estimator evaluated in ten disjoint,
+equal-exposure file blocks. For block estimates $x_k$,
+\begin{equation}
+ \operatorname{SEM}(x)=
+ \frac{1}{\sqrt{10}}
+ \sqrt{\frac{1}{9}\sum_{k=1}^{10}(x_k-\bar{x})^2}.
+\end{equation}
+OS--SS subtraction and every nonlinear yield ratio are formed inside each
+block before the standard error is calculated, retaining the within-block
+covariance of shared counts. Final points require ten finite block
+estimators.\claim{O6}

@@ -1,0 +1,105 @@
+\section{Generator samples and event activity}
+\label{sec:model}
+
+\subsection{Campaign definition}
+
+The canonical \pathcode{HF_RUN3_V1} campaign was generated with PYTHIA~8.317
+for proton--proton collisions at $\sqrt{s}=13.6$~TeV. Both
+\pathcode{HardQCD:hardccbar} and \pathcode{HardQCD:hardbbbar} are enabled, with
+\pathcode{PhaseSpace:pTHatMin = 2.0}. The producer requires exactly one signed
+selected-hard heavy-quark pair in every successful event. The sample is
+therefore forced hard-heavy and is not a minimum-bias sample.\claim{M1}
+
+Each tune has 1,000 canonical files with 100,000 successful events per file,
+or 100 million events per tune. Ten disjoint statistical blocks contain 100
+files per tune.\claim{M2} The three nominal cards contain the complete MONASH,
+JUNCTIONS, and CLOSEPACKING bundles; no parameter family is interpreted in
+isolation.
+
+\begin{table}[H]
+\centering
+\caption{Canonical campaign and analysis settings. Each entry is controlled by
+the selector, nominal cards, or generated registry and is mapped to evidence in
+the claim checklist.}
+\label{tab:campaign}
+\begin{tabular}{ll}
+\toprule
+Item & Contract value \\
+\midrule
+Collision system and energy & pp, $\sqrt{s}=13.6$~TeV \\
+Generator & PYTHIA~8.317 \\
+Pinned plotting runtime & ROOT~6.30.01 \\
+Hard processes & $c\bar c$ and $b\bar b$ enabled \\
+Hard threshold & $\pthat>2.0$~GeV \\
+Exposure per tune & $1000\times100000=10^8$ events \\
+Statistical blocks & 10 blocks of 100 files \\
+Tune bundles & MONASH, JUNCTIONS, CLOSEPACKING \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Multiplicity counter and common classes}
+
+Event activity is the operational ``final charged non-heavy'' counter. It
+increments exactly when PYTHIA reports a particle as final and charged, the
+particle has no heavy constituent, $p_{\mathrm{T}}>0.15$~GeV/$c$, and
+$|\eta|\leq1$.\claim{M3} The cards use
+\pathcode{ParticleDecays:tau0Max = 0.01}~mm; the installed PYTHIA particle
+table contains no tested light-hadron state between that cutoff and the
+conventional 10~mm primary threshold. Heavy-hadron decays are disabled, and
+heavy hadrons are excluded because their artificial stability would create an
+activity--observable autocorrelation. The counter should therefore not be
+called an experimentally identical primary-particle definition without this
+qualification.
+
+A paired PYTHIA~8.317 MONASH minimum-bias calibration measured the production
+counter at 6.986 and the intended experimental-decay convention at 7.040, a
+0.7670\% undercount. Propagating that measured shift up and down through the
+current half-integer boundaries moves no boundary across an integer, so the S5
+class-membership change is exactly zero for c1--c11 in the calibration. This
+does not establish the bias in the forced hard-heavy sample and does not
+correct the percentile labels.
+
+The analysis uses eleven non-overlapping absolute classes common to all three
+tunes. Their half-integer boundaries assign every integer \nch to exactly one
+class. MONASH minimum-bias top-percentile ranges are labels for this shared
+axis; they are not per-tune quantiles and their direction is opposite to the
+class numbering.\claim{M4}
+
+\begin{table}[H]
+\centering
+\caption{Common absolute event-activity classes. Class c1 is the lowest and c11
+the highest activity. Percentages are labels derived from the independent
+MONASH minimum-bias calibration sample.}
+\label{tab:classes}
+\begin{tabular}{ccc}
+\toprule
+Class & Integer \nch & MONASH top-percentile label \\
+\midrule
+c1  & 0--2       & 88.197--100.000\% \\
+c2  & 3          & 80.597--88.197\% \\
+c3  & 4--5       & 65.937--80.597\% \\
+c4  & 6          & 59.850--65.937\% \\
+c5  & 7--8       & 50.308--59.850\% \\
+c6  & 9--10      & 43.030--50.308\% \\
+c7  & 11--13     & 34.614--43.030\% \\
+c8  & 14--17     & 26.154--34.614\% \\
+c9  & 18--23     & 17.124--26.154\% \\
+c10 & 24--32     & 8.422--17.124\% \\
+c11 & 33 and above & 0.000--8.422\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Systematic scope}
+
+The registered sources vary renormalisation and factorisation scales (S1a and
+S1b), the parton distribution (S2), the hard-process threshold (S3), the
+activity-counter window (S4), decay-daughter class migration (S5), and
+ambiguous hard-carrier assignment (S6).\claim{M5} S4 has no class-resolved
+delta. S6 uses a different five-bin axis and is not added to the c1--c11
+budget. Detector response, efficiency, resolution, and unfolding are outside
+this generator-level study. The 2026-08-21 correction applies the documented
+nominal-plus-variation SEM rule to derived deltas. Uncertainty-bearing final
+figures and release-level inferences remain blocked by the missing S4 source
+and the unbounded tune-dependent generator-hang selection risk.

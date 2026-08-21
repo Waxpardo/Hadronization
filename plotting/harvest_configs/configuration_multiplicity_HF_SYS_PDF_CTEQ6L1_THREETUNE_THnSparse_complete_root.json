@@ -1,0 +1,1667 @@
+{
+ "_comment_axis": "Multiplicity classes are the ruled COMMON ABSOLUTE N_ch boundaries in config/multiplicity_class_boundaries_v1.json, which the plotting stack reads directly. The multiplicityMin/multiplicityMax values here are LABELS ONLY: percentiles of the MONASH minimum-bias distribution (AnalysisScripts/anchors/b4_multiplicity_mb, 172429 events), recomputed from that sample and identical for every tune. They are NOT the labelled tune's own percentiles and they do not define the boundaries.",
+ "VERBOSE": false,
+ "calculate_errors": true,
+ "bb_bar_complete_root_dir_sub_samples": "/data/alice/ipardoza/hf/hadronization_merged/SUBSAMPLES_HF_SYS_PDF_CTEQ6L1/combined_root_subSamples",
+ "cc_bar_complete_root_dir_sub_samples": "/data/alice/ipardoza/hf/hadronization_merged/SUBSAMPLES_HF_SYS_PDF_CTEQ6L1/combined_root_subSamples",
+ "nSubSamples": 10,
+ "pair_combinatorics_mode": "ordered_conditional_v1",
+ "same_sign_pair_factor": 1.0,
+ "pair_input_selection_contract": {
+  "mode": "v3_metadata_only_v1",
+  "legacy_metadata_free_complete_root_tag": "",
+  "histogram_pt_eta_fields": "legacy_recuts_only_v1",
+  "v3_analysis_schema": "paul_pair_objects_primary_ground_v3",
+  "v3_analysis_implementation": "one_pass_primary_ground_pair_analysis_v2",
+  "v3_analysis_version": "status_analysis_THnSparse_qq_v2",
+  "v3_analysis_profile": "central_primary_ground_v1",
+  "v3_selector_version": "hard_trigger_primary_ground__primary_ground_associate_v1",
+  "v3_pair_combinatorics_mode": "ordered_conditional_v1",
+  "v3_trigger_pt_min_exclusive": 1.0,
+  "v3_associate_pt_min_exclusive": 0.15,
+  "v3_eta_abs_max_inclusive": 4.0,
+  "v3_same_sign_pair_factor": 1.0,
+  "v3_pt_upper_selection": "none"
+ },
+ "subsample_error_bins_to_exclude": [],
+ "draw_correlation_plots": false,
+ "base_dir": "/data/alice/ipardoza/hf/hadronization_merged",
+ "PYTHIA_TUNES": [
+  "MONASH",
+  "JUNCTIONS",
+  "CLOSEPACKING"
+ ],
+ "bb_bar_complete_root_dir": "complete_root_HF_SYS_PDF_CTEQ6L1",
+ "cc_bar_complete_root_dir": "complete_root_HF_SYS_PDF_CTEQ6L1",
+ "beauty_correlations_to_analyse": [
+  {
+   "trigger": "B^{+}",
+   "configs": [
+    {
+     "trigger": "B^{+}",
+     "associateOS": "B-",
+     "associateSS": "B^{+}",
+     "OS": "BplusBminus.root",
+     "SS": "BplusBplus.root"
+    },
+    {
+     "trigger": "B^{+}",
+     "associateOS": "Lambda_b",
+     "associateSS": "Lambda_b-bar",
+     "OS": "BplusLb.root",
+     "SS": "BplusLbbar.root"
+    }
+   ]
+  }
+ ],
+ "charm_correlations_to_analyse": [
+  {
+   "trigger": "D^{+}",
+   "configs": [
+    {
+     "trigger": "D^{+}",
+     "associateOS": "D-",
+     "associateSS": "D^{+}",
+     "OS": "DplusDminus.root",
+     "SS": "DplusDplus.root"
+    },
+    {
+     "trigger": "D^{+}",
+     "associateOS": "Lambda_c(+)-bar",
+     "associateSS": "Lambda_c(+)",
+     "OS": "DplusLambdacplusbar.root",
+     "SS": "DplusLambdacplus.root"
+    }
+   ]
+  }
+ ],
+ "histograms_to_analyse": [
+  {
+   "binLabel": "c1_MB88p197_100",
+   "hDPhi": "hDPhic1_MB88p197_100",
+   "hTrPt": "hTrPtc1_MB88p197_100",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 88.197,
+   "multiplicityMax": 100.0
+  },
+  {
+   "binLabel": "c2_MB80p597_88p197",
+   "hDPhi": "hDPhic2_MB80p597_88p197",
+   "hTrPt": "hTrPtc2_MB80p597_88p197",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 80.597,
+   "multiplicityMax": 88.197
+  },
+  {
+   "binLabel": "c3_MB65p937_80p597",
+   "hDPhi": "hDPhic3_MB65p937_80p597",
+   "hTrPt": "hTrPtc3_MB65p937_80p597",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 65.937,
+   "multiplicityMax": 80.597
+  },
+  {
+   "binLabel": "c4_MB59p85_65p937",
+   "hDPhi": "hDPhic4_MB59p85_65p937",
+   "hTrPt": "hTrPtc4_MB59p85_65p937",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 59.85,
+   "multiplicityMax": 65.937
+  },
+  {
+   "binLabel": "c5_MB50p308_59p85",
+   "hDPhi": "hDPhic5_MB50p308_59p85",
+   "hTrPt": "hTrPtc5_MB50p308_59p85",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 50.308,
+   "multiplicityMax": 59.85
+  },
+  {
+   "binLabel": "c6_MB43p03_50p308",
+   "hDPhi": "hDPhic6_MB43p03_50p308",
+   "hTrPt": "hTrPtc6_MB43p03_50p308",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 43.03,
+   "multiplicityMax": 50.308
+  },
+  {
+   "binLabel": "c7_MB34p614_43p03",
+   "hDPhi": "hDPhic7_MB34p614_43p03",
+   "hTrPt": "hTrPtc7_MB34p614_43p03",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 34.614,
+   "multiplicityMax": 43.03
+  },
+  {
+   "binLabel": "c8_MB26p154_34p614",
+   "hDPhi": "hDPhic8_MB26p154_34p614",
+   "hTrPt": "hTrPtc8_MB26p154_34p614",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 26.154,
+   "multiplicityMax": 34.614
+  },
+  {
+   "binLabel": "c9_MB17p124_26p154",
+   "hDPhi": "hDPhic9_MB17p124_26p154",
+   "hTrPt": "hTrPtc9_MB17p124_26p154",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 17.124,
+   "multiplicityMax": 26.154
+  },
+  {
+   "binLabel": "c10_MB8p422_17p124",
+   "hDPhi": "hDPhic10_MB8p422_17p124",
+   "hTrPt": "hTrPtc10_MB8p422_17p124",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 8.422,
+   "multiplicityMax": 17.124
+  },
+  {
+   "binLabel": "c11_MB0_8p422",
+   "hDPhi": "hDPhic11_MB0_8p422",
+   "hTrPt": "hTrPtc11_MB0_8p422",
+   "triggerPhiMin": -3.14159265,
+   "triggerPhiMax": 3.14159265,
+   "assocPhiMin": -3.14159265,
+   "assocPhiMax": 3.14159265,
+   "triggerEtaMin": -4.0,
+   "triggerEtaMax": 4.0,
+   "assocEtaMin": -4.0,
+   "assocEtaMax": 4.0,
+   "triggerPtMin": 1.0,
+   "triggerPtMax": 20.0,
+   "assocPtMin": 0.0,
+   "assocPtMax": 100.0,
+   "multiplicityMin": 0.0,
+   "multiplicityMax": 8.422
+  }
+ ],
+ "canvases_to_be_drawn": [
+  {
+   "canvas_name": "mini_beauty_balancing_MONASH",
+   "draw_function_to_use": "drawBalancingPlots",
+   "TUNES": [
+    "MONASH"
+   ],
+   "FLAVOUR": "BEAUTY",
+   "TriggerToUse": "B^{+}",
+   "denominator_TUNE": "NONE",
+   "baryons_to_plot_in_baryon/meson_ratio": [],
+   "use_hard_coded_settings": false,
+   "write": false,
+   "write_path": "NONE",
+   "write_name": "NONE",
+   "canvas_title": "MONASH",
+   "x_axis_title": "",
+   "y_axis_title": "yield",
+   "x_size_canvas": 800,
+   "y_size_canvas": 600,
+   "x_min_mini_pad": 0.05,
+   "x_max_mini_pad": 0.5,
+   "y_min_mini_pad": 0.38,
+   "y_max_mini_pad": 0.569,
+   "top_margin_mini_pad": 0.1,
+   "bottom_margin_mini_pad": 0.12,
+   "left_margin_mini_pad": 0.13,
+   "right_margin_mini_pad": 0.03,
+   "y_min_axis": 0.01,
+   "y_max_axis": 0.42,
+   "histogram_minimum": -1,
+   "histogram_maximum": -1,
+   "set_log_y": true,
+   "x_min_legend": -1,
+   "x_max_legend": -1,
+   "y_min_legend": -1,
+   "y_max_legend": -1,
+   "legend_entries": [
+    {
+     "object_name": "hDPhic1_MB88p197_100",
+     "display_name": "88.2-100.0%"
+    },
+    {
+     "object_name": "hDPhic2_MB80p597_88p197",
+     "display_name": "80.6-88.2%"
+    },
+    {
+     "object_name": "hDPhic3_MB65p937_80p597",
+     "display_name": "65.9-80.6%"
+    },
+    {
+     "object_name": "hDPhic4_MB59p85_65p937",
+     "display_name": "59.8-65.9%"
+    },
+    {
+     "object_name": "hDPhic5_MB50p308_59p85",
+     "display_name": "50.3-59.8%"
+    },
+    {
+     "object_name": "hDPhic6_MB43p03_50p308",
+     "display_name": "43.0-50.3%"
+    },
+    {
+     "object_name": "hDPhic7_MB34p614_43p03",
+     "display_name": "34.6-43.0%"
+    },
+    {
+     "object_name": "hDPhic8_MB26p154_34p614",
+     "display_name": "26.2-34.6%"
+    },
+    {
+     "object_name": "hDPhic9_MB17p124_26p154",
+     "display_name": "17.1-26.2%"
+    },
+    {
+     "object_name": "hDPhic10_MB8p422_17p124",
+     "display_name": "8.4-17.1%"
+    },
+    {
+     "object_name": "hDPhic11_MB0_8p422",
+     "display_name": "0.0-8.4%"
+    }
+   ],
+   "TUNE_colours": [],
+   "dependency_line_styles": [
+    {
+     "dependency_name": "hDPhic1_MB88p197_100",
+     "line_style": 1
+    },
+    {
+     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "line_style": 10
+    },
+    {
+     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "line_style": 9
+    },
+    {
+     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "line_style": 8
+    },
+    {
+     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "line_style": 7
+    },
+    {
+     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "line_style": 6
+    },
+    {
+     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "line_style": 5
+    },
+    {
+     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "line_style": 4
+    },
+    {
+     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "line_style": 3
+    },
+    {
+     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "line_style": 2
+    },
+    {
+     "dependency_name": "hDPhic11_MB0_8p422",
+     "line_style": 1
+    }
+   ],
+   "baryon_line_styles": [],
+   "bins_to_ignore": [],
+   "nominator_TUNES": [],
+   "legend_columns": 1
+  },
+  {
+   "canvas_name": "mini_beauty_balancing_JUNCTIONS",
+   "draw_function_to_use": "drawBalancingPlots",
+   "TUNES": [
+    "JUNCTIONS"
+   ],
+   "FLAVOUR": "BEAUTY",
+   "TriggerToUse": "B^{+}",
+   "denominator_TUNE": "NONE",
+   "baryons_to_plot_in_baryon/meson_ratio": [],
+   "use_hard_coded_settings": false,
+   "write": false,
+   "write_path": "NONE",
+   "write_name": "NONE",
+   "canvas_title": "JUNCTIONS",
+   "x_axis_title": "",
+   "y_axis_title": "yield",
+   "x_size_canvas": 800,
+   "y_size_canvas": 600,
+   "x_min_mini_pad": 0.05,
+   "x_max_mini_pad": 0.5,
+   "y_min_mini_pad": 0.57,
+   "y_max_mini_pad": 0.759,
+   "top_margin_mini_pad": 0.1,
+   "bottom_margin_mini_pad": 0.12,
+   "left_margin_mini_pad": 0.13,
+   "right_margin_mini_pad": 0.03,
+   "y_min_axis": 0.01,
+   "y_max_axis": 0.42,
+   "histogram_minimum": -1,
+   "histogram_maximum": -1,
+   "set_log_y": true,
+   "x_min_legend": -1,
+   "x_max_legend": -1,
+   "y_min_legend": -1,
+   "y_max_legend": -1,
+   "legend_entries": [
+    {
+     "object_name": "hDPhic1_MB88p197_100",
+     "display_name": "88.2-100.0%"
+    },
+    {
+     "object_name": "hDPhic2_MB80p597_88p197",
+     "display_name": "80.6-88.2%"
+    },
+    {
+     "object_name": "hDPhic3_MB65p937_80p597",
+     "display_name": "65.9-80.6%"
+    },
+    {
+     "object_name": "hDPhic4_MB59p85_65p937",
+     "display_name": "59.8-65.9%"
+    },
+    {
+     "object_name": "hDPhic5_MB50p308_59p85",
+     "display_name": "50.3-59.8%"
+    },
+    {
+     "object_name": "hDPhic6_MB43p03_50p308",
+     "display_name": "43.0-50.3%"
+    },
+    {
+     "object_name": "hDPhic7_MB34p614_43p03",
+     "display_name": "34.6-43.0%"
+    },
+    {
+     "object_name": "hDPhic8_MB26p154_34p614",
+     "display_name": "26.2-34.6%"
+    },
+    {
+     "object_name": "hDPhic9_MB17p124_26p154",
+     "display_name": "17.1-26.2%"
+    },
+    {
+     "object_name": "hDPhic10_MB8p422_17p124",
+     "display_name": "8.4-17.1%"
+    },
+    {
+     "object_name": "hDPhic11_MB0_8p422",
+     "display_name": "0.0-8.4%"
+    }
+   ],
+   "TUNE_colours": [],
+   "dependency_line_styles": [
+    {
+     "dependency_name": "hDPhic1_MB88p197_100",
+     "line_style": 1
+    },
+    {
+     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "line_style": 10
+    },
+    {
+     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "line_style": 9
+    },
+    {
+     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "line_style": 8
+    },
+    {
+     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "line_style": 7
+    },
+    {
+     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "line_style": 6
+    },
+    {
+     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "line_style": 5
+    },
+    {
+     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "line_style": 4
+    },
+    {
+     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "line_style": 3
+    },
+    {
+     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "line_style": 2
+    },
+    {
+     "dependency_name": "hDPhic11_MB0_8p422",
+     "line_style": 1
+    }
+   ],
+   "baryon_line_styles": [],
+   "bins_to_ignore": [],
+   "nominator_TUNES": [],
+   "legend_columns": 1
+  },
+  {
+   "canvas_name": "mini_beauty_balancing_CLOSEPACKING",
+   "draw_function_to_use": "drawBalancingPlots",
+   "TUNES": [
+    "CLOSEPACKING"
+   ],
+   "FLAVOUR": "BEAUTY",
+   "TriggerToUse": "B^{+}",
+   "denominator_TUNE": "NONE",
+   "baryons_to_plot_in_baryon/meson_ratio": [],
+   "use_hard_coded_settings": false,
+   "write": false,
+   "write_path": "NONE",
+   "write_name": "NONE",
+   "canvas_title": "CLOSEPACKING",
+   "x_axis_title": "",
+   "y_axis_title": "yield",
+   "x_size_canvas": 800,
+   "y_size_canvas": 600,
+   "x_min_mini_pad": 0.05,
+   "x_max_mini_pad": 0.5,
+   "y_min_mini_pad": 0.76,
+   "y_max_mini_pad": 0.95,
+   "top_margin_mini_pad": 0.1,
+   "bottom_margin_mini_pad": 0.12,
+   "left_margin_mini_pad": 0.13,
+   "right_margin_mini_pad": 0.03,
+   "y_min_axis": 0.01,
+   "y_max_axis": 0.42,
+   "histogram_minimum": -1,
+   "histogram_maximum": -1,
+   "set_log_y": true,
+   "x_min_legend": 0.14,
+   "x_max_legend": 0.99,
+   "y_min_legend": 0.7,
+   "y_max_legend": 0.9,
+   "legend_entries": [
+    {
+     "object_name": "hDPhic1_MB88p197_100",
+     "display_name": "88.2-100.0%"
+    },
+    {
+     "object_name": "hDPhic2_MB80p597_88p197",
+     "display_name": "80.6-88.2%"
+    },
+    {
+     "object_name": "hDPhic3_MB65p937_80p597",
+     "display_name": "65.9-80.6%"
+    },
+    {
+     "object_name": "hDPhic4_MB59p85_65p937",
+     "display_name": "59.8-65.9%"
+    },
+    {
+     "object_name": "hDPhic5_MB50p308_59p85",
+     "display_name": "50.3-59.8%"
+    },
+    {
+     "object_name": "hDPhic6_MB43p03_50p308",
+     "display_name": "43.0-50.3%"
+    },
+    {
+     "object_name": "hDPhic7_MB34p614_43p03",
+     "display_name": "34.6-43.0%"
+    },
+    {
+     "object_name": "hDPhic8_MB26p154_34p614",
+     "display_name": "26.2-34.6%"
+    },
+    {
+     "object_name": "hDPhic9_MB17p124_26p154",
+     "display_name": "17.1-26.2%"
+    },
+    {
+     "object_name": "hDPhic10_MB8p422_17p124",
+     "display_name": "8.4-17.1%"
+    },
+    {
+     "object_name": "hDPhic11_MB0_8p422",
+     "display_name": "0.0-8.4%"
+    }
+   ],
+   "TUNE_colours": [],
+   "dependency_line_styles": [
+    {
+     "dependency_name": "hDPhic1_MB88p197_100",
+     "line_style": 1
+    },
+    {
+     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "line_style": 10
+    },
+    {
+     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "line_style": 9
+    },
+    {
+     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "line_style": 8
+    },
+    {
+     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "line_style": 7
+    },
+    {
+     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "line_style": 6
+    },
+    {
+     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "line_style": 5
+    },
+    {
+     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "line_style": 4
+    },
+    {
+     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "line_style": 3
+    },
+    {
+     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "line_style": 2
+    },
+    {
+     "dependency_name": "hDPhic11_MB0_8p422",
+     "line_style": 1
+    }
+   ],
+   "baryon_line_styles": [],
+   "bins_to_ignore": [],
+   "nominator_TUNES": [],
+   "legend_columns": 4
+  },
+  {
+   "canvas_name": "mini_beauty_balancing_JUNCTIONS_over_MONASH",
+   "draw_function_to_use": "drawBalancingPlotsTUNERatios",
+   "TUNES": [
+    "MONASH",
+    "JUNCTIONS"
+   ],
+   "FLAVOUR": "BEAUTY",
+   "TriggerToUse": "B^{+}",
+   "denominator_TUNE": "MONASH",
+   "baryons_to_plot_in_baryon/meson_ratio": [],
+   "use_hard_coded_settings": false,
+   "write": false,
+   "write_path": "NONE",
+   "write_name": "NONE",
+   "canvas_title": "JUNCTIONS / MONASH",
+   "x_axis_title": "",
+   "y_axis_title": "JUN/MON",
+   "x_size_canvas": 800,
+   "y_size_canvas": 600,
+   "x_min_mini_pad": 0.05,
+   "x_max_mini_pad": 0.5,
+   "y_min_mini_pad": 0.0,
+   "y_max_mini_pad": 0.189,
+   "top_margin_mini_pad": 0.1,
+   "bottom_margin_mini_pad": 0.12,
+   "left_margin_mini_pad": 0.13,
+   "right_margin_mini_pad": 0.03,
+   "y_min_axis": 0.6,
+   "y_max_axis": 2.5,
+   "histogram_minimum": -1,
+   "histogram_maximum": -1,
+   "set_log_y": false,
+   "x_min_legend": -1,
+   "x_max_legend": -1,
+   "y_min_legend": -1,
+   "y_max_legend": -1,
+   "legend_entries": [
+    {
+     "object_name": "hDPhic1_MB88p197_100",
+     "display_name": "88.2-100.0%"
+    },
+    {
+     "object_name": "hDPhic2_MB80p597_88p197",
+     "display_name": "80.6-88.2%"
+    },
+    {
+     "object_name": "hDPhic3_MB65p937_80p597",
+     "display_name": "65.9-80.6%"
+    },
+    {
+     "object_name": "hDPhic4_MB59p85_65p937",
+     "display_name": "59.8-65.9%"
+    },
+    {
+     "object_name": "hDPhic5_MB50p308_59p85",
+     "display_name": "50.3-59.8%"
+    },
+    {
+     "object_name": "hDPhic6_MB43p03_50p308",
+     "display_name": "43.0-50.3%"
+    },
+    {
+     "object_name": "hDPhic7_MB34p614_43p03",
+     "display_name": "34.6-43.0%"
+    },
+    {
+     "object_name": "hDPhic8_MB26p154_34p614",
+     "display_name": "26.2-34.6%"
+    },
+    {
+     "object_name": "hDPhic9_MB17p124_26p154",
+     "display_name": "17.1-26.2%"
+    },
+    {
+     "object_name": "hDPhic10_MB8p422_17p124",
+     "display_name": "8.4-17.1%"
+    },
+    {
+     "object_name": "hDPhic11_MB0_8p422",
+     "display_name": "0.0-8.4%"
+    }
+   ],
+   "TUNE_colours": [],
+   "dependency_line_styles": [
+    {
+     "dependency_name": "hDPhic1_MB88p197_100",
+     "line_style": 1
+    },
+    {
+     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "line_style": 10
+    },
+    {
+     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "line_style": 9
+    },
+    {
+     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "line_style": 8
+    },
+    {
+     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "line_style": 7
+    },
+    {
+     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "line_style": 6
+    },
+    {
+     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "line_style": 5
+    },
+    {
+     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "line_style": 4
+    },
+    {
+     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "line_style": 3
+    },
+    {
+     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "line_style": 2
+    },
+    {
+     "dependency_name": "hDPhic11_MB0_8p422",
+     "line_style": 1
+    }
+   ],
+   "baryon_line_styles": [],
+   "bins_to_ignore": [],
+   "nominator_TUNES": [
+    "JUNCTIONS"
+   ],
+   "legend_columns": 1
+  },
+  {
+   "canvas_name": "mini_beauty_balancing_CLOSEPACKING_over_MONASH",
+   "draw_function_to_use": "drawBalancingPlotsTUNERatios",
+   "TUNES": [
+    "MONASH",
+    "CLOSEPACKING"
+   ],
+   "FLAVOUR": "BEAUTY",
+   "TriggerToUse": "B^{+}",
+   "denominator_TUNE": "MONASH",
+   "baryons_to_plot_in_baryon/meson_ratio": [],
+   "use_hard_coded_settings": false,
+   "write": false,
+   "write_path": "NONE",
+   "write_name": "NONE",
+   "canvas_title": "CLOSEPACKING / MONASH",
+   "x_axis_title": "",
+   "y_axis_title": "CLP/MON",
+   "x_size_canvas": 800,
+   "y_size_canvas": 600,
+   "x_min_mini_pad": 0.05,
+   "x_max_mini_pad": 0.5,
+   "y_min_mini_pad": 0.19,
+   "y_max_mini_pad": 0.379,
+   "top_margin_mini_pad": 0.1,
+   "bottom_margin_mini_pad": 0.12,
+   "left_margin_mini_pad": 0.13,
+   "right_margin_mini_pad": 0.03,
+   "y_min_axis": 0.6,
+   "y_max_axis": 2.5,
+   "histogram_minimum": -1,
+   "histogram_maximum": -1,
+   "set_log_y": false,
+   "x_min_legend": -1,
+   "x_max_legend": -1,
+   "y_min_legend": -1,
+   "y_max_legend": -1,
+   "legend_entries": [
+    {
+     "object_name": "hDPhic1_MB88p197_100",
+     "display_name": "88.2-100.0%"
+    },
+    {
+     "object_name": "hDPhic2_MB80p597_88p197",
+     "display_name": "80.6-88.2%"
+    },
+    {
+     "object_name": "hDPhic3_MB65p937_80p597",
+     "display_name": "65.9-80.6%"
+    },
+    {
+     "object_name": "hDPhic4_MB59p85_65p937",
+     "display_name": "59.8-65.9%"
+    },
+    {
+     "object_name": "hDPhic5_MB50p308_59p85",
+     "display_name": "50.3-59.8%"
+    },
+    {
+     "object_name": "hDPhic6_MB43p03_50p308",
+     "display_name": "43.0-50.3%"
+    },
+    {
+     "object_name": "hDPhic7_MB34p614_43p03",
+     "display_name": "34.6-43.0%"
+    },
+    {
+     "object_name": "hDPhic8_MB26p154_34p614",
+     "display_name": "26.2-34.6%"
+    },
+    {
+     "object_name": "hDPhic9_MB17p124_26p154",
+     "display_name": "17.1-26.2%"
+    },
+    {
+     "object_name": "hDPhic10_MB8p422_17p124",
+     "display_name": "8.4-17.1%"
+    },
+    {
+     "object_name": "hDPhic11_MB0_8p422",
+     "display_name": "0.0-8.4%"
+    }
+   ],
+   "TUNE_colours": [],
+   "dependency_line_styles": [
+    {
+     "dependency_name": "hDPhic1_MB88p197_100",
+     "line_style": 1
+    },
+    {
+     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "line_style": 10
+    },
+    {
+     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "line_style": 9
+    },
+    {
+     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "line_style": 8
+    },
+    {
+     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "line_style": 7
+    },
+    {
+     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "line_style": 6
+    },
+    {
+     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "line_style": 5
+    },
+    {
+     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "line_style": 4
+    },
+    {
+     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "line_style": 3
+    },
+    {
+     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "line_style": 2
+    },
+    {
+     "dependency_name": "hDPhic11_MB0_8p422",
+     "line_style": 1
+    }
+   ],
+   "baryon_line_styles": [],
+   "bins_to_ignore": [],
+   "nominator_TUNES": [
+    "CLOSEPACKING"
+   ],
+   "legend_columns": 1
+  },
+  {
+   "canvas_name": "mini_charm_balancing_MONASH",
+   "draw_function_to_use": "drawBalancingPlots",
+   "TUNES": [
+    "MONASH"
+   ],
+   "FLAVOUR": "CHARM",
+   "TriggerToUse": "D^{+}",
+   "denominator_TUNE": "NONE",
+   "baryons_to_plot_in_baryon/meson_ratio": [],
+   "use_hard_coded_settings": false,
+   "write": false,
+   "write_path": "NONE",
+   "write_name": "NONE",
+   "canvas_title": "MONASH",
+   "x_axis_title": "",
+   "y_axis_title": "yield",
+   "x_size_canvas": 800,
+   "y_size_canvas": 600,
+   "x_min_mini_pad": 0.501,
+   "x_max_mini_pad": 0.95,
+   "y_min_mini_pad": 0.38,
+   "y_max_mini_pad": 0.569,
+   "top_margin_mini_pad": 0.1,
+   "bottom_margin_mini_pad": 0.12,
+   "left_margin_mini_pad": 0.13,
+   "right_margin_mini_pad": 0.03,
+   "y_min_axis": 0.01,
+   "y_max_axis": 0.42,
+   "histogram_minimum": -1,
+   "histogram_maximum": -1,
+   "set_log_y": true,
+   "x_min_legend": -1,
+   "x_max_legend": -1,
+   "y_min_legend": -1,
+   "y_max_legend": -1,
+   "legend_entries": [
+    {
+     "object_name": "hDPhic1_MB88p197_100",
+     "display_name": "88.2-100.0%"
+    },
+    {
+     "object_name": "hDPhic2_MB80p597_88p197",
+     "display_name": "80.6-88.2%"
+    },
+    {
+     "object_name": "hDPhic3_MB65p937_80p597",
+     "display_name": "65.9-80.6%"
+    },
+    {
+     "object_name": "hDPhic4_MB59p85_65p937",
+     "display_name": "59.8-65.9%"
+    },
+    {
+     "object_name": "hDPhic5_MB50p308_59p85",
+     "display_name": "50.3-59.8%"
+    },
+    {
+     "object_name": "hDPhic6_MB43p03_50p308",
+     "display_name": "43.0-50.3%"
+    },
+    {
+     "object_name": "hDPhic7_MB34p614_43p03",
+     "display_name": "34.6-43.0%"
+    },
+    {
+     "object_name": "hDPhic8_MB26p154_34p614",
+     "display_name": "26.2-34.6%"
+    },
+    {
+     "object_name": "hDPhic9_MB17p124_26p154",
+     "display_name": "17.1-26.2%"
+    },
+    {
+     "object_name": "hDPhic10_MB8p422_17p124",
+     "display_name": "8.4-17.1%"
+    },
+    {
+     "object_name": "hDPhic11_MB0_8p422",
+     "display_name": "0.0-8.4%"
+    }
+   ],
+   "TUNE_colours": [],
+   "dependency_line_styles": [
+    {
+     "dependency_name": "hDPhic1_MB88p197_100",
+     "line_style": 1
+    },
+    {
+     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "line_style": 10
+    },
+    {
+     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "line_style": 9
+    },
+    {
+     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "line_style": 8
+    },
+    {
+     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "line_style": 7
+    },
+    {
+     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "line_style": 6
+    },
+    {
+     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "line_style": 5
+    },
+    {
+     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "line_style": 4
+    },
+    {
+     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "line_style": 3
+    },
+    {
+     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "line_style": 2
+    },
+    {
+     "dependency_name": "hDPhic11_MB0_8p422",
+     "line_style": 1
+    }
+   ],
+   "baryon_line_styles": [],
+   "bins_to_ignore": [],
+   "nominator_TUNES": [],
+   "legend_columns": 1
+  },
+  {
+   "canvas_name": "mini_charm_balancing_JUNCTIONS",
+   "draw_function_to_use": "drawBalancingPlots",
+   "TUNES": [
+    "JUNCTIONS"
+   ],
+   "FLAVOUR": "CHARM",
+   "TriggerToUse": "D^{+}",
+   "denominator_TUNE": "NONE",
+   "baryons_to_plot_in_baryon/meson_ratio": [],
+   "use_hard_coded_settings": false,
+   "write": false,
+   "write_path": "NONE",
+   "write_name": "NONE",
+   "canvas_title": "JUNCTIONS",
+   "x_axis_title": "",
+   "y_axis_title": "yield",
+   "x_size_canvas": 800,
+   "y_size_canvas": 600,
+   "x_min_mini_pad": 0.501,
+   "x_max_mini_pad": 0.95,
+   "y_min_mini_pad": 0.57,
+   "y_max_mini_pad": 0.759,
+   "top_margin_mini_pad": 0.1,
+   "bottom_margin_mini_pad": 0.12,
+   "left_margin_mini_pad": 0.13,
+   "right_margin_mini_pad": 0.03,
+   "y_min_axis": 0.01,
+   "y_max_axis": 0.42,
+   "histogram_minimum": -1,
+   "histogram_maximum": -1,
+   "set_log_y": true,
+   "x_min_legend": -1,
+   "x_max_legend": -1,
+   "y_min_legend": -1,
+   "y_max_legend": -1,
+   "legend_entries": [
+    {
+     "object_name": "hDPhic1_MB88p197_100",
+     "display_name": "88.2-100.0%"
+    },
+    {
+     "object_name": "hDPhic2_MB80p597_88p197",
+     "display_name": "80.6-88.2%"
+    },
+    {
+     "object_name": "hDPhic3_MB65p937_80p597",
+     "display_name": "65.9-80.6%"
+    },
+    {
+     "object_name": "hDPhic4_MB59p85_65p937",
+     "display_name": "59.8-65.9%"
+    },
+    {
+     "object_name": "hDPhic5_MB50p308_59p85",
+     "display_name": "50.3-59.8%"
+    },
+    {
+     "object_name": "hDPhic6_MB43p03_50p308",
+     "display_name": "43.0-50.3%"
+    },
+    {
+     "object_name": "hDPhic7_MB34p614_43p03",
+     "display_name": "34.6-43.0%"
+    },
+    {
+     "object_name": "hDPhic8_MB26p154_34p614",
+     "display_name": "26.2-34.6%"
+    },
+    {
+     "object_name": "hDPhic9_MB17p124_26p154",
+     "display_name": "17.1-26.2%"
+    },
+    {
+     "object_name": "hDPhic10_MB8p422_17p124",
+     "display_name": "8.4-17.1%"
+    },
+    {
+     "object_name": "hDPhic11_MB0_8p422",
+     "display_name": "0.0-8.4%"
+    }
+   ],
+   "TUNE_colours": [],
+   "dependency_line_styles": [
+    {
+     "dependency_name": "hDPhic1_MB88p197_100",
+     "line_style": 1
+    },
+    {
+     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "line_style": 10
+    },
+    {
+     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "line_style": 9
+    },
+    {
+     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "line_style": 8
+    },
+    {
+     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "line_style": 7
+    },
+    {
+     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "line_style": 6
+    },
+    {
+     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "line_style": 5
+    },
+    {
+     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "line_style": 4
+    },
+    {
+     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "line_style": 3
+    },
+    {
+     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "line_style": 2
+    },
+    {
+     "dependency_name": "hDPhic11_MB0_8p422",
+     "line_style": 1
+    }
+   ],
+   "baryon_line_styles": [],
+   "bins_to_ignore": [],
+   "nominator_TUNES": [],
+   "legend_columns": 1
+  },
+  {
+   "canvas_name": "mini_charm_balancing_CLOSEPACKING",
+   "draw_function_to_use": "drawBalancingPlots",
+   "TUNES": [
+    "CLOSEPACKING"
+   ],
+   "FLAVOUR": "CHARM",
+   "TriggerToUse": "D^{+}",
+   "denominator_TUNE": "NONE",
+   "baryons_to_plot_in_baryon/meson_ratio": [],
+   "use_hard_coded_settings": false,
+   "write": false,
+   "write_path": "NONE",
+   "write_name": "NONE",
+   "canvas_title": "CLOSEPACKING",
+   "x_axis_title": "",
+   "y_axis_title": "yield",
+   "x_size_canvas": 800,
+   "y_size_canvas": 600,
+   "x_min_mini_pad": 0.501,
+   "x_max_mini_pad": 0.95,
+   "y_min_mini_pad": 0.76,
+   "y_max_mini_pad": 0.95,
+   "top_margin_mini_pad": 0.1,
+   "bottom_margin_mini_pad": 0.12,
+   "left_margin_mini_pad": 0.13,
+   "right_margin_mini_pad": 0.03,
+   "y_min_axis": 0.01,
+   "y_max_axis": 0.42,
+   "histogram_minimum": -1,
+   "histogram_maximum": -1,
+   "set_log_y": true,
+   "x_min_legend": -1,
+   "x_max_legend": -1,
+   "y_min_legend": -1,
+   "y_max_legend": -1,
+   "legend_entries": [
+    {
+     "object_name": "hDPhic1_MB88p197_100",
+     "display_name": "88.2-100.0%"
+    },
+    {
+     "object_name": "hDPhic2_MB80p597_88p197",
+     "display_name": "80.6-88.2%"
+    },
+    {
+     "object_name": "hDPhic3_MB65p937_80p597",
+     "display_name": "65.9-80.6%"
+    },
+    {
+     "object_name": "hDPhic4_MB59p85_65p937",
+     "display_name": "59.8-65.9%"
+    },
+    {
+     "object_name": "hDPhic5_MB50p308_59p85",
+     "display_name": "50.3-59.8%"
+    },
+    {
+     "object_name": "hDPhic6_MB43p03_50p308",
+     "display_name": "43.0-50.3%"
+    },
+    {
+     "object_name": "hDPhic7_MB34p614_43p03",
+     "display_name": "34.6-43.0%"
+    },
+    {
+     "object_name": "hDPhic8_MB26p154_34p614",
+     "display_name": "26.2-34.6%"
+    },
+    {
+     "object_name": "hDPhic9_MB17p124_26p154",
+     "display_name": "17.1-26.2%"
+    },
+    {
+     "object_name": "hDPhic10_MB8p422_17p124",
+     "display_name": "8.4-17.1%"
+    },
+    {
+     "object_name": "hDPhic11_MB0_8p422",
+     "display_name": "0.0-8.4%"
+    }
+   ],
+   "TUNE_colours": [],
+   "dependency_line_styles": [
+    {
+     "dependency_name": "hDPhic1_MB88p197_100",
+     "line_style": 1
+    },
+    {
+     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "line_style": 10
+    },
+    {
+     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "line_style": 9
+    },
+    {
+     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "line_style": 8
+    },
+    {
+     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "line_style": 7
+    },
+    {
+     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "line_style": 6
+    },
+    {
+     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "line_style": 5
+    },
+    {
+     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "line_style": 4
+    },
+    {
+     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "line_style": 3
+    },
+    {
+     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "line_style": 2
+    },
+    {
+     "dependency_name": "hDPhic11_MB0_8p422",
+     "line_style": 1
+    }
+   ],
+   "baryon_line_styles": [],
+   "bins_to_ignore": [],
+   "nominator_TUNES": [],
+   "legend_columns": 1
+  },
+  {
+   "canvas_name": "mini_charm_balancing_JUNCTIONS_over_MONASH",
+   "draw_function_to_use": "drawBalancingPlotsTUNERatios",
+   "TUNES": [
+    "MONASH",
+    "JUNCTIONS"
+   ],
+   "FLAVOUR": "CHARM",
+   "TriggerToUse": "D^{+}",
+   "denominator_TUNE": "MONASH",
+   "baryons_to_plot_in_baryon/meson_ratio": [],
+   "use_hard_coded_settings": false,
+   "write": false,
+   "write_path": "NONE",
+   "write_name": "NONE",
+   "canvas_title": "JUNCTIONS / MONASH",
+   "x_axis_title": "",
+   "y_axis_title": "JUN/MON",
+   "x_size_canvas": 800,
+   "y_size_canvas": 600,
+   "x_min_mini_pad": 0.501,
+   "x_max_mini_pad": 0.95,
+   "y_min_mini_pad": 0.0,
+   "y_max_mini_pad": 0.189,
+   "top_margin_mini_pad": 0.1,
+   "bottom_margin_mini_pad": 0.12,
+   "left_margin_mini_pad": 0.13,
+   "right_margin_mini_pad": 0.03,
+   "y_min_axis": 0.6,
+   "y_max_axis": 2.5,
+   "histogram_minimum": -1,
+   "histogram_maximum": -1,
+   "set_log_y": false,
+   "x_min_legend": -1,
+   "x_max_legend": -1,
+   "y_min_legend": -1,
+   "y_max_legend": -1,
+   "legend_entries": [
+    {
+     "object_name": "hDPhic1_MB88p197_100",
+     "display_name": "88.2-100.0%"
+    },
+    {
+     "object_name": "hDPhic2_MB80p597_88p197",
+     "display_name": "80.6-88.2%"
+    },
+    {
+     "object_name": "hDPhic3_MB65p937_80p597",
+     "display_name": "65.9-80.6%"
+    },
+    {
+     "object_name": "hDPhic4_MB59p85_65p937",
+     "display_name": "59.8-65.9%"
+    },
+    {
+     "object_name": "hDPhic5_MB50p308_59p85",
+     "display_name": "50.3-59.8%"
+    },
+    {
+     "object_name": "hDPhic6_MB43p03_50p308",
+     "display_name": "43.0-50.3%"
+    },
+    {
+     "object_name": "hDPhic7_MB34p614_43p03",
+     "display_name": "34.6-43.0%"
+    },
+    {
+     "object_name": "hDPhic8_MB26p154_34p614",
+     "display_name": "26.2-34.6%"
+    },
+    {
+     "object_name": "hDPhic9_MB17p124_26p154",
+     "display_name": "17.1-26.2%"
+    },
+    {
+     "object_name": "hDPhic10_MB8p422_17p124",
+     "display_name": "8.4-17.1%"
+    },
+    {
+     "object_name": "hDPhic11_MB0_8p422",
+     "display_name": "0.0-8.4%"
+    }
+   ],
+   "TUNE_colours": [],
+   "dependency_line_styles": [
+    {
+     "dependency_name": "hDPhic1_MB88p197_100",
+     "line_style": 1
+    },
+    {
+     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "line_style": 10
+    },
+    {
+     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "line_style": 9
+    },
+    {
+     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "line_style": 8
+    },
+    {
+     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "line_style": 7
+    },
+    {
+     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "line_style": 6
+    },
+    {
+     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "line_style": 5
+    },
+    {
+     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "line_style": 4
+    },
+    {
+     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "line_style": 3
+    },
+    {
+     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "line_style": 2
+    },
+    {
+     "dependency_name": "hDPhic11_MB0_8p422",
+     "line_style": 1
+    }
+   ],
+   "baryon_line_styles": [],
+   "bins_to_ignore": [],
+   "nominator_TUNES": [
+    "JUNCTIONS"
+   ],
+   "legend_columns": 1
+  },
+  {
+   "canvas_name": "mini_charm_balancing_CLOSEPACKING_over_MONASH",
+   "draw_function_to_use": "drawBalancingPlotsTUNERatios",
+   "TUNES": [
+    "MONASH",
+    "CLOSEPACKING"
+   ],
+   "FLAVOUR": "CHARM",
+   "TriggerToUse": "D^{+}",
+   "denominator_TUNE": "MONASH",
+   "baryons_to_plot_in_baryon/meson_ratio": [],
+   "use_hard_coded_settings": false,
+   "write": false,
+   "write_path": "NONE",
+   "write_name": "NONE",
+   "canvas_title": "CLOSEPACKING / MONASH",
+   "x_axis_title": "",
+   "y_axis_title": "CLP/MON",
+   "x_size_canvas": 800,
+   "y_size_canvas": 600,
+   "x_min_mini_pad": 0.501,
+   "x_max_mini_pad": 0.95,
+   "y_min_mini_pad": 0.19,
+   "y_max_mini_pad": 0.379,
+   "top_margin_mini_pad": 0.1,
+   "bottom_margin_mini_pad": 0.12,
+   "left_margin_mini_pad": 0.13,
+   "right_margin_mini_pad": 0.03,
+   "y_min_axis": 0.6,
+   "y_max_axis": 2.5,
+   "histogram_minimum": -1,
+   "histogram_maximum": -1,
+   "set_log_y": false,
+   "x_min_legend": -1,
+   "x_max_legend": -1,
+   "y_min_legend": -1,
+   "y_max_legend": -1,
+   "legend_entries": [
+    {
+     "object_name": "hDPhic1_MB88p197_100",
+     "display_name": "88.2-100.0%"
+    },
+    {
+     "object_name": "hDPhic2_MB80p597_88p197",
+     "display_name": "80.6-88.2%"
+    },
+    {
+     "object_name": "hDPhic3_MB65p937_80p597",
+     "display_name": "65.9-80.6%"
+    },
+    {
+     "object_name": "hDPhic4_MB59p85_65p937",
+     "display_name": "59.8-65.9%"
+    },
+    {
+     "object_name": "hDPhic5_MB50p308_59p85",
+     "display_name": "50.3-59.8%"
+    },
+    {
+     "object_name": "hDPhic6_MB43p03_50p308",
+     "display_name": "43.0-50.3%"
+    },
+    {
+     "object_name": "hDPhic7_MB34p614_43p03",
+     "display_name": "34.6-43.0%"
+    },
+    {
+     "object_name": "hDPhic8_MB26p154_34p614",
+     "display_name": "26.2-34.6%"
+    },
+    {
+     "object_name": "hDPhic9_MB17p124_26p154",
+     "display_name": "17.1-26.2%"
+    },
+    {
+     "object_name": "hDPhic10_MB8p422_17p124",
+     "display_name": "8.4-17.1%"
+    },
+    {
+     "object_name": "hDPhic11_MB0_8p422",
+     "display_name": "0.0-8.4%"
+    }
+   ],
+   "TUNE_colours": [],
+   "dependency_line_styles": [
+    {
+     "dependency_name": "hDPhic1_MB88p197_100",
+     "line_style": 1
+    },
+    {
+     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "line_style": 10
+    },
+    {
+     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "line_style": 9
+    },
+    {
+     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "line_style": 8
+    },
+    {
+     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "line_style": 7
+    },
+    {
+     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "line_style": 6
+    },
+    {
+     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "line_style": 5
+    },
+    {
+     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "line_style": 4
+    },
+    {
+     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "line_style": 3
+    },
+    {
+     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "line_style": 2
+    },
+    {
+     "dependency_name": "hDPhic11_MB0_8p422",
+     "line_style": 1
+    }
+   ],
+   "baryon_line_styles": [],
+   "bins_to_ignore": [],
+   "nominator_TUNES": [
+    "CLOSEPACKING"
+   ],
+   "legend_columns": 1
+  }
+ ],
+ "global_canvases_to_be_drawn": [
+  {
+   "canvas_name": "global_balancing_plots",
+   "canvas_title": "balancing in beauty and charm, three tunes",
+   "mini_canvases": [
+    "mini_beauty_balancing_MONASH",
+    "mini_beauty_balancing_JUNCTIONS",
+    "mini_beauty_balancing_CLOSEPACKING",
+    "mini_beauty_balancing_JUNCTIONS_over_MONASH",
+    "mini_beauty_balancing_CLOSEPACKING_over_MONASH",
+    "mini_charm_balancing_MONASH",
+    "mini_charm_balancing_JUNCTIONS",
+    "mini_charm_balancing_CLOSEPACKING",
+    "mini_charm_balancing_JUNCTIONS_over_MONASH",
+    "mini_charm_balancing_CLOSEPACKING_over_MONASH"
+   ],
+   "write": true,
+   "write_path": "plotting/Plots/THnSparseCompleteRoot_HF_SYS_PDF_CTEQ6L1",
+   "write_name": "global_balancing_plots_multiplicity_HF_SYS_PDF_CTEQ6L1_THREETUNE",
+   "x_size_canvas": 2200,
+   "y_size_canvas": 2050
+  }
+ ],
+ "subsample_coverage_audit": false
+}

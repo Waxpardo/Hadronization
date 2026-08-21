@@ -1,0 +1,687 @@
+{
+  "schema": "hadronization_figure_acceptance_manifest_v1",
+  "audit_date": "2026-08-21",
+  "source_contract_commit": "81b5af21ffc2cf5f74d8baccc75893c56f5ac713",
+  "overall_status": "blocked",
+  "accepted_figure_count": 0,
+  "candidate_figure_count": 8,
+  "canonical_destinations": {
+    "main": "results/figures/main/",
+    "supplemental": "results/figures/supplemental/"
+  },
+  "acceptance_receipt_contract": {
+    "schema": "hadronization_figure_acceptance_receipt_v1",
+    "canonical_receipt": "results/provenance/figure_receipts/P<1-8>.json",
+    "canonical_output": "results/figures/main/P<1-8>/...",
+    "required_evidence": [
+      "manifest-bound producer source and digest",
+      "selected configuration evidence and digest",
+      "authorized dataset selector identity and digest",
+      "selected central-input evidence and digest",
+      "exactly ten blocks for each of MONASH, JUNCTIONS and CLOSEPACKING",
+      "selected machine-readable numerical sources and digests",
+      "ROOT 6.30.01 and PYTHIA 8.317",
+      "unique accepted output paths and digests",
+      "clean dated visual review",
+      "scientific approval with no unresolved blockers"
+    ]
+  },
+  "allowed_statuses": [
+    "missing",
+    "candidate",
+    "rejected",
+    "accepted"
+  ],
+  "dataset_contract": {
+    "selector_path": "config/dataset_selector_hf_run3_v1.json",
+    "selector_sha256": "1cf08ca79c5873b1f2876ad4c80e80be84c6f923302b830d0adfe926b7440b98",
+    "dataset_key": "hf_run3_v1_candidate",
+    "campaign": "HF_RUN3_V1",
+    "status": "canonical",
+    "publication_eligible": true,
+    "authorization_path": "docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md",
+    "authorization_sha256": "309bd99caeab0e929e0b5dee322d68771b642445486c4a812699ca1e0e8cf46f",
+    "collision_system": "proton-proton",
+    "sqrt_s_tev": 13.6,
+    "tunes": [
+      "MONASH",
+      "JUNCTIONS",
+      "CLOSEPACKING"
+    ],
+    "events_per_file": 100000,
+    "files_per_tune": 1000,
+    "block_count": 10,
+    "files_per_block_per_tune": 100,
+    "software": {
+      "pythia": "8.317",
+      "root": "6.30.01",
+      "root_package": "v6-30-01-alice5-2"
+    }
+  },
+  "shared_contracts": {
+    "pair_registry": {
+      "path": "config/heavy_flavour_pair_registry_v1.json",
+      "sha256": "ea9b0232c1be84158446e559e23aebf3410b3c8a6e39a221d367f0d0c7ddee23"
+    },
+    "species_registry": {
+      "path": "config/heavy_flavour_species_v1.json",
+      "sha256": "946828956f1b30ae7cb4d28c0c0687e8522b7349db127a067311c77bc3e21529"
+    },
+    "multiplicity_boundaries": {
+      "path": "config/multiplicity_class_boundaries_v1.json",
+      "sha256": "9b6e4e16340f7230ab5031698a2ad9b12eabb74f5488bd2d803723e2106ac2e1",
+      "common_across_tunes": true,
+      "counter": "final charged non-heavy particles with pT > 0.15 GeV/c and |eta| <= 1",
+      "classes": [
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c5",
+        "c6",
+        "c7",
+        "c8",
+        "c9",
+        "c10",
+        "c11"
+      ]
+    },
+    "pair_observable": {
+      "trigger_denominator": "hTrKinematics",
+      "same_sign_factor": 1.0,
+      "subtraction": "OS - SS",
+      "integrated_region": "full Delta phi",
+      "statistical_uncertainty": "SEM across ten disjoint blocks; OS - SS is formed inside each block"
+    }
+  },
+  "release_blockers": [
+    {
+      "id": "B1_EXTERNAL_INPUTS_UNAVAILABLE",
+      "paths": [
+        "/data/alice/ipardoza/hf/hadronization_production/HF_RUN3_V1",
+        "/data/alice/ipardoza/hf/hadronization_merged",
+        "/data/alice/ipardoza/hadronization_merged",
+        "/data/alice/ipardoza/figure_deploy_20260817"
+      ],
+      "evidence": "The paths are not mounted locally. A read-only SSH probe of stbc-i3.nikhef.nl on 2026-08-21 returned 'No route to host'. Central inputs, ten block inputs, render logs, receipts, and recorded final canvases could not be rehashed."
+    },
+    {
+      "id": "B2_FINAL_BYTES_AND_RECEIPTS_ABSENT",
+      "paths": [
+        "results/figures/main/",
+        "plotting/run_paper_plots.sh"
+      ],
+      "evidence": "The checkout contains no accepted ROOT-derived P1-P8 bytes. The runner sets plot_provenance_tool to an empty string, so it currently produces candidates without checksum-bound final-plot sidecars."
+    },
+    {
+      "id": "B3_DERIVED_UNCERTAINTY_FORMULA",
+      "paths": [
+        "extraction/combine_derived.py",
+        "docs/SYSTEMATICS.md"
+      ],
+      "evidence": "The 2026-08-21 correction applies nominal and variation SEMs to derived systematic deltas and records the changed classifications in verdict schema v2. Figure acceptance remains blocked by S4 and the tune-dependent generator-hang selection risk."
+    },
+    {
+      "id": "B4_S4_SYSTEMATIC_INCOMPLETE",
+      "paths": [
+        "results/systematics/20260820/per_class_combination.json",
+        "results/systematics/20260820/verdict.json",
+        "docs/SYSTEMATICS.md"
+      ],
+      "evidence": "The wide activity-counter variation S4 has no class-resolved delta and is absent from the combined budget. The current verdict is provisional."
+    },
+    {
+      "id": "B5_RECORDED_RENDER_NOT_CURRENT_REPRODUCTION",
+      "paths": [
+        "docs/GOLDEN_OUTPUTS.md",
+        "docs/FIGURE_INVENTORY.md"
+      ],
+      "evidence": "Those historical ledgers name candidate digests and older source/configuration digests. The current sources and generated configurations have changed, and the named output bytes do not travel with this checkout. Acceptance requires a current clean rerender and full receipt, not a digest copied from prose."
+    },
+    {
+      "id": "B6_INTEGRATED_CLOSURE_LOG_ABSENT",
+      "paths": [
+        "tests/fixtures/integrated_rows_nominal.log",
+        "tools/vintegrated_closure.py"
+      ],
+      "evidence": "The retained fixture carries uncertainty rows but omits PAIR_COUNTS. It cannot reproduce the registered integer-exact V-INTEGRATED closure."
+    },
+    {
+      "id": "B7_PAIR_METADATA_SCHEMA_DISAGREEMENT",
+      "paths": [
+        "analysis/status_analysis_THnSparse_qq.C",
+        "analysis/run_status_analysis.sh",
+        "docs/PHYSICS.md"
+      ],
+      "evidence": "The 2026-08-21 source repair derives new sidecars from the producer schema and requires the pair-directory schema to agree. Existing external sidecars have not been revalidated or regenerated, so figure closure still cannot rely on those historical sidecars as current provenance."
+    },
+    {
+      "id": "B8_HARVEST_CONFIGURATION_DRIFT",
+      "paths": [
+        "tools/make_harvest_configs.py",
+        "plotting/harvest_configs/",
+        "docs/PIPELINE.md"
+      ],
+      "evidence": "The 2026-08-21 source repair selector-binds campaign routes, uses the evidence-derived common labels, and makes all seven configurations generator-current. The external selected files and historical harvest/renders were not revalidated or rerun, so systematic figure inputs still cannot claim current reproduced status."
+    }
+  ],
+  "inventory_sets": [
+    {
+      "location": "tracked validation renders",
+      "root": "results/validation/plotting/",
+      "selection": "PNG, PDF, EPS, PS, and generated C render representations",
+      "file_count": 5,
+      "sorted_path_and_sha256_ledger_sha256": "9331b95a52f123f97f56d306c62a7a82683dd96a61d74533693acdf79878b8f1",
+      "disposition": "validation-only; none is a P1-P8 accepted output"
+    },
+    {
+      "location": "ignored historical paper",
+      "root": "Paper/Heavy_flavour_hadronisation_model_paper/",
+      "selection": "PNG, PDF, EPS, PS, and generated C render representations",
+      "file_count": 148,
+      "extension_counts": {
+        "eps": 10,
+        "pdf": 59,
+        "png": 79
+      },
+      "sorted_path_and_sha256_ledger_sha256": "d4e360a8c971647e7f45b68e540fdc9dcdbadde6eb24e1ddcb736f2d3402ccba",
+      "complete_per-file_disposition": "docs/FIGURE_INVENTORY.md",
+      "disposition": "historical structure and candidate index only; no byte accepted by directory location"
+    },
+    {
+      "location": "ignored historical plotting output",
+      "root": "PlottingScripts/",
+      "selection": "PNG, PDF, EPS, PS, and generated C render representations",
+      "file_count": 267,
+      "render_stem_count": 89,
+      "extension_counts": {
+        "C": 89,
+        "pdf": 89,
+        "png": 89
+      },
+      "sorted_path_and_sha256_ledger_sha256": "064e2660af157006f1a8501741fac15f4f35afcf4a98b75de1fe981c011c1f9a",
+      "disposition": "untracked historical output; not authoritative and no complete acceptance receipt was found"
+    },
+    {
+      "location": "external campaign and result storage",
+      "root": "stbc-i3.nikhef.nl:/data/alice/ipardoza/",
+      "selection": "selector-named raw, central, ten-block, deploy, receipt, and render paths",
+      "file_count": null,
+      "disposition": "not accessible from this audit environment; exact retrieval requirements are recorded per role"
+    },
+    {
+      "location": "retained run records",
+      "files": [
+        "results/validation/plotting/hf_run3_v1_kinematics_20260817/RUN_RECORD.md",
+        "results/validation/plotting/hf_run3_v1_monash_20260813/RUN_RECORD.md",
+        "results/validation/plotting/hf_run3_v1_threetune_20260816/RUN_RECORD.md"
+      ],
+      "file_count": 3,
+      "disposition": "historical provenance evidence; named final bytes remain candidates until harvested and rehashed"
+    }
+  ],
+  "internal_explanatory_graphics": {
+    "count": 3,
+    "classification": "excluded historical or explanatory artifacts",
+    "used_as_scientific_candidates": false,
+    "promoted_or_modified_by_this_audit": false
+  },
+  "roles": [
+    {
+      "figure_id": "P1",
+      "scientific_role": "shared event-multiplicity classification",
+      "status": "candidate",
+      "planned_manuscript_location": "Model.tex:130",
+      "producer": {
+        "source": "plotting/Plot_InclusiveKinematicSpectra_Raw.C",
+        "source_sha256": "4c002f73aaa1d25611e5b3c2114357ef01cf632ac3c08e4d1c15b36c8404381a",
+        "entry_point": "Plot_InclusiveMultiplicitySpectrum_Raw",
+        "runner": "plotting/run_paper_plots.sh multiplicity-spectrum"
+      },
+      "configuration": {
+        "path": null,
+        "contract": "selector plus config/multiplicity_class_boundaries_v1.json",
+        "boundary_utility": "plotting/MultiplicityBoundaryUtils.h",
+        "boundary_utility_sha256": "ba67271cb6b80bc491eff8de52657e9c5f7922c3b06a9a992d9801a59deed5af"
+      },
+      "dataset_selector_key": "hf_run3_v1_candidate",
+      "dataset_authorized": true,
+      "central_input_identity": "The sealed HF_RUN3_V1 canonical raw manifest, 1,000 disjoint raw files per tune, object hMULTIPLICITY; selector path /data/alice/ipardoza/hf/hadronization_production/HF_RUN3_V1/raw.",
+      "ten_block_identity_and_coverage": "The campaign partitions each tune into ten blocks of 100 files. The raw-spectrum macro aggregates the central manifest and does not currently emit a ten-block SEM or a figure-specific block-coverage receipt; acceptance must state whether counting errors alone are intended for P1.",
+      "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
+      "machine_readable_numerical_source": [
+        {
+          "path": "config/multiplicity_class_boundaries_v1.json",
+          "sha256": "9b6e4e16340f7230ab5031698a2ad9b12eabb74f5488bd2d803723e2106ac2e1",
+          "coverage": "common c1-c11 boundaries"
+        }
+      ],
+      "candidate_outputs": [
+        {
+          "path": "Multiplicity/MultiplicitySpectrum_Shared_shape.png",
+          "sha256": "85a2488a28a4d3b40872d60cca78e633cf282647bafd176ea5675fdac3691b67",
+          "bytes_available": false,
+          "source": "historical run record"
+        }
+      ],
+      "caption_source": "Ignored historical Paper/Heavy_flavour_hadronisation_model_paper/Model.tex:130; must be synchronized to the accepted manifest.",
+      "visual_review": {
+        "result": "blocked",
+        "finding": "The recorded current 13.6 TeV candidate bytes are absent. The available old-paper PNG is 14 TeV with |eta| <= 4 and is rejected. The ignored PlottingScripts PNG visibly says 'No input histograms found' and is rejected."
+      },
+      "accepted_outputs": [],
+      "retrieval_requirement": "Retrieve the sealed raw manifest and current final PNG/PDF plus receipt, or rerender with the current source, selector, common boundary artifact, and pinned ROOT; rehash every input and output and review the actual accepted bytes."
+    },
+    {
+      "figure_id": "P2",
+      "scientific_role": "charm meson angular correlations",
+      "status": "candidate",
+      "planned_manuscript_location": "Results.tex:48",
+      "producer": {
+        "source": "plotting/improvedPlotting_THnSparse.C",
+        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "entry_point": "improvedPlotting_THnSparse",
+        "runner": "tools/render_balancing_variant.sh plotting/configuration_multiplicity_HF_RUN3_V1_VCORRELATIONS.json"
+      },
+      "configuration": {
+        "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VCORRELATIONS.json",
+        "sha256": "06667bc18ed57d9edbad99e5fa542882be8f459adb7a7125fbe65b9ecb172a44",
+        "content": "MONASH correlation pads for D+ and Lambda_c+ triggers; D+ meson and anti-Lambda_c associate channels; isolated correlation configuration"
+      },
+      "dataset_selector_key": "hf_run3_v1_candidate",
+      "dataset_authorized": true,
+      "central_input_identity": "MONASH complete_root_HF_RUN3_V1 pair files DplusDminus/DplusDplus, DplusLambdacplusbar/DplusLambdacplus, and LambdacplusDminus/LambdacplusDplus under the selector's analyzed-data base.",
+      "ten_block_identity_and_coverage": "The corresponding six MONASH pair files in combined_root_1 through combined_root_10. Current config requests nSubSamples=10 and calculate_errors=true; observable-level coverage cannot be rehashed because the blocks and final receipt are absent.",
+      "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
+      "normalization_and_uncertainty": "OS and SS are separately normalized by hTrKinematics, subtracted with factor 1, and each Delta-phi-bin SEM is calculated from ten block-level OS-SS values.",
+      "machine_readable_numerical_source": [],
+      "candidate_outputs": [
+        {
+          "path": "Correlations/CHARMCorrelations_MONASH_PNG.png",
+          "sha256": "b426fd7f900a42186146ae642b2bff6c9ebc35c62e965637b821d7ed86d30f88",
+          "bytes_available": false,
+          "source": "historical run record"
+        },
+        {
+          "path": "Correlations/CHARMCorrelations_MONASH_PDF.pdf",
+          "sha256": "6fa553eb4ed01668a83da428cdcd2013d30e748a1b82f1293873b43ec41528ed",
+          "bytes_available": false,
+          "source": "historical run record"
+        }
+      ],
+      "caption_source": "Ignored historical Paper/Heavy_flavour_hadronisation_model_paper/Results.tex:48; must name the exact signed channels, hTrKinematics denominator, OS, SS, OS-SS, and ten-block SEM.",
+      "visual_review": {
+        "result": "blocked",
+        "finding": "The recorded current bytes are absent. The available old-paper PDF has an old layout, no visible uncertainty bars, an internal ROOT statistics box, incomplete energy/acceptance context, and legend/data collisions; it is rejected."
+      },
+      "accepted_outputs": [],
+      "retrieval_requirement": "Retrieve or rerender the current MONASH central and all ten block pair files, require a complete coverage receipt, harvest PNG/PDF and machine-readable bin values, then inspect the exact final bytes."
+    },
+    {
+      "figure_id": "P3",
+      "scientific_role": "beauty meson angular correlations",
+      "status": "candidate",
+      "planned_manuscript_location": "Results.tex:71",
+      "producer": {
+        "source": "plotting/improvedPlotting_THnSparse.C",
+        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "entry_point": "improvedPlotting_THnSparse",
+        "runner": "tools/render_balancing_variant.sh plotting/configuration_multiplicity_HF_RUN3_V1_VCORRELATIONS.json"
+      },
+      "configuration": {
+        "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VCORRELATIONS.json",
+        "sha256": "06667bc18ed57d9edbad99e5fa542882be8f459adb7a7125fbe65b9ecb172a44",
+        "content": "MONASH correlation pads for B+ and anti-Lambda_b triggers; B- meson and Lambda_b associate channels; isolated correlation configuration"
+      },
+      "dataset_selector_key": "hf_run3_v1_candidate",
+      "dataset_authorized": true,
+      "central_input_identity": "MONASH complete_root_HF_RUN3_V1 pair files BplusBminus/BplusBplus, BplusLb/BplusLbbar, and LbbarBminus/LbbarBplus under the selector's analyzed-data base.",
+      "ten_block_identity_and_coverage": "The corresponding six MONASH pair files in combined_root_1 through combined_root_10. Current config requests nSubSamples=10 and calculate_errors=true; observable-level coverage cannot be rehashed because the blocks and final receipt are absent.",
+      "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
+      "normalization_and_uncertainty": "OS and SS are separately normalized by hTrKinematics, subtracted with factor 1, and each Delta-phi-bin SEM is calculated from ten block-level OS-SS values.",
+      "machine_readable_numerical_source": [],
+      "candidate_outputs": [
+        {
+          "path": "Correlations/BEAUTYCorrelations_MONASH_PNG.png",
+          "sha256": "7238982cd877a16cdd8eb61df50238fc0dd410f1b1a7dd2beac67f00e54392ad",
+          "bytes_available": false,
+          "source": "historical run record"
+        },
+        {
+          "path": "Correlations/BEAUTYCorrelations_MONASH_PDF.pdf",
+          "sha256": "261bce28551d0d91f9d614d770916c462b1f258ff03914c03959cf9b347ff255",
+          "bytes_available": false,
+          "source": "historical run record"
+        }
+      ],
+      "caption_source": "Ignored historical Paper/Heavy_flavour_hadronisation_model_paper/Results.tex:71; must name the exact signed channels, hTrKinematics denominator, OS, SS, OS-SS, and ten-block SEM.",
+      "visual_review": {
+        "result": "blocked",
+        "finding": "The recorded current bytes are absent. The available old-paper PDF has an old layout, no visible uncertainty bars, an internal ROOT statistics box, incomplete energy/acceptance context, and title/legend collisions; it is rejected."
+      },
+      "accepted_outputs": [],
+      "retrieval_requirement": "Retrieve or rerender the current MONASH central and all ten block pair files, require a complete coverage receipt, harvest PNG/PDF and machine-readable bin values, then inspect the exact final bytes."
+    },
+    {
+      "figure_id": "P4",
+      "scientific_role": "integrated charm balancing yields",
+      "status": "candidate",
+      "planned_manuscript_location": "Results.tex:92",
+      "producer": {
+        "source": "plotting/improvedPlotting_THnSparse.C",
+        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "entry_point": "improvedPlotting_THnSparse",
+        "runner": "tools/render_balancing_variant.sh plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json"
+      },
+      "configuration": {
+        "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json",
+        "sha256": "3f51f1dc64b66c360fa59c0c6db6f983ac49258ff1f38e50be0e42f9c90e8590",
+        "display": "one multiplicity-integrated interval, 0.0-100.0 percent"
+      },
+      "dataset_selector_key": "hf_run3_v1_candidate",
+      "dataset_authorized": true,
+      "central_input_identity": "All three complete_root_HF_RUN3_V1 tune bundles; DplusDminus/DplusDplus and DplusLambdacplusbar/DplusLambdacplus pair files.",
+      "ten_block_identity_and_coverage": "The same four charm pair channels for every tune in combined_root_1 through combined_root_10. Current config requests ten-block errors; the external source log and current final receipt are absent.",
+      "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
+      "normalization_and_uncertainty": "Full-Delta-phi OS-SS balancing yield per hTrKinematics trigger; factor-one SS subtraction; ten-block SEM.",
+      "machine_readable_numerical_source": [
+        {
+          "path": "tests/fixtures/integrated_rows_nominal.log",
+          "sha256": "c1c7382758b27e89751d86a1e90ff25495168690204b9f49995cf0623497efe0",
+          "limitation": "retained uncertainty rows only; integer-exact closure cannot be reproduced without PAIR_COUNTS"
+        }
+      ],
+      "candidate_outputs": [
+        {
+          "path": "VariantIntegrated/global_balancing_plots_multiplicity_HF_RUN3_V1_THREETUNE_VINTEGRATED_POLISH_PROPOSAL_PNG.png",
+          "sha256": "88fdb62845ccbcb623bf908a0ff0eedc8a822194a3c05dfbb5483882da1d4990",
+          "bytes_available": false,
+          "source": "historical combined charm-and-beauty V-INTEGRATED run record"
+        }
+      ],
+      "caption_source": "Ignored historical Paper/Heavy_flavour_hadronisation_model_paper/Results.tex:92; must be rewritten against the accepted V-INTEGRATED record.",
+      "visual_review": {
+        "result": "blocked",
+        "finding": "The recorded current V-INTEGRATED canvas is absent. The available old integrated-charm PDF is a tiny legacy canvas with stale tune styling and no complete energy, selection, or uncertainty annotation; it is rejected."
+      },
+      "accepted_outputs": [],
+      "retrieval_requirement": "Retrieve the V-INTEGRATED render, exact source log with PAIR_COUNTS, receipt, all central/block identities, and PNG/PDF; or rerender after the uncertainty blockers are resolved. Decide explicitly whether one combined canvas serves P4 and P6 or split outputs are required."
+    },
+    {
+      "figure_id": "P5",
+      "scientific_role": "multiplicity-dependent charm balancing yields",
+      "status": "candidate",
+      "planned_manuscript_location": "Results.tex:105",
+      "producer": {
+        "source": "plotting/improvedPlotting_THnSparse.C",
+        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "entry_point": "improvedPlotting_THnSparse",
+        "runner": "tools/render_balancing_variant.sh with V-FULL or V-EXTREMES"
+      },
+      "configuration": {
+        "alternatives": [
+          {
+            "name": "V-FULL",
+            "path": "plotting/configuration_multiplicity_HF_RUN3_V1_THREETUNE_POLISH_PROPOSAL.json",
+            "sha256": "2d9613857c43fc14754065be5b70ed5d28a1758a4adc3a116732295913fe77ef",
+            "classes_shown": "c1-c11"
+          },
+          {
+            "name": "V-EXTREMES",
+            "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VEXTREMES.json",
+            "sha256": "76d87af8f6506df38cc0d6482600cbddd2af1295d1bd21ffce2a8ed1b970bcd2",
+            "classes_shown": "c1 and c11 from the same configured c1-c11 axis"
+          }
+        ],
+        "selection_status": "owner or journal choice intentionally unresolved"
+      },
+      "dataset_selector_key": "hf_run3_v1_candidate",
+      "dataset_authorized": true,
+      "central_input_identity": "All three complete_root_HF_RUN3_V1 tune bundles; DplusDminus/DplusDplus and DplusLambdacplusbar/DplusLambdacplus pair files on the common c1-c11 axis.",
+      "ten_block_identity_and_coverage": "The same charm channels for every tune in combined_root_1 through combined_root_10. Current configs request ten-block errors; the current block files and final receipts are absent.",
+      "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
+      "normalization_and_uncertainty": "Per-class full-Delta-phi OS-SS yield per hTrKinematics trigger; factor-one SS subtraction; ten-block SEM.",
+      "machine_readable_numerical_source": [
+        {
+          "path": "results/systematics/20260819/tune_separation.json",
+          "sha256": "37aae5bdad84dc6652399b2c77ddc6ae9c6c91df5073df6af1510d560315befd"
+        }
+      ],
+      "candidate_outputs": [
+        {
+          "variant": "V-FULL",
+          "sha256": "0cf807b6750894c949eacf97c93c407aa65cddaa064d549a9e45c7bca738a3f2",
+          "bytes_available": false
+        },
+        {
+          "variant": "V-EXTREMES",
+          "sha256_prefix": "63906e847f243c79",
+          "bytes_available": false
+        }
+      ],
+      "numerical_identity": "Historical assertions report exact identity for 24 c1/c11 points between V-EXTREMES, the closure run, and V-FULL. The source logs are absent, so this checkout cannot rerun that assertion.",
+      "caption_source": "Ignored historical Paper/Heavy_flavour_hadronisation_model_paper/Results.tex:105; final caption depends on the unresolved V-FULL versus V-EXTREMES presentation choice.",
+      "visual_review": {
+        "result": "blocked",
+        "finding": "The current V-FULL and V-EXTREMES bytes are absent. The available old multiplicity-charm PDF uses an obsolete 90-100 to 0-1 class scheme and stale styling; it is rejected. Tracked polished canvases are validation-only and do not provide the P5 final byte or receipt."
+      },
+      "accepted_outputs": [],
+      "retrieval_requirement": "Retrieve both current variants and their logs/receipts, rerun exact common-point identity, inspect both, then record the owner/journal presentation decision without changing the numbers."
+    },
+    {
+      "figure_id": "P6",
+      "scientific_role": "integrated beauty balancing yields",
+      "status": "candidate",
+      "planned_manuscript_location": "Results.tex:126",
+      "producer": {
+        "source": "plotting/improvedPlotting_THnSparse.C",
+        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "entry_point": "improvedPlotting_THnSparse",
+        "runner": "tools/render_balancing_variant.sh plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json"
+      },
+      "configuration": {
+        "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json",
+        "sha256": "3f51f1dc64b66c360fa59c0c6db6f983ac49258ff1f38e50be0e42f9c90e8590",
+        "display": "one multiplicity-integrated interval, 0.0-100.0 percent"
+      },
+      "dataset_selector_key": "hf_run3_v1_candidate",
+      "dataset_authorized": true,
+      "central_input_identity": "All three complete_root_HF_RUN3_V1 tune bundles; BplusBminus/BplusBplus and BplusLb/BplusLbbar pair files.",
+      "ten_block_identity_and_coverage": "The same four beauty pair channels for every tune in combined_root_1 through combined_root_10. Current config requests ten-block errors; the external source log and current final receipt are absent.",
+      "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
+      "normalization_and_uncertainty": "Full-Delta-phi OS-SS balancing yield per hTrKinematics trigger; factor-one SS subtraction; ten-block SEM.",
+      "machine_readable_numerical_source": [
+        {
+          "path": "tests/fixtures/integrated_rows_nominal.log",
+          "sha256": "c1c7382758b27e89751d86a1e90ff25495168690204b9f49995cf0623497efe0",
+          "limitation": "retained uncertainty rows only; integer-exact closure cannot be reproduced without PAIR_COUNTS"
+        }
+      ],
+      "candidate_outputs": [
+        {
+          "path": "VariantIntegrated/global_balancing_plots_multiplicity_HF_RUN3_V1_THREETUNE_VINTEGRATED_POLISH_PROPOSAL_PNG.png",
+          "sha256": "88fdb62845ccbcb623bf908a0ff0eedc8a822194a3c05dfbb5483882da1d4990",
+          "bytes_available": false,
+          "source": "historical combined charm-and-beauty V-INTEGRATED run record"
+        }
+      ],
+      "caption_source": "Ignored historical Paper/Heavy_flavour_hadronisation_model_paper/Results.tex:126; must be rewritten against the accepted V-INTEGRATED record.",
+      "visual_review": {
+        "result": "blocked",
+        "finding": "The recorded current V-INTEGRATED canvas is absent. The available old integrated-beauty PDF is a tiny legacy canvas with stale tune styling and no complete energy, selection, or uncertainty annotation; it is rejected."
+      },
+      "accepted_outputs": [],
+      "retrieval_requirement": "Retrieve the V-INTEGRATED render, exact source log with PAIR_COUNTS, receipt, all central/block identities, and PNG/PDF; or rerender after the uncertainty blockers are resolved. Decide explicitly whether one combined canvas serves P4 and P6 or split outputs are required."
+    },
+    {
+      "figure_id": "P7",
+      "scientific_role": "multiplicity-dependent beauty balancing yields",
+      "status": "candidate",
+      "planned_manuscript_location": "Results.tex:139",
+      "producer": {
+        "source": "plotting/improvedPlotting_THnSparse.C",
+        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "entry_point": "improvedPlotting_THnSparse",
+        "runner": "tools/render_balancing_variant.sh with V-FULL or V-EXTREMES"
+      },
+      "configuration": {
+        "alternatives": [
+          {
+            "name": "V-FULL",
+            "path": "plotting/configuration_multiplicity_HF_RUN3_V1_THREETUNE_POLISH_PROPOSAL.json",
+            "sha256": "2d9613857c43fc14754065be5b70ed5d28a1758a4adc3a116732295913fe77ef",
+            "classes_shown": "c1-c11"
+          },
+          {
+            "name": "V-EXTREMES",
+            "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VEXTREMES.json",
+            "sha256": "76d87af8f6506df38cc0d6482600cbddd2af1295d1bd21ffce2a8ed1b970bcd2",
+            "classes_shown": "c1 and c11 from the same configured c1-c11 axis"
+          }
+        ],
+        "selection_status": "owner or journal choice intentionally unresolved"
+      },
+      "dataset_selector_key": "hf_run3_v1_candidate",
+      "dataset_authorized": true,
+      "central_input_identity": "All three complete_root_HF_RUN3_V1 tune bundles; BplusBminus/BplusBplus and BplusLb/BplusLbbar pair files on the common c1-c11 axis.",
+      "ten_block_identity_and_coverage": "The same beauty channels for every tune in combined_root_1 through combined_root_10. Current configs request ten-block errors; the current block files and final receipts are absent.",
+      "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
+      "normalization_and_uncertainty": "Per-class full-Delta-phi OS-SS yield per hTrKinematics trigger; factor-one SS subtraction; ten-block SEM.",
+      "machine_readable_numerical_source": [
+        {
+          "path": "results/systematics/20260819/tune_separation.json",
+          "sha256": "37aae5bdad84dc6652399b2c77ddc6ae9c6c91df5073df6af1510d560315befd"
+        }
+      ],
+      "candidate_outputs": [
+        {
+          "variant": "V-FULL",
+          "sha256": "0cf807b6750894c949eacf97c93c407aa65cddaa064d549a9e45c7bca738a3f2",
+          "bytes_available": false
+        },
+        {
+          "variant": "V-EXTREMES",
+          "sha256_prefix": "63906e847f243c79",
+          "bytes_available": false
+        }
+      ],
+      "numerical_identity": "Historical assertions report exact identity for 24 c1/c11 points between V-EXTREMES, the closure run, and V-FULL. The source logs are absent, so this checkout cannot rerun that assertion.",
+      "caption_source": "Ignored historical Paper/Heavy_flavour_hadronisation_model_paper/Results.tex:139; final caption depends on the unresolved V-FULL versus V-EXTREMES presentation choice.",
+      "visual_review": {
+        "result": "blocked",
+        "finding": "The current V-FULL and V-EXTREMES bytes are absent. The available old multiplicity-beauty PDF uses an obsolete 90-100 to 0-1 class scheme and stale styling; it is rejected. Tracked polished canvases are validation-only and do not provide the P7 final byte or receipt."
+      },
+      "accepted_outputs": [],
+      "retrieval_requirement": "Retrieve both current variants and their logs/receipts, rerun exact common-point identity, inspect both, then record the owner/journal presentation decision without changing the numbers."
+    },
+    {
+      "figure_id": "P8",
+      "scientific_role": "charm and beauty baryon/reference-meson balancing ratios versus multiplicity",
+      "status": "candidate",
+      "planned_manuscript_location": "Results.tex:152",
+      "producer": {
+        "source": "plotting/improvedPlotting_THnSparse.C",
+        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "entry_point": "improvedPlotting_THnSparse",
+        "runner": "tools/render_balancing_variant.sh plotting/configuration_multiplicity_HF_RUN3_V1_VBARYONMESON.json"
+      },
+      "configuration": {
+        "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VBARYONMESON.json",
+        "sha256": "55c0a8d3911add22ce276af4fcd3a7a611fd00cbc2eab4b93ca87263c0f3ed45",
+        "definition": "registry-resolved signed anti-Lambda_c/D- and Lambda_b/B- balancing-yield ratios for D+ and B+ triggers"
+      },
+      "dataset_selector_key": "hf_run3_v1_candidate",
+      "dataset_authorized": true,
+      "central_input_identity": "All three complete_root_HF_RUN3_V1 tune bundles; signed meson and baryon OS/SS pair files resolved through the generated pair registry.",
+      "ten_block_identity_and_coverage": "The same signed channels for every tune in combined_root_1 through combined_root_10. Current config requests ten-block errors; current block files, source log, and final receipt are absent.",
+      "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
+      "normalization_and_uncertainty": "Each component is a full-Delta-phi OS-SS yield per hTrKinematics trigger with factor-one SS subtraction. The ratio uses the registry's signed reference_meson_pdg and propagates ten-block statistical uncertainties.",
+      "machine_readable_numerical_source": [
+        {
+          "path": "results/systematics/20260819/ratio_trend.json",
+          "sha256": "b1b5954812398d748297111ab64375d2abecfb4d04b3e98ff3ccdf8d9890087e",
+          "coverage": "beauty Lambda_b/B- trend"
+        }
+      ],
+      "candidate_outputs": [
+        {
+          "path": "VariantBaryonMeson/global_balancing_plots_multiplicity_HF_RUN3_V1_THREETUNE_VBARYONMESON_POLISH_PROPOSAL_PNG.png",
+          "sha256": "4d38492feb91ab8fc00f91230e7c8e47b29882f025d32a41e42b80d9fca33201",
+          "bytes_available": false,
+          "source": "historical signed-off current-campaign run record"
+        }
+      ],
+      "caption_source": "Ignored historical Paper/Heavy_flavour_hadronisation_model_paper/Results.tex:152 is scientifically stale; final text must use anti-Lambda_c/D- and Lambda_b/B-, not an inclusive baryon/meson production ratio.",
+      "visual_review": {
+        "result": "blocked",
+        "finding": "The recorded current signed canvas is absent. The available old-paper PDF and PNG show legacy inclusive-style Lambda_b/B+ and Lambda_c+/D+ quantities and are rejected; screenshots cannot be used to reconstruct points."
+      },
+      "accepted_outputs": [],
+      "retrieval_requirement": "Retrieve or rerender the signed current canvas, log, receipt, central/block identities, and machine-readable charm and beauty values after uncertainty closure; inspect labels, ratio direction, class direction, error bars, and tune palette on the actual bytes."
+    }
+  ],
+  "rejected_role_candidates": [
+    {
+      "figure_id": "P1",
+      "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/Kinematic Plots/MultiplicitySpectrum_Shared_shape.png",
+      "sha256": "29ff14acfb650c930a664acdc1198ef6de47246011d077b3b9c8a6a49f16fe9d",
+      "reason": "14 TeV, |eta| <= 4, and obsolete class presentation"
+    },
+    {
+      "figure_id": "P1",
+      "path": "PlottingScripts/Plots/KinematicSpectra/Multiplicity/MultiplicitySpectrum_Shared_shape.png",
+      "sha256": "747b59e8e01d0149372267766e849c6bc6032ebb09a0f7b073daefc478057540",
+      "reason": "visible 'No input histograms found' placeholder"
+    },
+    {
+      "figure_id": "P2",
+      "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/AngularCorrelations/CharmCorrelations_MONASH_PDF.pdf",
+      "sha256": "ad72101eae400360dbccaa5a33c81af8060faa8b54e55b110476e29a580cd48d",
+      "reason": "legacy selection/layout, no visible uncertainty bars, internal statistics box, incomplete physics annotation, and collisions"
+    },
+    {
+      "figure_id": "P3",
+      "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/AngularCorrelations/BeautyCorrelations_MONASH_PDF.pdf",
+      "sha256": "3995e0c706e406e552cb2fa3d4e4f576f975327ab0891f38c1ca6e54634bfa83",
+      "reason": "legacy selection/layout, no visible uncertainty bars, internal statistics box, incomplete physics annotation, and collisions"
+    },
+    {
+      "figure_id": "P4",
+      "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/YieldsBalancing/global_balancing_plots_integrated_charm_PDF.pdf",
+      "sha256": "6394acf8924110b3a6b8a70a9fc13b72143f517ca8cfd512b02bbebfb12590c4",
+      "reason": "legacy tiny canvas with stale tune coding and incomplete scientific labels"
+    },
+    {
+      "figure_id": "P5",
+      "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/YieldsBalancing/global_balancing_plots_multiplicity_charm_PDF.pdf",
+      "sha256": "282cbd5d0d277cd7df206cd1683e46ea77d351d1e2ba6699356ea61ce191097b",
+      "reason": "obsolete 90-100 through 0-1 activity presentation, not the common c1-c11 axis"
+    },
+    {
+      "figure_id": "P6",
+      "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/YieldsBalancing/global_balancing_plots_integrated_beauty_PDF.pdf",
+      "sha256": "c2e8028ddca5ab8679159c70c6c20ff97e558e858a90e43f53fca4545c8e5144",
+      "reason": "legacy tiny canvas with stale tune coding and incomplete scientific labels"
+    },
+    {
+      "figure_id": "P7",
+      "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/YieldsBalancing/global_balancing_plots_multiplicity_beauty_PDF.pdf",
+      "sha256": "ab0abcae09248fd20419d26980922f941f9cb2c296b388b3754d1854d9e90550",
+      "reason": "obsolete 90-100 through 0-1 activity presentation, not the common c1-c11 axis"
+    },
+    {
+      "figure_id": "P8",
+      "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/BaryonMesonRelativeYieldsBalancing/global_balancing_baryon_over_meson_ratio_multiplicity_PDF.pdf",
+      "sha256": "6fab4aaa5787e48bde2530013065c0ea39ce1cbfefb0f327219d1fe69833abb6",
+      "reason": "old Lambda_b/B+ and Lambda_c+/D+ inclusive-style quantity, not the current signed registry definition"
+    },
+    {
+      "figure_id": "P8",
+      "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/BaryonMesonRelativeYieldsBalancing/balancing-baron-meson-ratio.png",
+      "sha256": "af9aec016556a21ab1f297992281604b103a730f1c8f54649241a1a8dbea782e",
+      "reason": "legacy inclusive-yield ratio with raw histogram labels"
+    }
+  ],
+  "accepted_outputs": [],
+  "acceptance_rule": "No role may change to accepted until its exact bytes exist at the canonical destination, every named central and block input is rehashed, the configuration and source digests match the run, a checksum-bound receipt exists, numerical and visual checks pass, and the scientific-contract uncertainty blockers are resolved."
+}

@@ -1,0 +1,13 @@
+{
+  "schema": "a2_regression_sentinel_v1",
+  "verdict": "PASS",
+  "variation": "permissive_largest_index",
+  "variation_sha256": "4e491134d8d3a2b4b6ed4cc2f5dba4c70115e6695de35baae159f080717240f1",
+  "compared": "/data/alice/ipardoza/hadronization_analysis/HF_RUN3_V1/per_job/MONASH/slot_000 vs /data/alice/ipardoza/a2_runs/regression_largest/MONASH/slot_000",
+  "recorded": "2026-08-13T18:59:12Z",
+  "compare_summary": "COMPARE_DONE files=300 diffs=300 missing=0",
+  "allowed_field": "analysis_macro_sha256",
+  "allowed_difference_count": 300,
+  "unexpected_difference_count": 0,
+  "unexpected_examples": []
+}

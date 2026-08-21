@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: >-
+  This citation record is provisional. The repository is PUBLIC-BLOCKED, and
+  the owner must approve authorship, author order, affiliations, identifiers,
+  release identity, and licensing before publication.
+title: Heavy-flavour quantum-number balancing in PYTHIA 8 as a function of event activity
+type: software
+authors:
+  - family-names: Pardo Zambrana
+    given-names: I.
+  - family-names: Veen
+    given-names: P.
+  - family-names: Vos
+    given-names: K.
+  - family-names: Christakoglou
+    given-names: P.

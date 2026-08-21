@@ -1,0 +1,345 @@
+{
+  "bias_provenance": {
+    "document": "ValidationReports/NCH_DECAY_POLICY_BIAS_8317.md",
+    "events_per_arm": 200000,
+    "experimental_convention_dndeta": 7.04,
+    "paired_on_seed": 20260730,
+    "production_policy_dndeta": 6.986,
+    "pythia_version": "8.317",
+    "superseded_8315_bias": 0.013272441843870412,
+    "superseded_8315_document": "ValidationReports/NCH_CALIBRATION_20260730.md"
+  },
+  "boundaries": [
+    {
+      "absolute_move": 0.00386487260234758,
+      "class": "c1",
+      "crosses_an_integer": false,
+      "down": -0.4961939667324499,
+      "nominal": -0.5,
+      "relative_margin_to_integer": 1.0,
+      "up": -0.5038648726023476
+    },
+    {
+      "absolute_move": 0.019324363011737677,
+      "class": "c2",
+      "crosses_an_integer": false,
+      "down": 2.4809698336622494,
+      "nominal": 2.5,
+      "relative_margin_to_integer": 0.2,
+      "up": 2.5193243630117377
+    },
+    {
+      "absolute_move": 0.027054108216432837,
+      "class": "c3",
+      "crosses_an_integer": false,
+      "down": 3.4733577671271494,
+      "nominal": 3.5,
+      "relative_margin_to_integer": 0.14285714285714285,
+      "up": 3.527054108216433
+    },
+    {
+      "absolute_move": 0.04251359862582316,
+      "class": "c4",
+      "crosses_an_integer": false,
+      "down": 5.458133634056948,
+      "nominal": 5.5,
+      "relative_margin_to_integer": 0.09090909090909091,
+      "up": 5.542513598625823
+    },
+    {
+      "absolute_move": 0.05024334383051787,
+      "class": "c5",
+      "crosses_an_integer": false,
+      "down": 6.450521567521848,
+      "nominal": 6.5,
+      "relative_margin_to_integer": 0.07692307692307693,
+      "up": 6.550243343830518
+    },
+    {
+      "absolute_move": 0.06570283423990908,
+      "class": "c6",
+      "crosses_an_integer": false,
+      "down": 8.435297434451648,
+      "nominal": 8.5,
+      "relative_margin_to_integer": 0.058823529411764705,
+      "up": 8.565702834239909
+    },
+    {
+      "absolute_move": 0.08116232464929851,
+      "class": "c7",
+      "crosses_an_integer": false,
+      "down": 10.420073301381448,
+      "nominal": 10.5,
+      "relative_margin_to_integer": 0.047619047619047616,
+      "up": 10.581162324649299
+    },
+    {
+      "absolute_move": 0.10435156026338355,
+      "class": "c8",
+      "crosses_an_integer": false,
+      "down": 13.397237101776147,
+      "nominal": 13.5,
+      "relative_margin_to_integer": 0.037037037037037035,
+      "up": 13.604351560263384
+    },
+    {
+      "absolute_move": 0.1352705410821642,
+      "class": "c9",
+      "crosses_an_integer": false,
+      "down": 17.366788835635745,
+      "nominal": 17.5,
+      "relative_margin_to_integer": 0.02857142857142857,
+      "up": 17.635270541082164
+    },
+    {
+      "absolute_move": 0.18164901231033426,
+      "class": "c10",
+      "crosses_an_integer": false,
+      "down": 23.321116436425147,
+      "nominal": 23.5,
+      "relative_margin_to_integer": 0.02127659574468085,
+      "up": 23.681649012310334
+    },
+    {
+      "absolute_move": 0.2512167191525947,
+      "class": "c11",
+      "crosses_an_integer": false,
+      "down": 32.25260783760924,
+      "nominal": 32.5,
+      "relative_margin_to_integer": 0.015384615384615385,
+      "up": 32.751216719152595
+    }
+  ],
+  "boundary_above_which_this_bias_would_migrate": 65.18518518518486,
+  "boundary_artifact_sha256_source": "config/multiplicity_class_boundaries_v1.json",
+  "integer_partition_identical": {
+    "down": true,
+    "up": true
+  },
+  "measured_bias": 0.007670454545454584,
+  "nch_max_covered": 175,
+  "per_tune": {
+    "CLOSEPACKING": {
+      "arms": {
+        "down": [
+          20187,
+          12323,
+          23773,
+          9992,
+          16078,
+          12628,
+          15046,
+          15401,
+          16334,
+          15050,
+          13449
+        ],
+        "up": [
+          20187,
+          12323,
+          23773,
+          9992,
+          16078,
+          12628,
+          15046,
+          15401,
+          16334,
+          15050,
+          13449
+        ]
+      },
+      "nominal": [
+        20187,
+        12323,
+        23773,
+        9992,
+        16078,
+        12628,
+        15046,
+        15401,
+        16334,
+        15050,
+        13449
+      ],
+      "relative_delta": {
+        "down": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "total_events": 170261
+    },
+    "JUNCTIONS": {
+      "arms": {
+        "down": [
+          19110,
+          11630,
+          22912,
+          9798,
+          16274,
+          12588,
+          15167,
+          15396,
+          16381,
+          15529,
+          15604
+        ],
+        "up": [
+          19110,
+          11630,
+          22912,
+          9798,
+          16274,
+          12588,
+          15167,
+          15396,
+          16381,
+          15529,
+          15604
+        ]
+      },
+      "nominal": [
+        19110,
+        11630,
+        22912,
+        9798,
+        16274,
+        12588,
+        15167,
+        15396,
+        16381,
+        15529,
+        15604
+      ],
+      "relative_delta": {
+        "down": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "total_events": 170389
+    },
+    "MONASH": {
+      "arms": {
+        "down": [
+          20352,
+          13104,
+          25278,
+          10497,
+          16453,
+          12548,
+          14513,
+          14587,
+          15571,
+          15004,
+          14522
+        ],
+        "up": [
+          20352,
+          13104,
+          25278,
+          10497,
+          16453,
+          12548,
+          14513,
+          14587,
+          15571,
+          15004,
+          14522
+        ]
+      },
+      "nominal": [
+        20352,
+        13104,
+        25278,
+        10497,
+        16453,
+        12548,
+        14513,
+        14587,
+        15571,
+        15004,
+        14522
+      ],
+      "relative_delta": {
+        "down": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "up": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "total_events": 172429
+    }
+  },
+  "preregistration": "docs/SYSTEMATICS_PREREGISTRATION.md",
+  "relative_shift_that_would_move_the_widest_boundary": 0.015384615384615385,
+  "schema": "hadronization_systematic_class_migration_v1",
+  "source": "S5",
+  "structural_null": true,
+  "transformation": "boundary -> boundary / (1 +- delta)"
+}

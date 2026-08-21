@@ -1,0 +1,24 @@
+{
+  "schema": "hadronization_dataset_selector_v1",
+  "active_dataset": "hf_run3_v1_candidate",
+  "datasets": {
+    "hf_run3_v1_candidate": {
+      "status": "canonical",
+      "campaign": "HF_RUN3_V1",
+      "raw_schema": "hf_primary_ground_raw_v7",
+      "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
+      "canonical_manifest": "campaigns/HF_RUN3_V1/freeze/canonical_manifest.jsonl",
+      "production_root": "/data/alice/ipardoza/hf/hadronization_production/HF_RUN3_V1",
+      "analysis_root": "/data/alice/ipardoza/hf/hadronization_analysis/HF_RUN3_V1",
+      "raw_base": "/data/alice/ipardoza/hf/hadronization_production/HF_RUN3_V1/raw",
+      "analyzed_data_base": "/data/alice/ipardoza/hf/hadronization_merged",
+      "complete_root_tag": "complete_root_HF_RUN3_V1",
+      "subsample_base": "/data/alice/ipardoza/hf/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples",
+      "block_count": 10,
+      "publication_eligible": true,
+      "publication_authorization": "docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md",
+      "publication_authorization_sha256": "309bd99caeab0e929e0b5dee322d68771b642445486c4a812699ca1e0e8cf46f",
+      "interpretation": "HF_RUN3_V1 is the physics campaign and the first dataset whose merged product declares analysis_schema paul_pair_objects_primary_ground_v3. SEALED AND AUTHORIZED 2026-08-17: status canonical, publication_eligible true, per docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md. All three tunes are merged (33/33 legs, one closure PASS each) and the freeze at campaigns/HF_RUN3_V1/freeze/ carries 3000 rows verified against the bytes on disk. The four paths are absolute because the merged product lives outside the checkout, so this row is Nikhef-specific by construction. The key retains the _candidate suffix deliberately: it is exported as HADRONIZATION_DATASET_ID and may appear in provenance already written, so renaming it would orphan those records -- the key is an identifier, status carries the claim."
+    }
+  }
+}

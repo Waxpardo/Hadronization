@@ -1,0 +1,85 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{microtype}
+\usepackage{tabularx}
+\usepackage[table]{xcolor}
+\usepackage{url}
+\usepackage[colorlinks=true,allcolors=blue!55!black]{hyperref}
+
+\definecolor{blockred}{HTML}{8B1E2D}
+\definecolor{blockfill}{HTML}{FFF3F3}
+\definecolor{claimblue}{HTML}{155D8B}
+\newcommand{\claim}[1]{\textsuperscript{\textcolor{claimblue}{[#1]}}}
+\newcommand{\pthat}{\ensuremath{\hat{p}_{\mathrm{T}}}}
+\newcommand{\nch}{\ensuremath{N_{\mathrm{ch}}}}
+\newcommand{\dphi}{\ensuremath{\Delta\varphi}}
+\newcommand{\osss}{\ensuremath{\mathrm{OS}-\mathrm{SS}}}
+\newcommand{\pathcode}[1]{\texttt{\detokenize{#1}}}
+
+\title{Heavy-flavour quantum-number balancing in PYTHIA 8\\
+       as a function of event activity}
+\author{I. Pardo Zambrana, P. Veen, K. Vos, and P. Christakoglou}
+\date{Synchronized public draft -- 21 August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\fcolorbox{blockred}{blockfill}{%
+  \parbox{0.91\linewidth}{\centering\bfseries\color{blockred}
+  PUBLIC-BLOCKED MANUSCRIPT\\[2pt]
+  The figure-acceptance manifest marks P1--P8 as candidates and accepts no
+  scientific figure bytes. This PDF is a contract-synchronized review draft,
+  not a release-ready article.}}
+\end{center}
+
+\begin{abstract}
+We study how compensating charm and beauty are distributed among heavy-hadron
+species and in relative azimuth in a forced hard-heavy PYTHIA~8.317 sample of
+proton--proton collisions at $\sqrt{s}=13.6$~TeV.\claim{A1} The observable is
+the opposite-heavy-sign minus same-heavy-sign associated yield per selected
+trigger, with the trigger count taken from the dedicated trigger-kinematics
+object.\claim{A2} Event activity is measured with final charged non-heavy
+particles in $|\eta|\leq 1$, and eleven common absolute multiplicity classes
+are used for the complete MONASH, JUNCTIONS, and CLOSEPACKING tune
+bundles.\claim{A3} Committed tables show activity-dependent redistribution
+between beauty meson and baryon balancing yields in both non-baseline bundles;
+the current uncertainty-qualified inference remains provisional because the
+wide-counter systematic is absent and the tune-dependent generator-hang
+selection risk is unbounded.\claim{A4} No mechanism-isolation claim is made.
+The scientific figure programme remains blocked until exact ROOT-derived
+bytes, ten-block coverage, numerical sources, receipts, and visual acceptance
+are available for all manuscript figures.
+\end{abstract}
+
+\tableofcontents
+
+\input{Introduction}
+\input{Observables}
+\input{Model}
+\input{Results}
+\input{Summary}
+
+\section*{Data and code availability}
+The repository contains the analysis code, configurations, compact result
+tables, validation records, and provenance contracts. The sealed raw files,
+reduced pair products, central merges, ten block merges, and accepted final
+ROOT-rendered canvases are external to the checkout and currently have no
+public retrieval route.\claim{D1} The local reproduction boundary and the
+remaining release blockers are recorded in the repository data-availability
+statement and in the figure-acceptance manifest.
+
+\section*{Acknowledgements}
+The author list and acknowledgements require approval before journal release.
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\end{document}

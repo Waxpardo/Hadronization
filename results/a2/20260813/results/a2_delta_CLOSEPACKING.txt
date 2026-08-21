@@ -1,0 +1,17 @@
+GATE PASSED  variation=a4df31e6b6da5098...  compared=/data/alice/ipardoza/hadronization_analysis/HF_RUN3_V1/per_job/MONASH/slot_000 vs /data/alice/ipardoza/a2_runs/regression/MONASH/slot_000  recorded=2026-08-13T16:59:54Z
+CAMPAIGN_RESTORATION tune=CLOSEPACKING jobs=100 restored_charm=12114 restored_beauty=173 contested_seen=24590 zero_restoration_jobs=0 per_Mevt=1228.7 status=PASS
+TUNE CLOSEPACKING   slots=100   blocks=10
+
+class  N_ch        Delta %      SEM  blocks  flag
+M1     1-9          0.0098   0.0008      10  
+M2     10-19        0.0220   0.0026      10  
+M3     20-29        0.0365   0.0046      10  
+M4     30-39        0.0614   0.0095      10  
+M5     >=40         0.0420   0.0135      10  
+
+INTEGRATED          0.0192   0.0007
+
+VERDICT: MUST BE QUOTED PER MULTIPLICITY CLASS
+  classes off the integrated value by >2 SEM: ['M1', 'M3', 'M4']
+  spread across classes = 0.0516 pp (> 50% of |integrated|)
+  sign check (pre-registered: Delta >= 0): OK

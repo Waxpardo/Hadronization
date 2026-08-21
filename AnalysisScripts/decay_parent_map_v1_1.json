@@ -1,0 +1,3186 @@
+{
+  "conjugation": {
+    "applied_to": "antiparticle parents (pdg < 0)",
+    "involution_pairs_checked": 101,
+    "reference": "docs/MAP_V1_CONJUGATION_BUG.md",
+    "rows_conjugated": 101,
+    "supersedes": "hf_decay_parent_map_v1, which stored PYTHIA's unconjugated products for antiparticle parents"
+  },
+  "derived_from": "PYTHIA particleData, pinned install, via tools/f4_probe",
+  "gate": {
+    "consequence": "channels survive stabilisation, so the map derives AFTER the stabilisation pass -- the proposal's primary path",
+    "probed": 202,
+    "question": "do decay channels remain readable after mayDecay(id,false)?",
+    "species_with_channels": 202,
+    "survived": 202,
+    "verdict": "READABLE_AFTER_DISABLE"
+  },
+  "map_sha256": "dd502a10c5932fffa2bb3121296a40532224b4d6910330ea5e044e045089c43f",
+  "ordinal_table_digest_fnv1a64": "646f310f78126267",
+  "pythia_version": "8.317",
+  "schema": "hf_decay_parent_map_v1_1",
+  "species": [
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -513,
+        -411
+      ],
+      "name": "B*_1c-",
+      "ordinal": 0,
+      "pdg": -20543,
+      "products_as_probed": [
+        513,
+        411
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -523,
+        321
+      ],
+      "name": "B*_1sbar0",
+      "ordinal": 1,
+      "pdg": -20533,
+      "products_as_probed": [
+        523,
+        -321
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -513,
+        -211
+      ],
+      "name": "B*_1-",
+      "ordinal": 2,
+      "pdg": -20523,
+      "products_as_probed": [
+        513,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -523,
+        211
+      ],
+      "name": "B*_1bar0",
+      "ordinal": 3,
+      "pdg": -20513,
+      "products_as_probed": [
+        523,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        -433,
+        111
+      ],
+      "name": "D*_1s-",
+      "ordinal": 4,
+      "pdg": -20433,
+      "products_as_probed": [
+        433,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -413,
+        211
+      ],
+      "name": "D*_1bar0",
+      "ordinal": 5,
+      "pdg": -20423,
+      "products_as_probed": [
+        413,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -423,
+        -211
+      ],
+      "name": "D*_1-",
+      "ordinal": 6,
+      "pdg": -20413,
+      "products_as_probed": [
+        423,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 6,
+      "dominant_branching_ratio": 0.24,
+      "dominant_products": [
+        -4222,
+        211
+      ],
+      "name": "Lambda_c(2593)bar-",
+      "ordinal": 7,
+      "pdg": -14122,
+      "products_as_probed": [
+        4222,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -513,
+        -411
+      ],
+      "name": "B_1c-",
+      "ordinal": 8,
+      "pdg": -10543,
+      "products_as_probed": [
+        513,
+        411
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -511,
+        -411
+      ],
+      "name": "B*_0c-",
+      "ordinal": 9,
+      "pdg": -10541,
+      "products_as_probed": [
+        511,
+        411
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -523,
+        321
+      ],
+      "name": "B_1sbar0",
+      "ordinal": 10,
+      "pdg": -10533,
+      "products_as_probed": [
+        523,
+        -321
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -521,
+        321
+      ],
+      "name": "B*_0sbar0",
+      "ordinal": 11,
+      "pdg": -10531,
+      "products_as_probed": [
+        521,
+        -321
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -513,
+        -211
+      ],
+      "name": "B_1-",
+      "ordinal": 12,
+      "pdg": -10523,
+      "products_as_probed": [
+        513,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -511,
+        -211
+      ],
+      "name": "B*_0-",
+      "ordinal": 13,
+      "pdg": -10521,
+      "products_as_probed": [
+        511,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -523,
+        211
+      ],
+      "name": "B_1bar0",
+      "ordinal": 14,
+      "pdg": -10513,
+      "products_as_probed": [
+        523,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -521,
+        211
+      ],
+      "name": "B*_0bar0",
+      "ordinal": 15,
+      "pdg": -10511,
+      "products_as_probed": [
+        521,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -423,
+        -321
+      ],
+      "name": "D_1s-",
+      "ordinal": 16,
+      "pdg": -10433,
+      "products_as_probed": [
+        423,
+        321
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -431,
+        111
+      ],
+      "name": "D*_0s-",
+      "ordinal": 17,
+      "pdg": -10431,
+      "products_as_probed": [
+        431,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -413,
+        211
+      ],
+      "name": "D_1bar0",
+      "ordinal": 18,
+      "pdg": -10423,
+      "products_as_probed": [
+        413,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -411,
+        211
+      ],
+      "name": "D*_0bar0",
+      "ordinal": 19,
+      "pdg": -10421,
+      "products_as_probed": [
+        411,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -423,
+        -211
+      ],
+      "name": "D_1-",
+      "ordinal": 20,
+      "pdg": -10413,
+      "products_as_probed": [
+        423,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        -421,
+        -211
+      ],
+      "name": "D*_0-",
+      "ordinal": 21,
+      "pdg": -10411,
+      "products_as_probed": [
+        421,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Omega*_bbbbar+",
+      "ordinal": 22,
+      "pdg": -5554,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Omega*_bbcbar0",
+      "ordinal": 23,
+      "pdg": -5544,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Omega_bbcbar0",
+      "ordinal": 24,
+      "pdg": -5542,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Omega*_bbbar+",
+      "ordinal": 25,
+      "pdg": -5534,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Omega_bbbar+",
+      "ordinal": 26,
+      "pdg": -5532,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Xi*_bbbar0",
+      "ordinal": 27,
+      "pdg": -5524,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Xi_bbbar0",
+      "ordinal": 28,
+      "pdg": -5522,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Xi*_bbbar+",
+      "ordinal": 29,
+      "pdg": -5514,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Xi_bbbar+",
+      "ordinal": 30,
+      "pdg": -5512,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Omega*_bccbar-",
+      "ordinal": 31,
+      "pdg": -5444,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Omega_bccbar-",
+      "ordinal": 32,
+      "pdg": -5442,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Omega*_bcbar0",
+      "ordinal": 33,
+      "pdg": -5434,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Omega'_bcbar0",
+      "ordinal": 34,
+      "pdg": -5432,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Xi*_bcbar-",
+      "ordinal": 35,
+      "pdg": -5424,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Xi'_bcbar-",
+      "ordinal": 36,
+      "pdg": -5422,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Xi*_bcbar0",
+      "ordinal": 37,
+      "pdg": -5414,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Xi'_bcbar0",
+      "ordinal": 38,
+      "pdg": -5412,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Omega_bcbar0",
+      "ordinal": 39,
+      "pdg": -5342,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5332,
+        22
+      ],
+      "name": "Omega*_bbar+",
+      "ordinal": 40,
+      "pdg": -5334,
+      "products_as_probed": [
+        5332,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 47,
+      "dominant_branching_ratio": 0.263225,
+      "dominant_products": [
+        2,
+        -4,
+        -1,
+        -3303
+      ],
+      "name": "Omega_bbar+",
+      "ordinal": 41,
+      "pdg": -5332,
+      "products_as_probed": [
+        -2,
+        4,
+        1,
+        3303
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5232,
+        22
+      ],
+      "name": "Xi*_bbar0",
+      "ordinal": 42,
+      "pdg": -5324,
+      "products_as_probed": [
+        5232,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5232,
+        22
+      ],
+      "name": "Xi'_bbar0",
+      "ordinal": 43,
+      "pdg": -5322,
+      "products_as_probed": [
+        5232,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5132,
+        22
+      ],
+      "name": "Xi*_bbar+",
+      "ordinal": 44,
+      "pdg": -5314,
+      "products_as_probed": [
+        5132,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5132,
+        22
+      ],
+      "name": "Xi'_bbar+",
+      "ordinal": 45,
+      "pdg": -5312,
+      "products_as_probed": [
+        5132,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Xi_bcbar-",
+      "ordinal": 46,
+      "pdg": -5242,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 52,
+      "dominant_branching_ratio": 0.263225,
+      "dominant_products": [
+        2,
+        -4,
+        -1,
+        -3201
+      ],
+      "name": "Xi_bbar0",
+      "ordinal": 47,
+      "pdg": -5232,
+      "products_as_probed": [
+        -2,
+        4,
+        1,
+        3201
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5122,
+        -211
+      ],
+      "name": "Sigma*_bbar-",
+      "ordinal": 48,
+      "pdg": -5224,
+      "products_as_probed": [
+        5122,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5122,
+        -211
+      ],
+      "name": "Sigma_bbar-",
+      "ordinal": 49,
+      "pdg": -5222,
+      "products_as_probed": [
+        5122,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5122,
+        111
+      ],
+      "name": "Sigma*_bbar0",
+      "ordinal": 50,
+      "pdg": -5214,
+      "products_as_probed": [
+        5122,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5122,
+        111
+      ],
+      "name": "Sigma_bbar0",
+      "ordinal": 51,
+      "pdg": -5212,
+      "products_as_probed": [
+        5122,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        81
+      ],
+      "name": "Xi_bcbar0",
+      "ordinal": 52,
+      "pdg": -5142,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 52,
+      "dominant_branching_ratio": 0.263225,
+      "dominant_products": [
+        2,
+        -4,
+        -1,
+        -3101
+      ],
+      "name": "Xi_bbar+",
+      "ordinal": 53,
+      "pdg": -5132,
+      "products_as_probed": [
+        -2,
+        4,
+        1,
+        3101
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 41,
+      "dominant_branching_ratio": 0.4411147,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        -2101
+      ],
+      "name": "Lambda_bbar0",
+      "ordinal": 54,
+      "pdg": -5122,
+      "products_as_probed": [
+        -2,
+        1,
+        4,
+        2101
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5122,
+        211
+      ],
+      "name": "Sigma*_bbar+",
+      "ordinal": 55,
+      "pdg": -5114,
+      "products_as_probed": [
+        5122,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -5122,
+        211
+      ],
+      "name": "Sigma_bbar+",
+      "ordinal": 56,
+      "pdg": -5112,
+      "products_as_probed": [
+        5122,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        -2,
+        1,
+        -3,
+        81
+      ],
+      "name": "Omega*_cccbar--",
+      "ordinal": 57,
+      "pdg": -4444,
+      "products_as_probed": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        -2,
+        1,
+        -3,
+        81
+      ],
+      "name": "Omega*_ccbar-",
+      "ordinal": 58,
+      "pdg": -4434,
+      "products_as_probed": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        -2,
+        1,
+        -3,
+        81
+      ],
+      "name": "Omega_ccbar-",
+      "ordinal": 59,
+      "pdg": -4432,
+      "products_as_probed": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        -2,
+        1,
+        -3,
+        81
+      ],
+      "name": "Xi*_ccbar--",
+      "ordinal": 60,
+      "pdg": -4424,
+      "products_as_probed": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        -2,
+        1,
+        -3,
+        81
+      ],
+      "name": "Xi_ccbar--",
+      "ordinal": 61,
+      "pdg": -4422,
+      "products_as_probed": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        -2,
+        1,
+        -3,
+        81
+      ],
+      "name": "Xi*_ccbar-",
+      "ordinal": 62,
+      "pdg": -4414,
+      "products_as_probed": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        -2,
+        1,
+        -3,
+        81
+      ],
+      "name": "Xi_ccbar-",
+      "ordinal": 63,
+      "pdg": -4412,
+      "products_as_probed": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -4332,
+        22
+      ],
+      "name": "Omega*_cbar0",
+      "ordinal": 64,
+      "pdg": -4334,
+      "products_as_probed": [
+        4332,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 3,
+      "dominant_branching_ratio": 0.964,
+      "dominant_products": [
+        -2,
+        1,
+        -3,
+        -3303
+      ],
+      "name": "Omega_cbar0",
+      "ordinal": 65,
+      "pdg": -4332,
+      "products_as_probed": [
+        2,
+        -1,
+        3,
+        3303
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -4232,
+        111
+      ],
+      "name": "Xi*_cbar-",
+      "ordinal": 66,
+      "pdg": -4324,
+      "products_as_probed": [
+        4232,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -4232,
+        22
+      ],
+      "name": "Xi'_cbar-",
+      "ordinal": 67,
+      "pdg": -4322,
+      "products_as_probed": [
+        4232,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -4132,
+        111
+      ],
+      "name": "Xi*_cbar0",
+      "ordinal": 68,
+      "pdg": -4314,
+      "products_as_probed": [
+        4132,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -4132,
+        22
+      ],
+      "name": "Xi'_cbar0",
+      "ordinal": 69,
+      "pdg": -4312,
+      "products_as_probed": [
+        4132,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 5,
+      "dominant_branching_ratio": 0.93,
+      "dominant_products": [
+        -2,
+        1,
+        -3,
+        -3201
+      ],
+      "name": "Xi_cbar-",
+      "ordinal": 70,
+      "pdg": -4232,
+      "products_as_probed": [
+        2,
+        -1,
+        3,
+        3201
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -4122,
+        -211
+      ],
+      "name": "Sigma*_cbar--",
+      "ordinal": 71,
+      "pdg": -4224,
+      "products_as_probed": [
+        4122,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -4122,
+        -211
+      ],
+      "name": "Sigma_cbar--",
+      "ordinal": 72,
+      "pdg": -4222,
+      "products_as_probed": [
+        4122,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -4122,
+        111
+      ],
+      "name": "Sigma*_cbar-",
+      "ordinal": 73,
+      "pdg": -4214,
+      "products_as_probed": [
+        4122,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -4122,
+        111
+      ],
+      "name": "Sigma_cbar-",
+      "ordinal": 74,
+      "pdg": -4212,
+      "products_as_probed": [
+        4122,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 8,
+      "dominant_branching_ratio": 0.54,
+      "dominant_products": [
+        -2,
+        1,
+        -3,
+        -3101
+      ],
+      "name": "Xi_cbar0",
+      "ordinal": 75,
+      "pdg": -4132,
+      "products_as_probed": [
+        2,
+        -1,
+        3,
+        3101
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 3,
+      "dominant_branching_ratio": 0.66,
+      "dominant_products": [
+        -4122,
+        -211,
+        211
+      ],
+      "name": "Lambda_c(2625)bar-",
+      "ordinal": 76,
+      "pdg": -4124,
+      "products_as_probed": [
+        4122,
+        211,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 76,
+      "dominant_branching_ratio": 0.14,
+      "dominant_products": [
+        -2,
+        -3201
+      ],
+      "name": "Lambda_cbar-",
+      "ordinal": 77,
+      "pdg": -4122,
+      "products_as_probed": [
+        2,
+        3201
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -4122,
+        211
+      ],
+      "name": "Sigma*_cbar0",
+      "ordinal": 78,
+      "pdg": -4114,
+      "products_as_probed": [
+        4122,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -4122,
+        211
+      ],
+      "name": "Sigma_cbar0",
+      "ordinal": 79,
+      "pdg": -4112,
+      "products_as_probed": [
+        4122,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.3,
+      "dominant_products": [
+        -511,
+        -411
+      ],
+      "name": "B*_2c-",
+      "ordinal": 80,
+      "pdg": -545,
+      "products_as_probed": [
+        511,
+        411
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -541,
+        22
+      ],
+      "name": "B*_c-",
+      "ordinal": 81,
+      "pdg": -543,
+      "products_as_probed": [
+        541,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 85,
+      "dominant_branching_ratio": 0.202,
+      "dominant_products": [
+        -533,
+        -213
+      ],
+      "name": "B_c-",
+      "ordinal": 82,
+      "pdg": -541,
+      "products_as_probed": [
+        533,
+        213
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.33,
+      "dominant_products": [
+        -511,
+        -311
+      ],
+      "name": "B*_2sbar0",
+      "ordinal": 83,
+      "pdg": -535,
+      "products_as_probed": [
+        511,
+        311
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -531,
+        22
+      ],
+      "name": "B*_sbar0",
+      "ordinal": 84,
+      "pdg": -533,
+      "products_as_probed": [
+        531,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 246,
+      "dominant_branching_ratio": 0.3574344,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        -3
+      ],
+      "name": "B_sbar0",
+      "ordinal": 85,
+      "pdg": -531,
+      "products_as_probed": [
+        2,
+        -1,
+        -4,
+        3
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 6,
+      "dominant_branching_ratio": 0.31,
+      "dominant_products": [
+        -513,
+        -211
+      ],
+      "name": "B*_2-",
+      "ordinal": 86,
+      "pdg": -525,
+      "products_as_probed": [
+        513,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -521,
+        22
+      ],
+      "name": "B*-",
+      "ordinal": 87,
+      "pdg": -523,
+      "products_as_probed": [
+        521,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 735,
+      "dominant_branching_ratio": 0.268336,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        -2
+      ],
+      "name": "B-",
+      "ordinal": 88,
+      "pdg": -521,
+      "products_as_probed": [
+        2,
+        -1,
+        -4,
+        2
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 6,
+      "dominant_branching_ratio": 0.31,
+      "dominant_products": [
+        -523,
+        211
+      ],
+      "name": "B*_2bar0",
+      "ordinal": 89,
+      "pdg": -515,
+      "products_as_probed": [
+        523,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        -511,
+        22
+      ],
+      "name": "B*bar0",
+      "ordinal": 90,
+      "pdg": -513,
+      "products_as_probed": [
+        511,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 890,
+      "dominant_branching_ratio": 0.316,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        -1
+      ],
+      "name": "Bbar0",
+      "ordinal": 91,
+      "pdg": -511,
+      "products_as_probed": [
+        2,
+        -1,
+        -4,
+        1
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.45,
+      "dominant_products": [
+        -411,
+        -311
+      ],
+      "name": "D*_2s(2573)-",
+      "ordinal": 92,
+      "pdg": -435,
+      "products_as_probed": [
+        411,
+        311
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.942,
+      "dominant_products": [
+        -431,
+        22
+      ],
+      "name": "D*_s-",
+      "ordinal": 93,
+      "pdg": -433,
+      "products_as_probed": [
+        431,
+        22
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 61,
+      "dominant_branching_ratio": 0.13104,
+      "dominant_products": [
+        221,
+        -213
+      ],
+      "name": "D_s-",
+      "ordinal": 94,
+      "pdg": -431,
+      "products_as_probed": [
+        221,
+        213
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 6,
+      "dominant_branching_ratio": 0.38,
+      "dominant_products": [
+        -411,
+        211
+      ],
+      "name": "D*_2(2460)bar0",
+      "ordinal": 95,
+      "pdg": -425,
+      "products_as_probed": [
+        411,
+        -211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.619,
+      "dominant_products": [
+        -421,
+        111
+      ],
+      "name": "D*bar0",
+      "ordinal": 96,
+      "pdg": -423,
+      "products_as_probed": [
+        421,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 84,
+      "dominant_branching_ratio": 0.139,
+      "dominant_products": [
+        321,
+        -211,
+        111
+      ],
+      "name": "Dbar0",
+      "ordinal": 97,
+      "pdg": -421,
+      "products_as_probed": [
+        -321,
+        211,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 6,
+      "dominant_branching_ratio": 0.38,
+      "dominant_products": [
+        -421,
+        -211
+      ],
+      "name": "D*_2(2460)-",
+      "ordinal": 98,
+      "pdg": -415,
+      "products_as_probed": [
+        421,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 3,
+      "dominant_branching_ratio": 0.677,
+      "dominant_products": [
+        -421,
+        -211
+      ],
+      "name": "D*-",
+      "ordinal": 99,
+      "pdg": -413,
+      "products_as_probed": [
+        421,
+        211
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 74,
+      "dominant_branching_ratio": 0.097,
+      "dominant_products": [
+        -311,
+        -211,
+        111
+      ],
+      "name": "D-",
+      "ordinal": 100,
+      "pdg": -411,
+      "products_as_probed": [
+        311,
+        211,
+        111
+      ],
+      "status": "OK"
+    },
+    {
+      "channels": 74,
+      "dominant_branching_ratio": 0.097,
+      "dominant_products": [
+        311,
+        211,
+        111
+      ],
+      "name": "D+",
+      "ordinal": 101,
+      "pdg": 411,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 3,
+      "dominant_branching_ratio": 0.677,
+      "dominant_products": [
+        421,
+        211
+      ],
+      "name": "D*+",
+      "ordinal": 102,
+      "pdg": 413,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 6,
+      "dominant_branching_ratio": 0.38,
+      "dominant_products": [
+        421,
+        211
+      ],
+      "name": "D*_2(2460)+",
+      "ordinal": 103,
+      "pdg": 415,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 84,
+      "dominant_branching_ratio": 0.139,
+      "dominant_products": [
+        -321,
+        211,
+        111
+      ],
+      "name": "D0",
+      "ordinal": 104,
+      "pdg": 421,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.619,
+      "dominant_products": [
+        421,
+        111
+      ],
+      "name": "D*0",
+      "ordinal": 105,
+      "pdg": 423,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 6,
+      "dominant_branching_ratio": 0.38,
+      "dominant_products": [
+        411,
+        -211
+      ],
+      "name": "D*_2(2460)0",
+      "ordinal": 106,
+      "pdg": 425,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 61,
+      "dominant_branching_ratio": 0.13104,
+      "dominant_products": [
+        221,
+        213
+      ],
+      "name": "D_s+",
+      "ordinal": 107,
+      "pdg": 431,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.942,
+      "dominant_products": [
+        431,
+        22
+      ],
+      "name": "D*_s+",
+      "ordinal": 108,
+      "pdg": 433,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.45,
+      "dominant_products": [
+        411,
+        311
+      ],
+      "name": "D*_2s(2573)+",
+      "ordinal": 109,
+      "pdg": 435,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 890,
+      "dominant_branching_ratio": 0.316,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        1
+      ],
+      "name": "B0",
+      "ordinal": 110,
+      "pdg": 511,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        511,
+        22
+      ],
+      "name": "B*0",
+      "ordinal": 111,
+      "pdg": 513,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 6,
+      "dominant_branching_ratio": 0.31,
+      "dominant_products": [
+        523,
+        -211
+      ],
+      "name": "B*_20",
+      "ordinal": 112,
+      "pdg": 515,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 735,
+      "dominant_branching_ratio": 0.268336,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        2
+      ],
+      "name": "B+",
+      "ordinal": 113,
+      "pdg": 521,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        521,
+        22
+      ],
+      "name": "B*+",
+      "ordinal": 114,
+      "pdg": 523,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 6,
+      "dominant_branching_ratio": 0.31,
+      "dominant_products": [
+        513,
+        211
+      ],
+      "name": "B*_2+",
+      "ordinal": 115,
+      "pdg": 525,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 246,
+      "dominant_branching_ratio": 0.3574344,
+      "dominant_products": [
+        2,
+        -1,
+        -4,
+        3
+      ],
+      "name": "B_s0",
+      "ordinal": 116,
+      "pdg": 531,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        531,
+        22
+      ],
+      "name": "B*_s0",
+      "ordinal": 117,
+      "pdg": 533,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.33,
+      "dominant_products": [
+        511,
+        311
+      ],
+      "name": "B*_2s0",
+      "ordinal": 118,
+      "pdg": 535,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 85,
+      "dominant_branching_ratio": 0.202,
+      "dominant_products": [
+        533,
+        213
+      ],
+      "name": "B_c+",
+      "ordinal": 119,
+      "pdg": 541,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        541,
+        22
+      ],
+      "name": "B*_c+",
+      "ordinal": 120,
+      "pdg": 543,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.3,
+      "dominant_products": [
+        511,
+        411
+      ],
+      "name": "B*_2c+",
+      "ordinal": 121,
+      "pdg": 545,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        4122,
+        -211
+      ],
+      "name": "Sigma_c0",
+      "ordinal": 122,
+      "pdg": 4112,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        4122,
+        -211
+      ],
+      "name": "Sigma*_c0",
+      "ordinal": 123,
+      "pdg": 4114,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 76,
+      "dominant_branching_ratio": 0.14,
+      "dominant_products": [
+        2,
+        3201
+      ],
+      "name": "Lambda_c+",
+      "ordinal": 124,
+      "pdg": 4122,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 3,
+      "dominant_branching_ratio": 0.66,
+      "dominant_products": [
+        4122,
+        211,
+        -211
+      ],
+      "name": "Lambda_c(2625)+",
+      "ordinal": 125,
+      "pdg": 4124,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 8,
+      "dominant_branching_ratio": 0.54,
+      "dominant_products": [
+        2,
+        -1,
+        3,
+        3101
+      ],
+      "name": "Xi_c0",
+      "ordinal": 126,
+      "pdg": 4132,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        4122,
+        111
+      ],
+      "name": "Sigma_c+",
+      "ordinal": 127,
+      "pdg": 4212,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        4122,
+        111
+      ],
+      "name": "Sigma*_c+",
+      "ordinal": 128,
+      "pdg": 4214,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        4122,
+        211
+      ],
+      "name": "Sigma_c++",
+      "ordinal": 129,
+      "pdg": 4222,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        4122,
+        211
+      ],
+      "name": "Sigma*_c++",
+      "ordinal": 130,
+      "pdg": 4224,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 5,
+      "dominant_branching_ratio": 0.93,
+      "dominant_products": [
+        2,
+        -1,
+        3,
+        3201
+      ],
+      "name": "Xi_c+",
+      "ordinal": 131,
+      "pdg": 4232,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        4132,
+        22
+      ],
+      "name": "Xi'_c0",
+      "ordinal": 132,
+      "pdg": 4312,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        4132,
+        111
+      ],
+      "name": "Xi*_c0",
+      "ordinal": 133,
+      "pdg": 4314,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        4232,
+        22
+      ],
+      "name": "Xi'_c+",
+      "ordinal": 134,
+      "pdg": 4322,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        4232,
+        111
+      ],
+      "name": "Xi*_c+",
+      "ordinal": 135,
+      "pdg": 4324,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 3,
+      "dominant_branching_ratio": 0.964,
+      "dominant_products": [
+        2,
+        -1,
+        3,
+        3303
+      ],
+      "name": "Omega_c0",
+      "ordinal": 136,
+      "pdg": 4332,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        4332,
+        22
+      ],
+      "name": "Omega*_c0",
+      "ordinal": 137,
+      "pdg": 4334,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "name": "Xi_cc+",
+      "ordinal": 138,
+      "pdg": 4412,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "name": "Xi*_cc+",
+      "ordinal": 139,
+      "pdg": 4414,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "name": "Xi_cc++",
+      "ordinal": 140,
+      "pdg": 4422,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "name": "Xi*_cc++",
+      "ordinal": 141,
+      "pdg": 4424,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "name": "Omega_cc+",
+      "ordinal": 142,
+      "pdg": 4432,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "name": "Omega*_cc+",
+      "ordinal": 143,
+      "pdg": 4434,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 4,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        2,
+        -1,
+        3,
+        81
+      ],
+      "name": "Omega*_ccc++",
+      "ordinal": 144,
+      "pdg": 4444,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5122,
+        -211
+      ],
+      "name": "Sigma_b-",
+      "ordinal": 145,
+      "pdg": 5112,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5122,
+        -211
+      ],
+      "name": "Sigma*_b-",
+      "ordinal": 146,
+      "pdg": 5114,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 41,
+      "dominant_branching_ratio": 0.4411147,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        2101
+      ],
+      "name": "Lambda_b0",
+      "ordinal": 147,
+      "pdg": 5122,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 52,
+      "dominant_branching_ratio": 0.263225,
+      "dominant_products": [
+        -2,
+        4,
+        1,
+        3101
+      ],
+      "name": "Xi_b-",
+      "ordinal": 148,
+      "pdg": 5132,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Xi_bc0",
+      "ordinal": 149,
+      "pdg": 5142,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5122,
+        111
+      ],
+      "name": "Sigma_b0",
+      "ordinal": 150,
+      "pdg": 5212,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5122,
+        111
+      ],
+      "name": "Sigma*_b0",
+      "ordinal": 151,
+      "pdg": 5214,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5122,
+        211
+      ],
+      "name": "Sigma_b+",
+      "ordinal": 152,
+      "pdg": 5222,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5122,
+        211
+      ],
+      "name": "Sigma*_b+",
+      "ordinal": 153,
+      "pdg": 5224,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 52,
+      "dominant_branching_ratio": 0.263225,
+      "dominant_products": [
+        -2,
+        4,
+        1,
+        3201
+      ],
+      "name": "Xi_b0",
+      "ordinal": 154,
+      "pdg": 5232,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Xi_bc+",
+      "ordinal": 155,
+      "pdg": 5242,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5132,
+        22
+      ],
+      "name": "Xi'_b-",
+      "ordinal": 156,
+      "pdg": 5312,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5132,
+        22
+      ],
+      "name": "Xi*_b-",
+      "ordinal": 157,
+      "pdg": 5314,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5232,
+        22
+      ],
+      "name": "Xi'_b0",
+      "ordinal": 158,
+      "pdg": 5322,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5232,
+        22
+      ],
+      "name": "Xi*_b0",
+      "ordinal": 159,
+      "pdg": 5324,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 47,
+      "dominant_branching_ratio": 0.263225,
+      "dominant_products": [
+        -2,
+        4,
+        1,
+        3303
+      ],
+      "name": "Omega_b-",
+      "ordinal": 160,
+      "pdg": 5332,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        5332,
+        22
+      ],
+      "name": "Omega*_b-",
+      "ordinal": 161,
+      "pdg": 5334,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Omega_bc0",
+      "ordinal": 162,
+      "pdg": 5342,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Xi'_bc0",
+      "ordinal": 163,
+      "pdg": 5412,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Xi*_bc0",
+      "ordinal": 164,
+      "pdg": 5414,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Xi'_bc+",
+      "ordinal": 165,
+      "pdg": 5422,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Xi*_bc+",
+      "ordinal": 166,
+      "pdg": 5424,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Omega'_bc0",
+      "ordinal": 167,
+      "pdg": 5432,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Omega*_bc0",
+      "ordinal": 168,
+      "pdg": 5434,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Omega_bcc+",
+      "ordinal": 169,
+      "pdg": 5442,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Omega*_bcc+",
+      "ordinal": 170,
+      "pdg": 5444,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Xi_bb-",
+      "ordinal": 171,
+      "pdg": 5512,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Xi*_bb-",
+      "ordinal": 172,
+      "pdg": 5514,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Xi_bb0",
+      "ordinal": 173,
+      "pdg": 5522,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Xi*_bb0",
+      "ordinal": 174,
+      "pdg": 5524,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Omega_bb-",
+      "ordinal": 175,
+      "pdg": 5532,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Omega*_bb-",
+      "ordinal": 176,
+      "pdg": 5534,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Omega_bbc0",
+      "ordinal": 177,
+      "pdg": 5542,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Omega*_bbc0",
+      "ordinal": 178,
+      "pdg": 5544,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 9,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        -2,
+        1,
+        4,
+        81
+      ],
+      "name": "Omega*_bbb-",
+      "ordinal": 179,
+      "pdg": 5554,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        421,
+        211
+      ],
+      "name": "D*_0+",
+      "ordinal": 180,
+      "pdg": 10411,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        423,
+        211
+      ],
+      "name": "D_1+",
+      "ordinal": 181,
+      "pdg": 10413,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        411,
+        -211
+      ],
+      "name": "D*_00",
+      "ordinal": 182,
+      "pdg": 10421,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        413,
+        -211
+      ],
+      "name": "D_10",
+      "ordinal": 183,
+      "pdg": 10423,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 1,
+      "dominant_branching_ratio": 1.0,
+      "dominant_products": [
+        431,
+        111
+      ],
+      "name": "D*_0s+",
+      "ordinal": 184,
+      "pdg": 10431,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        423,
+        321
+      ],
+      "name": "D_1s+",
+      "ordinal": 185,
+      "pdg": 10433,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        521,
+        -211
+      ],
+      "name": "B*_00",
+      "ordinal": 186,
+      "pdg": 10511,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        523,
+        -211
+      ],
+      "name": "B_10",
+      "ordinal": 187,
+      "pdg": 10513,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        511,
+        211
+      ],
+      "name": "B*_0+",
+      "ordinal": 188,
+      "pdg": 10521,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        513,
+        211
+      ],
+      "name": "B_1+",
+      "ordinal": 189,
+      "pdg": 10523,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        521,
+        -321
+      ],
+      "name": "B*_0s0",
+      "ordinal": 190,
+      "pdg": 10531,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        523,
+        -321
+      ],
+      "name": "B_1s0",
+      "ordinal": 191,
+      "pdg": 10533,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        511,
+        411
+      ],
+      "name": "B*_0c+",
+      "ordinal": 192,
+      "pdg": 10541,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        513,
+        411
+      ],
+      "name": "B_1c+",
+      "ordinal": 193,
+      "pdg": 10543,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 6,
+      "dominant_branching_ratio": 0.24,
+      "dominant_products": [
+        4222,
+        -211
+      ],
+      "name": "Lambda_c(2593)+",
+      "ordinal": 194,
+      "pdg": 14122,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        423,
+        211
+      ],
+      "name": "D*_1+",
+      "ordinal": 195,
+      "pdg": 20413,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        413,
+        -211
+      ],
+      "name": "D*_10",
+      "ordinal": 196,
+      "pdg": 20423,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.76,
+      "dominant_products": [
+        433,
+        111
+      ],
+      "name": "D*_1s+",
+      "ordinal": 197,
+      "pdg": 20433,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        523,
+        -211
+      ],
+      "name": "B*_10",
+      "ordinal": 198,
+      "pdg": 20513,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.667,
+      "dominant_products": [
+        513,
+        211
+      ],
+      "name": "B*_1+",
+      "ordinal": 199,
+      "pdg": 20523,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        523,
+        -321
+      ],
+      "name": "B*_1s0",
+      "ordinal": 200,
+      "pdg": 20533,
+      "products_as_probed": null,
+      "status": "OK"
+    },
+    {
+      "channels": 2,
+      "dominant_branching_ratio": 0.5,
+      "dominant_products": [
+        513,
+        411
+      ],
+      "name": "B*_1c+",
+      "ordinal": 201,
+      "pdg": 20543,
+      "products_as_probed": null,
+      "status": "OK"
+    }
+  ],
+  "species_count": 202,
+  "unmapped_policy": "fail_closed_species_set_must_equal_ordinal_table"
+}

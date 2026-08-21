@@ -1,0 +1,19 @@
+# host=wn-pijl-003.nikhef.nl
+# started=2026-08-10T22:31:06+02:00
+# block=10
+# sector=b
+# checkout=43e35be876dd5d881a931cb845ab490ab9b97509
+# parametrised_macro_sha=0d03d191231163a553617333ce0494e09d765d429a7a5b489d530158fc67d6b5
+# scratch_counts_macro_sha=d7be6731b44f5b95950bec6e07fdf4a07002685ee88c97014059001d5916796c
+# frozen_charm_macro_sha=0b810239e6912a11715271dde65ed42c08ae874ed865244262b80a85f8826d2e
+# block_manifest_sha=0509f09e5c0bd297ad129ff7fd026f48196eb1d2e465f6b7d3c90bf7a079df67
+# production_root=/data/alice/ipardoza/hadronization_production/HF_RUN3_V1
+# rows=300
+XCHECK_OK sector=b unresolved_n=0 resolved_n=27788 measured_baryon_pct=4.9302
+XCHECK_OK sector=b unresolved_n=28 resolved_n=27674 measured_baryon_pct=32.0192
+XCHECK_OK sector=b unresolved_n=17 resolved_n=27748 measured_baryon_pct=31.9122
+# counted_files=300 lines=300
+M7_BLOCK block=10 tune=CLOSEPACKING sector=b ub=968 um=1741 rb=894089 rm=1869496 unresolved_rate_pct=0.097929 unresolved_baryon_pct=35.732743 measured_baryon_pct=32.352506 inclusive_baryon_pct=32.355816 relative_shift_pct=0.010232
+M7_BLOCK block=10 tune=JUNCTIONS sector=b ub=1021 um=1735 rb=884798 rm=1883609 unresolved_rate_pct=0.099453 unresolved_baryon_pct=37.046444 measured_baryon_pct=31.960546 inclusive_baryon_pct=31.965604 relative_shift_pct=0.015826
+M7_BLOCK block=10 tune=MONASH sector=b ub=38 um=297 rb=134852 rm=2632343 unresolved_rate_pct=0.012105 unresolved_baryon_pct=11.343284 measured_baryon_pct=4.873238 inclusive_baryon_pct=4.874021 relative_shift_pct=0.016071
+# finished=2026-08-10T22:47:04+02:00

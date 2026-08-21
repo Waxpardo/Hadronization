@@ -1,0 +1,124 @@
+\section{Results and publication status}
+\label{sec:results}
+
+\subsection{Multiplicity-integrated balancing yields}
+
+Table~\ref{tab:integrated} records pooled full-axis balancing yields and their
+ten-block standard errors. The values are retained in a committed plotting-log
+fixture. The fixture contains twelve finite-yield rows with ten finite blocks,
+but it omits the pair-count rows required to reproduce the registered
+integer-exact integrated closure. The numbers are therefore reportable as a
+labelled validation result, not as a closed final-figure source.\claim{R1}
+
+\begin{table}[H]
+\centering
+\caption{Multiplicity-integrated signed balancing yields per trigger. The
+source is the retained nominal validation fixture; the original pair-count log
+needed for integer-exact closure is unavailable.}
+\label{tab:integrated}
+\begin{tabular}{llcc}
+\toprule
+Sector & Tune bundle & Reference meson & Baryon \\
+\midrule
+Beauty & MONASH       & $B^-: 0.11625\pm0.00027$ & $\Lambda_b: 0.01942\pm0.00010$ \\
+Beauty & JUNCTIONS    & $B^-: 0.08730\pm0.00035$ & $\Lambda_b: 0.03653\pm0.00031$ \\
+Beauty & CLOSEPACKING & $B^-: 0.08550\pm0.00023$ & $\Lambda_b: 0.03330\pm0.00022$ \\
+Charm  & MONASH       & $D^-: 0.19345\pm0.00012$ & $\bar\Lambda_c^-: 0.01893\pm0.00005$ \\
+Charm  & JUNCTIONS    & $D^-: 0.17397\pm0.00013$ & $\bar\Lambda_c^-: 0.02402\pm0.00003$ \\
+Charm  & CLOSEPACKING & $D^-: 0.17348\pm0.00010$ & $\bar\Lambda_c^-: 0.02076\pm0.00004$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Relative to MONASH, both non-baseline bundles have a lower integrated
+reference-meson balancing yield and a higher integrated baryon balancing yield
+in the beauty sector. The charm baryon shift is also positive in both bundles,
+while the reference-meson yield is lower. These are comparisons between full
+configuration bundles and do not identify their microscopic cause. They are
+also conditioned on job completion. The recorded attempt rates are tune
+dependent: 0/1,000 for MONASH, 63/1,063 for JUNCTIONS, and 64/1,064 for
+CLOSEPACKING. Because the recorded hang is in
+\pathcode{JunctionSplitting} and event-content independence is unmeasured,
+these comparisons are not accepted publication inferences.
+
+\subsection{Beauty baryon/reference-meson trend}
+
+The committed class-resolved table provides the $\Lambda_b/B^-$ signed
+balancing-yield ratio for all eleven common classes. Table~\ref{tab:endpoints}
+shows its lowest- and highest-activity endpoints and the primary endpoint
+contrast. The central contrast is formed as $R(\mathrm{c11})-R(\mathrm{c1})$;
+its quoted uncertainty here is statistical only.\claim{R2}
+
+\begin{table}[H]
+\centering
+\caption{Endpoint contrast of the beauty $\Lambda_b/B^-$ balancing-yield
+ratio. Uncertainties in this table are ten-block statistical SEMs.}
+\label{tab:endpoints}
+\begin{tabular}{lccc}
+\toprule
+Tune bundle & $R(\mathrm{c1})$ & $R(\mathrm{c11})$ & $R(\mathrm{c11})-R(\mathrm{c1})$ \\
+\midrule
+MONASH       & $0.18645\pm0.00692$ & $0.16192\pm0.00258$ & $-0.02453\pm0.00739$ \\
+JUNCTIONS    & $0.21408\pm0.00873$ & $0.54317\pm0.00590$ & $+0.32909\pm0.01053$ \\
+CLOSEPACKING & $0.21624\pm0.00765$ & $0.50344\pm0.01129$ & $+0.28719\pm0.01364$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The non-baseline bundle contrasts exceed the MONASH contrast in the committed
+central table. The stored systematic verdict gives contrast differences of
+$0.35362\pm0.16134$ for JUNCTIONS minus MONASH and
+$0.31172\pm0.15666$ for CLOSEPACKING minus MONASH, where the uncertainty is the
+stored combined total.\claim{R3} Those totals exclude S4 and descend from the
+2026-08-21 two-SEM correction. They are
+included to synchronize the draft with the measured repository state, not to
+license a final significance statement. No trial correction across the 72
+stored comparisons or cross-class covariance estimate is available.
+
+The paper-facing charm baryon/reference-meson quantity uses the signed
+$\bar\Lambda_c^-/D^-$ registry definition. A complete machine-readable charm
+matrix and an accepted P8 canvas are absent, so this draft quotes no charm
+ratio trend and makes no charm-versus-beauty ratio comparison.\claim{R4}
+
+\subsection{Blocked scientific figure programme}
+
+The machine-readable figure manifest records eight candidate roles and zero
+accepted outputs. Accordingly, this build contains no scientific figure
+environment and no image copied from the historical paper tree. It also does
+not use the three internal explanatory SVGs.\claim{F0}
+
+Table~\ref{tab:figure-programme} preserves the intended paper order without
+turning a planned role into a figure claim. In particular, roles P2 and P3
+remain the charm and beauty correlation figures. The later balancing roles use
+the current combined-canvas layout rather than the obsolete pair of separate
+charm and beauty files.
+
+\begin{table}[H]
+\small
+\centering
+\caption{Planned publication figure roles. ``Candidate'' is the manifest
+status, not acceptance. No row contributes image bytes to this manuscript
+build.}
+\label{tab:figure-programme}
+\begin{tabularx}{\textwidth}{c l X l}
+\toprule
+Order & Role & Required current presentation & Status \\
+\midrule
+P1 & Event classification & Shared 13.6~TeV spectrum and common c1--c11 boundaries & Candidate \\
+P2 & Charm correlations & Per-trigger MONASH charm OS, SS, and OS--SS angular correlations & Candidate \\
+P3 & Beauty correlations & Per-trigger MONASH beauty OS, SS, and OS--SS angular correlations & Candidate \\
+P4/P6 & Integrated yields & One V-INTEGRATED canvas may carry charm and beauty after an explicit packaging ruling & Candidate \\
+P5/P7 & Activity-dependent yields & Combined charm and beauty canvas; V-FULL versus V-EXTREMES remains open & Candidate \\
+P8 & Signed ratios & Registry-resolved $\bar\Lambda_c^-/D^-$ and $\Lambda_b/B^-$ ratios & Candidate \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Acceptance requires the exact ROOT-derived output bytes at the canonical
+role-specific result path, configuration and source digests, selector
+authorization, central and ten-block input identities, machine-readable
+points, a v1 acceptance receipt, pinned runtime, and clean visual and
+scientific review. The inaccessible external products, absent final bytes,
+incomplete S4 result, integrated-log gap, unbounded hang-selection risk,
+unrevalidated external pair sidecars, and absent corrected rerenders remain
+release blockers.\claim{F9}
