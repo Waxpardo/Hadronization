@@ -6,9 +6,9 @@ Both implementations of the contract parser --
 `plotting/improvedPlotting_THnSparse.C` -- resolve the key prefix from the
 config's own content, reject a config that carries both families or neither,
 reject a prefix that disagrees with the schema it carries, and keep
-`RequireExactKeys` strict against the RESOLVED key set. It also establishes that
-the committed v2 configuration still resolves to the identical key set and the
-identical contract values it resolved to before the change.
+`RequireExactKeys` strict against the RESOLVED key set. The current executable
+configuration is v3 because HF_RUN3_V1 pair files carry the v3 species axis;
+the v2 direction remains a constructed parser-compatibility check.
 
 The test cannot establish that a full legacy plotting run is unchanged.
 That would require running the stack on the v2 dataset, and the v2 dataset no
@@ -19,7 +19,7 @@ This source check is not proof of run-level equivalence.
 
 The test covers both directions:
   * a v3 config carrying v2_ keys must FAIL;
-  * a v2 config must still PASS, unchanged.
+  * a syntactically valid v2 key family remains representable.
 """
 import json
 import re
@@ -29,7 +29,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 SHARED = REPO / "plotting/PairInputSelectionUtils.h"
 MACRO = REPO / "plotting/improvedPlotting_THnSparse.C"
-V2_CONFIG = REPO / ("plotting/configuration_multiplicity_reduced_JUNCTIONS"
+V3_CONFIG = REPO / ("plotting/configuration_multiplicity_reduced_JUNCTIONS"
                     "_THnSparse_complete_root.json")
 
 # The eleven schema-scoped fields, without their prefix.
@@ -87,21 +87,32 @@ def expected_keys(prefix):
 check("resolved key set is 14 for v2", len(expected_keys("v2_")) == 14)
 check("resolved key set is 14 for v3", len(expected_keys("v3_")) == 14)
 
-# ---- 4. THE V2 DIRECTION: the committed v2 config still resolves ----------
-config = json.loads(V2_CONFIG.read_text())["pair_input_selection_contract"]
-check("committed v2 config carries exactly the v2 resolved key set",
-      set(config) == expected_keys("v2_"),
-      f"unexpected={sorted(set(config) - expected_keys('v2_'))} "
-      f"missing={sorted(expected_keys('v2_') - set(config))}")
-check("committed v2 config declares the v2 schema",
-      config["v2_analysis_schema"].endswith("_v2"),
-      config["v2_analysis_schema"])
-check("committed v2 config was NOT modified to carry v3_ keys",
-      not any(k.startswith("v3_") for k in config))
+# ---- 4. CURRENT V3 DIRECTION: the executable config matches HF_RUN3_V1 ----
+config = json.loads(V3_CONFIG.read_text())["pair_input_selection_contract"]
+check("committed v3 config carries exactly the v3 resolved key set",
+      set(config) == expected_keys("v3_"),
+      f"unexpected={sorted(set(config) - expected_keys('v3_'))} "
+      f"missing={sorted(expected_keys('v3_') - set(config))}")
+check("committed v3 config declares the v3 schema",
+      config["v3_analysis_schema"].endswith("_v3"),
+      config["v3_analysis_schema"])
+check("committed v3 config carries no stale v2_ keys",
+      not any(k.startswith("v2_") for k in config))
+
+# A valid v2 key family remains expressible even though no runnable v2 dataset
+# is retained. This checks the compatibility direction without making a stale
+# v2 configuration the default workflow.
+synthetic_v2 = {
+    ("v2_" + key[3:] if key.startswith("v3_") else key): value
+    for key, value in config.items()
+}
+synthetic_v2["v2_analysis_schema"] = "paul_pair_objects_primary_ground_v2"
+check("constructed v2 contract carries exactly the v2 resolved key set",
+      set(synthetic_v2) == expected_keys("v2_"))
 
 # ---- 5. THE V3 DIRECTION: v2_ keys under a v3 schema must fail ------------
 # Constructed, not committed: this is the config that must be rejected.
-bad = dict(config)
+bad = dict(synthetic_v2)
 bad["v2_analysis_schema"] = "paul_pair_objects_primary_ground_v3"
 # Resolution picks v2_ (that is the family present), and the declared schema
 # then disagrees with the prefix -- which the parser must treat as fatal.

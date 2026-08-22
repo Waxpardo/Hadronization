@@ -50,6 +50,17 @@ def test_all_current_configs_use_the_contract() -> None:
         assert "COMMON ABSOLUTE" not in comment, path
         assert "Each tune resolves" in comment, path
 
+    for name in (
+        "configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json",
+        "configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json",
+    ):
+        contract = json.loads((ROOT / "plotting" / name).read_text())[
+            "pair_input_selection_contract"]
+        assert contract["mode"] == "v3_metadata_only_v1"
+        assert contract["v3_analysis_schema"] == (
+            "paul_pair_objects_primary_ground_v3")
+        assert not any(key.startswith("v2_") for key in contract)
+
 
 def test_cr_holdout_decision_is_exact_and_scoped() -> None:
     policy = json.loads(
