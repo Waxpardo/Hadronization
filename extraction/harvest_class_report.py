@@ -11,7 +11,7 @@ data as the nominal, so every shared row must agree at the precision the logs
 record, with NO tolerance. A control that drifts means the instrument moved, and
 no delta taken with it means anything.
 
-THE DELTAS follow the 2026-08-19 brief: Delta = variation - nominal, SEMs in
+THE DELTAS follow the registered definition: Delta = variation - nominal, SEMs in
 quadrature, flagged below 2 SEM. See `harvest_yield_deltas`.
 """
 

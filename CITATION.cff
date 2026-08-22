@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: >-
-  This citation record is provisional. The repository is PUBLIC-BLOCKED, and
-  the owner must approve authorship, author order, affiliations, identifiers,
-  release identity, and licensing before publication.
+  This citation record is provisional. Authorship, author order, affiliations,
+  identifiers, release identity, and licensing are not final and require
+  approval before publication.
 title: Heavy-flavour quantum-number balancing in PYTHIA 8 as a function of event activity
 type: software
 authors:

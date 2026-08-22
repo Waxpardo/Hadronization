@@ -158,7 +158,7 @@ def deduplicate_by_trigger(
     registry-weighted replication, not a physical total. Because the replication
     factor differs by sector it does NOT cancel in any cross-sector quantity:
     it inflated the total by ~24.2x and biased the charm/beauty split by
-    +0.74 pp. See private error-ledger entry E5.
+    +0.74 pp.
 
     FAIL-CLOSED ON DISAGREEMENT. Copies of one trigger's closure must be
     bit-identical, because they are literally the same in-memory object written
@@ -284,7 +284,7 @@ def preflight(merged: Path, expected: set[str]) -> None:
 def project(merged: Path, root_bin: str, workdir: Path, expected: int) -> Path:
     """Project every pair file, and refuse to continue if any of them failed.
 
-    THE DEFECT THIS CLOSES (review finding A5). The embedded macro logs
+    THE DEFECT THIS CLOSES. The embedded macro logs
     `PROJ_ERROR` and CONTINUES when a file cannot be opened, and this reader
     only required the eventual `PROJ_DONE` marker. A directory holding all 300
     expected filenames, one of them corrupt, therefore passed the filename
@@ -339,7 +339,7 @@ def main() -> int:
                     help="decay-parent map for the experiment-comparable grouping; "
                          "REQUIRED and deliberately without a default -- the old "
                          "default was the excluded historical v1 map, which does not "
-                         "conjugate antiparticle decays (private error-ledger entry E1)")
+                         "conjugate antiparticle decays")
     ap.add_argument("--blocks", nargs="*", default=None,
                     help="ten block directories; SEM wiring, not yet implemented")
     args = ap.parse_args()

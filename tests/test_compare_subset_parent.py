@@ -15,7 +15,7 @@ name `binomial`. That is not the null the project now uses for integrity work --
 I2 moved to the robust `mad` null on 2026-08-13 because the binomial one is
 misspecified for event-clustered pair counts. It is pinned here because THIS
 TEST IS THE AUDIT TRAIL OF A PUBLISHED NUMBER: "30 of 88 at |z| > 4" is quoted
-in ERROR_RECORD E4 and elsewhere, and it was computed with the binomial null.
+in the project record, and it was computed with the binomial null.
 Recomputing history under a new null and keeping the old caption would be a
 quiet rewrite. So the historical computation stays pinned, by name, and the
 recalibrated count is pinned separately in check 4.
@@ -25,7 +25,7 @@ Six checks, and each can fail independently:
   2. a negative control      -- parent against itself flags nothing;
   3. an injected positive    -- a synthetic 10 sigma bin is caught;
   4. the same case under MAD -- reproduces the recalibrated flagged set, and
-                                the E4 headline bins survive the wider null;
+                                the headline bins survive the wider null;
   5. MAD negative control    -- parent against itself flags nothing (this one
                                 exercises the degenerate sigma^ = 0 branch);
   6. MAD injected positive   -- the synthetic bin is still caught.
@@ -90,7 +90,7 @@ def main() -> int:
     failures = []
 
     # ---- 1. the known case ------------------------------------------------
-    # `null="binomial"` is DELIBERATE: this reproduces the historical E4
+    # `null="binomial"` is DELIBERATE: this reproduces the historical
     # computation, not the project's current integrity null. See the docstring.
     scale, f, rows, flagged, untestable, missing, _diag = compare(
         subset, parent, null="binomial", z_threshold=4.0, expect_scale=10.0)

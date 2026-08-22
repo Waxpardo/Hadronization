@@ -3,7 +3,7 @@
 
 Every expected value below is worked out longhand beside the assertion.
 Comparing the tool against its own output would prove agreement, not
-correctness (ERROR_RECORD E1), so no anchor here is a captured value.
+correctness, so no anchor here is a captured value.
 """
 
 from __future__ import annotations

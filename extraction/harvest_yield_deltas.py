@@ -7,7 +7,7 @@ subsample blocks. The row's identity is the five fields GOLDEN_OUTPUTS 9.9.1
 requires, with the multiplicity class parsed out of the bin name by
 `harvest_class_axis` (run record 18.2).
 
-THE ESTIMATOR, from the 2026-08-19 brief:
+THE REGISTERED ESTIMATOR:
 
     Delta      = variation - nominal                       (absolute)
     SEM(Delta) = sqrt(SEM_variation^2 + SEM_nominal^2)     (independent arms)

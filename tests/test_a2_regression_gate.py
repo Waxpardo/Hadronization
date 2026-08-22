@@ -5,7 +5,7 @@ THE DEFECT THIS CLOSES. The pre-registration makes the regression check a gate
 on consuming the permissive output. Between submitting the jobs and mechanizing
 this, the gate existed only as a sentence in a document. A sentence does not
 stop a script, and 300 well-formed output directories protected by prose is the
-exact shape of accident this project keeps writing error-record entries about.
+exact shape of accident this project has met before.
 
 EXTENDED 2026-08-13 for the named variation SET. The gate used to pin one sha
 in the analyzer. It now reads `config/a2_variations_v1.json` and requires the

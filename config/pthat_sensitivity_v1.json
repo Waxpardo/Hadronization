@@ -113,7 +113,7 @@
       "CLOSEPACKING"
     ]
   },
-  "margin_provenance": "Data-independent engineering targets introduced for this publication-readiness workflow, not values inherited from Paul or the paper. They may not be loosened after inspecting pilot results and require explicit Gate-B owner disposition.",
+  "margin_provenance": "Data-independent engineering targets introduced for publication readiness, not values inherited from Paul or the paper. They may not be loosened after inspecting pilot results and require explicit Gate-B disposition.",
   "multiplicity_bins": [
     0.0,
     10.0,

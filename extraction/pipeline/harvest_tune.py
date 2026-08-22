@@ -85,8 +85,8 @@ def closure_verdict(text: str) -> dict:
     if (measured.get("object_content_sumw2_closure_checks") == "1800"
             and measured.get("invariant_metadata_checks") == "600"):
         failures.append(
-            "1800/600 is the v2-sidecar resolution failure mode (review finding "
-            "A4): the closure ran against the wrong schema and still reports "
+            "1800/600 is the v2-sidecar resolution failure mode: the closure "
+            "ran against the wrong schema and still reports "
             "errors=0. This is NOT a pass.")
 
     return {"verdict": "PASS" if not failures else "FAIL",

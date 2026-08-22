@@ -2,12 +2,12 @@
 """A generator's --check must be SEEN to fail, not merely fail.
 
 THE DEFECT THIS CLOSES. `--check` returns non-zero correctly, but every place it
-was read during this work read it through a pipe:
+reads it does so through a pipe:
 
     python3 tools/apply_class_labels.py --check | tail -3   # $? is tail's
 
 `$?` after a pipeline is the LAST command's status, so a failing check reported
-success three separate times in three sessions. It is the E2 shape once more --
+success three separate times. The same defect shape has appeared before --
 a check that cannot be observed to fail is not a check - and it is easy to
 reintroduce, because the pipeline reads naturally.
 

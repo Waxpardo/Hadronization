@@ -1,17 +1,17 @@
 // F4 -- the decay-parent probe, against the PINNED PYTHIA 8.317 install.
 //
-// STEP 1 IS A GATE, and the proposal says so: the map may only be derived after
+// STEP 1 IS A GATE: the map may only be derived after
 // the stabilisation pass if decay channels REMAIN READABLE once
 // `mayDecay(id,false)` has been applied. The producer disables decays for every
 // heavy hadron (heavyflavourcorrelations_status.cpp:373), so if disabling also
 // clears the channel tables, the map has to be derived BEFORE stabilisation
-// instead. The proposal records both paths; this probe decides which one is
+// instead. Both paths are open; this probe decides which one is
 // live, by measurement rather than by reading the PYTHIA source.
 //
 // STEP 2, only if step 1 passes: for every sector-charged species in the
 // ordinal table, the dominant decay channel and its branching fraction, taken
 // from the generator's own tables. Never hand-written -- that is the whole
-// point of F4 and the reason the proposal forbids a typed-in map.
+// point of F4 and the reason a typed-in map is forbidden.
 //
 // Emits machine-readable lines; the JSON artifact is assembled by the caller so
 // that hashing and species-set validation happen in one place.

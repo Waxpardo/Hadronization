@@ -170,7 +170,7 @@ def main() -> int:
     # I3. `flags_total` was accumulated and then discarded, so this tool could
     # report hundreds of I2 failures and still exit 0 -- and an exit status is
     # exactly what a driver script reads. An integrity check whose result cannot
-    # reach the caller is not a gate. (Review finding A12.)
+    # reach the caller is not a gate.
     status = 0
     if mism:
         status = 3

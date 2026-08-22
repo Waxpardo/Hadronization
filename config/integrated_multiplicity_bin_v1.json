@@ -3,10 +3,10 @@
   "what": "The multiplicity-INTEGRATED histogram entry, for measurement renders.",
   "why": "The eleven-class THREETUNE configuration carries no integrated bin, so a render from it emits 132 rows and no integrated arm. The sealed central's integrated numbers come from the closure configuration below, which holds the same eleven class entries plus this twelfth. Copying the entry rather than writing one keeps the variation's integrated bin identical to the nominal's.",
   "source_file": "plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED_CLOSURE.json",
-  "source_deploy": "archived pre-rebuild figure deploy (external)",
+  "source_deploy": "archived figure deploy (external)",
   "source_sha256": "793344f36257e72fde6456f3f7232311ebacaf0f3d449e24f9dfa55b899887ae",
   "source_run": "vintegrated_closure.log, 2026-08-18 10:18, 144 UNCERTAINTY_MATRIX rows",
-  "read_only": "The figure branch and its deploy were read and not modified.",
+  "read_only": "The figure branch and its deploy are inputs only; neither was modified.",
   "recorded": "2026-08-19"
  },
  "entry": {

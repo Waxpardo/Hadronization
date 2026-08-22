@@ -6,7 +6,7 @@ arithmetic can be checked by eye. The contributions are chosen to make 3-4-5
 triangles, so every total below is exact in binary floating point and can be
 verified without running anything.
 
-THE CASE THE BRIEF ASKS FOR IS THE FIRST ONE: a cell where one source is
+THE REGISTERED CASE IS THE FIRST ONE: a cell where one source is
 resolved and contributes its |Delta|, and another is NOT resolved and
 contributes its SEM. Ruling A1 is continuous, so no branch on resolution appears
 anywhere in the arithmetic, and this test is what holds that true.

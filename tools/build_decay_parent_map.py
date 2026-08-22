@@ -7,15 +7,15 @@ into. Nothing else unblocks that regrouping: the diquark-structure grouping come
 free from the ordinal table's category column, but the decay-parent convention --
 the one an experiment can compare against -- needs the generator's own tables.
 
-DERIVED, NEVER HAND-WRITTEN. The proposal is explicit that a typed-in map is not
-acceptable, because a hand table drifts silently from the generator it claims to
+DERIVED, NEVER HAND-WRITTEN. A typed-in map is not acceptable, because a hand
+table drifts silently from the generator it claims to
 describe. Every row here comes from `f4_probe`, linked against the **pinned
 8.317 install** the producer itself links against.
 
 THE GATE THAT HAD TO PASS FIRST. The producer disables decays for every heavy
 hadron (`heavyflavourcorrelations_status.cpp:373`). If disabling also cleared the
 channel tables, the map would have to be derived BEFORE the stabilisation pass --
-the proposal records both paths and left the question open. **Measured: all 202
+both paths were open. **Measured: all 202
 species keep every channel after `mayDecay(id,false)`**, so the map derives in
 the state the analysis actually runs in. The probe re-checks this on every run
 and this assembler refuses output if the verdict is not `READABLE_AFTER_DISABLE`.
@@ -101,7 +101,7 @@ def heavy_flavour_sign(pdg: int) -> tuple[int, int]:
         (even) so D+ (411) has `q_c = +1`; beauty is 5 (odd) so B+ (521) is
         `u bbar` and has `q_b = -1`.
 
-    CORRECTED 2026-08-13 (review finding A11). This function previously read
+    CORRECTED 2026-08-13. This function previously read
     "the sign follows the code for mesons and for charm baryons, but INVERTS for
     beauty baryons". That is backwards on both counts: relative to production it
     inverted beauty MESONS (returning +1 for B+ where production gives -1) and

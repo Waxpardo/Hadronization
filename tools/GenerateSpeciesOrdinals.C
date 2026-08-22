@@ -1,7 +1,7 @@
-// Stage-1 (B15/registry proposal): derive the sector-charged species ordinal
+// Stage 1: derive the sector-charged species ordinal
 // table from a produced raw file's heavy_stability_audit tree.
 //
-// WHY DERIVED, NOT HAND-WRITTEN. The proposal's F4 rule is that mapping tables
+// WHY DERIVED, NOT HAND-WRITTEN. The F4 rule is that mapping tables
 // come from PYTHIA's own state, never from a table someone typed. The same
 // applies here: the ordinal table is the species axis's index space, and a
 // hand-maintained list would drift from the generator the moment PYTHIA moved.

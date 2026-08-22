@@ -135,7 +135,7 @@ def combined_systematic(nominal_value: float, nominal_sem: float,
     # source. Its variation SEM is therefore zero; the nominal derived
     # quantity still has finite sampling uncertainty and the same two-SEM rule
     # gives SEM(delta)=nominal_sem. Omitting this term is one of the four
-    # two-sigma classification changes identified by the 2026-08-21 audit.
+    # two-sigma classification changes recorded on 2026-08-21.
     quoted[S5_TERM] = Delta(0.0, nominal_sem * scale, 10,
                             "measured_structural_zero_two_sem")
     variation_sems[S5_TERM] = 0.0

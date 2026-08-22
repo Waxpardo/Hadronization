@@ -7,7 +7,7 @@ reports the delta per tune per diquark-structure category.
 
 TWO ESTIMATORS, BOTH REPORTED. Pre-registration 2.2 registers the relative
 shift formed INSIDE each block, averaged over ten, SEM over those ten, dof 9.
-The 2026-08-19 brief specifies means-first with SEMs in quadrature. They are
+The second estimator is means-first with SEMs in quadrature. They are
 different operations, so this tool prints both and never silently picks one.
 
 LOW-STAT is the pre-registration 2.3 rule, reused verbatim: a class whose block

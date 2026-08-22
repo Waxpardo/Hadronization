@@ -61,8 +61,7 @@ SimulationScripts/ccbarcorrelations_status_JUNCTIONS
 # Ignored historical paper archive; the selected package is `paper/*.tex`.
 Paper/Heavy_flavour_hadronisation_model_paper/
 
-# Private working material and generated scratch. These paths are inventoried
-# privately and are preserved, not deleted.
+# Local working material, never tracked.
 .codex-tmp/
 /LEARNING_ROADMAP.md
 /LEARNING_ROADMAP.md.bak-*
@@ -92,7 +91,7 @@ submit_analysis_*.sub
 # Burned-seed ledger is machine/campaign state, not code
 config/burned_seeds.txt
 
-# Third-party writing standard source. Retain privately; never export it.
+# Third-party document, never tracked.
 /docs/writing_standard/ASD-STE100_ISSUE9.pdf
 
 # Third-party literature. Never committed.

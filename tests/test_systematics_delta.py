@@ -3,7 +3,7 @@
 
 Every expected value below is HAND-COMPUTED and written out longhand in the
 docstring or comment beside it. Comparing a tool against its own output proves
-agreement, not correctness (E1), so nothing here is a golden value captured
+agreement, not correctness, so nothing here is a golden value captured
 from a previous run.
 """
 
@@ -181,7 +181,7 @@ def test_ruling_a1_contribution_is_max_abs_or_sem() -> None:
     assert close(contribution_of(Delta(-3.0, 0.1, 10, "x"), UNRESOLVED_MAX_ABS_OR_SEM), 3.0)
 
 
-def test_ruling_a1_the_worked_example_from_the_brief() -> None:
+def test_ruling_a1_the_registered_worked_example() -> None:
     """resolved 3.0 +- 0.1 and unresolved 1.0 +- 2.0.
 
     contributions: max(3.0, 0.1) = 3.0 ; max(1.0, 2.0) = 2.0

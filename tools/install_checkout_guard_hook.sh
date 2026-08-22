@@ -9,10 +9,10 @@
 #
 # but only for the person who remembers to run it. Raw `git checkout`,
 # `git reset --hard`, `git merge` and `git pull` bypass it completely. That is
-# the gap the v30 self-review named as "the obvious next hardening".
+# the gap named earlier as "the obvious next hardening".
 #
-# THERE IS A SHARPER REASON, discovered on 2026-08-09 and not known when that
-# self-review was written. The Nikhef checkout is DETACHED at 61fe978f, the
+# THERE IS A SHARPER REASON, discovered on 2026-08-09 and not known earlier.
+# The Nikhef checkout is DETACHED at 61fe978f, the
 # commit its 3000 in-flight analysis jobs pin. The guard was committed later, at
 # 7e1f7e7. So on Nikhef, right now:
 #
