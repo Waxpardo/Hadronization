@@ -53,6 +53,8 @@ condor_submit submit_analysis_HF_RUN3_V1.sub
 
 # Non-publication systematic measurement; staged config, log, figures,
 # output assertion, and receipt all stay in its commit-scoped measurement root.
+# Its staged audit canvas gets a wider display frame than the nominal paper
+# figure; the measured uncertainty rows are unchanged and must be complete.
 ./hadronization plot hf_sys_mur_up_variation measure-balancing
 ```
 

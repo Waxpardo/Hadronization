@@ -16,7 +16,12 @@ contract. `plot <variation> measure-balancing` stages every nested canvas path
 under
 `project/results/<campaign>/<commit>/measurements/<dataset>/`, then verifies
 the produced files and publication trees before writing a non-publication
-measurement receipt. It never uses the publication symlink as its output path.
+measurement receipt. Each selector names its campaign-specific three-tune
+harvest configuration. The staged audit copy widens nominal display frames so
+a legitimate systematic shift is not clipped; uncertainty rows are calculated
+before axes are applied and the receipt requires the exact configured identity
+set and complete-root tag. It never uses the publication symlink as its output
+path.
 
 ```text
 tracked checkout

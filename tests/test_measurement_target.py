@@ -139,6 +139,7 @@ def test_the_unified_cli_routes_measurements_through_the_wrapper() -> None:
     assert '"${project_base}/tools/render_measurement.sh"' in text
     assert "HADRONIZATION_MEASUREMENT_ROOT_EXACT=1" in text
     assert "HADRONIZATION_MEASUREMENT_CONFIG" in text
+    assert 'MEASUREMENT_WIDEN_AXES="${MEASUREMENT_WIDEN_AXES:-1}"' in text
 
 
 def test_the_unified_cli_uses_a_commit_scoped_exact_measurement_root() -> None:
