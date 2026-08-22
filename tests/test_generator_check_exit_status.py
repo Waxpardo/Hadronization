@@ -17,6 +17,8 @@ clean tree exits 0, and a deliberately corrupted configuration exits non-zero -
 so it fails if the generator ever stops detecting drift.
 """
 
+from __future__ import annotations
+
 import json
 import re
 import shutil

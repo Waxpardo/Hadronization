@@ -68,6 +68,12 @@ def test_tracked_routes_are_account_independent() -> None:
             (ROOT / "plotting").glob("configuration_*.json")):
         assert "/data/alice/ipardoza" not in path.read_text(), path
 
+    makefile = (ROOT / "Makefile").read_text()
+    nikhef = (ROOT / "config/sites/nikhef.conf").read_text()
+    assert "$(HADRONIZATION_DATA_ROOT)/project/runs" in makefile
+    assert "pythia_stock_8317/install" in nikhef
+    assert "${HADRONIZATION_DATA_ROOT}" in nikhef
+
 
 if __name__ == "__main__":
     test_per_tune_class_contract()
