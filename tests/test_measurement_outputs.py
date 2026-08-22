@@ -13,13 +13,14 @@ real 2026-08-19 15:14 render, with the mtimes and the window read off the
 cluster, and it MUST fail the assertion.
 """
 import sys
+import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "tools"))
 
 from assert_measurement_outputs import (  # noqa: E402
-    assess, files_in_window, missing_artifacts)
+    assess, discover_publication_trees, files_in_window, missing_artifacts)
 
 failures = []
 
@@ -108,6 +109,22 @@ check("a render missing its own artifacts FAILS",
       incomplete["passed"] is False
       and incomplete["missing_measurement_artifacts"] == ["plots/x.pdf"],
       str(incomplete))
+
+with tempfile.TemporaryDirectory() as temporary:
+    root = Path(temporary)
+    checkout = root / "checkout"
+    external = root / "external-results"
+    (checkout / "plotting").mkdir(parents=True)
+    external.mkdir()
+    (checkout / "plotting" / "Plots").symlink_to(
+        external, target_is_directory=True
+    )
+    discovered = discover_publication_trees([str(checkout)])
+    check(
+        "the ignored publication symlink resolves to its external target",
+        discovered == [str(external.resolve())],
+        str(discovered),
+    )
 
 print(f"\n{'FAILED: ' + ', '.join(failures) if failures else 'ALL CHECKS PASS'}")
 sys.exit(1 if failures else 0)

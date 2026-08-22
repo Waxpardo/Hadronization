@@ -88,7 +88,17 @@ def discover_publication_trees(scan_bases) -> list[str]:
     for base in scan_bases:
         for dirpath, dirnames, _ in os.walk(base):
             if os.path.basename(dirpath) == PUBLICATION_DIRECTORY_NAME:
-                found.add(dirpath)
+                found.add(os.path.realpath(dirpath))
+            # os.walk deliberately does not follow directory symlinks by
+            # default. The clean workflow's publication view is exactly such
+            # a symlink (`plotting/Plots` -> external commit-scoped results),
+            # so discover its real target without recursively following any
+            # other link in the checkout.
+            for dirname in dirnames:
+                if dirname == PUBLICATION_DIRECTORY_NAME:
+                    found.add(
+                        os.path.realpath(os.path.join(dirpath, dirname))
+                    )
             if ".git" in dirnames:
                 dirnames.remove(".git")
     return sorted(found)
