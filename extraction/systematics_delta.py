@@ -197,7 +197,7 @@ def combine_quadrature(terms: dict[str, Delta],
     if s6_policy != "separate":
         raise CombinationPolicyRequired(
             "s6_policy must be 'separate' -- pre-registration 9.6 stands "
-            "(OWNER AMENDMENT A2). A2 is on the M1..M5 partition and is not "
+            "(AMENDMENT A2). A2 is on the M1..M5 partition and is not "
             "summed into per-class c1..c11 totals."
         )
     offenders = S6_TERM_NAMES & set(terms) - drop

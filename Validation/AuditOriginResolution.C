@@ -1150,7 +1150,7 @@ int AuditOriginResolution(const char* inputPath, const char* outputPath,
     auditMetadata.Write();
     TObjString(
         "This audit is diagnostic. Nonzero unresolved trigger candidates "
-        "block full production until explicit owner physics sign-off.")
+        "block full production until explicit physics sign-off.")
         .Write("publication_gate_policy");
     output.Write();
     output.Close();

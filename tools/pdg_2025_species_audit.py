@@ -5,7 +5,7 @@ The committed reference is deliberately small.  It is reproducibly extracted
 from two official PDG files whose URLs and SHA-256 digests are fixed below; the
 23 MB SQLite database is not part of the repository.  Exit status 2 means that
 all mechanical checks passed but the operational registry still needs physics
-review.  It is never a PASS or an owner sign-off.
+review.  It is never a PASS or a physics sign-off.
 """
 
 from __future__ import annotations

@@ -3,8 +3,8 @@
 
 WHY v2 EXISTS. v1 chains each species through its DOMINANT CHANNEL only, so a
 species is assigned WHOLE to one descendant. That put 12.84 % of total weight at
-risk (docs/SECOND_BRANCH_WEIGHT.md). The owner ruled: build v2 with fractional
-splits, do not switch conventions.
+risk (docs/SECOND_BRANCH_WEIGHT.md). The recorded decision: build v2 with
+fractional splits, do not switch conventions.
 
 THE KEY CORRECTION IS SPECIES-LEVEL AGGREGATION, NOT THE SPLIT ITSELF. The
 12.84 % is CHANNEL-level, but the convention assigns to a SPECIES, so two
@@ -23,7 +23,7 @@ ruled. The terminal set is therefore identical to v1's by construction.
 BR SOURCE: PYTHIA 8.317 particleData, the pinned install, via the extended
 probe (all channels). Same source as v1, so v2 is comparable to v1 by
 construction. This is NOT the PDG; see docs/MAP_V2_PREREGISTRATION.md §4, an
-open provenance question for the owner.
+open provenance question.
 
 Usage:
   tools/build_decay_parent_map_v2.py PROBE_OUT --ordinals ... --v1 ... --out ...
@@ -199,7 +199,7 @@ def main() -> int:
             "table": "particleData, channels read after mayDecay(id,false)",
             "is_pdg": False,
             "note": ("NOT the PDG. Same source as v1 so the two are comparable; "
-                     "switching to PDG values is an open owner decision recorded "
+                     "switching to PDG values is an open decision recorded "
                      "in docs/MAP_V2_PREREGISTRATION.md section 4."),
         },
         "pythia_version": v1["pythia_version"],

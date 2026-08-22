@@ -11,10 +11,10 @@ absent one.
 
 THE RULES IT APPLIES, none of them chosen here:
 
-    A1 (owner, 2026-08-18)   each source contributes max(|D|, SEM(D)) per class,
+    A1 (recorded 2026-08-18) each source contributes max(|D|, SEM(D)) per class,
                              continuously, with no threshold cliff. The 2 SEM
                              flag is presentational and is never a branch.
-    A2 (owner, 2026-08-18)   S6/A2 is on the M1..M5 partition and is NEVER
+    A2 (recorded 2026-08-18) S6/A2 is on the M1..M5 partition and is NEVER
                              summed into a c1..c11 total.
     section 9.1              mu_F and PDF act on the same object. If both are
                              non-negligible, quote the larger and drop the other.

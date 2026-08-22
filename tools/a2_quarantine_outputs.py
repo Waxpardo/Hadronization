@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Quarantine the A2 permissive outputs when the regression has FAILED.
 
-Owner ruling, 2026-08-13: do not leave well-formed outputs on disk protected
+Decision recorded 2026-08-13: do not leave well-formed outputs on disk protected
 only by a paragraph. If the variation cannot reproduce the baseline, its 300
 output directories are not a measurement -- they are 300 plausible-looking
 directories that will eventually be read by someone who did not read the prose.

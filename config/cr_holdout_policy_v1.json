@@ -14,5 +14,5 @@
     "reporting": "Attempt attrition is disclosed as measured and is not corrected away or converted into an event weight."
   },
   "interpretation": "This accepts the recorded approximately-six-percent CR campaign attrition. It is not a universal tolerance for future campaigns; a materially different rate or failure mechanism requires a new recorded decision.",
-  "evidence_origin": "private pre-rebuild RELEASE_BLOCKERS.md adversarial-remediation amendment, 2026-08-21"
+  "evidence_origin": "pre-rebuild adversarial-remediation amendment, 2026-08-21; record held in the internal repository"
 }

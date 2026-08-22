@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate balancing-yield variants from the tune-local percentile contract.
 
-Three variants of the same observable are under owner evaluation, and none is a
+Three variants of the same observable are under evaluation, and none is a
 down-selection of another:
 
   V-FULL        every multiplicity class overlaid (the canvas as it stands)
