@@ -22,6 +22,9 @@ Usage: ./hadronization COMMAND [arguments]
       Run the repository contract suite. --portable allows an off-pin local
       ROOT/PYTHIA environment and is never a production certification.
 
+  build
+      Build the pinned heavy-flavour producer in the current site profile.
+
   dataset DATASET_KEY
       Resolve and display one named dataset route.
 
@@ -75,6 +78,10 @@ case "${command_name}" in
       make -C "${project_base}" check
     fi
     [[ "$#" -eq 0 ]] || { echo "ERROR: unexpected check arguments" >&2; exit 2; }
+    ;;
+  build)
+    [[ "$#" -eq 0 ]] || { usage >&2; exit 2; }
+    make -C "${project_base}" build
     ;;
   dataset)
     [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }

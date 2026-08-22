@@ -34,6 +34,7 @@ and [`cr_holdout_policy_v1.json`](config/cr_holdout_policy_v1.json).
 ./hadronization site
 ./hadronization check --portable        # local source-development check
 ./hadronization check                   # pinned Nikhef certification
+./hadronization build                   # pinned producer build on Nikhef/STBC
 ./hadronization dataset hf_run3_v1_candidate
 ```
 
