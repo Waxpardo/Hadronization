@@ -55,6 +55,30 @@ resolve_dataset() {
   export HADRONIZATION_DATASET="${dataset_key}"
 }
 
+prepare_plot_output_plane() {
+  local commit output_link output_target existing_target
+  commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
+  output_link="${project_base}/plotting/Plots"
+  output_target="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/plotting"
+  mkdir -p "${output_target}"
+  if [[ -L "${output_link}" ]]; then
+    existing_target="$(readlink "${output_link}")"
+    if [[ "${existing_target}" != "${output_target}" ]]; then
+      echo "ERROR: ${output_link} points to ${existing_target}, expected ${output_target}" >&2
+      echo "       Preserve or migrate the existing run before changing the link." >&2
+      exit 1
+    fi
+  elif [[ -e "${output_link}" ]]; then
+    echo "ERROR: ${output_link} is checkout-local output state." >&2
+    echo "       Move it under ${HADRONIZATION_RESULTS_ROOT} before plotting." >&2
+    exit 1
+  else
+    ln -s "${output_target}" "${output_link}"
+  fi
+  export HADRONIZATION_MEASUREMENT_ROOT="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/measurements"
+  printf 'HADRONIZATION_PLOT_OUTPUT=%s\n' "${output_target}"
+}
+
 command_name="${1:-help}"
 if [[ "$#" -gt 0 ]]; then shift; fi
 
@@ -69,6 +93,7 @@ case "${command_name}" in
     printf 'HF_PRODUCTION_ROOT=%s\n' "${HF_PRODUCTION_ROOT}"
     printf 'HADRONIZATION_ANALYSIS_ROOT=%s\n' "${HADRONIZATION_ANALYSIS_ROOT}"
     printf 'HADRONIZATION_MERGED_ROOT=%s\n' "${HADRONIZATION_MERGED_ROOT}"
+    printf 'HADRONIZATION_RESULTS_ROOT=%s\n' "${HADRONIZATION_RESULTS_ROOT}"
     ;;
   check)
     if [[ "${1:-}" == "--portable" ]]; then
@@ -131,6 +156,7 @@ case "${command_name}" in
     [[ "$#" -ge 1 ]] || { usage >&2; exit 2; }
     dataset_key="$1"; shift
     resolve_dataset "${dataset_key}"
+    prepare_plot_output_plane
     if [[ "$#" -eq 0 ]]; then set -- all; fi
     DATASET_SELECTOR="${selector}" \
       "${project_base}/plotting/run_paper_plots.sh" "$@"

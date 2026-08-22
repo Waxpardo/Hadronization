@@ -73,9 +73,13 @@ def test_tracked_routes_are_account_independent() -> None:
     assert "$(HADRONIZATION_DATA_ROOT)/project/runs" in makefile
     assert "pythia_stock_8317/install" in nikhef
     assert "${HADRONIZATION_DATA_ROOT}" in nikhef
+    assert "HADRONIZATION_RESULTS_ROOT" in nikhef
     command = (ROOT / "hadronization").read_text()
     assert "  build)" in command
     assert 'make -C "${project_base}" build' in command
+    assert "prepare_plot_output_plane" in command
+    assert 'output_link="${project_base}/plotting/Plots"' in command
+    assert "HADRONIZATION_RESULTS_ROOT" in command
 
 
 if __name__ == "__main__":

@@ -43,6 +43,7 @@ Jobs/HF/**/hf_*.root
 
 # Ignore generated plot outputs
 plotting/Plots/
+plotting/Plots
 plotting/**/Plots/
 Balancing_and_Sampling/**/Plots/
 

@@ -77,6 +77,7 @@ Large data always live outside Git:
 ```text
 ${HADRONIZATION_DATA_ROOT}/
   project/runs/                 seed ledger and sealed campaign freezes
+  project/results/              plots, receipts, and measurements by commit
   hadronization_production/   promoted raw campaign files
   hadronization_analysis/     per-job reductions and validation
   hadronization_merged/       central and ten-block pair products

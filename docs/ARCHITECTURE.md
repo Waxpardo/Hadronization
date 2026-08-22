@@ -5,7 +5,9 @@
 Git is the control plane: source, scientific contracts, schemas, registries,
 selectors, and tests. Nikhef storage is the data plane: raw ROOT files,
 seed ledgers, canonical freezes, per-job reductions, merged objects, and
-harvest outputs. Mutable state never lives in the checkout. A checkout can be
+harvest outputs. Plot outputs are routed through an ignored `plotting/Plots`
+symlink to `project/results/<campaign>/<commit>/plotting`. Mutable state never
+lives in the checkout. A checkout can be
 replaced without moving the data plane, and a laptop can disappear without
 interrupting the pipeline.
 
