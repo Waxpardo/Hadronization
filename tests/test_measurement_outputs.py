@@ -43,7 +43,7 @@ def check(label, condition, detail=""):
 #
 # 1787145242 - 1787144985 = 257 s = 4 min 17 s, which is 15:09:45 to 15:14:02.
 # 1787145242 - 1787138394 = 6848 s = 1 h 54 min 8 s, which is 13:19:54 to 15:14:02.
-PUBLICATION = ("/data/alice/ipardoza/sys_plot_deploy/plotting/Plots"
+PUBLICATION = ("${HADRONIZATION_DATA_ROOT}/sys_plot_deploy/plotting/Plots"
                "/THnSparseCompleteRoot_HF_RUN3_V1")
 STEM = f"{PUBLICATION}/global_balancing_plots_multiplicity_HF_RUN3_V1_THREETUNE"
 HISTORICAL_ENTRIES = [

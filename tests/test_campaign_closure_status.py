@@ -28,7 +28,7 @@ def check(label, condition, detail=""):
 
 def marker(tune: str) -> str:
     return (f"CANONICAL_PAIR_BLOCK_CLOSURE_PASS tune={tune} "
-            f"report=/data/alice/ipardoza/hadronization_analysis/X/validation/y.log")
+            "report=${HADRONIZATION_ANALYSIS_ROOT}/X/validation/y.log")
 
 
 ALL_THREE = "\n".join(marker(t) for t in ("MONASH", "JUNCTIONS", "CLOSEPACKING"))

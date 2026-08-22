@@ -98,9 +98,9 @@ def test_agrees_at_recorded_precision() -> None:
 
 CENTRAL_LOG = """
     config: plotting/harvest_configs/configuration_multiplicity_HF_SYS_MUR_UP_x.json
-Beauty central resolver MONASH: base=/data/alice/ipardoza/hadronization_merged, tag=complete_root_HF_RUN3_V1
-Beauty subsample resolver MONASH: base=/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples
-Charm central resolver MONASH: base=/data/alice/ipardoza/hadronization_merged, tag=complete_root_HF_RUN3_V1
+Beauty central resolver MONASH: base=${HADRONIZATION_MERGED_ROOT}, tag=complete_root_HF_RUN3_V1
+Beauty subsample resolver MONASH: base=${HADRONIZATION_MERGED_ROOT}/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples
+Charm central resolver MONASH: base=${HADRONIZATION_MERGED_ROOT}, tag=complete_root_HF_RUN3_V1
 """
 
 VARIATION_LOG = CENTRAL_LOG.replace("HF_RUN3_V1", "HF_SYS_MUR_UP")
