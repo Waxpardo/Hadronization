@@ -9,11 +9,12 @@ down-selection of another:
   V-INTEGRATED  multiplicity-integrated, one point per species per tune
 
 THE INVERSION TRAP, and why rank is derived from N_ch and never from the label.
-The class percentiles are TOP percentiles: the fraction of minimum-bias events
-AT OR ABOVE the boundary. A low-activity class therefore carries a LARGE number.
-c1 spans 88.2-100.0% and is the LOWEST multiplicity class; c11 spans 0.0-8.4%
-and is the HIGHEST. Reading "88.2-100.0%" as "the high one" is the natural
-misreading, and a legend that hand-labels the extremes will make it eventually.
+The class percentiles are TOP percentiles: the fraction of the tune's own
+events AT OR ABOVE the boundary. A low-activity class therefore carries a LARGE
+number. c1 spans 90.0-100.0% and is the LOWEST multiplicity class; c11 spans
+0.0-1.0% and is the HIGHEST. Reading "90.0-100.0%" as "the high one" is the
+natural misreading, and a legend that hand-labels the extremes will make it
+eventually.
 
 The contract stores c1 through c11 in ascending activity.  Plain-language rank
 and percentile text are both derived from that order, so neither can drift from
@@ -336,6 +337,12 @@ BARYONMESON_DEFERRED_SIGMA = True
 # window holds the data; the data is not cropped to the window. The envelope
 # stays here as a number with a source, because a bare 4.0 tells a later reader
 # nothing about what it must contain.
+#
+# PROVENANCE AND STATUS. The render measured this envelope on the retired class
+# axis, in bin hDPhic9_MB17p124_26p154. That bin name belongs to the retired
+# axis and has no counterpart in the tune-local percentile contract. The two
+# values are a display-only bound: they size the y-axis window and enter no
+# result. A re-measurement waits for the first accepted percentile-axis render.
 BARYONMESON_TUNE_RATIO_ENVELOPE = (2.711630660826422, 2.8484012581559983)
 BARYONMESON_TUNE_RATIO_ENVELOPE_SOURCE = (
     "JUNCTIONS/MONASH, associate=Lambda_b, bin=hDPhic9_MB17p124_26p154, "

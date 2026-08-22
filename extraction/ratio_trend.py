@@ -15,8 +15,9 @@ TWO ESTIMATORS, AND THE MODEL-FREE ONE LEADS.
                           so the line can be seen to fail.
 
 THE X-AXIS IS THE CLASS INDEX, AND THAT IS A CONVENTION, NOT A MEASUREMENT. The
-classes are not equally spaced in N_ch: c1 spans N_ch 0 to 2 and c11 is open
-above 32. A slope "per class" is therefore a summary of a monotone trend, not a
+classes are not equally spaced in N_ch, and every tune resolves its own N_ch
+edges, so the spacing also differs between tunes. A slope "per class" is
+therefore a summary of a monotone trend, not a
 physical d(ratio)/dN_ch. The endpoint contrast is the number that carries no
 such convention, which is why it is quoted first.
 

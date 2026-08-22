@@ -20,8 +20,9 @@ Three observables: the two balancing yields, and the Lambda_b/B- ratio whose
 uncertainty comes from the plotter's own `ratio_sem` because numerator and
 denominator share triggers and events.
 
-`c1` is N_ch 0 to 2 and `c11` is N_ch 33 and above: the window label is a top
-percentile and runs the other way.
+`c1` is the lowest-activity class and `c11` is the highest: the window label is
+a top percentile and runs the other way. Every tune resolves its own N_ch edges,
+so no absolute N_ch range applies across tunes.
 """
 
 from __future__ import annotations

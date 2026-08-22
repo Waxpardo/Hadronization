@@ -17,8 +17,9 @@ triggers and their events, so a quadrature sum of the two yield SEMs would be
 wrong. The plotter forms the ratio inside each block and reports `ratio_sem`
 over the ten.
 
-THE CLASS AXIS RUNS OPPOSITE TO ITS LABEL: `c1` is N_ch 0 to 2 and `c11` is
-N_ch 33 and above. See `harvest_class_axis`.
+THE CLASS AXIS RUNS OPPOSITE TO ITS LABEL: `c1` is the lowest-activity class
+and `c11` is the highest. Every tune resolves its own N_ch edges. See
+`harvest_class_axis`.
 """
 
 from __future__ import annotations

@@ -9,16 +9,18 @@ The `bin` histogram name encodes the class; no separate field carries it:
 
 `p` is the decimal point. The five-field key prevents window-label collisions.
 
-The window is a top percentile, so a high percentile means low N_ch.
-The render log states the mapping outright:
+The window is a top percentile, so a high percentile means low N_ch. `c1` is
+the lowest-activity class and `c11` is the highest.
 
-    MULTIPLICITY_BOUNDARY percentile=100     nch=0
-    MULTIPLICITY_BOUNDARY percentile=88.197  nch=2
-    MULTIPLICITY_BOUNDARY percentile=8.422   nch=32
-    MULTIPLICITY_BOUNDARY percentile=0       nch=4095
+Every tune resolves its own percentile edges from its own merged summed
+MULTIPLICITY histogram. No minimum-bias tune and no common absolute N_ch
+boundary defines another tune's classes, so no fixed N_ch range belongs here.
+`config/multiplicity_percentile_classes_v2.json` holds the eleven windows and
+the tie rule: a threshold integer belongs to the lower-activity class, and the
+adjacent higher-activity class starts at that integer plus one.
 
-Thus, `c1` is N_ch 0 to 2 and `c11` is N_ch 33 and above.
-The boundary artifact gives half-integer edges of -0.5, 2.5, and 32.5.
+`LEGACY_CLASS_BIN` below still parses the retired `hDPhic<N>_MB<lo>_<hi>` names.
+Those labels carry the percentile edges of one retired axis.
 """
 
 from __future__ import annotations
