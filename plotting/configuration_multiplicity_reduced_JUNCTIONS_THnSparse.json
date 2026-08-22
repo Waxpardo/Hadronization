@@ -213,8 +213,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 90,
-      "multiplicityMax": 100
+      "multiplicityMin": 90.0,
+      "multiplicityMax": 100.0
     },
     {
       "binLabel": "M80_90",
@@ -232,8 +232,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 80,
-      "multiplicityMax": 90
+      "multiplicityMin": 80.0,
+      "multiplicityMax": 90.0
     },
     {
       "binLabel": "M70_80",
@@ -251,8 +251,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 70,
-      "multiplicityMax": 80
+      "multiplicityMin": 70.0,
+      "multiplicityMax": 80.0
     },
     {
       "binLabel": "M60_70",
@@ -270,8 +270,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 60,
-      "multiplicityMax": 70
+      "multiplicityMin": 60.0,
+      "multiplicityMax": 70.0
     },
     {
       "binLabel": "M50_60",
@@ -289,8 +289,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 50,
-      "multiplicityMax": 60
+      "multiplicityMin": 50.0,
+      "multiplicityMax": 60.0
     },
     {
       "binLabel": "M40_50",
@@ -308,8 +308,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 40,
-      "multiplicityMax": 50
+      "multiplicityMin": 40.0,
+      "multiplicityMax": 50.0
     },
     {
       "binLabel": "M30_40",
@@ -327,8 +327,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 30,
-      "multiplicityMax": 40
+      "multiplicityMin": 30.0,
+      "multiplicityMax": 40.0
     },
     {
       "binLabel": "M20_30",
@@ -346,8 +346,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 20,
-      "multiplicityMax": 30
+      "multiplicityMin": 20.0,
+      "multiplicityMax": 30.0
     },
     {
       "binLabel": "M10_20",
@@ -365,8 +365,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 10,
-      "multiplicityMax": 20
+      "multiplicityMin": 10.0,
+      "multiplicityMax": 20.0
     },
     {
       "binLabel": "M1_10",
@@ -384,8 +384,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 1,
-      "multiplicityMax": 10
+      "multiplicityMin": 1.0,
+      "multiplicityMax": 10.0
     },
     {
       "binLabel": "M0_1",
@@ -403,8 +403,8 @@
       "triggerPtMax": 20,
       "assocPtMin": 0,
       "assocPtMax": 100,
-      "multiplicityMin": 0,
-      "multiplicityMax": 1
+      "multiplicityMin": 0.0,
+      "multiplicityMax": 1.0
     }
   ],
   "canvases_to_be_drawn": [
@@ -3058,5 +3058,7 @@
       "y_size_canvas": 2050
     }
   ],
-  "subsample_coverage_audit": false
+  "subsample_coverage_audit": false,
+  "_comment_axis": "Multiplicity classes are tune-local top-percentile classes from config/multiplicity_percentile_classes_v2.json. Each tune resolves multiplicityMin/multiplicityMax from its own merged summed MULTIPLICITY histogram. Absolute N_ch thresholds may differ across tunes; no MONASH minimum-bias sample defines this axis.",
+  "label_owner": "tools/apply_per_tune_multiplicity_contract.py"
 }

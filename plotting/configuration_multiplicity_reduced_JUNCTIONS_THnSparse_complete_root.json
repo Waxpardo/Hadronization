@@ -2191,5 +2191,7 @@
       "y_size_canvas": 2050
     }
   ],
-  "subsample_coverage_audit": false
+  "subsample_coverage_audit": false,
+  "_comment_axis": "Multiplicity classes are tune-local top-percentile classes from config/multiplicity_percentile_classes_v2.json. Each tune resolves multiplicityMin/multiplicityMax from its own merged summed MULTIPLICITY histogram. Absolute N_ch thresholds may differ across tunes; no MONASH minimum-bias sample defines this axis.",
+  "label_owner": "tools/apply_per_tune_multiplicity_contract.py"
 }

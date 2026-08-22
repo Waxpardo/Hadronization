@@ -148,9 +148,9 @@ Tune comparisons are bundle-to-bundle across the three complete nominal cards.
 | Components | Role and data flow | Enforcing contract |
 |---|---|---|
 | `improvedPlotting_THnSparse.C` | Frozen main macro for balancing-yield canvases and uncertainty-matrix logs. | Its `digest`, pair-object schema checks, dataset selector, and boundary receipts bind each render. |
-| `Plot_InclusiveKinematicSpectra_Raw.C` | Plots inclusive raw spectra and the common multiplicity axis. | Raw manifest, seal, input-contract, style, and output-side tests run before promotion. |
+| `Plot_InclusiveKinematicSpectra_Raw.C` | Plots inclusive raw spectra with tune-local percentile boundary markers. | Raw manifest, seal, input-contract, style, and output-side tests run before promotion. |
 | `Plot_KinematicSpectra_THnSparse.C` | Projects kinematic spectra from pair files with ten-block uncertainties. | Projection-cut, input-schema, and complete-block tests guard each selection. |
-| `Plot_MultiplicityDistribution_PercentileBoundaries.C` | Draws the minimum-bias spectrum and fixed class boundaries. | Boundary utilities, the boundary artifact `digest`, and plotting receipts must agree. |
+| `Plot_MultiplicityDistribution_PercentileBoundaries.C` | Draws each tune's event spectrum and resolved percentile boundaries. | Boundary utilities, the percentile-contract `digest`, and v2 plotting receipts must agree. |
 | `Plot_FlavourClosure.C` | Diagnostic plot of category and species closure. | It reads committed extraction tables; closure tests check the same totals independently. |
 | `Validate_THnSparse_Production.C` | Plot-input validator for manifests, objects, schemas, and union consistency. | `plotting/validate_thnsparse_inputs.sh` converts its summary into a fail-closed gate. |
 | `make_hf_run3_v1_three_tune_config.py` | Generates the ten-panel three-tune configuration from the MONASH source. | `tests/test_three_tune_plot_config.py` rejects generated drift. |
@@ -163,8 +163,9 @@ Tune comparisons are bundle-to-bundle across the three complete nominal cards.
 `StagedOutputs.h` implements stage-then-promote output handling.
 `TunePlotStyle.h` fixes tune colours, markers, draw order, and class line styles.
 
-`CommonMultiplicityBoundaries.h`, `MultiplicityBoundaryUtils.h`, and `GeneratedClassLabelPrecision.h` implement the shared class axis.
-Their source and artifact `digest` values appear in the boundary receipts.
+`MultiplicityBoundaryUtils.h` and `GeneratedClassLabelPrecision.h` implement
+the tune-local percentile axes. Their source and class-contract `digest`
+values appear in the v2 boundary receipts.
 `PtMultiplicity/PlottingPathUtils.h` resolves legacy diagnostic inputs without defining a publication dataset.
 
 The JSON files under `plotting/` select live, diagnostic, or variation renders.
@@ -214,7 +215,7 @@ Generators write headers or derived JSON, and drift tests compare both forms.
 | `AnalysisScripts/species_ordinals_v2.json` | `AnalysisScripts/GeneratedSpeciesOrdinals.h` | `generate_species_ordinals_header.py --check`; fixed count and `digest` test. |
 | Associate-origin category definitions | `AnalysisScripts/AssociateOriginCategoryContract.h` | Compile tests compare its labels and indices with the producer definition. |
 | Species ordinals and PYTHIA decay channels | `AnalysisScripts/decay_parent_map_v1_1.json` and v2 | Map builders enforce sign, conjugation, terminal, and weight invariants. |
-| `config/multiplicity_class_boundaries_v1.json` | Plot headers and receipts | Boundary tests recompute edges, labels, and the artifact `digest`. |
+| `config/multiplicity_percentile_classes_v2.json` | Plot configurations and receipts | Boundary tests enforce per-tune resolution, class labels, coverage, and the contract `digest`. |
 | `config/systematics_variations_v1.json` | Cards, selectors, harvest configurations | Variant generators and identity tests require exact source rows. |
 
 `AnalysisScripts/` holds frozen artifacts, and its name is historical because `digest` pins forbid moving it.

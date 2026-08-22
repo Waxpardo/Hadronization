@@ -39,9 +39,9 @@ def main() -> int:
     MODULE.validate_route(central, MODULE.NOMINAL)
 
     central_labels = labels(central)
-    assert "59.8-65.9%" in central_labels
-    assert "50.3-59.8%" in central_labels
-    assert not any("59.9" in label for label in central_labels)
+    assert "60-70%" in central_labels
+    assert "50-60%" in central_labels
+    assert "0-1%" in central_labels
 
     for campaign in MODULE.CAMPAIGNS:
         derived = json.loads(MODULE.output_path(campaign).read_text())
@@ -66,7 +66,7 @@ def main() -> int:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "HARVEST_CONFIGS_CURRENT files=7" in result.stdout
-    print("harvest configs: 7 current, routes selector-bound, labels common")
+    print("harvest configs: 7 current, routes selector-bound, tune-local windows shared")
     return 0
 
 

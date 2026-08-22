@@ -32,7 +32,7 @@
     "tune_difference_allowlist_schema": "pythia_tune_difference_allowlist_v2",
     "tune_difference_allowlist_sha256": "2b35e52a589ddb488ed4230592203578228425ecac42733f685f90bdd20283c9",
     "boundary_configuration_path": "plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json",
-    "boundary_configuration_sha256": "6bfeb9a670b63d84024b8a0177e6d903a461c1367f12b8a3cf580679c7e212f3",
+    "boundary_configuration_sha256": "bc73801fea7106bf27c2e021982ad7a93e775e1bf17edcb44264da0538c1a805",
     "effective_settings_schema": "effective_pythia_settings_exhaustive_v2",
     "canonical_files_per_tune_minimum": 100,
     "canonical_files_per_tune_policy": "manifest_derived_equal_N_divisible_by_10",

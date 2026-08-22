@@ -61,24 +61,22 @@ The scientific contracts use generated headers, validators, and digests. Each co
 | Signed species and 300 pairs | `config/heavy_flavour_species_v1.json` and `config/heavy_flavour_pair_registry_v1.json` | `tools/generate_registry_artifacts.py --check` |
 | Pair-file objects | `config/pair_file_object_contract_v1.json` | `tools/generate_pair_object_contract.py --check` |
 | Species axis | `AnalysisScripts/species_ordinals_v2.json` | The generated-header check and merged-file digest check |
-| Multiplicity classes | `config/multiplicity_class_boundaries_v1.json` | Plot tests and each multiplicity boundary receipt |
+| Multiplicity classes | `config/multiplicity_percentile_classes_v2.json` | Plot tests and each v2 per-tune multiplicity boundary receipt |
 | Tune differences | `config/tune_difference_allowlist_v1.json` | `tools/validate_tune_cards.py` |
 | Systematic variations | `config/systematics_variations_v1.json` | `tools/make_systematic_cards.py --check` |
 | Decay regrouping | `AnalysisScripts/decay_parent_map_v2.json` | Map builders, extraction tests, and the species-axis pin |
 
 The species axis has 202 entries. Its FNV-1a digest is `646f310f78126267`, which each v3 merged file must carry.
 
-The multiplicity axis uses one public MONASH minimum-bias distribution. `AnalysisScripts/anchors/b4_multiplicity_mb/nch_mb_MONASH.csv` contains 172,429 accepted events.
+The multiplicity contract fixes percentile windows `90-100, 80-90, ...,
+1-10, 0-1%`. For every tune, plotting initialization loads that tune's merged
+`summed MULTIPLICITY` histogram, resolves all percentile thresholds, and
+requires a disjoint, exhaustive integer partition. Thresholds may differ
+between tunes. The source histogram identity, thresholds, achieved fractions,
+class-contract digest, and validation verdict are written to a v2 receipt.
 
-The boundary procedure uses cumulative targets `k/11` for `k = 1,...,10`. For each target, select the first integer `N_ch` whose cumulative count reaches it.
-
-Place the class boundary 0.5 above that integer. Add `-0.5` as the lower edge of `c1`.
-
-This procedure gives `-0.5, 2.5, 3.5, 5.5, 6.5, 8.5, 10.5, 13.5, 17.5, 23.5, 32.5`. The values match the boundary artifact exactly.
-
-The public calibration macro defines the counter used by the CSV. It counts final charged non-heavy particles with `pT > 0.15 GeV/c` and `|eta| <= 1`.
-
-The committed CSV and procedure can therefore rederive every class boundary. A new minimum-bias sample still needs the pinned PYTHIA runtime.
+The retained MONASH minimum-bias CSV is calibration evidence only. It does not
+define another tune's class boundaries.
 
 ## 4. Dataset identity and campaign provenance
 
@@ -333,7 +331,8 @@ Restore the authoritative burned-seed ledger before rendering. An empty replacem
    ```bash
    python3 tools/resubmit_held.py HF_RUN3_V1 \
      --jobs 1000 --events 100000 --attempt 1 \
-     --checkout "$PWD" --seed-ledger config/burned_seeds.txt
+     --checkout "$PWD" \
+     --seed-ledger "$HADRONIZATION_DATA_ROOT/project/runs/seed_ledgers/burned_seeds.txt"
    ```
 
 9. Build the write-once canonical manifest after all slots exist.

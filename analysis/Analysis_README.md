@@ -326,15 +326,13 @@ It no longer offers random/bootstrap discovery for publication inputs.
 The central counter is `NCH_PRIMARY_CHARGED_ETA10_V1`: final charged
 non-heavy-flavour particles with `pT > 0.15 GeV/c` and `|eta| <= 1`.
 `NCH_PRIMARY_CHARGED_ETA40_V1` is the `|eta| <= 4` cross-check.
-The eleven half-integer boundaries in
-`config/multiplicity_class_boundaries_v1.json` define one common absolute axis
-for every tune and all ten blocks. They are mutually exclusive and exhaustive:
-`c1` contains `N_ch = 0--2`, while `c11` contains `N_ch >= 33`.
-
-Readers recompute percentile labels from the committed MONASH minimum-bias
-distribution. Per-tune minimum-bias translations are residual diagnostics,
-not separate class definitions. The hard-heavy sample does not define the
-central activity axis.
+The eleven windows in `config/multiplicity_percentile_classes_v2.json` are
+tune-local top-percentile classes: `90-100, ..., 1-10, 0-1%`. Each tune derives
+its own integer `N_ch` thresholds from its merged `summed MULTIPLICITY`
+histogram. The thresholds are frozen once per run, are applied to the central
+and all ten blocks, and are required to form a mutually exclusive, exhaustive
+partition. A separate MONASH minimum-bias distribution does not define the
+classes.
 
 ## Statistical estimators
 

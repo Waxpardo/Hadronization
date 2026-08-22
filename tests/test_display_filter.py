@@ -10,11 +10,11 @@ is exactly the silent re-binning the B6 family exists to prevent.
 So the axis stays whole and the filtering is display-only. This test pins the
 four properties that make that safe:
 
-  (a) the FULL axis is still configured and validated -- every artifact class is
+  (a) the FULL axis is still configured and validated -- every contract class is
       present in every variant, so removing one is still refused;
   (b) a filter may never leave zero drawn bins;
   (c) the self-declaration is DERIVED, so changing the artifact changes it;
-  (d) the declaration's ranges come from the artifact, not from the config's
+  (d) the declaration's ranges come from the contract, not from the config's
       transcribed multiplicityMin/multiplicityMax.
 
 (d) is here because the first version of the generator read the config's own
@@ -30,7 +30,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PLOTTING = ROOT / "plotting"
-BOUNDARIES = ROOT / "config" / "multiplicity_class_boundaries_v1.json"
+BOUNDARIES = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
 GENERATOR = ROOT / "tools" / "make_variant_configs.py"
 
 VARIANTS = {
@@ -89,31 +89,24 @@ def main() -> int:
         if len(drawn) < len(bins) and not declaration:
             failures.append(f"{name}: filtered but carries no axis_declaration")
 
-    # (d) the declaration must not carry the config's transcribed percentiles.
-    # The artifact puts a boundary at 59.8; the configs transcribe 59.85.
+    # (d) the declaration carries the authoritative tune-local windows.
     closure = json.loads(
         (PLOTTING / "configuration_multiplicity_HF_RUN3_V1_VINTEGRATED_CLOSURE.json"
          ).read_text())
     decl = closure.get("axis_declaration", "")
-    if "59.9" in decl:
+    if "60-70%" not in decl and "60.0-70.0%" not in decl:
         failures.append(
-            "declaration contains 59.9, which is the config's transcribed "
-            "label; the artifact boundary is 59.8 (E9). It must derive from "
-            "the artifact")
-    if "59.8" not in decl:
-        failures.append(
-            f"declaration should carry the artifact's 59.8 boundary: {decl!r}")
+            f"declaration should carry the contract's 60-70% class: {decl!r}")
 
     # (c) derived, not fixed: perturb the artifact and the label must follow.
     with tempfile.TemporaryDirectory() as tmp:
         sandbox = Path(tmp) / "repo"
         subprocess.run(["cp", "-R", str(ROOT), str(sandbox)],
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        art = sandbox / "config" / "multiplicity_class_boundaries_v1.json"
+        art = sandbox / "config" / "multiplicity_percentile_classes_v2.json"
         doc = json.loads(art.read_text())
-        # Move the top class's boundary; its percentile, hence the label, moves.
-        doc["classes"][-1]["boundary_nch"] = \
-            doc["classes"][-1]["boundary_nch"] + 6.0
+        # Move the top class's requested edge; the derived declaration follows.
+        doc["classes"][-1]["percentile_max"] = 2.0
         art.write_text(json.dumps(doc, indent=2) + "\n")
         run = subprocess.run(
             [sys.executable, str(sandbox / "tools" / "make_variant_configs.py")],

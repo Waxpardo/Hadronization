@@ -34,7 +34,7 @@
   ],
   "dataset_contract": {
     "selector_path": "config/dataset_selector_hf_run3_v1.json",
-    "selector_sha256": "1cf08ca79c5873b1f2876ad4c80e80be84c6f923302b830d0adfe926b7440b98",
+    "selector_sha256": "8395173bab4a90aef2a15efc857396153801bb996db2f4fb9cf6a70ebb6c3d60",
     "dataset_key": "hf_run3_v1_candidate",
     "campaign": "HF_RUN3_V1",
     "status": "canonical",
@@ -68,9 +68,10 @@
       "sha256": "946828956f1b30ae7cb4d28c0c0687e8522b7349db127a067311c77bc3e21529"
     },
     "multiplicity_boundaries": {
-      "path": "config/multiplicity_class_boundaries_v1.json",
-      "sha256": "9b6e4e16340f7230ab5031698a2ad9b12eabb74f5488bd2d803723e2106ac2e1",
-      "common_across_tunes": true,
+      "path": "config/multiplicity_percentile_classes_v2.json",
+      "sha256": "a950f34a4870d4e431b3ff3753149b8dbde78412ad32e13f6734becb0a2af510",
+      "common_across_tunes": false,
+      "definition": "percentile windows are shared; absolute N_ch thresholds are derived independently for each tune",
       "counter": "final charged non-heavy particles with pT > 0.15 GeV/c and |eta| <= 1",
       "classes": [
         "c1",
@@ -234,13 +235,13 @@
       "planned_manuscript_location": "Model.tex:130",
       "producer": {
         "source": "plotting/Plot_InclusiveKinematicSpectra_Raw.C",
-        "source_sha256": "4c002f73aaa1d25611e5b3c2114357ef01cf632ac3c08e4d1c15b36c8404381a",
+        "source_sha256": "26673f25413868efe31ed9c3ebd029b16273ef98c4d79b74a7583d0a6e3428bd",
         "entry_point": "Plot_InclusiveMultiplicitySpectrum_Raw",
         "runner": "plotting/run_paper_plots.sh multiplicity-spectrum"
       },
       "configuration": {
         "path": null,
-        "contract": "selector plus config/multiplicity_class_boundaries_v1.json",
+        "contract": "selector plus config/multiplicity_percentile_classes_v2.json",
         "boundary_utility": "plotting/MultiplicityBoundaryUtils.h",
         "boundary_utility_sha256": "ba67271cb6b80bc491eff8de52657e9c5f7922c3b06a9a992d9801a59deed5af"
       },
@@ -251,9 +252,9 @@
       "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
       "machine_readable_numerical_source": [
         {
-          "path": "config/multiplicity_class_boundaries_v1.json",
-          "sha256": "9b6e4e16340f7230ab5031698a2ad9b12eabb74f5488bd2d803723e2106ac2e1",
-          "coverage": "common c1-c11 boundaries"
+          "path": "config/multiplicity_percentile_classes_v2.json",
+          "sha256": "a950f34a4870d4e431b3ff3753149b8dbde78412ad32e13f6734becb0a2af510",
+          "coverage": "tune-local c1-c11 percentile contract"
         }
       ],
       "candidate_outputs": [
@@ -270,7 +271,7 @@
         "finding": "The recorded current 13.6 TeV candidate bytes are absent. The available old-paper PNG is 14 TeV with |eta| <= 4 and is rejected. The ignored PlottingScripts PNG visibly says 'No input histograms found' and is rejected."
       },
       "accepted_outputs": [],
-      "retrieval_requirement": "Retrieve the sealed raw manifest and current final PNG/PDF plus receipt, or rerender with the current source, selector, common boundary artifact, and pinned ROOT; rehash every input and output and review the actual accepted bytes."
+      "retrieval_requirement": "Rerender with the current source, selector, tune-local percentile contract, per-tune boundary receipt, and pinned ROOT; rehash every input and output and review the actual accepted bytes."
     },
     {
       "figure_id": "P2",
@@ -279,13 +280,13 @@
       "planned_manuscript_location": "Results.tex:48",
       "producer": {
         "source": "plotting/improvedPlotting_THnSparse.C",
-        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "source_sha256": "c70351e22c9ec26e7bc039a4176f066c0d31a7e6079f05ba2ced133af3dc7d0a",
         "entry_point": "improvedPlotting_THnSparse",
         "runner": "tools/render_balancing_variant.sh plotting/configuration_multiplicity_HF_RUN3_V1_VCORRELATIONS.json"
       },
       "configuration": {
         "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VCORRELATIONS.json",
-        "sha256": "06667bc18ed57d9edbad99e5fa542882be8f459adb7a7125fbe65b9ecb172a44",
+        "sha256": "4e5b9d1cf09ea0c7489a7d58fc6bd23291d28d84e80b5be73eb9b2a5769186d0",
         "content": "MONASH correlation pads for D+ and Lambda_c+ triggers; D+ meson and anti-Lambda_c associate channels; isolated correlation configuration"
       },
       "dataset_selector_key": "hf_run3_v1_candidate",
@@ -324,13 +325,13 @@
       "planned_manuscript_location": "Results.tex:71",
       "producer": {
         "source": "plotting/improvedPlotting_THnSparse.C",
-        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "source_sha256": "c70351e22c9ec26e7bc039a4176f066c0d31a7e6079f05ba2ced133af3dc7d0a",
         "entry_point": "improvedPlotting_THnSparse",
         "runner": "tools/render_balancing_variant.sh plotting/configuration_multiplicity_HF_RUN3_V1_VCORRELATIONS.json"
       },
       "configuration": {
         "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VCORRELATIONS.json",
-        "sha256": "06667bc18ed57d9edbad99e5fa542882be8f459adb7a7125fbe65b9ecb172a44",
+        "sha256": "4e5b9d1cf09ea0c7489a7d58fc6bd23291d28d84e80b5be73eb9b2a5769186d0",
         "content": "MONASH correlation pads for B+ and anti-Lambda_b triggers; B- meson and Lambda_b associate channels; isolated correlation configuration"
       },
       "dataset_selector_key": "hf_run3_v1_candidate",
@@ -369,13 +370,13 @@
       "planned_manuscript_location": "Results.tex:92",
       "producer": {
         "source": "plotting/improvedPlotting_THnSparse.C",
-        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "source_sha256": "c70351e22c9ec26e7bc039a4176f066c0d31a7e6079f05ba2ced133af3dc7d0a",
         "entry_point": "improvedPlotting_THnSparse",
         "runner": "tools/render_balancing_variant.sh plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json"
       },
       "configuration": {
         "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json",
-        "sha256": "3f51f1dc64b66c360fa59c0c6db6f983ac49258ff1f38e50be0e42f9c90e8590",
+        "sha256": "e478ef18e1ea48c2de7de45335357b3bf3cd9337d873651d723821f20beffae5",
         "display": "one multiplicity-integrated interval, 0.0-100.0 percent"
       },
       "dataset_selector_key": "hf_run3_v1_candidate",
@@ -414,7 +415,7 @@
       "planned_manuscript_location": "Results.tex:105",
       "producer": {
         "source": "plotting/improvedPlotting_THnSparse.C",
-        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "source_sha256": "c70351e22c9ec26e7bc039a4176f066c0d31a7e6079f05ba2ced133af3dc7d0a",
         "entry_point": "improvedPlotting_THnSparse",
         "runner": "tools/render_balancing_variant.sh with V-FULL or V-EXTREMES"
       },
@@ -423,13 +424,13 @@
           {
             "name": "V-FULL",
             "path": "plotting/configuration_multiplicity_HF_RUN3_V1_THREETUNE_POLISH_PROPOSAL.json",
-            "sha256": "2d9613857c43fc14754065be5b70ed5d28a1758a4adc3a116732295913fe77ef",
+            "sha256": "b0afb9eb7029a2da3985a53199e341aa3e5b02ee6c28eba27a828d96fc6ea09e",
             "classes_shown": "c1-c11"
           },
           {
             "name": "V-EXTREMES",
             "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VEXTREMES.json",
-            "sha256": "76d87af8f6506df38cc0d6482600cbddd2af1295d1bd21ffce2a8ed1b970bcd2",
+            "sha256": "4b367b459162d8aee5e78cb5930f173e0b21776d7200e6cf1ffb9b0eaf84fc6b",
             "classes_shown": "c1 and c11 from the same configured c1-c11 axis"
           }
         ],
@@ -437,7 +438,7 @@
       },
       "dataset_selector_key": "hf_run3_v1_candidate",
       "dataset_authorized": true,
-      "central_input_identity": "All three complete_root_HF_RUN3_V1 tune bundles; DplusDminus/DplusDplus and DplusLambdacplusbar/DplusLambdacplus pair files on the common c1-c11 axis.",
+      "central_input_identity": "All three complete_root_HF_RUN3_V1 tune bundles; DplusDminus/DplusDplus and DplusLambdacplusbar/DplusLambdacplus pair files on the tune-local c1-c11 percentile axis.",
       "ten_block_identity_and_coverage": "The same charm channels for every tune in combined_root_1 through combined_root_10. Current configs request ten-block errors; the current block files and final receipts are absent.",
       "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
       "normalization_and_uncertainty": "Per-class full-Delta-phi OS-SS yield per hTrKinematics trigger; factor-one SS subtraction; ten-block SEM.",
@@ -475,13 +476,13 @@
       "planned_manuscript_location": "Results.tex:126",
       "producer": {
         "source": "plotting/improvedPlotting_THnSparse.C",
-        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "source_sha256": "c70351e22c9ec26e7bc039a4176f066c0d31a7e6079f05ba2ced133af3dc7d0a",
         "entry_point": "improvedPlotting_THnSparse",
         "runner": "tools/render_balancing_variant.sh plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json"
       },
       "configuration": {
         "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json",
-        "sha256": "3f51f1dc64b66c360fa59c0c6db6f983ac49258ff1f38e50be0e42f9c90e8590",
+        "sha256": "e478ef18e1ea48c2de7de45335357b3bf3cd9337d873651d723821f20beffae5",
         "display": "one multiplicity-integrated interval, 0.0-100.0 percent"
       },
       "dataset_selector_key": "hf_run3_v1_candidate",
@@ -520,7 +521,7 @@
       "planned_manuscript_location": "Results.tex:139",
       "producer": {
         "source": "plotting/improvedPlotting_THnSparse.C",
-        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "source_sha256": "c70351e22c9ec26e7bc039a4176f066c0d31a7e6079f05ba2ced133af3dc7d0a",
         "entry_point": "improvedPlotting_THnSparse",
         "runner": "tools/render_balancing_variant.sh with V-FULL or V-EXTREMES"
       },
@@ -529,13 +530,13 @@
           {
             "name": "V-FULL",
             "path": "plotting/configuration_multiplicity_HF_RUN3_V1_THREETUNE_POLISH_PROPOSAL.json",
-            "sha256": "2d9613857c43fc14754065be5b70ed5d28a1758a4adc3a116732295913fe77ef",
+            "sha256": "b0afb9eb7029a2da3985a53199e341aa3e5b02ee6c28eba27a828d96fc6ea09e",
             "classes_shown": "c1-c11"
           },
           {
             "name": "V-EXTREMES",
             "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VEXTREMES.json",
-            "sha256": "76d87af8f6506df38cc0d6482600cbddd2af1295d1bd21ffce2a8ed1b970bcd2",
+            "sha256": "4b367b459162d8aee5e78cb5930f173e0b21776d7200e6cf1ffb9b0eaf84fc6b",
             "classes_shown": "c1 and c11 from the same configured c1-c11 axis"
           }
         ],
@@ -543,7 +544,7 @@
       },
       "dataset_selector_key": "hf_run3_v1_candidate",
       "dataset_authorized": true,
-      "central_input_identity": "All three complete_root_HF_RUN3_V1 tune bundles; BplusBminus/BplusBplus and BplusLb/BplusLbbar pair files on the common c1-c11 axis.",
+      "central_input_identity": "All three complete_root_HF_RUN3_V1 tune bundles; BplusBminus/BplusBplus and BplusLb/BplusLbbar pair files on the tune-local c1-c11 percentile axis.",
       "ten_block_identity_and_coverage": "The same beauty channels for every tune in combined_root_1 through combined_root_10. Current configs request ten-block errors; the current block files and final receipts are absent.",
       "environment": "PYTHIA 8.317 campaign; ROOT 6.30.01 render required.",
       "normalization_and_uncertainty": "Per-class full-Delta-phi OS-SS yield per hTrKinematics trigger; factor-one SS subtraction; ten-block SEM.",
@@ -581,13 +582,13 @@
       "planned_manuscript_location": "Results.tex:152",
       "producer": {
         "source": "plotting/improvedPlotting_THnSparse.C",
-        "source_sha256": "914019eddba601a72e477a675d9a9b041a2226eaabbac78cec8921956c7679d7",
+        "source_sha256": "c70351e22c9ec26e7bc039a4176f066c0d31a7e6079f05ba2ced133af3dc7d0a",
         "entry_point": "improvedPlotting_THnSparse",
         "runner": "tools/render_balancing_variant.sh plotting/configuration_multiplicity_HF_RUN3_V1_VBARYONMESON.json"
       },
       "configuration": {
         "path": "plotting/configuration_multiplicity_HF_RUN3_V1_VBARYONMESON.json",
-        "sha256": "55c0a8d3911add22ce276af4fcd3a7a611fd00cbc2eab4b93ca87263c0f3ed45",
+        "sha256": "29018c1d4627d8769de5aeddb118d3107cf717bd27176773adfeb5947078da46",
         "definition": "registry-resolved signed anti-Lambda_c/D- and Lambda_b/B- balancing-yield ratios for D+ and B+ triggers"
       },
       "dataset_selector_key": "hf_run3_v1_candidate",
@@ -655,7 +656,7 @@
       "figure_id": "P5",
       "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/YieldsBalancing/global_balancing_plots_multiplicity_charm_PDF.pdf",
       "sha256": "282cbd5d0d277cd7df206cd1683e46ea77d351d1e2ba6699356ea61ce191097b",
-      "reason": "obsolete 90-100 through 0-1 activity presentation, not the common c1-c11 axis"
+      "reason": "legacy bytes without current selectors, per-tune boundary receipts, or accepted visual review"
     },
     {
       "figure_id": "P6",
@@ -667,7 +668,7 @@
       "figure_id": "P7",
       "path": "Paper/Heavy_flavour_hadronisation_model_paper/figures/YieldsBalancing/global_balancing_plots_multiplicity_beauty_PDF.pdf",
       "sha256": "ab0abcae09248fd20419d26980922f941f9cb2c296b388b3754d1854d9e90550",
-      "reason": "obsolete 90-100 through 0-1 activity presentation, not the common c1-c11 axis"
+      "reason": "legacy bytes without current selectors, per-tune boundary receipts, or accepted visual review"
     },
     {
       "figure_id": "P8",

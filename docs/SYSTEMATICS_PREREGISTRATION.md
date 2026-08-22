@@ -1,5 +1,10 @@
 # Systematics — the pre-registration, six sources
 
+> **Rebuild amendment (2026-08-22).** Generation-variation choices remain
+> recorded, but every class-axis prescription and class-dependent result below
+> is superseded by tune-local percentile classes. Re-harvest each campaign with
+> a v2 per-tune boundary receipt before combining any systematic uncertainty.
+
 **Written 2026-08-17, before any variation job was rendered or queued.** Wall
 clock at the first line: 10:38 CEST. The first `condor_submit` of this program
 must not precede this document being committed; if the git history shows

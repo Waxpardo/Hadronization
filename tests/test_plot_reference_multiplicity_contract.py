@@ -189,7 +189,7 @@ def check_plotter_contract() -> None:
         "status=NOT_APPLICABLE",
         "reason=structural_reference_self_ratio",
         "ValidatePairCombinatoricsForSelectionMode",
-        "multiplicity_boundary_receipt_v1.json",
+        "multiplicity_boundary_receipt_v2.json",
         "WriteMultiplicityBoundaryReceipt",
         "Non-positive value cannot be represented on the configured ",
     )
@@ -397,7 +397,9 @@ def check_figure_acceptance_manifest() -> None:
             "inside each block"
         ),
     }
-    assert shared["multiplicity_boundaries"]["common_across_tunes"] is True
+    assert shared["multiplicity_boundaries"]["common_across_tunes"] is False
+    assert "derived independently for each tune" in (
+        shared["multiplicity_boundaries"]["definition"])
     assert shared["multiplicity_boundaries"]["classes"] == [
         f"c{index}" for index in range(1, 12)
     ]

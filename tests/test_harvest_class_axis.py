@@ -26,6 +26,11 @@ def test_percentile() -> None:
 
 
 def test_parse_bin() -> None:
+    assert parse_bin("hDPhiM90_100") == ("c1", 90.0, 100.0)
+    assert parse_bin("hDPhiM0_1") == ("c11", 0.0, 1.0)
+    assert parse_bin("hDPhiM1_10") == ("c10", 1.0, 10.0)
+    # Archived pre-rebuild logs remain readable, but current configs do not
+    # emit the legacy MONASH-MB spelling.
     assert parse_bin("hDPhic1_MB88p197_100") == ("c1", 88.197, 100.0)
     assert parse_bin("hDPhic11_MB0_8p422") == ("c11", 0.0, 8.422)
     assert parse_bin("hDPhic10_MB8p422_17p124") == ("c10", 8.422, 17.124)
@@ -141,27 +146,19 @@ def test_resolver_assertion_fails_closed_on_a_silent_log() -> None:
 def test_the_percentile_axis_runs_opposite_to_the_multiplicity_axis() -> None:
     """A high percentile is a LOW N_ch, and the label invites the opposite read.
 
-    The window is a TOP percentile, the fraction of minimum-bias events ABOVE
-    the boundary. The render log states the mapping: percentile 100 is nch 0 and
-    percentile 8.422 is nch 32. So `c1`, labelled `MB88p197_100`, is the LOWEST
-    multiplicity class and `c11` the highest.
-
-    `config/multiplicity_class_boundaries_v1.json` is the other statement of the
-    same fact, and the two must not drift apart. Reading the label as an
-    ordinary percentile inverts every per-class trend in the tables.
+    The window is a TOP percentile. c1 is the 90-100% lowest-activity class and
+    c11 is the 0-1% highest-activity class. Absolute N_ch thresholds are
+    tune-dependent and therefore are not part of this static contract test.
     """
-    boundaries = json.loads(
-        (ROOT / "config/multiplicity_class_boundaries_v1.json").read_text())
-    nch = {c["class"]: c["boundary_nch"] for c in boundaries["classes"]}
-
-    _, c1_low, c1_high = parse_bin("hDPhic1_MB88p197_100")
-    _, c11_low, c11_high = parse_bin("hDPhic11_MB0_8p422")
+    contract = json.loads(
+        (ROOT / "config/multiplicity_percentile_classes_v2.json").read_text())
+    _, c1_low, c1_high = parse_bin("hDPhiM90_100")
+    _, c11_low, c11_high = parse_bin("hDPhiM0_1")
 
     assert c1_low > c11_high, (c1_low, c1_high, c11_low, c11_high)
-    assert nch["c1"] < nch["c11"], nch
-    assert nch["c1"] == -0.5 and nch["c11"] == 32.5, nch
+    assert [row["class"] for row in contract["classes"]] == [
+        f"c{i}" for i in range(1, 12)]
     assert class_order("c1") < class_order("c11")
-    assert all(nch[f"c{i}"] < nch[f"c{i + 1}"] for i in range(1, 11)), nch
 
 
 def main() -> int:

@@ -52,9 +52,9 @@
 #include "TSystem.h"
 #include "TTree.h"
 
-#include "CommonMultiplicityBoundaries.h"
 #include "GeneratedClassLabelPrecision.h"
 #include "HistogramErrorUtils.h"
+#include "MultiplicityBoundaryUtils.h"
 #include "TunePlotStyle.h"
 #include "../generation/registries/GeneratedHeavyFlavourRegistry.h"
 #include "../generation/producer/HeavyFlavourUtils.h"
@@ -1644,101 +1644,33 @@ void DrawSimulationInfoBlock(double x, double y, double headerSize, double bodyS
   text.DrawLatex(x, y - 3.0 * spacing, MultiplicityDefinitionLine3());
 }
 
-// ---------------------------------------------------------------------------
-// The inset's boundary markers come from the COMMITTED ARTIFACT, never from a
-// quantile of the drawn histogram.
-//
-// What this replaces, and why it was wrong. The previous implementation took
-// running-integral quantiles of whichever histogram it was handed
-// (`CalculateMultiplicityThreshold`). That is a per-tune derivation of an axis
-// that docs/PRODUCTION_SHAPE_DECISION.md ruled is ABSOLUTE and shared, and it
-// was wrong twice over:
-//
-//   1. The drawn histogram is the PRODUCTION sample -- HardQCD with
-//      pTHatMin = 2 -- while the percentile labels are defined on the MONASH
-//      MINIMUM-BIAS distribution. Quantiles of one distribution were being
-//      drawn under labels defined on a different one.
-//   2. config/multiplicity_class_boundaries_v1.json says in its own text that
-//      it is THE one definition and that no consumer may carry a copy, because
-//      "two definitions drift, and the axis is the thing every per-multiplicity
-//      number is conditioned on". This macro was a third consumer that never
-//      read it.
-//
-// So: boundaries are read from the artifact, and the labels are RECOMPUTED from
-// the committed MB anchor as the fraction strictly below each boundary -- the
-// same rule, and the same source files, as tools/class_label_format.py.
-// Recomputed rather than transcribed so a label cannot drift away from the
-// sample it claims to describe.
-// ---------------------------------------------------------------------------
-
-struct CommonBoundaryMarker {
-  double nch;            // absolute half-integer lower edge, from the artifact
-  // MONASH-MB percentile in the receipt's convention: 100 - (fraction strictly
-  // below), i.e. "top p%". A low-activity edge therefore carries a LARGE
-  // number: boundary -0.5 is 100%, boundary 32.5 is 8.422%. Verified against
-  // results/validation/plotting/hf_run3_v1_threetune_20260816/
-  // multiplicity_boundary_receipt_v1_polished.json to better than 0.0005 on
-  // all eleven boundaries, which is the receipt's own rounding.
-  double mbPercentile;
-  std::string className; // c1 ... c11, from the artifact
+struct PerTuneBoundaryMarker {
+  double nch;
+  double percentileMax;
+  std::string className;
 };
 
-std::map<int, double> LoadMinimumBiasNch(const std::string& base,
-                                         const std::string& tune)
+std::vector<PerTuneBoundaryMarker> PerTuneBoundaryMarkers(const TH1D* histogram)
 {
-  const std::string path = base +
-      "/AnalysisScripts/anchors/b4_multiplicity_mb/nch_mb_" + tune + ".csv";
-  std::ifstream stream(path);
-  if (!stream.is_open()) {
-    throw std::runtime_error(
-        "Cannot open the committed minimum-bias anchor " + path +
-        ". The inset's percentile labels are defined on it and are not "
-        "recoverable from the production sample.");
-  }
-  std::map<int, double> distribution;
-  std::string line;
-  std::getline(stream, line);  // header: nch,count
-  while (std::getline(stream, line)) {
-    if (line.empty()) continue;
-    const size_t comma = line.find(',');
-    if (comma == std::string::npos) continue;
-    distribution[std::stoi(line.substr(0, comma))] =
-        std::stod(line.substr(comma + 1));
-  }
-  if (distribution.empty()) {
-    throw std::runtime_error("Minimum-bias anchor is empty: " + path);
-  }
-  return distribution;
-}
-
-std::vector<CommonBoundaryMarker> CommonBoundaryMarkers(const std::string& base)
-{
-  const auto boundaries = HadronizationMultiplicity::LoadCommonBoundaries(
-      MultiplicityPercentileClasses().size(),
-      base + "/" + HadronizationMultiplicity::kCommonBoundaryArtifactPath);
-
-  // The common percentile labels come from the MONASH minimum-bias anchor.
-  const auto mb = LoadMinimumBiasNch(base, "MONASH");
-  double total = 0.0;
-  for (const auto& entry : mb) total += entry.second;
-
-  std::vector<CommonBoundaryMarker> markers;
-  for (size_t i = 0; i < boundaries.lowerEdgesNch.size(); ++i) {
-    const double edge = boundaries.lowerEdgesNch[i];
-    double below = 0.0;
-    for (const auto& entry : mb) {
-      if (entry.first < edge) below += entry.second;
-    }
+  const auto identity = HadronizationMultiplicity::CaptureHistogramIdentity(
+      histogram, "MONASH raw multiplicity inset");
+  const auto classes = MultiplicityPercentileClasses();
+  std::vector<PerTuneBoundaryMarker> markers;
+  for (size_t index = 0; index < classes.size(); ++index) {
+    const auto& activityClass = classes[index];
+    const int threshold =
+        HadronizationMultiplicity::ThresholdForPercentile(
+            identity, activityClass.maxPercentile,
+            "MONASH raw multiplicity inset");
+    const double lowerEdge = static_cast<double>(threshold) +
+        (activityClass.maxPercentile < 100.0 ? 0.5 : -0.5);
     markers.push_back(
-        {edge, 100.0 - 100.0 * below / total, boundaries.classNames[i]});
+        {lowerEdge, activityClass.maxPercentile,
+         "c" + std::to_string(index + 1U)});
   }
-
-  std::cout << "COMMON_MULTIPLICITY_BOUNDARIES_CONSUMED"
-            << " artifact=" << boundaries.artifactPath
-            << " sha256=" << boundaries.artifactSha256
-            << " classes=" << markers.size()
-            << " label_provenance=MONASH_MB_recomputed"
-            << std::endl;
+  std::cout << "MULTIPLICITY_PER_TUNE_BOUNDARIES"
+            << " tune=MONASH source=raw_production_histogram"
+            << " classes=" << markers.size() << " status=PASS" << std::endl;
   return markers;
 }
 
@@ -1799,7 +1731,7 @@ void DrawMonashPercentileInset(TH1D* monash,
   insetHist->GetYaxis()->SetNdivisions(503);
   insetHist->Draw("HIST");
 
-  const auto markers = CommonBoundaryMarkers(FindHadronizationBase());
+  const auto markers = PerTuneBoundaryMarkers(insetHist);
   for (const auto& marker : markers) {
     if (marker.nch < xMin || marker.nch > xMax) continue;
     TLine* line = new TLine(marker.nch, yMin, marker.nch, yMax);
@@ -1835,9 +1767,9 @@ void DrawMonashPercentileInset(TH1D* monash,
     // The MB-percentile range this absolute class spans. Percentiles DECREASE
     // with activity, so this class's own lower N_ch edge carries the larger
     // number and the next edge the smaller; the top class runs down to 0.
-    const double hiPct = markers[i].mbPercentile;
+    const double hiPct = markers[i].percentileMax;
     const double loPct =
-        (i + 1 < markers.size()) ? markers[i + 1].mbPercentile : 0.0;
+        (i + 1 < markers.size()) ? markers[i + 1].percentileMax : 0.0;
     // Precision comes from the generated header, which is the SAME constant the
     // legend labels in the plotting configs are generated with. It was 0 here
     // and 1 there; at 0 decimals E9's corrected 59.8 and the wrong 59.9 it
@@ -1853,14 +1785,14 @@ void DrawMonashPercentileInset(TH1D* monash,
   title.SetTextFont(62);
   title.SetTextSize(0.054);
   title.SetTextAlign(13);
-  title.DrawLatex(0.02, 0.965, "Common absolute N_{ch} classes");
+  title.DrawLatex(0.02, 0.965, "MONASH tune-local percentile classes");
   TLatex provenance;
   provenance.SetNDC();
   provenance.SetTextFont(42);
   provenance.SetTextSize(0.042);
   provenance.SetTextAlign(13);
   provenance.DrawLatex(0.02, 0.895,
-                       "labels: MONASH min-bias percentiles");
+                       "thresholds: MONASH production sample");
   inset->RedrawAxis();
 }
 

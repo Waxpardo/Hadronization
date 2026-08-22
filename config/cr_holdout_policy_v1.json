@@ -1,0 +1,18 @@
+{
+  "schema": "hadronization_cr_holdout_policy_v1",
+  "decision": "accepted_by_supervisors",
+  "scope": "recorded nominal CR campaign attempts",
+  "observations": [
+    {"tune": "MONASH", "discarded_attempts": 0, "total_attempts": 1000, "reported_percent": 0.0},
+    {"tune": "JUNCTIONS", "discarded_attempts": 63, "total_attempts": 1063, "reported_percent": 5.93},
+    {"tune": "CLOSEPACKING", "discarded_attempts": 64, "total_attempts": 1064, "reported_percent": 6.02}
+  ],
+  "handling": {
+    "promotion": "A failed or guard-terminated attempt promotes no ROOT file.",
+    "retry": "A missing logical slot is regenerated with a new deterministic seed derived from campaign, tune, logical job, and attempt.",
+    "analysis": "Only promoted complete outputs named by the sealed canonical manifest enter reduction.",
+    "reporting": "Attempt attrition is disclosed as measured and is not corrected away or converted into an event weight."
+  },
+  "interpretation": "This accepts the recorded approximately-six-percent CR campaign attrition. It is not a universal tolerance for future campaigns; a materially different rate or failure mechanism requires a new recorded decision.",
+  "evidence_origin": "private pre-rebuild RELEASE_BLOCKERS.md adversarial-remediation amendment, 2026-08-21"
+}

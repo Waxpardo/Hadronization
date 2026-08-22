@@ -7,7 +7,7 @@
       "macro_sha256": "a4df31e6b6da5098d40b793a0c3616957457b326bcef48538bbe271b05f38553",
       "role": "pre-registered",
       "description": "Restores one claimant per contested hard index, winner = SMALLEST heavyIndex. The rule named in the pre-registration, chosen to be deterministic and uncorrelated with pT. This is the arm the quoted systematic is measured on.",
-      "scratch_tree": "/data/alice/ipardoza/a2_variation",
+      "scratch_tree": "${HADRONIZATION_DATA_ROOT}/scratch/a2_variation",
       "registered": "2026-08-13"
     },
     "permissive_largest_index": {
@@ -15,7 +15,7 @@
       "role": "robustness",
       "description": "Identical to permissive_smallest_index with the tie-break direction REVERSED: winner = LARGEST heavyIndex. Built by tools/a2_make_largest_index_variation.py, which asserts its source sha; the diff against the pre-registered arm is exactly one comparison operator and its comment. Answers whether the measured multiplicity dependence is a property of restoring one claimant or an artefact of which claimant the pre-registration named.",
       "derived_from": "permissive_smallest_index",
-      "scratch_tree": "/data/alice/ipardoza/a2_variation_largest",
+      "scratch_tree": "${HADRONIZATION_DATA_ROOT}/scratch/a2_variation_largest",
       "registered": "2026-08-13"
     }
   },

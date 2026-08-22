@@ -35,6 +35,35 @@ REQUIRED = {
     "interpretation",
 }
 
+PATH_FIELDS = {
+    "canonical_manifest",
+    "production_root",
+    "analysis_root",
+    "raw_base",
+    "analyzed_data_base",
+    "subsample_base",
+    "publication_authorization",
+}
+
+
+def expand_site_paths(row: dict) -> dict:
+    """Expand tracked ${VARIABLE} routes after setupEnv selected a site."""
+    resolved = dict(row)
+    for key in PATH_FIELDS:
+        value = resolved.get(key)
+        if value is None:
+            continue
+        if not isinstance(value, str):
+            raise ValueError(f"dataset field {key} must be a string or null")
+        expanded = os.path.expandvars(value)
+        if "$" in expanded:
+            raise ValueError(
+                f"dataset field {key} contains an unresolved site variable: "
+                f"{value!r}; source setupEnv.sh first"
+            )
+        resolved[key] = expanded
+    return resolved
+
 
 def load(
     path: Path,
@@ -82,7 +111,7 @@ def load(
             f"dataset is absent: {active}. "
             f"accepted keys: {sorted(datasets)}"
         )
-    row = datasets[active]
+    row = expand_site_paths(datasets[active])
     missing = REQUIRED - row.keys()
     if missing:
         raise ValueError(f"active dataset is missing fields: {sorted(missing)}")

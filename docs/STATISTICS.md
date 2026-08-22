@@ -228,8 +228,9 @@ C=R(c11)-R(c1).
 This central estimator imposes no curve model.
 It subtracts two rows and uses quadrature because no measurement supplies their covariance.
 
-Class `c1` is the lowest multiplicity class, and `c11` is the highest.
-`config/multiplicity_class_boundaries_v1.json` fixes this direction.
+Class `c1` is the lowest-activity percentile class, and `c11` is the highest.
+`config/multiplicity_percentile_classes_v2.json` fixes this direction while
+each tune supplies its own absolute thresholds.
 
 The diagnostic fit uses a weighted straight line in class index.
 It assigns indices one through eleven and weights each ratio by the inverse squared standard error.
@@ -239,7 +240,8 @@ The fit reports slope, slope standard error, intercept, chi-square, and degrees 
 Its chi-square per degree of freedom measures whether a straight line fairly summarizes the points.
 
 Class index is a convention, not a physical multiplicity coordinate.
-The classes have unequal widths in `N_ch`, and the highest class has no upper boundary.
+The classes can have unequal widths in `N_ch`, and the highest class has no
+finite upper boundary; the absolute widths are tune-dependent.
 
 A slope per class is therefore not a physical derivative `d(ratio)/dN_ch`.
 The artifact `results/systematics/20260819/ratio_trend.json` records both the endpoint and fit summaries.

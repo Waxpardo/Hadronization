@@ -12,7 +12,7 @@
 
 namespace Hadronization {
 
-constexpr int kClassLabelDecimals = 1;
+constexpr int kClassLabelDecimals = 0;
 
 }  // namespace Hadronization
 

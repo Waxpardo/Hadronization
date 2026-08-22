@@ -1,24 +1,15 @@
 #!/usr/bin/env python3
-"""Generate the multiplicity-class legend labels from the single boundary source.
+"""Compatibility checker for tune-local multiplicity-class legend labels.
 
-PROPOSAL (canvas polish, defect b). The plotting configurations carry the class
-labels as literal strings:
+The plotting configurations carry the class labels as literal strings:
 
-    {"object_name": "hDPhic1_MB88p197_100", "display_name": "88.2-100.0%"}
+    {"object_name": "hDPhiM90_100", "display_name": "90-100%"}
 
-`config/multiplicity_class_boundaries_v1.json` says in its own text that it is
-THE definition of the axis and that no consumer may carry a copy, "because two
-definitions drift, and the axis is the thing every per-multiplicity number is
-conditioned on". A hand-rounded percentile in a plotting config is exactly such
-a copy: nothing checks it, and a re-binning would leave every figure captioned
-with the previous axis.
-
-So the labels are GENERATED here and `--check`-able, in the same shape as the
+The labels are generated from `multiplicity_percentile_classes_v2.json` and
+are `--check`-able, in the same shape as the
 repository's other generators (`apply_card_config.py --check`,
-`make_systematic_cards.py --check`). The percentile rule is the published one --
-the fraction of the MONASH minimum-bias sample strictly below the boundary,
-recomputed from the committed anchor rather than transcribed. The shared
-implementation lives in `tools/class_label_format.py`.
+`make_systematic_cards.py --check`). The shared formatting implementation lives
+in `tools/class_label_format.py`.
 
 This does not move the labels out of the configuration, because that is where
 the macro reads them. It removes the HAND from the loop.
@@ -41,9 +32,11 @@ from class_label_format import (  # noqa: E402
 # Consumed by the macro so the figure-4 inset cannot drift from the legend.
 PRECISION_HEADER = ROOT / "plotting" / "GeneratedClassLabelPrecision.h"
 
-# hDPhic<k>_MB<lo>_<hi>; only the class index is read from the name, so a name
-# whose embedded range disagrees with the artifact cannot smuggle a value in.
-CLASS_OBJECT = re.compile(r"^hDPhic(?P<index>\d+)_MB")
+CLASS_OBJECT = re.compile(r"^hDPhiM(?P<low>\d+)_(?P<high>\d+)$")
+CLASS_OBJECT_TO_INDEX = {
+    f"hDPhi{row['bin']}": index
+    for index, row in enumerate(json.loads(BOUNDARIES.read_text())["classes"], 1)
+}
 
 
 def label_for_class(index: int, percentiles: list[float]) -> str:
@@ -109,10 +102,12 @@ def rewrite(path: Path, percentiles: list[float], apply: bool) -> list[str]:
             for key, value in node.items():
                 if key == "legend_entries" and isinstance(value, list):
                     for entry in value:
-                        match = CLASS_OBJECT.match(entry.get("object_name", ""))
-                        if not match:
+                        object_name = entry.get("object_name", "")
+                        match = CLASS_OBJECT.match(object_name)
+                        if not match or object_name not in CLASS_OBJECT_TO_INDEX:
                             continue
-                        want = label_for_class(int(match["index"]), percentiles)
+                        want = label_for_class(
+                            CLASS_OBJECT_TO_INDEX[object_name], percentiles)
                         have = entry.get("display_name")
                         if have != want:
                             drift.append(
@@ -144,7 +139,7 @@ def main() -> int:
         (ROOT / "plotting").glob("configuration_*.json"))
     percentiles = top_percentiles()
 
-    print("CLASS_LABELS_SOURCE boundaries=%s anchor=nch_mb_%s.csv classes=%d "
+    print("CLASS_LABELS_SOURCE contract=%s scope=%s classes=%d "
           "decimals=%d"
           % (BOUNDARIES.name, LABEL_TUNE, len(percentiles), LABEL_DECIMALS))
 

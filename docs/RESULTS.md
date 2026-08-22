@@ -1,5 +1,11 @@
 # Results
 
+> **Superseded result record.** The class-dependent tables and conclusions in
+> this file were produced on the retired common absolute multiplicity axis.
+> They remain historical provenance and are not results of the 2026-08-22
+> rebuild. Regeneration requires tune-local v2 boundary receipts; see
+> `docs/REBUILD_STATUS.md`.
+
 ## 1. Scope and claim hierarchy
 
 The primary result is a multiplicity trend in the beauty baryon-to-meson balancing-yield ratio.

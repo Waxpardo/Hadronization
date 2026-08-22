@@ -78,12 +78,15 @@ base_path.txt
 
 # Machine-specific dependency overrides (see config/dependencies.local.conf.example)
 config/dependencies.local.conf
+config/site.local.conf
+/.local-data/
 
 # Rendered batch submit files.
 submit_*_smoke.sub
 submit_*_prelim.sub
 submit_*_full.sub
 submit_*_retry*.sub
+submit_analysis_*.sub
 
 # Burned-seed ledger is machine/campaign state, not code
 config/burned_seeds.txt

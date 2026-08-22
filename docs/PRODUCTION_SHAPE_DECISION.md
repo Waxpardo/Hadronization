@@ -1,12 +1,10 @@
 # Production shape — combined vs split charm/beauty
 
-> **Historical decision record, not the current axis definition.** This file
-> began as an open owner decision on 2026-08-08. Sections 1 through 5b retain
-> the measurements and rejected per-tune-percentile alternatives that led to
-> the ruling. Section 5c closes the decision: the current central axis uses one
-> common set of absolute boundaries from
-> `config/multiplicity_class_boundaries_v1.json`, with MONASH minimum-bias
-> percentile labels and per-tune translations reported only as residuals.
+> **Historical decision, superseded 2026-08-22.** The common MONASH-derived
+> absolute axis discussed below is no longer the project definition. The active
+> contract is `config/multiplicity_percentile_classes_v2.json`, with thresholds
+> resolved independently for every tune. This file is retained only to explain
+> archived outputs that used the former decision.
 
 Every number below carries its method. **Nothing here is a paper number** — no
 category fraction lacking block SEM appears, and the statistics projection

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The ONE way a multiplicity-class percentile becomes text.
+"""The one way a tune-local multiplicity percentile becomes text.
 
 Two generators write class labels: `apply_class_labels.py` owns the committed
 plotting configurations, `make_variant_configs.py` owns the variant ones. They
@@ -13,35 +13,28 @@ consumers.
 
 from __future__ import annotations
 
-import csv
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-BOUNDARIES = ROOT / "config" / "multiplicity_class_boundaries_v1.json"
-MB_ANCHOR = ROOT / "AnalysisScripts" / "anchors" / "b4_multiplicity_mb"
-LABEL_TUNE = "MONASH"
+BOUNDARIES = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
+LABEL_TUNE = "PER_TUNE"
 
 # THE precision of a displayed class percentile. See E9: at 0 decimals the
 # corrected 59.8 and the wrong 59.9 it replaced print as the same string.
-LABEL_DECIMALS = 1
+LABEL_DECIMALS = 0
 
 # Every generated configuration declares who owns its labels, so neither
 # generator has to guess from a filename glob which files are its own.
 OWNER_KEY = "label_owner"
-OWNER_COMMITTED = "tools/apply_class_labels.py"
+OWNER_COMMITTED = "tools/apply_per_tune_multiplicity_contract.py"
 OWNER_VARIANTS = "tools/make_variant_configs.py"
 
 
 def top_percentiles() -> list[float]:
-    """100 - (fraction strictly below), one per class boundary, ascending N_ch."""
-    boundaries = [c["boundary_nch"]
-                  for c in json.loads(BOUNDARIES.read_text())["classes"]]
-    rows = csv.DictReader((MB_ANCHOR / f"nch_mb_{LABEL_TUNE}.csv").open())
-    dist = {int(r["nch"]): float(r["count"]) for r in rows}
-    total = sum(dist.values())
-    return [100.0 - 100.0 * sum(c for n, c in dist.items() if n < b) / total
-            for b in boundaries]
+    """Upper top-percentile edge for c1..c11, in ascending activity."""
+    classes = json.loads(BOUNDARIES.read_text())["classes"]
+    return [float(row["percentile_max"]) for row in classes]
 
 
 def format_percentile_range(low: float, high: float) -> str:

@@ -1,0 +1,6 @@
+# Optional untracked overrides. Copy to config/site.local.conf only when the
+# automatic local/Nikhef profile is not sufficient.
+#
+# HADRONIZATION_SITE=nikhef
+# HADRONIZATION_DATA_ROOT=/data/alice/my-account/hf
+# HF_PRODUCTION_ROOT=/another/large/storage/hadronization_production

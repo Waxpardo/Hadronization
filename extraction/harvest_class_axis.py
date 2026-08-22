@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Parse the class axis from the plotter's UNCERTAINTY_MATRIX log.
+"""Parse tune-local percentile classes from an UNCERTAINTY_MATRIX log.
 
 The `bin` histogram name encodes the class; no separate field carries it:
 
-    hDPhic1_MB88p197_100    class c1,  MONASH-MB percentile window 88.197-100
-    hDPhic11_MB0_8p422      class c11, window 0-8.422
+    hDPhiM90_100            class c1, tune-local percentile window 90-100
+    hDPhiM0_1               class c11, tune-local percentile window 0-1
     hDPhiM00_100            the multiplicity-INTEGRATED bin
 
 `p` is the decimal point. The five-field key prevents window-label collisions.
@@ -25,8 +25,17 @@ from __future__ import annotations
 
 import re
 
-CLASS_BIN = re.compile(r"^hDPhi(?P<cls>c\d+)_MB(?P<lo>[0-9p]+)_(?P<hi>[0-9p]+)$")
-INTEGRATED_BIN = re.compile(r"^hDPhiM(?P<lo>\d+)_(?P<hi>\d+)$")
+CLASS_BIN = re.compile(r"^hDPhiM(?P<lo>\d+)_(?P<hi>\d+)$")
+LEGACY_CLASS_BIN = re.compile(
+    r"^hDPhi(?P<cls>c\d+)_MB(?P<lo>[0-9p]+)_(?P<hi>[0-9p]+)$")
+CLASS_BY_WINDOW = {
+    (90.0, 100.0): "c1", (80.0, 90.0): "c2",
+    (70.0, 80.0): "c3", (60.0, 70.0): "c4",
+    (50.0, 60.0): "c5", (40.0, 50.0): "c6",
+    (30.0, 40.0): "c7", (20.0, 30.0): "c8",
+    (10.0, 20.0): "c9", (1.0, 10.0): "c10",
+    (0.0, 1.0): "c11",
+}
 INTEGRATED = "MB"
 
 
@@ -41,12 +50,18 @@ def parse_bin(name: str) -> tuple[str, float, float]:
     Fail closed: an unrecognised bin name is a changed emission, not a row to
     skip quietly.
     """
+    if name == "hDPhiM00_100":
+        return INTEGRATED, 0.0, 100.0
     m = CLASS_BIN.match(name)
     if m:
-        return m.group("cls"), percentile(m.group("lo")), percentile(m.group("hi"))
-    m = INTEGRATED_BIN.match(name)
+        window = (percentile(m.group("lo")), percentile(m.group("hi")))
+        if window in CLASS_BY_WINDOW:
+            return CLASS_BY_WINDOW[window], *window
+    # Read-only compatibility for archived pre-rebuild logs. New configs never
+    # emit this MONASH-MB form.
+    m = LEGACY_CLASS_BIN.match(name)
     if m:
-        return INTEGRATED, float(m.group("lo")), float(m.group("hi"))
+        return m.group("cls"), percentile(m.group("lo")), percentile(m.group("hi"))
     raise ValueError(f"unparsed UNCERTAINTY_MATRIX bin name: {name!r}")
 
 
@@ -63,7 +78,10 @@ def parse_log(text: str) -> dict[tuple[str, str, str, str, str], dict[str, str]]
             continue
         fields = dict(t.split("=", 1) for t in line.split() if "=" in t)
         cls, low, high = parse_bin(fields["bin"])
-        fields["class"], fields["mb_low"], fields["mb_high"] = cls, low, high
+        fields["class"] = cls
+        fields["percentile_low"], fields["percentile_high"] = low, high
+        # Compatibility aliases for archived extraction tables.
+        fields["mb_low"], fields["mb_high"] = low, high
         key = (fields["flavour"], fields["trigger"], fields["tune"],
                fields["associate"], cls)
         if key in rows:

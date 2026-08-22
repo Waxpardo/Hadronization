@@ -396,8 +396,8 @@ class BoundaryReceiptTest(unittest.TestCase):
 
         payload = {
             "schema": robustness.BOUNDARY_RECEIPT_SCHEMA,
-            "schema_version": 1,
-            "algorithm": "common_absolute_nch_class_boundaries_v1",
+            "schema_version": 2,
+            "algorithm": "per_tune_summed_multiplicity_quantiles_discrete_v2",
             "completion_status": "PASS",
             "configuration_path":
                 spec["contracts"]["boundary_configuration_path"],
@@ -408,8 +408,8 @@ class BoundaryReceiptTest(unittest.TestCase):
             "boundary_utility_sha256": digest(
                 ROOT / "plotting/MultiplicityBoundaryUtils.h"
             ),
-            "common_boundary_utility_sha256": digest(
-                ROOT / "plotting/CommonMultiplicityBoundaries.h"
+            "class_contract_sha256": digest(
+                ROOT / "config/multiplicity_percentile_classes_v2.json"
             ),
             "policy": {
                 "normalization": "sum_of_regular_bins",
@@ -502,7 +502,7 @@ class BoundaryReceiptTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             spec, receipt = self._receipt(directory)
-            path = directory / "multiplicity_boundary_receipt_v1.json"
+            path = directory / "multiplicity_boundary_receipt_v2.json"
             path.write_text(json.dumps(receipt, sort_keys=True))
             _, ranges, _, _ = robustness.validate_boundary_receipt(
                 path, spec, ROOT

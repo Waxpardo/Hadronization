@@ -35,6 +35,33 @@ fi
 HADRONIZATION_BASE="${HADRONIZATION_BASE%/}"
 export HADRONIZATION_BASE
 
+# Resolve the execution site before dependency and dataset paths. Nikhef is the
+# authoritative full-pipeline environment; local is a source-development
+# profile. A user may override either with config/site.local.conf or exported
+# variables, without editing tracked files.
+if [[ -z "${HADRONIZATION_SITE:-}" ]]; then
+  if [[ -d /data/alice && -d /cvmfs/alice.cern.ch ]]; then
+    HADRONIZATION_SITE="nikhef"
+  else
+    HADRONIZATION_SITE="local"
+  fi
+fi
+setupenv_site_conf="${SCRIPT_DIR}/config/sites/${HADRONIZATION_SITE}.conf"
+setupenv_site_local_conf="${SCRIPT_DIR}/config/site.local.conf"
+if [[ -f "${setupenv_site_local_conf}" ]]; then
+  # shellcheck source=/dev/null
+  source "${setupenv_site_local_conf}"
+elif [[ -f "${setupenv_site_conf}" ]]; then
+  # shellcheck source=/dev/null
+  source "${setupenv_site_conf}"
+else
+  echo "ERROR: unknown HADRONIZATION_SITE=${HADRONIZATION_SITE}; expected a profile at ${setupenv_site_conf}" >&2
+  return 1 2>/dev/null || exit 1
+fi
+export HADRONIZATION_SITE HADRONIZATION_DATA_ROOT
+export HADRONIZATION_ANALYSIS_ROOT HADRONIZATION_MERGED_ROOT
+export HADRONIZATION_SYSTEMATICS_ROOT HF_PRODUCTION_ROOT
+
 # 0. Resolve dependency locations.
 #
 # The local override is sourced first: every entry uses ": ${NAME:=value}", so
@@ -202,6 +229,7 @@ if [[ "${SETUPENV_QUIET:-0}" -ne 1 ]]; then
 fi
 
 unset setupenv_default_conf setupenv_local_conf
+unset setupenv_site_conf setupenv_site_local_conf
 unset setupenv_pythia_actual setupenv_root_actual
 
 if [[ "${setupenv_restore_errexit}" -eq 1 ]]; then

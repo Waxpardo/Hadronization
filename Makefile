@@ -28,7 +28,12 @@ CAMPAIGN     ?= HF_RUN3_PRELIM
 # The producer packs the ordinal into each event identifier, so later stages
 # cannot correct an implicit value.
 ORDINAL      ?=
-SEED_LEDGER  ?= $(ROOT_DIR)/config/burned_seeds.txt
+# Mutable campaign state belongs in the external data plane whenever the site
+# profile has been sourced.  The checkout-local fallbacks keep direct Makefile
+# development usable, but the root ./hadronization command always exports the
+# external Nikhef/local-development data root.
+STATE_ROOT   ?= $(if $(HADRONIZATION_DATA_ROOT),$(HADRONIZATION_DATA_ROOT)/project/runs,$(ROOT_DIR)/campaigns)
+SEED_LEDGER  ?= $(STATE_ROOT)/seed_ledgers/burned_seeds.txt
 # The hang guard uses CPU time because wedged generators continue to consume CPU.
 # The 3,600-second limit gives 2.6 times the measured CLOSEPACKING maximum.
 # A tight limit could reject slow, baryon-rich events and bias the observable.
@@ -39,7 +44,7 @@ MAX_RUNTIME  ?= 14400
 # Seeds derive from the campaign ordinal, tune, job, and attempt.
 ATTEMPT        ?= 1
 SUBMIT_ATTEMPT ?= 0
-FREEZE_DIR   ?= $(ROOT_DIR)/campaigns/$(CAMPAIGN)/freeze
+FREEZE_DIR   ?= $(STATE_ROOT)/$(CAMPAIGN)/freeze
 
 # The renderer normally calculates the digest of the built producer.
 # Set PRODUCER_SHA only when another host supplies that exact binary.
@@ -86,6 +91,7 @@ print-config:
 	@echo "TUNES       = $(TUNES)"
 	@echo "JOBS        = $(JOBS) x $(EVENTS) events"
 	@echo "SEED_LEDGER = $(SEED_LEDGER)"
+	@echo "STATE_ROOT  = $(STATE_ROOT)"
 
 # The doctor reports missing dependencies but does not gate another target.
 doctor:

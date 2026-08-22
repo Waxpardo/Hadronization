@@ -41,7 +41,6 @@
 
 #include "HistogramErrorUtils.h"
 #include "MultiplicityBoundaryUtils.h"
-#include "CommonMultiplicityBoundaries.h"
 #include "PairInputSelectionUtils.h"
 #include "TunePlotStyle.h"
 
@@ -317,7 +316,7 @@ PlotConfig ReadConfig(const char* configuration, const char* outputDir)
     }
     configOut.boundaryReceiptPath =
         JoinPath({*receiptDirectories.begin(),
-                  "multiplicity_boundary_receipt_v1.json"});
+                  "multiplicity_boundary_receipt_v2.json"});
     if (PathExists(configOut.boundaryReceiptPath)) {
         std::ifstream receiptInput(configOut.boundaryReceiptPath);
         if (!receiptInput.is_open()) {
@@ -331,10 +330,10 @@ PlotConfig ReadConfig(const char* configuration, const char* outputDir)
     return configOut;
 }
 
-// The classes are defined by the committed common absolute N_ch boundaries, so
-// both the drawn decorations and the receipt cross-check resolve that artifact
-// rather than recomputing this tune's own quantiles - which would now disagree
-// with the frozen receipt by construction.
+// The decorations and the receipt are both derived from the labelled tune's
+// own merged event-activity distribution.  This is the PR-13 scientific
+// definition; the shared utility supplies the later fail-closed and disjoint
+// integer-bin behaviour.
 std::map<double, int> CalculateThresholds(
     const TH1D* hMult,
     const std::vector<PercentileClass>& classes)
@@ -348,25 +347,14 @@ std::map<double, int> CalculateThresholds(
             {entry.minPercentile, entry.maxPercentile});
     }
     const std::string context = "standalone multiplicity-boundary plot";
-    const auto orderedPartition =
-        HadronizationMultiplicity::ValidateAndOrderPartition(
-            configuredClasses);
-    const auto commonBoundaries =
-        HadronizationMultiplicity::LoadCommonBoundaries(
-            orderedPartition.size(),
-            FindHadronizationBase() + "/" +
-                HadronizationMultiplicity::kCommonBoundaryArtifactPath);
-    const auto resolved =
-        HadronizationMultiplicity::CommonThresholdsForConfiguredClasses(
-            commonBoundaries, orderedPartition, percentiles,
-            HadronizationMultiplicity::CaptureHistogramIdentity(
-                hMult, context),
-            context);
-
+    HadronizationMultiplicity::ValidateAndOrderPartition(configuredClasses);
+    const auto identity =
+        HadronizationMultiplicity::CaptureHistogramIdentity(hMult, context);
     std::map<double, int> thresholds;
-    for (const auto& entry : resolved) {
-        thresholds[entry.first] =
-            static_cast<int>(std::lround(entry.second));
+    for (const double percentile : percentiles) {
+        thresholds[percentile] =
+            HadronizationMultiplicity::ThresholdForPercentile(
+                identity, percentile, context);
     }
     return thresholds;
 }
@@ -392,7 +380,7 @@ void VerifyBoundaryReceiptForHistogram(
     const json& receipt = config.boundaryReceipt;
     if (receipt.value("schema", std::string()) !=
             HadronizationMultiplicity::kBoundaryReceiptSchema ||
-        receipt.value("schema_version", 0) != 1 ||
+        receipt.value("schema_version", 0) != 2 ||
         receipt.value("algorithm", std::string()) !=
             HadronizationMultiplicity::kBoundaryAlgorithm ||
         receipt.value("completion_status", std::string()) != "PASS" ||

@@ -6,15 +6,8 @@ Two things are pinned here.
 1. `tools/make_variant_configs.py --check` is clean, so a hand-edit to a variant
    configuration is caught the way every other generated artifact's is.
 
-2. The extreme classes carry the rank the AXIS gives them, not the rank their
-   label looks like. The percentiles are TOP percentiles, so the lowest-activity
-   class carries the LARGEST number: c1 spans 88.2-100.0% and is the LOWEST
-   multiplicity class. A legend that read the percentile as the rank would call
-   it the highest, and it would look entirely reasonable on the page.
-
-   This test asserts the pairing directly: the class with the SMALLEST
-   boundary_nch must be the one whose legend says "lowest", and it must be the
-   one carrying the largest percentile.
+2. The extreme classes carry the rank the contract gives them. c1 is the
+   lowest-activity 90-100% class and c11 is the highest-activity 0-1% class.
 """
 
 import json
@@ -25,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 GENERATOR = ROOT / "tools" / "make_variant_configs.py"
 EXTREMES = ROOT / "plotting" / "configuration_multiplicity_HF_RUN3_V1_VEXTREMES.json"
-BOUNDARIES = ROOT / "config" / "multiplicity_class_boundaries_v1.json"
+BOUNDARIES = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
 
 
 def legend_entries(document) -> dict[str, str]:
@@ -83,24 +76,14 @@ def main() -> int:
         return 1
 
     classes = json.loads(BOUNDARIES.read_text())["classes"]
-    lowest_nch = min(c["boundary_nch"] for c in classes)
-    highest_nch = max(c["boundary_nch"] for c in classes)
-    lowest_index = [c["boundary_nch"] for c in classes].index(lowest_nch) + 1
-    highest_index = [c["boundary_nch"] for c in classes].index(highest_nch) + 1
+    lowest_index = 1
+    highest_index = len(classes)
 
     entries = legend_entries(document)
-    by_index = {}
-    for name, label in entries.items():
-        if not name.startswith("hDPhic"):
-            continue
-        digits = ""
-        for ch in name[len("hDPhic"):]:
-            if ch.isdigit():
-                digits += ch
-            else:
-                break
-        if digits:
-            by_index[int(digits)] = label
+    by_index = {
+        index: entries.get("hDPhi" + row["bin"], "")
+        for index, row in enumerate(classes, 1)
+    }
 
     failures = []
 
@@ -109,14 +92,14 @@ def main() -> int:
 
     if "lowest" not in low_label:
         failures.append(
-            f"class {lowest_index} has the smallest boundary_nch ({lowest_nch}) "
+            f"class {lowest_index} is first in the ascending-activity contract "
             f"so its legend must say 'lowest'; it says {low_label!r}")
     if "highest" not in high_label:
         failures.append(
-            f"class {highest_index} has the largest boundary_nch ({highest_nch}) "
+            f"class {highest_index} is last in the ascending-activity contract "
             f"so its legend must say 'highest'; it says {high_label!r}")
 
-    # The inversion itself: the LOWEST-N_ch class must carry the LARGER
+    # The inversion itself: the lowest-activity class must carry the LARGER
     # percentile. If someone ever derives rank from the percentile, this flips.
     def leading_percentile(label: str) -> float:
         tail = label.split(",")[-1].strip().rstrip("%")
@@ -125,7 +108,7 @@ def main() -> int:
     if low_label and high_label:
         if not leading_percentile(low_label) > leading_percentile(high_label):
             failures.append(
-                "top-percentile convention violated: the lowest-N_ch class must "
+                "top-percentile convention violated: the lowest-activity class must "
                 f"carry the LARGER percentile, got low={low_label!r} "
                 f"high={high_label!r}")
 

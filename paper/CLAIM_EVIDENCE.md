@@ -15,7 +15,7 @@ zero P1-P8 outputs.
 |---|---|---|---|
 | A1 | PYTHIA 8.317, pp at 13.6 TeV, forced hard-heavy sample | `config/dependencies.conf`; three nominal cards under `generation/cards/`; `config/dataset_selector_hf_run3_v1.json` | Selector authorizes the campaign; raw union remains external. |
 | A2 | OS-SS per trigger, factor-one SS, dedicated trigger denominator | `config/heavy_flavour_pair_registry_v1.json`; `config/pair_file_object_contract_v1.json`; `plotting/improvedPlotting_THnSparse.C`; `tests/test_plot_reference_multiplicity_contract.py` | Pair projection is not an admissible trigger count. |
-| A3 | Operational narrow counter, common classes, three complete bundles | `generation/producer/HeavyFlavourUtils.h`; `config/multiplicity_class_boundaries_v1.json`; `config/tune_difference_allowlist_v1.json`; `results/systematics/20260817/s5_class_migration.json` | The 0.7670% minimum-bias production-decay mismatch causes zero class migration under current boundaries, but is unmeasured in the forced hard sample. |
+| A3 | Operational narrow counter, tune-local percentile classes, three complete bundles | `generation/producer/HeavyFlavourUtils.h`; `config/multiplicity_percentile_classes_v2.json`; `config/tune_difference_allowlist_v1.json` | Class-dependent evidence is blocked until regeneration with a v2 per-tune boundary receipt. |
 | A4 | Activity-dependent beauty redistribution is provisional | `results/systematics/20260819/ratio_trend.json`; `results/systematics/20260820/verdict.json`; `docs/SYSTEMATICS.md` | The two-SEM correction is applied; S4 and the tune-dependent hang-selection bias remain open. |
 
 ## Methods, model, and results
@@ -33,7 +33,7 @@ zero P1-P8 outputs.
 | M1 | Campaign, energy, PYTHIA, hard processes, threshold | Selector, nominal cards, generated tune registry, and campaign authorization | 13.6 TeV; PYTHIA 8.317; `pTHatMin=2.0`. |
 | M2 | 1,000 files x 100,000 events and ten blocks | `config/dataset_selector_hf_run3_v1.json`; `docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md` | External file union cannot be rehashed locally. |
 | M3 | Multiplicity counter and decay-policy limitation | `generation/producer/HeavyFlavourUtils.h`; `results/systematics/20260817/s5_class_migration.json`; `docs/SYSTEMATICS.md` S5 | Exact final/charged/non-heavy/pT/eta predicate; 0.7670% minimum-bias mismatch; exact-zero class migration for current boundaries; forced-sample bias unmeasured. |
-| M4 | c1-c11 boundaries and direction | `config/multiplicity_class_boundaries_v1.json`; `AnalysisScripts/anchors/b4_multiplicity_mb/nch_mb_MONASH.csv` | Common absolute axis. |
+| M4 | c1-c11 percentiles and direction | `config/multiplicity_percentile_classes_v2.json`; tune-level merged `summed MULTIPLICITY` histograms | Each tune resolves its own absolute thresholds. |
 | M5 | S1-S6 scope and exclusions | `config/systematics_variations_v1.json`; `config/a2_variations_v1.json`; `docs/SYSTEMATICS.md` | S4 missing; S6 separate axis; no detector effects. |
 | R1 | Integrated table | `tests/fixtures/integrated_rows_nominal.log` | Labelled validation result; missing `PAIR_COUNTS` blocks exact closure. |
 | R2 | Beauty endpoint ratios and contrasts | `results/systematics/20260819/ratio_trend.json`, `endpoint_contrast_c11_minus_c1` | Statistical SEM only in the endpoint table. |

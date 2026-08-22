@@ -1,0 +1,136 @@
+#!/bin/bash
+# One command surface for local development and Nikhef execution.
+set -euo pipefail
+
+project_base="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export HADRONIZATION_BASE="${project_base}"
+export SETUPENV_QUIET=1
+# shellcheck source=/dev/null
+source "${project_base}/setupEnv.sh"
+cd "${project_base}"
+
+selector="${HADRONIZATION_DATASET_SELECTOR:-${project_base}/config/dataset_selector.json}"
+
+usage() {
+  cat <<'USAGE'
+Usage: ./hadronization COMMAND [arguments]
+
+  site
+      Show the selected site and external storage roots.
+
+  check [--portable]
+      Run the repository contract suite. --portable allows an off-pin local
+      ROOT/PYTHIA environment and is never a production certification.
+
+  dataset DATASET_KEY
+      Resolve and display one named dataset route.
+
+  render-production CAMPAIGN ORDINAL JOBS EVENTS [ATTEMPT]
+      Build a deterministic three-tune Condor submit file and reserve seeds.
+
+  freeze DATASET_KEY
+      Build the canonical manifest from promoted raw files.
+
+  render-analysis DATASET_KEY [OUTPUT.sub]
+      Render the canonical reduction submit file.
+
+  merge DATASET_KEY [PAIR_SCHEMA]
+      Validate and merge the central sample plus ten blocks. PAIR_SCHEMA
+      defaults to v3.
+
+  plot DATASET_KEY [TARGET ...]
+      Run the plot workflow for a named dataset. TARGET defaults to all; see
+      plotting/run_paper_plots.sh help.
+USAGE
+}
+
+resolve_dataset() {
+  local dataset_key="$1"
+  eval "$(python3 "${project_base}/tools/dataset_selector.py" shell \
+    --selector "${selector}" --checkout "${project_base}" \
+    --dataset "${dataset_key}")"
+  export HADRONIZATION_DATASET="${dataset_key}"
+}
+
+command_name="${1:-help}"
+if [[ "$#" -gt 0 ]]; then shift; fi
+
+case "${command_name}" in
+  help|-h|--help)
+    usage
+    ;;
+  site)
+    printf 'HADRONIZATION_SITE=%s\n' "${HADRONIZATION_SITE}"
+    printf 'HADRONIZATION_BASE=%s\n' "${HADRONIZATION_BASE}"
+    printf 'HADRONIZATION_DATA_ROOT=%s\n' "${HADRONIZATION_DATA_ROOT}"
+    printf 'HF_PRODUCTION_ROOT=%s\n' "${HF_PRODUCTION_ROOT}"
+    printf 'HADRONIZATION_ANALYSIS_ROOT=%s\n' "${HADRONIZATION_ANALYSIS_ROOT}"
+    printf 'HADRONIZATION_MERGED_ROOT=%s\n' "${HADRONIZATION_MERGED_ROOT}"
+    ;;
+  check)
+    if [[ "${1:-}" == "--portable" ]]; then
+      shift
+      HF_ALLOW_UNPINNED_ENV=1 make -C "${project_base}" check
+    else
+      make -C "${project_base}" check
+    fi
+    [[ "$#" -eq 0 ]] || { echo "ERROR: unexpected check arguments" >&2; exit 2; }
+    ;;
+  dataset)
+    [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }
+    python3 "${project_base}/tools/dataset_selector.py" show \
+      --selector "${selector}" --checkout "${project_base}" --dataset "$1"
+    ;;
+  render-production)
+    [[ "$#" -ge 4 && "$#" -le 5 ]] || { usage >&2; exit 2; }
+    campaign="$1"; ordinal="$2"; jobs="$3"; events="$4"; attempt="${5:-0}"
+    make -C "${project_base}" submit-full \
+      CAMPAIGN="${campaign}" ORDINAL="${ordinal}" JOBS="${jobs}" \
+      EVENTS="${events}" SUBMIT_ATTEMPT="${attempt}"
+    ;;
+  freeze)
+    [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }
+    resolve_dataset "$1"
+    freeze_dir="$(dirname "${HADRONIZATION_CANONICAL_MANIFEST}")"
+    python3 "${project_base}/tools/build_canonical_manifest.py" \
+      "${HADRONIZATION_CAMPAIGN}" "${freeze_dir}" \
+      --production-root "${HADRONIZATION_PRODUCTION_ROOT}"
+    ;;
+  render-analysis)
+    [[ "$#" -ge 1 && "$#" -le 2 ]] || { usage >&2; exit 2; }
+    dataset_key="$1"; output="${2:-}"
+    resolve_dataset "${dataset_key}"
+    if [[ -z "${output}" ]]; then
+      output="${project_base}/submit_analysis_${HADRONIZATION_CAMPAIGN}.sub"
+    fi
+    python3 "${project_base}/tools/render_analysis_submit.py" \
+      "${HADRONIZATION_CANONICAL_MANIFEST}" "${project_base}" \
+      "${HADRONIZATION_PRODUCTION_ROOT}" "${HADRONIZATION_ANALYSIS_ROOT}" \
+      "${output}"
+    ;;
+  merge)
+    [[ "$#" -ge 1 && "$#" -le 2 ]] || { usage >&2; exit 2; }
+    dataset_key="$1"; pair_schema="${2:-v3}"
+    resolve_dataset "${dataset_key}"
+    freeze_dir="$(dirname "${HADRONIZATION_CANONICAL_MANIFEST}")"
+    HADRONIZATION_EXPECTED_PAIR_SCHEMA="${pair_schema}" \
+      "${project_base}/merging/merge_root_files.sh" \
+      "${freeze_dir}" "${HADRONIZATION_PRODUCTION_ROOT}" \
+      "${HADRONIZATION_ANALYSIS_ROOT}" \
+      "${HADRONIZATION_ANALYZED_DATA_BASE}" \
+      "${HADRONIZATION_CAMPAIGN}"
+    ;;
+  plot)
+    [[ "$#" -ge 1 ]] || { usage >&2; exit 2; }
+    dataset_key="$1"; shift
+    resolve_dataset "${dataset_key}"
+    if [[ "$#" -eq 0 ]]; then set -- all; fi
+    DATASET_SELECTOR="${selector}" \
+      "${project_base}/plotting/run_paper_plots.sh" "$@"
+    ;;
+  *)
+    echo "ERROR: unknown command ${command_name}" >&2
+    usage >&2
+    exit 2
+    ;;
+esac

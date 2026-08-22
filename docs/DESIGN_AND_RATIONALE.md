@@ -508,11 +508,10 @@ that**. The threshold sits comfortably below the screening scale for every tune,
 and **JUNCTIONS is the tightest arm** either way.
 
 **This does not settle the working point — it only removes an arithmetic
-error.** The central event-activity axis is the one common set of absolute
-boundaries in `config/multiplicity_class_boundaries_v1.json`. The MONASH
-minimum-bias distribution supplies its percentile labels. The documentation
-uses per-tune minimum-bias translations only as residual diagnostics; they do
-not redefine the classes.
+error.** The central event-activity contract is the common set of percentile
+windows in `config/multiplicity_percentile_classes_v2.json`. Every tune derives
+its own absolute thresholds from its merged event distribution; the MONASH
+minimum-bias sample remains calibration evidence only.
 
 **Card text pending.** Three of the four cards carry a pasted sentence asserting
 `pT0Ref` is 2.28 GeV, which is correct only for MONASH and JUNCTIONS_MATCHED

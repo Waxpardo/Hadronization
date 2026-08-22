@@ -21,12 +21,13 @@
 namespace HadronizationMultiplicity {
 
 constexpr const char* kBoundaryReceiptSchema =
-    "hadronization_multiplicity_boundary_receipt_v1";
-// The receipt states how its numbers were made. The classes are no longer
-// per-tune weighted quantiles: docs/PRODUCTION_SHAPE_DECISION.md rules one set
-// of common absolute N_ch boundaries for every tune.
+    "hadronization_multiplicity_boundary_receipt_v2";
+// Each tune owns its event-activity definition. The percentile thresholds are
+// derived from that tune's merged `summed MULTIPLICITY` histogram, following
+// the PR-13 workflow, while the v2 algorithm retains the later fail-closed
+// histogram validation and disjoint integer-bin partition.
 constexpr const char* kBoundaryAlgorithm =
-    "common_absolute_nch_class_boundaries_v1";
+    "per_tune_summed_multiplicity_quantiles_discrete_v2";
 
 struct HistogramIdentity {
   int nBins = 0;

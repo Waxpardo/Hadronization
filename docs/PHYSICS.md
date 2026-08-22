@@ -113,35 +113,20 @@ light-hadron state between that cutoff and the conventional 10 mm primary
 threshold. Heavy-hadron decays are disabled, and heavy hadrons are excluded
 because their artificial stability would create an autocorrelation.
 
-The paired PYTHIA 8.317 MONASH minimum-bias calibration measured 6.986 for the
-production policy and 7.040 for the intended experimental-decay convention, a
-0.7670% undercount. Applying both signs of this relative shift to the current
-half-integer boundaries crosses no integer, so the committed S5 propagation is
-exactly zero in c1--c11. That result applies to class membership under the
-current boundaries. It neither measures the forced hard-heavy sample's bias
-nor corrects the percentile labels.
+The paired PYTHIA 8.317 MONASH minimum-bias calibration remains useful for
+counter studies, but it no longer defines class membership. Its former
+zero-migration statement was conditional on a superseded common absolute axis.
 
-Eleven common, absolute classes use half-integer boundaries.
-Each integer `N_ch` therefore belongs to exactly one class.
-The artifact `config/multiplicity_class_boundaries_v1.json` is the single class definition.
+Eleven tune-local classes use top-percentile windows `90-100, 80-90, ...,
+1-10, 0-1%`. Each tune derives all absolute `N_ch` thresholds from its own
+merged `summed MULTIPLICITY` histogram. Integer ranges are disjoint and
+exhaustive, so every accepted event belongs to exactly one class. The artifact
+`config/multiplicity_percentile_classes_v2.json` is the single class-window
+definition; a v2 run receipt records the tune-specific thresholds.
 
-| multiplicity class | integer `N_ch` | MONASH minimum-bias top-percentile label |
-|---|---:|---:|
-| `c1` | 0--2 | 88.197--100.000% |
-| `c2` | 3 | 80.597--88.197% |
-| `c3` | 4--5 | 65.937--80.597% |
-| `c4` | 6 | 59.850--65.937% |
-| `c5` | 7--8 | 50.308--59.850% |
-| `c6` | 9--10 | 43.030--50.308% |
-| `c7` | 11--13 | 34.614--43.030% |
-| `c8` | 14--17 | 26.154--34.614% |
-| `c9` | 18--23 | 17.124--26.154% |
-| `c10` | 24--32 | 8.422--17.124% |
-| `c11` | 33 and above | 0.000--8.422% |
-
-Class `c1` is the lowest multiplicity class, while `c11` is the highest.
-Top-percentile labels count from the most active end, so their numerical direction is opposite to the class order.
-The boundary artifact and minimum-bias distribution establish this direction.
+Class `c1` is the lowest-activity class (`90-100%` from the most-active end),
+while `c11` is the highest (`0-1%`). Equal percentile labels compare equal
+activity fractions across tune bundles, not equal absolute `N_ch` intervals.
 
 The labels derive from 172,429 MONASH minimum-bias events, not from the forced hard-pair sample.
 The distribution and manifest under `AnalysisScripts/anchors/b4_multiplicity_mb/` provide the counts.
@@ -266,11 +251,11 @@ Committed evidence establishes only the scope named in its row and does not repl
 | `OS`, `SS`, and `OS-SS` are registry-selected ordered conditional pairs; the SS factor is exactly 1 | pair registry; plotting configurations | `AnalysisScripts/GeneratedPairRegistry.h`; pair metadata `same_sign_pair_factor` | `ResolveConfiguredPairFromRegistry` and `calculateOneYield` in the ROOT plotter | `tests/test_plot_reference_multiplicity_contract.py`; `tests/test_observable_contract.py` | three-tune plotting run record and central tables | Write `(OS-SS)/N_trig`; never use the legacy one-half factor. |
 | Trigger normalization comes only from a dedicated trigger count | `config/pair_file_object_contract_v1.json` | `AnalysisScripts/GeneratedPairObjectContract.h` requires additive `hTrKinematics` and `hFlavourClosureSummary` | the balancing plotter projects `hTrKinematics` and requires matching OS/SS denominators; the closure diagnostic uses the summary's trigger bin; pair projections supply numerators only | `tests/test_pair_object_contract.py`; `tests/test_plot_reference_multiplicity_contract.py` | plotting run record; ten-block uncertainty logs | Do not normalize a yield by a trigger projection from `hCorrelations`. |
 | The stored angular axis is `-pi/2 <= Delta phi < 3pi/2`; the reported integrated yield covers that full axis | pair-object configuration | generated pair-object contract identifies `hCorrelations` but declares no regional boundary | `MakeCorrelation` in the reduction and full-histogram `Integral()` in `calculateOneYield` | `tests/test_statistical_robustness.py`; `tests/test_pair_object_contract.py` | ROOT plotting run record | Near-side and away-side may describe features of the distribution, but no near-side or away-side integrated yield is currently defined or evidenced. |
-| Event activity counts final charged non-heavy particles with `pT > 0.15 GeV/c` and `|eta| <= 1`; eleven non-overlapping absolute classes are common to all tunes | `config/multiplicity_class_boundaries_v1.json`; multiplicity utility | generated class labels and shared boundary reader in the plotting path | producer counter; ROOT common-boundary loader and partition validation | `tests/test_multiplicity_inset_boundary_source.py`; `tests/test_plot_reference_multiplicity_contract.py`; `tests/test_harvest_class_axis.py` | `AnalysisScripts/anchors/b4_multiplicity_mb/`; plotting boundary receipt | Use `c1` through `c11` as the central axis. MONASH minimum-bias percentiles are labels; per-tune translations are residual diagnostics. |
+| Event activity counts final charged non-heavy particles with `pT > 0.15 GeV/c` and `|eta| <= 1`; eleven percentile windows are resolved independently per tune | `config/multiplicity_percentile_classes_v2.json`; multiplicity utility | generated class labels and v2 receipt schema | producer counter; ROOT per-tune threshold resolution and partition validation | `tests/test_multiplicity_inset_boundary_source.py`; `tests/test_plot_reference_multiplicity_contract.py`; `tests/test_harvest_class_axis.py`; `tests/test_supervisor_decisions.py` | tune-level merged `summed MULTIPLICITY`; v2 plotting boundary receipt | Use `c1` through `c11` as equal-fraction activity classes. Do not require common absolute `N_ch` thresholds. |
 | Central values use the complete pooled union; uncertainty is the standard error across ten disjoint equal-exposure block estimators | `config/statistical_robustness_v1.json`; `docs/STATISTICS.md` | pair-object additive/identity scopes in `AnalysisScripts/GeneratedPairObjectContract.h` | manifest merge, ROOT block estimator, and extraction block combiners | `tests/test_statistical_robustness.py`; `tests/test_pair_object_contract.py`; `tests/test_decompose_exit_status.py` | three central plus thirty block extraction products; v3 closure logs | Do not call the central value a mean of blocks; form nonlinear ratios inside each block. |
 | A species/reference-meson ratio divides two signed balancing yields selected by the pair registry | pair registry `reference_meson_pdg` fields | `AnalysisScripts/GeneratedPairRegistry.h` and pair metadata | ROOT reference selection and within-block ratio calculation | `tests/test_plot_reference_multiplicity_contract.py`; `tests/test_baryon_meson_render_contract.py` | integrated-row fixtures and three-tune result tables | Call it a balancing-yield ratio. It is not an inclusive baryon/meson production ratio. |
 | Tune differences compare the complete MONASH, JUNCTIONS, and CLOSEPACKING bundles | three nominal cards; `config/tune_difference_allowlist_v1.json` | `generation/registries/GeneratedTuneSettingRegistry.h` | producer tune ordinal and three-tune plotting configuration | `tests/test_three_tune_plot_config.py`; `tests/test_registry.py` | `docs/THREE_TUNE_CENTRAL_TABLE.md`; three extraction-anchor manifests | Attribute differences to bundles, not isolated colour-reconnection, junction, or close-packing mechanisms. |
-| Systematics cover S1a/S1b scales, S2 PDF, S3 generation threshold, S4 activity-window convention, S5 class migration, and S6 origin ambiguity; they do not cover detector response | `config/systematics_variations_v1.json`; `config/a2_variations_v1.json`; `docs/SYSTEMATICS.md` | generated variation cards and harvest configurations | separate variation campaigns and combination scripts | `tests/test_systematics_variation_cards.py`; `tests/test_combine_per_class.py`; `tests/test_combine_derived.py`; `tests/test_systematics_delta.py` | `results/systematics/20260820/`; `results/systematics/20260817/s5_class_migration.json`; `results/a2/20260813/results/` | S4 has no class delta, S6 uses another class axis, and detector effects are absent; current combined verdicts are provisional. |
+| Systematic campaigns cover scale, PDF, generation-threshold, activity-window, and origin variations; every class-dependent combination must be regenerated on the tune-local axes and detector response remains absent | `config/systematics_variations_v1.json`; `config/a2_variations_v1.json`; `docs/SYSTEMATICS.md` | generated variation cards and harvest configurations | separate variation campaigns and combination scripts | `tests/test_systematics_variation_cards.py`; `tests/test_combine_per_class.py`; `tests/test_combine_derived.py`; `tests/test_systematics_delta.py` | historical records under `results/systematics/`; new v2 receipts pending | The former common-axis S5 zero-migration result is superseded; combined verdicts remain blocked until regeneration. |
 
 ## Scientific release blockers from the contract audit
 

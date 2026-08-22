@@ -42,7 +42,6 @@
 #include "../AnalysisScripts/GeneratedPairObjectContract.h"
 #include "../generation/producer/Sha256.h"
 #include "MultiplicityBoundaryUtils.h"
-#include "CommonMultiplicityBoundaries.h"
 #include "StagedOutputs.h"
 #include "TunePlotStyle.h"
 
@@ -1360,11 +1359,11 @@ void WriteMultiplicityBoundaryReceipt(const CONFIGS& configs) {
             JoinPath({FindHadronizationBase(),
                       "plotting",
                       "MultiplicityBoundaryUtils.h"}));
-    receipt["common_boundary_utility_sha256"] =
+    receipt["class_contract_sha256"] =
         Hadronization::Sha256FileHex(
             JoinPath({FindHadronizationBase(),
-                      "plotting",
-                      "CommonMultiplicityBoundaries.h"}));
+                      "config",
+                      "multiplicity_percentile_classes_v2.json"}));
     const std::string canonicalPayload = receipt.dump();
     receipt["payload_sha256"] =
         Hadronization::Sha256Hex(canonicalPayload);
@@ -1921,16 +1920,9 @@ FreezeAndValidateMultiplicityDefinitions(
     const auto orderedPartition =
         HadronizationMultiplicity::ValidateAndOrderPartition(
             configuredClasses);
-    const HadronizationMultiplicity::CommonBoundaries commonBoundaries =
-        HadronizationMultiplicity::LoadCommonBoundaries(
-            orderedPartition.size(),
-            JoinPath({FindHadronizationBase(),
-                      HadronizationMultiplicity::
-                          kCommonBoundaryArtifactPath}));
-
     json receipt = {
         {"schema", HadronizationMultiplicity::kBoundaryReceiptSchema},
-        {"schema_version", 1},
+        {"schema_version", 2},
         {"algorithm", HadronizationMultiplicity::kBoundaryAlgorithm},
         {"configuration_path", configurationPath},
         {"configuration_sha256", configurationSha256},
@@ -1939,14 +1931,15 @@ FreezeAndValidateMultiplicityDefinitions(
             {"underflow", "must_be_exactly_zero_and_is_excluded"},
             {"overflow", "must_be_exactly_zero_and_is_excluded"},
             {"threshold_rule",
-             "common_absolute_nch_class_boundaries_read_from_the_committed_"
-             "artifact_and_applied_identically_to_every_tune"},
+             "each_requested_percentile_is_derived_from_the_labelled_tunes_"
+             "own_merged_summed_multiplicity_histogram"},
             {"percentile_label_provenance",
-             HadronizationMultiplicity::kCommonBoundaryLabelProvenance},
+             "a percentile label always refers to the labelled tune; tunes "
+             "may and normally do resolve the same label to different "
+             "absolute N_ch thresholds"},
             {"class_fraction_reading",
-             "classes[].target_fraction is the MB LABEL width, not a fitted "
-             "target; realised_class_fractions carries what each tune's own "
-             "sample actually puts in the class"},
+             "classes[].target_fraction is the requested percentile width; "
+             "achieved_weighted_fraction records the discrete-bin result"},
             {"tie_rule",
              "boundary_integer_belongs_to_lower_activity_class;_adjacent_"
              "higher_activity_class_starts_at_boundary_plus_one"},
@@ -1955,14 +1948,13 @@ FreezeAndValidateMultiplicityDefinitions(
              "excluded_from_mutually_exclusive_partition"}
         }},
         {"boundary_source", {
-            {"artifact_path", commonBoundaries.artifactPath},
-            {"artifact_sha256", commonBoundaries.artifactSha256},
-            {"definition", commonBoundaries.definition},
-            {"derived_from", commonBoundaries.derivedFrom},
-            {"class_names", commonBoundaries.classNames},
-            {"class_lower_edges_nch", commonBoundaries.lowerEdgesNch},
-            {"per_tune_derivation_removed_at",
-             "33c9a8c30fa97c9281e26ecbd6d1becc1afb9c21"}
+            {"mode", "per_tune"},
+            {"histogram_name", "summed MULTIPLICITY"},
+            {"historical_contract",
+             "Paul Veen PR 13 merge 11884cf1ad3613e8e6997bbff32d48a3e7d89570"},
+            {"definition",
+             "percentile classes are resolved independently for every tune "
+             "from that tune's own merged event-activity distribution"}
         }},
         {"tunes", json::object()}
     };
@@ -2007,12 +1999,13 @@ FreezeAndValidateMultiplicityDefinitions(
                             pairRegistry->GetString().Data();
                     }
                     haveCentralIdentity = true;
-                    thresholdsByTune[tune] =
-                        HadronizationMultiplicity::
-                            CommonThresholdsForConfiguredClasses(
-                                commonBoundaries, orderedPartition,
-                                requestedPercentiles, centralIdentity,
-                                path);
+                    for (const double percentile : requestedPercentiles) {
+                        thresholdsByTune[tune][percentile] =
+                            static_cast<double>(
+                                HadronizationMultiplicity::
+                                    ThresholdForPercentile(
+                                        centralIdentity, percentile, path));
+                    }
                 } else {
                     RequireIdenticalMultiplicityHistogram(
                         centralIdentity, observed,
@@ -2205,30 +2198,23 @@ FreezeAndValidateMultiplicityDefinitions(
                 "weight for tune " + tune);
         }
 
-        // What a reader of THIS tune actually gets. The percentile label says
-        // where the boundary came from — the MONASH MB anchor — and says
-        // nothing about how much of this sample lands in the class. The
-        // campaign sits well below minimum bias in <N_ch>, so the
-        // high-activity classes are correspondingly THINNER than their labels
-        // suggest, and that is where OS-SS subtraction stability is most at
-        // risk. Published per class rather than left to be recomputed.
         json realisedRecords = json::array();
         for (std::size_t index = 0; index < classRecords.size(); ++index) {
             const json& classRecord = classRecords[index];
-            const double labelFraction =
+            const double targetFraction =
                 classRecord.at("target_fraction").get<double>();
             const double realisedFraction =
                 classRecord.at("achieved_weighted_fraction").get<double>();
             realisedRecords.push_back({
-                {"class", commonBoundaries.classNames[index]},
+                {"class", "c" + std::to_string(index + 1U)},
                 {"nch_min_inclusive",
                  classRecord.at("nch_min_inclusive")},
                 {"nch_max_inclusive",
                  classRecord.at("nch_max_inclusive")},
-                {"mb_label_fraction", labelFraction},
+                {"target_fraction", targetFraction},
                 {"realised_fraction", realisedFraction},
                 {"residual_percentage_points",
-                 100.0 * (realisedFraction - labelFraction)}
+                 100.0 * (realisedFraction - targetFraction)}
             });
         }
 
@@ -2261,7 +2247,7 @@ FreezeAndValidateMultiplicityDefinitions(
             {"blocks", blockReceipts},
             {"thresholds", thresholdRecords},
             {"classes", classRecords},
-            {"realised_class_fractions", realisedRecords},
+            {"per_tune_class_fractions", realisedRecords},
             {"partition", {
                 {"nch_min_inclusive",
                  integerThresholds.at(100.0)},
@@ -2296,30 +2282,13 @@ FreezeAndValidateMultiplicityDefinitions(
         }
     }
 
-    // The proof that the common-boundary path was actually taken. Asserted,
-    // not assumed: if two tunes disagree on a single boundary the axis is
-    // per-tune again, which is the thing the ruling rejected.
-    const std::string& referenceTune = thresholdsByTune.begin()->first;
-    const std::map<double, double>& referenceThresholds =
-        thresholdsByTune.begin()->second;
-    for (const auto& [tune, thresholds] : thresholdsByTune) {
-        if (thresholds != referenceThresholds) {
-            throw std::runtime_error(
-                "Multiplicity boundaries differ between tunes " +
-                referenceTune + " and " + tune +
-                "; the common-absolute axis is not common");
-        }
-    }
-    receipt["boundary_source"]["identical_across_tunes"] = "PASS";
-    receipt["boundary_source"]["tunes_compared"] = thresholdsByTune.size();
+    receipt["boundary_source"]["tunes_resolved"] = thresholdsByTune.size();
     std::cout
-        << "MULTIPLICITY_COMMON_BOUNDARIES"
-        << " artifact=" << commonBoundaries.artifactPath
-        << " artifact_sha256=" << commonBoundaries.artifactSha256
-        << " classes=" << commonBoundaries.lowerEdgesNch.size()
-        << " tunes_compared=" << thresholdsByTune.size()
-        << " reference_tune=" << referenceTune
-        << " identical_across_tunes=PASS"
+        << "MULTIPLICITY_PER_TUNE_BOUNDARIES"
+        << " algorithm=" << HadronizationMultiplicity::kBoundaryAlgorithm
+        << " classes=" << orderedPartition.size()
+        << " tunes_resolved=" << thresholdsByTune.size()
+        << " status=PASS"
         << std::endl;
 
     if (receiptOut) {
@@ -2796,7 +2765,7 @@ CONFIGS readConfig(const char* configurations) {
         boundaryReceiptDirectories.empty()
             ? std::string()
             : JoinPath({*boundaryReceiptDirectories.begin(),
-                        "multiplicity_boundary_receipt_v1.json"});
+                        "multiplicity_boundary_receipt_v2.json"});
 
     // TODO: make a function that prints content of a vector
     CONFIGS configs_from_json;

@@ -1,9 +1,9 @@
 {
- "_comment_axis": "Multiplicity classes are the ruled COMMON ABSOLUTE N_ch boundaries in config/multiplicity_class_boundaries_v1.json, which the plotting stack reads directly. The multiplicityMin/multiplicityMax values here are LABELS ONLY: percentiles of the MONASH minimum-bias distribution (AnalysisScripts/anchors/b4_multiplicity_mb, 172429 events), recomputed from that sample and identical for every tune. They are NOT the labelled tune's own percentiles and they do not define the boundaries.",
+ "_comment_axis": "Multiplicity classes are tune-local top-percentile classes from config/multiplicity_percentile_classes_v2.json. Each tune resolves multiplicityMin/multiplicityMax from its own merged summed MULTIPLICITY histogram. Absolute N_ch thresholds may differ across tunes; no MONASH minimum-bias sample defines this axis.",
  "VERBOSE": false,
  "calculate_errors": true,
- "bb_bar_complete_root_dir_sub_samples": "/data/alice/ipardoza/hf/hadronization_merged/SUBSAMPLES_HF_SYS_MUR_DOWN/combined_root_subSamples",
- "cc_bar_complete_root_dir_sub_samples": "/data/alice/ipardoza/hf/hadronization_merged/SUBSAMPLES_HF_SYS_MUR_DOWN/combined_root_subSamples",
+ "bb_bar_complete_root_dir_sub_samples": "${HADRONIZATION_DATA_ROOT}/hadronization_merged/SUBSAMPLES_HF_SYS_MUR_DOWN/combined_root_subSamples",
+ "cc_bar_complete_root_dir_sub_samples": "${HADRONIZATION_DATA_ROOT}/hadronization_merged/SUBSAMPLES_HF_SYS_MUR_DOWN/combined_root_subSamples",
  "nSubSamples": 10,
  "pair_combinatorics_mode": "ordered_conditional_v1",
  "same_sign_pair_factor": 1.0,
@@ -25,7 +25,7 @@
  },
  "subsample_error_bins_to_exclude": [],
  "draw_correlation_plots": false,
- "base_dir": "/data/alice/ipardoza/hf/hadronization_merged",
+ "base_dir": "${HADRONIZATION_DATA_ROOT}/hadronization_merged",
  "PYTHIA_TUNES": [
   "MONASH",
   "JUNCTIONS",
@@ -77,9 +77,9 @@
  ],
  "histograms_to_analyse": [
   {
-   "binLabel": "c1_MB88p197_100",
-   "hDPhi": "hDPhic1_MB88p197_100",
-   "hTrPt": "hTrPtc1_MB88p197_100",
+   "binLabel": "M90_100",
+   "hDPhi": "hDPhiM90_100",
+   "hTrPt": "hTrPtM90_100",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -92,13 +92,13 @@
    "triggerPtMax": 20.0,
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
-   "multiplicityMin": 88.197,
+   "multiplicityMin": 90.0,
    "multiplicityMax": 100.0
   },
   {
-   "binLabel": "c2_MB80p597_88p197",
-   "hDPhi": "hDPhic2_MB80p597_88p197",
-   "hTrPt": "hTrPtc2_MB80p597_88p197",
+   "binLabel": "M80_90",
+   "hDPhi": "hDPhiM80_90",
+   "hTrPt": "hTrPtM80_90",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -111,13 +111,13 @@
    "triggerPtMax": 20.0,
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
-   "multiplicityMin": 80.597,
-   "multiplicityMax": 88.197
+   "multiplicityMin": 80.0,
+   "multiplicityMax": 90.0
   },
   {
-   "binLabel": "c3_MB65p937_80p597",
-   "hDPhi": "hDPhic3_MB65p937_80p597",
-   "hTrPt": "hTrPtc3_MB65p937_80p597",
+   "binLabel": "M70_80",
+   "hDPhi": "hDPhiM70_80",
+   "hTrPt": "hTrPtM70_80",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -130,13 +130,13 @@
    "triggerPtMax": 20.0,
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
-   "multiplicityMin": 65.937,
-   "multiplicityMax": 80.597
+   "multiplicityMin": 70.0,
+   "multiplicityMax": 80.0
   },
   {
-   "binLabel": "c4_MB59p85_65p937",
-   "hDPhi": "hDPhic4_MB59p85_65p937",
-   "hTrPt": "hTrPtc4_MB59p85_65p937",
+   "binLabel": "M60_70",
+   "hDPhi": "hDPhiM60_70",
+   "hTrPt": "hTrPtM60_70",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -149,13 +149,13 @@
    "triggerPtMax": 20.0,
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
-   "multiplicityMin": 59.85,
-   "multiplicityMax": 65.937
+   "multiplicityMin": 60.0,
+   "multiplicityMax": 70.0
   },
   {
-   "binLabel": "c5_MB50p308_59p85",
-   "hDPhi": "hDPhic5_MB50p308_59p85",
-   "hTrPt": "hTrPtc5_MB50p308_59p85",
+   "binLabel": "M50_60",
+   "hDPhi": "hDPhiM50_60",
+   "hTrPt": "hTrPtM50_60",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -168,13 +168,13 @@
    "triggerPtMax": 20.0,
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
-   "multiplicityMin": 50.308,
-   "multiplicityMax": 59.85
+   "multiplicityMin": 50.0,
+   "multiplicityMax": 60.0
   },
   {
-   "binLabel": "c6_MB43p03_50p308",
-   "hDPhi": "hDPhic6_MB43p03_50p308",
-   "hTrPt": "hTrPtc6_MB43p03_50p308",
+   "binLabel": "M40_50",
+   "hDPhi": "hDPhiM40_50",
+   "hTrPt": "hTrPtM40_50",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -187,13 +187,13 @@
    "triggerPtMax": 20.0,
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
-   "multiplicityMin": 43.03,
-   "multiplicityMax": 50.308
+   "multiplicityMin": 40.0,
+   "multiplicityMax": 50.0
   },
   {
-   "binLabel": "c7_MB34p614_43p03",
-   "hDPhi": "hDPhic7_MB34p614_43p03",
-   "hTrPt": "hTrPtc7_MB34p614_43p03",
+   "binLabel": "M30_40",
+   "hDPhi": "hDPhiM30_40",
+   "hTrPt": "hTrPtM30_40",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -206,13 +206,13 @@
    "triggerPtMax": 20.0,
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
-   "multiplicityMin": 34.614,
-   "multiplicityMax": 43.03
+   "multiplicityMin": 30.0,
+   "multiplicityMax": 40.0
   },
   {
-   "binLabel": "c8_MB26p154_34p614",
-   "hDPhi": "hDPhic8_MB26p154_34p614",
-   "hTrPt": "hTrPtc8_MB26p154_34p614",
+   "binLabel": "M20_30",
+   "hDPhi": "hDPhiM20_30",
+   "hTrPt": "hTrPtM20_30",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -225,13 +225,13 @@
    "triggerPtMax": 20.0,
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
-   "multiplicityMin": 26.154,
-   "multiplicityMax": 34.614
+   "multiplicityMin": 20.0,
+   "multiplicityMax": 30.0
   },
   {
-   "binLabel": "c9_MB17p124_26p154",
-   "hDPhi": "hDPhic9_MB17p124_26p154",
-   "hTrPt": "hTrPtc9_MB17p124_26p154",
+   "binLabel": "M10_20",
+   "hDPhi": "hDPhiM10_20",
+   "hTrPt": "hTrPtM10_20",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -244,13 +244,13 @@
    "triggerPtMax": 20.0,
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
-   "multiplicityMin": 17.124,
-   "multiplicityMax": 26.154
+   "multiplicityMin": 10.0,
+   "multiplicityMax": 20.0
   },
   {
-   "binLabel": "c10_MB8p422_17p124",
-   "hDPhi": "hDPhic10_MB8p422_17p124",
-   "hTrPt": "hTrPtc10_MB8p422_17p124",
+   "binLabel": "M1_10",
+   "hDPhi": "hDPhiM1_10",
+   "hTrPt": "hTrPtM1_10",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -263,13 +263,13 @@
    "triggerPtMax": 20.0,
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
-   "multiplicityMin": 8.422,
-   "multiplicityMax": 17.124
+   "multiplicityMin": 1.0,
+   "multiplicityMax": 10.0
   },
   {
-   "binLabel": "c11_MB0_8p422",
-   "hDPhi": "hDPhic11_MB0_8p422",
-   "hTrPt": "hTrPtc11_MB0_8p422",
+   "binLabel": "M0_1",
+   "hDPhi": "hDPhiM0_1",
+   "hTrPt": "hTrPtM0_1",
    "triggerPhiMin": -3.14159265,
    "triggerPhiMax": 3.14159265,
    "assocPhiMin": -3.14159265,
@@ -283,7 +283,7 @@
    "assocPtMin": 0.0,
    "assocPtMax": 100.0,
    "multiplicityMin": 0.0,
-   "multiplicityMax": 8.422
+   "multiplicityMax": 1.0
   }
  ],
  "canvases_to_be_drawn": [
@@ -325,94 +325,94 @@
    "y_max_legend": -1,
    "legend_entries": [
     {
-     "object_name": "hDPhic1_MB88p197_100",
-     "display_name": "88.2-100.0%"
+     "object_name": "hDPhiM90_100",
+     "display_name": "90-100%"
     },
     {
-     "object_name": "hDPhic2_MB80p597_88p197",
-     "display_name": "80.6-88.2%"
+     "object_name": "hDPhiM80_90",
+     "display_name": "80-90%"
     },
     {
-     "object_name": "hDPhic3_MB65p937_80p597",
-     "display_name": "65.9-80.6%"
+     "object_name": "hDPhiM70_80",
+     "display_name": "70-80%"
     },
     {
-     "object_name": "hDPhic4_MB59p85_65p937",
-     "display_name": "59.8-65.9%"
+     "object_name": "hDPhiM60_70",
+     "display_name": "60-70%"
     },
     {
-     "object_name": "hDPhic5_MB50p308_59p85",
-     "display_name": "50.3-59.8%"
+     "object_name": "hDPhiM50_60",
+     "display_name": "50-60%"
     },
     {
-     "object_name": "hDPhic6_MB43p03_50p308",
-     "display_name": "43.0-50.3%"
+     "object_name": "hDPhiM40_50",
+     "display_name": "40-50%"
     },
     {
-     "object_name": "hDPhic7_MB34p614_43p03",
-     "display_name": "34.6-43.0%"
+     "object_name": "hDPhiM30_40",
+     "display_name": "30-40%"
     },
     {
-     "object_name": "hDPhic8_MB26p154_34p614",
-     "display_name": "26.2-34.6%"
+     "object_name": "hDPhiM20_30",
+     "display_name": "20-30%"
     },
     {
-     "object_name": "hDPhic9_MB17p124_26p154",
-     "display_name": "17.1-26.2%"
+     "object_name": "hDPhiM10_20",
+     "display_name": "10-20%"
     },
     {
-     "object_name": "hDPhic10_MB8p422_17p124",
-     "display_name": "8.4-17.1%"
+     "object_name": "hDPhiM1_10",
+     "display_name": "1-10%"
     },
     {
-     "object_name": "hDPhic11_MB0_8p422",
-     "display_name": "0.0-8.4%"
+     "object_name": "hDPhiM0_1",
+     "display_name": "0-1%"
     }
    ],
    "TUNE_colours": [],
    "dependency_line_styles": [
     {
-     "dependency_name": "hDPhic1_MB88p197_100",
+     "dependency_name": "hDPhiM90_100",
      "line_style": 1
     },
     {
-     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "dependency_name": "hDPhiM80_90",
      "line_style": 10
     },
     {
-     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "dependency_name": "hDPhiM70_80",
      "line_style": 9
     },
     {
-     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "dependency_name": "hDPhiM60_70",
      "line_style": 8
     },
     {
-     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "dependency_name": "hDPhiM50_60",
      "line_style": 7
     },
     {
-     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "dependency_name": "hDPhiM40_50",
      "line_style": 6
     },
     {
-     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "dependency_name": "hDPhiM30_40",
      "line_style": 5
     },
     {
-     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "dependency_name": "hDPhiM20_30",
      "line_style": 4
     },
     {
-     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "dependency_name": "hDPhiM10_20",
      "line_style": 3
     },
     {
-     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "dependency_name": "hDPhiM1_10",
      "line_style": 2
     },
     {
-     "dependency_name": "hDPhic11_MB0_8p422",
+     "dependency_name": "hDPhiM0_1",
      "line_style": 1
     }
    ],
@@ -459,94 +459,94 @@
    "y_max_legend": -1,
    "legend_entries": [
     {
-     "object_name": "hDPhic1_MB88p197_100",
-     "display_name": "88.2-100.0%"
+     "object_name": "hDPhiM90_100",
+     "display_name": "90-100%"
     },
     {
-     "object_name": "hDPhic2_MB80p597_88p197",
-     "display_name": "80.6-88.2%"
+     "object_name": "hDPhiM80_90",
+     "display_name": "80-90%"
     },
     {
-     "object_name": "hDPhic3_MB65p937_80p597",
-     "display_name": "65.9-80.6%"
+     "object_name": "hDPhiM70_80",
+     "display_name": "70-80%"
     },
     {
-     "object_name": "hDPhic4_MB59p85_65p937",
-     "display_name": "59.8-65.9%"
+     "object_name": "hDPhiM60_70",
+     "display_name": "60-70%"
     },
     {
-     "object_name": "hDPhic5_MB50p308_59p85",
-     "display_name": "50.3-59.8%"
+     "object_name": "hDPhiM50_60",
+     "display_name": "50-60%"
     },
     {
-     "object_name": "hDPhic6_MB43p03_50p308",
-     "display_name": "43.0-50.3%"
+     "object_name": "hDPhiM40_50",
+     "display_name": "40-50%"
     },
     {
-     "object_name": "hDPhic7_MB34p614_43p03",
-     "display_name": "34.6-43.0%"
+     "object_name": "hDPhiM30_40",
+     "display_name": "30-40%"
     },
     {
-     "object_name": "hDPhic8_MB26p154_34p614",
-     "display_name": "26.2-34.6%"
+     "object_name": "hDPhiM20_30",
+     "display_name": "20-30%"
     },
     {
-     "object_name": "hDPhic9_MB17p124_26p154",
-     "display_name": "17.1-26.2%"
+     "object_name": "hDPhiM10_20",
+     "display_name": "10-20%"
     },
     {
-     "object_name": "hDPhic10_MB8p422_17p124",
-     "display_name": "8.4-17.1%"
+     "object_name": "hDPhiM1_10",
+     "display_name": "1-10%"
     },
     {
-     "object_name": "hDPhic11_MB0_8p422",
-     "display_name": "0.0-8.4%"
+     "object_name": "hDPhiM0_1",
+     "display_name": "0-1%"
     }
    ],
    "TUNE_colours": [],
    "dependency_line_styles": [
     {
-     "dependency_name": "hDPhic1_MB88p197_100",
+     "dependency_name": "hDPhiM90_100",
      "line_style": 1
     },
     {
-     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "dependency_name": "hDPhiM80_90",
      "line_style": 10
     },
     {
-     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "dependency_name": "hDPhiM70_80",
      "line_style": 9
     },
     {
-     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "dependency_name": "hDPhiM60_70",
      "line_style": 8
     },
     {
-     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "dependency_name": "hDPhiM50_60",
      "line_style": 7
     },
     {
-     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "dependency_name": "hDPhiM40_50",
      "line_style": 6
     },
     {
-     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "dependency_name": "hDPhiM30_40",
      "line_style": 5
     },
     {
-     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "dependency_name": "hDPhiM20_30",
      "line_style": 4
     },
     {
-     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "dependency_name": "hDPhiM10_20",
      "line_style": 3
     },
     {
-     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "dependency_name": "hDPhiM1_10",
      "line_style": 2
     },
     {
-     "dependency_name": "hDPhic11_MB0_8p422",
+     "dependency_name": "hDPhiM0_1",
      "line_style": 1
     }
    ],
@@ -593,94 +593,94 @@
    "y_max_legend": 0.9,
    "legend_entries": [
     {
-     "object_name": "hDPhic1_MB88p197_100",
-     "display_name": "88.2-100.0%"
+     "object_name": "hDPhiM90_100",
+     "display_name": "90-100%"
     },
     {
-     "object_name": "hDPhic2_MB80p597_88p197",
-     "display_name": "80.6-88.2%"
+     "object_name": "hDPhiM80_90",
+     "display_name": "80-90%"
     },
     {
-     "object_name": "hDPhic3_MB65p937_80p597",
-     "display_name": "65.9-80.6%"
+     "object_name": "hDPhiM70_80",
+     "display_name": "70-80%"
     },
     {
-     "object_name": "hDPhic4_MB59p85_65p937",
-     "display_name": "59.8-65.9%"
+     "object_name": "hDPhiM60_70",
+     "display_name": "60-70%"
     },
     {
-     "object_name": "hDPhic5_MB50p308_59p85",
-     "display_name": "50.3-59.8%"
+     "object_name": "hDPhiM50_60",
+     "display_name": "50-60%"
     },
     {
-     "object_name": "hDPhic6_MB43p03_50p308",
-     "display_name": "43.0-50.3%"
+     "object_name": "hDPhiM40_50",
+     "display_name": "40-50%"
     },
     {
-     "object_name": "hDPhic7_MB34p614_43p03",
-     "display_name": "34.6-43.0%"
+     "object_name": "hDPhiM30_40",
+     "display_name": "30-40%"
     },
     {
-     "object_name": "hDPhic8_MB26p154_34p614",
-     "display_name": "26.2-34.6%"
+     "object_name": "hDPhiM20_30",
+     "display_name": "20-30%"
     },
     {
-     "object_name": "hDPhic9_MB17p124_26p154",
-     "display_name": "17.1-26.2%"
+     "object_name": "hDPhiM10_20",
+     "display_name": "10-20%"
     },
     {
-     "object_name": "hDPhic10_MB8p422_17p124",
-     "display_name": "8.4-17.1%"
+     "object_name": "hDPhiM1_10",
+     "display_name": "1-10%"
     },
     {
-     "object_name": "hDPhic11_MB0_8p422",
-     "display_name": "0.0-8.4%"
+     "object_name": "hDPhiM0_1",
+     "display_name": "0-1%"
     }
    ],
    "TUNE_colours": [],
    "dependency_line_styles": [
     {
-     "dependency_name": "hDPhic1_MB88p197_100",
+     "dependency_name": "hDPhiM90_100",
      "line_style": 1
     },
     {
-     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "dependency_name": "hDPhiM80_90",
      "line_style": 10
     },
     {
-     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "dependency_name": "hDPhiM70_80",
      "line_style": 9
     },
     {
-     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "dependency_name": "hDPhiM60_70",
      "line_style": 8
     },
     {
-     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "dependency_name": "hDPhiM50_60",
      "line_style": 7
     },
     {
-     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "dependency_name": "hDPhiM40_50",
      "line_style": 6
     },
     {
-     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "dependency_name": "hDPhiM30_40",
      "line_style": 5
     },
     {
-     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "dependency_name": "hDPhiM20_30",
      "line_style": 4
     },
     {
-     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "dependency_name": "hDPhiM10_20",
      "line_style": 3
     },
     {
-     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "dependency_name": "hDPhiM1_10",
      "line_style": 2
     },
     {
-     "dependency_name": "hDPhic11_MB0_8p422",
+     "dependency_name": "hDPhiM0_1",
      "line_style": 1
     }
    ],
@@ -728,94 +728,94 @@
    "y_max_legend": -1,
    "legend_entries": [
     {
-     "object_name": "hDPhic1_MB88p197_100",
-     "display_name": "88.2-100.0%"
+     "object_name": "hDPhiM90_100",
+     "display_name": "90-100%"
     },
     {
-     "object_name": "hDPhic2_MB80p597_88p197",
-     "display_name": "80.6-88.2%"
+     "object_name": "hDPhiM80_90",
+     "display_name": "80-90%"
     },
     {
-     "object_name": "hDPhic3_MB65p937_80p597",
-     "display_name": "65.9-80.6%"
+     "object_name": "hDPhiM70_80",
+     "display_name": "70-80%"
     },
     {
-     "object_name": "hDPhic4_MB59p85_65p937",
-     "display_name": "59.8-65.9%"
+     "object_name": "hDPhiM60_70",
+     "display_name": "60-70%"
     },
     {
-     "object_name": "hDPhic5_MB50p308_59p85",
-     "display_name": "50.3-59.8%"
+     "object_name": "hDPhiM50_60",
+     "display_name": "50-60%"
     },
     {
-     "object_name": "hDPhic6_MB43p03_50p308",
-     "display_name": "43.0-50.3%"
+     "object_name": "hDPhiM40_50",
+     "display_name": "40-50%"
     },
     {
-     "object_name": "hDPhic7_MB34p614_43p03",
-     "display_name": "34.6-43.0%"
+     "object_name": "hDPhiM30_40",
+     "display_name": "30-40%"
     },
     {
-     "object_name": "hDPhic8_MB26p154_34p614",
-     "display_name": "26.2-34.6%"
+     "object_name": "hDPhiM20_30",
+     "display_name": "20-30%"
     },
     {
-     "object_name": "hDPhic9_MB17p124_26p154",
-     "display_name": "17.1-26.2%"
+     "object_name": "hDPhiM10_20",
+     "display_name": "10-20%"
     },
     {
-     "object_name": "hDPhic10_MB8p422_17p124",
-     "display_name": "8.4-17.1%"
+     "object_name": "hDPhiM1_10",
+     "display_name": "1-10%"
     },
     {
-     "object_name": "hDPhic11_MB0_8p422",
-     "display_name": "0.0-8.4%"
+     "object_name": "hDPhiM0_1",
+     "display_name": "0-1%"
     }
    ],
    "TUNE_colours": [],
    "dependency_line_styles": [
     {
-     "dependency_name": "hDPhic1_MB88p197_100",
+     "dependency_name": "hDPhiM90_100",
      "line_style": 1
     },
     {
-     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "dependency_name": "hDPhiM80_90",
      "line_style": 10
     },
     {
-     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "dependency_name": "hDPhiM70_80",
      "line_style": 9
     },
     {
-     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "dependency_name": "hDPhiM60_70",
      "line_style": 8
     },
     {
-     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "dependency_name": "hDPhiM50_60",
      "line_style": 7
     },
     {
-     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "dependency_name": "hDPhiM40_50",
      "line_style": 6
     },
     {
-     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "dependency_name": "hDPhiM30_40",
      "line_style": 5
     },
     {
-     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "dependency_name": "hDPhiM20_30",
      "line_style": 4
     },
     {
-     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "dependency_name": "hDPhiM10_20",
      "line_style": 3
     },
     {
-     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "dependency_name": "hDPhiM1_10",
      "line_style": 2
     },
     {
-     "dependency_name": "hDPhic11_MB0_8p422",
+     "dependency_name": "hDPhiM0_1",
      "line_style": 1
     }
    ],
@@ -865,94 +865,94 @@
    "y_max_legend": -1,
    "legend_entries": [
     {
-     "object_name": "hDPhic1_MB88p197_100",
-     "display_name": "88.2-100.0%"
+     "object_name": "hDPhiM90_100",
+     "display_name": "90-100%"
     },
     {
-     "object_name": "hDPhic2_MB80p597_88p197",
-     "display_name": "80.6-88.2%"
+     "object_name": "hDPhiM80_90",
+     "display_name": "80-90%"
     },
     {
-     "object_name": "hDPhic3_MB65p937_80p597",
-     "display_name": "65.9-80.6%"
+     "object_name": "hDPhiM70_80",
+     "display_name": "70-80%"
     },
     {
-     "object_name": "hDPhic4_MB59p85_65p937",
-     "display_name": "59.8-65.9%"
+     "object_name": "hDPhiM60_70",
+     "display_name": "60-70%"
     },
     {
-     "object_name": "hDPhic5_MB50p308_59p85",
-     "display_name": "50.3-59.8%"
+     "object_name": "hDPhiM50_60",
+     "display_name": "50-60%"
     },
     {
-     "object_name": "hDPhic6_MB43p03_50p308",
-     "display_name": "43.0-50.3%"
+     "object_name": "hDPhiM40_50",
+     "display_name": "40-50%"
     },
     {
-     "object_name": "hDPhic7_MB34p614_43p03",
-     "display_name": "34.6-43.0%"
+     "object_name": "hDPhiM30_40",
+     "display_name": "30-40%"
     },
     {
-     "object_name": "hDPhic8_MB26p154_34p614",
-     "display_name": "26.2-34.6%"
+     "object_name": "hDPhiM20_30",
+     "display_name": "20-30%"
     },
     {
-     "object_name": "hDPhic9_MB17p124_26p154",
-     "display_name": "17.1-26.2%"
+     "object_name": "hDPhiM10_20",
+     "display_name": "10-20%"
     },
     {
-     "object_name": "hDPhic10_MB8p422_17p124",
-     "display_name": "8.4-17.1%"
+     "object_name": "hDPhiM1_10",
+     "display_name": "1-10%"
     },
     {
-     "object_name": "hDPhic11_MB0_8p422",
-     "display_name": "0.0-8.4%"
+     "object_name": "hDPhiM0_1",
+     "display_name": "0-1%"
     }
    ],
    "TUNE_colours": [],
    "dependency_line_styles": [
     {
-     "dependency_name": "hDPhic1_MB88p197_100",
+     "dependency_name": "hDPhiM90_100",
      "line_style": 1
     },
     {
-     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "dependency_name": "hDPhiM80_90",
      "line_style": 10
     },
     {
-     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "dependency_name": "hDPhiM70_80",
      "line_style": 9
     },
     {
-     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "dependency_name": "hDPhiM60_70",
      "line_style": 8
     },
     {
-     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "dependency_name": "hDPhiM50_60",
      "line_style": 7
     },
     {
-     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "dependency_name": "hDPhiM40_50",
      "line_style": 6
     },
     {
-     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "dependency_name": "hDPhiM30_40",
      "line_style": 5
     },
     {
-     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "dependency_name": "hDPhiM20_30",
      "line_style": 4
     },
     {
-     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "dependency_name": "hDPhiM10_20",
      "line_style": 3
     },
     {
-     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "dependency_name": "hDPhiM1_10",
      "line_style": 2
     },
     {
-     "dependency_name": "hDPhic11_MB0_8p422",
+     "dependency_name": "hDPhiM0_1",
      "line_style": 1
     }
    ],
@@ -1001,94 +1001,94 @@
    "y_max_legend": -1,
    "legend_entries": [
     {
-     "object_name": "hDPhic1_MB88p197_100",
-     "display_name": "88.2-100.0%"
+     "object_name": "hDPhiM90_100",
+     "display_name": "90-100%"
     },
     {
-     "object_name": "hDPhic2_MB80p597_88p197",
-     "display_name": "80.6-88.2%"
+     "object_name": "hDPhiM80_90",
+     "display_name": "80-90%"
     },
     {
-     "object_name": "hDPhic3_MB65p937_80p597",
-     "display_name": "65.9-80.6%"
+     "object_name": "hDPhiM70_80",
+     "display_name": "70-80%"
     },
     {
-     "object_name": "hDPhic4_MB59p85_65p937",
-     "display_name": "59.8-65.9%"
+     "object_name": "hDPhiM60_70",
+     "display_name": "60-70%"
     },
     {
-     "object_name": "hDPhic5_MB50p308_59p85",
-     "display_name": "50.3-59.8%"
+     "object_name": "hDPhiM50_60",
+     "display_name": "50-60%"
     },
     {
-     "object_name": "hDPhic6_MB43p03_50p308",
-     "display_name": "43.0-50.3%"
+     "object_name": "hDPhiM40_50",
+     "display_name": "40-50%"
     },
     {
-     "object_name": "hDPhic7_MB34p614_43p03",
-     "display_name": "34.6-43.0%"
+     "object_name": "hDPhiM30_40",
+     "display_name": "30-40%"
     },
     {
-     "object_name": "hDPhic8_MB26p154_34p614",
-     "display_name": "26.2-34.6%"
+     "object_name": "hDPhiM20_30",
+     "display_name": "20-30%"
     },
     {
-     "object_name": "hDPhic9_MB17p124_26p154",
-     "display_name": "17.1-26.2%"
+     "object_name": "hDPhiM10_20",
+     "display_name": "10-20%"
     },
     {
-     "object_name": "hDPhic10_MB8p422_17p124",
-     "display_name": "8.4-17.1%"
+     "object_name": "hDPhiM1_10",
+     "display_name": "1-10%"
     },
     {
-     "object_name": "hDPhic11_MB0_8p422",
-     "display_name": "0.0-8.4%"
+     "object_name": "hDPhiM0_1",
+     "display_name": "0-1%"
     }
    ],
    "TUNE_colours": [],
    "dependency_line_styles": [
     {
-     "dependency_name": "hDPhic1_MB88p197_100",
+     "dependency_name": "hDPhiM90_100",
      "line_style": 1
     },
     {
-     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "dependency_name": "hDPhiM80_90",
      "line_style": 10
     },
     {
-     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "dependency_name": "hDPhiM70_80",
      "line_style": 9
     },
     {
-     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "dependency_name": "hDPhiM60_70",
      "line_style": 8
     },
     {
-     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "dependency_name": "hDPhiM50_60",
      "line_style": 7
     },
     {
-     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "dependency_name": "hDPhiM40_50",
      "line_style": 6
     },
     {
-     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "dependency_name": "hDPhiM30_40",
      "line_style": 5
     },
     {
-     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "dependency_name": "hDPhiM20_30",
      "line_style": 4
     },
     {
-     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "dependency_name": "hDPhiM10_20",
      "line_style": 3
     },
     {
-     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "dependency_name": "hDPhiM1_10",
      "line_style": 2
     },
     {
-     "dependency_name": "hDPhic11_MB0_8p422",
+     "dependency_name": "hDPhiM0_1",
      "line_style": 1
     }
    ],
@@ -1135,94 +1135,94 @@
    "y_max_legend": -1,
    "legend_entries": [
     {
-     "object_name": "hDPhic1_MB88p197_100",
-     "display_name": "88.2-100.0%"
+     "object_name": "hDPhiM90_100",
+     "display_name": "90-100%"
     },
     {
-     "object_name": "hDPhic2_MB80p597_88p197",
-     "display_name": "80.6-88.2%"
+     "object_name": "hDPhiM80_90",
+     "display_name": "80-90%"
     },
     {
-     "object_name": "hDPhic3_MB65p937_80p597",
-     "display_name": "65.9-80.6%"
+     "object_name": "hDPhiM70_80",
+     "display_name": "70-80%"
     },
     {
-     "object_name": "hDPhic4_MB59p85_65p937",
-     "display_name": "59.8-65.9%"
+     "object_name": "hDPhiM60_70",
+     "display_name": "60-70%"
     },
     {
-     "object_name": "hDPhic5_MB50p308_59p85",
-     "display_name": "50.3-59.8%"
+     "object_name": "hDPhiM50_60",
+     "display_name": "50-60%"
     },
     {
-     "object_name": "hDPhic6_MB43p03_50p308",
-     "display_name": "43.0-50.3%"
+     "object_name": "hDPhiM40_50",
+     "display_name": "40-50%"
     },
     {
-     "object_name": "hDPhic7_MB34p614_43p03",
-     "display_name": "34.6-43.0%"
+     "object_name": "hDPhiM30_40",
+     "display_name": "30-40%"
     },
     {
-     "object_name": "hDPhic8_MB26p154_34p614",
-     "display_name": "26.2-34.6%"
+     "object_name": "hDPhiM20_30",
+     "display_name": "20-30%"
     },
     {
-     "object_name": "hDPhic9_MB17p124_26p154",
-     "display_name": "17.1-26.2%"
+     "object_name": "hDPhiM10_20",
+     "display_name": "10-20%"
     },
     {
-     "object_name": "hDPhic10_MB8p422_17p124",
-     "display_name": "8.4-17.1%"
+     "object_name": "hDPhiM1_10",
+     "display_name": "1-10%"
     },
     {
-     "object_name": "hDPhic11_MB0_8p422",
-     "display_name": "0.0-8.4%"
+     "object_name": "hDPhiM0_1",
+     "display_name": "0-1%"
     }
    ],
    "TUNE_colours": [],
    "dependency_line_styles": [
     {
-     "dependency_name": "hDPhic1_MB88p197_100",
+     "dependency_name": "hDPhiM90_100",
      "line_style": 1
     },
     {
-     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "dependency_name": "hDPhiM80_90",
      "line_style": 10
     },
     {
-     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "dependency_name": "hDPhiM70_80",
      "line_style": 9
     },
     {
-     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "dependency_name": "hDPhiM60_70",
      "line_style": 8
     },
     {
-     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "dependency_name": "hDPhiM50_60",
      "line_style": 7
     },
     {
-     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "dependency_name": "hDPhiM40_50",
      "line_style": 6
     },
     {
-     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "dependency_name": "hDPhiM30_40",
      "line_style": 5
     },
     {
-     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "dependency_name": "hDPhiM20_30",
      "line_style": 4
     },
     {
-     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "dependency_name": "hDPhiM10_20",
      "line_style": 3
     },
     {
-     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "dependency_name": "hDPhiM1_10",
      "line_style": 2
     },
     {
-     "dependency_name": "hDPhic11_MB0_8p422",
+     "dependency_name": "hDPhiM0_1",
      "line_style": 1
     }
    ],
@@ -1269,94 +1269,94 @@
    "y_max_legend": -1,
    "legend_entries": [
     {
-     "object_name": "hDPhic1_MB88p197_100",
-     "display_name": "88.2-100.0%"
+     "object_name": "hDPhiM90_100",
+     "display_name": "90-100%"
     },
     {
-     "object_name": "hDPhic2_MB80p597_88p197",
-     "display_name": "80.6-88.2%"
+     "object_name": "hDPhiM80_90",
+     "display_name": "80-90%"
     },
     {
-     "object_name": "hDPhic3_MB65p937_80p597",
-     "display_name": "65.9-80.6%"
+     "object_name": "hDPhiM70_80",
+     "display_name": "70-80%"
     },
     {
-     "object_name": "hDPhic4_MB59p85_65p937",
-     "display_name": "59.8-65.9%"
+     "object_name": "hDPhiM60_70",
+     "display_name": "60-70%"
     },
     {
-     "object_name": "hDPhic5_MB50p308_59p85",
-     "display_name": "50.3-59.8%"
+     "object_name": "hDPhiM50_60",
+     "display_name": "50-60%"
     },
     {
-     "object_name": "hDPhic6_MB43p03_50p308",
-     "display_name": "43.0-50.3%"
+     "object_name": "hDPhiM40_50",
+     "display_name": "40-50%"
     },
     {
-     "object_name": "hDPhic7_MB34p614_43p03",
-     "display_name": "34.6-43.0%"
+     "object_name": "hDPhiM30_40",
+     "display_name": "30-40%"
     },
     {
-     "object_name": "hDPhic8_MB26p154_34p614",
-     "display_name": "26.2-34.6%"
+     "object_name": "hDPhiM20_30",
+     "display_name": "20-30%"
     },
     {
-     "object_name": "hDPhic9_MB17p124_26p154",
-     "display_name": "17.1-26.2%"
+     "object_name": "hDPhiM10_20",
+     "display_name": "10-20%"
     },
     {
-     "object_name": "hDPhic10_MB8p422_17p124",
-     "display_name": "8.4-17.1%"
+     "object_name": "hDPhiM1_10",
+     "display_name": "1-10%"
     },
     {
-     "object_name": "hDPhic11_MB0_8p422",
-     "display_name": "0.0-8.4%"
+     "object_name": "hDPhiM0_1",
+     "display_name": "0-1%"
     }
    ],
    "TUNE_colours": [],
    "dependency_line_styles": [
     {
-     "dependency_name": "hDPhic1_MB88p197_100",
+     "dependency_name": "hDPhiM90_100",
      "line_style": 1
     },
     {
-     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "dependency_name": "hDPhiM80_90",
      "line_style": 10
     },
     {
-     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "dependency_name": "hDPhiM70_80",
      "line_style": 9
     },
     {
-     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "dependency_name": "hDPhiM60_70",
      "line_style": 8
     },
     {
-     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "dependency_name": "hDPhiM50_60",
      "line_style": 7
     },
     {
-     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "dependency_name": "hDPhiM40_50",
      "line_style": 6
     },
     {
-     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "dependency_name": "hDPhiM30_40",
      "line_style": 5
     },
     {
-     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "dependency_name": "hDPhiM20_30",
      "line_style": 4
     },
     {
-     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "dependency_name": "hDPhiM10_20",
      "line_style": 3
     },
     {
-     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "dependency_name": "hDPhiM1_10",
      "line_style": 2
     },
     {
-     "dependency_name": "hDPhic11_MB0_8p422",
+     "dependency_name": "hDPhiM0_1",
      "line_style": 1
     }
    ],
@@ -1404,94 +1404,94 @@
    "y_max_legend": -1,
    "legend_entries": [
     {
-     "object_name": "hDPhic1_MB88p197_100",
-     "display_name": "88.2-100.0%"
+     "object_name": "hDPhiM90_100",
+     "display_name": "90-100%"
     },
     {
-     "object_name": "hDPhic2_MB80p597_88p197",
-     "display_name": "80.6-88.2%"
+     "object_name": "hDPhiM80_90",
+     "display_name": "80-90%"
     },
     {
-     "object_name": "hDPhic3_MB65p937_80p597",
-     "display_name": "65.9-80.6%"
+     "object_name": "hDPhiM70_80",
+     "display_name": "70-80%"
     },
     {
-     "object_name": "hDPhic4_MB59p85_65p937",
-     "display_name": "59.8-65.9%"
+     "object_name": "hDPhiM60_70",
+     "display_name": "60-70%"
     },
     {
-     "object_name": "hDPhic5_MB50p308_59p85",
-     "display_name": "50.3-59.8%"
+     "object_name": "hDPhiM50_60",
+     "display_name": "50-60%"
     },
     {
-     "object_name": "hDPhic6_MB43p03_50p308",
-     "display_name": "43.0-50.3%"
+     "object_name": "hDPhiM40_50",
+     "display_name": "40-50%"
     },
     {
-     "object_name": "hDPhic7_MB34p614_43p03",
-     "display_name": "34.6-43.0%"
+     "object_name": "hDPhiM30_40",
+     "display_name": "30-40%"
     },
     {
-     "object_name": "hDPhic8_MB26p154_34p614",
-     "display_name": "26.2-34.6%"
+     "object_name": "hDPhiM20_30",
+     "display_name": "20-30%"
     },
     {
-     "object_name": "hDPhic9_MB17p124_26p154",
-     "display_name": "17.1-26.2%"
+     "object_name": "hDPhiM10_20",
+     "display_name": "10-20%"
     },
     {
-     "object_name": "hDPhic10_MB8p422_17p124",
-     "display_name": "8.4-17.1%"
+     "object_name": "hDPhiM1_10",
+     "display_name": "1-10%"
     },
     {
-     "object_name": "hDPhic11_MB0_8p422",
-     "display_name": "0.0-8.4%"
+     "object_name": "hDPhiM0_1",
+     "display_name": "0-1%"
     }
    ],
    "TUNE_colours": [],
    "dependency_line_styles": [
     {
-     "dependency_name": "hDPhic1_MB88p197_100",
+     "dependency_name": "hDPhiM90_100",
      "line_style": 1
     },
     {
-     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "dependency_name": "hDPhiM80_90",
      "line_style": 10
     },
     {
-     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "dependency_name": "hDPhiM70_80",
      "line_style": 9
     },
     {
-     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "dependency_name": "hDPhiM60_70",
      "line_style": 8
     },
     {
-     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "dependency_name": "hDPhiM50_60",
      "line_style": 7
     },
     {
-     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "dependency_name": "hDPhiM40_50",
      "line_style": 6
     },
     {
-     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "dependency_name": "hDPhiM30_40",
      "line_style": 5
     },
     {
-     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "dependency_name": "hDPhiM20_30",
      "line_style": 4
     },
     {
-     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "dependency_name": "hDPhiM10_20",
      "line_style": 3
     },
     {
-     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "dependency_name": "hDPhiM1_10",
      "line_style": 2
     },
     {
-     "dependency_name": "hDPhic11_MB0_8p422",
+     "dependency_name": "hDPhiM0_1",
      "line_style": 1
     }
    ],
@@ -1541,94 +1541,94 @@
    "y_max_legend": -1,
    "legend_entries": [
     {
-     "object_name": "hDPhic1_MB88p197_100",
-     "display_name": "88.2-100.0%"
+     "object_name": "hDPhiM90_100",
+     "display_name": "90-100%"
     },
     {
-     "object_name": "hDPhic2_MB80p597_88p197",
-     "display_name": "80.6-88.2%"
+     "object_name": "hDPhiM80_90",
+     "display_name": "80-90%"
     },
     {
-     "object_name": "hDPhic3_MB65p937_80p597",
-     "display_name": "65.9-80.6%"
+     "object_name": "hDPhiM70_80",
+     "display_name": "70-80%"
     },
     {
-     "object_name": "hDPhic4_MB59p85_65p937",
-     "display_name": "59.8-65.9%"
+     "object_name": "hDPhiM60_70",
+     "display_name": "60-70%"
     },
     {
-     "object_name": "hDPhic5_MB50p308_59p85",
-     "display_name": "50.3-59.8%"
+     "object_name": "hDPhiM50_60",
+     "display_name": "50-60%"
     },
     {
-     "object_name": "hDPhic6_MB43p03_50p308",
-     "display_name": "43.0-50.3%"
+     "object_name": "hDPhiM40_50",
+     "display_name": "40-50%"
     },
     {
-     "object_name": "hDPhic7_MB34p614_43p03",
-     "display_name": "34.6-43.0%"
+     "object_name": "hDPhiM30_40",
+     "display_name": "30-40%"
     },
     {
-     "object_name": "hDPhic8_MB26p154_34p614",
-     "display_name": "26.2-34.6%"
+     "object_name": "hDPhiM20_30",
+     "display_name": "20-30%"
     },
     {
-     "object_name": "hDPhic9_MB17p124_26p154",
-     "display_name": "17.1-26.2%"
+     "object_name": "hDPhiM10_20",
+     "display_name": "10-20%"
     },
     {
-     "object_name": "hDPhic10_MB8p422_17p124",
-     "display_name": "8.4-17.1%"
+     "object_name": "hDPhiM1_10",
+     "display_name": "1-10%"
     },
     {
-     "object_name": "hDPhic11_MB0_8p422",
-     "display_name": "0.0-8.4%"
+     "object_name": "hDPhiM0_1",
+     "display_name": "0-1%"
     }
    ],
    "TUNE_colours": [],
    "dependency_line_styles": [
     {
-     "dependency_name": "hDPhic1_MB88p197_100",
+     "dependency_name": "hDPhiM90_100",
      "line_style": 1
     },
     {
-     "dependency_name": "hDPhic2_MB80p597_88p197",
+     "dependency_name": "hDPhiM80_90",
      "line_style": 10
     },
     {
-     "dependency_name": "hDPhic3_MB65p937_80p597",
+     "dependency_name": "hDPhiM70_80",
      "line_style": 9
     },
     {
-     "dependency_name": "hDPhic4_MB59p85_65p937",
+     "dependency_name": "hDPhiM60_70",
      "line_style": 8
     },
     {
-     "dependency_name": "hDPhic5_MB50p308_59p85",
+     "dependency_name": "hDPhiM50_60",
      "line_style": 7
     },
     {
-     "dependency_name": "hDPhic6_MB43p03_50p308",
+     "dependency_name": "hDPhiM40_50",
      "line_style": 6
     },
     {
-     "dependency_name": "hDPhic7_MB34p614_43p03",
+     "dependency_name": "hDPhiM30_40",
      "line_style": 5
     },
     {
-     "dependency_name": "hDPhic8_MB26p154_34p614",
+     "dependency_name": "hDPhiM20_30",
      "line_style": 4
     },
     {
-     "dependency_name": "hDPhic9_MB17p124_26p154",
+     "dependency_name": "hDPhiM10_20",
      "line_style": 3
     },
     {
-     "dependency_name": "hDPhic10_MB8p422_17p124",
+     "dependency_name": "hDPhiM1_10",
      "line_style": 2
     },
     {
-     "dependency_name": "hDPhic11_MB0_8p422",
+     "dependency_name": "hDPhiM0_1",
      "line_style": 1
     }
    ],
@@ -1663,5 +1663,6 @@
    "y_size_canvas": 2050
   }
  ],
- "subsample_coverage_audit": false
+ "subsample_coverage_audit": false,
+ "label_owner": "tools/apply_per_tune_multiplicity_contract.py"
 }

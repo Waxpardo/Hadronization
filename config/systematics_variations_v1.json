@@ -3,7 +3,7 @@
   "purpose": "The generation-dependent systematics variations. Each is the nominal tune card with EXACTLY ONE setting changed. Cards are generated from this file by tools/make_systematic_cards.py and are never hand-edited.",
   "preregistration": "docs/SYSTEMATICS_PREREGISTRATION.md",
   "campaign_ordinals_claimed": [4, 5, 6, 7, 8, 9, 10],
-  "ordinal_note": "The authoritative burned-seed ledger is /data/alice/ipardoza/Hadronization/config/burned_seeds.txt (untracked and git-ignored, so appending to it does not dirty the frozen checkout). It carried 3557 seeds at ordinals 0 and 3 when these were claimed on 2026-08-17.",
+  "ordinal_note": "The authoritative burned-seed ledger is HADRONIZATION_DATA_ROOT/project/runs/seed_ledgers/burned_seeds.txt, outside every execution checkout. Its archived predecessor carried 3557 seeds at ordinals 0 and 3 when these were claimed on 2026-08-17.",
   "variations": [
     {
       "name": "mur_up",
