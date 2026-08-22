@@ -1646,7 +1646,7 @@
       "bottom_margin_mini_pad": 0.001,
       "left_margin_mini_pad": 0.05,
       "right_margin_mini_pad": 0.001,
-      "y_min_axis": 0.0001,
+      "y_min_axis": 5e-05,
       "y_max_axis": 0.8,
       "histogram_minimum": -1,
       "histogram_maximum": -1,

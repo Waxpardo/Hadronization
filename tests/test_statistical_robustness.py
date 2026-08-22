@@ -38,7 +38,7 @@ class StatisticalFormulaTest(unittest.TestCase):
         self.assertEqual(lookup[(411, -411)]["filename"], "DplusDminus.root")
         self.assertEqual(lookup[(521, 5122)]["heavy_sign"], "OS")
 
-    def test_nominal_tune_ratio_canvases_keep_validated_headroom(self) -> None:
+    def test_nominal_canvases_keep_validated_headroom(self) -> None:
         configuration = json.loads(
             (
                 ROOT
@@ -61,6 +61,17 @@ class StatisticalFormulaTest(unittest.TestCase):
             with self.subTest(canvas=name):
                 self.assertEqual(canvas["y_min_axis"], 0)
                 self.assertEqual(canvas["y_max_axis"], 2.5)
+
+        by_name = {
+            row["canvas_name"]: row
+            for row in configuration["canvases_to_be_drawn"]
+        }
+        monash_full = by_name[
+            "mini_beauty_balancing_MONASH_full_multiplicity"
+        ]
+        # The sealed HF_RUN3_V1 Bc 0-1% envelope reaches 8.75e-5.
+        self.assertEqual(monash_full["y_min_axis"], 0.00005)
+        self.assertEqual(monash_full["y_max_axis"], 0.8)
 
     def test_block_sem_and_jackknife_formulae(self) -> None:
         block = robustness.block_sem([1.0, 3.0])
