@@ -38,6 +38,30 @@ class StatisticalFormulaTest(unittest.TestCase):
         self.assertEqual(lookup[(411, -411)]["filename"], "DplusDminus.root")
         self.assertEqual(lookup[(521, 5122)]["heavy_sign"], "OS")
 
+    def test_nominal_tune_ratio_canvases_keep_validated_headroom(self) -> None:
+        configuration = json.loads(
+            (
+                ROOT
+                / "plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json"
+            ).read_text()
+        )
+        expected = {
+            "mini_beauty_balancing_JUNCTIONS_CLOSEPACKING_over_MONASH",
+            "mini_beauty_balancing_JUNCTIONS_CLOSEPACKING_over_MONASH_lambda_trigger",
+            "mini_charm_balancing_JUNCTIONS_CLOSEPACKING_over_MONASH",
+            "mini_charm_balancing_JUNCTIONS_CLOSEPACKING_over_MONASH_lambda_trigger",
+        }
+        canvases = {
+            row["canvas_name"]: row
+            for row in configuration["canvases_to_be_drawn"]
+            if row["canvas_name"] in expected
+        }
+        self.assertEqual(set(canvases), expected)
+        for name, canvas in canvases.items():
+            with self.subTest(canvas=name):
+                self.assertEqual(canvas["y_min_axis"], 0)
+                self.assertEqual(canvas["y_max_axis"], 2.5)
+
     def test_block_sem_and_jackknife_formulae(self) -> None:
         block = robustness.block_sem([1.0, 3.0])
         self.assertAlmostEqual(block["mean"], 2.0)
