@@ -38,6 +38,8 @@ def test_a_live_variation_row_loads() -> None:
     assert row["status"] == "systematic_variation", row["status"]
     assert row["publication_eligible"] is False, row
     assert row["complete_root_tag"] == "complete_root_HF_SYS_MUR_UP", row
+    assert row["measurement_config"].endswith(
+        "HF_SYS_MUR_UP_THREETUNE_THnSparse_complete_root.json"), row
     assert row["subsample_base"].endswith(
         "SUBSAMPLES_HF_SYS_MUR_UP/combined_root_subSamples"), row
     assert active == "hf_sys_mur_up_variation", active
@@ -70,6 +72,19 @@ def test_the_contract_fields_are_still_required() -> None:
             assert marker in str(error), (key, str(error))
             continue
         raise AssertionError(f"a wrong {key} must be refused")
+
+
+def test_a_variation_requires_an_existing_harvest_config() -> None:
+    for value, marker in (("", "requires measurement_config"),
+                          ("plotting/no-such-config.json", "does not exist")):
+        doc = json.loads(LIVE.read_text())
+        doc["datasets"][doc["active_dataset"]]["measurement_config"] = value
+        try:
+            _load(doc)
+        except ValueError as error:
+            assert marker in str(error), str(error)
+            continue
+        raise AssertionError(f"measurement_config={value!r} was accepted")
 
 
 def test_the_sealed_row_is_untouched_by_this_status() -> None:

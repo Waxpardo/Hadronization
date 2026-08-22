@@ -166,7 +166,7 @@ case "${command_name}" in
     if [[ "$#" -eq 0 ]]; then set -- all; fi
     if [[ "$#" -eq 1 && "$1" == "measure-balancing" ]]; then
       prepare_measurement_output_plane
-      measurement_config="${THNSPARSE_COMPLETE_ROOT_CONFIG:-plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json}"
+      measurement_config="${THNSPARSE_COMPLETE_ROOT_CONFIG:-${HADRONIZATION_MEASUREMENT_CONFIG:-plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json}}"
       measurement_log="${HADRONIZATION_MEASUREMENT_ROOT}/render.log"
       HADRONIZATION_MEASUREMENT_ROOT_EXACT=1 \
         "${project_base}/tools/render_measurement.sh" \

@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DRIVER = ROOT / "plotting" / "run_paper_plots.sh"
 WRAPPER = ROOT / "tools" / "render_measurement.sh"
+RECEIPT_WRITER = ROOT / "tools" / "write_measurement_receipt.py"
 UNIFIED_CLI = ROOT / "hadronization"
 
 
@@ -38,6 +39,7 @@ def _run(target: str, selector: str, env_extra: dict | None = None,
          extra_targets: list[str] | None = None) -> subprocess.CompletedProcess:
     env = dict(os.environ)
     env.update(HADRONIZATION_BASE=str(ROOT), DATASET_SELECTOR=selector)
+    env.setdefault("HADRONIZATION_DATA_ROOT", "/tmp/hadronization-test-data")
     env.pop("HADRONIZATION_MEASUREMENT_ROOT", None)
     env.update(env_extra or {})
     return subprocess.run(["bash", str(DRIVER), target, *(extra_targets or [])],
@@ -119,10 +121,16 @@ def test_the_wrapper_captures_the_render_status_with_nothing_in_between() -> Non
 
 
 def test_the_receipt_declares_its_purpose() -> None:
-    text = WRAPPER.read_text()
+    text = RECEIPT_WRITER.read_text()
     assert '"purpose": "measurement"' in text, text[:200]
     assert '"publication_eligible": False' in text
-    assert '"render_exit_status": int(rc)' in text
+    assert '"render_exit_status": args.render_status' in text
+
+
+def test_the_wrapper_enforces_the_receipt_status() -> None:
+    text = WRAPPER.read_text()
+    assert 'RECEIPT_RC=$?' in text
+    assert 'exit "$RECEIPT_RC"' in text
 
 
 def test_the_unified_cli_routes_measurements_through_the_wrapper() -> None:
@@ -130,6 +138,7 @@ def test_the_unified_cli_routes_measurements_through_the_wrapper() -> None:
     assert '[[ "$#" -eq 1 && "$1" == "measure-balancing" ]]' in text
     assert '"${project_base}/tools/render_measurement.sh"' in text
     assert "HADRONIZATION_MEASUREMENT_ROOT_EXACT=1" in text
+    assert "HADRONIZATION_MEASUREMENT_CONFIG" in text
 
 
 def test_the_unified_cli_uses_a_commit_scoped_exact_measurement_root() -> None:

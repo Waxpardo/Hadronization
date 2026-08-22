@@ -213,6 +213,22 @@ def load(
             != "hard_trigger_primary_ground__primary_ground_associate_v1"
         ):
             raise ValueError("systematic variation has wrong selector")
+        measurement_config = row.get("measurement_config")
+        if not isinstance(measurement_config, str) or not measurement_config:
+            raise ValueError(
+                "systematic variation requires measurement_config"
+            )
+        config_path = (checkout / measurement_config).resolve()
+        try:
+            config_path.relative_to(checkout)
+        except ValueError as error:
+            raise ValueError(
+                "measurement_config must remain inside the checkout"
+            ) from error
+        if not config_path.is_file():
+            raise ValueError(
+                f"measurement_config does not exist: {measurement_config}"
+            )
     else:
         raise ValueError(f"unsupported dataset status: {status!r}")
     return active, row
@@ -279,6 +295,8 @@ def main() -> int:
                 shell_value("analyzed_data_base"),
             "HADRONIZATION_COMPLETE_ROOT_TAG":
                 shell_value("complete_root_tag"),
+            "HADRONIZATION_MEASUREMENT_CONFIG":
+                str(row.get("measurement_config") or ""),
             "HADRONIZATION_SUBSAMPLE_BASE":
                 shell_value("subsample_base"),
         }

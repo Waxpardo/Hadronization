@@ -132,12 +132,29 @@ names = sorted({e["write_name"]
                 for s in ("canvases_to_be_drawn", "global_canvases_to_be_drawn")
                 for e in staged.get(s, []) if e.get("write")})
 bins = [h["binLabel"] for h in staged["histograms_to_analyse"]]
+expected_identities = []
+for flavour, section in (
+    ("BEAUTY", "beauty_correlations_to_analyse"),
+    ("CHARM", "charm_correlations_to_analyse"),
+):
+    for trigger_group in staged[section]:
+        trigger = trigger_group["trigger"]
+        for tune in staged["PYTHIA_TUNES"]:
+            for associate in trigger_group["configs"]:
+                for histogram in staged["histograms_to_analyse"]:
+                    expected_identities.append("|".join((
+                        flavour, trigger, tune, associate["associateOS"],
+                        histogram["hDPhi"],
+                    )))
+if len(expected_identities) != len(set(expected_identities)):
+    sys.exit("STAGING FAILED: duplicate expected uncertainty identities")
 pathlib.Path(facts_path).write_text(json.dumps({
     "write_path_readback": plots,
     "writing_canvases": sorted(writing),
     "write_names": names,
     "bin_labels": bins,
-    "expected_uncertainty_matrix_rows": len(bins) * 12,
+    "expected_uncertainty_matrix_rows": len(expected_identities),
+    "expected_uncertainty_identities": sorted(expected_identities),
     "axes_widened": widen,
 }, indent=2, sort_keys=True) + "\n")
 print(f"staged {dst} write_path={plots} canvases={len(writing)} "
@@ -185,47 +202,23 @@ python3 "$BASE/tools/assert_measurement_outputs.py" \
 ASSERT_RC=$?
 
 RECEIPT="$CAMPAIGN_ROOT/measurement_receipt.json"
-python3 - "$RECEIPT" "$CAMPAIGN" "$RC" "$LOG" "$STAGED" "$ASSERT_RC" "$FACTS" \
-         "$CAMPAIGN_ROOT/output_assertion.json" "$WINDOW_START" "$WINDOW_END" <<'PY'
-import hashlib, json, pathlib, sys, datetime
-(receipt, campaign, rc, log, staged, assert_rc, facts, assertion,
- w_start, w_end) = sys.argv[1:11]
-text = pathlib.Path(log).read_text(errors="replace")
-resolved = sorted({line.split("tag=")[1].strip()
-                   for line in text.splitlines()
-                   if "central resolver" in line and "tag=" in line})
-rows = sum(1 for l in text.splitlines() if l.startswith("UNCERTAINTY_MATRIX"))
-facts_data = json.loads(pathlib.Path(facts).read_text())
-pathlib.Path(receipt).write_text(json.dumps({
-    "schema": "hadronization_measurement_receipt_v2",
-    "purpose": "measurement",
-    "publication_eligible": False,
-    "campaign": campaign,
-    "render_exit_status": int(rc),
-    "output_assertion_exit_status": int(assert_rc),
-    "output_assertion": json.loads(pathlib.Path(assertion).read_text())
-                        if pathlib.Path(assertion).exists() else None,
-    "render_window": [int(w_start), int(w_end)],
-    "uncertainty_matrix_rows": rows,
-    "expected_uncertainty_matrix_rows":
-        facts_data["expected_uncertainty_matrix_rows"],
-    "staged_configuration_facts": facts_data,
-    "resolved_complete_root_tags": resolved,
-    "staged_configuration_sha256":
-        hashlib.sha256(pathlib.Path(staged).read_bytes()).hexdigest(),
-    "log_sha256": hashlib.sha256(pathlib.Path(log).read_bytes()).hexdigest(),
-    "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-}, indent=2, sort_keys=True) + "\n")
-print(f"receipt purpose=measurement rc={rc} output_assertion_rc={assert_rc} "
-      f"rows={rows}/{facts_data['expected_uncertainty_matrix_rows']} "
-      f"resolved={resolved}")
-PY
+python3 "$BASE/tools/write_measurement_receipt.py" \
+  --receipt "$RECEIPT" --campaign "$CAMPAIGN" --render-status "$RC" \
+  --log "$LOG" --staged "$STAGED" --assertion-status "$ASSERT_RC" \
+  --facts "$FACTS" --assertion "$CAMPAIGN_ROOT/output_assertion.json" \
+  --window-start "$WINDOW_START" --window-end "$WINDOW_END" \
+  --expected-tag "${HADRONIZATION_COMPLETE_ROOT_TAG:?complete-root tag required}"
+RECEIPT_RC=$?
 
 # The render's status and the output assertion are separate facts and both must
 # hold. A render that succeeded into the wrong directory is not a success.
 if [ "$RC" -ne 0 ]; then
-  echo "RENDER_MEASUREMENT campaign=$CAMPAIGN rc=$RC output_assertion=$ASSERT_RC"
+  echo "RENDER_MEASUREMENT campaign=$CAMPAIGN rc=$RC output_assertion=$ASSERT_RC receipt=$RECEIPT_RC"
   exit "$RC"
 fi
-echo "RENDER_MEASUREMENT campaign=$CAMPAIGN rc=$RC output_assertion=$ASSERT_RC"
-exit "$ASSERT_RC"
+if [ "$ASSERT_RC" -ne 0 ]; then
+  echo "RENDER_MEASUREMENT campaign=$CAMPAIGN rc=$RC output_assertion=$ASSERT_RC receipt=$RECEIPT_RC"
+  exit "$ASSERT_RC"
+fi
+echo "RENDER_MEASUREMENT campaign=$CAMPAIGN rc=$RC output_assertion=$ASSERT_RC receipt=$RECEIPT_RC"
+exit "$RECEIPT_RC"

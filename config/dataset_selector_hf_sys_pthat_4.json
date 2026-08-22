@@ -7,6 +7,7 @@
       "status": "systematic_variation",
       "publication_eligible": false,
       "complete_root_tag": "complete_root_HF_SYS_PTHAT_4",
+      "measurement_config": "plotting/harvest_configs/configuration_multiplicity_HF_SYS_PTHAT_4_THREETUNE_THnSparse_complete_root.json",
       "subsample_base": "${HADRONIZATION_DATA_ROOT}/hadronization_merged/SUBSAMPLES_HF_SYS_PTHAT_4/combined_root_subSamples",
       "analyzed_data_base": "${HADRONIZATION_DATA_ROOT}/hadronization_merged",
       "production_root": "${HADRONIZATION_DATA_ROOT}/hadronization_production/HF_SYS_PTHAT_4",
