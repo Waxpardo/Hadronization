@@ -20,6 +20,10 @@ def main() -> int:
         '"${PYTHIA8DATA%/}/Index.xml" ]]'
     ) in setup
     assert 'PYTHIA8DATA:       ${PYTHIA8DATA:-\'(not set)\'}' in setup
+    assert (
+        "export HF_PYTHIA8_PREFIX HF_PYTHIA8_VERSION HF_PYTHIA8_GCC_PREFIX"
+        in setup
+    )
     print("setup environment contract test passed")
     return 0
 

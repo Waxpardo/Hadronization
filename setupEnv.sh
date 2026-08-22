@@ -212,10 +212,13 @@ fi
 : "${HF_PRODUCTION_ROOT:=${HADRONIZATION_BASE}/Production}"
 export HF_PRODUCTION_ROOT
 
-# The pinned versions are asserted above from these values.  Export them so
-# child processes -- notably the ROOT validator, which runs in its own
-# interpreter -- check against the same pin rather than a hardcoded copy.
-export HF_PYTHIA8_VERSION HF_ROOT_VERSION
+# The pins and their resolved prefixes must cross the process boundary. The
+# unified command invokes Make, which launches the doctor, build scripts and
+# validators in child shells; leaving a site-profile prefix shell-local made a
+# fresh Nikhef checkout work in the parent but appear unconfigured to `make
+# check`.
+export HF_PYTHIA8_PREFIX HF_PYTHIA8_VERSION HF_PYTHIA8_GCC_PREFIX
+export HF_ROOT_PREFIX HF_ROOT_VERSION HF_ROOT_GCC_PREFIX HF_ROOT_ALIENV_PACKAGE
 
 if [[ "${SETUPENV_QUIET:-0}" -ne 1 ]]; then
   echo "Environment set:"
