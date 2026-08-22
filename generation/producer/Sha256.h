@@ -147,6 +147,9 @@ class Sha256 {
   }
 
   void Finalize() {
+    if (bufferSize_ >= buffer_.size()) {
+      throw std::logic_error("invalid SHA-256 internal buffer size");
+    }
     std::array<std::uint8_t, 128> tail{};
     for (std::size_t index = 0; index < bufferSize_; ++index) {
       tail[index] = static_cast<std::uint8_t>(buffer_[index]);

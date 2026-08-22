@@ -69,6 +69,18 @@ int main() {
   assert(Sha256Hex("abc") ==
          "ba7816bf8f01cfea414140de5dae2223"
          "b00361a396177a9cb410ff61f20015ad");
+  assert(Sha256Hex(std::string(55U, 'a')) ==
+         "9f4390f8d30c2dd92ec9f095b65e2b9"
+         "ae9b0a925a5258e241c9f1e910f734318");
+  assert(Sha256Hex(std::string(56U, 'a')) ==
+         "b35439a4ac6f0948b6d6f9e3c6af0f5"
+         "f590ce20f1bde7090ef7970686ec6738a");
+  assert(Sha256Hex(std::string(63U, 'a')) ==
+         "7d3e74a05d7db15bce4ad9ec0658ea98"
+         "e3f06eeecf16b4c6fff2da457ddc2f34");
+  assert(Sha256Hex(std::string(64U, 'a')) ==
+         "ffe054fe7ae0cb6dc65c3af9b61d5209"
+         "f439851db43d0ba5997337df154668eb");
   Sha256 streamedDigest;
   streamedDigest.Update("a");
   streamedDigest.Update("b");
