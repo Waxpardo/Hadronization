@@ -26,6 +26,34 @@ fi
 
 failed=0
 total=0
+
+# A contract suite is read-only with respect to scientific results. On Nikhef,
+# plotting/Plots is an ignored symlink into the external result plane, so a
+# test that accidentally renders can mutate published bytes while leaving Git
+# clean. Snapshot the resolved tree content (paths + SHA-256) and fail the
+# entire suite if any test changes it.
+test_output_plane="$(python3 - "${project_base}/plotting/Plots" <<'PY'
+import pathlib, sys
+path = pathlib.Path(sys.argv[1])
+print(path.resolve() if path.exists() or path.is_symlink() else "")
+PY
+)"
+snapshot_output_plane() {
+  python3 - "$1" <<'PY'
+import hashlib, pathlib, sys
+digest = hashlib.sha256()
+if sys.argv[1]:
+    root = pathlib.Path(sys.argv[1])
+    if root.is_dir():
+        for path in sorted(p for p in root.rglob("*") if p.is_file()):
+            digest.update(path.relative_to(root).as_posix().encode())
+            digest.update(b"\0")
+            digest.update(hashlib.sha256(path.read_bytes()).digest())
+print(digest.hexdigest())
+PY
+}
+test_output_plane_before="$(snapshot_output_plane "${test_output_plane}")"
+
 for t in "${project_base}"/tests/test_*.py; do
   total=$((total + 1))
   # Each driver starts without HADRONIZATION_BASE because worker tests enforce that boundary.
@@ -36,6 +64,14 @@ for t in "${project_base}"/tests/test_*.py; do
     failed=$((failed + 1))
   fi
 done
+
+test_output_plane_after="$(snapshot_output_plane "${test_output_plane}")"
+if [[ "${test_output_plane_after}" != "${test_output_plane_before}" ]]; then
+  echo "  FAIL external scientific output plane changed during tests: ${test_output_plane}"
+  failed=$((failed + 1))
+else
+  echo "  PASS external scientific output plane unchanged"
+fi
 
 echo "  $((total - failed))/${total} passed"
 exit $(( failed == 0 ? 0 : 1 ))

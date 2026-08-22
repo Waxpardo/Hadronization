@@ -87,6 +87,10 @@ Useful environment overrides:
       default: false; true permits a tracked-dirty checkout only for
       explicitly non-release development validation. Canonical release
       plotting remains tracked-clean by default.
+  HADRONIZATION_REQUEST_PREFLIGHT_ONLY
+      default: false. When true, validate dataset/target/output-purpose gates
+      and exit before environment setup, ROOT, or any scientific output. Used
+      by request-gate tests; it is an explicit no-render result.
 
 Examples:
   ./plotting/run_paper_plots.sh
@@ -190,6 +194,9 @@ FINAL_NSUB="${FINAL_NSUB:-10}"
 FINAL_NORMALIZE="$(normalize_bool "${FINAL_NORMALIZE:-true}")"
 PLOT_PROVENANCE_DEVELOPMENT="$(
   normalize_bool "${PLOT_PROVENANCE_DEVELOPMENT:-false}"
+)"
+HADRONIZATION_REQUEST_PREFLIGHT_ONLY="$(
+  normalize_bool "${HADRONIZATION_REQUEST_PREFLIGHT_ONLY:-false}"
 )"
 # Final-plot provenance tracking was part of the gate layer and has been
 # removed. The per-target blocks below that used to set provenance_enabled are
@@ -331,6 +338,11 @@ if [[ "${legacy_diagnostic_requested}" == "true" ]] &&
      [[ "${HADRONIZATION_DATASET_PUBLICATION_ELIGIBLE:-}" != "false" ]]; }; then
   echo "ERROR: legacy diagnostics require the explicit nonpublication legacy selector." >&2
   exit 1
+fi
+
+if [[ "${HADRONIZATION_REQUEST_PREFLIGHT_ONLY}" == "true" ]]; then
+  echo "REQUEST_PREFLIGHT_ONLY status=PASS root_execution=false outputs_written=false"
+  exit 0
 fi
 
 canonical_pair_provenance_mode="canonical-pair"

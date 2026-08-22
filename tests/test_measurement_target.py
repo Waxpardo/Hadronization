@@ -38,7 +38,11 @@ SEL_LEGACY = "config/dataset_selector.json"
 def _run(target: str, selector: str, env_extra: dict | None = None,
          extra_targets: list[str] | None = None) -> subprocess.CompletedProcess:
     env = dict(os.environ)
-    env.update(HADRONIZATION_BASE=str(ROOT), DATASET_SELECTOR=selector)
+    env.update(
+        HADRONIZATION_BASE=str(ROOT),
+        DATASET_SELECTOR=selector,
+        HADRONIZATION_REQUEST_PREFLIGHT_ONLY="1",
+    )
     env.setdefault("HADRONIZATION_DATA_ROOT", "/tmp/hadronization-test-data")
     env.pop("HADRONIZATION_MEASUREMENT_ROOT", None)
     env.update(env_extra or {})
@@ -66,6 +70,7 @@ def test_the_measurement_target_accepts_a_variation() -> None:
         r = _run("measure-balancing", SEL_VARIATION,
                  {"HADRONIZATION_MEASUREMENT_ROOT": f"{tmp}/measurements"})
     assert "MEASUREMENT_TARGET purpose=measurement" in r.stdout, r.stdout + r.stderr
+    assert "REQUEST_PREFLIGHT_ONLY status=PASS" in r.stdout, r.stdout + r.stderr
     assert "fail-closed" not in r.stderr, r.stderr
 
 
@@ -140,6 +145,13 @@ def test_the_unified_cli_routes_measurements_through_the_wrapper() -> None:
     assert "HADRONIZATION_MEASUREMENT_ROOT_EXACT=1" in text
     assert "HADRONIZATION_MEASUREMENT_CONFIG" in text
     assert 'MEASUREMENT_WIDEN_AXES="${MEASUREMENT_WIDEN_AXES:-1}"' in text
+
+
+def test_request_gate_tests_never_start_root() -> None:
+    text = DRIVER.read_text()
+    preflight = text.index("REQUEST_PREFLIGHT_ONLY status=PASS")
+    root_requirement = text.index("if ! command -v root")
+    assert preflight < root_requirement
 
 
 def test_the_unified_cli_uses_a_commit_scoped_exact_measurement_root() -> None:
