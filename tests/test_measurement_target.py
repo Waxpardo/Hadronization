@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DRIVER = ROOT / "plotting" / "run_paper_plots.sh"
 WRAPPER = ROOT / "tools" / "render_measurement.sh"
+UNIFIED_CLI = ROOT / "hadronization"
 
 
 # The gate reads the dataset STATUS from the selector, not from the
@@ -122,6 +123,28 @@ def test_the_receipt_declares_its_purpose() -> None:
     assert '"purpose": "measurement"' in text, text[:200]
     assert '"publication_eligible": False' in text
     assert '"render_exit_status": int(rc)' in text
+
+
+def test_the_unified_cli_routes_measurements_through_the_wrapper() -> None:
+    text = UNIFIED_CLI.read_text()
+    assert '[[ "$#" -eq 1 && "$1" == "measure-balancing" ]]' in text
+    assert '"${project_base}/tools/render_measurement.sh"' in text
+    assert "HADRONIZATION_MEASUREMENT_ROOT_EXACT=1" in text
+
+
+def test_the_unified_cli_uses_a_commit_scoped_exact_measurement_root() -> None:
+    cli = UNIFIED_CLI.read_text()
+    wrapper = WRAPPER.read_text()
+    expected = (
+        '"${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/'
+        '${commit}/measurements/${HADRONIZATION_DATASET}"'
+    )
+    assert expected in cli
+    assert (
+        'if [ "${HADRONIZATION_MEASUREMENT_ROOT_EXACT:-0}" = "1" ]; then'
+        in wrapper
+    )
+    assert 'CAMPAIGN_ROOT="$ROOT"' in wrapper
 
 
 def main() -> int:

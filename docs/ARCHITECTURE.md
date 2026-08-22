@@ -11,6 +11,13 @@ lives in the checkout. A checkout can be
 replaced without moving the data plane, and a laptop can disappear without
 interrupting the pipeline.
 
+Systematic renders use the same top-level command but a separate output
+contract. `plot <variation> measure-balancing` stages every nested canvas path
+under
+`project/results/<campaign>/<commit>/measurements/<dataset>/`, then verifies
+the produced files and publication trees before writing a non-publication
+measurement receipt. It never uses the publication symlink as its output path.
+
 ```text
 tracked checkout
   generation cards + producer
@@ -52,6 +59,12 @@ errors, and `Sumw2`. It derives that tune's thresholds once, validates the
 integer partition, records the source hash and achieved fractions, and reuses
 the frozen map for all pairs and all canvases. Another tune repeats that process
 independently.
+
+An optional pair-level `multiplicity_scope` narrows the domain of a genuinely
+unavailable observable (currently Bc pairs: integrated and 0–1% only). The
+calculation records unavailable errors outside that domain, and both yield and
+tune-ratio renderers omit those points. They are never converted to zero and
+never allowed through the finite-value guard.
 
 ## Execution profiles
 

@@ -75,8 +75,15 @@ prepare_plot_output_plane() {
   else
     ln -s "${output_target}" "${output_link}"
   fi
-  export HADRONIZATION_MEASUREMENT_ROOT="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/measurements"
   printf 'HADRONIZATION_PLOT_OUTPUT=%s\n' "${output_target}"
+}
+
+prepare_measurement_output_plane() {
+  local commit
+  commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
+  export HADRONIZATION_MEASUREMENT_ROOT="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/measurements/${HADRONIZATION_DATASET}"
+  printf 'HADRONIZATION_MEASUREMENT_OUTPUT=%s\n' \
+    "${HADRONIZATION_MEASUREMENT_ROOT}"
 }
 
 command_name="${1:-help}"
@@ -156,10 +163,20 @@ case "${command_name}" in
     [[ "$#" -ge 1 ]] || { usage >&2; exit 2; }
     dataset_key="$1"; shift
     resolve_dataset "${dataset_key}"
-    prepare_plot_output_plane
     if [[ "$#" -eq 0 ]]; then set -- all; fi
-    DATASET_SELECTOR="${selector}" \
-      "${project_base}/plotting/run_paper_plots.sh" "$@"
+    if [[ "$#" -eq 1 && "$1" == "measure-balancing" ]]; then
+      prepare_measurement_output_plane
+      measurement_config="${THNSPARSE_COMPLETE_ROOT_CONFIG:-plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json}"
+      measurement_log="${HADRONIZATION_MEASUREMENT_ROOT}/render.log"
+      HADRONIZATION_MEASUREMENT_ROOT_EXACT=1 \
+        "${project_base}/tools/render_measurement.sh" \
+        "${HADRONIZATION_CAMPAIGN}" "${measurement_config}" "${selector}" \
+        "${HADRONIZATION_MEASUREMENT_ROOT}" "${measurement_log}"
+    else
+      prepare_plot_output_plane
+      DATASET_SELECTOR="${selector}" \
+        "${project_base}/plotting/run_paper_plots.sh" "$@"
+    fi
     ;;
   *)
     echo "ERROR: unknown command ${command_name}" >&2

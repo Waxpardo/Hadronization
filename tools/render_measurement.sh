@@ -44,11 +44,17 @@ case "$ROOT" in
 esac
 [ -e "$LOG" ] && { echo "REFUSING: $LOG exists" >&2; exit 3; }
 
-STAGED_DIR="$ROOT/$CAMPAIGN/config"
-PLOTS="$ROOT/$CAMPAIGN/plots"
+if [ "${HADRONIZATION_MEASUREMENT_ROOT_EXACT:-0}" = "1" ]; then
+  CAMPAIGN_ROOT="$ROOT"
+else
+  CAMPAIGN_ROOT="$ROOT/$CAMPAIGN"
+fi
+
+STAGED_DIR="$CAMPAIGN_ROOT/config"
+PLOTS="$CAMPAIGN_ROOT/plots"
 mkdir -p "$STAGED_DIR" "$PLOTS"
 STAGED="$STAGED_DIR/$(basename "$CONFIG")"
-FACTS="$ROOT/$CAMPAIGN/staged_configuration_facts.json"
+FACTS="$CAMPAIGN_ROOT/staged_configuration_facts.json"
 
 python3 - "$BASE/$CONFIG" "$STAGED" "$PLOTS" "$FACTS" "$INTEGRATED_BIN" \
          "${MEASUREMENT_WIDEN_AXES:-0}" <<'PY'
@@ -143,7 +149,7 @@ WINDOW_START=$(( $(date +%s) - 1 ))
 
 HADRONIZATION_BASE="$BASE" \
 DATASET_SELECTOR="$SELECTOR" \
-HADRONIZATION_MEASUREMENT_ROOT="$ROOT/$CAMPAIGN" \
+HADRONIZATION_MEASUREMENT_ROOT="$CAMPAIGN_ROOT" \
 THNSPARSE_COMPLETE_ROOT_CONFIG="${STAGED#$BASE/}" \
   bash "$BASE/plotting/run_paper_plots.sh" measure-balancing > "$LOG" 2>&1
 RC=$?          # THE RENDER'S OWN STATUS. Nothing may run before this line.
@@ -170,17 +176,17 @@ if [ -n "${MEASUREMENT_PUBLICATION_TREES:-}" ]; then
 fi
 
 python3 "$BASE/tools/assert_measurement_outputs.py" \
-  --measurement-root "$ROOT/$CAMPAIGN" \
+  --measurement-root "$CAMPAIGN_ROOT" \
   --window-start "$WINDOW_START" --window-end "$WINDOW_END" \
   "${TREES[@]}" \
   --expect "config/$(basename "$CONFIG")" \
   "${EXPECT[@]}" \
-  --out "$ROOT/$CAMPAIGN/output_assertion.json"
+  --out "$CAMPAIGN_ROOT/output_assertion.json"
 ASSERT_RC=$?
 
-RECEIPT="$ROOT/$CAMPAIGN/measurement_receipt.json"
+RECEIPT="$CAMPAIGN_ROOT/measurement_receipt.json"
 python3 - "$RECEIPT" "$CAMPAIGN" "$RC" "$LOG" "$STAGED" "$ASSERT_RC" "$FACTS" \
-         "$ROOT/$CAMPAIGN/output_assertion.json" "$WINDOW_START" "$WINDOW_END" <<'PY'
+         "$CAMPAIGN_ROOT/output_assertion.json" "$WINDOW_START" "$WINDOW_END" <<'PY'
 import hashlib, json, pathlib, sys, datetime
 (receipt, campaign, rc, log, staged, assert_rc, facts, assertion,
  w_start, w_end) = sys.argv[1:11]

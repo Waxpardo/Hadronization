@@ -50,6 +50,10 @@ condor_submit submit_analysis_HF_RUN3_V1.sub
 
 ./hadronization merge hf_run3_v1_candidate v3
 ./hadronization plot hf_run3_v1_candidate all
+
+# Non-publication systematic measurement; staged config, log, figures,
+# output assertion, and receipt all stay in its commit-scoped measurement root.
+./hadronization plot hf_sys_mur_up_variation measure-balancing
 ```
 
 The portable check does not certify the pinned production runtime, external
@@ -77,7 +81,7 @@ Large data always live outside Git:
 ```text
 ${HADRONIZATION_DATA_ROOT}/
   project/runs/                 seed ledger and sealed campaign freezes
-  project/results/              plots, receipts, and measurements by commit
+  project/results/            campaign/commit plots, receipts, and measurements
   hadronization_production/   promoted raw campaign files
   hadronization_analysis/     per-job reductions and validation
   hadronization_merged/       central and ten-block pair products

@@ -4410,6 +4410,23 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
                 auto it = legendEntriesMap.find(dependencyMap[k]);
                 if (it == legendEntriesMap.end()) { continue; }
 
+                // A pair-level multiplicity scope declares where the
+                // observable exists. Calculation leaves its unavailable
+                // errors as NaN so accidental use still fails closed; the
+                // renderer must omit those points rather than feed an
+                // intentionally unavailable value to SetPlotPointOrThrow.
+                if (IsOutsideDeclaredScope(
+                        fileNamesOSandSS.multiplicityScope,
+                        binFromTHnSparse.binLabel)) {
+                    if (VERBOSE) {
+                        std::cout << "Declared pair scope excludes "
+                                  << associateName << " in "
+                                  << binFromTHnSparse.binLabel
+                                  << " >>> not drawing this point" << std::endl;
+                    }
+                    continue;
+                }
+
                 vHists[i][k] = new TH1D(Form("hYields_%s_%i_%i_%i_%s", FLAVOUR, i, j, k, (canvasConfigs.canvasName).c_str()), Form("hYields_%s_%i_%i_%i_%s", FLAVOUR, i, j, k, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
                 const Double_t yield = vYieldsAndErrors.vYields[i][j][k];
                 const Double_t yieldError = CALCULATE_ERRORS ? vYieldsAndErrors.vYieldsErrors[i][j][k] : 0.0;
@@ -4634,6 +4651,21 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
             // TODO: make this verbose
             auto it = legendEntriesMap.find(dependencyMap[k]);
             if (it == legendEntriesMap.end()) { continue; }
+
+            // Tune ratios carry the same pair/bin domain as their numerator
+            // and denominator yields. An out-of-scope point is absent by
+            // contract, not a zero and not an error-bar exception.
+            if (IsOutsideDeclaredScope(
+                    fileNamesOSandSS.multiplicityScope,
+                    binFromTHnSparse.binLabel)) {
+                if (VERBOSE) {
+                    std::cout << "Declared pair scope excludes "
+                              << associateName << " in "
+                              << binFromTHnSparse.binLabel
+                              << " >>> not drawing this tune ratio" << std::endl;
+                }
+                continue;
+            }
 
 
             for (Int_t iTUNE=0; iTUNE < nTUNES; iTUNE++) {
