@@ -44,7 +44,7 @@ def row(campaign, delta, sem, nominal=100.0):
 # --- THE MIXED RESOLVED AND UNRESOLVED CELL -------------------------------
 # S1a  up +3.0 +/- 0.5, down -1.0 +/- 0.5 -> quotes UP, |D| = 3 >= 2*0.5,
 #                                            RESOLVED, contributes |D| = 3
-# S3   up +1.0 +/- 4.0, down -0.5 +/- 4.0 -> quotes UP, |D| = 1 <  2*4.0,
+# S3   +1.0 +/- 4.0, ONE-SIDED under R9    -> quotes PTHAT_4, |D| = 1 < 2*4.0,
 #                                            UNRESOLVED, contributes SEM = 4
 # S1b  and S2 are exactly zero, so neither is "non-negligible" and section 9.1
 #      does not fire.
@@ -56,7 +56,6 @@ MIXED = {
     "HF_SYS_MUF_DOWN": row("HF_SYS_MUF_DOWN", 0.0, 0.0),
     "HF_SYS_PDF_CTEQ6L1": row("HF_SYS_PDF_CTEQ6L1", 0.0, 0.0),
     "HF_SYS_PTHAT_4": row("HF_SYS_PTHAT_4", 1.0, 4.0),
-    "HF_SYS_PTHAT_1": row("HF_SYS_PTHAT_1", -0.5, 4.0),
 }
 mixed = combine_cell(MIXED)
 check("the mixed cell combines to exactly 5 per cent",
@@ -75,8 +74,17 @@ check("the larger arm is quoted for the pT-hat source",
       str(mixed["quoted_arm"]))
 check("nothing is dropped when mu_F and PDF are both negligible",
       mixed["dropped"] == [], str(mixed["dropped"]))
-check("S5 is present and contributes zero",
-      mixed["terms_percent"]["S5_class_migration"]["contribution"] == 0.0)
+# Ruling R11 (2026-08-23) holds S5 unresolved on the v2 percentile axis, so it
+# contributes NO term. Its old contribution was max(|0|, 0) = 0, so the removal
+# changes no combined value -- the total above is still exactly 5.
+check("R11: S5 contributes no term at all",
+      "S5_class_migration" not in mixed["terms_percent"],
+      str(sorted(mixed["terms_percent"])))
+# Ruling R9 (2026-08-23) makes S3 one-sided. The excluded arm is quoted nowhere.
+check("R9: S3 is quoted from HF_SYS_PTHAT_4 alone",
+      mixed["quoted_arm"]["S3_pthat"] == "HF_SYS_PTHAT_4"
+      and "HF_SYS_PTHAT_1" not in set(mixed["quoted_arm"].values()),
+      str(mixed["quoted_arm"]))
 
 # --- RULING A1 IS CONTINUOUS ---------------------------------------------
 # max(|D|, SEM) has no cliff. At |D| = SEM the two expressions agree, and
@@ -106,7 +114,6 @@ NINE_ONE.update({
     "HF_SYS_MUF_DOWN": row("HF_SYS_MUF_DOWN", -1.0, 0.5),
     "HF_SYS_PDF_CTEQ6L1": row("HF_SYS_PDF_CTEQ6L1", -4.0, 0.5),
     "HF_SYS_PTHAT_4": row("HF_SYS_PTHAT_4", 0.0, 0.0),
-    "HF_SYS_PTHAT_1": row("HF_SYS_PTHAT_1", 0.0, 0.0),
 })
 nine_one = combine_cell(NINE_ONE)
 check("mu_F is dropped when PDF is the larger of the two",
@@ -168,8 +175,13 @@ try:
     check("a partial source set is refused", False, "no raise")
 except SourcesIncomplete:
     check("a partial source set is refused", True)
-check("all seven campaigns are required", len(
-    {c for arms in SOURCES.values() for c in arms}) == 7)
+# Seven campaigns were registered. R9 excludes HF_SYS_PTHAT_1, so six are
+# required. The seventh stays declared, excluded, in the source contract.
+check("six campaigns are required after R9", len(
+    {c for arms in SOURCES.values() for c in arms}) == 6,
+    str(sorted({c for arms in SOURCES.values() for c in arms})))
+check("and HF_SYS_PTHAT_1 is not one of them",
+      "HF_SYS_PTHAT_1" not in {c for arms in SOURCES.values() for c in arms})
 
 # --- THE TUNE SEPARATION --------------------------------------------------
 # 0.12 - 0.10 = 0.02;  sqrt(0.003^2 + 0.004^2) = 0.005.

@@ -78,7 +78,7 @@ def fixture(tmp: Path, *, status: str = "COMPLETE", schema: str | None = None,
     envelope.write_text(json.dumps({
         "schema": schema or "hadronization_systematics_envelope_v1",
         "status": status,
-        "missing": [] if status == "COMPLETE" else ["HF_SYS_PTHAT_1: no PASS receipt"],
+        "missing": [] if status == "COMPLETE" else ["HF_SYS_PTHAT_4: no PASS receipt"],
         "method": {"d2_quadrature": "", "a1_max_rule": "", "a2_s6_excluded": ""},
         "sources": [],
         "rows": [{"class": "c1", "combined_percent": 1.0}] if rows is None else rows,
@@ -200,8 +200,9 @@ def test_the_request_tool_resolves_every_declared_campaign() -> None:
     from combine_per_class import required_campaigns  # noqa: E402
     assert set(plan["resolver_tags"]) == required_campaigns(), plan["resolver_tags"]
     assert set(plan["receipts"]) == required_campaigns()
-    assert "HF_SYS_PTHAT_1" in plan["resolver_tags"], (
-        "PTHAT_1 stays declared; excluding it is an owner decision")
+    assert "HF_SYS_PTHAT_1" not in plan["resolver_tags"], (
+        "R9 excludes the PTHAT_1 arm; a request must not demand its receipt")
+    assert "HF_SYS_PTHAT_4" in plan["resolver_tags"], plan["resolver_tags"]
     assert "/systematics" in plan["out_dir"]
     assert "/plotting" not in plan["out_dir"]
 
@@ -238,7 +239,7 @@ def test_an_incomplete_envelope_names_the_status_field() -> None:
         result = assert_tool(envelope, plane)
     assert result.returncode != 0
     assert "field=status" in result.stderr, result.stderr
-    assert "HF_SYS_PTHAT_1" in result.stderr, result.stderr
+    assert "HF_SYS_PTHAT_4" in result.stderr, result.stderr
 
 
 def test_a_boundary_receipt_mismatch_names_its_field() -> None:

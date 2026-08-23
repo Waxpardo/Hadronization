@@ -18,7 +18,12 @@ THE RULES IT APPLIES, none of them chosen here:
                              summed into a c1..c11 total.
     section 9.1              mu_F and PDF act on the same object. If both are
                              non-negligible, quote the larger and drop the other.
-    section 9.5              S5 contributes exactly zero, measured.
+    section 9.5              S5 contributed exactly zero, measured -- on the
+                             RETIRED absolute axis. Ruling R11 (2026-08-23)
+                             holds S5 unresolved on the v2 percentile axis, so
+                             it enters no per-class sum and no term is written.
+    ruling R9 (2026-08-23)   HF_SYS_PTHAT_1 is excluded. S3 is quoted one-sided
+                             as measured, from HF_SYS_PTHAT_4 alone.
     section 2.5              a two-sided source quotes the arm with the larger
                              |D|. Not half the spread, not an envelope.
 
@@ -50,16 +55,29 @@ from systematics_delta import (UNRESOLVED_MAX_ABS_OR_SEM, Delta,  # noqa: E402
                                combine_quadrature, correlated_pair_choice,
                                larger_arm)
 
-# Source name -> (up campaign, down campaign). A one-element tuple is one-sided.
+# Source name -> the INCLUDED arms, (up campaign, down campaign). A one-element
+# tuple is one-sided. `config/systematics_sources_v1.json` is the declaration
+# and carries the excluded arms with their reasons; this map is what the
+# arithmetic applies. `tools/systematics_envelope.py` refuses when the two
+# disagree, so neither can drift without the envelope saying so.
+#
+# S3 is one-sided under ruling R9 of 2026-08-23. HF_SYS_PTHAT_1 is excluded: on
+# the v2 percentile axis its MONASH p80 and p90 quantiles both resolve to
+# N_ch = 2, so the 80-90 per cent class needs the empty range [3,2]. R9 quotes
+# S3 one-sided AS MEASURED and does not symmetrise it.
 SOURCES: dict[str, tuple[str, ...]] = {
     "S1a_mur": ("HF_SYS_MUR_UP", "HF_SYS_MUR_DOWN"),
     "S1b_muf": ("HF_SYS_MUF_UP", "HF_SYS_MUF_DOWN"),
     "S2_pdf": ("HF_SYS_PDF_CTEQ6L1",),
-    "S3_pthat": ("HF_SYS_PTHAT_4", "HF_SYS_PTHAT_1"),
+    "S3_pthat": ("HF_SYS_PTHAT_4",),
 }
-# Section 9.5: measured, exactly zero, every class. Listed rather than omitted,
-# because a zero that was measured is a different object from a source never
-# examined.
+# Sources that contribute a per-class term without a variation campaign of their
+# own. Ruling R11 of 2026-08-23 excludes S5_class_migration -- its structural
+# zero was measured on the retired absolute axis and does not carry to the v2
+# percentile axis -- so this set is empty and `combine_cell` adds no such term.
+# The name stays defined because `combine_derived` still quotes it on the
+# derived route, and because the source contract still declares it.
+CAMPAIGNLESS_TERMS: tuple[str, ...] = ()
 S5_TERM = "S5_class_migration"
 
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
@@ -119,7 +137,9 @@ def combine_cell(cells: dict[str, dict]) -> dict:
             name = up if chosen is deltas[up] else down
         quoted[source] = deltas[name]
         arms[source] = name
-    quoted[S5_TERM] = Delta(0.0, 0.0, 10, "measured_structural_zero")
+    # R11 removed the S5 term from this sum. Its per-class contribution was
+    # max(|0|, 0) = 0, so no combined value changes; what changes is that the
+    # envelope no longer prints a number for an unresolved source.
 
     drop = correlated_pair_choice(quoted["S1b_muf"], quoted["S2_pdf"])
     total_pct = combine_quadrature(

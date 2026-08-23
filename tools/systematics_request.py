@@ -3,9 +3,10 @@
 
 WHAT A REQUEST NEEDS BEFORE IT MAY RUN. An envelope is built from several
 campaigns at once, so the request layer has more to check than a single-
-dataset render: every included source must name campaigns, every campaign
-must have a selector row that declares its complete-root tag, and the
-destination must be a systematics plane and not a plotting one.
+dataset render: every included arm of every included source must name a
+campaign, every such campaign must have a selector row that declares its
+complete-root tag, and the destination must be a systematics plane and not a
+plotting one.
 
 Checking those AFTER a multi-hour extraction chain would be checking them too
 late, so this tool answers first and the orchestrator runs second. With
@@ -44,13 +45,21 @@ class RequestRefused(Exception):
 
 
 def included_campaigns(sources: dict) -> dict[str, str]:
-    """campaign -> source name, for every included source that has campaigns."""
+    """campaign -> source name, for every INCLUDED ARM of an included source.
+
+    Inclusion is per arm. Ruling R9 excludes the HF_SYS_PTHAT_1 arm of S3 and
+    keeps HF_SYS_PTHAT_4, so a request must not demand a selector row or a
+    receipt for the excluded arm. Ruling R11 excludes S5_class_migration
+    whole; it declares no campaign either way.
+    """
     out: dict[str, str] = {}
     for row in sources["sources"]:
         if not row.get("included", False):
             continue
-        for campaign in row.get("campaigns", []):
-            out[campaign] = row["source"]
+        for arm in row.get("campaigns", []):
+            if not arm.get("included", False):
+                continue
+            out[arm["campaign"]] = row["source"]
     return out
 
 

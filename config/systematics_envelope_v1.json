@@ -9,9 +9,11 @@
     "missing",
     "method",
     "sources",
+    "exclusions",
     "rows",
     "provenance"
   ],
+  "exclusions": "One entry per source or arm that an owner ruling removed from this envelope: {source, campaign, reason}. `campaign` is null when the whole source is excluded. The reason is copied from `exclusion_reason` in config/systematics_sources_v1.json. tools/systematics_envelope.py FAILS when an excluded entry records no reason. An exclusion is not a deletion: a source removed from the contract would leave a smaller envelope that looks complete, while an excluded source with a recorded reason states what is not in the band and which ruling took it out. Two exclusions stand on 2026-08-23: R9 removes the HF_SYS_PTHAT_1 arm of S3_pthat, which is then quoted one-sided as measured, and R11 removes S5_class_migration until it is re-derived on the percentile axis.",
   "status_values": {
     "COMPLETE": "Every included source produced a PASS measurement receipt, every receipt agreed with its declared resolver tag, every input carried the v2 class partition, and every row combined. Only a COMPLETE envelope may be rendered.",
     "INCOMPLETE": "At least one included source is unavailable. The reason is in `missing`. The envelope carries whatever it could derive and MUST NOT be rendered.",
@@ -23,7 +25,7 @@
     "tune": "One of MONASH, JUNCTIONS, CLOSEPACKING. The three tunes are the measurement; the envelope is computed for each separately and is never taken across them.",
     "trigger_and_associate": "The heavy-flavour pair, for example trigger B^{+} with associate Lambda_b. `flavour` is BEAUTY or CHARM.",
     "observable": "balancing_yield -- the per-trigger balancing yield Y_bal = (N_OS - N_SS)/N_trig.",
-    "class": "One of c1..c11 from config/multiplicity_percentile_classes_v2.json, or MB for the multiplicity-integrated bin."
+    "class": "One class of config/multiplicity_percentile_classes_v2.json, or MB for the multiplicity-integrated bin. The class set, its labels and its count come from that contract and from nowhere else; ruling R10 makes the contract the single source. See rebuild-quarantine-20260822/ADJUSTING_CLASSES.md in the internal repository for the edit-and-regenerate recipe."
   },
   "term_fields": {
     "campaign": "The variation campaign whose arm was quoted for this source in this row.",
@@ -65,6 +67,8 @@
     "A receipt whose resolved_complete_root_tags disagree with the selector's complete_root_tag.",
     "An input row whose class is not in the v2 percentile contract.",
     "A per-class delta report whose class set does not cover the v2 partition.",
+    "A source or an arm that is excluded and records no exclusion_reason.",
+    "An included source whose every declared arm is excluded.",
     "Any attempt to write an envelope under a plotting output plane."
   ],
   "not_a_systematic": "The spread between tune bundles is the measurement. It never enters an envelope."

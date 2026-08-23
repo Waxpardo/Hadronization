@@ -40,6 +40,10 @@ CLASSES = [f"c{i}" for i in range(1, 12)]
 #   S3   PTHAT_4   delta +12, SEM(delta) = sqrt(4^2 + 3^2) = 5  -> |delta| binds, 12
 # Section 9.1 then drops S2 because |muf| = 8 >= |pdf| = 6 and both exceed 0.1.
 # Combined = sqrt(5^2 + 8^2 + 12^2) = sqrt(233).
+#
+# HF_SYS_PTHAT_1 is NOT here. Ruling R9 excludes that arm, so a fixture that
+# supplied it would prove the tool works on inputs the contract forbids.
+# EXCLUDED_ARM below is used only where a test needs the excluded name itself.
 ARMS = {
     "HF_SYS_MUR_UP": (104.0, 4.0),
     "HF_SYS_MUR_DOWN": (97.0, 4.0),
@@ -47,8 +51,9 @@ ARMS = {
     "HF_SYS_MUF_DOWN": (94.0, 0.0),
     "HF_SYS_PDF_CTEQ6L1": (106.0, 4.0),
     "HF_SYS_PTHAT_4": (112.0, 4.0),
-    "HF_SYS_PTHAT_1": (88.0, 4.0),
 }
+EXCLUDED_ARM = "HF_SYS_PTHAT_1"
+EXCLUDED_SOURCE = "S5_class_migration"
 NOMINAL_YIELD, NOMINAL_SEM = 100.0, 3.0
 EXPECTED_COMBINED = math.sqrt(233.0)
 BOUNDARY_SHA = "b" * 64
@@ -150,26 +155,62 @@ def test_the_envelope_contract_declares_its_schema_and_method_tags() -> None:
         assert key in contract["provenance_fields"], key
 
 
-def test_the_source_contract_keeps_pthat_1_included() -> None:
-    """The fail-closed state is deliberate: excluding it is an owner decision."""
+def test_ruling_r9_excludes_one_arm_and_keeps_the_other() -> None:
+    """S3 stays a source. One of its two arms leaves, with a reason."""
     sources = json.loads(SOURCES_CONTRACT.read_text())
     assert sources["schema"] == "hadronization_systematics_sources_v1"
     by_name = {row["source"]: row for row in sources["sources"]}
-    assert by_name["S3_pthat"]["included"] is True
-    assert "HF_SYS_PTHAT_1" in by_name["S3_pthat"]["campaigns"]
-    assert all(row["included"] for row in sources["sources"])
+    s3 = by_name["S3_pthat"]
+    assert s3["included"] is True
+    by_campaign = {arm["campaign"]: arm for arm in s3["campaigns"]}
+    assert by_campaign["HF_SYS_PTHAT_4"]["included"] is True
+    assert by_campaign[EXCLUDED_ARM]["included"] is False
+    assert by_campaign[EXCLUDED_ARM]["exclusion_reason"] == (
+        "R9: empty 80-90% class from a discrete tie on the percentile axis; "
+        "S3 quoted one-sided as measured")
     absent = {row["source"] for row in sources["declared_absent"]}
     assert {"S4_counter_window", "S6_unresolved_origin",
             "tune_bundle_spread"} <= absent
 
 
-def test_the_source_contract_agrees_with_the_arithmetic() -> None:
-    sys.path.insert(0, str(ROOT / "extraction"))
-    from combine_per_class import SOURCES  # noqa: E402
+def test_ruling_r11_excludes_s5_and_does_not_delete_it() -> None:
+    """An excluded source with a recorded reason, still declared."""
     sources = json.loads(SOURCES_CONTRACT.read_text())
-    declared = {row["source"]: tuple(row["campaigns"])
-                for row in sources["sources"] if row["campaigns"]}
-    assert declared == SOURCES, (declared, SOURCES)
+    by_name = {row["source"]: row for row in sources["sources"]}
+    assert EXCLUDED_SOURCE in by_name, "R11 excludes S5; it does not delete it"
+    assert by_name[EXCLUDED_SOURCE]["included"] is False
+    assert by_name[EXCLUDED_SOURCE]["exclusion_reason"] == (
+        "R11: unresolved; re-derivation on the percentile axis pending")
+
+
+def test_every_exclusion_records_a_reason() -> None:
+    """The rule the builder enforces, asserted on the tracked contract."""
+    sources = json.loads(SOURCES_CONTRACT.read_text())
+    for row in sources["sources"]:
+        if not row["included"]:
+            assert row.get("exclusion_reason", "").strip(), row["source"]
+        for arm in row["campaigns"]:
+            assert isinstance(arm, dict), row["source"]
+            if not arm["included"]:
+                assert arm.get("exclusion_reason", "").strip(), arm["campaign"]
+
+
+def test_the_source_contract_agrees_with_the_arithmetic() -> None:
+    """Per arm. The included arms are exactly what the arithmetic quotes."""
+    sys.path.insert(0, str(ROOT / "extraction"))
+    from combine_per_class import CAMPAIGNLESS_TERMS, SOURCES  # noqa: E402
+    sources = json.loads(SOURCES_CONTRACT.read_text())
+    declared = {
+        row["source"]: tuple(a["campaign"] for a in row["campaigns"]
+                             if a["included"])
+        for row in sources["sources"] if row["included"]
+    }
+    campaignless = {name for name, kept in declared.items() if not kept}
+    assert {n: k for n, k in declared.items() if k} == SOURCES, (declared,
+                                                                 SOURCES)
+    assert campaignless == set(CAMPAIGNLESS_TERMS), campaignless
+    assert SOURCES["S3_pthat"] == ("HF_SYS_PTHAT_4",), (
+        "R9 quotes S3 one-sided as measured")
 
 
 # ---- the arithmetic -------------------------------------------------------
@@ -240,29 +281,73 @@ def test_a2_keeps_s6_out_of_the_per_class_quadrature() -> None:
             assert "S6" not in name and name != "A2", name
 
 
-def test_s5_is_a_measured_zero_and_not_an_absent_source() -> None:
+def test_the_envelope_records_its_exclusions_with_their_reasons() -> None:
+    """R9 and R11 must be readable in the artifact, not only in a commit."""
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp))
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert envelope["status"] == "COMPLETE", envelope["missing"]
+    by_key = {(e["source"], e["campaign"]): e["reason"]
+              for e in envelope["exclusions"]}
+    assert by_key[("S3_pthat", EXCLUDED_ARM)].startswith("R9:"), by_key
+    assert by_key[(EXCLUDED_SOURCE, None)].startswith("R11:"), by_key
+    assert all(reason.strip() for reason in by_key.values()), by_key
+
+
+def test_an_excluded_source_produces_no_term() -> None:
+    """R11: S5 enters no budget, so no row may carry a number for it."""
     with tempfile.TemporaryDirectory() as tmp:
         _, envelope = run(Path(tmp))
-    term = next(r for r in envelope["rows"]
-                if r["class"] == "c1")["terms"]["S5_class_migration"]
-    assert term["delta"] == 0.0
-    assert term["contribution"] == 0.0
+    for row in envelope["rows"]:
+        assert EXCLUDED_SOURCE not in row["terms"], row["class"]
+        assert EXCLUDED_SOURCE not in row["quoted_arm"], row["class"]
+
+
+def test_an_excluded_arm_is_never_quoted() -> None:
+    """R9: S3 is one-sided as measured, from HF_SYS_PTHAT_4 alone."""
+    with tempfile.TemporaryDirectory() as tmp:
+        _, envelope = run(Path(tmp))
+    for row in envelope["rows"]:
+        for name, term in row["terms"].items():
+            assert term["campaign"] != EXCLUDED_ARM, (row["class"], name)
+        assert row["quoted_arm"]["S3_pthat"] == "HF_SYS_PTHAT_4", row["class"]
+
+
+def test_the_excluded_arm_needs_no_receipt() -> None:
+    """The envelope completes without any HF_SYS_PTHAT_1 input at all."""
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp))
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert envelope["status"] == "COMPLETE", envelope["missing"]
+    assert EXCLUDED_ARM not in envelope["provenance"]["measurement_receipts"]
+    assert not any(EXCLUDED_ARM in reason for reason in envelope["missing"])
 
 
 # ---- the refusals ---------------------------------------------------------
 
-def test_a_missing_receipt_refuses() -> None:
+def test_a_missing_receipt_for_an_INCLUDED_source_still_refuses() -> None:
+    """Excluding one arm must not soften the gate on the arms that remain."""
     with tempfile.TemporaryDirectory() as tmp:
-        proc, envelope = run(Path(tmp), skip={"HF_SYS_PTHAT_1"})
+        proc, envelope = run(Path(tmp), skip={"HF_SYS_PTHAT_4"})
     assert proc.returncode != 0, proc.stdout
     assert envelope["status"] == "INCOMPLETE", envelope["status"]
-    assert any("HF_SYS_PTHAT_1" in r for r in envelope["missing"]), envelope
+    assert any("HF_SYS_PTHAT_4" in r for r in envelope["missing"]), envelope
     assert envelope["rows"] == [] or envelope["status"] != "COMPLETE"
+
+
+def test_every_included_arm_is_gated_one_at_a_time() -> None:
+    """One mutation per arm. A gate never seen to fail is not known to be one."""
+    for campaign in ARMS:
+        with tempfile.TemporaryDirectory() as tmp:
+            proc, envelope = run(Path(tmp), skip={campaign})
+        assert proc.returncode != 0, (campaign, proc.stdout)
+        assert envelope["status"] == "INCOMPLETE", (campaign, envelope["status"])
+        assert any(campaign in r for r in envelope["missing"]), campaign
 
 
 def test_a_fail_receipt_refuses() -> None:
     with tempfile.TemporaryDirectory() as tmp:
-        proc, envelope = run(Path(tmp), fail={"HF_SYS_PTHAT_1"})
+        proc, envelope = run(Path(tmp), fail={"HF_SYS_PTHAT_4"})
     assert proc.returncode != 0, proc.stdout
     assert envelope["status"] == "FAIL", envelope["status"]
     assert any("not PASS" in r for r in envelope["missing"]), envelope["missing"]
@@ -306,12 +391,81 @@ def test_the_classes_checked_are_the_v2_contract_classes() -> None:
 def test_a_refusal_still_writes_an_auditable_envelope() -> None:
     """A refusal with no artifact is a refusal nobody can audit."""
     with tempfile.TemporaryDirectory() as tmp:
-        proc, envelope = run(Path(tmp), skip={"HF_SYS_PTHAT_1"})
+        proc, envelope = run(Path(tmp), skip={"HF_SYS_PTHAT_4"})
         assert (Path(tmp) / "systematics_envelope.json").is_file()
         assert not list(Path(tmp).glob("*.staging")), "a staging file survived"
     assert envelope["schema"] == "hadronization_systematics_envelope_v1"
     assert envelope["missing"], "a refusal must record its reason"
     assert proc.returncode != 0
+
+
+def _builder():
+    sys.path.insert(0, str(ROOT / "tools"))
+    sys.path.insert(0, str(ROOT / "extraction"))
+    import systematics_envelope  # noqa: E402
+    return systematics_envelope
+
+
+def test_an_exclusion_that_records_no_reason_is_refused() -> None:
+    """Synthetic contract. An unreasoned exclusion is the failure to prevent."""
+    builder = _builder()
+    for contract, expected in (
+            ({"sources": [{"source": "S9", "included": False,
+                           "campaigns": []}]}, "source S9 is excluded"),
+            ({"sources": [{"source": "S9", "included": True, "campaigns": [
+                {"campaign": "HF_SYS_A", "included": True},
+                {"campaign": "HF_SYS_B", "included": False}]}]},
+             "arm HF_SYS_B of source S9 is excluded")):
+        recorded, unreasoned = builder.exclusions(contract)
+        assert recorded, contract
+        assert any(expected in problem for problem in unreasoned), unreasoned
+
+    ok = {"sources": [{"source": "S9", "included": False, "campaigns": [],
+                       "exclusion_reason": "R99: because the owner said so"}]}
+    recorded, unreasoned = builder.exclusions(ok)
+    assert unreasoned == [], unreasoned
+    assert recorded == [{"source": "S9", "campaign": None,
+                         "reason": "R99: because the owner said so"}]
+
+
+def test_a_source_whose_every_arm_is_excluded_is_refused() -> None:
+    """An included source with no measured arm cannot contribute a term."""
+    builder = _builder()
+    problems = builder.agrees_with_combination_map(
+        {"sources": [{"source": "S3_pthat", "included": True, "campaigns": [
+            {"campaign": "HF_SYS_PTHAT_4", "included": False,
+             "exclusion_reason": "synthetic"},
+            {"campaign": "HF_SYS_PTHAT_1", "included": False,
+             "exclusion_reason": "synthetic"}]}]})
+    assert any("every one of its arms is excluded" in p for p in problems), \
+        problems
+
+
+def test_a_contract_that_readmits_the_excluded_arm_is_refused() -> None:
+    """The drift check is per arm, so a two-sided S3 no longer agrees."""
+    builder = _builder()
+    problems = builder.agrees_with_combination_map(
+        {"sources": [
+            {"source": "S1a_mur", "included": True, "campaigns": [
+                {"campaign": "HF_SYS_MUR_UP", "included": True},
+                {"campaign": "HF_SYS_MUR_DOWN", "included": True}]},
+            {"source": "S1b_muf", "included": True, "campaigns": [
+                {"campaign": "HF_SYS_MUF_UP", "included": True},
+                {"campaign": "HF_SYS_MUF_DOWN", "included": True}]},
+            {"source": "S2_pdf", "included": True, "campaigns": [
+                {"campaign": "HF_SYS_PDF_CTEQ6L1", "included": True}]},
+            {"source": "S3_pthat", "included": True, "campaigns": [
+                {"campaign": "HF_SYS_PTHAT_4", "included": True},
+                {"campaign": EXCLUDED_ARM, "included": True}]}]})
+    assert any("S3_pthat maps to" in p for p in problems), problems
+
+
+def test_the_tracked_contract_passes_its_own_drift_check() -> None:
+    builder = _builder()
+    contract = json.loads(SOURCES_CONTRACT.read_text())
+    assert builder.agrees_with_combination_map(contract) == []
+    _, unreasoned = builder.exclusions(contract)
+    assert unreasoned == []
 
 
 def test_the_envelope_refuses_a_plotting_output_plane() -> None:

@@ -18,7 +18,19 @@ returns nonzero, and stamps the envelope INCOMPLETE or FAIL:
   tag disagreement    a receipt resolved a complete-root tag the selector
                       does not declare for that campaign
   partition mismatch  an input row carries a class the v2 percentile contract
-                      does not define, or the report does not cover c1..c11
+                      does not define, or the report does not cover the
+                      contract's classes
+  unreasoned exclusion
+                      a source or an arm is excluded and records no
+                      exclusion_reason
+
+WHAT AN EXCLUSION IS, AND WHY IT IS NOT A DELETION. Rulings R9 and R11 of
+2026-08-23 exclude the HF_SYS_PTHAT_1 arm of S3 and the whole of
+S5_class_migration. Both stay declared in `config/systematics_sources_v1.json`
+with their reasons, and both are copied into the envelope's `exclusions` block.
+A source deleted from the contract would leave a smaller envelope that looks
+complete; an excluded source with a recorded reason says what is not in the
+band and who decided that.
 
 STAGE, THEN PROMOTE. The envelope is written to a temporary file beside its
 destination and renamed only after the status is decided, so no reader can
@@ -47,8 +59,8 @@ for _extra in (ROOT / "extraction", ROOT / "tools"):
     if str(_extra) not in sys.path:
         sys.path.insert(0, str(_extra))
 
-from combine_per_class import (SOURCES, S5_TERM, SourcesIncomplete,  # noqa: E402
-                               combine_cell)
+from combine_per_class import (CAMPAIGNLESS_TERMS, SOURCES,  # noqa: E402
+                               SourcesIncomplete, combine_cell)
 from harvest_class_axis import INTEGRATED, class_order  # noqa: E402
 
 ENVELOPE_SCHEMA = "hadronization_systematics_envelope_v1"
@@ -96,36 +108,95 @@ def load_json(path: Path, schema: str | None = None) -> dict:
 # The declared sources
 # --------------------------------------------------------------------------
 
+def arms(row: dict) -> list[dict]:
+    """The campaign entries of one source, as objects.
+
+    Every entry is `{campaign, included, reason}`, and an excluded entry adds
+    `exclusion_reason`. The per-arm shape exists because ruling R9 excludes ONE
+    arm of a two-sided source: a single flag on the source could only have
+    dropped S3 entirely or kept an arm the owner ruled out.
+    """
+    return list(row.get("campaigns") or [])
+
+
 def included_campaigns(sources: dict) -> tuple[list[str], dict[str, str]]:
     """(campaigns needing a receipt, campaign -> source name).
 
-    A source with no campaign needs no receipt. S5 is the measured structural
-    zero and is deliberately such a source.
+    An excluded source needs no receipt for any arm, and an excluded arm of an
+    included source needs none either. A source that declares no campaign needs
+    none by construction.
     """
     campaigns: list[str] = []
     owner: dict[str, str] = {}
     for row in sources["sources"]:
         if not row.get("included", False):
             continue
-        for campaign in row.get("campaigns", []):
-            campaigns.append(campaign)
-            owner[campaign] = row["source"]
+        for arm in arms(row):
+            if not arm.get("included", False):
+                continue
+            campaigns.append(arm["campaign"])
+            owner[arm["campaign"]] = row["source"]
     return campaigns, owner
+
+
+def exclusions(sources: dict) -> tuple[list[dict], list[str]]:
+    """(the recorded exclusions, the entries that record no reason).
+
+    An exclusion with no reason is the failure this block prevents: a source
+    could then leave the envelope with no record of who removed it or why. So a
+    missing reason is a refusal, not a warning.
+    """
+    recorded: list[dict] = []
+    unreasoned: list[str] = []
+    for row in sources["sources"]:
+        source = row["source"]
+        if not row.get("included", False):
+            reason = (row.get("exclusion_reason") or "").strip()
+            recorded.append(
+                {"source": source, "campaign": None, "reason": reason})
+            if not reason:
+                unreasoned.append(
+                    f"source {source} is excluded and records no "
+                    "exclusion_reason")
+            continue
+        for arm in arms(row):
+            if arm.get("included", False):
+                continue
+            reason = (arm.get("exclusion_reason") or "").strip()
+            recorded.append({"source": source, "campaign": arm["campaign"],
+                             "reason": reason})
+            if not reason:
+                unreasoned.append(
+                    f"arm {arm['campaign']} of source {source} is excluded "
+                    "and records no exclusion_reason")
+    return recorded, unreasoned
 
 
 def agrees_with_combination_map(sources: dict) -> list[str]:
     """The declared map must equal the map the arithmetic actually applies.
 
-    Two files naming the same thing is a drift risk, so the disagreement is a
-    refusal rather than a comment. S5 carries no campaign here and is added by
-    `combine_cell` itself, so it is compared by name only.
+    Two files naming the same thing is a drift risk, so a disagreement is a
+    refusal rather than a comment. The comparison runs per arm, so excluding one
+    arm in the contract and not in the arithmetic is caught here instead of
+    surfacing later as a silently two-sided term.
     """
-    declared = {
-        row["source"]: tuple(row["campaigns"])
-        for row in sources["sources"]
-        if row.get("included", False) and row.get("campaigns")
-    }
-    problems = []
+    declared: dict[str, tuple[str, ...]] = {}
+    campaignless: set[str] = set()
+    problems: list[str] = []
+    for row in sources["sources"]:
+        if not row.get("included", False):
+            continue
+        kept = tuple(a["campaign"] for a in arms(row) if a.get("included"))
+        if not kept:
+            if arms(row):
+                problems.append(
+                    f"source {row['source']} is included and every one of its "
+                    "arms is excluded; a source with no measured arm cannot "
+                    "contribute a term")
+            campaignless.add(row["source"])
+            continue
+        declared[row["source"]] = kept
+
     for source, campaigns in sorted(SOURCES.items()):
         if source not in declared:
             problems.append(
@@ -139,11 +210,11 @@ def agrees_with_combination_map(sources: dict) -> list[str]:
         problems.append(
             f"source {source} is included in the contract and unknown to "
             "combine_per_class")
-    if not any(row["source"] == S5_TERM and row.get("included", False)
-               for row in sources["sources"]):
+    if campaignless != set(CAMPAIGNLESS_TERMS):
         problems.append(
-            f"combine_per_class always adds {S5_TERM}; the contract must "
-            "include it")
+            "the contract includes campaignless sources "
+            f"{sorted(campaignless)} and combine_per_class adds "
+            f"{sorted(CAMPAIGNLESS_TERMS)}")
     return problems
 
 
@@ -331,6 +402,14 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
         reasons += drift
         status = "FAIL"
 
+    # Every exclusion travels into the envelope with its reason. A reader who
+    # asks why S3 is one-sided must find the answer in the artifact, not in a
+    # commit message.
+    recorded_exclusions, unreasoned = exclusions(sources)
+    if unreasoned:
+        reasons += unreasoned
+        status = "FAIL"
+
     campaigns, _owner = included_campaigns(sources)
     receipts, receipt_reasons = assert_receipts(
         campaigns, receipt_paths, resolver_tags)
@@ -377,6 +456,7 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
         "missing": reasons,
         "method": METHOD_TAGS,
         "sources": sources["sources"],
+        "exclusions": recorded_exclusions,
         "rows": rows,
         "provenance": {
             "producing_commit": producing_commit(),
@@ -444,6 +524,7 @@ def main() -> int:
             "missing": error.reasons,
             "method": METHOD_TAGS,
             "sources": [],
+            "exclusions": [],
             "rows": [],
             "provenance": {"producing_commit": producing_commit()},
         }

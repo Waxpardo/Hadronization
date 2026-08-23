@@ -77,21 +77,26 @@ for bad, why in (
     except (ValueError, ZeroDivisionError):
         check(why, True)
 
-# --- the combination over seven sources -----------------------------------
+# --- the combination over the included arms -------------------------------
 # nominal 100, so per cent equals absolute.
 #   S1a  up +3 (sem 0.5), down -1  -> quotes UP,   contributes |3| = 3
-#   S3   up +1 (sem 4),   down -0.5 -> quotes UP,  UNRESOLVED, contributes 4
+#   S3   +1 (sem 4), ONE-SIDED     -> quotes PTHAT_4, UNRESOLVED, contributes 4
 #   S1b, S2 exactly zero            -> negligible, section 9.1 does not fire
 # total = sqrt(3^2 + 4^2) = 5.
-SEVEN = {
+# Seven campaigns were registered. Ruling R9 excludes HF_SYS_PTHAT_1, so this
+# fixture supplies six and the arm the contract forbids appears nowhere.
+INCLUDED = {
     "HF_SYS_MUR_UP": (103.0, 0.5), "HF_SYS_MUR_DOWN": (99.0, 0.5),
     "HF_SYS_MUF_UP": (100.0, 0.0), "HF_SYS_MUF_DOWN": (100.0, 0.0),
     "HF_SYS_PDF_CTEQ6L1": (100.0, 0.0),
-    "HF_SYS_PTHAT_4": (101.0, 4.0), "HF_SYS_PTHAT_1": (99.5, 4.0),
+    "HF_SYS_PTHAT_4": (101.0, 4.0),
 }
-combined = combined_systematic(100.0, 0.0, SEVEN)
-check("the seven-source combination totals exactly 5 per cent",
+combined = combined_systematic(100.0, 0.0, INCLUDED)
+check("the included-arm combination totals exactly 5 per cent",
       combined["combined_percent"] == 5.0, "%.17g" % combined["combined_percent"])
+check("R9: the derived route quotes S3 one-sided too",
+      combined["quoted_arm"]["S3_pthat"] == "HF_SYS_PTHAT_4",
+      str(combined["quoted_arm"]))
 check("and 5 in absolute units on a nominal of 100",
       combined["combined_absolute"] == 5.0, str(combined["combined_absolute"]))
 check("the resolved source contributes its |Delta|",
@@ -107,19 +112,19 @@ check("nothing is dropped when mu_F and PDF are negligible",
 # Mirroring about zero: with nominal -100, value -v gives Delta' = -Delta, so
 # every |Delta| is unchanged and the total must be identical.
 negative = combined_systematic(-100.0, 0.0, {c: (-v, s)
-                                        for c, (v, s) in SEVEN.items()})
+                                        for c, (v, s) in INCLUDED.items()})
 check("a negative nominal gives the same absolute systematic",
       abs(negative["combined_absolute"] - 5.0) < 1e-12,
       str(negative["combined_absolute"]))
 
 try:
     combined_systematic(100.0, 0.0,
-                        {k: v for k, v in list(SEVEN.items())[:5]})
+                        {k: v for k, v in list(INCLUDED.items())[:5]})
     check("a partial source set is refused", False, "no exception")
 except ValueError:
     check("a partial source set is refused", True)
 try:
-    combined_systematic(0.0, 0.0, SEVEN)
+    combined_systematic(0.0, 0.0, INCLUDED)
     check("a zero nominal is refused rather than divided by", False, "no raise")
 except ZeroDivisionError:
     check("a zero nominal is refused rather than divided by", True)
@@ -135,7 +140,7 @@ TWO_SEM = {
     "HF_SYS_MUR_UP": (110.0, 1.0), "HF_SYS_MUR_DOWN": (99.0, 2.0),
     "HF_SYS_MUF_UP": (111.0, 1.0), "HF_SYS_MUF_DOWN": (101.0, 2.0),
     "HF_SYS_PDF_CTEQ6L1": (112.0, 1.0),
-    "HF_SYS_PTHAT_4": (100.0, 3.0), "HF_SYS_PTHAT_1": (100.0, 2.0),
+    "HF_SYS_PTHAT_4": (100.0, 3.0),
 }
 variation_only = combined_systematic(100.0, 0.0, TWO_SEM)
 two_sem = combined_systematic(100.0, 4.0, TWO_SEM)
@@ -155,7 +160,7 @@ check("the corrected full total changes that two-sigma classification",
 
 for bad_sem in (-1.0, math.inf, math.nan):
     try:
-        combined_systematic(100.0, bad_sem, SEVEN)
+        combined_systematic(100.0, bad_sem, INCLUDED)
         check(f"nominal SEM {bad_sem!r} is refused", False, "no raise")
     except ValueError:
         check(f"nominal SEM {bad_sem!r} is refused", True)
