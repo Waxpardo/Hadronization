@@ -44,6 +44,15 @@ Usage: ./hadronization COMMAND [arguments]
   plot DATASET_KEY [TARGET ...]
       Run the plot workflow for a named dataset. TARGET defaults to all; see
       plotting/run_paper_plots.sh help.
+
+  plot DATASET_KEY --systematics ENVELOPE [TARGET ...]
+      Draw the systematic overlay from one COMPLETE envelope. The path is
+      explicit: there is no default, no discovery, and no environment
+      fallback. Output goes to the plotting-syst plane, never to plotting.
+
+  systematics DATASET_KEY
+      Build the systematic-uncertainty envelope for a nominal dataset and
+      write it under RESULTS_ROOT/CAMPAIGN/COMMIT/systematics/.
 USAGE
 }
 
@@ -76,6 +85,31 @@ prepare_plot_output_plane() {
     ln -s "${output_target}" "${output_link}"
   fi
   printf 'HADRONIZATION_PLOT_OUTPUT=%s\n' "${output_target}"
+}
+
+prepare_systematics_output_plane() {
+  local commit
+  commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
+  export HADRONIZATION_SYSTEMATICS_OUTPUT="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/systematics"
+  export HADRONIZATION_NOMINAL_PLOT_PLANE="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/plotting"
+  case "${HADRONIZATION_SYSTEMATICS_OUTPUT}" in
+    */plotting/*|*/plotting)
+      echo "ERROR: refusing to write an envelope under a plotting output plane: ${HADRONIZATION_SYSTEMATICS_OUTPUT}" >&2
+      exit 1
+      ;;
+  esac
+  printf 'HADRONIZATION_SYSTEMATICS_OUTPUT=%s\n' "${HADRONIZATION_SYSTEMATICS_OUTPUT}"
+}
+
+# The overlay writes to its own plane. The nominal plotting/Plots symlink is
+# never touched here: an overlay that could land in the nominal tree would
+# make a statistical-only figure indistinguishable from one carrying a band.
+prepare_systematics_plot_output_plane() {
+  local commit
+  commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
+  export HADRONIZATION_PLOT_SYST_OUTPUT="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/plotting-syst"
+  export HADRONIZATION_NOMINAL_PLOT_PLANE="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/plotting"
+  printf 'HADRONIZATION_PLOT_SYST_OUTPUT=%s\n' "${HADRONIZATION_PLOT_SYST_OUTPUT}"
 }
 
 prepare_measurement_output_plane() {
@@ -159,10 +193,98 @@ case "${command_name}" in
       "${HADRONIZATION_ANALYZED_DATA_BASE}" \
       "${HADRONIZATION_CAMPAIGN}"
     ;;
+  systematics)
+    [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }
+    dataset_key="$1"
+    resolve_dataset "${dataset_key}"
+    prepare_systematics_output_plane
+    commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
+    plan_file="${HADRONIZATION_SYSTEMATICS_OUTPUT}/request_plan.json"
+    # Answer the request before any extraction runs. A multi-hour chain that
+    # discovers a missing selector row at its end has checked too late.
+    if [[ "${HADRONIZATION_REQUEST_PREFLIGHT_ONLY:-0}" == "1" ]]; then
+      python3 "${project_base}/tools/systematics_request.py" \
+        --selector "${selector}" --checkout "${project_base}" \
+        --dataset "${dataset_key}" \
+        --results-root "${HADRONIZATION_RESULTS_ROOT}" \
+        --commit "${commit}" --preflight-only
+      exit $?
+    fi
+    mkdir -p "${HADRONIZATION_SYSTEMATICS_OUTPUT}"
+    python3 "${project_base}/tools/systematics_request.py" \
+      --selector "${selector}" --checkout "${project_base}" \
+      --dataset "${dataset_key}" \
+      --results-root "${HADRONIZATION_RESULTS_ROOT}" \
+      --commit "${commit}" --out "${plan_file}"
+    "${project_base}/extraction/pipeline/systematics_chain.sh" \
+      "${plan_file}" "${HADRONIZATION_SYSTEMATICS_OUTPUT}"
+    ;;
   plot)
     [[ "$#" -ge 1 ]] || { usage >&2; exit 2; }
     dataset_key="$1"; shift
+    # The systematics flag is an explicit opt-in carrying an explicit path.
+    # No default, no discovery, no environment fallback: an envelope that a
+    # resolver found is an envelope nobody chose.
+    systematics_envelope=""
+    plot_arguments=()
+    while [[ "$#" -gt 0 ]]; do
+      case "$1" in
+        --systematics)
+          [[ "$#" -ge 2 ]] || {
+            echo "ERROR: --systematics requires an envelope path" >&2
+            exit 2
+          }
+          systematics_envelope="$2"
+          shift 2
+          ;;
+        --systematics=*)
+          systematics_envelope="${1#--systematics=}"
+          [[ -n "${systematics_envelope}" ]] || {
+            echo "ERROR: --systematics requires an envelope path" >&2
+            exit 2
+          }
+          shift
+          ;;
+        *)
+          plot_arguments+=("$1")
+          shift
+          ;;
+      esac
+    done
+    if [[ "${#plot_arguments[@]}" -gt 0 ]]; then
+      set -- "${plot_arguments[@]}"
+    else
+      set --
+    fi
     resolve_dataset "${dataset_key}"
+    if [[ -n "${systematics_envelope}" ]]; then
+      prepare_systematics_plot_output_plane
+      python3 "${project_base}/tools/assert_systematics_envelope.py" \
+        --envelope "${systematics_envelope}" \
+        --nominal-plot-plane "${HADRONIZATION_NOMINAL_PLOT_PLANE}"
+      HADRONIZATION_SYSTEMATICS_ENVELOPE="$(cd "$(dirname "${systematics_envelope}")" && pwd)/$(basename "${systematics_envelope}")"
+      HADRONIZATION_SYSTEMATICS_ENVELOPE_SHA256="$(shasum -a 256 "${systematics_envelope}" | awk '{print $1}')"
+      export HADRONIZATION_SYSTEMATICS_ENVELOPE
+      export HADRONIZATION_SYSTEMATICS_ENVELOPE_SHA256
+      printf 'HADRONIZATION_SYSTEMATICS_ENVELOPE=%s\n' "${HADRONIZATION_SYSTEMATICS_ENVELOPE}"
+      printf 'HADRONIZATION_SYSTEMATICS_ENVELOPE_SHA256=%s\n' "${HADRONIZATION_SYSTEMATICS_ENVELOPE_SHA256}"
+      if [[ "${HADRONIZATION_REQUEST_PREFLIGHT_ONLY:-0}" == "1" ]]; then
+        echo "SYSTEMATICS_OVERLAY_PREFLIGHT_ONLY status=PASS root_execution=false outputs_written=false"
+        exit 0
+      fi
+      overlay="${project_base}/plotting/render_systematics_overlay.py"
+      if [[ ! -f "${overlay}" ]]; then
+        echo "ERROR: the systematic overlay renderer is absent: ${overlay}" >&2
+        exit 1
+      fi
+      python3 "${overlay}" \
+        --envelope "${HADRONIZATION_SYSTEMATICS_ENVELOPE}" \
+        --output-plane "${HADRONIZATION_PLOT_SYST_OUTPUT}" \
+        --campaign "${HADRONIZATION_CAMPAIGN}" \
+        --commit "$(git -C "${project_base}" rev-parse HEAD)" \
+        ${1+"$@"}
+      exit $?
+    fi
     if [[ "$#" -eq 0 ]]; then set -- all; fi
     if [[ "$#" -eq 1 && "$1" == "measure-balancing" ]]; then
       prepare_measurement_output_plane
