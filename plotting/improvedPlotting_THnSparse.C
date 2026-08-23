@@ -1506,7 +1506,7 @@ void ApplyTuneVisualStyle(TH1D* hist, const std::string& tune, bool applyTuneLin
     hist->SetMarkerSize(1.0);
 }
 
-// AMENDMENT (ii), owner-authorised 2026-08-17. The species bin labels are the
+// AMENDMENT (ii), recorded 2026-08-17. The species bin labels are the
 // only text on the balancing canvases whose size was never set, so they took
 // ROOT's default -- sized for a single pad, not for a 2x5 grid of them. On the
 // full canvas they render at a few pixels and are effectively unreadable.
@@ -3121,8 +3121,8 @@ void ApplyCorrelationSubsampleSEM(
 // closure to be asserted exactly instead of against an invented tolerance.
 //
 // The precondition is therefore enforced rather than assumed. A non-integral
-// content means a weighted campaign, and that is an owner decision, not an
-// epsilon: it fails loudly here.
+// content means a weighted campaign, and that needs a recorded decision, not
+// an epsilon: it fails loudly here.
 void RequireIntegralPairCount(Double_t value, const char* what,
                               const std::string& tune,
                               const std::string& binLabel) {
@@ -3130,13 +3130,14 @@ void RequireIntegralPairCount(Double_t value, const char* what,
         throw std::runtime_error(Form(
             "NON-INTEGRAL %s = %.17g (tune=%s bin=%s). The V-INTEGRATED closure "
             "asserts integer-exact equality and is valid only on unit-weight "
-            "input; a weighted campaign is an owner decision, not a tolerance. "
+            "input; a weighted campaign needs a recorded decision, not a "
+            "tolerance. "
             "See docs/V_INTEGRATED_PREREGISTRATION.md section 2.",
             what, value, tune.c_str(), binLabel.c_str()));
     }
 }
 
-// AMENDMENT, owner-authorised 2026-08-18. ONE explicit legend text size for the
+// AMENDMENT, recorded 2026-08-18. ONE explicit legend text size for the
 // balancing-canvas family.
 //
 // These legends never called SetTextSize, so ROOT auto-scaled them: it divides

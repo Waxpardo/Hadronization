@@ -1751,8 +1751,9 @@ void DrawMonashPercentileInset(TH1D* monash,
   label.SetTextAngle(90);
   // 0.34 placed the label centres at 4.14e-6. These labels are ROTATED and
   // CENTRED, so each one extends about a decade above its own centre, and the
-  // top class -- whose label sits at the geometric mean of [32.5, 170], i.e.
-  // N_ch 74.3, where this curve has fallen to 2.05e-5 -- was struck straight
+  // top class -- whose label sits at the geometric mean of its band, [32.5,
+  // 170] for the MONASH edge this inset derived, i.e. N_ch 74.3, where this
+  // curve has fallen to 2.05e-5 -- was struck straight
   // through by the curve it annotates. 0.20 drops the centres to 2.60e-7,
   // clearing the curve there, and still leaves every label inside the frame:
   // lower fractions began clipping the labels on the axis.
@@ -1764,9 +1765,11 @@ void DrawMonashPercentileInset(TH1D* monash,
                              : xMax;
     if (right <= left) continue;
     const double xLabel = std::sqrt(left * right);
-    // The MB-percentile range this absolute class spans. Percentiles DECREASE
-    // with activity, so this class's own lower N_ch edge carries the larger
-    // number and the next edge the smaller; the top class runs down to 0.
+    // The tune-local percentile range this class spans. ThresholdForPercentile
+    // above derives every N_ch edge from this tune's own histogram, so the
+    // edges are not common to two tunes. Percentiles DECREASE with activity, so
+    // this class's own lower N_ch edge carries the larger number and the next
+    // edge the smaller; the top class runs down to 0.
     const double hiPct = markers[i].percentileMax;
     const double loPct =
         (i + 1 < markers.size()) ? markers[i + 1].percentileMax : 0.0;
