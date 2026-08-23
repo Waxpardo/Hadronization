@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import hashlib
 import re
 from pathlib import Path
 
@@ -19,10 +18,8 @@ BOUNDARY_PLOTTER = (
 )
 RUNNER = ROOT / "plotting/run_paper_plots.sh"
 RAW_PLOTTER = ROOT / "plotting/Plot_InclusiveKinematicSpectra_Raw.C"
-FIGURE_ACCEPTANCE_MANIFEST = (
-    ROOT / "results/provenance/figure_acceptance_manifest_v1.json"
-)
 PAIR_REGISTRY = ROOT / "config/heavy_flavour_pair_registry_v1.json"
+PERCENTILE_CLASSES = ROOT / "config/multiplicity_percentile_classes_v2.json"
 CONFIGURATIONS = (
     ROOT
     / "plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json",
@@ -30,10 +27,6 @@ CONFIGURATIONS = (
     / "plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json",
 )
 REDUCED_CONFIGURATION = CONFIGURATIONS[1]
-
-
-def sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def check_configured_references() -> None:
@@ -355,121 +348,29 @@ def check_runner_modes() -> None:
     assert 'plot_provenance_tool=""' in source
 
 
-def check_figure_acceptance_manifest() -> None:
-    document = json.loads(FIGURE_ACCEPTANCE_MANIFEST.read_text())
+def check_multiplicity_boundary_contract() -> None:
+    """Require the multiplicity classes to stay tune-local.
+
+    Every tune derives its own percentile edges, so no absolute N_ch boundary
+    is common to two tunes. The retired figure-acceptance register carried
+    this contract as `common_across_tunes: false`. The class contract itself
+    now carries it, and it is the file the pipeline actually reads.
+    """
+    document = json.loads(PERCENTILE_CLASSES.read_text())
     assert document["schema"] == (
-        "hadronization_figure_acceptance_manifest_v1"
+        "hadronization_multiplicity_percentile_classes_v2"
     )
-    assert document["overall_status"] == "blocked"
-    assert document["accepted_figure_count"] == 0
-    assert document["candidate_figure_count"] == 8
-    assert document["accepted_outputs"] == []
-    assert document["internal_explanatory_graphics"] == {
-        "count": 3,
-        "classification": "excluded historical or explanatory artifacts",
-        "used_as_scientific_candidates": False,
-        "promoted_or_modified_by_this_audit": False,
-    }
-
-    dataset = document["dataset_contract"]
-    assert dataset["dataset_key"] == "hf_run3_v1_candidate"
-    assert dataset["campaign"] == "HF_RUN3_V1"
-    assert dataset["publication_eligible"] is True
-    assert dataset["sqrt_s_tev"] == 13.6
-    assert dataset["tunes"] == [
-        "MONASH",
-        "JUNCTIONS",
-        "CLOSEPACKING",
-    ]
-    assert dataset["block_count"] == 10
-    for key in ("selector_path", "authorization_path"):
-        digest_key = key.replace("path", "sha256")
-        assert sha256(ROOT / dataset[key]) == dataset[digest_key]
-
-    shared = document["shared_contracts"]
-    assert shared["pair_observable"] == {
-        "trigger_denominator": "hTrKinematics",
-        "same_sign_factor": 1.0,
-        "subtraction": "OS - SS",
-        "integrated_region": "full Delta phi",
-        "statistical_uncertainty": (
-            "SEM across ten disjoint blocks; OS - SS is formed "
-            "inside each block"
-        ),
-    }
-    assert shared["multiplicity_boundaries"]["common_across_tunes"] is False
-    assert "derived independently for each tune" in (
-        shared["multiplicity_boundaries"]["definition"])
-    assert shared["multiplicity_boundaries"]["classes"] == [
-        f"c{index}" for index in range(1, 12)
-    ]
-    for contract in (
-        shared["pair_registry"],
-        shared["species_registry"],
-        shared["multiplicity_boundaries"],
-    ):
-        assert sha256(ROOT / contract["path"]) == contract["sha256"]
-
-    blocker_ids = {row["id"] for row in document["release_blockers"]}
-    assert blocker_ids == {
-        "B1_EXTERNAL_INPUTS_UNAVAILABLE",
-        "B2_FINAL_BYTES_AND_RECEIPTS_ABSENT",
-        "B3_DERIVED_UNCERTAINTY_FORMULA",
-        "B4_S4_SYSTEMATIC_INCOMPLETE",
-        "B5_RECORDED_RENDER_NOT_CURRENT_REPRODUCTION",
-        "B6_INTEGRATED_CLOSURE_LOG_ABSENT",
-        "B7_PAIR_METADATA_SCHEMA_DISAGREEMENT",
-        "B8_HARVEST_CONFIGURATION_DRIFT",
-    }
-
-    roles = document["roles"]
-    assert [row["figure_id"] for row in roles] == [
-        f"P{index}" for index in range(1, 9)
-    ]
-    required_fields = {
-        "producer",
-        "configuration",
-        "dataset_selector_key",
-        "dataset_authorized",
-        "central_input_identity",
-        "ten_block_identity_and_coverage",
-        "environment",
-        "machine_readable_numerical_source",
-        "candidate_outputs",
-        "caption_source",
-        "visual_review",
-        "accepted_outputs",
-        "retrieval_requirement",
-    }
-    for role in roles:
-        assert role["status"] == "candidate"
-        assert role["dataset_selector_key"] == dataset["dataset_key"]
-        assert role["dataset_authorized"] is True
-        assert role["accepted_outputs"] == []
-        assert required_fields <= role.keys()
-        assert role["visual_review"]["result"] == "blocked"
-        source = ROOT / role["producer"]["source"]
-        assert sha256(source) == role["producer"]["source_sha256"]
-        configuration = role["configuration"]
-        if configuration.get("path"):
-            assert sha256(ROOT / configuration["path"]) == (
-                configuration["sha256"]
-            )
-        for alternative in configuration.get("alternatives", []):
-            assert sha256(ROOT / alternative["path"]) == (
-                alternative["sha256"]
-            )
-        for numerical_source in role["machine_readable_numerical_source"]:
-            assert sha256(ROOT / numerical_source["path"]) == (
-                numerical_source["sha256"]
-            )
+    definition = document["definition"]
+    assert "independently" in definition, definition
+    assert "no common absolute N_ch boundary" in definition, definition
+    assert len(document["classes"]) == 11, len(document["classes"])
 
 
 def main() -> int:
     check_configured_references()
     check_plotter_contract()
     check_runner_modes()
-    check_figure_acceptance_manifest()
+    check_multiplicity_boundary_contract()
     cpp_test = (
         ROOT / "Validation/TestPlotReferenceMultiplicityContracts.C"
     )
