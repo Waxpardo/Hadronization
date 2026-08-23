@@ -60,7 +60,8 @@ for _extra in (ROOT / "extraction", ROOT / "tools"):
         sys.path.insert(0, str(_extra))
 
 from combine_per_class import (CAMPAIGNLESS_TERMS, SOURCES,  # noqa: E402
-                               SourcesIncomplete, combine_cell)
+                               SourcesIncomplete, combine_cell,
+                               source_arms, source_exclusions)
 from harvest_class_axis import (INTEGRATED, class_names,  # noqa: E402
                                 class_order)
 
@@ -117,7 +118,7 @@ def arms(row: dict) -> list[dict]:
     arm of a two-sided source: a single flag on the source could only have
     dropped S3 entirely or kept an arm the owner ruled out.
     """
-    return list(row.get("campaigns") or [])
+    return source_arms(row)
 
 
 def included_campaigns(sources: dict) -> tuple[list[str], dict[str, str]]:
@@ -143,34 +144,11 @@ def included_campaigns(sources: dict) -> tuple[list[str], dict[str, str]]:
 def exclusions(sources: dict) -> tuple[list[dict], list[str]]:
     """(the recorded exclusions, the entries that record no reason).
 
-    An exclusion with no reason is the failure this block prevents: a source
-    could then leave the envelope with no record of who removed it or why. So a
-    missing reason is a refusal, not a warning.
+    The implementation is `combine_per_class.source_exclusions`. Ruling R16
+    puts the derived route on the same reader, and two copies of the shape
+    would be free to drift.
     """
-    recorded: list[dict] = []
-    unreasoned: list[str] = []
-    for row in sources["sources"]:
-        source = row["source"]
-        if not row.get("included", False):
-            reason = (row.get("exclusion_reason") or "").strip()
-            recorded.append(
-                {"source": source, "campaign": None, "reason": reason})
-            if not reason:
-                unreasoned.append(
-                    f"source {source} is excluded and records no "
-                    "exclusion_reason")
-            continue
-        for arm in arms(row):
-            if arm.get("included", False):
-                continue
-            reason = (arm.get("exclusion_reason") or "").strip()
-            recorded.append({"source": source, "campaign": arm["campaign"],
-                             "reason": reason})
-            if not reason:
-                unreasoned.append(
-                    f"arm {arm['campaign']} of source {source} is excluded "
-                    "and records no exclusion_reason")
-    return recorded, unreasoned
+    return source_exclusions(sources)
 
 
 def agrees_with_combination_map(sources: dict) -> list[str]:

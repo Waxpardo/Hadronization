@@ -6,6 +6,7 @@ numerically the absolute one and the arithmetic can be checked by eye. The
 contributions are a 3-4-5 triangle, so every total is exact in binary floating
 point.
 """
+import copy
 import json
 import math
 import sys
@@ -16,6 +17,7 @@ sys.path.insert(0, str(ROOT / "extraction"))
 
 from combine_derived import (combined_systematic, endpoint_contrast,  # noqa: E402
                              ratio_at, trend_difference, verdict)
+from combine_per_class import load_source_contract  # noqa: E402
 
 failures = []
 
@@ -133,9 +135,17 @@ except ZeroDivisionError:
 # This fixture distinguishes the audited two-SEM method from the former
 # variation-only implementation and asserts the full derived total plus the
 # classification it controls. Nominal=100 keeps per cent and absolute units
-# equal. S1a contributes 10, S2 contributes 12 while S1b is dropped, S3 has
-# variation SEM 3 and nominal SEM 4 so contributes 5, and S5 has exact shift
-# zero plus the same nominal SEM so contributes 4. Total=sqrt(285).
+# equal. S1a contributes 10, S2 contributes 12 while S1b is dropped, and S3 has
+# variation SEM 3 and nominal SEM 4 so contributes 5. Total=sqrt(269).
+#
+# RULING R16 (2026-08-23) MOVED THIS TOTAL. Before it, this route added a fifth
+# term for S5_class_migration -- exact shift zero plus the same nominal SEM, so
+# a contribution of 4 -- from a constant, whatever the source contract said.
+# R11 had already excluded S5, so the total was sqrt(285) here and sqrt(269) on
+# the per-class route for the same declared sources. Under R16 the derived
+# route reads the contract, S5 contributes nothing, and the two agree:
+# sqrt(285) - 4^2 = sqrt(269). The demonstration value below moved from 34 to
+# 33 for the same reason; see the comment there.
 TWO_SEM = {
     "HF_SYS_MUR_UP": (110.0, 1.0), "HF_SYS_MUR_DOWN": (99.0, 2.0),
     "HF_SYS_MUF_UP": (111.0, 1.0), "HF_SYS_MUF_DOWN": (101.0, 2.0),
@@ -147,16 +157,76 @@ two_sem = combined_systematic(100.0, 4.0, TWO_SEM)
 check("unequal nonzero SEMs use sqrt(variation^2 + nominal^2)",
       two_sem["terms_percent"]["S3_pthat"]["sem"] == 5.0,
       str(two_sem["terms_percent"]["S3_pthat"]))
-check("the structural-zero source retains the nominal SEM",
-      two_sem["terms_percent"]["S5_class_migration"]["contribution"] == 4.0,
-      str(two_sem["terms_percent"]["S5_class_migration"]))
-check("the full corrected derived systematic is sqrt(285)",
-      two_sem["combined_absolute"] == math.sqrt(285.0),
+check("R16: an excluded source contributes no term",
+      "S5_class_migration" not in two_sem["terms_percent"],
+      str(sorted(two_sem["terms_percent"])))
+check("the full corrected derived systematic is sqrt(269)",
+      two_sem["combined_absolute"] == math.sqrt(269.0),
       "%.17g" % two_sem["combined_absolute"])
+# Amendment D2 still flips a classification, and this pins it. The value is 33,
+# not the 34 this fixture used before R16: with S5 out of the derived budget,
+# both totals fell, and 34 now sits above two sigma on BOTH. 33 straddles them
+# again -- variation-only 2.012, two-SEM 1.955 -- so the check still measures
+# what D2 does rather than passing by luck.
 check("the former variation-only total lies above the two-sigma threshold",
-      verdict(34.0, 4.0, variation_only["combined_absolute"])["significance"] > 2.0)
+      verdict(33.0, 4.0, variation_only["combined_absolute"])["significance"] > 2.0,
+      str(verdict(33.0, 4.0, variation_only["combined_absolute"])["significance"]))
 check("the corrected full total changes that two-sigma classification",
-      verdict(34.0, 4.0, two_sem["combined_absolute"])["significance"] < 2.0)
+      verdict(33.0, 4.0, two_sem["combined_absolute"])["significance"] < 2.0,
+      str(verdict(33.0, 4.0, two_sem["combined_absolute"])["significance"]))
+
+# --- R16: the contract decides, and the floor rule survives ---------------
+# The measured-zero floor is gated, not deleted. A synthetic contract that
+# INCLUDES a re-measured S5 must bring the term back with no code change, which
+# is what "the rule applies to the new measurement" has to mean in practice.
+tracked = load_source_contract()
+check("the tracked contract excludes S5",
+      not next(row for row in tracked["sources"]
+               if row["source"] == "S5_class_migration")["included"])
+excluded_by_source = {row["source"]: row["reason"] for row in two_sem["exclusions"]}
+check("R16: the exclusion is recorded in the output with its reason",
+      excluded_by_source.get("S5_class_migration", "").startswith("R11:"),
+      str(two_sem["exclusions"]))
+check("R16: the excluded ARM is recorded in the same list",
+      any(row["source"] == "S3_pthat"
+          and row["campaign"] == "HF_SYS_PTHAT_1"
+          and row["reason"].startswith("R9:")
+          for row in two_sem["exclusions"]),
+      str(two_sem["exclusions"]))
+
+RE_MEASURED = copy.deepcopy(tracked)
+for row in RE_MEASURED["sources"]:
+    if row["source"] == "S5_class_migration":
+        row["included"] = True
+        row.pop("exclusion_reason", None)
+        row["reason"] = "synthetic: re-measured as an exact zero on the v2 axis"
+restored = combined_systematic(100.0, 4.0, TWO_SEM, sources=RE_MEASURED)
+check("R16: an INCLUDED measured zero brings the floor term back",
+      restored["terms_percent"]["S5_class_migration"]["contribution"] == 4.0,
+      str(restored["terms_percent"].get("S5_class_migration")))
+check("its shift is exactly zero and its variation SEM is zero",
+      restored["terms_percent"]["S5_class_migration"]["delta"] == 0.0
+      and restored["terms_percent"]["S5_class_migration"]["variation_sem"] == 0.0,
+      str(restored["terms_percent"]["S5_class_migration"]))
+check("and the total returns to sqrt(285)",
+      restored["combined_absolute"] == math.sqrt(285.0),
+      "%.17g" % restored["combined_absolute"])
+check("a re-included S5 is no longer listed as excluded",
+      all(row["source"] != "S5_class_migration"
+          for row in restored["exclusions"]),
+      str(restored["exclusions"]))
+
+# An exclusion with no recorded reason is refused, not combined.
+UNREASONED = copy.deepcopy(tracked)
+for row in UNREASONED["sources"]:
+    if row["source"] == "S5_class_migration":
+        row["exclusion_reason"] = "   "
+try:
+    combined_systematic(100.0, 4.0, TWO_SEM, sources=UNREASONED)
+    check("an exclusion with no reason is refused", False, "no raise")
+except ValueError as error:
+    check("an exclusion with no reason is refused",
+          "exclusion_reason" in str(error), str(error))
 
 for bad_sem in (-1.0, math.inf, math.nan):
     try:

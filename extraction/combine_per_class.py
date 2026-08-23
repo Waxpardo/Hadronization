@@ -75,10 +75,72 @@ SOURCES: dict[str, tuple[str, ...]] = {
 # own. Ruling R11 of 2026-08-23 excludes S5_class_migration -- its structural
 # zero was measured on the retired absolute axis and does not carry to the v2
 # percentile axis -- so this set is empty and `combine_cell` adds no such term.
-# The name stays defined because `combine_derived` still quotes it on the
-# derived route, and because the source contract still declares it.
+# No source name appears here as a constant: ruling R16 put both combination
+# routes on the contract below, which is where the names live.
 CAMPAIGNLESS_TERMS: tuple[str, ...] = ()
-S5_TERM = "S5_class_migration"
+
+# The declared sources. Ruling R16 of 2026-08-23 makes BOTH combination routes
+# read this file: `combine_cell` here and `combined_systematic` in
+# `combine_derived`. Before R16 the derived route synthesised an S5 term from a
+# constant whatever the contract said.
+SOURCES_CONTRACT = (Path(__file__).resolve().parents[1]
+                    / "config" / "systematics_sources_v1.json")
+
+
+def load_source_contract(path: Path | None = None) -> dict:
+    """The declared sources, read from the contract."""
+    return json.loads((path or SOURCES_CONTRACT).read_text())
+
+
+def source_arms(row: dict) -> list[dict]:
+    """The campaign entries of one source, as objects."""
+    return list(row.get("campaigns") or [])
+
+
+def included_campaignless_sources(sources: dict) -> list[str]:
+    """Included sources that declare no campaign at all.
+
+    Such a source was MEASURED without a variation campaign, so it carries a
+    term with no variation of its own. S5_class_migration is the only one this
+    project has, and R11 currently excludes it, so today this list is empty.
+    """
+    return [row["source"] for row in sources["sources"]
+            if row.get("included", False) and not source_arms(row)]
+
+
+def source_exclusions(sources: dict) -> tuple[list[dict], list[str]]:
+    """(the recorded exclusions, the entries that record no reason).
+
+    An exclusion with no reason is the failure this prevents: a source could
+    leave a budget with no record of who removed it or why. So a missing reason
+    is a refusal, not a warning. Both combination routes and the envelope
+    builder use this one implementation, so the shape cannot drift between
+    them.
+    """
+    recorded: list[dict] = []
+    unreasoned: list[str] = []
+    for row in sources["sources"]:
+        source = row["source"]
+        if not row.get("included", False):
+            reason = (row.get("exclusion_reason") or "").strip()
+            recorded.append(
+                {"source": source, "campaign": None, "reason": reason})
+            if not reason:
+                unreasoned.append(
+                    f"source {source} is excluded and records no "
+                    "exclusion_reason")
+            continue
+        for arm in source_arms(row):
+            if arm.get("included", False):
+                continue
+            reason = (arm.get("exclusion_reason") or "").strip()
+            recorded.append({"source": source, "campaign": arm["campaign"],
+                             "reason": reason})
+            if not reason:
+                unreasoned.append(
+                    f"arm {arm['campaign']} of source {source} is excluded "
+                    "and records no exclusion_reason")
+    return recorded, unreasoned
 
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 

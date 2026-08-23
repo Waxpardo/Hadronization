@@ -39,7 +39,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from combine_per_class import SOURCES, S5_TERM, missing_campaigns  # noqa: E402
+from combine_per_class import (SOURCES, included_campaignless_sources,  # noqa: E402
+                               load_source_contract, missing_campaigns,
+                               source_exclusions)
 from systematics_delta import (UNRESOLVED_MAX_ABS_OR_SEM, Delta,  # noqa: E402
                                combine_quadrature, correlated_pair_choice,
                                larger_arm)
@@ -79,8 +81,8 @@ def trend_difference(rows: dict, tune: str, reference: str = "MONASH"
 
 
 def combined_systematic(nominal_value: float, nominal_sem: float,
-                        per_campaign: dict) -> dict:
-    """Combined systematic on ONE derived scalar, over all seven campaigns.
+                        per_campaign: dict, sources: dict | None = None) -> dict:
+    """Combined systematic on ONE derived scalar, over the included sources.
 
     `per_campaign` maps campaign -> (value, sem) of the SAME derived quantity,
     recomputed from that campaign's own render. `nominal_sem` is the SEM of the
@@ -96,6 +98,12 @@ def combined_systematic(nominal_value: float, nominal_sem: float,
     reports and the unit section 9.1's negligibility threshold is written in.
     The nominal is a common positive factor, so max() and quadrature commute
     with the rescaling and the absolute answer is recovered exactly.
+
+    `sources` is the declared source contract, read from
+    `config/systematics_sources_v1.json` when the caller names none. Ruling R16
+    of 2026-08-23 put this route on that contract, and the returned
+    `exclusions` list carries every source and arm the contract removed, with
+    the reason it recorded.
     """
     missing = missing_campaigns(set(per_campaign))
     if missing:
@@ -107,6 +115,13 @@ def combined_systematic(nominal_value: float, nominal_sem: float,
             "undefined and the cell must be named, not filled")
     if not math.isfinite(nominal_sem) or nominal_sem < 0:
         raise ValueError("nominal SEM must be finite and non-negative")
+
+    declared = load_source_contract() if sources is None else sources
+    recorded_exclusions, unreasoned = source_exclusions(declared)
+    if unreasoned:
+        # Same rule as the envelope builder: a source may leave a budget, but
+        # never without a recorded reason.
+        raise ValueError("refusing to combine: " + "; ".join(unreasoned))
 
     scale = 100.0 / abs(nominal_value)
     quoted: dict[str, Delta] = {}
@@ -131,14 +146,25 @@ def combined_systematic(nominal_value: float, nominal_sem: float,
         quoted[source] = deltas[name]
         arms[source] = name
         variation_sems[source] = per_campaign[name][1] * scale
-    # S5's measured class migration is an exact zero shift, not an absent
-    # source. Its variation SEM is therefore zero; the nominal derived
-    # quantity still has finite sampling uncertainty and the same two-SEM rule
-    # gives SEM(delta)=nominal_sem. Omitting this term is one of the four
-    # two-sigma classification changes recorded on 2026-08-21.
-    quoted[S5_TERM] = Delta(0.0, nominal_sem * scale, 10,
-                            "measured_structural_zero_two_sem")
-    variation_sems[S5_TERM] = 0.0
+    # THE MEASURED-ZERO FLOOR, and what ruling R16 (2026-08-23) changed about
+    # it. A source measured as an exact structural zero is not an absent
+    # source. Its variation SEM is zero, the nominal derived quantity still has
+    # finite sampling uncertainty, and the same two-SEM rule then gives
+    # SEM(delta) = nominal_sem. That floor is worth a term: omitting it is one
+    # of the four two-sigma classification changes recorded on 2026-08-21.
+    #
+    # Before R16 this route wrote that term for S5_class_migration from a
+    # constant, whatever `config/systematics_sources_v1.json` said. R11 had
+    # already excluded S5 -- its zero was measured on the RETIRED absolute axis
+    # -- so the derived budget carried a term the per-class budget did not.
+    # R16 gates the floor on the contract: an included source that declares no
+    # campaign gets it, an excluded source gets no term at all. The rule is not
+    # deleted. When S5 is re-measured on the percentile axis and the contract
+    # includes it again, this loop returns its floor term without any edit.
+    for source in included_campaignless_sources(declared):
+        quoted[source] = Delta(0.0, nominal_sem * scale, 10,
+                               "measured_structural_zero_two_sem")
+        variation_sems[source] = 0.0
 
     drop = correlated_pair_choice(quoted["S1b_muf"], quoted["S2_pdf"])
     total_pct = combine_quadrature(
@@ -152,6 +178,7 @@ def combined_systematic(nominal_value: float, nominal_sem: float,
         "combined_absolute": total_pct * abs(nominal_value) / 100.0,
         "quoted_arm": arms,
         "dropped": sorted(drop),
+        "exclusions": recorded_exclusions,
         "terms_percent": {
             name: {"delta": d.value, "sem": d.sem,
                    "nominal_sem": nominal_sem * scale,
