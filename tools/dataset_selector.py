@@ -259,9 +259,20 @@ def main() -> int:
         ),
     )
     args = parser.parse_args()
-    active, row = load(
-        args.selector.resolve(), args.checkout.resolve(), args.dataset
-    )
+    # A refusal is a named exit, not a traceback. `./hadronization` reads this
+    # tool's status, and a traceback carries the reason to a human while
+    # telling the caller nothing it can act on.
+    try:
+        active, row = load(
+            args.selector.resolve(), args.checkout.resolve(), args.dataset
+        )
+    except ValueError as error:
+        print(
+            f"DATASET_SELECTOR_REFUSED dataset={args.dataset!r} "
+            f"selector={args.selector}: {error}",
+            file=sys.stderr,
+        )
+        return 2
     if args.command == "validate":
         print(
             f"DATASET_SELECTOR_VALID active={active} "

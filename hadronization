@@ -56,11 +56,31 @@ Usage: ./hadronization COMMAND [arguments]
 USAGE
 }
 
+# An unknown dataset key must stop here, named, before anything is arranged.
+#
+# THE DEFECT THIS CLOSES. The resolution used to be one `eval "$(...)"`. A
+# command substitution's status is discarded, so the selector's refusal
+# reached this function as an EMPTY environment and `eval ""` succeeded. The
+# run then continued into prepare_plot_output_plane and died on
+# `HADRONIZATION_CAMPAIGN: unbound variable` -- a message that names neither
+# the key the user typed nor the file that rejected it.
 resolve_dataset() {
-  local dataset_key="$1"
-  eval "$(python3 "${project_base}/tools/dataset_selector.py" shell \
-    --selector "${selector}" --checkout "${project_base}" \
-    --dataset "${dataset_key}")"
+  local dataset_key="$1" resolved
+  if ! resolved="$(python3 "${project_base}/tools/dataset_selector.py" shell \
+      --selector "${selector}" --checkout "${project_base}" \
+      --dataset "${dataset_key}")"; then
+    echo "ERROR: dataset key rejected: ${dataset_key}" >&2
+    echo "       rejected by selector: ${selector}" >&2
+    echo "       The accepted keys are listed above and in that file." >&2
+    exit 2
+  fi
+  if [[ -z "${resolved}" ]]; then
+    echo "ERROR: dataset key rejected: ${dataset_key}" >&2
+    echo "       rejected by selector: ${selector}" >&2
+    echo "       The selector resolved no environment for this key." >&2
+    exit 2
+  fi
+  eval "${resolved}"
   export HADRONIZATION_DATASET="${dataset_key}"
 }
 
