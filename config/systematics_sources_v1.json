@@ -1,0 +1,66 @@
+{
+  "schema": "hadronization_systematics_sources_v1",
+  "definition": "The declared systematic sources of the per-class balancing-yield envelope, each mapped to the variation campaigns that measure it. This file declares WHICH sources enter the envelope. It does not hold any measured value, and it never decides a physics question: a source stays included until an owner ruling excludes it, and an included source without a PASS measurement receipt stops the envelope.",
+  "authority": "docs/SYSTEMATICS_PREREGISTRATION.md sections 3, 4, 5, 7 and the 2026-08-18 owner amendment. Ruling R7 makes this module detachable; the internal DECISIONS.md carries R7.",
+  "campaign_map_owner": "config/systematics_variations_v1.json declares the PYTHIA setting each campaign changes. This file declares which source each campaign serves. extraction/combine_per_class.py::SOURCES holds the same map for the arithmetic and must agree with this file.",
+  "arm_rule": "Pre-registration 2.5: a two-sided source quotes the arm with the larger |Delta| per class. Not half the spread, and not an envelope.",
+  "sources": [
+    {
+      "source": "S1a_mur",
+      "title": "Renormalisation scale",
+      "setting": "SigmaProcess:renormMultFac",
+      "campaigns": ["HF_SYS_MUR_UP", "HF_SYS_MUR_DOWN"],
+      "included": true,
+      "reason": "Registered in pre-registration section 3 and launched. Both arms are declared in config/systematics_variations_v1.json."
+    },
+    {
+      "source": "S1b_muf",
+      "title": "Factorisation scale",
+      "setting": "SigmaProcess:factorMultFac",
+      "campaigns": ["HF_SYS_MUF_UP", "HF_SYS_MUF_DOWN"],
+      "included": true,
+      "reason": "Registered in pre-registration section 3 and launched. Varied independently of the renormalisation scale so that S1 and S2 do not entangle."
+    },
+    {
+      "source": "S2_pdf",
+      "title": "Parton distribution",
+      "setting": "PDF:pSet",
+      "campaigns": ["HF_SYS_PDF_CTEQ6L1"],
+      "included": true,
+      "reason": "Registered in pre-registration section 4 and launched. One-sided by construction: CTEQ6L1 against the NNPDF2.3 default."
+    },
+    {
+      "source": "S3_pthat",
+      "title": "Hard-process phase-space minimum",
+      "setting": "PhaseSpace:pTHatMin",
+      "campaigns": ["HF_SYS_PTHAT_4", "HF_SYS_PTHAT_1"],
+      "included": true,
+      "reason": "Registered in pre-registration section 5 and launched. BOTH arms are declared. HF_SYS_PTHAT_1 has no PASS measurement receipt: its MONASH p80 and p90 quantiles both resolve to N_ch = 2, so the 80-90 per cent class would need the empty range [3,2] and the pipeline wrote a FAIL receipt with 0/132 rows. Whether that arm is excluded is an OPEN OWNER DECISION and is not decided here. Until it is ruled, the envelope stays INCOMPLETE. That is the intended fail-closed state."
+    },
+    {
+      "source": "S5_class_migration",
+      "title": "Decay-daughter class migration",
+      "setting": "no generation; re-projection of the sealed central only",
+      "campaigns": [],
+      "included": true,
+      "reason": "Registered in pre-registration section 7 and MEASURED as an exact structural zero on 2026-08-17. A measured zero is a different object from a source never examined, so it is listed and contributes a zero shift. It needs no variation campaign and therefore no measurement receipt."
+    }
+  ],
+  "declared_absent": [
+    {
+      "source": "S4_counter_window",
+      "title": "Event-activity counter window",
+      "reason": "Pre-registration section 6 registers S4 and DELIBERATELY does not launch it. No campaign, no receipt, and no term. Its absence is a declared limit of this envelope, not an omission."
+    },
+    {
+      "source": "S6_unresolved_origin",
+      "title": "Pair-level unresolved origin",
+      "reason": "Amendment A2: S6 lives on the M1..M5 partition and is NEVER summed into a c1..c11 total. extraction/systematics_delta.py::combine_quadrature refuses any term named in S6_TERM_NAMES. It is quoted as a separate line, not folded in."
+    },
+    {
+      "source": "tune_bundle_spread",
+      "title": "MONASH against JUNCTIONS against CLOSEPACKING",
+      "reason": "The spread between tune bundles is the measurement, not a systematic uncertainty. Folding it into a band would destroy the quantity the paper reports."
+    }
+  ]
+}

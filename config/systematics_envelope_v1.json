@@ -1,0 +1,71 @@
+{
+  "schema": "hadronization_systematics_envelope_v1",
+  "definition": "The shape of one systematic-uncertainty envelope over the per-class balancing yield. This file is the CONTRACT, not an envelope. tools/systematics_envelope.py writes envelope INSTANCES into the commit-scoped results plane and validates them against this file; ./hadronization plot --systematics PATH revalidates an instance before it renders anything.",
+  "authority": "Ruling R7 in the internal DECISIONS.md approves one tracked envelope artifact, written only by ./hadronization systematics and consumed only through an explicit plot --systematics flag. The statistics are PRACTICE section 5 and the 2026-08-18 owner amendment.",
+  "detachable": "Systematics are OFF by default. Every accepted output was produced without an envelope, and no nominal render reads this contract or any envelope instance.",
+  "instance_required_keys": [
+    "schema",
+    "status",
+    "missing",
+    "method",
+    "sources",
+    "rows",
+    "provenance"
+  ],
+  "status_values": {
+    "COMPLETE": "Every included source produced a PASS measurement receipt, every receipt agreed with its declared resolver tag, every input carried the v2 class partition, and every row combined. Only a COMPLETE envelope may be rendered.",
+    "INCOMPLETE": "At least one included source is unavailable. The reason is in `missing`. The envelope carries whatever it could derive and MUST NOT be rendered.",
+    "FAIL": "A declared input contradicted itself: a receipt reported FAIL, a receipt disagreed with its resolver tag, or a class partition disagreed with the v2 contract. The reason is in `missing`. The producing tool exits nonzero."
+  },
+  "row_identity": {
+    "fields": ["campaign", "tune", "flavour", "trigger", "associate", "observable", "class"],
+    "campaign": "The NOMINAL campaign the envelope applies to, for example HF_RUN3_V1. The variation campaigns appear per source term, not in the row identity.",
+    "tune": "One of MONASH, JUNCTIONS, CLOSEPACKING. The three tunes are the measurement; the envelope is computed for each separately and is never taken across them.",
+    "trigger_and_associate": "The heavy-flavour pair, for example trigger B^{+} with associate Lambda_b. `flavour` is BEAUTY or CHARM.",
+    "observable": "balancing_yield -- the per-trigger balancing yield Y_bal = (N_OS - N_SS)/N_trig.",
+    "class": "One of c1..c11 from config/multiplicity_percentile_classes_v2.json, or MB for the multiplicity-integrated bin."
+  },
+  "term_fields": {
+    "campaign": "The variation campaign whose arm was quoted for this source in this row.",
+    "delta": "Delta = variation - nominal, absolute, in the yield's own units. PRACTICE section 5 rule 5.",
+    "sem_var": "The standard error of the variation mean over its ten file blocks, dof 9.",
+    "sem_nominal": "The standard error of the nominal mean over its ten file blocks, dof 9.",
+    "sem_delta": "SEM(Delta) = sqrt(sem_var^2 + sem_nominal^2). Amendment D2. The two generations are independent, so the errors add in quadrature.",
+    "contribution": "max(|delta|, sem_delta). Amendment A1, applied continuously with no threshold cliff.",
+    "delta_percent": "delta as a percentage of the row's nominal yield.",
+    "contribution_percent": "contribution as a percentage of the row's nominal yield. The quadrature runs in per cent; the nominal is a common positive factor, so max() and quadrature commute with the rescaling."
+  },
+  "row_fields": {
+    "nominal_yield": "The sealed nominal balancing yield for this row.",
+    "nominal_sem": "Its standard error over the ten blocks.",
+    "terms": "One entry per included source that contributed, keyed by source name.",
+    "quoted_arm": "Source name to the campaign whose arm was quoted, per pre-registration 2.5.",
+    "dropped": "Source names removed by pre-registration 9.1, where mu_F and the PDF act on the same object and only the larger is quoted.",
+    "combined_percent": "The quadrature sum of every contribution_percent, per cent.",
+    "combined_absolute": "combined_percent multiplied back by nominal_yield."
+  },
+  "method_tags": {
+    "d2_quadrature": "SEM(Delta) = sqrt(SEM_var^2 + SEM_nominal^2). Amendment D2, PRACTICE section 5 rule 6.",
+    "a1_max_rule": "Each source contributes max(|Delta|, SEM(Delta)) per class, applied continuously. Amendment A1, PRACTICE section 5 rule 7.",
+    "a2_s6_excluded": "S6 stays out of the per-class quadrature. It lives on the M1..M5 partition and nothing is summed across incompatible partitions. Amendment A2, PRACTICE section 5 rule 8."
+  },
+  "provenance_fields": {
+    "producing_commit": "The forty-character commit of the checkout that wrote the envelope.",
+    "sources_contract_sha256": "sha256 of config/systematics_sources_v1.json as read.",
+    "envelope_contract_sha256": "sha256 of this file as read.",
+    "class_contract_sha256": "sha256 of config/multiplicity_percentile_classes_v2.json as read.",
+    "delta_report_sha256": "sha256 of the per-class delta report the envelope was built from.",
+    "measurement_receipts": "Campaign to {receipt_sha256, completion_status, expected_complete_root_tag, resolved_complete_root_tags}. One entry per included variation campaign.",
+    "resolver_tags": "Campaign to the complete-root tag the dataset selector declares. A receipt whose resolved tag differs is a FAIL, never a warning.",
+    "nominal_boundary_receipt_sha256": "sha256 of the multiplicity_boundary_receipt_v2.json written by the NOMINAL render this envelope applies to. plot --systematics refuses unless this equals the sha of the receipt in the nominal plotting plane.",
+    "nominal_dataset": "The dataset key of the nominal render, for example hf_run3_v1_candidate."
+  },
+  "refusals": [
+    "An included source without a PASS measurement receipt.",
+    "A receipt whose resolved_complete_root_tags disagree with the selector's complete_root_tag.",
+    "An input row whose class is not in the v2 percentile contract.",
+    "A per-class delta report whose class set does not cover the v2 partition.",
+    "Any attempt to write an envelope under a plotting output plane."
+  ],
+  "not_a_systematic": "The spread between tune bundles is the measurement. It never enters an envelope."
+}
