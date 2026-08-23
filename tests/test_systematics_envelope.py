@@ -30,7 +30,10 @@ CLASS_CONTRACT = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
 
 CAMPAIGN = "HF_RUN3_V1"
 DATASET = "hf_run3_v1_candidate"
-CLASSES = [f"c{i}" for i in range(1, 12)]
+# Ruling R10: the fixture's class set is the contract's, so this test measures
+# the tool against the contract rather than against a second copy of it.
+CLASSES = [row["class"] for row in
+           json.loads(CLASS_CONTRACT.read_text())["classes"]]
 
 # campaign -> (variation_yield, variation_sem). Nominal is 100.0 +- 3.0.
 # Chosen so that D2 and A1 both give exact values:
@@ -383,9 +386,49 @@ def test_a_partition_that_omits_a_class_refuses() -> None:
                for r in envelope["missing"]), envelope["missing"]
 
 
-def test_the_classes_checked_are_the_v2_contract_classes() -> None:
+def test_the_class_labels_follow_the_c_number_convention() -> None:
+    """The count comes from the contract; the naming convention is pinned."""
     contract = json.loads(CLASS_CONTRACT.read_text())
-    assert [row["class"] for row in contract["classes"]] == CLASSES
+    names = [row["class"] for row in contract["classes"]]
+    assert names == [f"c{i}" for i in range(1, len(names) + 1)], names
+
+
+def test_the_envelope_derives_its_row_count_from_the_class_contract() -> None:
+    """R10: no constant may stand in for the class count."""
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp))
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    provenance = envelope["provenance"]
+    assert provenance["class_contract_classes"] == CLASSES
+    assert provenance["expected_rows"] == len(CLASSES)
+    assert len(envelope["rows"]) == provenance["expected_rows"]
+
+
+def test_two_complete_series_give_twice_the_rows() -> None:
+    """The derived count follows the series, not a number written down."""
+    report = delta_report()
+    report["deltas"] += [{**row, "associate": "B-"}
+                         for row in list(report["deltas"])]
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp), report=report)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert envelope["provenance"]["expected_rows"] == 2 * len(CLASSES)
+    assert len(envelope["rows"]) == 2 * len(CLASSES)
+
+
+def test_one_series_short_of_one_class_refuses() -> None:
+    """A second series missing one class. The whole-report check cannot see it."""
+    dropped = CLASSES[-1]
+    report = delta_report()
+    report["deltas"] += [{**row, "associate": "B-"}
+                         for row in list(report["deltas"])
+                         if row["class"] != dropped]
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp), report=report)
+    assert proc.returncode != 0, proc.stdout
+    assert envelope["status"] == "FAIL", envelope["status"]
+    assert any(dropped in reason and "B-" in reason
+               for reason in envelope["missing"]), envelope["missing"]
 
 
 def test_a_refusal_still_writes_an_auditable_envelope() -> None:

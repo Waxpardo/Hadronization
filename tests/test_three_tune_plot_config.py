@@ -8,7 +8,7 @@ gave one canvas a different y-range or a stale `bins_to_ignore` would render, an
 would look plausible.
 
 The test requires `bins_to_ignore` to stay empty in every canvas.
-The v2 reduced configuration lists ten of the eleven multiplicity classes there.
+The v2 reduced configuration lists all but one of the multiplicity classes there.
 A canvas built by copying it draws ONE class, faithfully, and nothing in the
 stack complains. A source check prevents this copied exclusion from recurring.
 """
@@ -25,6 +25,9 @@ MONASH_CFG = REPO / ("plotting/configuration_multiplicity_HF_RUN3_V1_MONASH"
                      "_THnSparse_complete_root.json")
 
 TUNES = ["MONASH", "JUNCTIONS", "CLOSEPACKING"]
+# Ruling R10: the class count comes from the contract, never from a literal.
+BOUNDARIES = REPO / "config/multiplicity_percentile_classes_v2.json"
+N_CLASSES = len(json.loads(BOUNDARIES.read_text())["classes"])
 failures = []
 
 
@@ -70,8 +73,8 @@ for tune in ("JUNCTIONS", "CLOSEPACKING"):
 for c in canvases:
     check(f"{c['canvas_name']} ignores no multiplicity class",
           c["bins_to_ignore"] == [], str(len(c["bins_to_ignore"])))
-check("every canvas carries all eleven classes",
-      {len(c["legend_entries"]) for c in canvases} == {11},
+check(f"every canvas carries all {N_CLASSES} classes",
+      {len(c["legend_entries"]) for c in canvases} == {N_CLASSES},
       str({len(c["legend_entries"]) for c in canvases}))
 
 # --- the contract must be v3, not the v2 the reduced configuration carries --

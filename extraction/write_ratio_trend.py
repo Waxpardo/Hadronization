@@ -19,10 +19,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from combine_per_class import baryon_meson_ratio  # noqa: E402
-from harvest_class_axis import parse_log  # noqa: E402
+from harvest_class_axis import class_names, parse_log  # noqa: E402
 from ratio_trend import contrast, slope_difference, weighted_linear_fit  # noqa: E402
 
-CLASSES = [f"c{i}" for i in range(1, 12)]
+# Ruling R10: the class set comes from
+# config/multiplicity_percentile_classes_v2.json and from nowhere else.
+CLASSES = class_names()
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 RECONNECTION = ("JUNCTIONS", "CLOSEPACKING")
 

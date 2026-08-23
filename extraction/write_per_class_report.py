@@ -14,11 +14,16 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from harvest_class_axis import class_order  # noqa: E402
+from harvest_class_axis import class_names, class_order  # noqa: E402
 
 SERIES = [("BEAUTY", "B^{+}", "B-"), ("BEAUTY", "B^{+}", "Lambda_b"),
           ("CHARM", "D^{+}", "D-"), ("CHARM", "D^{+}", "Lambda_c(+)-bar")]
 TUNES = ["MONASH", "JUNCTIONS", "CLOSEPACKING"]
+# Ruling R10: the class set comes from
+# config/multiplicity_percentile_classes_v2.json and from nowhere else. The
+# per-campaign cell count is CLASSES x SERIES x TUNES, derived here, so a
+# contract with a different class count reports its own total rather than 132.
+CLASSES = class_names()
 SHORT = {"MONASH": "MON", "JUNCTIONS": "JUN", "CLOSEPACKING": "CLP"}
 
 
@@ -77,21 +82,26 @@ def main() -> int:
             add(f"| `{campaign}` | " + " | ".join(cells) + " |")
 
     # --- the per-class arm -------------------------------------------------
+    series_per_class = len(SERIES) * len(TUNES)
+    cells_per_campaign = len(CLASSES) * series_per_class
     add("\n## The per-class deltas, resolved counts\n")
-    add("132 cells per campaign: eleven classes by twelve series. "
+    add(f"{cells_per_campaign} cells per campaign: {len(CLASSES)} classes by "
+        f"{series_per_class} series. "
         "The count is how many are resolved at 2 SEM.\n")
-    add("| campaign | resolved / 132 | " + " | ".join(f"c{i}" for i in range(1, 12)) + " |")
-    add("|---|---|" + "---|" * 11)
+    add(f"| campaign | resolved / {cells_per_campaign} | "
+        + " | ".join(CLASSES) + " |")
+    add("|---|---|" + "---|" * len(CLASSES))
     for campaign in campaigns:
         per_class = []
         total = 0
-        for i in range(1, 12):
+        for cls in CLASSES:
             got = [r for r in rows
-                   if r["campaign"] == campaign and r["class"] == f"c{i}"]
+                   if r["campaign"] == campaign and r["class"] == cls]
             n = sum(1 for r in got if not r["flagged_below_2sem"])
-            per_class.append(f"{n}/12")
+            per_class.append(f"{n}/{series_per_class}")
             total += n
-        add(f"| `{campaign}` | **{total}/132** | " + " | ".join(per_class) + " |")
+        add(f"| `{campaign}` | **{total}/{cells_per_campaign}** | "
+            + " | ".join(per_class) + " |")
 
     # --- the largest effects ----------------------------------------------
     add("\n## The ten largest per-class effects, by significance\n")

@@ -4,16 +4,64 @@
 This is a mechanical configuration generator.  It replaces the superseded
 MONASH-minimum-bias class names and windows with the PR-13 percentile classes,
 and updates every reference to the corresponding histogram object name.
+
+WHAT IT CAN AND CANNOT CHANGE. Ruling R10 makes
+`config/multiplicity_percentile_classes_v2.json` the one source of the class
+set. This tool applies a changed LABEL, a changed WINDOW and a changed BIN name
+to every tracked configuration. It does NOT change the class COUNT: it rewrites
+one configuration entry per contract class and cannot invent the style, the
+axis range or the legend slot a new entry would need. A count mismatch is
+refused by name, never applied in part and never reported as CURRENT.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
+# The statistical spec pins the sha256 of one plotting configuration this tool
+# rewrites. A pin left stale after a class change stops the suite one test
+# later, in a file that names no class, so this tool carries the pin.
+STATISTICAL_SPEC = ROOT / "config" / "statistical_robustness_v1.json"
+PIN_KEY = "boundary_configuration_sha256"
+PATH_KEY = "boundary_configuration_path"
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def pinned_configuration_drift(apply: bool) -> list[str]:
+    """Keep the statistical spec's boundary-configuration pin current.
+
+    Returns the drift it found. With `apply` false it only reports, so
+    `--check` can fail on a stale pin rather than leave it for a later test.
+    """
+    if not STATISTICAL_SPEC.is_file():
+        return []
+    raw = STATISTICAL_SPEC.read_text()
+    spec = json.loads(raw)
+    relative = spec.get("contracts", {}).get(PATH_KEY)
+    recorded = spec.get("contracts", {}).get(PIN_KEY)
+    if not relative or not recorded:
+        return []
+    target = ROOT / relative
+    if not target.is_file():
+        return [f"{STATISTICAL_SPEC.name}: {PATH_KEY} names no file: {relative}"]
+    current = sha256(target)
+    if current == recorded:
+        return []
+    if apply:
+        STATISTICAL_SPEC.write_text(
+            re.sub(f'"{PIN_KEY}": "[0-9a-f]{{64}}"',
+                   f'"{PIN_KEY}": "{current}"', raw))
+    return [f"{STATISTICAL_SPEC.name}: {PIN_KEY} is {recorded[:12]}..., "
+            f"{relative} hashes to {current[:12]}..."]
 
 
 def indent_of(text: str) -> int:
@@ -24,11 +72,32 @@ def indent_of(text: str) -> int:
     return 2
 
 
-def replacement_table(document: dict, classes: list[dict]) -> dict[str, str]:
+class ClassCountMismatch(Exception):
+    """The document holds a different number of classes than the contract.
+
+    This generator RENAMES and RE-WINDOWS a class entry; it does not create or
+    delete one. A count change therefore needs one hand-authored entry per new
+    class in the configuration before this tool can run. Returning the document
+    unchanged would have reported CURRENT for a configuration the contract no
+    longer describes, so the mismatch is a refusal.
+    """
+
+
+def class_rows(document: dict) -> list[dict]:
+    """The class entries of a configuration, the integrated bin excluded."""
     bins = document.get("histograms_to_analyse", [])
-    class_bins = [row for row in bins if row.get("hDPhi") != "hDPhiM00_100"]
-    if len(class_bins) != len(classes):
+    return [row for row in bins if row.get("hDPhi") != "hDPhiM00_100"]
+
+
+def replacement_table(document: dict, classes: list[dict]) -> dict[str, str]:
+    class_bins = class_rows(document)
+    if not class_bins:
         return {}
+    if len(class_bins) != len(classes):
+        raise ClassCountMismatch(
+            f"the configuration carries {len(class_bins)} classes and "
+            f"{CONTRACT.name} declares {len(classes)}. This tool renames "
+            "classes; it does not add or remove them.")
     replacements: dict[str, str] = {}
     for old, new in zip(class_bins, classes):
         replacements[str(old["binLabel"])] = str(new["bin"])
@@ -109,7 +178,12 @@ def main() -> int:
     for path in args.paths or candidate_paths():
         raw = path.read_text()
         document = json.loads(raw)
-        generated = build(document, classes)
+        try:
+            generated = build(document, classes)
+        except ClassCountMismatch as error:
+            print(f"PER_TUNE_MULTIPLICITY_REFUSED {path.relative_to(ROOT)}: "
+                  f"{error}")
+            return 2
         payload = json.dumps(generated, indent=indent_of(raw)) + "\n"
         if payload == raw:
             continue
@@ -118,10 +192,15 @@ def main() -> int:
         else:
             path.write_text(payload)
             changed.append(path)
-    if stale:
+    pin = pinned_configuration_drift(apply=not args.check)
+    if stale or (pin and args.check):
         for path in stale:
             print(f"PER_TUNE_MULTIPLICITY_STALE {path.relative_to(ROOT)}")
+        for line in pin:
+            print(f"PER_TUNE_MULTIPLICITY_STALE_PIN {line}")
         return 1
+    for line in pin:
+        print(f"PER_TUNE_MULTIPLICITY_PIN_REFRESHED {line}")
     print(
         "PER_TUNE_MULTIPLICITY_CURRENT"
         if args.check else

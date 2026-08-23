@@ -31,17 +31,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PLOTTING = ROOT / "plotting"
 BOUNDARIES = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
+sys.path.insert(0, str(ROOT / "tools"))
+from class_label_format import format_percentile_range  # noqa: E402
 GENERATOR = ROOT / "tools" / "make_variant_configs.py"
-
-VARIANTS = {
-    "configuration_multiplicity_HF_RUN3_V1_VEXTREMES.json": 2,
-    "configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json": 1,
-    "configuration_multiplicity_HF_RUN3_V1_VINTEGRATED_CLOSURE.json": 12,
-}
-
 
 def artifact_class_count() -> int:
     return len(json.loads(BOUNDARIES.read_text())["classes"])
+
+
+def artifact_classes() -> list[dict]:
+    return json.loads(BOUNDARIES.read_text())["classes"]
+
+
+# How many bins each variant DRAWS. The closure variant draws every class and
+# the integrated bin, so its count is derived: ruling R10 forbids writing the
+# class count down a second time.
+VARIANTS = {
+    "configuration_multiplicity_HF_RUN3_V1_VEXTREMES.json": 2,
+    "configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json": 1,
+    "configuration_multiplicity_HF_RUN3_V1_VINTEGRATED_CLOSURE.json":
+        artifact_class_count() + 1,
+}
 
 
 def drawn_of(doc: dict) -> list[str]:
@@ -94,9 +104,13 @@ def main() -> int:
         (PLOTTING / "configuration_multiplicity_HF_RUN3_V1_VINTEGRATED_CLOSURE.json"
          ).read_text())
     decl = closure.get("axis_declaration", "")
-    if "60-70%" not in decl and "60.0-70.0%" not in decl:
-        failures.append(
-            f"declaration should carry the contract's 60-70% class: {decl!r}")
+    for row in artifact_classes():
+        label = format_percentile_range(row["percentile_min"],
+                                        row["percentile_max"])
+        if label not in decl:
+            failures.append(
+                f"declaration should carry the contract's {label} class: "
+                f"{decl!r}")
 
     # (c) derived, not fixed: perturb the artifact and the label must follow.
     with tempfile.TemporaryDirectory() as tmp:
@@ -106,7 +120,9 @@ def main() -> int:
         art = sandbox / "config" / "multiplicity_percentile_classes_v2.json"
         doc = json.loads(art.read_text())
         # Move the top class's requested edge; the derived declaration follows.
-        doc["classes"][-1]["percentile_max"] = 2.0
+        # The new edge is one point above whatever the contract holds, so this
+        # mutation is a real change for any class set (ruling R10).
+        doc["classes"][-1]["percentile_max"] += 1.0
         art.write_text(json.dumps(doc, indent=2) + "\n")
         run = subprocess.run(
             [sys.executable, str(sandbox / "tools" / "make_variant_configs.py")],

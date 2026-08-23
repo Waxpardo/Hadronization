@@ -56,6 +56,8 @@
     "sources_contract_sha256": "sha256 of config/systematics_sources_v1.json as read.",
     "envelope_contract_sha256": "sha256 of this file as read.",
     "class_contract_sha256": "sha256 of config/multiplicity_percentile_classes_v2.json as read.",
+    "class_contract_classes": "The class set the envelope was built against, copied from that contract. Ruling R10 makes the contract the one source: no tool in this repository enumerates the classes itself.",
+    "expected_rows": "How many rows the class contract requires: series times classes, plus one integrated row per series that carries one. DERIVED, never a constant. A COMPLETE envelope whose row count differs is a FAIL.",
     "delta_report_sha256": "sha256 of the per-class delta report the envelope was built from.",
     "measurement_receipts": "Campaign to {receipt_sha256, completion_status, expected_complete_root_tag, resolved_complete_root_tags}. One entry per included variation campaign.",
     "resolver_tags": "Campaign to the complete-root tag the dataset selector declares. A receipt whose resolved tag differs is a FAIL, never a warning.",
@@ -67,6 +69,8 @@
     "A receipt whose resolved_complete_root_tags disagree with the selector's complete_root_tag.",
     "An input row whose class is not in the v2 percentile contract.",
     "A per-class delta report whose class set does not cover the v2 partition.",
+    "A series that carries no input row for one of the contract's classes.",
+    "A COMPLETE envelope whose row count differs from the count the class contract requires.",
     "A source or an arm that is excluded and records no exclusion_reason.",
     "An included source whose every declared arm is excluded.",
     "Any attempt to write an envelope under a plotting output plane."

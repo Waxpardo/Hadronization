@@ -20,6 +20,17 @@ RUNNER = ROOT / "plotting/run_paper_plots.sh"
 RAW_PLOTTER = ROOT / "plotting/Plot_InclusiveKinematicSpectra_Raw.C"
 PAIR_REGISTRY = ROOT / "config/heavy_flavour_pair_registry_v1.json"
 PERCENTILE_CLASSES = ROOT / "config/multiplicity_percentile_classes_v2.json"
+
+
+def contract_bins() -> list[str]:
+    """The class histogram names, in contract order. Ruling R10: one source.
+
+    The count, the labels and the order all come from
+    config/multiplicity_percentile_classes_v2.json. A second copy of them here
+    would make the owner edit two files to change one class set.
+    """
+    return ["hDPhi" + row["bin"] for row in
+            json.loads(PERCENTILE_CLASSES.read_text())["classes"]]
 CONFIGURATIONS = (
     ROOT
     / "plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json",
@@ -118,22 +129,17 @@ def check_configured_references() -> None:
         "B^{+}",
         "D^{+}",
     }
-    activity_bins = {
-        "hDPhiM90_100",
-        "hDPhiM80_90",
-        "hDPhiM70_80",
-        "hDPhiM60_70",
-        "hDPhiM50_60",
-        "hDPhiM40_50",
-        "hDPhiM30_40",
-        "hDPhiM20_30",
-        "hDPhiM10_20",
-        "hDPhiM1_10",
-        "hDPhiM0_1",
-    }
+    # Ruling R10: the class set is the contract's. Only WHICH class the reduced
+    # figure draws is a property of that configuration, and it stays literal.
+    activity_bins = set(contract_bins())
+    # The reduced figure draws exactly one class: c10. WHICH class is a
+    # property of this configuration; its BIN NAME comes from the contract.
+    drawn = {"hDPhi" + row["bin"]
+             for row in json.loads(PERCENTILE_CLASSES.read_text())["classes"]
+             if row["class"] == "c10"}
+    assert len(drawn) == 1, drawn
     assert all(
-        activity_bins - set(canvas["bins_to_ignore"])
-        == {"hDPhiM1_10"}
+        activity_bins - set(canvas["bins_to_ignore"]) == drawn
         for canvas in canvases
     )
     configured_canvas_names = {
@@ -145,19 +151,7 @@ def check_configured_references() -> None:
     assert "lambda_sigma" not in json.dumps(reduced)
     assert [
         row["hDPhi"] for row in reduced["histograms_to_analyse"]
-    ] == [
-        "hDPhiM90_100",
-        "hDPhiM80_90",
-        "hDPhiM70_80",
-        "hDPhiM60_70",
-        "hDPhiM50_60",
-        "hDPhiM40_50",
-        "hDPhiM30_40",
-        "hDPhiM20_30",
-        "hDPhiM10_20",
-        "hDPhiM1_10",
-        "hDPhiM0_1",
-    ]
+    ] == contract_bins()
 
 
 def check_plotter_contract() -> None:
@@ -363,7 +357,14 @@ def check_multiplicity_boundary_contract() -> None:
     definition = document["definition"]
     assert "independently" in definition, definition
     assert "no common absolute N_ch boundary" in definition, definition
-    assert len(document["classes"]) == 11, len(document["classes"])
+    # The class COUNT and the eleven windows are pinned once, in
+    # tests/test_supervisor_decisions.py, which is the executable record of the
+    # owner ruling. Ruling R10 forbids a second copy here, so this test asserts
+    # the shape the pipeline needs and leaves the count to the contract test.
+    assert document["classes"], "the contract declares no class"
+    for row in document["classes"]:
+        for key in ("class", "bin", "percentile_min", "percentile_max"):
+            assert key in row, (key, row)
 
 
 def main() -> int:

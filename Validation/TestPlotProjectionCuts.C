@@ -1,4 +1,5 @@
 #include "../plotting/improvedPlotting_THnSparse.C"
+#include "../plotting/GeneratedMultiplicityPercentileClasses.h"
 
 #include <TMemFile.h>
 #include <THnSparse.h>
@@ -74,11 +75,11 @@ bool CheckedMultiplicityOrderIsValid(const std::string& path,
   ParsePairInputSelectionContract(
       configuration.at("pair_input_selection_contract"));
 
+  // Ruling R10: the class set comes from
+  // config/multiplicity_percentile_classes_v2.json through the generated
+  // header, so this check cannot go on passing against a retired axis.
   const std::vector<std::pair<Double_t, Double_t>> expected = {
-      {90.0, 100.0}, {80.0, 90.0}, {70.0, 80.0},
-      {60.0, 70.0},  {50.0, 60.0}, {40.0, 50.0},
-      {30.0, 40.0},  {20.0, 30.0}, {10.0, 20.0},
-      {1.0, 10.0},   {0.0, 1.0}};
+      HADRONIZATION_MULTIPLICITY_PERCENTILE_WINDOWS};
   const auto& bins = configuration.at("histograms_to_analyse");
   const std::size_t offset = hasIntegratedBin ? 1U : 0U;
   if (bins.size() != expected.size() + offset) return false;
@@ -315,10 +316,7 @@ int TestPlotProjectionCuts() {
       {40.0, 6.0},  {30.0, 7.0}, {20.0, 8.0},
       {10.0, 9.0},  {1.0, 10.0}, {0.0, 11.0}};
   const std::vector<std::pair<double, double>> percentileClasses = {
-      {90.0, 100.0}, {80.0, 90.0}, {70.0, 80.0},
-      {60.0, 70.0},  {50.0, 60.0}, {40.0, 50.0},
-      {30.0, 40.0},  {20.0, 30.0}, {10.0, 20.0},
-      {1.0, 10.0},   {0.0, 1.0}};
+      HADRONIZATION_MULTIPLICITY_PERCENTILE_WINDOWS};
   std::pair<double, double> previousRange = {-1.0, -1.0};
   for (std::size_t index = 0; index < percentileClasses.size(); ++index) {
     const auto range = GetDiscreteMultiplicityRange(

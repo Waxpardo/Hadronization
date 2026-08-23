@@ -4,7 +4,7 @@
 THIS IS HALF OF THE HEADLINE COMPARISON, AND IT IS THE HALF THAT NEEDS NO
 VARIATION. The separation between two tunes is a property of the nominal
 campaign: three tunes, three sets of raw files, three sets of seeds. The other
-half, the combined systematic, needs all seven variation campaigns and
+half, the combined systematic, needs every included variation arm and
 `combine_per_class.py` refuses without them.
 
 THE THREE TUNES ARE INDEPENDENT SAMPLES, so the SEM of a difference is the two
@@ -18,8 +18,8 @@ wrong. The plotter forms the ratio inside each block and reports `ratio_sem`
 over the ten.
 
 THE CLASS AXIS RUNS OPPOSITE TO ITS LABEL: `c1` is the lowest-activity class
-and `c11` is the highest. Every tune resolves its own N_ch edges. See
-`harvest_class_axis`.
+and the last class is the highest. Every tune resolves its own N_ch edges, and
+the class set is read from the contract. See `harvest_class_axis`.
 """
 
 from __future__ import annotations
@@ -32,9 +32,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from combine_per_class import baryon_meson_ratio  # noqa: E402
-from harvest_class_axis import class_order, parse_log  # noqa: E402
+from harvest_class_axis import (INTEGRATED, class_names,  # noqa: E402
+                                class_order, parse_log)
 
-CLASSES = [f"c{i}" for i in range(1, 12)] + ["MB"]
+# Ruling R10: the class set comes from
+# config/multiplicity_percentile_classes_v2.json and from nowhere else.
+CLASSES = class_names() + [INTEGRATED]
 OBSERVABLES = [
     ("B+ - B- balancing yield", "B-", "yield"),
     ("B+ - Lambda_b balancing yield", "Lambda_b", "yield"),

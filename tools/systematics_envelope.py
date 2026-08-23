@@ -61,7 +61,8 @@ for _extra in (ROOT / "extraction", ROOT / "tools"):
 
 from combine_per_class import (CAMPAIGNLESS_TERMS, SOURCES,  # noqa: E402
                                SourcesIncomplete, combine_cell)
-from harvest_class_axis import INTEGRATED, class_order  # noqa: E402
+from harvest_class_axis import (INTEGRATED, class_names,  # noqa: E402
+                                class_order)
 
 ENVELOPE_SCHEMA = "hadronization_systematics_envelope_v1"
 SOURCES_SCHEMA = "hadronization_systematics_sources_v1"
@@ -288,8 +289,34 @@ def assert_receipts(campaigns: list[str], receipt_paths: dict[str, Path],
 # --------------------------------------------------------------------------
 
 def contract_classes() -> list[str]:
-    contract = load_json(CLASS_CONTRACT)
-    return [row["class"] for row in contract["classes"]]
+    """The class set, read from the contract. Ruling R10: never a constant."""
+    return class_names()
+
+
+def expected_row_count(rows: list[dict], expected: list[str]) -> tuple[int, list[str]]:
+    """(rows the contract requires, series that do not carry every class).
+
+    The count is DERIVED: series times classes, plus one integrated row for
+    each series that carries one. Writing 132 here would freeze the class set
+    into a number, and a contract with ten classes would then look short by
+    twelve rows rather than being ten classes long.
+    """
+    by_series: dict[tuple, set[str]] = {}
+    for row in rows:
+        key = (row["flavour"], row["trigger"], row["associate"], row["tune"])
+        by_series.setdefault(key, set()).add(row["class"])
+    required = set(expected)
+    total = 0
+    short: list[str] = []
+    for key in sorted(by_series):
+        seen = by_series[key]
+        missing = sorted(required - seen, key=class_order)
+        if missing:
+            short.append(
+                "series " + "/".join(key) + " carries no input row for "
+                f"classes {missing}")
+        total += len(required) + (1 if INTEGRATED in seen else 0)
+    return total, short
 
 
 def assert_partition(rows: list[dict], expected: list[str]) -> list[str]:
@@ -395,6 +422,7 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
     status = "COMPLETE"
     rows: list[dict] = []
     receipts: dict = {}
+    expected_rows = 0
 
     sources = load_json(SOURCES_CONTRACT, SOURCES_SCHEMA)
     drift = agrees_with_combination_map(sources)
@@ -431,6 +459,11 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
             reasons += partition
             status = "FAIL"
         else:
+            expected_rows, short = expected_row_count(
+                report["deltas"], contract_classes())
+            if short:
+                reasons += short
+                status = "FAIL"
             try:
                 rows = build_rows(report, campaign)
             except SourcesIncomplete as error:
@@ -441,6 +474,12 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
                 reasons.append(f"cannot combine: {error}")
                 status = "FAIL"
 
+    if status == "COMPLETE" and len(rows) != expected_rows:
+        reasons.append(
+            f"the envelope holds {len(rows)} rows and "
+            "config/multiplicity_percentile_classes_v2.json requires "
+            f"{expected_rows}")
+        status = "FAIL"
     if status == "COMPLETE" and not rows:
         reasons.append("no envelope row was produced")
         status = "INCOMPLETE"
@@ -463,6 +502,8 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
             "sources_contract_sha256": sha256(SOURCES_CONTRACT),
             "envelope_contract_sha256": sha256(ENVELOPE_CONTRACT),
             "class_contract_sha256": sha256(CLASS_CONTRACT),
+            "class_contract_classes": contract_classes(),
+            "expected_rows": expected_rows,
             "delta_report_sha256":
                 sha256(report_path) if report_path.is_file() else "",
             "measurement_receipts": receipts,

@@ -12,19 +12,46 @@ BOUNDARY = ROOT / "plotting/Plot_MultiplicityDistribution_PercentileBoundaries.C
 PLOTTER = ROOT / "plotting/improvedPlotting_THnSparse.C"
 UTILITY = ROOT / "plotting/MultiplicityBoundaryUtils.h"
 CONTRACT = ROOT / "config/multiplicity_percentile_classes_v2.json"
+CLASSES_HEADER = ROOT / "plotting/GeneratedMultiplicityPercentileClasses.h"
 
 
 def test_contract_is_pr13_tune_local_axis() -> None:
+    """The provenance of the axis. The windows themselves are pinned once.
+
+    Ruling R10 allows one source for the class set, so the eleven windows are
+    asserted in tests/test_supervisor_decisions.py -- the executable record of
+    the owner ruling -- and are not copied here. A second copy would have to be
+    edited alongside the contract, which is the defect R10 removes.
+    """
     document = json.loads(CONTRACT.read_text())
     assert document["schema"] == "hadronization_multiplicity_percentile_classes_v2"
     assert document["historical_contract"]["github_pr"] == 13
-    assert [(row["percentile_min"], row["percentile_max"])
-            for row in document["classes"]] == [
-        (90.0, 100.0), (80.0, 90.0), (70.0, 80.0),
-        (60.0, 70.0), (50.0, 60.0), (40.0, 50.0),
-        (30.0, 40.0), (20.0, 30.0), (10.0, 20.0),
-        (1.0, 10.0), (0.0, 1.0),
-    ]
+    assert document["classes"], "the contract declares no class"
+    for row in document["classes"]:
+        assert row["percentile_min"] < row["percentile_max"], row
+
+
+def test_the_raw_macro_takes_its_classes_from_the_generated_header() -> None:
+    """R10: the C++ side reads the contract through one generated header."""
+    raw = RAW.read_text()
+    assert '#include "GeneratedMultiplicityPercentileClasses.h"' in raw
+    assert "HADRONIZATION_MULTIPLICITY_PERCENTILE_CLASSES" in raw
+
+    header = CLASSES_HEADER.read_text()
+    rows = json.loads(CONTRACT.read_text())["classes"]
+    assert ("HADRONIZATION_MULTIPLICITY_PERCENTILE_CLASS_COUNT %d" % len(rows)
+            ) in header
+    for row in rows:
+        entry = "{%s, %s," % (float(row["percentile_min"]),
+                              float(row["percentile_max"]))
+        assert entry in header, entry
+
+    # The old second copy is gone: no percentile window is written out in the
+    # macro any more.
+    for row in rows:
+        literal = "{%s, %s," % (float(row["percentile_min"]),
+                                float(row["percentile_max"]))
+        assert literal not in raw, literal
 
 
 def test_plotters_derive_thresholds_from_their_tune_histogram() -> None:

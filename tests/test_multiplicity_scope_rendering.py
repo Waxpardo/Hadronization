@@ -8,6 +8,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+CLASS_CONTRACT = ROOT / "config/multiplicity_percentile_classes_v2.json"
 CONFIGURATION = (
     ROOT / "plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json"
 )
@@ -41,8 +42,11 @@ def main() -> int:
 
     assert scoped, "fixture has no scoped pairs"
     assert {pair["associateOS"] for pair in scoped} == {"Bc-"}
+    # The scoped pairs carry the integrated bin and the HIGHEST-activity
+    # class. Ruling R10: which class that is comes from the contract.
+    highest = json.loads(CLASS_CONTRACT.read_text())["classes"][-1]["bin"]
     assert all(
-        set(pair["multiplicity_scope"]) == {"M00_100", "M0_1"}
+        set(pair["multiplicity_scope"]) == {"M00_100", highest}
         for pair in scoped
     )
 

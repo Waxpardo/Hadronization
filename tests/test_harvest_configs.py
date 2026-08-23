@@ -10,6 +10,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+from class_label_format import format_percentile_range  # noqa: E402
+
+CONTRACT = ROOT / "config/multiplicity_percentile_classes_v2.json"
 SOURCE = ROOT / "tools/make_harvest_configs.py"
 SPEC = importlib.util.spec_from_file_location("make_harvest_configs", SOURCE)
 assert SPEC and SPEC.loader
@@ -39,9 +43,12 @@ def main() -> int:
     MODULE.validate_route(central, MODULE.NOMINAL)
 
     central_labels = labels(central)
-    assert "60-70%" in central_labels
-    assert "50-60%" in central_labels
-    assert "0-1%" in central_labels
+    # Ruling R10: every class label the contract defines must be present, and
+    # the labels come from the contract rather than from a copy of them here.
+    for row in json.loads(CONTRACT.read_text())["classes"]:
+        expected = format_percentile_range(row["percentile_min"],
+                                           row["percentile_max"])
+        assert expected in central_labels, expected
 
     for campaign in MODULE.CAMPAIGNS:
         derived = json.loads(MODULE.output_path(campaign).read_text())

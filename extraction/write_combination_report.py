@@ -20,7 +20,11 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from harvest_class_axis import class_order  # noqa: E402
+from harvest_class_axis import INTEGRATED, class_names, class_order  # noqa: E402
+
+# Ruling R10: the class set comes from
+# config/multiplicity_percentile_classes_v2.json and from nowhere else.
+CLASSES = class_names() + [INTEGRATED]
 
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 SHORT = {"MONASH": "MON", "JUNCTIONS": "JUN", "CLOSEPACKING": "CLP"}
@@ -71,7 +75,7 @@ def main() -> int:
         add(f"\n### {flavour} {trigger} — {associate}\n")
         add("| class | " + " | ".join(SHORT[t] for t in TUNES) + " |")
         add("|---" * (len(TUNES) + 1) + "|")
-        for cls in [f"c{i}" for i in range(1, 12)] + ["MB"]:
+        for cls in CLASSES:
             cols = []
             for tune in TUNES:
                 cell = index[(flavour, trigger, associate, tune, cls)]

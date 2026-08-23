@@ -15,9 +15,12 @@ the lowest-activity class and `c11` is the highest.
 Every tune resolves its own percentile edges from its own merged summed
 MULTIPLICITY histogram. No minimum-bias tune and no common absolute N_ch
 boundary defines another tune's classes, so no fixed N_ch range belongs here.
-`config/multiplicity_percentile_classes_v2.json` holds the eleven windows and
-the tie rule: a threshold integer belongs to the lower-activity class, and the
-adjacent higher-activity class starts at that integer plus one.
+`config/multiplicity_percentile_classes_v2.json` holds the windows and the tie
+rule: a threshold integer belongs to the lower-activity class, and the adjacent
+higher-activity class starts at that integer plus one. Under ruling R10 that
+file is the ONE source of the class set. `contract_classes`, `class_names`,
+`class_count`, `class_bins` and `class_by_window` below read it, and no module
+in this repository may enumerate the classes itself.
 
 `LEGACY_CLASS_BIN` below still parses the retired `hDPhic<N>_MB<lo>_<hi>` names.
 Those labels carry the percentile edges of one retired axis.
@@ -25,20 +28,54 @@ Those labels carry the percentile edges of one retired axis.
 
 from __future__ import annotations
 
+import json
 import re
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+CLASS_CONTRACT = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
 
 CLASS_BIN = re.compile(r"^hDPhiM(?P<lo>\d+)_(?P<hi>\d+)$")
 LEGACY_CLASS_BIN = re.compile(
     r"^hDPhi(?P<cls>c\d+)_MB(?P<lo>[0-9p]+)_(?P<hi>[0-9p]+)$")
-CLASS_BY_WINDOW = {
-    (90.0, 100.0): "c1", (80.0, 90.0): "c2",
-    (70.0, 80.0): "c3", (60.0, 70.0): "c4",
-    (50.0, 60.0): "c5", (40.0, 50.0): "c6",
-    (30.0, 40.0): "c7", (20.0, 30.0): "c8",
-    (10.0, 20.0): "c9", (1.0, 10.0): "c10",
-    (0.0, 1.0): "c11",
-}
 INTEGRATED = "MB"
+INTEGRATED_BIN = "hDPhiM00_100"
+
+
+def contract_classes() -> list[dict]:
+    """The class rows of the contract, in contract order.
+
+    Ruling R10 makes `config/multiplicity_percentile_classes_v2.json` the ONE
+    place the class set is written down. Every count, label and window below
+    comes from here, so changing the class set means editing that file and
+    regenerating -- never editing an enumeration in code.
+    """
+    return json.loads(CLASS_CONTRACT.read_text())["classes"]
+
+
+def class_names() -> list[str]:
+    """c1..cN in contract order, ascending event activity."""
+    return [row["class"] for row in contract_classes()]
+
+
+def class_count() -> int:
+    return len(contract_classes())
+
+
+def class_bins() -> dict[str, str]:
+    """class name -> its histogram bin label, for example c1 -> M90_100."""
+    return {row["class"]: row["bin"] for row in contract_classes()}
+
+
+def class_by_window() -> dict[tuple[float, float], str]:
+    """(percentile_min, percentile_max) -> class name."""
+    return {(float(row["percentile_min"]), float(row["percentile_max"])):
+            row["class"] for row in contract_classes()}
+
+
+# Read once at import. An unreadable or malformed contract stops every consumer
+# here rather than letting one of them guess a class set.
+CLASS_BY_WINDOW = class_by_window()
 
 
 def percentile(token: str) -> float:
@@ -52,7 +89,7 @@ def parse_bin(name: str) -> tuple[str, float, float]:
     Fail closed: an unrecognised bin name is a changed emission, not a row to
     skip quietly.
     """
-    if name == "hDPhiM00_100":
+    if name == INTEGRATED_BIN:
         return INTEGRATED, 0.0, 100.0
     m = CLASS_BIN.match(name)
     if m:
@@ -68,7 +105,7 @@ def parse_bin(name: str) -> tuple[str, float, float]:
 
 
 def class_order(cls: str) -> int:
-    """c1 < c2 < ... < c11 < MB. Sorting on the string puts c10 before c2."""
+    """c1 < c2 < ... < cN < MB. Sorting on the string puts c10 before c2."""
     return 999 if cls == INTEGRATED else int(cls[1:])
 
 

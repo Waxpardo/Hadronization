@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+CONTRACT = ROOT / "config/multiplicity_percentile_classes_v2.json"
 sys.path.insert(0, str(ROOT / "extraction"))
 
 from harvest_class_axis import (  # noqa: E402
@@ -26,11 +27,15 @@ def test_percentile() -> None:
 
 
 def test_parse_bin() -> None:
-    assert parse_bin("hDPhiM90_100") == ("c1", 90.0, 100.0)
-    assert parse_bin("hDPhiM0_1") == ("c11", 0.0, 1.0)
-    assert parse_bin("hDPhiM1_10") == ("c10", 1.0, 10.0)
+    # Ruling R10: the current-axis anchors come from the contract. A second
+    # copy of the class set here would have to be edited alongside it.
+    for row in json.loads(CONTRACT.read_text())["classes"]:
+        assert parse_bin("hDPhi" + row["bin"]) == (
+            row["class"], row["percentile_min"], row["percentile_max"])
     # Archived pre-rebuild logs remain readable, but current configs do not
-    # emit the legacy MONASH-MB spelling.
+    # emit the legacy MONASH-MB spelling. Those names carry the RETIRED
+    # absolute axis and stay literal: they are historical data, not this
+    # repository's class set.
     assert parse_bin("hDPhic1_MB88p197_100") == ("c1", 88.197, 100.0)
     assert parse_bin("hDPhic11_MB0_8p422") == ("c11", 0.0, 8.422)
     assert parse_bin("hDPhic10_MB8p422_17p124") == ("c10", 8.422, 17.124)
@@ -146,19 +151,21 @@ def test_resolver_assertion_fails_closed_on_a_silent_log() -> None:
 def test_the_percentile_axis_runs_opposite_to_the_multiplicity_axis() -> None:
     """A high percentile is a LOW N_ch, and the label invites the opposite read.
 
-    The window is a TOP percentile. c1 is the 90-100% lowest-activity class and
-    c11 is the 0-1% highest-activity class. Absolute N_ch thresholds are
-    tune-dependent and therefore are not part of this static contract test.
+    The window is a TOP percentile. The first contract class is the
+    lowest-activity one and the last is the highest. Absolute N_ch thresholds
+    are tune-dependent and therefore are not part of this static contract test.
     """
-    contract = json.loads(
-        (ROOT / "config/multiplicity_percentile_classes_v2.json").read_text())
-    _, c1_low, c1_high = parse_bin("hDPhiM90_100")
-    _, c11_low, c11_high = parse_bin("hDPhiM0_1")
+    contract = json.loads(CONTRACT.read_text())
+    rows = contract["classes"]
+    # Ruling R10: the first and last class come from the contract, so this
+    # check follows any class set rather than one written down here.
+    _, c1_low, c1_high = parse_bin("hDPhi" + rows[0]["bin"])
+    _, top_low, top_high = parse_bin("hDPhi" + rows[-1]["bin"])
 
-    assert c1_low > c11_high, (c1_low, c1_high, c11_low, c11_high)
-    assert [row["class"] for row in contract["classes"]] == [
-        f"c{i}" for i in range(1, 12)]
-    assert class_order("c1") < class_order("c11")
+    assert c1_low > top_high, (c1_low, c1_high, top_low, top_high)
+    names = [row["class"] for row in contract["classes"]]
+    assert names == [f"c{i}" for i in range(1, len(names) + 1)], names
+    assert class_order(rows[0]["class"]) < class_order(rows[-1]["class"])
 
 
 def main() -> int:

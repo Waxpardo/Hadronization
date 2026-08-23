@@ -53,6 +53,7 @@
 #include "TTree.h"
 
 #include "GeneratedClassLabelPrecision.h"
+#include "GeneratedMultiplicityPercentileClasses.h"
 #include "HistogramErrorUtils.h"
 #include "MultiplicityBoundaryUtils.h"
 #include "TunePlotStyle.h"
@@ -965,19 +966,11 @@ const char* MultiplicitySpectrumYTitle(bool normalizeShape)
 
 std::vector<MultiplicityPercentileClass> MultiplicityPercentileClasses()
 {
-  return {
-    {90.0, 100.0, "90-100%"},
-    {80.0, 90.0, "80-90%"},
-    {70.0, 80.0, "70-80%"},
-    {60.0, 70.0, "60-70%"},
-    {50.0, 60.0, "50-60%"},
-    {40.0, 50.0, "40-50%"},
-    {30.0, 40.0, "30-40%"},
-    {20.0, 30.0, "20-30%"},
-    {10.0, 20.0, "10-20%"},
-    {1.0, 10.0, "1-10%"},
-    {0.0, 1.0, "0-1%"},
-  };
+  // The class set comes from config/multiplicity_percentile_classes_v2.json
+  // through GeneratedMultiplicityPercentileClasses.h. Ruling R10 makes that
+  // contract the one source: this file used to carry its own copy of the
+  // eleven windows and their labels, and nothing compared the two.
+  return { HADRONIZATION_MULTIPLICITY_PERCENTILE_CLASSES };
 }
 
 HistSet BookSpeciesHistograms(const SpeciesDef& species, const std::string& tune)

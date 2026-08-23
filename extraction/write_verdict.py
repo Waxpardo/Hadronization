@@ -20,9 +20,10 @@ Three observables: the two balancing yields, and the Lambda_b/B- ratio whose
 uncertainty comes from the plotter's own `ratio_sem` because numerator and
 denominator share triggers and events.
 
-`c1` is the lowest-activity class and `c11` is the highest: the window label is
-a top percentile and runs the other way. Every tune resolves its own N_ch edges,
-so no absolute N_ch range applies across tunes.
+`c1` is the lowest-activity class and the last class is the highest: the window
+label is a top percentile and runs the other way. Every tune resolves its own
+N_ch edges, so no absolute N_ch range applies across tunes. The class set itself
+is read from the contract, per ruling R10.
 """
 
 from __future__ import annotations
@@ -36,9 +37,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from combine_derived import (combined_systematic, endpoint_contrast,  # noqa: E402
                              ratio_at, trend_difference, verdict)
-from harvest_class_axis import parse_log  # noqa: E402
+from harvest_class_axis import INTEGRATED, class_names, parse_log  # noqa: E402
 
-CLASSES = [f"c{i}" for i in range(1, 12)] + ["MB"]
+# Ruling R10: the class set comes from
+# config/multiplicity_percentile_classes_v2.json and from nowhere else.
+CLASSES = class_names() + [INTEGRATED]
 PAIRS = [("MONASH", "JUNCTIONS"), ("MONASH", "CLOSEPACKING")]
 OBSERVABLES = ["B+ - Lambda_b", "B+ - B-", "Lambda_b / B-"]
 

@@ -35,11 +35,12 @@ ROOT = Path(__file__).resolve().parents[1]
 RENDERER = ROOT / "plotting" / "render_systematics_overlay.py"
 PLOTTER = ROOT / "plotting" / "improvedPlotting_THnSparse.C"
 
-CLASSES = [f"c{i}" for i in range(1, 12)]
-BINS = {"c1": "hDPhiM90_100", "c2": "hDPhiM80_90", "c3": "hDPhiM70_80",
-        "c4": "hDPhiM60_70", "c5": "hDPhiM50_60", "c6": "hDPhiM40_50",
-        "c7": "hDPhiM30_40", "c8": "hDPhiM20_30", "c9": "hDPhiM10_20",
-        "c10": "hDPhiM1_10", "c11": "hDPhiM0_1"}
+# Ruling R10: the class set and its bin names come from the contract, so this
+# fixture cannot drift from the axis the renderer will meet.
+CLASS_CONTRACT = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
+_CLASS_ROWS = json.loads(CLASS_CONTRACT.read_text())["classes"]
+CLASSES = [row["class"] for row in _CLASS_ROWS]
+BINS = {row["class"]: "hDPhi" + row["bin"] for row in _CLASS_ROWS}
 TUNES = ("MONASH", "JUNCTIONS")
 COMMIT = "1234567890abcdef1234567890abcdef12345678"
 
@@ -184,6 +185,9 @@ def test_the_overlay_writes_only_under_a_plotting_syst_plane() -> None:
 
 def test_a_class_the_envelope_omits_is_labelled_statistical_only() -> None:
     """A reader must never guess which points carry a band."""
+    # Ruling R10: which two classes the envelope omits follows the contract's
+    # own class list, so this test does not name them a second time.
+    omitted = set(CLASSES[-2:])
     with tempfile.TemporaryDirectory() as tmp:
         result = render(Path(tmp), classes=CLASSES[:-2])
         assert result.returncode == 0, result.stdout + result.stderr
@@ -191,7 +195,6 @@ def test_a_class_the_envelope_omits_is_labelled_statistical_only() -> None:
         manifest = json.loads(next(plane.glob("*_manifest.json")).read_text())
         macro = next(plane.glob("*.C")).read_text()
         drawn = pdf_text(next(plane.glob("*.pdf")).read_bytes())
-    omitted = {"c10", "c11"}
     labelled = {row["class"] for row in manifest["statistical_only_points"]}
     assert labelled == omitted, labelled
     for point in manifest["points"]:
@@ -200,7 +203,8 @@ def test_a_class_the_envelope_omits_is_labelled_statistical_only() -> None:
             assert point["systematic"] == 0.0
             assert point["label"] == "STAT-ONLY"
     assert "STAT-ONLY" in macro, "the canvas does not say which points lack a band"
-    assert "stat_only=4" in result.stdout, result.stdout
+    assert f"stat_only={len(omitted) * len(TUNES)}" in result.stdout, \
+        result.stdout
     assert b"STAT-ONLY" in drawn, "the drawn canvas omits the label"
 
 
