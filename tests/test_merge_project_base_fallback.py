@@ -1,6 +1,6 @@
 """`merge_root_files.sh` must resolve its project base without the environment.
 
-`docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` §9.2 recorded how close this came to
+A run record held in the internal repository shows how close this came to
 stopping a merge: *"`/proc/108654/environ` confirms `HADRONIZATION_BASE` **is**
 exported. That, and only that, is what keeps the `merge_root_files.sh:27`
 `project_base` fallback from killing this run."*

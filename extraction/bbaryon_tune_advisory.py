@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-"""Per-tune b-baryon particle/antiparticle advisory — step 2 of the ladder in
-docs/B_BARYON_ADVISORY_DIAGNOSTIC.md, which §2 records as blocked on the merged
-three-tune output.
+"""Per-tune b-baryon particle/antiparticle advisory — step 2 of the advisory
+ladder, which is blocked on the merged three-tune output.
 
 RAW WEIGHTS, NO MAP. Step 1 of that ladder computed its ratios "directly from
 per_species.csv, with no map applied at all", and exonerated the map. Step 2 is
@@ -14,8 +13,8 @@ transport predicts the CR tunes carry at least MONASH's asymmetry. That is a
 direction, not a threshold, and this prints it as an advisory exactly as
 apply_decay_map.py's advisory does -- it never fails.
 
-Ratios are formed INSIDE each block and then averaged, per
-docs/PER_TUNE_PROCESSING_PREREGISTRATION.md step 3: a ratio of summed
+Ratios are formed INSIDE each block and then averaged, per the registered
+per-tune processing, step 3: a ratio of summed
 numerators to summed denominators is a different estimator with a smaller,
 wrong variance.
 """

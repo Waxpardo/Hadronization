@@ -4,8 +4,8 @@
 An I2 failure must not exit successfully when I3 passes.
 
 I2's binomial null is known to be
-misspecified for event-clustered pair counts (docs/MONASH_CENTRAL_TABLE.md S3:
-353 flags in 880 comparisons, ~5x overdispersion), so real runs legitimately
+misspecified for event-clustered pair counts (353 flags in 880 comparisons,
+~5x overdispersion), so real runs legitimately
 flag. The fix is that flagging must reach the caller, with an EXPLICIT
 `--i2-advisory` opt-out that appears in the command line and therefore in the
 transcript. Silence is what is forbidden, not flagging.

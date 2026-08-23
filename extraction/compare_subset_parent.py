@@ -14,7 +14,7 @@ The caller must select one of two null models because they answer different ques
   This assumes the pair counts are independent draws. THEY ARE NOT: a pair count
   is event-clustered, one event contributing many correlated pairs, and the
   measured overdispersion is ~4.75 in variance (~2.2x in sigma) --
-  `docs/MONASH_CENTRAL_TABLE.md` S3, 353 flags in 880 comparisons. So this null
+  the MONASH central table S3, 353 flags in 880 comparisons. So this null
   is KNOWN to be misspecified for block-vs-central integrity work. It is kept,
   and must be named explicitly, because it is the computation behind a published
   audit trail (E4's "30 of 88") and that history is pinned, not rewritten.

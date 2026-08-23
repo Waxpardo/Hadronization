@@ -20,7 +20,7 @@ from harvest_tune import closure_verdict  # noqa: E402
 DRIVER = REPO / "extraction/pipeline/harvest_tune.py"
 DEDUP = REPO / "AnalysisScripts/anchors/merged_monash_dedup"
 
-# MONASH's real closure output, as recorded in docs/MONASH_CENTRAL_TABLE.md §1.
+# MONASH's real closure output, as recorded in the MONASH central table §1.
 MONASH_CLOSURE = (
     "PAIR_BLOCK_CLOSURE errors=0 "
     "analysis_schema=paul_pair_objects_primary_ground_v3 "

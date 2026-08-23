@@ -2,9 +2,10 @@
 """The three-tune table and the b-baryon advisory, pinned against MONASH.
 
 A TOOL THAT PRODUCES A PUBLISHED NUMBER MUST REPRODUCE A KNOWN ONE. Both tools
-here fed `docs/THREE_TUNE_CENTRAL_TABLE.md`, so both are run against the
-committed MONASH anchor (`AnalysisScripts/anchors/merged_monash_dedup`) and
-required to return the values recorded in `docs/MONASH_CENTRAL_TABLE.md` §0.
+here fed the published central tables, so both are run against the committed
+MONASH anchor (`AnalysisScripts/anchors/merged_monash_dedup`) and required to
+return the values those tables record. The tables are held in the internal
+repository.
 That is the same discipline test_harvest_tune.py applies to the harvest driver.
 
 TWO PROPERTIES ARE PINNED THAT ARE EASY TO "FIX" INTO ERRORS.
@@ -51,7 +52,7 @@ out = r.stdout
 check("three_tune_table exits 0 on the committed MONASH anchor",
       r.returncode == 0, r.stderr[-300:])
 
-# docs/MONASH_CENTRAL_TABLE.md section 0, structural.
+# MONASH central table section 0, structural.
 for group, value, sem in (("kCentralGround", "52.4959", "0.0074"),
                           ("kExcludedVector", "46.4946", "0.0079"),
                           ("kExcludedExcited", "1.0095", "0.0012")):
@@ -60,7 +61,7 @@ for group, value, sem in (("kCentralGround", "52.4959", "0.0074"),
               for ln in out.splitlines()),
           out[:200])
 
-# docs/MONASH_CENTRAL_TABLE.md section 0, experiment-comparable (map v2, split).
+# MONASH central table section 0, experiment-comparable (map v2, split).
 for species, value in (("D0", "25.4543"), ("Dbar0", "25.3809"),
                        ("D+", "13.2505"), ("D-", "13.2225"),
                        ("D_s+", "4.2720"), ("D_s-", "4.2684"),
@@ -121,7 +122,7 @@ check("three-tune table exits 0 on the committed anchors", r.returncode == 0,
       r.stderr[-300:])
 out = r.stdout
 
-# docs/THREE_TUNE_CENTRAL_TABLE.md section 1, every structural cell.
+# Three-tune central table section 1, every structural cell.
 FINAL = {
     "kCentralGround":   [("52.4959", "0.0074"), ("58.2318", "0.0078"), ("54.1697", "0.0112")],
     "kExcludedVector":  [("46.4946", "0.0079"), ("39.9409", "0.0083"), ("39.9976", "0.0105")],
@@ -138,8 +139,8 @@ for group, cells in FINAL.items():
 check("the structural table sums to 100 % for every tune",
       sum("sum = 100.0000 %" in ln for ln in out.splitlines()) == 3, out[-400:])
 
-# The digest recorded in docs/GOLDEN_OUTPUTS.md 2.9c and in
-# THREE_TUNE_CENTRAL_TABLE.md section 7's regeneration recipe.
+# The digest recorded in docs/GOLDEN_OUTPUTS.md 2.9c and in the three-tune
+# central table's section 7 regeneration recipe.
 PINNED = "a46a7f6b96f668177ee600746e51eadf1dfaabdaceac07c1265ef5d7d0fc930d"
 digest = hashlib.sha256(out.encode()).hexdigest()
 check("the table's stdout matches the digest pinned in GOLDEN_OUTPUTS 2.9c",

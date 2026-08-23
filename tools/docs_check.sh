@@ -27,10 +27,10 @@ owner_for() {
       echo "docs/PHYSICS.md (comparison) + docs/PIPELINE.md (contract)" ;;
 
     generation/*|analysis/*|merging/*|extraction/*|AnalysisScripts/*)
-      echo "docs/PIPELINE.md (dataflow) + docs/COMPONENTS.md (catalog)" ;;
+      echo "docs/PIPELINE.md (dataflow) + the component catalog in the internal repository" ;;
 
     Validation/*)
-      echo "docs/COMPONENTS.md (validator) + docs/PIPELINE.md (gate)" ;;
+      echo "the component catalog in the internal repository + docs/PIPELINE.md (gate)" ;;
 
     # Plotting changes can affect the stage contract and publication outputs.
     "plotting"/*)
@@ -43,10 +43,10 @@ owner_for() {
       echo "docs/REPRODUCIBILITY.md (runtime and checks)" ;;
 
     tools/*)
-      echo "docs/COMPONENTS.md (catalog); update the owning spine contract when needed" ;;
+      echo "the component catalog in the internal repository; update the owning spine contract when needed" ;;
 
     tests/*)
-      echo "docs/COMPONENTS.md when the guarded contract changes" ;;
+      echo "the component catalog in the internal repository when the guarded contract changes" ;;
 
     *.md)
       echo "(documentation itself)" ;;

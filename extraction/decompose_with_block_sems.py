@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Species decomposition with block SEMs, both conventions.
 
-THE ESTIMATOR IS FIXED BY PRE-REGISTRATION (docs/PER_TUNE_PROCESSING_PREREGISTRATION.md
-step 3) and this implements exactly that, because the choice matters:
+THE ESTIMATOR IS FIXED BY PRE-REGISTRATION (per-tune processing, step 3) and
+this implements exactly that, because the choice matters:
 
   * every nonlinear quantity is formed INSIDE a block before averaging. A
     fraction is computed per block from that block's own counts; the ten

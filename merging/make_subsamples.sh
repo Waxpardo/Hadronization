@@ -13,7 +13,7 @@ disjoint equal-exposure blocks. Every tune must contribute the same number of
 jobs, at least ten and divisible by ten -- merge_root_files.sh:63,66-67 and
 tools/validate_analysis_outputs.py:112-113. Jobs per tune is a campaign
 parameter, not a contract constant; the canonical production shape is 1000
-per tune (docs/DESIGN_AND_RATIONALE.md:263).
+per tune.
 No random/bootstrap partition is permitted for paper inputs.
 EOF
   exit 0

@@ -93,7 +93,7 @@ def test_read_category_counts() -> None:
 def test_reproduces_the_sealed_central_table() -> None:
     """The strongest anchor: the committed nominal must come back exactly.
 
-    THREE_TUNE_CENTRAL_TABLE.md section 1 quotes MONASH at kCentralGround
+    The three-tune central table section 1 quotes MONASH at kCentralGround
     52.4959, kExcludedVector 46.4946, kExcludedExcited 1.0095, kMultiplyHeavy
     0.0000, and the I3 total at 53,662,416. Those are published numbers this
     file does not produce, so agreeing with them is a real check on the

@@ -9,7 +9,7 @@ or the columns are not comparable.
 
 The estimator is unchanged and is re-derived here from the same CSVs the tool
 reads: fractions are formed INSIDE each block and then averaged, SEM =
-stdev(ten)/sqrt(10) with dof = 9, per docs/PER_TUNE_PROCESSING_PREREGISTRATION.md
+stdev(ten)/sqrt(10) with dof = 9, per the registered per-tune processing,
 step 3. The structural numbers this prints are checked against that tool's
 output for all three tunes before use.
 """

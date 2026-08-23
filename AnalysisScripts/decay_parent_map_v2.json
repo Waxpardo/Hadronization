@@ -2,7 +2,7 @@
   "br_source": {
     "generator": "PYTHIA",
     "is_pdg": false,
-    "note": "NOT the PDG. Same source as v1 so the two are comparable; switching to PDG values is an open decision recorded in docs/MAP_V2_PREREGISTRATION.md section 4.",
+    "note": "NOT the PDG. Same source as v1 so the two are comparable; switching to PDG values is an open decision whose record is held in the internal repository.",
     "table": "particleData, channels read after mayDecay(id,false)",
     "version": "8.317"
   },

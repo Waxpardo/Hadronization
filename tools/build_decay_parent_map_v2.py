@@ -3,7 +3,7 @@
 
 WHY v2 EXISTS. v1 chains each species through its DOMINANT CHANNEL only, so a
 species is assigned WHOLE to one descendant. That put 12.84 % of total weight at
-risk (docs/SECOND_BRANCH_WEIGHT.md). The recorded decision: build v2 with
+risk. The recorded decision: build v2 with
 fractional splits, do not switch conventions.
 
 THE KEY CORRECTION IS SPECIES-LEVEL AGGREGATION, NOT THE SPLIT ITSELF. The
@@ -22,8 +22,8 @@ ruled. The terminal set is therefore identical to v1's by construction.
 
 BR SOURCE: PYTHIA 8.317 particleData, the pinned install, via the extended
 probe (all channels). Same source as v1, so v2 is comparable to v1 by
-construction. This is NOT the PDG; see docs/MAP_V2_PREREGISTRATION.md §4, an
-open provenance question.
+construction. This is NOT the PDG, which remains an open provenance
+question.
 
 Usage:
   tools/build_decay_parent_map_v2.py PROBE_OUT --ordinals ... --v1 ... --out ...
@@ -65,7 +65,7 @@ def main() -> int:
     ap.add_argument("--ordinals", type=Path, required=True)
     ap.add_argument("--v1", type=Path, required=True,
                     help="the BASE map: must be v1.1 or later. v1 is defective "
-                         "(docs/MAP_V1_CONJUGATION_BUG.md)")
+                         "it does not conjugate antiparticle decays")
     ap.add_argument("--weights", type=Path, required=True,
                     help="per_species.csv, for the threshold decision")
     ap.add_argument("--out", type=Path, required=True)
@@ -89,7 +89,7 @@ def main() -> int:
     if v1.get("schema") == "hf_decay_parent_map_v1":
         raise SystemExit(
             "FAIL-CLOSED: base map is v1, which does not conjugate antiparticle "
-            "decays (docs/MAP_V1_CONJUGATION_BUG.md). Build on v1.1 or later.")
+            "decays. Build on v1.1 or later.")
 
     def daughter_of(prods):
         for p in prods:
@@ -199,8 +199,8 @@ def main() -> int:
             "table": "particleData, channels read after mayDecay(id,false)",
             "is_pdg": False,
             "note": ("NOT the PDG. Same source as v1 so the two are comparable; "
-                     "switching to PDG values is an open decision recorded "
-                     "in docs/MAP_V2_PREREGISTRATION.md section 4."),
+                     "switching to PDG values is an open decision whose "
+                     "record is held in the internal repository."),
         },
         "pythia_version": v1["pythia_version"],
         "ordinal_table_digest_fnv1a64": v1["ordinal_table_digest_fnv1a64"],

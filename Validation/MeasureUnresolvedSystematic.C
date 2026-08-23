@@ -31,7 +31,7 @@
 // section rather than while designing the run. The sector is now an argument.
 //
 // The default is "c", so every pre-existing invocation is unchanged and the
-// charm numbers in docs/M7_UNRESOLVED_SYSTEMATIC.md remain reproducible by the
+// charm numbers already recorded remain reproducible by the
 // exact command that produced them. The beauty sector uses heavyQb/heavyOriginB,
 // which are the same branches the production analysis reads
 // (analysis/status_analysis_THnSparse_qq.C:410-412).

@@ -2,7 +2,7 @@
   "conjugation": {
     "applied_to": "antiparticle parents (pdg < 0)",
     "involution_pairs_checked": 101,
-    "reference": "docs/MAP_V1_CONJUGATION_BUG.md",
+    "reference": "v1 conjugation defect record, held in the internal repository",
     "rows_conjugated": 101,
     "supersedes": "hf_decay_parent_map_v1, which stored PYTHIA's unconjugated products for antiparticle parents"
   },

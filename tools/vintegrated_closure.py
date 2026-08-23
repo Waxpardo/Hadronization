@@ -13,7 +13,7 @@ projections summed, against one unrestricted projection -- so agreement is a
 real check that the classes tile the multiplicity axis, not an identity.
 
 INTEGER-EXACT, no tolerance. The counts are unweighted for this campaign
-(docs/V_INTEGRATED_PREREGISTRATION.md section 2, measured over 1.2M events), so
+(measured over 1.2M events), so
 the contents are exact integers in doubles and exact equality is the right
 comparison. A mismatch means the classes do not tile the sample -- a dropped
 class, a bins_to_ignore entry, an off-by-one on a boundary bin -- and the fix is

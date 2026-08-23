@@ -52,7 +52,7 @@ EXPECTED_PYTHIA = "8.317"
 # conjugation: particleDataEntryPtr(-413) returns the +413 entry. The probe
 # therefore reports UNCONJUGATED products for negative ids, and v1 recorded them
 # verbatim -- which mapped D*- and D*bar0 to D0 instead of D0bar and put a 4.49x
-# charge asymmetry into the published table. See docs/MAP_V1_CONJUGATION_BUG.md.
+# charge asymmetry into the published table.
 #
 # The probe's record is CORRECT AS A RECORD; conjugation is interpretation, so
 # it lives here and the probe output stays untouched raw material.
@@ -346,7 +346,8 @@ def main() -> int:
             "involution_pairs_checked": involution_pairs,
             "supersedes": "hf_decay_parent_map_v1, which stored PYTHIA's "
                           "unconjugated products for antiparticle parents",
-            "reference": "docs/MAP_V1_CONJUGATION_BUG.md",
+            "reference": "v1 conjugation defect record, held in the "
+                         "internal repository",
         },
         "species": species,
     }

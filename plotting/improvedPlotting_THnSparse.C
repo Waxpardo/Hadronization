@@ -3116,8 +3116,8 @@ void ApplyCorrelationSubsampleSEM(
 // The pair and trigger histograms are filled through a WEIGHTED path --
 // analysis/status_analysis_THnSparse_qq.C fills them with event_weight -- so
 // integrality is a property of the DATA, not of the code. It was measured for
-// this campaign (1.2M events across all three tunes, every weight exactly 1.0;
-// docs/V_INTEGRATED_PREREGISTRATION.md section 2), which is what allows the
+// this campaign (1.2M events across all three tunes, every weight exactly
+// 1.0), which is what allows the
 // closure to be asserted exactly instead of against an invented tolerance.
 //
 // The precondition is therefore enforced rather than assumed. A non-integral
@@ -3132,7 +3132,7 @@ void RequireIntegralPairCount(Double_t value, const char* what,
             "asserts integer-exact equality and is valid only on unit-weight "
             "input; a weighted campaign needs a recorded decision, not a "
             "tolerance. "
-            "See docs/V_INTEGRATED_PREREGISTRATION.md section 2.",
+            "The precondition was measured over 1.2M events.",
             what, value, tune.c_str(), binLabel.c_str()));
     }
 }
