@@ -277,11 +277,16 @@ case "${command_name}" in
         echo "ERROR: the systematic overlay renderer is absent: ${overlay}" >&2
         exit 1
       fi
+      # The nominal render log has no default. The overlay draws the
+      # statistical error from the same render the envelope is bound to, and
+      # a discovered log could be a different render entirely.
+      nominal_log="${HADRONIZATION_SYSTEMATICS_NOMINAL_LOG:?set HADRONIZATION_SYSTEMATICS_NOMINAL_LOG to the nominal render log this envelope applies to}"
       python3 "${overlay}" \
         --envelope "${HADRONIZATION_SYSTEMATICS_ENVELOPE}" \
         --output-plane "${HADRONIZATION_PLOT_SYST_OUTPUT}" \
         --campaign "${HADRONIZATION_CAMPAIGN}" \
         --commit "$(git -C "${project_base}" rev-parse HEAD)" \
+        --nominal-log "${nominal_log}" \
         ${1+"$@"}
       exit $?
     fi
