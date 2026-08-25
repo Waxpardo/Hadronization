@@ -144,14 +144,31 @@ env-verdict:
 # It also rejects a checkout with tracked changes.
 
 # Every submit target requires an ordinal because every target writes event identifiers.
+#
+# This message names where the claims are read from; it does not list them.
+# The list it replaced had drifted: it named HF_RUN3_V1 as the newest campaign,
+# knew nothing of the seven variation campaigns, and then told the reader to
+# re-run with the one ordinal it had just declared taken.
 require-ordinal:
 	@if [ -z "$(strip $(ORDINAL))" ]; then \
 	  echo "ERROR: ORDINAL is not set, and there is deliberately no default."; \
 	  echo "  The campaign ordinal is packed into every event ID and cannot be"; \
 	  echo "  corrected once the jobs have run."; \
-	  echo "  Already in use: 1 (HF_PT2, HF_SMOKE2, PTHAT2), 2 (HF_PT2_INT)."; \
-	  echo "  HF_RUN3_V1 is ordinal 3."; \
-	  echo "  Re-run as: make $(or $(MAKECMDGOALS),<target>) ORDINAL=3"; \
+	  echo "  Read the live claims before you choose one:"; \
+	  echo "    config/systematics_variations_v1.json"; \
+	  echo "      campaign_ordinals_claimed, and one per variation"; \
+	  echo "    docs/PIPELINE.md:126"; \
+	  echo "      ordinals must be unique among campaigns whose events can"; \
+	  echo "      enter one merge; :127 adds the distinct-ordinal convention"; \
+	  echo "    $(SEED_LEDGER)"; \
+	  echo "      the burned-seed ledger, which that JSON names authoritative."; \
+	  echo "      It lives under the data root; a path inside this checkout"; \
+	  echo "      means setupEnv.sh has not been sourced in this shell."; \
+	  echo "  Two claims do not move: the legacy campaigns hold 0-3, and"; \
+	  echo "  HF_SMOKE3 is assigned 11. HF_SMOKE3 has burned no seeds yet, so"; \
+	  echo "  the ledger does not carry it. Every other claim moves, so it is"; \
+	  echo "  read above and not written here."; \
+	  echo "  Re-run as: make $(or $(MAKECMDGOALS),<target>) ORDINAL=<ordinal>"; \
 	  exit 1; \
 	fi
 
