@@ -14,6 +14,10 @@ Checks:
      absolute root whose segments are all non-empty;
   2. the Nikhef profile puts the account in the root as its own path segment,
      and the name equals `id -un`;
+  2b. the Nikhef profile refuses an account whose data directory does not
+     exist -- the pool-account guard: `id -un` answers which account the
+     process runs as, so a pool or glidein account resolves a well-formed root
+     that no shape rule can reject;
   3. an empty account name makes the Nikhef profile refuse, loudly, naming the
      file to edit;
   4. an empty HADRONIZATION_BASE makes the local profile refuse the same way;
@@ -26,7 +30,10 @@ Checks:
      it names the file that supplied the value;
   8. the environment verdict blocks on a malformed data root, reports the site
      and the account it resolved without the environment, and does not let
-     HF_ALLOW_UNPINNED_ENV suppress it.
+     HF_ALLOW_UNPINNED_ENV suppress it;
+  9. the account guard in the shared file accepts an account that has a data
+     directory and refuses one that does not, both branches driven against a
+     sandbox parent.
 
 Run against another directory of profiles to check a copy:
     python3 tests/test_site_profile_environment_independence.py --sites-dir DIR
@@ -38,6 +45,7 @@ seen to fail against the pre-fix profile.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -55,6 +63,24 @@ REPORT = (
     'printf "%s\\n%s\\n" "${HADRONIZATION_DATA_ROOT:-}" '
     '"${HADRONIZATION_SITE_ACCOUNT:-}"\n'
 )
+
+# The same, but reporting what the profile derived even when it refuses.
+# config/sites/nikhef.conf assigns HADRONIZATION_DATA_ROOT before it asserts
+# that the account's data directory exists, so the derived root is readable on a
+# host that carries no /data/alice -- which is every host except the cluster.
+# Without this probe the environment-independence property of the Nikhef profile
+# could only be checked on Nikhef, and that is the one host where an
+# environment-dependent path would still have resolved.
+DERIVE = (
+    'source "$1"\n'
+    'hf_probe_status=$?\n'
+    'printf "%s\\n%s\\n%s\\n" "${hf_probe_status}" '
+    '"${HADRONIZATION_DATA_ROOT:-}" "${HADRONIZATION_SITE_ACCOUNT:-}"\n'
+)
+
+# The refusal the pool-account guard prints, and the directory it names.
+ACCOUNT_DIR_REFUSAL = re.compile(
+    r"the data directory of account '([^']*)' does not exist: ([^;]+);")
 
 # Every shape config/sites/site_guard.sh refuses, and why it still names a real
 # directory. A shape that resolves to nothing would not need a rule.
@@ -77,14 +103,14 @@ def check(label, condition, detail=""):
         failures.append(label)
 
 
-def source_profile(profile, keep=None, path=None):
+def source_profile(profile, keep=None, path=None, script=REPORT):
     """Source one profile with an empty environment and report what it did."""
     command = ["env", "-i"]
     if path is not None:
         command.append(f"PATH={path}")
     for name, value in (keep or {}).items():
         command.append(f"{name}={value}")
-    command += ["bash", "-c", REPORT, "_", str(profile)]
+    command += ["bash", "-c", script, "_", str(profile)]
     return subprocess.run(command, capture_output=True, text=True)
 
 
@@ -138,21 +164,44 @@ def check_profiles(sites_dir):
     if nikhef.is_file():
         # Nothing is passed. No USER, no LOGNAME, no HOME, not even PATH: the
         # account must come from the process credential.
-        got = source_profile(nikhef)
-        check("the Nikhef profile resolves under `env -i`, with no USER",
-              got.returncode == 0, f"rc={got.returncode} {got.stderr[:300]}")
-        if got.returncode == 0:
-            root, resolved_account = (got.stdout.split("\n") + ["", ""])[:2]
-            check("...to a root whose segments are all usable",
-                  malformed(root) == "", f"{root!r} has {malformed(root)}")
-            # A path component, not a substring: /data/alice/hf -- the shared
-            # directory the pilot wrote into -- contains "/alice/" already.
-            check("...that carries the account as its own path segment",
-                  bool(account) and account in root.split("/")[1:],
-                  f"{root!r} has no segment {account!r}")
+        #
+        # Two outcomes are correct here, and which one appears depends on the
+        # host rather than on the profile. On Nikhef the account has a data
+        # directory and the profile resolves. Everywhere else /data/alice does
+        # not exist, so the pool-account guard refuses -- and the derived root
+        # is still readable, because the profile assigns it before it asserts
+        # the directory. The derivation is what this check is about, so it runs
+        # either way; a third outcome, any other refusal, is a defect.
+        got = source_profile(nikhef, script=DERIVE)
+        status, root, resolved_account = (got.stdout.split("\n") + ["", "", ""])[:3]
+        refusal = ACCOUNT_DIR_REFUSAL.search(got.stderr)
+        check("the Nikhef profile derives a root under `env -i`, with no USER",
+              status in ("0", "1") and bool(root),
+              f"status={status!r} root={root!r} {got.stderr[:300]}")
+        check("...whose segments are all usable",
+              malformed(root) == "", f"{root!r} has {malformed(root)}")
+        # A path component, not a substring: /data/alice/hf -- the shared
+        # directory the pilot wrote into -- contains "/alice/" already.
+        check("...and carries the account as its own path segment",
+              bool(account) and account in root.split("/")[1:],
+              f"{root!r} has no segment {account!r}")
+        if status == "0":
             check("...and reports the account it used",
                   resolved_account == account,
                   f"{resolved_account!r} != {account!r} from `id -un`")
+        else:
+            check("...and, off the storage plane, refuses for the account "
+                  "directory and nothing else",
+                  refusal is not None, got.stderr[:400])
+            if refusal is not None:
+                named_account, named_dir = refusal.group(1), refusal.group(2)
+                check("...naming the account `id -un` gave",
+                      named_account == account,
+                      f"{named_account!r} != {account!r} from `id -un`")
+                check("...and the directory the derived root sits below",
+                      root.startswith(f"{named_dir}/")
+                      and named_dir.split("/")[-1] == account,
+                      f"{named_dir!r} is not the account parent of {root!r}")
 
     check("the local profile exists", local.is_file(), str(local))
     if local.is_file():
@@ -224,6 +273,37 @@ def check_profiles(sites_dir):
         check(f"{path.name} reads no USER or LOGNAME", not reads,
               f"{reads} -- an account segment taken from the environment is "
               f"empty in a Condor job")
+
+    # --- 9. the account guard, both branches, against a sandbox parent -------
+    # /data/alice cannot be created on a development host, so the guard is
+    # driven as a function with a parent this test owns. That is what makes the
+    # pool-account case reproducible off the cluster: the guard has to refuse an
+    # account name that is perfectly well formed by every shape rule and simply
+    # has no directory, which is exactly what a pool, glidein or uid-mapped
+    # account looks like.
+    guard = sites_dir / "site_guard.sh"
+    has_rule = guard.is_file() and "hf_site_require_account_dir" in guard.read_text()
+    check("the shared guard carries the account-directory rule", has_rule,
+          f"{guard} defines no hf_site_require_account_dir")
+    if has_rule:
+        drive = ('source "$1"\n'
+                 'hf_site_require_account_dir "config/sites/nikhef.conf" "$2" "$3"\n')
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "has-storage").mkdir()
+            got = subprocess.run(
+                ["bash", "-c", drive, "_", str(guard), tmp, "has-storage"],
+                capture_output=True, text=True)
+            check("the account guard accepts an account that has a data "
+                  "directory", got.returncode == 0,
+                  f"rc={got.returncode} err={got.stderr[:300]}")
+            got = subprocess.run(
+                ["bash", "-c", drive, "_", str(guard), tmp, "pool-account"],
+                capture_output=True, text=True)
+            check("...and refuses a well-formed account that has none",
+                  refuses(got, "config/sites/nikhef.conf"),
+                  f"rc={got.returncode} err={got.stderr[:300]}")
+            check("...naming the directory it required",
+                  f"{tmp}/pool-account" in got.stderr, got.stderr[:300])
 
 
 def check_setup_env():

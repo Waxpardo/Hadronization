@@ -30,13 +30,17 @@ esac
 # errexit off, so a refusal that returns without this call leaves the caller
 # running AND leaves its errexit off for the rest of the job. That is what
 # happened on the first HF_SMOKE3 pilot: the PYTHIA refusal below printed its
-# error and generation/submit/runCondorJob.sh ran the producer anyway.
+# error and generation/submit/runCondorJob.sh ran the producer anyway, 109 lines
+# further into the worker.
 #
-# SCOPE. Only the site-resolution refusals call this, and the normal exit at the
-# end of the file. The eleven dependency and runtime refusals below -- the PYTHIA
-# one among them -- still return with the caller's errexit off, so they still do
-# not stop a worker. Closing that is a separate change and is reported, not made
-# here.
+# SCOPE. Every refusal in this file calls this, and so does the normal exit at
+# the end. That was not true when the helper was written: only the site-
+# resolution refusals and the normal exit called it, and the eleven dependency
+# and runtime refusals -- the PYTHIA one among them -- still returned with the
+# caller's errexit off, which is worse than no refusal at all because the caller
+# then runs the rest of the job with `set -e` and `set -u` cleared.
+# tests/test_setupenv_refusal_propagation.py reads this file and fails when a
+# refusal carries no call, so the gap cannot reopen unnoticed.
 setupenv_restore_shell_flags() {
   if [[ "${setupenv_restore_errexit}" -eq 1 ]]; then
     set -e
@@ -145,6 +149,7 @@ setupenv_local_conf="${SCRIPT_DIR}/config/dependencies.local.conf"
 if [[ -n "${HADRONIZATION_DEPENDENCIES_CONF:-}" ]]; then
   if [[ ! -f "${HADRONIZATION_DEPENDENCIES_CONF}" ]]; then
     echo "ERROR: HADRONIZATION_DEPENDENCIES_CONF does not exist: ${HADRONIZATION_DEPENDENCIES_CONF}" >&2
+    setupenv_restore_shell_flags
     return 1 2>/dev/null || exit 1
   fi
   # shellcheck source=/dev/null
@@ -156,6 +161,7 @@ else
   fi
   if [[ ! -f "${setupenv_default_conf}" ]]; then
     echo "ERROR: dependency configuration is missing: ${setupenv_default_conf}" >&2
+    setupenv_restore_shell_flags
     return 1 2>/dev/null || exit 1
   fi
   # shellcheck source=/dev/null
@@ -188,6 +194,7 @@ if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then
     if [[ ! -x "${root_package}/bin/thisroot.sh" && ! -f "${root_package}/bin/thisroot.sh" ]]; then
       echo "ERROR: pinned ROOT package is unavailable: ${root_package}" >&2
       echo "       Set HF_ROOT_PREFIX in config/dependencies.local.conf." >&2
+      setupenv_restore_shell_flags
       return 1 2>/dev/null || exit 1
     fi
     root_runtime_libs=""
@@ -213,18 +220,22 @@ if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then
   if [[ ! -x "${pythia_package}/bin/pythia8-config" ]]; then
     echo "ERROR: pinned PYTHIA package is unavailable: ${pythia_package}" >&2
     echo "       Set HF_PYTHIA8_PREFIX in config/dependencies.local.conf." >&2
+    setupenv_restore_shell_flags
     return 1 2>/dev/null || exit 1
   fi
   if [[ ! -x "${pythia_gcc_package}/bin/g++" ]]; then
     echo "ERROR: pinned PYTHIA compiler runtime is unavailable: ${pythia_gcc_package}" >&2
+    setupenv_restore_shell_flags
     return 1 2>/dev/null || exit 1
   fi
   if [[ ! -f "${pythia_package}/share/Pythia8/xmldoc/Index.xml" ]]; then
     echo "ERROR: pinned PYTHIA data are unavailable: ${pythia_package}/share/Pythia8/xmldoc/Index.xml" >&2
+    setupenv_restore_shell_flags
     return 1 2>/dev/null || exit 1
   fi
   if [[ ! -e "${pythia_package}/lib/libpythia8.so" ]]; then
     echo "ERROR: pinned PYTHIA shared library is unavailable: ${pythia_package}/lib/libpythia8.so" >&2
+    setupenv_restore_shell_flags
     return 1 2>/dev/null || exit 1
   fi
   export PYTHIA8="${pythia_package}"
@@ -242,11 +253,13 @@ if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then
       export PYTHIA8DATA="${pythia_data_candidate}"
     else
       echo "ERROR: PYTHIA8DATA is unset and no runtime XML data exist under ${pythia_data_candidate}" >&2
+      setupenv_restore_shell_flags
       return 1 2>/dev/null || exit 1
     fi
   fi
   if [[ -n "${PYTHIA8DATA:-}" && ! -f "${PYTHIA8DATA%/}/Index.xml" ]]; then
     echo "ERROR: PYTHIA8DATA does not contain Index.xml: ${PYTHIA8DATA}" >&2
+    setupenv_restore_shell_flags
     return 1 2>/dev/null || exit 1
   fi
 
@@ -261,6 +274,7 @@ if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then
     echo "ERROR: PYTHIA version mismatch under ${pythia_package}" >&2
     echo "       configured HF_PYTHIA8_VERSION=${HF_PYTHIA8_VERSION}" >&2
     echo "       reported by pythia8-config=${setupenv_pythia_actual:-'(none)'}" >&2
+    setupenv_restore_shell_flags
     return 1 2>/dev/null || exit 1
   fi
   if command -v root-config >/dev/null 2>&1; then
@@ -269,6 +283,7 @@ if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then
       echo "ERROR: ROOT version mismatch" >&2
       echo "       configured HF_ROOT_VERSION=${HF_ROOT_VERSION}" >&2
       echo "       reported by root-config=${setupenv_root_actual:-'(none)'}" >&2
+      setupenv_restore_shell_flags
       return 1 2>/dev/null || exit 1
     fi
   fi
@@ -321,4 +336,4 @@ unset setupenv_pythia_actual setupenv_root_actual
 setupenv_restore_shell_flags
 unset -f setupenv_restore_shell_flags
 unset -f hf_site_refuse hf_site_account hf_site_check_root hf_site_root_problem
-unset -f hf_site_detect hf_site_profile_path
+unset -f hf_site_require_account_dir hf_site_detect hf_site_profile_path

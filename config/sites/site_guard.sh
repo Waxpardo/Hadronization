@@ -86,6 +86,28 @@ hf_site_root_problem() {
   return 0
 }
 
+hf_site_require_account_dir() {
+  # $1 the file that supplied the value, $2 the storage parent, $3 the account.
+  #
+  # The pool-account guard. `id -un` answers which account THIS PROCESS runs
+  # as, not which account submitted the job. Under a pool, glidein or
+  # uid-mapped account it returns a different name, and the root built from it
+  # is absolute, carries no empty segment and ends in no separator, so every
+  # shape rule above accepts it. The directory is what separates the two cases:
+  # an account with storage has one and a pool account does not.
+  # generation/submit/runCondorJob.sh runs `mkdir -p` on the resolved root, so
+  # without this assertion a wrong account creates its own tree and the job
+  # succeeds into a directory nobody will look in. The same assertion catches a
+  # typo in an exported HADRONIZATION_DATA_ROOT and a storage mount that did
+  # not come up on the execute node.
+  local hf_site_source="$1" hf_site_parent="$2" hf_site_name="$3"
+  local hf_site_dir="${hf_site_parent%/}/${hf_site_name}"
+  [[ -d "${hf_site_dir}" ]] && return 0
+  hf_site_refuse "${hf_site_source}" \
+    "the data directory of account '${hf_site_name}' does not exist: ${hf_site_dir}; \`id -un\` names the account this process runs as, not the account that submitted the job"
+  return 1
+}
+
 hf_site_check_root() {
   # $1 the file that supplied the value, $2 variable name, $3 resolved value.
   # Refuse every shape that names a valid but wrong location.
