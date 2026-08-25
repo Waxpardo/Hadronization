@@ -222,22 +222,43 @@ case "${command_name}" in
     plan_file="${HADRONIZATION_SYSTEMATICS_OUTPUT}/request_plan.json"
     # Answer the request before any extraction runs. A multi-hour chain that
     # discovers a missing selector row at its end has checked too late.
+    #
+    # A REFUSAL MUST REACH THE CALLER AS A NONZERO STATUS. Each step below
+    # captures its own status and exits with it. Nothing here leans on
+    # `set -e`: this file sources setupEnv.sh, which sources the site login
+    # script, and a refusal that arrives as status 0 reads as a pass to every
+    # caller, runbook and log reader (PRACTICE 3.5).
+    request_status=0
     if [[ "${HADRONIZATION_REQUEST_PREFLIGHT_ONLY:-0}" == "1" ]]; then
       python3 "${project_base}/tools/systematics_request.py" \
         --selector "${selector}" --checkout "${project_base}" \
         --dataset "${dataset_key}" \
         --results-root "${HADRONIZATION_RESULTS_ROOT}" \
-        --commit "${commit}" --preflight-only
-      exit $?
+        --commit "${commit}" --preflight-only || request_status=$?
+      if [[ "${request_status}" -ne 0 ]]; then
+        echo "SYSTEMATICS_REFUSED the request was refused; status ${request_status}" >&2
+        exit "${request_status}"
+      fi
+      exit 0
     fi
     mkdir -p "${HADRONIZATION_SYSTEMATICS_OUTPUT}"
     python3 "${project_base}/tools/systematics_request.py" \
       --selector "${selector}" --checkout "${project_base}" \
       --dataset "${dataset_key}" \
       --results-root "${HADRONIZATION_RESULTS_ROOT}" \
-      --commit "${commit}" --out "${plan_file}"
+      --commit "${commit}" --out "${plan_file}" || request_status=$?
+    if [[ "${request_status}" -ne 0 ]]; then
+      echo "SYSTEMATICS_REFUSED the request was refused; status ${request_status}" >&2
+      exit "${request_status}"
+    fi
+    chain_status=0
     "${project_base}/extraction/pipeline/systematics_chain.sh" \
-      "${plan_file}" "${HADRONIZATION_SYSTEMATICS_OUTPUT}"
+      "${plan_file}" "${HADRONIZATION_SYSTEMATICS_OUTPUT}" || chain_status=$?
+    if [[ "${chain_status}" -ne 0 ]]; then
+      echo "SYSTEMATICS_REFUSED the systematics chain refused; status ${chain_status}" >&2
+      exit "${chain_status}"
+    fi
+    exit 0
     ;;
   plot)
     [[ "$#" -ge 1 ]] || { usage >&2; exit 2; }
@@ -301,14 +322,18 @@ case "${command_name}" in
       # statistical error from the same render the envelope is bound to, and
       # a discovered log could be a different render entirely.
       nominal_log="${HADRONIZATION_SYSTEMATICS_NOMINAL_LOG:?set HADRONIZATION_SYSTEMATICS_NOMINAL_LOG to the nominal render log this envelope applies to}"
+      overlay_status=0
       python3 "${overlay}" \
         --envelope "${HADRONIZATION_SYSTEMATICS_ENVELOPE}" \
         --output-plane "${HADRONIZATION_PLOT_SYST_OUTPUT}" \
         --campaign "${HADRONIZATION_CAMPAIGN}" \
         --commit "$(git -C "${project_base}" rev-parse HEAD)" \
         --nominal-log "${nominal_log}" \
-        ${1+"$@"}
-      exit $?
+        ${1+"$@"} || overlay_status=$?
+      if [[ "${overlay_status}" -ne 0 ]]; then
+        echo "SYSTEMATICS_OVERLAY_REFUSED status ${overlay_status}" >&2
+      fi
+      exit "${overlay_status}"
     fi
     if [[ "$#" -eq 0 ]]; then set -- all; fi
     if [[ "$#" -eq 1 && "$1" == "measure-balancing" ]]; then

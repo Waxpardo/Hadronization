@@ -15,6 +15,13 @@ THE TWO GATES. `systematics` answers its request before any extraction runs;
 are exercised through HADRONIZATION_REQUEST_PREFLIGHT_ONLY, which is what
 makes them testable on a host that holds no campaign data.
 
+THE THIRD GATE IS THE EXIT STATUS. A refusal that reaches its caller as
+status 0 is indistinguishable from success, which is the incident class
+PRACTICE 3.5 exists for. The envelope probe of 2026-08-25 reported exactly
+that on the chain's receipt-absence path, so
+`test_the_systematics_command_exits_nonzero_when_the_chain_refuses` runs the
+real refusal on a fixture tree and reads the status.
+
 WHERE AN INPUT COMES FROM. Results are commit-scoped and an accepted result is
 immutable, so the request tool resolves the current commit root first and the
 digest pin in `config/accepted_measurements_v1.json` second. The pin holds the
@@ -482,6 +489,85 @@ def test_an_accepted_root_is_never_a_destination() -> None:
     assert result.returncode != 0, result.stdout
     assert ACCEPTED_ROOT in result.stderr, result.stderr
     assert "accepted root" in result.stderr, result.stderr
+
+
+# ---- a refusal must be nonzero --------------------------------------------
+
+def test_the_systematics_command_exits_nonzero_when_the_chain_refuses() -> None:
+    """The Phase 1b gate. Run the real refusal and read the status.
+
+    The probe of 2026-08-25 reported this refusal reaching its caller as 0. A
+    caller cannot tell that from a completed envelope, so the status is the
+    thing under test, not the message.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        results = Path(tmp) / "results"
+        results.mkdir()
+        result = cli("systematics", NOMINAL, env_extra={
+            "HADRONIZATION_REQUEST_PREFLIGHT_ONLY": "0",
+            "HADRONIZATION_RESULTS_ROOT": str(results),
+            "HADRONIZATION_DATA_ROOT": "/tmp/hadronization-test-data"})
+    assert result.returncode != 0, (
+        "the chain refused and the command reported success: "
+        + result.stdout + result.stderr)
+    assert "SYSTEMATICS_CHAIN_REFUSED" in result.stderr, result.stderr
+    assert "SYSTEMATICS_REFUSED" in result.stderr, result.stderr
+    # The refusal must name the accepted root it looked in, not a path under
+    # the current commit that never held these results.
+    assert ACCEPTED_ROOT in result.stderr, result.stderr
+
+
+def test_the_chain_script_exits_nonzero_on_a_missing_receipt() -> None:
+    """The same gate one layer down, with no environment in the way."""
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        out_dir = base / "systematics"
+        out_dir.mkdir()
+        plan = base / "plan.json"
+        plan.write_text(json.dumps({
+            "nominal_campaign": "HF_RUN3_V1",
+            "nominal_dataset": NOMINAL,
+            "envelope": str(out_dir / "systematics_envelope.json"),
+            "resolver_tags": {"HF_SYS_MUR_UP": "complete_root_HF_SYS_MUR_UP"},
+            "receipts": {"HF_SYS_MUR_UP": str(base / "absent" / RECEIPT_NAME)},
+            "accepted_roots": {"HF_SYS_MUR_UP": {
+                "root": ACCEPTED_ROOT, "source": "accepted_pin",
+                "receipt_sha256": "0" * 64, "verified": False}},
+            "nominal_boundary": {"root": NOMINAL_ROOT,
+                                 "source": "accepted_pin",
+                                 "boundary_receipt_sha256": "0" * 64,
+                                 "verified": False},
+        }))
+        result = subprocess.run(
+            ["bash", str(CHAIN), str(plan), str(out_dir)],
+            text=True, capture_output=True, check=False)
+    assert result.returncode != 0, result.stdout + result.stderr
+    assert "SYSTEMATICS_CHAIN_MISSING_RECEIPT" in result.stderr, result.stderr
+    assert "SYSTEMATICS_CHAIN_REFUSED" in result.stderr, result.stderr
+
+
+def test_every_chain_refusal_leaves_through_one_door() -> None:
+    """`refuse` is the only writer of the refusal marker, and it exits nonzero."""
+    text = CHAIN.read_text()
+    body = text[text.index("refuse() {"):text.index("\n}\n", text.index("refuse() {"))]
+    assert 'echo "SYSTEMATICS_CHAIN_REFUSED $*" >&2' in body, body
+    assert 'exit "${status}"' in body, body
+    others = [line for line in text.splitlines()
+              if "SYSTEMATICS_CHAIN_REFUSED" in line
+              and 'echo "SYSTEMATICS_CHAIN_REFUSED $*"' not in line]
+    assert others == [], others
+    assert "exit $?" not in text, "a discarded status is how a refusal reads as 0"
+
+
+def test_the_systematics_arm_never_discards_a_status() -> None:
+    """The CLI carries the chain's status out; it does not rely on set -e."""
+    text = CLI.read_text()
+    arm = text[text.index("\n  systematics)"):text.index("\n  plot)")]
+    assert "chain_status=0" in arm, arm
+    assert 'exit "${chain_status}"' in arm, arm
+    assert "request_status=0" in arm, arm
+    assert 'exit "${request_status}"' in arm, arm
+    assert "exit $?" not in arm, "a discarded status is how a refusal reads as 0"
 
 
 def main() -> int:
