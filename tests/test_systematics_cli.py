@@ -15,6 +15,13 @@ THE TWO GATES. `systematics` answers its request before any extraction runs;
 are exercised through HADRONIZATION_REQUEST_PREFLIGHT_ONLY, which is what
 makes them testable on a host that holds no campaign data.
 
+WHERE AN INPUT COMES FROM. Results are commit-scoped and an accepted result is
+immutable, so the request tool resolves the current commit root first and the
+digest pin in `config/accepted_measurements_v1.json` second. The pin holds the
+digests of artifacts that live on the cluster, which no fixture can forge, so
+the pin-hit and digest-drift paths are exercised at the function, where the
+pin map is a parameter, and the resolution order is exercised end to end.
+
 Every refusal below is a MUTATION of a fixture that otherwise passes, and each
 must name the field it refused on.
 """
@@ -35,9 +42,35 @@ ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "hadronization"
 ASSERT_TOOL = ROOT / "tools" / "assert_systematics_envelope.py"
 REQUEST_TOOL = ROOT / "tools" / "systematics_request.py"
+PIN_FILE = ROOT / "config" / "accepted_measurements_v1.json"
 CHAIN = ROOT / "extraction" / "pipeline" / "systematics_chain.sh"
+SELECTOR = ROOT / "config" / "dataset_selector.json"
 NOMINAL = "hf_run3_v1_candidate"
 VARIATION = "hf_sys_mur_up_variation"
+ACCEPTED_ROOT = "33451a28fdff"
+NOMINAL_ROOT = "4d309e9f99e4"
+RECEIPT_NAME = "measurement_receipt.json"
+
+
+def request_module():
+    """The request tool as a module, so the pin map can be a parameter."""
+    if str(ROOT / "tools") not in sys.path:
+        sys.path.insert(0, str(ROOT / "tools"))
+    import systematics_request  # noqa: E402
+
+    return systematics_request
+
+
+def request(results_root: Path, *extra: str,
+            commit: str = "aaaaaaaaaaaa") -> subprocess.CompletedProcess:
+    """Run the request tool against a results root that holds no data."""
+    return subprocess.run(
+        [sys.executable, str(REQUEST_TOOL), "--selector", str(SELECTOR),
+         "--checkout", str(ROOT), "--dataset", NOMINAL,
+         "--results-root", str(results_root), "--commit", commit, *extra],
+        env={**os.environ,
+             "HADRONIZATION_DATA_ROOT": "/tmp/hadronization-test-data"},
+        text=True, capture_output=True, check=False)
 
 
 def cli(*args: str, env_extra: dict | None = None) -> subprocess.CompletedProcess:
@@ -314,6 +347,141 @@ def test_the_flag_exports_the_envelope_and_its_digest() -> None:
     assert f"HADRONIZATION_SYSTEMATICS_ENVELOPE_SHA256={digest}" in result.stdout
     assert "/plotting/" not in result.stdout.split(
         "HADRONIZATION_PLOT_SYST_OUTPUT=")[1].splitlines()[0]
+
+
+# ---- the accepted measurement roots ---------------------------------------
+
+def test_the_pin_file_declares_every_included_campaign() -> None:
+    """The pin and the arithmetic must want the same campaigns."""
+    pins = json.loads(PIN_FILE.read_text())
+    assert pins["schema"] == "hadronization_accepted_measurements_v1"
+    sys.path.insert(0, str(ROOT / "extraction"))
+    from combine_per_class import required_campaigns  # noqa: E402
+    assert set(pins["campaigns"]) == required_campaigns(), sorted(pins["campaigns"])
+    assert "HF_SYS_PTHAT_1" not in pins["campaigns"], (
+        "R9 excludes that arm; a pin would offer the envelope a ruled-out input")
+    for campaign, row in pins["campaigns"].items():
+        assert row["accepted_root"] == ACCEPTED_ROOT, row
+        assert row["receipt_path"].startswith(
+            f"{campaign}/{ACCEPTED_ROOT}/measurements/"), row
+        assert row["receipt_path"].endswith(RECEIPT_NAME), row
+        assert len(row["receipt_sha256"]) == 64, row
+        assert row["receipt_sha256"] == row["receipt_sha256"].lower().strip()
+    assert pins["nominal"]["accepted_root"] == NOMINAL_ROOT, pins["nominal"]
+    assert len(pins["nominal"]["boundary_receipt_sha256"]) == 64
+
+
+def test_the_pin_file_holds_no_site_specific_path() -> None:
+    """A tracked absolute path would freeze one cluster's layout in the repo."""
+    text = PIN_FILE.read_text()
+    assert "/data/" not in text, "the pin file carries a site-specific path"
+    assert "/cvmfs/" not in text
+
+
+def test_the_request_reads_the_pin_when_the_current_root_is_empty() -> None:
+    """Resolution order, end to end: current commit root first, then the pin."""
+    with tempfile.TemporaryDirectory() as tmp:
+        result = request(Path(tmp) / "results", "--out", f"{tmp}/plan.json")
+        assert result.returncode == 0, result.stdout + result.stderr
+        plan = json.loads(Path(f"{tmp}/plan.json").read_text())
+    pins = json.loads(PIN_FILE.read_text())
+    for campaign, row in plan["accepted_roots"].items():
+        assert row["source"] == "accepted_pin", (campaign, row)
+        assert row["root"] == ACCEPTED_ROOT, (campaign, row)
+        assert row["receipt_sha256"] == \
+            pins["campaigns"][campaign]["receipt_sha256"], campaign
+        assert f"/{ACCEPTED_ROOT}/" in plan["receipts"][campaign], campaign
+    assert plan["nominal_boundary"]["root"] == NOMINAL_ROOT, plan
+    assert plan["nominal_boundary"]["source"] == "accepted_pin", plan
+    assert plan["accepted_measurements_sha256"] == hashlib.sha256(
+        PIN_FILE.read_bytes()).hexdigest()
+
+
+def test_the_current_commit_root_wins_over_the_pin() -> None:
+    """A newer commit that HAS the input never reaches for an accepted root."""
+    campaign, commit = "HF_SYS_MUR_UP", "aaaaaaaaaaaa"
+    with tempfile.TemporaryDirectory() as tmp:
+        results = Path(tmp) / "results"
+        here = (results / campaign / commit / "measurements"
+                / f"{campaign.lower()}_variation")
+        here.mkdir(parents=True)
+        (here / RECEIPT_NAME).write_text('{"campaign": "HF_SYS_MUR_UP"}')
+        result = request(results, "--out", f"{tmp}/plan.json", commit=commit)
+        assert result.returncode == 0, result.stdout + result.stderr
+        plan = json.loads(Path(f"{tmp}/plan.json").read_text())
+        digest = hashlib.sha256((here / RECEIPT_NAME).read_bytes()).hexdigest()
+    row = plan["accepted_roots"][campaign]
+    assert row["source"] == "current_commit_root", row
+    assert row["root"] == commit, row
+    assert row["receipt_sha256"] == digest, row
+    assert row["verified"] is True, row
+    others = {c for c, r in plan["accepted_roots"].items()
+              if r["source"] == "accepted_pin"}
+    assert campaign not in others and others, plan["accepted_roots"]
+
+
+def test_a_pinned_receipt_that_does_not_hash_refuses_by_name() -> None:
+    """A pin is a digest. A file at the pinned path is not enough."""
+    with tempfile.TemporaryDirectory() as tmp:
+        results = Path(tmp) / "results"
+        pins = json.loads(PIN_FILE.read_text())
+        row = pins["campaigns"]["HF_SYS_PTHAT_4"]
+        planted = results / row["receipt_path"]
+        planted.parent.mkdir(parents=True)
+        planted.write_text("this is not the accepted receipt")
+        result = request(results)
+    assert result.returncode != 0, result.stdout
+    assert "HF_SYS_PTHAT_4" in result.stderr, result.stderr
+    assert "accepted_measurements_v1.json" in result.stderr, result.stderr
+    assert row["receipt_sha256"] in result.stderr, result.stderr
+
+
+def test_a_campaign_the_pin_does_not_declare_refuses_by_name() -> None:
+    """No pin and no current root is a refusal, never a guessed path."""
+    module = request_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            module.resolve_receipt(
+                Path(tmp), "HF_SYS_PTHAT_1", "hf_sys_pthat_1_variation",
+                "aaaaaaaaaaaa", {"campaigns": {}})
+        except module.RequestRefused as error:
+            message = str(error)
+        else:
+            raise AssertionError("an undeclared campaign resolved")
+    assert "HF_SYS_PTHAT_1" in message, message
+    assert "accepted_measurements_v1.json" in message, message
+
+
+def test_a_pinned_receipt_that_hashes_correctly_resolves() -> None:
+    """The pin hit: the artifact is present and carries the pinned digest."""
+    module = request_module()
+    with tempfile.TemporaryDirectory() as tmp:
+        results = Path(tmp)
+        relative = (f"HF_SYS_MUF_UP/{ACCEPTED_ROOT}/measurements/"
+                    f"hf_sys_muf_up_variation/{RECEIPT_NAME}")
+        planted = results / relative
+        planted.parent.mkdir(parents=True)
+        planted.write_text('{"campaign": "HF_SYS_MUF_UP"}')
+        digest = hashlib.sha256(planted.read_bytes()).hexdigest()
+        pins = {"campaigns": {"HF_SYS_MUF_UP": {
+            "accepted_root": ACCEPTED_ROOT, "receipt_path": relative,
+            "receipt_sha256": digest}}}
+        resolved = module.resolve_receipt(
+            results, "HF_SYS_MUF_UP", "hf_sys_muf_up_variation",
+            "aaaaaaaaaaaa", pins)
+    assert resolved["source"] == "accepted_pin", resolved
+    assert resolved["root"] == ACCEPTED_ROOT, resolved
+    assert resolved["receipt_sha256"] == digest, resolved
+    assert resolved["verified"] is True, resolved
+
+
+def test_an_accepted_root_is_never_a_destination() -> None:
+    """Nothing writes into a root the pin names. Ruling R7's fail-closed frame."""
+    with tempfile.TemporaryDirectory() as tmp:
+        result = request(Path(tmp) / "results", commit=ACCEPTED_ROOT)
+    assert result.returncode != 0, result.stdout
+    assert ACCEPTED_ROOT in result.stderr, result.stderr
+    assert "accepted root" in result.stderr, result.stderr
 
 
 def main() -> int:

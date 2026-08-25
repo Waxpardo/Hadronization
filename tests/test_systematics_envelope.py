@@ -11,10 +11,17 @@ WHY EVERY REFUSAL IS A MUTATION. A gate never seen to fail is not known to be
 a gate. Each fail-closed test changes exactly one thing about a fixture that
 otherwise completes, and requires a nonzero exit with the reason recorded in
 the envelope's `missing` list.
+
+WHY THE FIXTURE TREE HAS THE REAL SHAPE. Every receipt sits at
+`results/<CAMPAIGN>/<root>/measurements/<dataset>/measurement_receipt.json`,
+with the variation's own boundary receipt in `plots/` beside it. The envelope
+reads that directory, so a flat fixture would prove the tool works on a layout
+that never occurs.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import subprocess
@@ -30,6 +37,13 @@ CLASS_CONTRACT = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
 
 CAMPAIGN = "HF_RUN3_V1"
 DATASET = "hf_run3_v1_candidate"
+ACCEPTED_CONTRACT = ROOT / "config" / "accepted_measurements_v1.json"
+# The commit root a current checkout writes under, and an accepted root that
+# only the digest pin may reach. The two must be different for the provenance
+# tests to mean anything.
+CURRENT_ROOT = "aaaaaaaaaaaa"
+PINNED_ROOT = "33451a28fdff"
+BOUNDARY_NAME = "multiplicity_boundary_receipt_v2.json"
 # Ruling R10: the fixture's class set is the contract's, so this test measures
 # the tool against the contract rather than against a second copy of it.
 CLASSES = [row["class"] for row in
@@ -109,31 +123,82 @@ def receipt(campaign: str, status: str = "PASS",
     }
 
 
+def boundary_receipt(campaign: str) -> dict:
+    """The boundary receipt ruling R10 makes every variation write for itself."""
+    return {
+        "schema": "hadronization_multiplicity_boundary_receipt_v2",
+        "completion_status": "PASS",
+        "algorithm": "per_tune_summed_multiplicity_quantiles_discrete_v2",
+        "campaign": campaign,
+    }
+
+
 def run(tmp: Path, *, report: dict | None = None,
         skip: set[str] | None = None,
         fail: set[str] | None = None,
-        bad_tag: str | None = None) -> tuple[subprocess.CompletedProcess, dict]:
-    """Write a fixture tree, run the tool, return (process, envelope)."""
+        bad_tag: str | None = None,
+        pinned: set[str] | None = None,
+        digest_drift: set[str] | None = None,
+        no_boundary: set[str] | None = None,
+        unresolved: set[str] | None = None
+        ) -> tuple[subprocess.CompletedProcess, dict]:
+    """Write a fixture tree, run the tool, return (process, envelope).
+
+    `pinned` marks the campaigns the request plan resolved through the digest
+    pin rather than the current commit root. `digest_drift` makes the plan
+    record a digest the receipt on disk does not have, which is the receipt
+    changing between the request and the read. `unresolved` drops a campaign
+    from the plan's resolution entirely.
+    """
+    pinned = pinned or set()
+    digest_drift = digest_drift or set()
+    no_boundary = no_boundary or set()
+    unresolved = unresolved or set()
+
     report_path = tmp / "per_class_deltas.json"
     report_path.write_text(json.dumps(report or delta_report()))
     tags_path = tmp / "resolver_tags.json"
     tags_path.write_text(json.dumps(resolver_tags()))
+    roots_path = tmp / "accepted_roots.json"
     out = tmp / "systematics_envelope.json"
 
     args = [sys.executable, str(TOOL), "--report", str(report_path),
             "--campaign", CAMPAIGN, "--nominal-dataset", DATASET,
             "--resolver-tags", str(tags_path),
+            "--accepted-roots", str(roots_path),
             "--boundary-receipt-sha", BOUNDARY_SHA, "--out", str(out)]
+    accepted_roots: dict[str, dict] = {}
     for campaign in ARMS:
         if skip and campaign in skip:
             continue
+        root = PINNED_ROOT if campaign in pinned else CURRENT_ROOT
+        directory = (tmp / "results" / campaign / root / "measurements"
+                     / f"{campaign.lower()}_variation")
+        directory.mkdir(parents=True, exist_ok=True)
         body = receipt(
             campaign,
             "FAIL" if fail and campaign in fail else "PASS",
             ["complete_root_SOMETHING_ELSE"] if bad_tag == campaign else None)
-        path = tmp / f"{campaign}_receipt.json"
+        path = directory / "measurement_receipt.json"
         path.write_text(json.dumps(body))
+        if campaign not in no_boundary:
+            plots = directory / "plots"
+            plots.mkdir(exist_ok=True)
+            (plots / BOUNDARY_NAME).write_text(
+                json.dumps(boundary_receipt(campaign)))
+        if campaign not in unresolved:
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+            accepted_roots[campaign] = {
+                "path": str(path),
+                "root": root,
+                "source": "accepted_pin" if campaign in pinned
+                          else "current_commit_root",
+                "receipt_sha256": "0" * 64 if campaign in digest_drift
+                                  else digest,
+                "verified": True,
+            }
         args += ["--receipt", f"{campaign}={path}"]
+    roots_path.write_text(json.dumps(accepted_roots))
 
     proc = subprocess.run(args, capture_output=True, text=True, check=False)
     envelope = json.loads(out.read_text()) if out.is_file() else {}
@@ -518,14 +583,99 @@ def test_the_envelope_refuses_a_plotting_output_plane() -> None:
         report.write_text(json.dumps(delta_report()))
         tags = base / "tags.json"
         tags.write_text(json.dumps(resolver_tags()))
+        roots = base / "accepted_roots.json"
+        roots.write_text(json.dumps({}))
         proc = subprocess.run(
             [sys.executable, str(TOOL), "--report", str(report),
              "--campaign", CAMPAIGN, "--nominal-dataset", DATASET,
-             "--resolver-tags", str(tags),
+             "--resolver-tags", str(tags), "--accepted-roots", str(roots),
              "--out", str(base / "plotting" / "envelope.json")],
             capture_output=True, text=True, check=False)
     assert proc.returncode != 0, proc.stdout
     assert "may not be written under a plotting" in proc.stderr, proc.stderr
+
+
+# ---- the accepted measurement roots ---------------------------------------
+
+def test_the_envelope_records_which_root_supplied_each_campaign() -> None:
+    """Provenance answers one question: where did this input come from?"""
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp))
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    roots = envelope["provenance"]["input_roots"]
+    assert set(roots) == set(ARMS), roots
+    for campaign in ARMS:
+        assert roots[campaign]["root"] == CURRENT_ROOT, roots[campaign]
+        assert roots[campaign]["source"] == "current_commit_root", roots[campaign]
+        entry = envelope["provenance"]["measurement_receipts"][campaign]
+        assert entry["input_root"] == CURRENT_ROOT, entry
+        assert entry["input_root_source"] == "current_commit_root", entry
+
+
+def test_the_envelope_names_the_accepted_root_that_supplied_an_input() -> None:
+    """One campaign read from the pin. The envelope must say so by name."""
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp), pinned={"HF_SYS_PTHAT_4"})
+    # The tracked pin holds the cluster digest, which a synthetic receipt can
+    # never carry, so this run refuses. The refusal must name the campaign and
+    # the pin file rather than fail anonymously.
+    assert proc.returncode != 0, proc.stdout
+    assert any("HF_SYS_PTHAT_4" in r and "accepted_measurements_v1.json" in r
+               for r in envelope["missing"]), envelope["missing"]
+
+
+def test_the_envelope_records_each_variation_boundary_receipt() -> None:
+    """Ruling R10: every variation re-derives its own class boundaries."""
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp))
+        expected = {
+            campaign: hashlib.sha256(json.dumps(
+                boundary_receipt(campaign)).encode()).hexdigest()
+            for campaign in ARMS}
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    receipts = envelope["provenance"]["measurement_receipts"]
+    for campaign in ARMS:
+        assert receipts[campaign]["boundary_receipt_sha256"] == \
+            expected[campaign], campaign
+    assert envelope["provenance"]["nominal_boundary_receipt_sha256"] == \
+        BOUNDARY_SHA
+
+
+def test_a_variation_without_its_boundary_receipt_refuses() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp), no_boundary={"HF_SYS_MUR_UP"})
+    assert proc.returncode != 0, proc.stdout
+    assert envelope["status"] != "COMPLETE", envelope["status"]
+    assert any("HF_SYS_MUR_UP" in r and BOUNDARY_NAME in r
+               for r in envelope["missing"]), envelope["missing"]
+
+
+def test_a_receipt_that_does_not_hash_to_the_resolved_digest_refuses() -> None:
+    """The receipt changed between the request and the read."""
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp), digest_drift={"HF_SYS_PDF_CTEQ6L1"})
+    assert proc.returncode != 0, proc.stdout
+    assert envelope["status"] == "FAIL", envelope["status"]
+    assert any("HF_SYS_PDF_CTEQ6L1" in r and "hashes to" in r
+               for r in envelope["missing"]), envelope["missing"]
+
+
+def test_a_campaign_with_no_resolved_input_root_refuses() -> None:
+    """An envelope that cannot name its input root cannot state provenance."""
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp), unresolved={"HF_SYS_MUF_DOWN"})
+    assert proc.returncode != 0, proc.stdout
+    assert envelope["status"] != "COMPLETE", envelope["status"]
+    assert any("HF_SYS_MUF_DOWN" in r and "input root" in r
+               for r in envelope["missing"]), envelope["missing"]
+
+
+def test_the_envelope_records_the_pin_file_digest() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        proc, envelope = run(Path(tmp))
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert envelope["provenance"]["accepted_measurements_sha256"] == \
+        hashlib.sha256(ACCEPTED_CONTRACT.read_bytes()).hexdigest()
 
 
 def main() -> int:

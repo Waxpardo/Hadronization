@@ -59,10 +59,12 @@
     "class_contract_classes": "The class set the envelope was built against, copied from that contract. Ruling R10 makes the contract the one source: no tool in this repository enumerates the classes itself.",
     "expected_rows": "How many rows the class contract requires: series times classes, plus one integrated row per series that carries one. DERIVED, never a constant. A COMPLETE envelope whose row count differs is a FAIL.",
     "delta_report_sha256": "sha256 of the per-class delta report the envelope was built from.",
-    "measurement_receipts": "Campaign to {receipt_sha256, completion_status, expected_complete_root_tag, resolved_complete_root_tags}. One entry per included variation campaign.",
+    "measurement_receipts": "Campaign to {receipt_sha256, completion_status, expected_complete_root_tag, resolved_complete_root_tags, input_root, input_root_source, receipt_path, boundary_receipt_sha256}. One entry per included variation campaign. input_root names the commit root that supplied the input, and input_root_source is current_commit_root or accepted_pin. boundary_receipt_sha256 is the sha256 of plots/multiplicity_boundary_receipt_v2.json beside that receipt: ruling R10 makes every variation re-derive its own class boundaries, so the per-variation receipt is part of the provenance.",
     "resolver_tags": "Campaign to the complete-root tag the dataset selector declares. A receipt whose resolved tag differs is a FAIL, never a warning.",
     "nominal_boundary_receipt_sha256": "sha256 of the multiplicity_boundary_receipt_v2.json written by the NOMINAL render this envelope applies to. plot --systematics refuses unless this equals the sha of the receipt in the nominal plotting plane.",
-    "nominal_dataset": "The dataset key of the nominal render, for example hf_run3_v1_candidate."
+    "nominal_dataset": "The dataset key of the nominal render, for example hf_run3_v1_candidate.",
+    "accepted_measurements_sha256": "sha256 of config/accepted_measurements_v1.json as read. That file pins the accepted commit roots by digest. An accepted result is immutable under its own root and is never regenerated to satisfy a newer commit.",
+    "input_roots": "Campaign to {root, source}, copied from the request plan's resolution. It answers one question in the artifact: which commit root supplied this campaign's inputs, the current one or an accepted pinned one."
   },
   "refusals": [
     "An included source without a PASS measurement receipt.",
@@ -73,7 +75,11 @@
     "A COMPLETE envelope whose row count differs from the count the class contract requires.",
     "A source or an arm that is excluded and records no exclusion_reason.",
     "An included source whose every declared arm is excluded.",
-    "Any attempt to write an envelope under a plotting output plane."
+    "Any attempt to write an envelope under a plotting output plane.",
+    "A campaign the request plan resolved from no recorded input root.",
+    "A receipt whose measured sha256 differs from the one the request plan resolved.",
+    "A pinned receipt whose measured sha256 differs from config/accepted_measurements_v1.json.",
+    "An included campaign with no plots/multiplicity_boundary_receipt_v2.json beside its measurement receipt."
   ],
   "not_a_systematic": "The spread between tune bundles is the measurement. It never enters an envelope."
 }

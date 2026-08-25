@@ -37,6 +37,22 @@ destination and renamed only after the status is decided, so no reader can
 ever observe a half-filled COMPLETE envelope. A refusal still writes the
 envelope: a refusal with no artifact is a refusal nobody can audit.
 
+WHICH ROOT SUPPLIED EACH INPUT. Results are commit-scoped and an accepted
+result is immutable, so a newer commit reads accepted inputs through the
+digest pin in `config/accepted_measurements_v1.json`. The request tool
+resolves that order and writes the answer beside the plan; this tool receives
+it as `--accepted-roots`, re-measures every receipt against it, and re-checks
+every pinned receipt against the pin file itself. Two checks are not one
+check written twice: the resolution and the read happen in different
+processes, and a receipt that changed between them would otherwise pass.
+
+Ruling R10 makes every variation re-derive its own class boundaries, so each
+accepted root carries its own boundary receipt beside its measurement
+receipt. The envelope records that hash per campaign, alongside the nominal
+one. A variation whose boundary receipt is absent refuses by name: an
+envelope that cannot say which class edges its inputs used cannot say what
+its band sits on.
+
 THE ARITHMETIC IS NOT HERE. Every number comes from `extraction/
 systematics_delta.py` and `extraction/combine_per_class.py`, which already
 carry amendments A1 and A2 as required policy flags that refuse to default.
@@ -67,11 +83,15 @@ from harvest_class_axis import (INTEGRATED, class_names,  # noqa: E402
 
 ENVELOPE_SCHEMA = "hadronization_systematics_envelope_v1"
 SOURCES_SCHEMA = "hadronization_systematics_sources_v1"
+ACCEPTED_SCHEMA = "hadronization_accepted_measurements_v1"
 DELTA_REPORT_SCHEMA = "hadronization_per_class_delta_v1"
 RECEIPT_SCHEMA = "hadronization_measurement_receipt_v3"
 CLASS_CONTRACT = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
 ENVELOPE_CONTRACT = ROOT / "config" / "systematics_envelope_v1.json"
 SOURCES_CONTRACT = ROOT / "config" / "systematics_sources_v1.json"
+ACCEPTED_CONTRACT = ROOT / "config" / "accepted_measurements_v1.json"
+VARIATION_BOUNDARY_RECEIPT = Path("plots") / "multiplicity_boundary_receipt_v2.json"
+ACCEPTED_PIN = "accepted_pin"
 
 METHOD_TAGS = {
     "d2_quadrature": "SEM(Delta) = sqrt(SEM_var^2 + SEM_nominal^2)",
@@ -201,17 +221,37 @@ def agrees_with_combination_map(sources: dict) -> list[str]:
 # Receipts and resolver tags
 # --------------------------------------------------------------------------
 
+def accepted_pins() -> dict:
+    """The tracked digest pin, or an empty map when the file is absent."""
+    if not ACCEPTED_CONTRACT.is_file():
+        return {}
+    payload = json.loads(ACCEPTED_CONTRACT.read_text())
+    if payload.get("schema") != ACCEPTED_SCHEMA:
+        raise EnvelopeRefused(
+            "FAIL",
+            [f"{ACCEPTED_CONTRACT.name} declares schema "
+             f"{payload.get('schema')!r}, expected {ACCEPTED_SCHEMA!r}"])
+    return payload
+
+
 def assert_receipts(campaigns: list[str], receipt_paths: dict[str, Path],
-                    resolver_tags: dict[str, str]) -> tuple[dict, list[str]]:
+                    resolver_tags: dict[str, str],
+                    accepted_roots: dict[str, dict],
+                    pins: dict) -> tuple[dict, list[str]]:
     """One receipt per campaign, PASS, and agreeing with its resolver tag.
 
     The caller names every receipt path explicitly, exactly as
     `harvest_class_report.py` names every variation log. A receipt directory
     whose shape this tool guessed would resolve a wrong-but-plausible file
     after any layout change, and the run would look successful.
+
+    The digest comes first. Every receipt is hashed against the resolution the
+    request tool recorded, and a pinned receipt against the pin file as well,
+    BEFORE this tool parses it or reads anything else in its directory.
     """
     receipts: dict[str, dict] = {}
     reasons: list[str] = []
+    pinned = pins.get("campaigns", {})
     for campaign in sorted(set(campaigns)):
         path = receipt_paths.get(campaign)
         if path is None:
@@ -222,6 +262,41 @@ def assert_receipts(campaigns: list[str], receipt_paths: dict[str, Path],
             reasons.append(
                 f"{campaign}: no measurement receipt at {path}")
             continue
+
+        resolution = accepted_roots.get(campaign)
+        if resolution is None:
+            reasons.append(
+                f"{campaign}: the request plan records no input root; the "
+                "envelope cannot say which commit root supplied this receipt")
+            continue
+        measured = sha256(path)
+        if measured != resolution.get("receipt_sha256"):
+            reasons.append(
+                f"{campaign}: the receipt at {path} hashes to {measured}; the "
+                f"request plan resolved {resolution.get('receipt_sha256')}")
+            continue
+        if resolution.get("source") == ACCEPTED_PIN:
+            pin = pinned.get(campaign)
+            if pin is None:
+                reasons.append(
+                    f"{campaign}: the request plan read this campaign from an "
+                    f"accepted root and {ACCEPTED_CONTRACT.name} pins none")
+                continue
+            if measured != pin.get("receipt_sha256"):
+                reasons.append(
+                    f"{campaign}: the pinned receipt at {path} hashes to "
+                    f"{measured}; {ACCEPTED_CONTRACT.name} pins "
+                    f"{pin.get('receipt_sha256')}")
+                continue
+
+        boundary = path.parent / VARIATION_BOUNDARY_RECEIPT
+        if not boundary.is_file():
+            reasons.append(
+                f"{campaign}: no {VARIATION_BOUNDARY_RECEIPT.as_posix()} "
+                f"beside {path}; ruling R10 makes every variation re-derive "
+                "its own class boundaries and the envelope records that hash")
+            continue
+
         receipt = json.loads(path.read_text())
         if receipt.get("schema") != RECEIPT_SCHEMA:
             reasons.append(
@@ -253,11 +328,15 @@ def assert_receipts(campaigns: list[str], receipt_paths: dict[str, Path],
                 f"declares {[declared]!r}")
             continue
         receipts[campaign] = {
-            "receipt_sha256": sha256(path),
+            "receipt_sha256": measured,
             "completion_status": receipt["completion_status"],
             "expected_complete_root_tag":
                 receipt.get("expected_complete_root_tag"),
             "resolved_complete_root_tags": resolved,
+            "input_root": resolution.get("root"),
+            "input_root_source": resolution.get("source"),
+            "receipt_path": str(path),
+            "boundary_receipt_sha256": sha256(boundary),
         }
     return receipts, reasons
 
@@ -394,7 +473,8 @@ def producing_commit() -> str:
 
 def build(report_path: Path, receipt_paths: dict[str, Path],
           resolver_tags: dict[str, str], campaign: str, nominal_dataset: str,
-          boundary_receipt_sha: str) -> tuple[dict, list[str], str]:
+          boundary_receipt_sha: str,
+          accepted_roots: dict[str, dict]) -> tuple[dict, list[str], str]:
     """(envelope, reasons, status). Never raises for a declared refusal."""
     reasons: list[str] = []
     status = "COMPLETE"
@@ -402,6 +482,7 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
     receipts: dict = {}
     expected_rows = 0
 
+    pins = accepted_pins()
     sources = load_json(SOURCES_CONTRACT, SOURCES_SCHEMA)
     drift = agrees_with_combination_map(sources)
     if drift:
@@ -418,7 +499,7 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
 
     campaigns, _owner = included_campaigns(sources)
     receipts, receipt_reasons = assert_receipts(
-        campaigns, receipt_paths, resolver_tags)
+        campaigns, receipt_paths, resolver_tags, accepted_roots, pins)
     if receipt_reasons:
         reasons += receipt_reasons
         # A receipt that exists and reports FAIL, or that contradicts its
@@ -426,7 +507,7 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
         # an incomplete input. The two deserve different names.
         contradiction = any(
             "not PASS" in r or "resolved" in r or "schema" in r
-            or "names campaign" in r
+            or "names campaign" in r or "hashes to" in r
             for r in receipt_reasons)
         status = "FAIL" if contradiction or status == "FAIL" else "INCOMPLETE"
 
@@ -486,6 +567,11 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
                 sha256(report_path) if report_path.is_file() else "",
             "measurement_receipts": receipts,
             "resolver_tags": dict(sorted(resolver_tags.items())),
+            "accepted_measurements_sha256":
+                sha256(ACCEPTED_CONTRACT) if ACCEPTED_CONTRACT.is_file() else "",
+            "input_roots": {c: {"root": r.get("root"),
+                                "source": r.get("source")}
+                            for c, r in sorted(accepted_roots.items())},
             "nominal_boundary_receipt_sha256": boundary_receipt_sha,
             "nominal_dataset": nominal_dataset,
             "nominal_campaign": campaign,
@@ -522,10 +608,14 @@ def main() -> int:
                     help="JSON object: campaign -> declared complete-root tag")
     ap.add_argument("--boundary-receipt-sha", default="",
                     help="sha256 of the nominal render's boundary receipt")
+    ap.add_argument("--accepted-roots", type=Path, required=True,
+                    help="JSON object: campaign -> the request plan's "
+                         "resolved {root, source, receipt_sha256}")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
     resolver_tags = json.loads(args.resolver_tags.read_text())
+    accepted_roots = json.loads(args.accepted_roots.read_text())
     receipt_paths: dict[str, Path] = {}
     for spec in args.receipt:
         name, sep, path = spec.partition("=")
@@ -535,7 +625,7 @@ def main() -> int:
     try:
         envelope, reasons, status = build(
             args.report, receipt_paths, resolver_tags, args.campaign,
-            args.nominal_dataset, args.boundary_receipt_sha)
+            args.nominal_dataset, args.boundary_receipt_sha, accepted_roots)
     except EnvelopeRefused as error:
         envelope = {
             "schema": ENVELOPE_SCHEMA,

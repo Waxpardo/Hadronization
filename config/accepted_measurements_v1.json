@@ -1,0 +1,58 @@
+{
+  "schema": "hadronization_accepted_measurements_v1",
+  "definition": "The accepted measurement roots of the systematic-uncertainty envelope. Each entry names one commit-scoped result root, the measurement receipt inside it, and that receipt's sha256. This file holds no physics value and decides no physics question. It states which already-accepted artifacts a newer commit may read.",
+  "authority": "Ruling R7's fail-closed frame, and the architect-verified envelope probe of 2026-08-25. PRACTICE section 4 makes a result root commit-scoped and forbids overwriting an accepted one. The probe measured every hash below from the artifact on the Nikhef cluster; the 2026-08-22 executive handoff carries the same six values from an independent measurement.",
+  "why_a_pin_and_not_a_rerun": "An accepted result is immutable under its own commit root. A newer commit never regenerates it to satisfy a newer path, because a regenerated result is a different measurement wearing an accepted name. A newer commit references the accepted root by digest instead, and this file is that reference.",
+  "resolution_order": "tools/systematics_request.py resolves each measurement input in one order: the current commit root first, then the entry below, then a refusal that names the campaign and this file. A campaign with no entry refuses. A pinned receipt whose measured sha256 differs from the value below refuses. No tool writes into a root named here.",
+  "path_rule": "Every path below is relative to HADRONIZATION_RESULTS_ROOT. The site prefix stays out of this file: a tracked absolute path would freeze one cluster's layout into the repository.",
+  "receipt_name": "measurement_receipt.json",
+  "variation_boundary_receipt_path": "plots/multiplicity_boundary_receipt_v2.json, relative to the measurement directory. Ruling R10 makes every variation re-derive its own class boundaries, so each accepted root carries its own boundary receipt. tools/systematics_envelope.py measures that file and records its sha256 in the envelope's provenance.",
+  "nominal": {
+    "campaign": "HF_RUN3_V1",
+    "accepted_root": "4d309e9f99e4",
+    "boundary_receipt_path": "HF_RUN3_V1/4d309e9f99e4/plotting/THnSparse/multiplicity_boundary_receipt_v2.json",
+    "boundary_receipt_sha256": "0a3709bdb0c6dbc9e99b2c9e413c41f0b59a1c0a174de3afbea30510cf5d84e7",
+    "reason": "The accepted nominal render. The envelope binds to the class edges this receipt records, so an envelope built against another render would sit on other classes."
+  },
+  "campaigns": {
+    "HF_SYS_MUF_DOWN": {
+      "accepted_root": "33451a28fdff",
+      "dataset": "hf_sys_muf_down_variation",
+      "receipt_path": "HF_SYS_MUF_DOWN/33451a28fdff/measurements/hf_sys_muf_down_variation/measurement_receipt.json",
+      "receipt_sha256": "4cffc1c68d7b4e113d8351dde98a32ab8c5a31fbd12c495a28df11e9af336e71"
+    },
+    "HF_SYS_MUF_UP": {
+      "accepted_root": "33451a28fdff",
+      "dataset": "hf_sys_muf_up_variation",
+      "receipt_path": "HF_SYS_MUF_UP/33451a28fdff/measurements/hf_sys_muf_up_variation/measurement_receipt.json",
+      "receipt_sha256": "badf98302db14635c472bfe3947b98a4fd5792f88c1f9b8ac4278d4fccb88b52"
+    },
+    "HF_SYS_MUR_DOWN": {
+      "accepted_root": "33451a28fdff",
+      "dataset": "hf_sys_mur_down_variation",
+      "receipt_path": "HF_SYS_MUR_DOWN/33451a28fdff/measurements/hf_sys_mur_down_variation/measurement_receipt.json",
+      "receipt_sha256": "ac8d37df27e207d4e3b279576603fe923d99330f316c70c083060247afd0eba9"
+    },
+    "HF_SYS_MUR_UP": {
+      "accepted_root": "33451a28fdff",
+      "dataset": "hf_sys_mur_up_variation",
+      "receipt_path": "HF_SYS_MUR_UP/33451a28fdff/measurements/hf_sys_mur_up_variation/measurement_receipt.json",
+      "receipt_sha256": "2c966051ed37ff05bdbf915a95ff47ecd2561befc5b93db26e24cfc9235c1102"
+    },
+    "HF_SYS_PDF_CTEQ6L1": {
+      "accepted_root": "33451a28fdff",
+      "dataset": "hf_sys_pdf_cteq6l1_variation",
+      "receipt_path": "HF_SYS_PDF_CTEQ6L1/33451a28fdff/measurements/hf_sys_pdf_cteq6l1_variation/measurement_receipt.json",
+      "receipt_sha256": "cd21bebcd8cc190c66e3390189f35f2bf057ed0fd84e416765d661c7d6c6dce3"
+    },
+    "HF_SYS_PTHAT_4": {
+      "accepted_root": "33451a28fdff",
+      "dataset": "hf_sys_pthat_4_variation",
+      "receipt_path": "HF_SYS_PTHAT_4/33451a28fdff/measurements/hf_sys_pthat_4_variation/measurement_receipt.json",
+      "receipt_sha256": "5a5ec8aad88ccaacf0d980882c1ab5cc0c314cd2d38a8703743a7900c50dbab4"
+    }
+  },
+  "declared_absent": {
+    "HF_SYS_PTHAT_1": "Ruling R9 excludes this arm from the per-class envelope. Its measurement receipt exists under the same accepted root and reports completion_status FAIL. No pin is declared, because a pin here would offer the envelope an input the owner ruled out."
+  }
+}
