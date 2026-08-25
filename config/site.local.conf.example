@@ -1,6 +1,24 @@
 # Optional untracked overrides. Copy to config/site.local.conf only when the
 # automatic local/Nikhef profile is not sufficient.
 #
-# HADRONIZATION_SITE=nikhef
-# HADRONIZATION_DATA_ROOT=/data/alice/my-account/hf
-# HF_PRODUCTION_ROOT=/another/large/storage/hadronization_production
+# setupEnv.sh sources this file INSTEAD of config/sites/<site>.conf, so none of
+# the tracked profile's refusals run, and nothing this file leaves unset gets a
+# site default. Set every root you need, not only the data root. setupEnv.sh
+# then checks each resolved root and stops when one is empty, relative, carries
+# an empty path segment, ends with a separator, carries a . or .. segment, or
+# contains a newline.
+#
+# Use the ": ${NAME:=value}" form. setupEnv.sh documents the precedence as
+# environment > local > tracked defaults, and only that form honours it; a plain
+# NAME=value assignment silently overrides an exported value instead.
+#
+# Write a literal path. Never build a path segment from the environment:
+# tools/render_production_submit.py emits `getenv = False` and no
+# `environment =` line, so a Condor job starts with an empty environment.
+# ${USER} was empty on the execute node, /data/alice//hf collapsed to the shared
+# /data/alice/hf, and the first HF_SMOKE3 pilot wrote outside the account
+# because that path still resolved.
+#
+# : "${HADRONIZATION_SITE:=nikhef}"
+# : "${HADRONIZATION_DATA_ROOT:=/data/alice/my-account/hf}"
+# : "${HF_PRODUCTION_ROOT:=/another/large/storage/hadronization_production}"

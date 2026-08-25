@@ -149,6 +149,8 @@ case "${command_name}" in
     ;;
   site)
     printf 'HADRONIZATION_SITE=%s\n' "${HADRONIZATION_SITE}"
+    printf 'HADRONIZATION_SITE_ACCOUNT=%s\n' \
+      "${HADRONIZATION_SITE_ACCOUNT:-(none; this profile builds no account segment)}"
     printf 'HADRONIZATION_BASE=%s\n' "${HADRONIZATION_BASE}"
     printf 'HADRONIZATION_DATA_ROOT=%s\n' "${HADRONIZATION_DATA_ROOT}"
     printf 'HF_PRODUCTION_ROOT=%s\n' "${HF_PRODUCTION_ROOT}"

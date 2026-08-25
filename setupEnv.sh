@@ -24,6 +24,28 @@ case "$-" in
     ;;
 esac
 
+# Put the caller's shell options back before refusing. A sourced script cannot
+# force its caller to stop; it can only return a status, and a caller with
+# `set -e` acts on that status only while errexit is on. The block above turns
+# errexit off, so a refusal that returns without this call leaves the caller
+# running AND leaves its errexit off for the rest of the job. That is what
+# happened on the first HF_SMOKE3 pilot: the PYTHIA refusal below printed its
+# error and generation/submit/runCondorJob.sh ran the producer anyway.
+#
+# SCOPE. Only the site-resolution refusals call this, and the normal exit at the
+# end of the file. The eleven dependency and runtime refusals below -- the PYTHIA
+# one among them -- still return with the caller's errexit off, so they still do
+# not stop a worker. Closing that is a separate change and is reported, not made
+# here.
+setupenv_restore_shell_flags() {
+  if [[ "${setupenv_restore_errexit}" -eq 1 ]]; then
+    set -e
+  fi
+  if [[ "${setupenv_restore_nounset}" -eq 1 ]]; then
+    set -u
+  fi
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [[ -n "${HADRONIZATION_BASE:-}" && -d "${HADRONIZATION_BASE%/}/plotting" ]]; then
   HADRONIZATION_BASE="${HADRONIZATION_BASE%/}"
@@ -39,27 +61,76 @@ export HADRONIZATION_BASE
 # authoritative full-pipeline environment; local is a source-development
 # profile. A user may override either with config/site.local.conf or exported
 # variables, without editing tracked files.
+setupenv_site_guard="${SCRIPT_DIR}/config/sites/site_guard.sh"
+if [[ ! -f "${setupenv_site_guard}" ]]; then
+  echo "ERROR: the shared site guard is missing: ${setupenv_site_guard}" >&2
+  setupenv_restore_shell_flags
+  return 1 2>/dev/null || exit 1
+fi
+# shellcheck source=/dev/null
+source "${setupenv_site_guard}"
 if [[ -z "${HADRONIZATION_SITE:-}" ]]; then
-  if [[ -d /data/alice && -d /cvmfs/alice.cern.ch ]]; then
-    HADRONIZATION_SITE="nikhef"
-  else
-    HADRONIZATION_SITE="local"
-  fi
+  HADRONIZATION_SITE="$(hf_site_detect)"
 fi
 setupenv_site_conf="${SCRIPT_DIR}/config/sites/${HADRONIZATION_SITE}.conf"
 setupenv_site_local_conf="${SCRIPT_DIR}/config/site.local.conf"
+setupenv_site_status=0
+# Name the file that supplied the values. An untracked config/site.local.conf
+# replaces the tracked profile, so a message that says "the local site profile"
+# would point the reader at a tracked file that never ran.
 if [[ -f "${setupenv_site_local_conf}" ]]; then
+  setupenv_site_source="config/site.local.conf"
   # shellcheck source=/dev/null
   source "${setupenv_site_local_conf}"
+  setupenv_site_status=$?
 elif [[ -f "${setupenv_site_conf}" ]]; then
+  setupenv_site_source="config/sites/${HADRONIZATION_SITE}.conf"
   # shellcheck source=/dev/null
   source "${setupenv_site_conf}"
+  setupenv_site_status=$?
 else
   echo "ERROR: unknown HADRONIZATION_SITE=${HADRONIZATION_SITE}; expected a profile at ${setupenv_site_conf}" >&2
+  setupenv_restore_shell_flags
   return 1 2>/dev/null || exit 1
 fi
-: "${HADRONIZATION_RESULTS_ROOT:=${HADRONIZATION_DATA_ROOT}/project/results}"
-export HADRONIZATION_SITE HADRONIZATION_DATA_ROOT
+# A profile that refuses must stop the run. Read its status; a sourced file can
+# report a refusal only this way.
+if [[ "${setupenv_site_status}" -ne 0 ]]; then
+  echo "ERROR: ${setupenv_site_source} refused; no dependency, dataset or output path is set up." >&2
+  setupenv_restore_shell_flags
+  return 1 2>/dev/null || exit 1
+fi
+: "${HADRONIZATION_RESULTS_ROOT:=${HADRONIZATION_DATA_ROOT:-}/project/results}"
+# Check every root that survived, whatever supplied it. config/site.local.conf
+# replaces the tracked profile and its refusals, and an exported value beats
+# both, so a shape that the tracked profiles refuse can still arrive here. The
+# siblings are checked too: config/site.local.conf.example invites the reader to
+# set HF_PRODUCTION_ROOT on its own, and that variable decides where hundreds of
+# gigabytes of raw campaign output land.
+if ! hf_site_check_root "${setupenv_site_source}" HADRONIZATION_DATA_ROOT \
+     "${HADRONIZATION_DATA_ROOT:-}"; then
+  setupenv_restore_shell_flags
+  return 1 2>/dev/null || exit 1
+fi
+# The siblings are checked when they carry a value. config/site.local.conf
+# replaces the tracked profile, and it may legitimately leave a sibling unset
+# for a run that never reaches that plane; a value that IS set has to be usable.
+for setupenv_root_name in HADRONIZATION_ANALYSIS_ROOT HADRONIZATION_MERGED_ROOT \
+    HADRONIZATION_SYSTEMATICS_ROOT HADRONIZATION_RESULTS_ROOT HF_PRODUCTION_ROOT; do
+  eval "setupenv_root_value=\"\${${setupenv_root_name}:-}\""
+  [[ -z "${setupenv_root_value}" ]] && continue
+  if ! hf_site_check_root "${setupenv_site_source}" "${setupenv_root_name}" \
+       "${setupenv_root_value}"; then
+    unset setupenv_root_name setupenv_root_value
+    setupenv_restore_shell_flags
+    return 1 2>/dev/null || exit 1
+  fi
+done
+unset setupenv_root_name setupenv_root_value
+# HADRONIZATION_SITE_ACCOUNT records the account name a profile put into the
+# data root, so `hadronization site` and the environment verdict can name it.
+# The local profile builds no account segment and leaves it unset.
+export HADRONIZATION_SITE HADRONIZATION_SITE_ACCOUNT HADRONIZATION_DATA_ROOT
 export HADRONIZATION_ANALYSIS_ROOT HADRONIZATION_MERGED_ROOT
 export HADRONIZATION_SYSTEMATICS_ROOT HADRONIZATION_RESULTS_ROOT
 export HF_PRODUCTION_ROOT
@@ -212,6 +283,15 @@ fi
 # HF_PRODUCTION_ROOT in config/dependencies.local.conf on any machine with real
 # storage; the in-checkout default only suits a smoke test.
 : "${HF_PRODUCTION_ROOT:=${HADRONIZATION_BASE}/Production}"
+# By this point HF_PRODUCTION_ROOT may come from the environment, from
+# config/dependencies.local.conf, from the site profile, or from the default
+# just applied, so the message names every place worth looking.
+if ! hf_site_check_root \
+     "config/dependencies.local.conf, ${setupenv_site_source}, or the environment" \
+     HF_PRODUCTION_ROOT "${HF_PRODUCTION_ROOT}"; then
+  setupenv_restore_shell_flags
+  return 1 2>/dev/null || exit 1
+fi
 export HF_PRODUCTION_ROOT
 
 # The pins and their resolved prefixes must cross the process boundary. The
@@ -235,11 +315,10 @@ fi
 
 unset setupenv_default_conf setupenv_local_conf
 unset setupenv_site_conf setupenv_site_local_conf
+unset setupenv_site_guard setupenv_site_status setupenv_site_source
 unset setupenv_pythia_actual setupenv_root_actual
 
-if [[ "${setupenv_restore_errexit}" -eq 1 ]]; then
-  set -e
-fi
-if [[ "${setupenv_restore_nounset}" -eq 1 ]]; then
-  set -u
-fi
+setupenv_restore_shell_flags
+unset -f setupenv_restore_shell_flags
+unset -f hf_site_refuse hf_site_account hf_site_check_root hf_site_root_problem
+unset -f hf_site_detect hf_site_profile_path
