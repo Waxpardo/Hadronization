@@ -29,6 +29,14 @@ digests of artifacts that live on the cluster, which no fixture can forge, so
 the pin-hit and digest-drift paths are exercised at the function, where the
 pin map is a parameter, and the resolution order is exercised end to end.
 
+ISOLATION FROM THE PLOT PLANE. `./hadronization plot` creates the
+`plotting/Plots` symlink on its first run in a checkout that has none, and
+refuses a later run that resolves a different target. Every case here therefore
+runs through `cli`, which puts that link back exactly as it found it. Without
+that, the first case decided what the second one saw: the first `make check` in
+a fresh clone failed, and the second passed only because by then the link
+pointed somewhere that made both cases refuse alike.
+
 Every refusal below is a MUTATION of a fixture that otherwise passes, and each
 must name the field it refused on.
 """
@@ -80,13 +88,65 @@ def request(results_root: Path, *extra: str,
         text=True, capture_output=True, check=False)
 
 
+PLOT_LINK = ROOT / "plotting" / "Plots"
+
+
+def plot_plane_state() -> tuple[str, str | None]:
+    """What `plotting/Plots` is at this moment, in a form that can be put back.
+
+    A symlink whose target has been deleted still exists as a link, so the
+    symlink test comes first: `Path.exists()` follows the link and answers
+    False for exactly the case this file creates.
+    """
+    if PLOT_LINK.is_symlink():
+        return ("symlink", os.readlink(PLOT_LINK))
+    if PLOT_LINK.exists():
+        return ("other", None)
+    return ("absent", None)
+
+
+def restore_plot_plane(before: tuple[str, str | None]) -> None:
+    """Put `plotting/Plots` back the way the caller found it.
+
+    `./hadronization plot` creates this symlink on its first run in a checkout
+    that has none, and `prepare_plot_output_plane` then refuses any later run
+    resolving a different target. That refusal is correct for an operator: a
+    plot plane holds published bytes and must be migrated deliberately, not
+    re-pointed. It is also state that must not cross between the cases in this
+    file, which is what made the first `make check` in a fresh clone fail while
+    the second passed. In a fresh clone the first case created the link and
+    succeeded, and the second case resolved a different temporary root and was
+    refused; in an established checkout the link already pointed somewhere
+    else, so both cases were refused alike and the comparison passed for a
+    reason that had nothing to do with what it tests.
+
+    Only a symlink is ever removed. A real directory at this path is operator
+    output; `prepare_plot_output_plane` refuses to touch it and so does this.
+    """
+    after = plot_plane_state()
+    if after == before:
+        return
+    if PLOT_LINK.is_symlink():
+        PLOT_LINK.unlink()
+    if before[0] == "symlink" and not PLOT_LINK.is_symlink() \
+            and not PLOT_LINK.exists():
+        PLOT_LINK.symlink_to(before[1])
+
+
 def cli(*args: str, env_extra: dict | None = None) -> subprocess.CompletedProcess:
     env = dict(os.environ)
     env["HADRONIZATION_REQUEST_PREFLIGHT_ONLY"] = "1"
     env.pop("HADRONIZATION_DATASET", None)
     env.update(env_extra or {})
-    return subprocess.run(["bash", str(CLI), *args], cwd=str(ROOT), env=env,
-                          text=True, capture_output=True, check=False)
+    # Every case in this file goes through here, so the plot plane is restored
+    # for all of them and no case can decide what the next one sees.
+    before = plot_plane_state()
+    try:
+        return subprocess.run(["bash", str(CLI), *args], cwd=str(ROOT),
+                              env=env, text=True, capture_output=True,
+                              check=False)
+    finally:
+        restore_plot_plane(before)
 
 
 def assert_tool(envelope: Path, plane: Path) -> subprocess.CompletedProcess:
@@ -159,6 +219,29 @@ def test_plot_without_the_flag_never_reads_a_systematics_path() -> None:
         "plot without --systematics behaved differently when an envelope "
         f"existed: {transcripts[0]} vs {transcripts[1]}")
     assert "systematics" not in transcripts[0][1].lower()
+
+
+def test_the_cli_helper_leaves_the_plot_plane_as_it_found_it() -> None:
+    """The isolation itself, pinned.
+
+    A plot run against a temporary results root resolves a target no checkout
+    link can already point at, so it either creates the link or is refused for
+    pointing elsewhere. Both outcomes are correct; what this reads is that
+    neither one survives the call. `make check` snapshots the resolved
+    plotting/Plots tree and fails the whole suite if a test changes it, so a
+    case that left a link behind would also be reporting a plane it never
+    wrote.
+    """
+    before = plot_plane_state()
+    with tempfile.TemporaryDirectory() as tmp:
+        results = Path(tmp) / "results"
+        (results / "HF_RUN3_V1" / "aaaaaaaaaaaa" / "plotting").mkdir(
+            parents=True)
+        cli("plot", NOMINAL,
+            env_extra={"HADRONIZATION_RESULTS_ROOT": str(results)})
+    assert plot_plane_state() == before, (
+        f"the plot plane changed across a cli() call: {before} -> "
+        f"{plot_plane_state()}")
 
 
 def test_the_plot_arm_has_no_default_for_the_flag() -> None:
