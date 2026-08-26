@@ -155,19 +155,23 @@ require-ordinal:
 	  echo "  The campaign ordinal is packed into every event ID and cannot be"; \
 	  echo "  corrected once the jobs have run."; \
 	  echo "  Read the live claims before you choose one:"; \
+	  echo "    config/campaign_ordinals_v1.json"; \
+	  echo "      every ordinal this project has claimed, with the campaigns"; \
+	  echo "      that hold it. render_production_submit.py reads this file"; \
+	  echo "      and refuses a claimed ordinal, so a wrong value stops at"; \
+	  echo "      render time rather than after the jobs have run."; \
 	  echo "    config/systematics_variations_v1.json"; \
-	  echo "      campaign_ordinals_claimed, and one per variation"; \
+	  echo "      campaign_ordinals_claimed, and one per variation; a test"; \
+	  echo "      cross-checks these against the registry above"; \
 	  echo "    docs/PIPELINE.md:126"; \
 	  echo "      ordinals must be unique among campaigns whose events can"; \
 	  echo "      enter one merge; :127 adds the distinct-ordinal convention"; \
 	  echo "    $(SEED_LEDGER)"; \
-	  echo "      the burned-seed ledger, which that JSON names authoritative."; \
-	  echo "      It lives under the data root; a path inside this checkout"; \
-	  echo "      means setupEnv.sh has not been sourced in this shell."; \
-	  echo "  Two claims do not move: the legacy campaigns hold 0-3, and"; \
-	  echo "  HF_SMOKE3 is assigned 11. HF_SMOKE3 has burned no seeds yet, so"; \
-	  echo "  the ledger does not carry it. Every other claim moves, so it is"; \
-	  echo "  read above and not written here."; \
+	  echo "      the burned-seed ledger, authoritative for which seeds are"; \
+	  echo "      spent. It records seeds and not campaign names, so it cannot"; \
+	  echo "      say who holds an ordinal. It lives under the data root; a"; \
+	  echo "      path inside this checkout means setupEnv.sh has not been"; \
+	  echo "      sourced in this shell."; \
 	  echo "  Re-run as: make $(or $(MAKECMDGOALS),<target>) ORDINAL=<ordinal>"; \
 	  exit 1; \
 	fi

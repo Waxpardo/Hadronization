@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 import re
 import subprocess
@@ -40,6 +41,45 @@ from campaign import (  # noqa: E402
 
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 SAFE_TOKEN = re.compile(r"^[A-Za-z0-9._-]+$")
+
+# The registry of claimed campaign ordinals. Read from this tool's own tree
+# rather than from the checkout being rendered, for the same reason the seed
+# derivation is imported from tools/campaign.py rather than read out of
+# project_base: which ordinals the project has claimed is a property of this
+# codebase, not of the directory a render happens to point at.
+ORDINAL_REGISTRY = "config/campaign_ordinals_v1.json"
+ORDINAL_REGISTRY_SCHEMA = "hadronization_campaign_ordinals_v1"
+REPOSITORY = Path(__file__).resolve().parents[1]
+
+
+def claimed_campaign_ordinals() -> dict[int, tuple[str, ...]]:
+    """Map every claimed ordinal to the campaigns that hold it.
+
+    Fail-closed. The ordinal keys the seed band and the producer packs it into
+    every event identifier, so a render that cannot read the registry cannot
+    say whether it is about to re-use one; it refuses instead of proceeding.
+    An ordinal held by no campaign is still held: ordinal 0's seed band was
+    burned under a derivation that had no campaign term.
+    """
+    path = REPOSITORY / ORDINAL_REGISTRY
+    try:
+        registry = json.loads(path.read_text())
+    except FileNotFoundError:
+        raise ValueError(f"the campaign ordinal registry is missing: {path}")
+    except json.JSONDecodeError as error:
+        raise ValueError(f"the campaign ordinal registry does not parse: {path}: {error}")
+    if registry.get("schema") != ORDINAL_REGISTRY_SCHEMA:
+        raise ValueError(
+            f"{path} declares schema {registry.get('schema')!r}, "
+            f"expected {ORDINAL_REGISTRY_SCHEMA!r}"
+        )
+    claimed: dict[int, tuple[str, ...]] = {}
+    for entry in registry["ordinals"]:
+        ordinal = entry["ordinal"]
+        if ordinal in claimed:
+            raise ValueError(f"{path} records ordinal {ordinal} more than once")
+        claimed[ordinal] = tuple(entry["campaigns"])
+    return claimed
 
 # A CPU-time limit catches a busy loop without penalizing a contended worker.
 # Four wedged jobs used CPU at 0.97 of wall time and consumed 34 CPU-hours.
@@ -169,6 +209,23 @@ def main() -> int:
         )
     if not 1 <= args.campaign_ordinal <= 65_535:
         raise ValueError("campaign_ordinal must be in [1,65535]")
+    # Refuse a claimed ordinal here, before a submit file exists and before a
+    # single seed is burned. Downstream the same mistake is a merge that holds
+    # two campaigns' events under one identifier, which no validator traces
+    # back to this argument.
+    holders = claimed_campaign_ordinals().get(args.campaign_ordinal)
+    if holders is not None and args.campaign not in holders:
+        held_by = ", ".join(holders) if holders else (
+            "no campaign, and its seed band is spent")
+        raise ValueError(
+            f"campaign ordinal {args.campaign_ordinal} is already claimed by "
+            f"{held_by} in {ORDINAL_REGISTRY}, so {args.campaign} cannot take "
+            f"it. The ordinal keys the seed band and is packed into every event "
+            f"identifier: a second holder draws seeds the first has burned and "
+            f"stamps identifiers the first already used, and neither is "
+            f"correctable once the jobs have run. Choose an ordinal the "
+            f"registry does not hold, and record the claim there."
+        )
     if args.jobs < 1 or args.events < 1:
         raise ValueError("--jobs and --events must be positive")
     if args.multiplicity_audit_events < 0:

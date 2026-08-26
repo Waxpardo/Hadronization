@@ -9,6 +9,7 @@ never collide, the liveness guard is present, and a burned seed is refused.
 
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -18,6 +19,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RENDERER = ROOT / "tools" / "render_production_submit.py"
 FAKE_SHA = "a" * 64
+
+# A campaign this test invents must not take an ordinal the project has
+# claimed: tools/render_production_submit.py reads
+# config/campaign_ordinals_v1.json and refuses one, which is the point of the
+# registry. The value is a literal rather than a computation over the registry,
+# so a reader can check it by eye; the assertion below fails loudly, and says
+# what to do, if the registry ever grows to hold it.
+FIXTURE_ORDINAL = 12
+
+
+def assert_fixture_ordinal_is_free() -> None:
+    registry = json.loads(
+        (ROOT / "config/campaign_ordinals_v1.json").read_text())
+    held = {entry["ordinal"] for entry in registry["ordinals"]}
+    assert FIXTURE_ORDINAL not in held, (
+        f"config/campaign_ordinals_v1.json now claims ordinal "
+        f"{FIXTURE_ORDINAL}; raise FIXTURE_ORDINAL in this file to an ordinal "
+        f"the registry does not hold, and update the burned-seed literal that "
+        f"is derived from it")
 
 
 def make_checkout(directory: Path) -> Path:
@@ -49,7 +69,8 @@ def render(
     result = subprocess.run(
         [
             sys.executable, str(RENDERER), str(checkout), str(output),
-            "--campaign", "RENDERTEST", "--campaign-ordinal", "1",
+            "--campaign", "RENDERTEST",
+            "--campaign-ordinal", str(FIXTURE_ORDINAL),
             "--jobs", "3", "--events", "100000",
             "--producer-executable-sha256", FAKE_SHA,
             *extra,
@@ -149,11 +170,12 @@ def test_write_once() -> None:
 def test_seed_ledger_refuses_burned_seed() -> None:
     with tempfile.TemporaryDirectory() as directory:
         ledger = Path(directory) / "burned.txt"
-        # seed_derivation_v2: the render helper passes --campaign-ordinal 1, so
-        # the first seed is SEED_BASE + 1*CAMPAIGN_STRIDE = 110000001, not the
-        # v1 value 100000001. Pinning the v1 value would make this test pass
-        # vacuously -- no collision, no refusal, and the guard goes untested.
-        ledger.write_text("# previously used\n110000001\n")
+        # seed_derivation_v2: the render helper passes
+        # --campaign-ordinal FIXTURE_ORDINAL, so the first seed is
+        # SEED_BASE + 12*CAMPAIGN_STRIDE = 220000001, not the v1 value
+        # 100000001. Pinning the v1 value would make this test pass vacuously
+        # -- no collision, no refusal, and the guard goes untested.
+        ledger.write_text("# previously used\n220000001\n")
         checkout = make_checkout(Path(directory))
         result = render(
             checkout, Path(directory) / "ledger.sub",
@@ -163,6 +185,7 @@ def test_seed_ledger_refuses_burned_seed() -> None:
 
 
 def main() -> int:
+    assert_fixture_ordinal_is_free()
     test_liveness_guard_present()
     test_deterministic_and_seeds_unique()
     test_all_four_tunes_render()

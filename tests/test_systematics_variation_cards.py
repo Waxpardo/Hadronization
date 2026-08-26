@@ -37,6 +37,25 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKER = ROOT / "generation" / "submit" / "runCondorJob.sh"
 GENERATOR = ROOT / "tools" / "make_systematic_cards.py"
 RENDERER = ROOT / "tools" / "render_production_submit.py"
+
+# A campaign this test invents must not take an ordinal the project has
+# claimed: tools/render_production_submit.py reads
+# config/campaign_ordinals_v1.json and refuses one, which is the point of the
+# registry. The value is a literal rather than a computation over the registry,
+# so a reader can check it by eye; the assertion below fails loudly, and says
+# what to do, if the registry ever grows to hold it.
+FIXTURE_ORDINAL = 12
+
+
+def assert_fixture_ordinal_is_free() -> None:
+    registry = json.loads(
+        (ROOT / "config/campaign_ordinals_v1.json").read_text())
+    held = {entry["ordinal"] for entry in registry["ordinals"]}
+    assert FIXTURE_ORDINAL not in held, (
+        f"config/campaign_ordinals_v1.json now claims ordinal "
+        f"{FIXTURE_ORDINAL}; raise FIXTURE_ORDINAL in this file to an ordinal "
+        f"the registry does not hold, and update the burned-seed literal that "
+        f"is derived from it")
 sys.path.insert(0, str(ROOT / "tools"))
 
 import make_systematic_cards  # noqa: E402
@@ -214,7 +233,8 @@ def render(checkout: Path, output: Path, *extra: str) -> subprocess.CompletedPro
     return subprocess.run(
         [
             sys.executable, str(RENDERER), str(checkout), str(output),
-            "--campaign", "HF_SYS_TEST", "--campaign-ordinal", "4",
+            "--campaign", "HF_SYS_TEST",
+            "--campaign-ordinal", str(FIXTURE_ORDINAL),
             "--jobs", "1", "--events", "1000",
             "--producer-executable-sha256", FAKE_SHA, *extra,
         ],
@@ -330,6 +350,7 @@ def test_sidecars_predating_the_variant_field_read_as_nominal() -> None:
 
 
 def main() -> int:
+    assert_fixture_ordinal_is_free()
     failures = 0
     for name, function in sorted(globals().items()):
         if not name.startswith("test_") or not callable(function):
