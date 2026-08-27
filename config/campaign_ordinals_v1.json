@@ -100,7 +100,7 @@
       "claimed": "2026-08-25",
       "claimed_evidence": "The owner ruling of 2026-08-25 that assigned the ordinal is internal and this file cannot cite it. The date is the date HF_SMOKE3 entered this repository, at commit 578e63f, which added its dataset selector rows; the ordinal binding is stated in the Makefile at require-ordinal.",
       "seed_derivation": "seed_derivation_v2",
-      "scope": "The 600,000-event operations-certification campaign, not physics: three tunes, 10 jobs per tune, run end to end from the rebuilt repository (config/dataset_selector_hf_smoke3.json). No seed of this band is burned yet."
+      "scope": "The 600,000-event operations-certification campaign, not physics: three tunes, 10 jobs per tune, run end to end from the rebuilt repository (config/dataset_selector_hf_smoke3.json). This file records the ordinal, which fixes the seed band SEED_BASE + 11 * CAMPAIGN_STRIDE in tools/campaign.py. It records no burn state. The burned seeds of the band live in the ledger at STATE_ROOT/seed_ledgers/burned_seeds.txt, outside the checkout, and tools/render_production_submit.py reads that ledger before it writes a submit file. A claim about burn state here would be a claim this repository cannot check."
     }
   ]
 }
