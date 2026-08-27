@@ -340,7 +340,30 @@ case "${command_name}" in
     if [[ "$#" -eq 0 ]]; then set -- all; fi
     if [[ "$#" -eq 1 && "$1" == "measure-balancing" ]]; then
       prepare_measurement_output_plane
-      measurement_config="${THNSPARSE_COMPLETE_ROOT_CONFIG:-${HADRONIZATION_MEASUREMENT_CONFIG:-plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json}}"
+      # The measurement configuration is derived from the campaign, never
+      # defaulted.
+      #
+      # THE DEFECT THIS CLOSES. The default here was the reduced JUNCTIONS
+      # configuration, which draws two canvases. A control render of the
+      # HF_RUN3_V1 nominal took it silently -- the dataset row carries no
+      # measurement_config, so HADRONIZATION_MEASUREMENT_CONFIG arrived empty
+      # -- and produced a FAIL 12/132 receipt against a 132-row envelope. A
+      # configuration mismatch read as a physics disagreement, which is the
+      # most expensive shape a silent default can take in this project.
+      #
+      # A caller who wants the reduced configuration names it.
+      measurement_config="${THNSPARSE_COMPLETE_ROOT_CONFIG:-${HADRONIZATION_MEASUREMENT_CONFIG:-}}"
+      if [[ -z "${measurement_config}" ]]; then
+        measurement_config="plotting/configuration_multiplicity_${HADRONIZATION_CAMPAIGN}_THREETUNE_THnSparse_complete_root.json"
+        if [[ ! -f "${project_base}/${measurement_config}" ]]; then
+          echo "ERROR: no measurement configuration for campaign '${HADRONIZATION_CAMPAIGN}'" >&2
+          echo "       derived: ${measurement_config}" >&2
+          echo "       That file does not exist and no default stands behind it." >&2
+          echo "       Set THNSPARSE_COMPLETE_ROOT_CONFIG to the configuration this" >&2
+          echo "       measurement needs, or add the derived file." >&2
+          exit 1
+        fi
+      fi
       measurement_log="${HADRONIZATION_MEASUREMENT_ROOT}/render.log"
       # Systematic shifts need not fit the nominal publication frame. Widen
       # only the staged, non-publication copy; the uncertainty rows are

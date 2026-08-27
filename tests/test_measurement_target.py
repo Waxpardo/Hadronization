@@ -169,6 +169,146 @@ def test_the_unified_cli_uses_a_commit_scoped_exact_measurement_root() -> None:
     assert 'CAMPAIGN_ROOT="$ROOT"' in wrapper
 
 
+# --- the measurement configuration the CLI chooses -------------------------
+#
+# THE DEFECT THESE CLOSE. `measure-balancing` defaulted to
+# plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json,
+# which draws two canvases. The HF_RUN3_V1 dataset row carries no
+# measurement_config, so HADRONIZATION_MEASUREMENT_CONFIG arrived empty and a
+# control render of the nominal took that default silently. It produced a FAIL
+# 12/132 receipt against a 132-row envelope: a configuration mismatch that read
+# as a physics disagreement.
+#
+# The CLI is driven in a sandbox checkout. Every entry is a symlink to this
+# checkout except two files: tools/render_measurement.sh reports the arguments
+# the CLI chose and renders nothing, and setupEnv.sh stands in for the site and
+# dependency planes, which this choice does not read. Both keep the case fast
+# and identical on every host.
+CAMPAIGN = "HF_RUN3_V1"
+DATASET_KEY = "hf_run3_v1_candidate"
+DERIVED_CONFIG = (
+    f"plotting/configuration_multiplicity_{CAMPAIGN}"
+    "_THREETUNE_THnSparse_complete_root.json")
+REDUCED_CONFIG = (
+    "plotting/configuration_multiplicity_reduced_JUNCTIONS"
+    "_THnSparse_complete_root.json")
+
+_STUB_SETUP_ENV = """# Sandbox stand-in for setupEnv.sh.
+export HADRONIZATION_SITE=local
+export HADRONIZATION_DATA_ROOT="${HADRONIZATION_DATA_ROOT:?}"
+export HADRONIZATION_RESULTS_ROOT="${HADRONIZATION_DATA_ROOT}/project/results"
+export HADRONIZATION_ANALYSIS_ROOT="${HADRONIZATION_DATA_ROOT}/analysis"
+export HADRONIZATION_MERGED_ROOT="${HADRONIZATION_DATA_ROOT}/merged"
+export HADRONIZATION_SYSTEMATICS_ROOT="${HADRONIZATION_DATA_ROOT}/systematics"
+export HF_PRODUCTION_ROOT="${HADRONIZATION_DATA_ROOT}/production"
+"""
+
+_STUB_RENDER = """#!/bin/bash
+# Sandbox stand-in for tools/render_measurement.sh. Report what the CLI chose.
+printf 'RENDER_CAMPAIGN=%s\\n' "$1"
+printf 'RENDER_CONFIG=%s\\n' "$2"
+exit 0
+"""
+
+
+def _cli_sandbox(tmp: str, cli_text: str | None = None,
+                 drop_config: str | None = None) -> Path:
+    """Build a checkout that differs from this one only where it must."""
+    base = Path(tmp) / "checkout"
+    base.mkdir()
+    replaced = {".git", "tools", "plotting", "setupEnv.sh", "hadronization"}
+    for entry in sorted(ROOT.iterdir()):
+        if entry.name not in replaced:
+            (base / entry.name).symlink_to(entry)
+    for name in ("tools", "plotting"):
+        (base / name).mkdir()
+        for entry in sorted((ROOT / name).iterdir()):
+            if entry.name in {"render_measurement.sh", drop_config}:
+                continue
+            (base / name / entry.name).symlink_to(entry)
+    stub = base / "tools/render_measurement.sh"
+    stub.write_text(_STUB_RENDER)
+    stub.chmod(0o755)
+    (base / "setupEnv.sh").write_text(_STUB_SETUP_ENV)
+    cli = base / "hadronization"
+    cli.write_text(cli_text if cli_text is not None
+                   else UNIFIED_CLI.read_text())
+    cli.chmod(0o755)
+    # prepare_measurement_output_plane reads the commit, so the sandbox needs a
+    # repository of its own. Never the real one: a test must not be able to
+    # write into it.
+    for command in (["init", "-q"],
+                    ["-c", "user.name=t", "-c", "user.email=t@t", "commit",
+                     "-q", "--allow-empty", "-m", "sandbox"]):
+        subprocess.run(["git", "-C", str(base), *command], check=True,
+                       capture_output=True)
+    return base
+
+
+def _run_cli(base: Path,
+             env_extra: dict | None = None) -> subprocess.CompletedProcess:
+    data = base.parent / "data"
+    data.mkdir(exist_ok=True)
+    env = dict(os.environ)
+    env.update(
+        HADRONIZATION_DATA_ROOT=str(data),
+        HADRONIZATION_DATASET_SELECTOR=str(ROOT / SEL_CANONICAL),
+    )
+    for name in ("THNSPARSE_COMPLETE_ROOT_CONFIG",
+                 "HADRONIZATION_MEASUREMENT_CONFIG",
+                 "HADRONIZATION_MEASUREMENT_ROOT"):
+        env.pop(name, None)
+    env.update(env_extra or {})
+    return subprocess.run(
+        ["bash", str(base / "hadronization"), "plot", DATASET_KEY,
+         "measure-balancing"],
+        env=env, text=True, capture_output=True)
+
+
+def _chosen_config(result: subprocess.CompletedProcess) -> str:
+    for line in result.stdout.splitlines():
+        if line.startswith("RENDER_CONFIG="):
+            return line.split("=", 1)[1]
+    return ""
+
+
+def test_the_measurement_configuration_is_derived_from_the_campaign() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        got = _run_cli(_cli_sandbox(tmp))
+    assert got.returncode == 0, got.stdout + got.stderr
+    assert _chosen_config(got) == DERIVED_CONFIG, got.stdout + got.stderr
+
+
+def test_a_missing_derived_configuration_refuses_by_name() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        base = _cli_sandbox(tmp, drop_config=Path(DERIVED_CONFIG).name)
+        got = _run_cli(base)
+    assert got.returncode != 0, got.stdout
+    assert _chosen_config(got) == "", "the render ran on a refusal"
+    # Name the file that is missing and the variable that answers it. A refusal
+    # the reader cannot act on costs the same as no refusal.
+    assert f"derived: {DERIVED_CONFIG}" in got.stderr, got.stderr
+    assert "THNSPARSE_COMPLETE_ROOT_CONFIG" in got.stderr, got.stderr
+    assert REDUCED_CONFIG not in got.stderr, "a fallback was offered"
+
+
+def test_an_explicitly_named_configuration_is_used() -> None:
+    """The reduced configuration is reachable, but only by naming it."""
+    with tempfile.TemporaryDirectory() as tmp:
+        got = _run_cli(_cli_sandbox(tmp),
+                       {"THNSPARSE_COMPLETE_ROOT_CONFIG": REDUCED_CONFIG})
+    assert got.returncode == 0, got.stdout + got.stderr
+    assert _chosen_config(got) == REDUCED_CONFIG, got.stdout + got.stderr
+
+
+def test_the_cli_carries_no_measurement_configuration_default() -> None:
+    """Read the source too: the sandbox cases cannot see a second default."""
+    text = UNIFIED_CLI.read_text()
+    choice = text[text.index("measurement_config="):]
+    choice = choice[:choice.index("measurement_log=")]
+    assert REDUCED_CONFIG not in choice, choice
+
+
 def main() -> int:
     tests = [v for n, v in sorted(globals().items())
              if n.startswith("test_") and callable(v)]
