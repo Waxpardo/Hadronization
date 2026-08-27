@@ -187,9 +187,32 @@ case "${command_name}" in
     [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }
     resolve_dataset "$1"
     freeze_dir="$(dirname "${HADRONIZATION_CANONICAL_MANIFEST}")"
+    # build_canonical_manifest.py takes the BASE production root and joins the
+    # campaign itself (tools/build_canonical_manifest.py:87). Its own default,
+    # HF_PRODUCTION_ROOT, is that base root, and `make manifest` relies on it.
+    # The selector exports HADRONIZATION_PRODUCTION_ROOT campaign-scoped
+    # (tools/dataset_selector.py:300), so passing it doubled the campaign
+    # segment and `./hadronization freeze` refused with
+    # `no raw directory: .../HF_SMOKE3/HF_SMOKE3/raw`. Every run before
+    # HF_SMOKE3 reused pre-rebuild manifests, so no run reached this surface.
+    #
+    # Derive the base from the row rather than from HF_PRODUCTION_ROOT: the
+    # selector row is what says where this dataset's production tree is, and a
+    # row that disagrees with the site profile must not be silently overridden.
+    freeze_production_base="$(dirname "${HADRONIZATION_PRODUCTION_ROOT}")"
+    if [[ -z "${HADRONIZATION_CAMPAIGN}" || -z "${HADRONIZATION_PRODUCTION_ROOT}" \
+          || "$(basename "${HADRONIZATION_PRODUCTION_ROOT}")" != "${HADRONIZATION_CAMPAIGN}" ]]; then
+      echo "ERROR: cannot derive the base production root for this dataset" >&2
+      echo "       campaign:        '${HADRONIZATION_CAMPAIGN}'" >&2
+      echo "       production root: '${HADRONIZATION_PRODUCTION_ROOT}'" >&2
+      echo "       build_canonical_manifest.py joins the campaign onto the root" >&2
+      echo "       it is given, so the row's production_root must end with the" >&2
+      echo "       campaign. Correct the row in the dataset selector." >&2
+      exit 1
+    fi
     python3 "${project_base}/tools/build_canonical_manifest.py" \
       "${HADRONIZATION_CAMPAIGN}" "${freeze_dir}" \
-      --production-root "${HADRONIZATION_PRODUCTION_ROOT}"
+      --production-root "${freeze_production_base}"
     ;;
   render-analysis)
     [[ "$#" -ge 1 && "$#" -le 2 ]] || { usage >&2; exit 2; }
