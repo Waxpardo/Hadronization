@@ -463,6 +463,205 @@ def test_the_driver_carries_no_reduced_configuration_default() -> None:
               name not in text, name)
 
 
+# --- Phase 4: the defaults sweep -------------------------------------------
+#
+# Every configuration default plotting/run_paper_plots.sh still carries, with
+# the showing that places each target it feeds. MEASUREMENT-PLANE means the
+# target can reach an accepted or a measurement root: the campaign- and
+# commit-scoped plot plane below plotting/Plots, or HADRONIZATION_MEASUREMENT_ROOT.
+# DEVELOPMENT-ONLY means it cannot, and the showing says where its output goes
+# instead. A measurement-plane variable carries no default. A development-only
+# one may, and the showing is recorded here rather than in prose.
+#
+# CONSUMER SEARCH, measured 2026-08-27. docs/GOLDEN_OUTPUTS.md names only
+# campaign-scoped configurations and mentions none of RootFiles/HF, 12-01-2026,
+# 27-03-2026 or FinalAnalysis; `git ls-files plotting/FinalAnalysis` tracks the
+# two macros and no output. No tracked artifact was produced through any
+# default below. History is recorded, not rewritten.
+DRIVER = ROOT / "plotting/run_paper_plots.sh"
+
+SWEEP = (
+    ("THNSPARSE_CONFIG", ("thnsparse", "freeze-boundaries"),
+     "measurement-plane",
+     "renders and freezes into the campaign-scoped plot plane"),
+    ("THNSPARSE_COMPLETE_ROOT_CONFIG",
+     ("thnsparse-complete-root", "measure-balancing",
+      "multiplicity-boundaries-smoke", "freeze-boundaries-smoke"),
+     "measurement-plane",
+     "measure-balancing writes under HADRONIZATION_MEASUREMENT_ROOT; the "
+     "others render into the plot plane"),
+    ("MULTIPLICITY_CONFIG", ("multiplicity-boundaries", "multiplicity-compact"),
+     "measurement-plane",
+     "writes MULTIPLICITY_OUTPUT_DIR, which defaults inside plotting/Plots"),
+    ("KINEMATIC_RAW_BASE", ("multiplicity-spectrum", "kinematic-spectra"),
+     "measurement-plane",
+     "reads raw files and writes KINEMATIC_OUTPUT_DIR, inside plotting/Plots"),
+    ("FINAL_INDEPENDENT_TAG", ("final-multiplicity", "final-yields"),
+     "development-only",
+     "both macros write GetHadronizationBaseDir()/plotting/FinalAnalysis/Plots, "
+     "a checkout-local directory that is not the plot plane and holds no "
+     "tracked file"),
+    ("FINAL_COMBINED_TAG", ("final-multiplicity", "final-yields"),
+     "development-only", "as FINAL_INDEPENDENT_TAG"),
+    ("FINAL_NSUB", ("final-multiplicity", "final-yields"),
+     "development-only", "as FINAL_INDEPENDENT_TAG"),
+)
+
+# Targets that read no configuration default at all, with why.
+NO_CONFIG_TARGETS = {
+    "audit-subsamples": "reads the freeze and the subsample base only",
+    "legacy-regression": "gated to the legacy_regression_default status, "
+                         "which is publication-ineligible by contract",
+    "validate-inputs": "runs plotting/validate_thnsparse_inputs.sh, which "
+                       "writes nothing",
+}
+
+
+def accepted_targets() -> set[str]:
+    """Every target the driver can run, read from the driver, not listed here.
+
+    Two sources: the alternation of directly nameable targets, and the group
+    expansions. multiplicity-boundaries-smoke reaches a run only through the
+    smoke group, so an alternation-only reading would miss it.
+    """
+    text = DRIVER.read_text()
+    targets: set[str] = set()
+    for line in text.splitlines():
+        stripped = line.strip()
+        if (stripped.endswith(")") and "|" in stripped
+                and "measure-balancing" in stripped
+                and "audit-subsamples" in stripped):
+            targets |= set(stripped[:-1].split("|"))
+        if stripped.startswith("expanded_targets+=("):
+            targets |= {name for name in
+                        stripped[stripped.index("(") + 1:-1].replace(
+                            '"', "").split()
+                        if "$" not in name}
+    return targets
+
+
+def test_the_sweep_covers_every_target_the_driver_accepts() -> None:
+    """A new target cannot escape the classification by being added quietly."""
+    accepted = accepted_targets()
+    check("the driver's accepted-target list was read", bool(accepted),
+          "no target alternation found in the driver")
+    classified = {t for _, targets, _, _ in SWEEP for t in targets}
+    classified |= set(NO_CONFIG_TARGETS)
+    check("every accepted target carries a classification",
+          accepted <= classified, str(sorted(accepted - classified)))
+    check("...and nothing is classified that the driver does not accept",
+          classified <= accepted, str(sorted(classified - accepted)))
+
+
+def test_no_measurement_plane_variable_carries_a_default() -> None:
+    text = DRIVER.read_text()
+    for name, targets, plane, showing in SWEEP:
+        if plane != "measurement-plane":
+            continue
+        # `${NAME:-` with anything but an empty or another-variable value is a
+        # default. The derivations assign through printf -v, not through :-.
+        literal = f'{name}="${{{name}:-'
+        line = next((l for l in text.splitlines() if l.startswith(literal)), "")
+        remainder = line[len(literal):] if line else ""
+        defaulted = bool(remainder) and not remainder.startswith(("}", "${"))
+        check(f"{name} carries no literal default ({', '.join(targets)})",
+              not defaulted, line)
+
+
+def test_a_development_only_default_writes_outside_every_plane() -> None:
+    """The showing for the three FINAL_* defaults, per target, not per script."""
+    for target, macro in (
+            ("final-multiplicity",
+             "plotting/FinalAnalysis/Plot_MultiplicityDistributions_TwoSamples.C"),
+            ("final-yields",
+             "plotting/FinalAnalysis/Plot_SelectedParticleYields_IndependentVsCombined.C")):
+        source = (ROOT / macro).read_text()
+        check(f"{target} writes only below plotting/FinalAnalysis/Plots",
+              'GetHadronizationBaseDir() + "/plotting/FinalAnalysis/Plots"'
+              in source, macro)
+        check(f"...so {target} reaches no plot plane",
+              "plotting/Plots/" not in source
+              and "HADRONIZATION_MEASUREMENT_ROOT" not in source, macro)
+    tracked = subprocess.run(
+        ["git", "-C", str(ROOT), "ls-files", "plotting/FinalAnalysis"],
+        capture_output=True, text=True, check=True).stdout.split()
+    check("...and that directory holds no tracked output",
+          all(name.endswith(".C") for name in tracked), str(tracked))
+
+
+def test_nothing_can_reach_the_legacy_sample_by_default() -> None:
+    """The raw base has no fallback, and two rules stand in front of it.
+
+    REACHABILITY, measured 2026-08-27. The RootFiles/HF fallback that this
+    checks the absence of was not reachable in the tracked tree. Both routes to
+    it are closed by rules that already existed, and both are asserted here so
+    that removing one is visible:
+
+      1. tools/dataset_selector.py refuses a canonical row with no raw_base;
+      2. with USE_DATASET_SELECTOR=false the publication gate refuses a
+         raw-reading target, for an unset dataset status.
+
+    The fallback was therefore a latent hazard rather than a live defect, and
+    the driver's own refusal is defence in depth. Saying so is the point: a
+    check that claimed to exercise the guard would be claiming a reachability
+    this tree does not have.
+    """
+    # The comment above the refusal names the removed value, so read the code
+    # lines only. A comment that records a defect is not the defect.
+    code = [line for line in DRIVER.read_text().splitlines()
+            if line.strip() and not line.lstrip().startswith("#")]
+    check("the driver carries no legacy raw-base fallback",
+          not [line for line in code if "RootFiles/HF" in line],
+          str([line for line in code if "RootFiles/HF" in line])[:200])
+
+    document = json.loads((ROOT / "config/dataset_selector_hf_run3_v1.json")
+                          .read_text())
+    document["datasets"]["hf_run3_v1_candidate"]["raw_base"] = ""
+    with tempfile.TemporaryDirectory() as tmp:
+        base = sandbox(tmp, replace={"plotting/Plots": None}, git=True)
+        selector = Path(tmp) / "selector.json"
+        selector.write_text(json.dumps(document))
+        row = run_cli(base, Path(tmp) / "data",
+                      ["plot", "hf_run3_v1_candidate", "kinematic-spectra"],
+                      {"HADRONIZATION_DATASET_SELECTOR": str(selector),
+                       "HADRONIZATION_REQUEST_PREFLIGHT_ONLY": "1"})
+    check("rule 1: a canonical row with no raw_base is refused by the selector",
+          row.returncode != 0 and "requires raw_base" in row.stderr,
+          f"rc={row.returncode} {row.stderr[:300]}")
+
+    # Rule 2 is a driver rule, so drive the driver: ./hadronization always
+    # resolves a dataset first and never reaches USE_DATASET_SELECTOR=false.
+    with tempfile.TemporaryDirectory() as tmp:
+        base = sandbox(tmp, replace={"plotting/Plots": None}, git=True)
+        environment = dict(os.environ)
+        environment.update(USE_DATASET_SELECTOR="false",
+                           HADRONIZATION_REQUEST_PREFLIGHT_ONLY="1",
+                           HADRONIZATION_BASE=str(base))
+        for name in ("KINEMATIC_RAW_BASE", "HADRONIZATION_RAW_BASE",
+                     "HADRONIZATION_DATASET_STATUS"):
+            environment.pop(name, None)
+        loose = subprocess.run(
+            ["bash", str(base / "plotting/run_paper_plots.sh"),
+             "kinematic-spectra"],
+            env=environment, text=True, capture_output=True)
+    check("rule 2: with no selector the publication gate refuses first",
+          loose.returncode != 0
+          and "fail-closed" in loose.stderr, f"rc={loose.returncode} "
+          f"{loose.stderr[:300]}")
+
+
+def test_a_target_that_reads_no_raw_files_is_not_refused_for_one() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        base = sandbox(tmp, replace={"plotting/Plots": None}, git=True)
+        got = run_cli(base, Path(tmp) / "data",
+                      ["plot", "hf_run3_v1_candidate", "thnsparse-complete-root"],
+                      {"HADRONIZATION_DATASET_SELECTOR": str(FULL_SELECTOR),
+                       "HADRONIZATION_REQUEST_PREFLIGHT_ONLY": "1"})
+    check("a target that reads no raw files is unaffected by the raw base",
+          "REQUEST_PREFLIGHT_ONLY status=PASS" in got.stdout,
+          f"rc={got.returncode} {got.stderr[:300]}")
+
+
 def main() -> int:
     tests = [value for name, value in sorted(globals().items())
              if name.startswith("test_") and callable(value)]

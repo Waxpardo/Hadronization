@@ -72,7 +72,9 @@ Useful environment overrides:
   MULTIPLICITY_COMPACT
       default: false
   KINEMATIC_RAW_BASE
-      default: RootFiles/HF
+      no default. Taken from the selector's HADRONIZATION_RAW_BASE. The run
+      refuses, naming both variables, when a target that reads raw files is
+      requested and neither is set.
   KINEMATIC_OUTPUT_DIR
       default: plotting/Plots/KinematicSpectra
   KINEMATIC_NORMALIZE
@@ -80,11 +82,11 @@ Useful environment overrides:
   KINEMATIC_STRICT
       default: true
   FINAL_INDEPENDENT_TAG
-      default: 12-01-2026
+      default: 12-01-2026; read only by final-multiplicity and final-yields
   FINAL_COMBINED_TAG
-      default: 27-03-2026
+      default: 27-03-2026; read only by final-multiplicity and final-yields
   FINAL_NSUB
-      default: 10
+      default: 10; read only by final-multiplicity and final-yields
   FINAL_NORMALIZE
       default: true
   PLOT_PROVENANCE_DEVELOPMENT
@@ -185,7 +187,8 @@ MULTIPLICITY_OUTPUT_DIR="${MULTIPLICITY_OUTPUT_DIR:-plotting/Plots/MultiplicityD
 MULTIPLICITY_NORMALIZE="$(normalize_bool "${MULTIPLICITY_NORMALIZE:-false}")"
 MULTIPLICITY_STRICT="$(normalize_bool "${MULTIPLICITY_STRICT:-true}")"
 MULTIPLICITY_COMPACT="$(normalize_bool "${MULTIPLICITY_COMPACT:-false}")"
-KINEMATIC_RAW_BASE="${KINEMATIC_RAW_BASE:-${HADRONIZATION_RAW_BASE:-RootFiles/HF}}"
+# No RootFiles/HF fallback: see the raw-base refusal below.
+KINEMATIC_RAW_BASE="${KINEMATIC_RAW_BASE:-${HADRONIZATION_RAW_BASE:-}}"
 KINEMATIC_OUTPUT_DIR="${KINEMATIC_OUTPUT_DIR:-plotting/Plots/KinematicSpectra}"
 KINEMATIC_NORMALIZE="$(normalize_bool "${KINEMATIC_NORMALIZE:-true}")"
 KINEMATIC_STRICT="$(normalize_bool "${KINEMATIC_STRICT:-true}")"
@@ -363,6 +366,7 @@ fi
 hf_need_thnsparse=false
 hf_need_complete_root=false
 hf_need_multiplicity=false
+hf_need_raw_base=false
 for hf_target in "${expanded_targets[@]}"; do
   case "${hf_target}" in
     thnsparse|freeze-boundaries)
@@ -371,6 +375,10 @@ for hf_target in "${expanded_targets[@]}"; do
       hf_need_multiplicity=true ;;
     thnsparse-complete-root|measure-balancing|multiplicity-boundaries-smoke|freeze-boundaries-smoke)
       hf_need_complete_root=true ;;
+  esac
+  case "${hf_target}" in
+    multiplicity-spectrum|kinematic-spectra)
+      hf_need_raw_base=true ;;
   esac
 done
 if [[ "${hf_need_multiplicity}" == "true" && -z "${MULTIPLICITY_CONFIG:-}" ]]; then
@@ -415,6 +423,28 @@ if [[ "${hf_need_complete_root}" == "true" && -z "${THNSPARSE_COMPLETE_ROOT_CONF
     "THnSparse_complete_root.json" || exit 2
 fi
 MULTIPLICITY_CONFIG="${MULTIPLICITY_CONFIG:-${THNSPARSE_CONFIG:-}}"
+
+# The raw base has no default either.
+#
+# WHAT THIS CLOSES, stated exactly. KINEMATIC_RAW_BASE fell back to the
+# checkout-relative RootFiles/HF, the legacy pre-rebuild sample -- the value the
+# legacy_21_06_2026 row supplies explicitly. That fallback was NOT reachable in
+# the tracked tree, measured 2026-08-27: tools/dataset_selector.py refuses a
+# canonical row that carries no raw_base, and with USE_DATASET_SELECTOR=false
+# the publication gate above refuses a raw-reading target first. So this is
+# defence in depth behind those two rules, not a live-defect fix. It matters
+# because the value it removed was a silent one: a row or a route that ever
+# reached it would have drawn a publication figure from the legacy sample
+# without saying so. A caller who wants that sample names it, or names the
+# legacy row that carries it.
+if [[ "${hf_need_raw_base}" == "true" && -z "${KINEMATIC_RAW_BASE}" ]]; then
+  echo "ERROR: no raw base for this run" >&2
+  echo "       multiplicity-spectrum and kinematic-spectra read raw files, and" >&2
+  echo "       neither KINEMATIC_RAW_BASE nor HADRONIZATION_RAW_BASE is set." >&2
+  echo "       Name a dataset row, which supplies HADRONIZATION_RAW_BASE, or" >&2
+  echo "       set KINEMATIC_RAW_BASE. No default stands behind it." >&2
+  exit 2
+fi
 
 if [[ "${HADRONIZATION_REQUEST_PREFLIGHT_ONLY}" == "true" ]]; then
   echo "REQUEST_PREFLIGHT_ONLY status=PASS root_execution=false outputs_written=false"
