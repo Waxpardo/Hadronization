@@ -248,6 +248,7 @@ done
 publication_target_requested=false
 legacy_diagnostic_requested=false
 measurement_target_requested=false
+development_only_target_requested=false
 for target in "${expanded_targets[@]}"; do
   case "${target}" in
     multiplicity-boundaries|multiplicity-boundaries-smoke|multiplicity-compact|multiplicity-spectrum|kinematic-spectra|thnsparse|thnsparse-complete-root|freeze-boundaries|freeze-boundaries-smoke|audit-subsamples)
@@ -259,8 +260,35 @@ for target in "${expanded_targets[@]}"; do
     measure-balancing)
       measurement_target_requested=true
       ;;
+    validate-inputs|final-multiplicity|final-yields)
+      development_only_target_requested=true
+      ;;
   esac
 done
+
+# ---------------------------------------------------------------------------
+# THE DEVELOPMENT-ONLY CLASS, added 2026-08-27 for session N's finding F2.
+#
+# These three targets reach none of the dataset gates below: not the
+# publication gate, not the authorization gate, not the legacy gate. That was
+# already true and it was already intended. What was missing is that nothing
+# said so: they were the targets left over when the other three case arms had
+# taken their own, and a reader had to prove the absence by elimination.
+#
+# The bypass is safe because none of the three can write into a plot plane:
+# `validate-inputs` runs plotting/validate_thnsparse_inputs.sh, which writes
+# nothing, and the two `final-*` targets run macros that write only below
+# plotting/FinalAnalysis/Plots, a checkout-local directory holding no tracked
+# file. tests/test_cli_surface.py asserts both halves.
+#
+# This arm adds no gate. It states the classification, so that a new target
+# cannot join this class silently and so that removing the declaration is a
+# visible change rather than an omission.
+# ---------------------------------------------------------------------------
+if [[ "${development_only_target_requested}" == "true" ]]; then
+  echo "DEVELOPMENT_ONLY_TARGET class=development-only dataset_gates=bypassed" \
+       "reason=writes no plot plane"
+fi
 
 # ---------------------------------------------------------------------------
 # THE MEASUREMENT TARGET, added 2026-08-19.

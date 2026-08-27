@@ -553,6 +553,76 @@ def test_the_sweep_covers_every_target_the_driver_accepts() -> None:
           classified <= accepted, str(sorted(classified - accepted)))
 
 
+def driver_classification() -> dict[str, set[str]]:
+    """Read the driver's target classification, one class per case arm.
+
+    Parses the `for target in "${expanded_targets[@]}"` loop rather than
+    listing the arms here, so a change to the driver moves this test with it.
+    """
+    text = DRIVER.read_text()
+    start = text.index('for target in "${expanded_targets[@]}"; do')
+    block = text[start:text.index("\ndone", start)]
+    classes: dict[str, set[str]] = {}
+    pending: set[str] = set()
+    for line in block.splitlines():
+        stripped = line.strip()
+        if stripped.endswith(")") and "|" in stripped or (
+                stripped.endswith(")") and stripped[:-1].replace("-", "").isalnum()):
+            pending = set(stripped[:-1].split("|"))
+        elif stripped.endswith("_requested=true"):
+            classes.setdefault(stripped.split("=")[0], set()).update(pending)
+            pending = set()
+    return classes
+
+
+def test_the_development_only_targets_are_declared() -> None:
+    """Session N's F2: three targets bypass every dataset gate by design.
+
+    The bypass was real and intended before this test; what it lacked was a
+    statement. A reader had to prove the absence by elimination, and a fourth
+    target could have joined the class by being added quietly. The driver now
+    declares the class, and these checks fail if the declaration is dropped.
+    """
+    text = DRIVER.read_text()
+    classes = driver_classification()
+    expected = {"validate-inputs", "final-multiplicity", "final-yields"}
+
+    check("the driver initialises the development-only flag",
+          "development_only_target_requested=false" in text,
+          "the declaration is absent from the driver")
+    check("the development-only class names exactly the three targets",
+          classes.get("development_only_target_requested") == expected,
+          str(sorted(classes.get("development_only_target_requested", set()))))
+
+    # A target may carry one class and no more: the classes decide which gates
+    # run, so two classes for one target would make the gate order matter.
+    counted: dict[str, int] = {}
+    for targets in classes.values():
+        for target in targets:
+            counted[target] = counted.get(target, 0) + 1
+    check("no target carries two classes",
+          all(n == 1 for n in counted.values()),
+          str(sorted(t for t, n in counted.items() if n > 1)))
+
+    # The declaration is the whole point, so the driver must say it at run time.
+    check("the driver announces the bypass when one of them runs",
+          "DEVELOPMENT_ONLY_TARGET class=development-only" in text,
+          "no announcement line in the driver")
+
+    # The bypass is only safe while these three write no plot plane. The two
+    # final-* macros are checked by the test below; validate-inputs is checked
+    # here, at its own script.
+    validator = ROOT / "plotting/validate_thnsparse_inputs.sh"
+    check("validate-inputs runs a script that writes no plot plane",
+          validator.is_file()
+          and "plotting/Plots/" not in validator.read_text(),
+          str(validator))
+
+    check("every accepted target is classified or recorded as config-free",
+          expected <= (accepted_targets() | set(NO_CONFIG_TARGETS)),
+          str(sorted(expected - accepted_targets())))
+
+
 def test_no_measurement_plane_variable_carries_a_default() -> None:
     text = DRIVER.read_text()
     for name, targets, plane, showing in SWEEP:
