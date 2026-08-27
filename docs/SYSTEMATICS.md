@@ -91,7 +91,7 @@ The committed artifacts record these checks:
 - No pair of distinct variations agrees on all 144 yields.
 
 `docs/SYSTEMATICS_PREREGISTRATION.md` fixes the design before the campaign results.
-`docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` records the execution and its deviations.
+`git show 4a007f2^:docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` records the execution and its deviations.
 
 ## S1: renormalization and factorization scales
 
@@ -213,7 +213,7 @@ S5 tests the class effect of keeping heavy hadrons stable during production.
 An experimental primary definition counts some heavy-hadron decay daughters, so the production counter undercounts activity.
 
 The PYTHIA 8.317 calibration measured a 0.7670% bias.
-`results/systematics/20260817/s5_class_migration.json` records 200,000 events per convention and one shared seed.
+`results/validation/generator/NCH_DECAY_POLICY_BIAS_8317.md` records 200,000 events per convention and one shared seed.
 
 The S5 tool divides every class boundary by `1 + delta` and `1 - delta`.
 It then compares the selected integer `N_ch` values with the nominal selection.
@@ -345,8 +345,8 @@ The evidence for each source remains separate from this summary.
 | source | definition and method | result artifacts |
 |---|---|---|
 | S1-S3 | `config/systematics_variations_v1.json`; `extraction/systematics_delta.py` | `results/systematics/20260819/`; `results/systematics/20260820/` |
-| S4 | `docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` sections 25-27 | `results/systematics/20260820/s4/` |
-| S5 | `tools/systematic_class_migration.py` | `results/systematics/20260817/s5_class_migration.json` |
+| S4 | `git show 4a007f2^:docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` sections 25-27 | `results/systematics/20260820/s4/` |
+| S5 | `git show b1c4c12^:tools/systematic_class_migration.py` | `git show b1c4c12^:results/systematics/20260817/s5_class_migration.json` |
 | S6 | `config/a2_variations_v1.json`; `analysis/a2_block_shift.py` | `results/a2/20260813/results/` |
 | combination | `extraction/combine_per_class.py`; `extraction/combine_derived.py` | `results/systematics/20260820/per_class_combination.json`; `verdict.json` |
 

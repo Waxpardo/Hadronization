@@ -32,7 +32,7 @@ zero P1-P8 outputs.
 | O6 | Pooled central and ten-block SEM | `config/statistical_robustness_v1.json`; `docs/STATISTICS.md`; `tests/test_statistical_robustness.py` | Nonlinear quantities are formed inside blocks. |
 | M1 | Campaign, energy, PYTHIA, hard processes, threshold | Selector, nominal cards, generated tune registry, and campaign authorization | 13.6 TeV; PYTHIA 8.317; `pTHatMin=2.0`. |
 | M2 | 1,000 files x 100,000 events and ten blocks | `config/dataset_selector_hf_run3_v1.json`; `docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md` | External file union cannot be rehashed locally. |
-| M3 | Multiplicity counter and decay-policy limitation | `generation/producer/HeavyFlavourUtils.h`; `results/systematics/20260817/s5_class_migration.json`; `docs/SYSTEMATICS.md` S5 | Exact final/charged/non-heavy/pT/eta predicate; 0.7670% minimum-bias mismatch; exact-zero class migration for current boundaries; forced-sample bias unmeasured. |
+| M3 | Multiplicity counter and decay-policy limitation | `generation/producer/HeavyFlavourUtils.h`; `results/validation/generator/NCH_DECAY_POLICY_BIAS_8317.md`; `results/systematics/20260820/per_class_combination.json`, `S5_class_migration`; `docs/SYSTEMATICS.md` S5 | Exact final/charged/non-heavy/pT/eta predicate; 0.7670% minimum-bias mismatch; exact-zero class migration for current boundaries; forced-sample bias unmeasured. |
 | M4 | c1-c11 percentiles and direction | `config/multiplicity_percentile_classes_v2.json`; tune-level merged `summed MULTIPLICITY` histograms | Each tune resolves its own absolute thresholds. |
 | M5 | S1-S6 scope and exclusions | `config/systematics_variations_v1.json`; `config/a2_variations_v1.json`; `docs/SYSTEMATICS.md` | S4 missing; S6 separate axis; no detector effects. |
 | R1 | Integrated table | `tests/fixtures/integrated_rows_nominal.log` | Labelled validation result; missing `PAIR_COUNTS` blocks exact closure. |
@@ -71,9 +71,10 @@ supplies the status ``Candidate''; it does not mean final.
 
 ## Bibliography reconciliation
 
-The paper bibliography is a six-entry, DOI-deduplicated subset of the
-historical draft and `references/References.bib`. It contains no `file` fields,
-local Zotero paths, abstracts, access dates, undefined keys, or duplicate DOI
-records. On 2026-08-21, the reconciliation checked the PYTHIA 8.3, Monash,
+The paper bibliography, `paper/references.bib`, is a six-entry,
+DOI-deduplicated subset of the historical draft and of the byte-identical
+`References.bib` copy that ruling R23 moved to the project archive. It
+contains no `file` fields, local Zotero paths, abstracts, access dates,
+undefined keys, or duplicate DOI records. On 2026-08-21, the reconciliation checked the PYTHIA 8.3, Monash,
 JUNCTIONS, and CLOSEPACKING primary metadata against the PYTHIA documentation
 and publisher or arXiv records.

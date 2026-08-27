@@ -53,7 +53,7 @@ They do not replace the full-union central value.
 
 Multiplicity integration follows the same rule.
 The integrated configuration selects the full multiplicity range, then calculates one pooled ratio from those selected counts.
-`docs/V_INTEGRATED_PREREGISTRATION.md` records this calculation and its block coverage.
+The pre-registration record, recoverable with `git show 4a007f2^:docs/V_INTEGRATED_PREREGISTRATION.md`, records this calculation and its block coverage.
 
 ## Ten-block uncertainty design
 

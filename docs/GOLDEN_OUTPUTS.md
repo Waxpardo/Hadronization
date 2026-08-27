@@ -31,8 +31,8 @@ input the recipe reads. **The pair is the contract.**
 | **content invariant** | a number or count that must reproduce, not a file | e.g. closure 2100/1500, the anchor totals |
 
 > **The record quotes `map_sha256`; this document quotes both.** The truncated
-> `dd502a10…` in `EXTRACTION_CONVENTIONS.md`, the superseded private convention-table record, and
-> `evidence/MANIFEST.md` is the **internal** digest, **not** the
+> `dd502a10…` in `git show 4a007f2^:docs/EXTRACTION_CONVENTIONS.md` §2, the superseded private convention-table record, and
+> `git show 4a007f2^:AnalysisScripts/anchors/MANIFEST.md` §1 is the **internal** digest, **not** the
 > file's sha256. They differ, they are both correct, and confusing them is a
 > live trap: a reviewer who runs `sha256sum decay_parent_map_v1_1.json` and gets
 > `ed148156…` has **not** found a discrepancy.
@@ -195,7 +195,7 @@ void.
   `heavy_stability_audit` tree. **UNVERIFIED for regeneration** — the input is
   one JUNCTIONS raw file on Nikhef (`HF_PT2_INT/raw/JUNCTIONS/hf_JUNCTIONS_job001.root`,
   sha256 `49657c2c9a25e319513be5cda659a4d5e53bb3944f33bef51702b5660aaa3651`,
-  96,578,417 bytes, per `docs/SPECIES_AXIS_VALIDATION.md`). **The fixture is not
+96,578,417 bytes, per `git show 4a007f2^:docs/SPECIES_AXIS_VALIDATION.md` §2). **The fixture is not
   in the repository**; the digest is. See §5.
 
 ### 2.2 Decay-parent maps
@@ -307,7 +307,7 @@ current result.**
 
 **G11–G13 are NOT regenerable.** Their provenance is unrecoverable: tune, input
 count, reader commit and run date were never recorded, and the two prose claims
-that survive disagree with each other (`EXTRACTION_CONVENTIONS.md` §6 says
+that survive disagree with each other (`git show 4a007f2^:docs/EXTRACTION_CONVENTIONS.md` §6 says
 "one directory, 100 inputs"; `HANDOFF_v40` §6 says "four directories"). See §5.
 They remain frozen because they are (i) the historical cross-check for totals
 and species shares, and (ii) the **regression fixture** for
@@ -350,7 +350,7 @@ from G14, total 1,298,655,240, MONASH only:
 | map-v1.1 D⁰ | **28.1301 %** |
 | map-v1.1 D̄⁰ | **28.0467 %** |
 
-**History, from the anchor — `docs/EXTRACTION_CONVENTIONS.md`** (supersession
+**History, from the anchor — `git show 4a007f2^:docs/EXTRACTION_CONVENTIONS.md`** (supersession
 banner carried; tables stay as history): v1.1 D⁰ 28.1326 %, D̄⁰ 28.0536 %;
 **v1 D⁰ 45.9475 % — superseded, do not quote.**
 
@@ -438,7 +438,7 @@ for the merged basis.
 > inclusive unresolved-origin rate and inclusive baryon-fraction shift. They
 > are **not** a bound on the OS−SS pair observable's systematic.
 
-`docs/M7_UNRESOLVED_SYSTEMATIC.md`. 3000 raw files, ~300 M events, cluster
+`git show 4a007f2^:docs/M7_UNRESOLVED_SYSTEMATIC.md`. 3000 raw files, ~300 M events, cluster
 `5402022`, ten jobs.
 
 | tune | unresolved rate % | baryon % measured | baryon % inclusive | **relative shift %** |
@@ -482,7 +482,7 @@ their own committed inputs.**
 > **SCOPE: inclusive-level diagnostic, exactly as §2.7.** Not a bound on the
 > pair observable.
 
-`docs/M7_BEAUTY_UNRESOLVED_SYSTEMATIC.md`. Cluster `5425788`, 10 jobs, all `rc=0`.
+`git show 4a007f2^:docs/M7_BEAUTY_UNRESOLVED_SYSTEMATIC.md`. Cluster `5425788`, 10 jobs, all `rc=0`.
 
 | tune | unresolved rate % | baryon % measured | baryon % inclusive | **relative shift %** |
 |---|---|---|---|---|
@@ -508,7 +508,7 @@ Integer counts: unresolved_n 3,170 / 28,315 / 27,184; resolved_n 27,645,508 /
 
 **Recipe:** `extraction/aggregate_m7.py evidence/m7b_blocks/*.log`
 — fail-closed below ten blocks and on mixed sectors. **Status:
-VERIFIED-BY-RECORD** (`anchors/MANIFEST.md` §2 — the aggregator reproduces the
+VERIFIED-BY-RECORD** (`git show 4a007f2^:AnalysisScripts/anchors/MANIFEST.md` §2 and §2b — the aggregator reproduces the
 published table; P2 additionally reproduces the *charm* table exactly:
 0.0847 / 1.1530 / 1.1355 %, shifts 0.0451 / 0.5497 / 0.5125 %).
 
@@ -523,7 +523,7 @@ all ten.
 
 ### 2.9 Σ_b raw-count leg
 
-`docs/SIGMA_B_ORDERING_AND_ADJUDICATION.md`. Final at 1000 files: Σ_b
+`git show 4a007f2^:docs/SIGMA_B_ORDERING_AND_ADJUDICATION.md`. Final at 1000 files: Σ_b
 **26.59 % ± 0.24**, Σ*_b **10.51 % ± 0.19**, ground **0.83 % ± 0.11**.
 R1 HIT; R3 for Σ*_b HIT (+1.47 % ± 0.47, +3.2 σ); Σ_b null. **The Σ_b physics
 gate is passed.**
@@ -537,7 +537,7 @@ aggregator recipe for these logs was found in `tools/`. See §6, finding F2.
 
 ### 2.9b MONASH central table — the first tune's numbers, `38bf707`
 
-`docs/MONASH_CENTRAL_TABLE.md`, delivered 2026-08-12. **Closure PASSED at the
+`git show 4a007f2^:docs/MONASH_CENTRAL_TABLE.md` §1, delivered 2026-08-12. **Closure PASSED at the
 registered counts**; the decomposition is FINAL for MONASH.
 
 | registered | required | observed |
@@ -587,7 +587,7 @@ mechanism was not what the words said. The wording was replaced before it
 reached a committed document.**
 
 **Approved text, to be committed verbatim at point of use in
-`MONASH_CENTRAL_TABLE.md` §4a** (full check table: private restructure plan, Section 1.3):
+`git show 4a007f2^:docs/MONASH_CENTRAL_TABLE.md` §4a** (full check table: private restructure plan, Section 1.3):
 
 > kMultiplyHeavy 0.0000% — 192 entries of 1,298,655,240 (1.5 × 10⁻⁵ %).
 > This category holds hadrons with |q_c| > 1 or |q_b| > 1 — the doubly-
@@ -675,7 +675,7 @@ Totals **53,662,416 / 46,311,148 / 46,678,201**; per event **0.5366 / 0.4631 /
 > edited, because a registration changed after the result stops being one.
 > **This entry records the table as FINAL on the closure verdicts plus that
 > ruling**, with the caveat, not without it.
-> `THREE_TUNE_CENTRAL_TABLE.md` §0 carries the ruling and its measured basis.
+> `git show 4a007f2^:docs/THREE_TUNE_CENTRAL_TABLE.md` §0 carries the ruling and its measured basis.
 
 **Regeneration recipe** — the table's stdout is the regenerable object:
 
@@ -856,7 +856,7 @@ exact block-sum identity is what must catch a broad or uniform displacement.
 **The quarantine STANDS**, on exactly the grounds the ruling gave: localized,
 physically large deviations, not a flag count.
 
-**This does not affect the MONASH SEMs.** `MONASH_CENTRAL_TABLE.md` §3 records
+**This does not affect the MONASH SEMs.** `git show 4a007f2^:docs/MONASH_CENTRAL_TABLE.md` §3 records
 I3 as exact and the SEMs as unaffected; the misspecified null is a flagging
 instrument, not an input to the numbers.
 
@@ -921,7 +921,7 @@ reproduction targets because none is an accepted scientific output.
 > **through** the upper error-bar caps in the beauty panel, where the SEM is a
 > sixth of the bar height — they now anchor above the error bar rather than
 > above the bar. **No number moved**: fig 1's 42 cells were re-checked against
-> `THREE_TUNE_CENTRAL_TABLE.md` (0 mismatches) and all three figures remain
+> `git show 4a007f2^:docs/THREE_TUNE_CENTRAL_TABLE.md` (0 mismatches) and all three figures remain
 > byte-identical across independent runs. fig 3 was unchanged.
 >
 > **fig 1 and fig 3 moved on 2026-08-16, for different reasons.**
@@ -930,7 +930,7 @@ reproduction targets because none is an accepted scientific output.
 > landed, so the figure now draws three bars per group instead of one and the
 > legend no longer says *"not yet merged"*. This is the legitimate move the
 > paragraph below anticipated. Its 42 cells — every mean **and** every SEM in
-> both panels — were checked against `THREE_TUNE_CENTRAL_TABLE.md` and agree
+> both panels — were checked against `git show 4a007f2^:docs/THREE_TUNE_CENTRAL_TABLE.md` and agree
 > exactly. Panel B's rows are now the table's common row set rather than one
 > tune's top-8, because each tune's own top-8 is a different set.
 >
@@ -981,7 +981,7 @@ Regeneration contracts that live in code and text, not in a digest:
 | **C-3** | producer binary sha256 `e54b27bb9e3fcfd42d70193e08e2eacf965cc5081eabb5c42a9971203f130659`, present in all 300 analysis outputs | private phase-4 submission checklist, B2 |
 | **C-4** | `seed_derivation_v2`; `SEED_BASE=100_000_001`, strides 10M/1M/100k; ordinal cap **79**, raising rather than truncating | `REPRODUCIBILITY.md` §2 |
 | **C-5** | full-production cost **562.5 CPU-hours**, not 390 | `REPRODUCIBILITY.md` §6 |
-| **C-6** | campaign HF_RUN3_V1 complete and promoted, **3000/3000**; seed ledger **3557/3557** | `docs/campaigns/HF_RUN3_V1_RECORD.md:753` |
+| **C-6** | campaign HF_RUN3_V1 complete and promoted, **3000/3000**; seed ledger **3557/3557** | `git show 4a007f2^:docs/campaigns/HF_RUN3_V1_RECORD.md` line 753 |
 | **C-7** | heavy flavour signed by **quark content, not charge**: `q_c = n_c − n_cbar` | `REPRODUCIBILITY.md` §1 |
 | **C-8** | the 34 breach partials were **moved, never deleted**, with a committed manifest | private partials-archive record |
 
@@ -1187,7 +1187,7 @@ aa8b6c8146e67f44d4f4d0dff7b85c3f802502bdd9e7a603139034cd6e57ae0b  sigmab_raw/sig
    CLOSEPACKING have not. **When the cross-tune table lands it becomes the most
    important entry in this document and it is not here yet.**
 2. **`Paper/**`** — out of scope by instruction, untouched, unexamined.
-3. **Plotting outputs.** `plotting/PAPER_FIGURE_PROVENANCE.md` exists;
+3. **Plotting outputs.** The plotting-provenance record existed (`git show 4a007f2^:plotting/PAPER_FIGURE_PROVENANCE.md`);
    whether the paper figures are digest-pinned anywhere was **not established**.
    **UNKNOWN** — see the private restructure plan, Section 8.1 Q2.
 4. **Any claim that a recipe was run.** None were, this session, by instruction.
@@ -1816,7 +1816,7 @@ Configurations are **generated**, never hand-written:
 
 ### 9.5.2 The identity assertions — filtering changed the view and nothing else
 
-Run by `tools/assert_variant_identity.py`, comparing the printed 17-significant-digit
+Run by `tools/assert_variant_identity.py` -- retired from the tree at 4a007f2, recoverable with `git show 4a007f2^:tools/assert_variant_identity.py` -- comparing the printed 17-significant-digit
 values with **no numeric tolerance**:
 
 | assertion | points | result |
@@ -1881,7 +1881,7 @@ behind. Pre-styling artifacts archived as `*.prestyle_20260818T114842`.
 > rather than carried to merge.
 >
 > **CORRECTED AT MERGE.** The claim above was true of the DATA and not of the
-> TOOL. `tools/assert_variant_identity.py` still ran its V-FULL leg through a
+> TOOL. `tools/assert_variant_identity.py` (`git show 4a007f2^:tools/assert_variant_identity.py`) still ran its V-FULL leg through a
 > `compare_rounded` helper that re-printed each value at the source's precision,
 > so the assertion it actually made was the weaker one, against a log that had
 > carried 17 significant figures since the styling re-render. The leg now uses
@@ -1937,7 +1937,7 @@ CANONICAL_FREEZE_CONTRACT manifest_sha256=fcd96eaebd4dc11f071a2c8db8849f6a4cc19b
 ```
 
 **Closed loop, re-verified independently this session** — recomputed from
-`config/multiplicity_class_boundaries_v1.json` against the MB anchor
+`config/multiplicity_class_boundaries_v1.json` (retired at b1c4c12 under ruling D1; `git show b1c4c12^:config/multiplicity_class_boundaries_v1.json`) against the MB anchor
 (172 429 events) and compared to the frozen receipt: **worst |D| = 0.000465**
 against tolerance 0.0005, **PASS on all eleven**, every per-class residual
 reproducing the recorded table to the digit. This check is a property of the
@@ -2182,7 +2182,7 @@ directory, and the balancing configurations are untouched.
 |---|---|
 | the balancing canvas rendered under this configuration vs the **signed-off V-INTEGRATED** | **BYTE-IDENTICAL PNG**, `88fdb62845ccbcb6…` on both |
 | every shared `UNCERTAINTY_MATRIX` value | **14 keys vs 12, 12 shared, ZERO differing** at 17-digit string equality; the two extras are exactly the pairs registered |
-| `tools/assert_variant_identity.py`, re-run unchanged | **IDENTICAL** on all three legs, `RC=0` |
+| `tools/assert_variant_identity.py` (`git show 4a007f2^:tools/assert_variant_identity.py`), re-run unchanged | **IDENTICAL** on all three legs, `RC=0` |
 
 The first leg is the strongest available statement, because the PNG is this
 project's byte-reproducibility anchor (§9.4.3) rather than an agreement to some
@@ -2689,7 +2689,7 @@ recomputed from the committed bytes rather than read.
 
 | output | where its digest is recorded | verified |
 |---|---|---|
-| `…_THREETUNE_PNG.png` | `results/validation/plotting/hf_run3_v1_threetune_20260816/RUN_RECORD.md:37` | ✅ **match** |
+| `…_THREETUNE_PNG.png` | `git show 4a007f2^:results/validation/plotting/hf_run3_v1_threetune_20260816/RUN_RECORD.md`, line 37 | ✅ **match** |
 | `…_THREETUNE_POLISHED_PNG.png` | the same record, `:230` | ✅ **match** |
 | **`…_MONASH_PNG.png`** | **nowhere** | ⛔ **unrecorded** |
 
@@ -2730,7 +2730,7 @@ blocks. Recorded as a gap rather than closed by writing the number down.
 |---|---|
 | product | `results/systematics/20260819/per_category_deltas.json` |
 | sha256 | `06bb639200ff01ae150baada8c86e737848da6888592a1b5aeddb7a3d3054981` |
-| rendered | `results/systematics/20260819/PER_CATEGORY_DELTAS.md` |
+| rendered | `git show 4a007f2^:results/systematics/20260819/PER_CATEGORY_DELTAS.md` |
 | inputs | `/data/alice/ipardoza/sys_runs/HF_SYS_*/` on Nikhef, 165 directories |
 | instrument | the four shas of §2.4, unchanged: reader `4cd8b6fa…`, artifact `ccec0dbc…`, map v2 `58081aa2…`, registry `ea9b0232…` |
 | nominal arm | the committed anchors `evidence/merged_{monash,junctions,closepacking}_dedup`, central and ten blocks |
@@ -2760,7 +2760,7 @@ digit.
 | product | `results/systematics/20260819/per_class_deltas.json` |
 | sha256 | `cac0a757ec7bdca04f2390668334733488d95bba14b3f22be2e0216980ad86c2` |
 | flat form | `results/systematics/20260819/per_class_deltas.csv`, sha256 `70e07e49d8feeeda9cef5738b2cfaab4ef467a25db511e95e80caf2e38e4bb78` |
-| rendered | `results/systematics/20260819/PER_CLASS_DELTAS.md` |
+| rendered | `git show 4a007f2^:results/systematics/20260819/PER_CLASS_DELTAS.md` |
 | instrument | `plotting/improvedPlotting_THnSparse.C` sha256 `6dace2025d1edf37…`, through the `measure-balancing` target |
 | nominal arm | `figure_deploy_20260817/vintegrated_closure.log`, sha256 `f507f6250e63d82c9c34e088abe4ec16b17359e3b0a54fcdb54e17cd67653d7b`, 144 rows, 2026-08-18 10:18 |
 | control | `sys_runs_plot5/render_HF_RUN3_V1.log`, sha256 `690f2dc5694fa8639582e7ff2a5dd42f392c66ab2ccdf1268e9e5974e65afe68` |
@@ -2828,7 +2828,7 @@ documents.
 |---|---|
 | product | `results/systematics/20260819/tune_separation.json` |
 | sha256 | `37aae5bdad84dc6652399b2c77ddc6ae9c6c91df5073df6af1510d560315befd` |
-| rendered | `results/systematics/20260819/TUNE_SEPARATION.md` |
+| rendered | `git show 4a007f2^:results/systematics/20260819/TUNE_SEPARATION.md` |
 | input | `figure_deploy_20260817/vintegrated_closure.log`, sha256 `f507f6250e63d82c9c34e088abe4ec16b17359e3b0a54fcdb54e17cd67653d7b` |
 | instrument | `extraction/write_tune_separation.py` |
 

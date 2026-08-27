@@ -282,7 +282,7 @@ Each variation changes exactly one setting from every nominal tune card.
 
 The retained run record reports 300 raw files per variation campaign: 100 per tune at 100,000 events each.
 Thus, each variation contains 10 million events per tune and 30 million events across the three tunes.
-`docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` records the completed shape and merge receipts.
+Commit 4a007f2 of 2026-08-22 moved that record out of this repository; `git show 4a007f2^:docs/SYSTEMATICS_HARVEST_RUN_RECORD.md` records the completed shape and merge receipts.
 
 The external variation manifests and raw files are unavailable in this checkout.
 The repository can derive the registered shape and verify downstream committed results, but it cannot recount all 2,100 raw files.

@@ -4,7 +4,7 @@
 > this file were produced on the retired common absolute multiplicity axis.
 > They remain historical provenance and are not results of the 2026-08-22
 > rebuild. Regeneration requires tune-local v2 boundary receipts; see
-> `docs/REBUILD_STATUS.md`.
+> `paper/CLAIM_EVIDENCE.md` row A3 and `docs/REPRODUCIBILITY.md` section 3.
 
 ## 1. Scope and claim hierarchy
 
@@ -82,7 +82,7 @@ and `extraction/three_tune_table.py`.
 The integrity artifacts report exact central-to-block addition for all three tunes.
 The robust block check reports zero MONASH flags, three JUNCTIONS flags, and one CLOSEPACKING flag.
 The anchor manifests identify the flagged bins and retain the closure provenance.
-Sources: the three `evidence/merged_<tune>_dedup/MANIFEST.md` files.
+Sources: `evidence/merged_junctions_dedup/MANIFEST.md`, `evidence/merged_closepacking_dedup/MANIFEST.md`, and, for MONASH, `git show 4a007f2^:AnalysisScripts/anchors/merged_monash_dedup/MANIFEST.md`.
 
 Every anchor directory reports exact species-to-category self-checks and conserved regrouping.
 The same manifests bind the extractor, species axis, pair registry, and decay-map digests.
@@ -130,7 +130,7 @@ Each cell gives the B- yield and the Lambda_b yield, each with its block SEM.
 | `c11` | 0.11802 +/- 0.00070 / 0.01911 +/- 0.00031 | 0.08034 +/- 0.00064 / 0.04364 +/- 0.00039 | 0.07795 +/- 0.00090 / 0.03924 +/- 0.00058 |
 
 Source: `results/systematics/20260819/tune_separation.json`.
-The class boundaries come from `config/multiplicity_class_boundaries_v1.json`.
+The class boundaries come from the retired common-axis artifact `config/multiplicity_class_boundaries_v1.json`, recoverable with `git show b1c4c12^:config/multiplicity_class_boundaries_v1.json`.
 
 ## 5. Baryon-to-meson ratio trend
 
@@ -249,7 +249,7 @@ Sources: `contracts/decay_parent_map_v2.json` and `extraction/second_branch_weig
 
 The registered split fractions and species count matched the v2 artifact.
 The registered total, D* share, and residual estimates missed by overestimating branches that converge on one ground state.
-Sources: `docs/MAP_V2_PREREGISTRATION.md`, `evidence/f4_probe/f4b_probe.out`, and the v2 map.
+Sources: `git show 4a007f2^:docs/MAP_V2_PREREGISTRATION.md`, `evidence/f4_probe/f4b_probe.out`, and the v2 map.
 
 The auxiliary b-baryon checks form a three-level diagnostic ladder.
 Raw generator logs test inclusive production without the analysis chain.

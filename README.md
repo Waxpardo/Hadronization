@@ -24,9 +24,14 @@ selected site root. No workflow stage requires files from a developer laptop.
   excluded and are retried with independent deterministic seeds; the measured
   attrition is reported, not corrected away.
 
-The authoritative records are [DECISIONS.md](docs/DECISIONS.md),
+The authoritative records are the internal DECISIONS.md, held in the project
+archive outside this repository,
 [`multiplicity_percentile_classes_v2.json`](config/multiplicity_percentile_classes_v2.json),
-and [`cr_holdout_policy_v1.json`](config/cr_holdout_policy_v1.json).
+and [`cr_holdout_policy_v1.json`](config/cr_holdout_policy_v1.json). The two
+tracked files carry the tune-local class definition and the accepted CR
+attrition in full. `config/systematics_envelope_v1.json` and
+`config/systematics_sources_v1.json` cite the same internal record for owner
+rulings R7 and R9 to R11.
 
 ## One workflow
 
@@ -101,7 +106,9 @@ The code mirrors that flow in `generation/`, `analysis/`, `merging/`,
 `extraction/`, and `plotting/`. Scientific registries and selectors live in
 `config/`; fail-closed checks live in `Validation/`, `tools/`, and `tests/`.
 
-See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for ownership and dataflow, and
-[MIGRATION.md](docs/MIGRATION.md) for the relationship to the archived working
-repositories and Nikhef data. [REBUILD_STATUS.md](docs/REBUILD_STATUS.md)
-separates current contracts from retained historical evidence.
+See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for ownership and dataflow. Commit
+4a007f2 of 2026-08-22 moved two records out of this repository.
+`git show 4a007f2^:docs/MIGRATION.md` states the relationship to the archived
+working repositories and Nikhef data.
+`git show 4a007f2^:docs/REBUILD_STATUS.md` separates the contracts current at
+that date from retained historical evidence.
