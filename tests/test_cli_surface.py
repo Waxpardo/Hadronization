@@ -358,6 +358,111 @@ def test_a_migration_to_the_same_target_changes_nothing() -> None:
         check("...recording no superseded pointer", asides == [], str(asides))
 
 
+# --- Phase 3: the plot configurations --------------------------------------
+#
+# THE DEFECT THIS CLOSES. plotting/run_paper_plots.sh defaulted THNSPARSE_CONFIG
+# and THNSPARSE_COMPLETE_ROOT_CONFIG to the reduced JUNCTIONS files, and
+# MULTIPLICITY_CONFIG inherited the first. `plot KEY all` took them silently for
+# any campaign. This is I3's rule applied to the publication path: derive from
+# the resolved campaign, refuse by name, honour an explicit variable.
+#
+# The cases use HADRONIZATION_REQUEST_PREFLIGHT_ONLY, which is the driver's own
+# explicit no-render result, so nothing starts ROOT and nothing is written.
+RUN3_COMPLETE_ROOT = ("configuration_multiplicity_HF_RUN3_V1"
+                      "_THREETUNE_THnSparse_complete_root.json")
+
+
+def plot_preflight(tmp: str, key: str, target: str,
+                   drop: str | None = None,
+                   env_extra: dict | None = None
+                   ) -> subprocess.CompletedProcess:
+    replace: dict = {"plotting/Plots": None}
+    if drop is not None:
+        replace[f"plotting/{drop}"] = None
+    base = sandbox(tmp, replace=replace, git=True)
+    env = {"HADRONIZATION_DATASET_SELECTOR": str(FULL_SELECTOR),
+           "HADRONIZATION_REQUEST_PREFLIGHT_ONLY": "1"}
+    env.update(env_extra or {})
+    return run_cli(base, Path(tmp) / "data", ["plot", key, target], env)
+
+
+def test_the_plot_configuration_is_derived_from_the_campaign() -> None:
+    """Presence of the derived file decides the run, so it is the file read."""
+    with tempfile.TemporaryDirectory() as tmp:
+        present = plot_preflight(tmp, "hf_run3_v1_candidate",
+                                 "thnsparse-complete-root")
+    check("a target whose derived configuration exists is accepted",
+          "REQUEST_PREFLIGHT_ONLY status=PASS" in present.stdout,
+          f"rc={present.returncode} {present.stderr[:300]}")
+    with tempfile.TemporaryDirectory() as tmp:
+        absent = plot_preflight(tmp, "hf_run3_v1_candidate",
+                                "thnsparse-complete-root",
+                                drop=RUN3_COMPLETE_ROOT)
+    check("...and refused when that same file is the only thing missing",
+          absent.returncode == 2, f"rc={absent.returncode} {absent.stdout[:200]}")
+    check("...naming the derived path it looked for",
+          f"plotting/{RUN3_COMPLETE_ROOT}" in absent.stderr,
+          absent.stderr[:400])
+    check("...and naming the variable that answers it",
+          "THNSPARSE_COMPLETE_ROOT_CONFIG" in absent.stderr, absent.stderr[:400])
+
+
+def test_a_campaign_without_a_configuration_is_refused_by_name() -> None:
+    """HF_SMOKE3 has no THREETUNE configuration. Refusing is the right answer."""
+    with tempfile.TemporaryDirectory() as tmp:
+        got = plot_preflight(tmp, "hf_smoke3", "all")
+    check("plot all refuses a campaign with no derived configuration",
+          got.returncode == 2, f"rc={got.returncode} {got.stdout[:200]}")
+    check("...naming both derived paths",
+          "plotting/configuration_multiplicity_HF_SMOKE3_THREETUNE_"
+          "THnSparse.json" in got.stderr
+          and "plotting/harvest_configs/configuration_multiplicity_HF_SMOKE3"
+          "_THREETUNE_THnSparse.json" in got.stderr, got.stderr[:500])
+    check("...and offering no reduced fallback",
+          "reduced_JUNCTIONS" not in got.stderr, got.stderr[:500])
+
+
+def test_an_explicit_plot_configuration_is_honoured() -> None:
+    """The reduced files stay reachable, but only by naming them."""
+    reduced = "plotting/configuration_multiplicity_reduced_JUNCTIONS"
+    with tempfile.TemporaryDirectory() as tmp:
+        got = plot_preflight(tmp, "hf_smoke3", "all", env_extra={
+            "THNSPARSE_CONFIG": f"{reduced}_THnSparse.json",
+            "THNSPARSE_COMPLETE_ROOT_CONFIG":
+                f"{reduced}_THnSparse_complete_root.json"})
+    check("an explicitly named configuration is used for a campaign with none",
+          "REQUEST_PREFLIGHT_ONLY status=PASS" in got.stdout,
+          f"rc={got.returncode} {got.stderr[:400]}")
+
+
+def test_a_run_derives_only_the_configurations_its_targets_read() -> None:
+    """A measurement run is not refused for a publication file it never opens.
+
+    HF_RUN3_V1 has a complete-root configuration and no plain THnSparse one, so
+    this property is the difference between a working measurement path and a
+    refused one.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        measurement = plot_preflight(tmp, "hf_run3_v1_candidate",
+                                     "thnsparse-complete-root")
+    check("a complete-root target does not require the plain configuration",
+          "REQUEST_PREFLIGHT_ONLY status=PASS" in measurement.stdout,
+          f"rc={measurement.returncode} {measurement.stderr[:300]}")
+    with tempfile.TemporaryDirectory() as tmp:
+        publication = plot_preflight(tmp, "hf_run3_v1_candidate", "all")
+    check("...while a target that does require it is refused, naming it",
+          publication.returncode == 2
+          and "THNSPARSE_CONFIG" in publication.stderr,
+          f"rc={publication.returncode} {publication.stderr[:300]}")
+
+
+def test_the_driver_carries_no_reduced_configuration_default() -> None:
+    text = (ROOT / "plotting/run_paper_plots.sh").read_text()
+    for name in ("default_thnsparse_config=", "default_complete_root_config="):
+        check(f"the driver defines no {name.rstrip('=')}",
+              name not in text, name)
+
+
 def main() -> int:
     tests = [value for name, value in sorted(globals().items())
              if name.startswith("test_") and callable(value)]

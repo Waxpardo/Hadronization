@@ -54,11 +54,15 @@ Useful environment overrides:
   USE_DATASET_SELECTOR
       default: true; set false only for an explicitly documented diagnostic
   THNSPARSE_CONFIG
-      default: plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json
+      no default. Derived from the resolved campaign as
+      configuration_multiplicity_<CAMPAIGN>_THREETUNE_THnSparse.json, under
+      plotting/ or plotting/harvest_configs/. The run refuses, naming both
+      derived paths, when neither exists.
   THNSPARSE_COMPLETE_ROOT_CONFIG
-      default: plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json
+      no default. Derived the same way from
+      configuration_multiplicity_<CAMPAIGN>_THREETUNE_THnSparse_complete_root.json.
   MULTIPLICITY_CONFIG
-      default: THNSPARSE_CONFIG; smoke uses its matching reduced config
+      default: THNSPARSE_CONFIG, once that is derived
   MULTIPLICITY_OUTPUT_DIR
       default: plotting/Plots/MultiplicityDistribution
   MULTIPLICITY_NORMALIZE
@@ -174,12 +178,9 @@ if [[ "${USE_DATASET_SELECTOR:-true}" == "true" ]]; then
   )"
 fi
 
-default_thnsparse_config="plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json"
-default_complete_root_config="plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse_complete_root.json"
-
-THNSPARSE_CONFIG="${THNSPARSE_CONFIG:-${default_thnsparse_config}}"
-THNSPARSE_COMPLETE_ROOT_CONFIG="${THNSPARSE_COMPLETE_ROOT_CONFIG:-${default_complete_root_config}}"
-MULTIPLICITY_CONFIG="${MULTIPLICITY_CONFIG:-${THNSPARSE_CONFIG}}"
+# THNSPARSE_CONFIG, THNSPARSE_COMPLETE_ROOT_CONFIG and MULTIPLICITY_CONFIG are
+# derived from the resolved campaign further down, after the dataset gates.
+# They have no defaults; see the derivation block below for why.
 MULTIPLICITY_OUTPUT_DIR="${MULTIPLICITY_OUTPUT_DIR:-plotting/Plots/MultiplicityDistribution}"
 MULTIPLICITY_NORMALIZE="$(normalize_bool "${MULTIPLICITY_NORMALIZE:-false}")"
 MULTIPLICITY_STRICT="$(normalize_bool "${MULTIPLICITY_STRICT:-true}")"
@@ -339,6 +340,81 @@ if [[ "${legacy_diagnostic_requested}" == "true" ]] &&
   echo "ERROR: legacy diagnostics require the explicit nonpublication legacy selector." >&2
   exit 1
 fi
+
+# The plot configurations are derived from the resolved campaign, never
+# defaulted.
+#
+# THE DEFECT THIS CLOSES. THNSPARSE_CONFIG and THNSPARSE_COMPLETE_ROOT_CONFIG
+# defaulted to the reduced JUNCTIONS configurations, and MULTIPLICITY_CONFIG
+# inherited the first. `./hadronization plot KEY all` took them silently, so a
+# campaign with no configuration of its own rendered against a reduced file
+# that is not its analogue. That is the same silent default that produced a
+# FAIL 12/132 control receipt through the measurement path, which the CLI now
+# refuses (hadronization:341). docs/GOLDEN_OUTPUTS.md names only
+# campaign-scoped configurations, so no tracked artifact was produced through
+# these defaults.
+#
+# The derivation runs AFTER the dataset gates above, so a run that is refused
+# for its status or its authorization still says so, and BEFORE the preflight
+# result, because a missing configuration is a defect in the request.
+#
+# A run derives only what its targets read: a measurement run is not refused
+# for a publication configuration it never opens.
+hf_need_thnsparse=false
+hf_need_complete_root=false
+hf_need_multiplicity=false
+for hf_target in "${expanded_targets[@]}"; do
+  case "${hf_target}" in
+    thnsparse|freeze-boundaries)
+      hf_need_thnsparse=true ;;
+    multiplicity-boundaries|multiplicity-compact)
+      hf_need_multiplicity=true ;;
+    thnsparse-complete-root|measure-balancing|multiplicity-boundaries-smoke|freeze-boundaries-smoke)
+      hf_need_complete_root=true ;;
+  esac
+done
+if [[ "${hf_need_multiplicity}" == "true" && -z "${MULTIPLICITY_CONFIG:-}" ]]; then
+  hf_need_thnsparse=true
+fi
+
+# Sets the named variable, or returns 1 without setting it. The status is read
+# by the caller: a command substitution would discard it, which is the defect
+# hadronization:60 and tools/render_measurement.sh:17 both record.
+hf_derive_campaign_config() {
+  local hf_var="$1" hf_suffix="$2" hf_name hf_candidate
+  if [[ -z "${HADRONIZATION_CAMPAIGN:-}" ]]; then
+    echo "ERROR: ${hf_var} is unset and this run resolved no campaign" >&2
+    echo "       Name a dataset, or set ${hf_var} to the configuration this" >&2
+    echo "       run needs. No default stands behind it." >&2
+    return 1
+  fi
+  hf_name="configuration_multiplicity_${HADRONIZATION_CAMPAIGN}_THREETUNE_${hf_suffix}"
+  # Nominal campaigns keep their configuration beside the plotters; the
+  # systematic variations keep theirs in harvest_configs/. Both are tracked
+  # locations, named here, not a search of the tree.
+  for hf_candidate in "plotting/${hf_name}" "plotting/harvest_configs/${hf_name}"; do
+    if [[ -f "${project_base}/${hf_candidate}" ]]; then
+      printf -v "${hf_var}" '%s' "${hf_candidate}"
+      return 0
+    fi
+  done
+  echo "ERROR: no ${hf_var} for campaign '${HADRONIZATION_CAMPAIGN}'" >&2
+  echo "       derived: plotting/${hf_name}" >&2
+  echo "                plotting/harvest_configs/${hf_name}" >&2
+  echo "       Neither file exists and no default stands behind them." >&2
+  echo "       Set ${hf_var} to the configuration this run needs, or add the" >&2
+  echo "       derived file." >&2
+  return 1
+}
+
+if [[ "${hf_need_thnsparse}" == "true" && -z "${THNSPARSE_CONFIG:-}" ]]; then
+  hf_derive_campaign_config THNSPARSE_CONFIG "THnSparse.json" || exit 2
+fi
+if [[ "${hf_need_complete_root}" == "true" && -z "${THNSPARSE_COMPLETE_ROOT_CONFIG:-}" ]]; then
+  hf_derive_campaign_config THNSPARSE_COMPLETE_ROOT_CONFIG \
+    "THnSparse_complete_root.json" || exit 2
+fi
+MULTIPLICITY_CONFIG="${MULTIPLICITY_CONFIG:-${THNSPARSE_CONFIG:-}}"
 
 if [[ "${HADRONIZATION_REQUEST_PREFLIGHT_ONLY}" == "true" ]]; then
   echo "REQUEST_PREFLIGHT_ONLY status=PASS root_execution=false outputs_written=false"
