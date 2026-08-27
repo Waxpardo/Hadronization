@@ -1371,7 +1371,8 @@ int ValidateRawOutput(const char* fileName, const char* expectedCampaign,
     // Pilot-only independent recomputation. The flat record lists every
     // final charged particle, so both counters follow from it alone. The
     // live-generator test Validation/TestPrimaryChargedDefinition.C proves
-    // separately that the record is complete.
+    // separately that the record is complete. That macro is in the internal
+    // archive since 2026-08-27.
     const std::size_t auditSize = multAuditPdg ? multAuditPdg->size() : 0;
     const bool auditSizesMatch =
         multAuditPdg && multAuditParticleIndex &&

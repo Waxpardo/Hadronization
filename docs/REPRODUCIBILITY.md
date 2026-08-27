@@ -385,9 +385,9 @@ For raw-file readers, compare file access times with the job start. For active m
 
 Use `rchar`, not `read_bytes`, for cached reads. Confirm the final positive verdict after the process exits.
 
-Two compatibility entrypoints cannot run the current chain. `generation/run_hf.sh` supplies too few producer arguments, so use the canonical submit renderer.
+Two compatibility entrypoints cannot run the current chain, and both are in the internal archive since 2026-08-27. `generation/run_hf.sh` supplied too few producer arguments, so use the canonical submit renderer.
 
-`merging/make_subsamples.sh` resolves a nonexistent nested driver path. Call `merging/merge_root_files.sh` directly.
+`merging/make_subsamples.sh` resolved a nonexistent nested driver path. Call `merging/merge_root_files.sh` directly.
 
 The tracked extraction chain requires explicit external merged and output
 roots but contains no site-specific default. It resolves the tracked extraction
@@ -458,7 +458,7 @@ Without those files, a reader cannot do the following work:
 - Reproduce exact integrated closure or virtual-trigger closure.
 - Recover every final ROOT-rendered figure and its receipt.
 
-No tracked file exists under `AnalyzedData/`. Therefore, the legacy FinalAnalysis and PtMultiplicity diagnostics remain source-only and are not publicly reproducible.
+No tracked file exists under `AnalyzedData/`. Therefore, the legacy FinalAnalysis diagnostics remain source-only and are not publicly reproducible. The PtMultiplicity macros are in the internal archive since 2026-08-27 and are not in this repository at all.
 
 The repository gives no public download route for the external data. It also gives no preservation service, archive identifier, or recovery authority.
 

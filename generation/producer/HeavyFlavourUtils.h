@@ -509,7 +509,7 @@ inline bool IsDirectPrimaryStatus(int status) {
 // for light flavour this card value is exactly equivalent to the conventional
 // 1 cm/c threshold; `Validation/TestPrimaryChargedDefinition.C` asserts that
 // equivalence against the installed PYTHIA ParticleData rather than trusting
-// it. Consequently `isFinal()` already means "primary" for light hadrons and
+// it. That macro is in the internal archive since 2026-08-27. Consequently `isFinal()` already means "primary" for light hadrons and
 // no ancestry traversal is required to exclude weak-decay products.
 //
 // Open- and hidden-heavy hadrons are excluded from the count. Their decays are

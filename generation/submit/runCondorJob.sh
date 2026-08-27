@@ -340,6 +340,7 @@ json.dump({
     # sensitivity.py reads them; this map is what the ROOT-side audits
     # (AuditOriginResolution.C, ListUnresolvedOrigins.C) require, and they
     # only assert it is a non-empty object of name -> digest.
+    # ListUnresolvedOrigins.C is in the internal archive since 2026-08-27.
     "validator_dependency_sha256": {
         "Validation/validate_raw_output.sh": digest("${validator}"),
         "Validation/ValidateRawOutput.C": digest(
