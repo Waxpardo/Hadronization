@@ -35,6 +35,13 @@ Checks:
      directory and refuses one that does not, both branches driven against a
      sandbox parent.
 
+Every check must mean the same thing on every host. Two did not: check 7a
+named `config/sites/local.conf`, which hf_site_detect answers only off the
+cluster, and check 7c's well-formed case required the whole of setupEnv.sh to
+succeed, which reads the dependency plane the sandbox deliberately replaces.
+Both are derived from the guard now. A check whose subject is the site plane
+asserts on the site plane, and says which plane refused when one does.
+
 Run against another directory of profiles to check a copy:
     python3 tests/test_site_profile_environment_independence.py --sites-dir DIR
 Checks 1 to 6 then read DIR. Checks 7 and 8 read setupEnv.sh and the verdict in
@@ -114,14 +121,45 @@ def source_profile(profile, keep=None, path=None, script=REPORT):
     return subprocess.run(command, capture_output=True, text=True)
 
 
-def source_setup_env(base, environment=None):
-    """Source a checkout's setupEnv.sh from a caller that runs with set -e."""
+def source_setup_env(base, environment=None, report=None):
+    """Source a checkout's setupEnv.sh from a caller that runs with set -e.
+
+    With `report`, the caller drops errexit and runs `report` afterwards, so a
+    check can read what the site plane resolved even on a host whose dependency
+    plane refuses for its own reasons. Only a probe may do that. A job must
+    stop, which is what the default form measures.
+    """
     inherited = dict(os.environ)
     inherited["SETUPENV_QUIET"] = "1"
     inherited.update(environment or {})
-    script = f'set -euo pipefail\nsource "{base}/setupEnv.sh"\necho JOB-LOGIC-RAN\n'
+    if report is None:
+        script = (f'set -euo pipefail\nsource "{base}/setupEnv.sh"\n'
+                  f'echo JOB-LOGIC-RAN\n')
+    else:
+        script = f'source "{base}/setupEnv.sh"\n{report}'
     return subprocess.run(["bash", "-c", script],
                           capture_output=True, text=True, env=inherited)
+
+
+def site_profile_source(base=ROOT):
+    """Name the file setupEnv.sh reads for its site plane on THIS host.
+
+    setupEnv.sh reads config/site.local.conf when that file exists and
+    config/sites/<site>.conf otherwise, and hf_site_detect answers `nikhef`
+    only where /data/alice and /cvmfs/alice.cern.ch both exist. Ask the guard
+    for both answers rather than naming a profile: this check hardcoded
+    `config/sites/local.conf`, which is correct on every development host and
+    wrong on the cluster -- the one host the Nikhef profile exists for. Return
+    an empty string when the guard cannot answer, so the caller fails loudly.
+    """
+    script = ('source "$1/config/sites/site_guard.sh"\n'
+              'hf_site_profile_path "$1" "$(hf_site_detect)"\n')
+    got = subprocess.run(["bash", "-c", script, "_", str(base)],
+                         capture_output=True, text=True)
+    resolved = got.stdout.strip()
+    if got.returncode != 0 or not resolved:
+        return ""
+    return os.path.relpath(resolved, str(base))
 
 
 def malformed(value):
@@ -307,6 +345,15 @@ def check_profiles(sites_dir):
 
 
 def check_setup_env():
+    # Which file setupEnv.sh reads for its site plane depends on the host, and
+    # every refusal below names that file rather than the site. Derive it once,
+    # from the guard that setupEnv.sh itself uses, so this test cannot drift
+    # from the selection rule it is checking.
+    site_source = site_profile_source()
+    check("the guard names the site profile setupEnv.sh would read",
+          bool(site_source),
+          "hf_site_detect or hf_site_profile_path did not answer")
+
     # --- 7a. a refusal reaches a caller that runs with `set -e` -------------
     # A sourced script cannot force its caller to stop; it can only return a
     # status. setupEnv.sh turns the caller's errexit off, so it must put the
@@ -317,8 +364,8 @@ def check_setup_env():
           got.returncode != 0 and "JOB-LOGIC-RAN" not in got.stdout,
           f"rc={got.returncode} out={got.stdout[:200]}")
     check("...and the refusal names the file that supplied the value",
-          "cannot resolve the data plane from config/sites/local.conf"
-          in got.stderr, got.stderr[-300:])
+          f"cannot resolve the data plane from {site_source}" in got.stderr,
+          f"expected {site_source}: {got.stderr[-300:]}")
 
     # --- 7b. a malformed sibling root stops the run too ---------------------
     # HF_PRODUCTION_ROOT decides where hundreds of gigabytes of raw campaign
@@ -328,6 +375,13 @@ def check_setup_env():
     check("a malformed HF_PRODUCTION_ROOT stops the run",
           got.returncode != 0 and "JOB-LOGIC-RAN" not in got.stdout,
           f"rc={got.returncode} out={got.stdout[:200]} err={got.stderr[:300]}")
+    # A non-zero status alone proves nothing on a host that carries
+    # /cvmfs/alice.cern.ch: the dependency plane below refuses there for its own
+    # reasons, so this check would pass with the sibling rule deleted. Name the
+    # plane that stopped the run and the variable it read.
+    check("...and the site plane is what stopped it, naming the variable",
+          refuses(got, site_source) and "HF_PRODUCTION_ROOT" in got.stderr,
+          f"rc={got.returncode} err={got.stderr[:400]}")
 
     # --- 7c. setupEnv.sh catches what no tracked profile ever sees ----------
     # config/site.local.conf is sourced INSTEAD of config/sites/<site>.conf, so
@@ -341,8 +395,9 @@ def check_setup_env():
         shutil.copy(GUARD, base / "config/sites/site_guard.sh")
         shutil.copy(ROOT / "config/sites/local.conf",
                     base / "config/sites/local.conf")
-        # Without this, setupEnv.sh refuses further down for a different reason
-        # and the well-formed case below would pass without accepting anything.
+        # The sandbox carries the tracked dependency defaults so that it reads
+        # as a real checkout. It is not what makes the well-formed case below
+        # meaningful; that case asserts on the site plane directly.
         shutil.copy(ROOT / "config/dependencies.conf",
                     base / "config/dependencies.conf")
         override = base / "config/site.local.conf"
@@ -356,11 +411,27 @@ def check_setup_env():
               in got.stderr, got.stderr[-400:])
 
         # The same file, well formed, must not be refused.
+        #
+        # Only the site plane is under test. Requiring the whole of setupEnv.sh
+        # to succeed made this case read the host's dependency plane as well:
+        # config/site.local.conf replaces the tracked profile entirely, and on
+        # Nikhef config/sites/nikhef.conf is also the file that supplies
+        # HF_PYTHIA8_PREFIX. On a host that carries /cvmfs/alice.cern.ch the
+        # sandbox therefore reached the PYTHIA pin with an empty prefix and
+        # refused there, with rc=1 and no site refusal at all. Measure what the
+        # site plane did, which is the same answer on every host.
         override.write_text('HADRONIZATION_DATA_ROOT=/data/alice/someone/hf\n')
-        got = source_setup_env(base)
+        got = source_setup_env(base, report=(
+            'printf "SITE-PLANE-ROOT=%s\\n" "${HADRONIZATION_DATA_ROOT:-}"\n'))
         check("...and accepts the same file when the root is well formed",
-              got.returncode == 0 and "JOB-LOGIC-RAN" in got.stdout,
+              "cannot resolve the data plane from" not in got.stderr
+              and "config/site.local.conf refused" not in got.stderr,
               f"rc={got.returncode} err={got.stderr[:400]}")
+        # Without this the check above would also pass on a sandbox that failed
+        # before the site plane ran at all, which prints no refusal either.
+        check("...keeping the root that file supplied",
+              "SITE-PLANE-ROOT=/data/alice/someone/hf" in got.stdout,
+              f"out={got.stdout[:200]} err={got.stderr[:300]}")
 
 
 def check_verdict():
