@@ -434,6 +434,44 @@ def check_setup_env():
               f"out={got.stdout[:200]} err={got.stderr[:300]}")
 
 
+def check_pin_refusal():
+    """--- 7d. the PYTHIA pin refusal names the plane, not one candidate file --
+
+    WHAT THIS MACHINE CANNOT DO. The block that carries this refusal is gated
+    on /cvmfs/alice.cern.ch/etc/login.sh (setupEnv.sh:172), which exists on the
+    cluster and on no development host, so these assertions read the source
+    rather than run it. That boundary is the same one check 7c records: the
+    site plane resolves everywhere, the dependency plane does not.
+
+    WHY THE MESSAGE CHANGED. config/sites/nikhef.conf sets HF_PYTHIA8_PREFIX on
+    its last line, and an untracked config/site.local.conf replaces the tracked
+    profile entirely, including that assignment. The refusal used to answer
+    that case with "Set HF_PYTHIA8_PREFIX in config/dependencies.local.conf",
+    which is the one file that had nothing to do with it.
+    """
+    text = SETUP_ENV.read_text()
+    start = text.index("pinned PYTHIA package is unavailable")
+    refusal = text[start:text.index("pinned PYTHIA compiler runtime")]
+
+    check("the pin refusal names the site plane in effect",
+          "${setupenv_site_source" in refusal, refusal[:400])
+    check("...and says that plane does not set the variable",
+          "does not set that variable" in refusal, refusal[:400])
+    check("...naming the tracked profile that does set it",
+          "config/sites/nikhef.conf" in refusal, refusal[:400])
+    check("...and the untracked file that replaces it",
+          "config/site.local.conf" in refusal, refusal[:400])
+    check("...and it no longer sends the reader to one file alone",
+          "Set HF_PYTHIA8_PREFIX in config/dependencies.local.conf."
+          not in refusal, refusal[:400])
+    check("...while still naming where the pin may be supplied",
+          "config/dependencies.local.conf" in refusal, refusal[:400])
+    # Fail-closed is the part that must NOT change.
+    check("...and the refusal still stops the run",
+          "setupenv_restore_shell_flags" in refusal
+          and "return 1 2>/dev/null || exit 1" in refusal, refusal[-200:])
+
+
 def check_verdict():
     account = subprocess.run(["id", "-un"], capture_output=True,
                              text=True).stdout.strip()
@@ -481,6 +519,7 @@ def main(argv):
     check_profiles(sites_dir)
     if repository:
         check_setup_env()
+        check_pin_refusal()
         check_verdict()
     else:
         print("  SKIP checks 7 and 8: they read setupEnv.sh and the "

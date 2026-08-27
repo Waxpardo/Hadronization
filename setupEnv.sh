@@ -218,8 +218,30 @@ if [ -f /cvmfs/alice.cern.ch/etc/login.sh ]; then
   pythia_package="${HF_PYTHIA8_PREFIX%/}"
   pythia_gcc_package="${HF_PYTHIA8_GCC_PREFIX%/}"
   if [[ ! -x "${pythia_package}/bin/pythia8-config" ]]; then
+    # Name the plane, not one candidate file.
+    #
+    # THE DEFECT THIS CLOSES. This refusal said "Set HF_PYTHIA8_PREFIX in
+    # config/dependencies.local.conf", which is the wrong file in the case that
+    # actually produced it. config/sites/nikhef.conf sets HF_PYTHIA8_PREFIX on
+    # its last line, deliberately, so that a fresh Nikhef clone runs without an
+    # ignored dependency override. An untracked config/site.local.conf replaces
+    # the tracked profile ENTIRELY, including that assignment, so the pin
+    # arrives empty and this check fires with nothing after the colon. Session
+    # I3 measured that path. A reader sent to dependencies.local.conf cannot
+    # see why the value went missing.
     echo "ERROR: pinned PYTHIA package is unavailable: ${pythia_package}" >&2
-    echo "       Set HF_PYTHIA8_PREFIX in config/dependencies.local.conf." >&2
+    if [[ -z "${pythia_package}" ]]; then
+      echo "       HF_PYTHIA8_PREFIX is empty. The site plane in effect is" >&2
+      echo "       ${setupenv_site_source:-(none resolved)}, and it does not set that variable." >&2
+      echo "       config/sites/nikhef.conf does set it. An untracked" >&2
+      echo "       config/site.local.conf replaces the tracked profile entirely," >&2
+      echo "       including that assignment." >&2
+    else
+      echo "       The site plane in effect is ${setupenv_site_source:-(none resolved)}." >&2
+    fi
+    echo "       Supply the pin where this run reads it: an exported" >&2
+    echo "       HF_PYTHIA8_PREFIX wins, then config/dependencies.local.conf," >&2
+    echo "       then the site file named above." >&2
     setupenv_restore_shell_flags
     return 1 2>/dev/null || exit 1
   fi
