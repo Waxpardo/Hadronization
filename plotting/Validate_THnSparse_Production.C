@@ -1,5 +1,5 @@
-#include "../AnalysisScripts/GeneratedPairRegistry.h"
-#include "../AnalysisScripts/GeneratedPairObjectContract.h"
+#include "../contracts/GeneratedPairRegistry.h"
+#include "../contracts/GeneratedPairObjectContract.h"
 #include "../generation/producer/Sha256.h"
 #include "PairInputSelectionUtils.h"
 

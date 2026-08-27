@@ -3,9 +3,9 @@
 // Reads the canonical raw schema once and emits the Paul-compatible ROOT
 // object contract for every signed pair in GeneratedPairRegistry.h.
 
-#include "../AnalysisScripts/GeneratedPairRegistry.h"
-#include "../AnalysisScripts/GeneratedSpeciesOrdinals.h"
-#include "../AnalysisScripts/AssociateOriginCategoryContract.h"
+#include "../contracts/GeneratedPairRegistry.h"
+#include "../contracts/GeneratedSpeciesOrdinals.h"
+#include "../contracts/AssociateOriginCategoryContract.h"
 #include "../generation/registries/GeneratedHeavyFlavourRegistry.h"
 #include "../generation/registries/GeneratedTuneSettingRegistry.h"
 #include "../generation/producer/HeavyFlavourUtils.h"

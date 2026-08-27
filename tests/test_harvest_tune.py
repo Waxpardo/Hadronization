@@ -18,7 +18,7 @@ sys.path.insert(0, str(REPO / "extraction/pipeline"))
 from harvest_tune import closure_verdict  # noqa: E402
 
 DRIVER = REPO / "extraction/pipeline/harvest_tune.py"
-DEDUP = REPO / "AnalysisScripts/anchors/merged_monash_dedup"
+DEDUP = REPO / "evidence/merged_monash_dedup"
 
 # MONASH's real closure output, as recorded in the MONASH central table §1.
 MONASH_CLOSURE = (

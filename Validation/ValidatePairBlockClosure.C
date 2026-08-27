@@ -1,7 +1,7 @@
-#include "../AnalysisScripts/GeneratedPairRegistry.h"
-#include "../AnalysisScripts/GeneratedPairObjectContract.h"
-#include "../AnalysisScripts/AssociateOriginCategoryContract.h"
-#include "../AnalysisScripts/GeneratedSpeciesOrdinals.h"
+#include "../contracts/GeneratedPairRegistry.h"
+#include "../contracts/GeneratedPairObjectContract.h"
+#include "../contracts/AssociateOriginCategoryContract.h"
+#include "../contracts/GeneratedSpeciesOrdinals.h"
 
 #include <TFile.h>
 #include <TAxis.h>

@@ -27,7 +27,7 @@ from collections import defaultdict
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-ARTIFACT = REPO / "AnalysisScripts/species_ordinals_v2.json"
+ARTIFACT = REPO / "contracts/species_ordinals_v2.json"
 ADVISORY_THRESHOLD = 0.10
 
 

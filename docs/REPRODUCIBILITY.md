@@ -60,11 +60,11 @@ The scientific contracts use generated headers, validators, and digests. Each co
 |---|---|---|
 | Signed species and 300 pairs | `config/heavy_flavour_species_v1.json` and `config/heavy_flavour_pair_registry_v1.json` | `tools/generate_registry_artifacts.py --check` |
 | Pair-file objects | `config/pair_file_object_contract_v1.json` | `tools/generate_pair_object_contract.py --check` |
-| Species axis | `AnalysisScripts/species_ordinals_v2.json` | The generated-header check and merged-file digest check |
+| Species axis | `contracts/species_ordinals_v2.json` | The generated-header check and merged-file digest check |
 | Multiplicity classes | `config/multiplicity_percentile_classes_v2.json` | Plot tests and each v2 per-tune multiplicity boundary receipt |
 | Tune differences | `config/tune_difference_allowlist_v1.json` | `tools/validate_tune_cards.py` |
 | Systematic variations | `config/systematics_variations_v1.json` | `tools/make_systematic_cards.py --check` |
-| Decay regrouping | `AnalysisScripts/decay_parent_map_v2.json` | Map builders, extraction tests, and the species-axis pin |
+| Decay regrouping | `contracts/decay_parent_map_v2.json` | Map builders, extraction tests, and the species-axis pin |
 
 The species axis has 202 entries. Its FNV-1a digest is `646f310f78126267`, which each v3 merged file must carry.
 
@@ -170,7 +170,7 @@ They compare the three complete tune bundles, obtain `N_trig` from `hTrKinematic
 
 The plotting stage writes into a staging directory. It promotes outputs only after the multiplicity boundary receipt passes.
 
-The repository quarantines `AnalysisScripts/anchors/extraction_dual` for charge-resolved use. Its provenance is incomplete, and later traceable anchors contradict its charge result.
+The repository quarantines `evidence/extraction_dual` for charge-resolved use. Its provenance is incomplete, and later traceable anchors contradict its charge result.
 
 Recorded receipt and anchor paths predate the storage consolidation. They are historical paths and need not exist at their recorded locations.
 
@@ -190,9 +190,9 @@ The following procedure checks one published number without external campaign da
 
    ```bash
    python3 extraction/three_tune_table.py \
-     MONASH=AnalysisScripts/anchors/merged_monash_dedup \
-     JUNCTIONS=AnalysisScripts/anchors/merged_junctions_dedup \
-     CLOSEPACKING=AnalysisScripts/anchors/merged_closepacking_dedup \
+     MONASH=evidence/merged_monash_dedup \
+     JUNCTIONS=evidence/merged_junctions_dedup \
+     CLOSEPACKING=evidence/merged_closepacking_dedup \
      > "$table_output"
    ```
 
@@ -224,13 +224,13 @@ The current decay maps also rebuild from committed probe anchors:
 
 ```bash
 python3 tools/build_decay_parent_map.py \
-  AnalysisScripts/anchors/f4_probe/f4_probe_v1.out \
-  --ordinals AnalysisScripts/species_ordinals_v2.json --out /tmp/map_v1_1.json
+  evidence/f4_probe/f4_probe_v1.out \
+  --ordinals contracts/species_ordinals_v2.json --out /tmp/map_v1_1.json
 python3 tools/build_decay_parent_map_v2.py \
-  AnalysisScripts/anchors/f4_probe/f4b_probe.out \
-  --ordinals AnalysisScripts/species_ordinals_v2.json \
+  evidence/f4_probe/f4b_probe.out \
+  --ordinals contracts/species_ordinals_v2.json \
   --v1 /tmp/map_v1_1.json \
-  --weights AnalysisScripts/anchors/extraction_dual/per_species.csv \
+  --weights evidence/extraction_dual/per_species.csv \
   --out /tmp/map_v2.json
 ```
 
@@ -369,7 +369,7 @@ Restore the authoritative burned-seed ledger before rendering. An empty replacem
 
     ```bash
     python3 extraction/extract_species_decomposition.py MERGED_PRODUCT \
-      --decay-map AnalysisScripts/decay_parent_map_v2.json --out OUTPUT_DIR
+      --decay-map contracts/decay_parent_map_v2.json --out OUTPUT_DIR
     ```
 
 15. Select the campaign explicitly before plotting.

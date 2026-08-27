@@ -56,9 +56,9 @@ from fractions import Fraction
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-ORDINALS = REPO / "AnalysisScripts/species_ordinals_v2.json"
+ORDINALS = REPO / "contracts/species_ordinals_v2.json"
 REGISTRY = REPO / "config/heavy_flavour_pair_registry_v1.json"
-PUBLISHED = REPO / "AnalysisScripts/anchors/merged_monash_replicated/per_species.csv"
+PUBLISHED = REPO / "evidence/merged_monash_replicated/per_species.csv"
 
 
 def replication_factors(registry: Path) -> dict[str, int]:

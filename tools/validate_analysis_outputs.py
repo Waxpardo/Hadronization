@@ -201,7 +201,7 @@ def require_ancestor(checkout: Path, ancestor: str, descendant: str) -> None:
 
 def expected_pair_filenames(checkout: Path) -> set[str]:
     header = (
-        checkout / "AnalysisScripts" / "GeneratedPairRegistry.h"
+        checkout / "contracts" / "GeneratedPairRegistry.h"
     ).read_text()
     values = set(re.findall(r'"([^"]+\.root)"', header))
     declared = re.search(

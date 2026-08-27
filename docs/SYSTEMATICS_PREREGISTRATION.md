@@ -500,7 +500,7 @@ The wide counter's mean is roughly 4× the narrow one, so the eleven boundaries
 cannot be reused as absolute numbers. **Pre-registered choice:
 percentile-preserving boundaries** — recompute each boundary as the wide-counter
 value at the same MONASH-minimum-bias percentile the narrow boundary sits at,
-from the committed MB samples in `AnalysisScripts/anchors/b4_multiplicity_mb`,
+from the committed MB samples in `evidence/b4_multiplicity_mb`,
 keeping the half-integer convention so no integer `N_ch` is ambiguous.
 
 **Why percentile-preserving and not the same absolute numbers.** The class

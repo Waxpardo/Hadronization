@@ -1,8 +1,8 @@
 #ifndef HADRONIZATION_PAIR_INPUT_SELECTION_UTILS_H
 #define HADRONIZATION_PAIR_INPUT_SELECTION_UTILS_H
 
-#include "../AnalysisScripts/AssociateOriginCategoryContract.h"
-#include "../AnalysisScripts/GeneratedPairObjectContract.h"
+#include "../contracts/AssociateOriginCategoryContract.h"
+#include "../contracts/GeneratedPairObjectContract.h"
 
 #include <TFile.h>
 #include <TObjString.h>

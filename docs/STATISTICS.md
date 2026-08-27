@@ -254,7 +254,7 @@ The extractor requires each central count to equal the ten-block sum exactly.
 The ROOT closure checks object contents and stored `Sumw2` values within its fixed merge tolerance.
 It also checks additive and invariant metadata.
 `Validation/validate_pair_block_closure.sh` implements these checks.
-The committed closure receipts under `AnalysisScripts/anchors/closure_v3_verdicts/` record successful comparisons.
+The committed closure receipts under `evidence/closure_v3_verdicts/` record successful comparisons.
 
 The closure driver requires the expected pair-object schema from its caller.
 It derives the required comparison counts for that schema and checks the emitted summary exactly.

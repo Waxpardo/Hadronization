@@ -4,7 +4,7 @@
 WHAT THIS IS. The first extraction layer over v3 merged output: it reads
 `hFlavourClosureSpecies` (the 202-bin species axis) out of every pair file in a
 merged directory, groups the ordinals by the category column of
-`AnalysisScripts/species_ordinals_v2.json`, and emits the per-species and
+`contracts/species_ordinals_v2.json`, and emits the per-species and
 per-category tables the paper's decomposition needs.
 
 WHY IT CARRIES ITS OWN SELF-CHECK, and why that check is the point. The species
@@ -50,7 +50,7 @@ from collections import defaultdict
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-ARTIFACT = REPO / "AnalysisScripts/species_ordinals_v2.json"
+ARTIFACT = REPO / "contracts/species_ordinals_v2.json"
 REGISTRY = REPO / "config/heavy_flavour_pair_registry_v1.json"
 
 PROJECT_MACRO = r"""

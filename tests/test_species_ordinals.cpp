@@ -6,7 +6,7 @@
 // became invisible in the first place, so a lookup that quietly returned a
 // sentinel would reintroduce exactly the defect the axis exists to remove.
 
-#include "../AnalysisScripts/GeneratedSpeciesOrdinals.h"
+#include "../contracts/GeneratedSpeciesOrdinals.h"
 
 #include <cstdio>
 #include <set>

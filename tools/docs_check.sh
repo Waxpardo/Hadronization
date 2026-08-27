@@ -26,7 +26,7 @@ owner_for() {
     generation/cards/*.cmnd|config/tune_difference_allowlist_v1.json)
       echo "docs/PHYSICS.md (comparison) + docs/PIPELINE.md (contract)" ;;
 
-    generation/*|analysis/*|merging/*|extraction/*|AnalysisScripts/*)
+    generation/*|analysis/*|merging/*|extraction/*|contracts/*|evidence/*)
       echo "docs/PIPELINE.md (dataflow) + the component catalog in the internal repository" ;;
 
     Validation/*)

@@ -99,7 +99,7 @@ def test_reproduces_the_sealed_central_table() -> None:
     file does not produce, so agreeing with them is a real check on the
     fraction arithmetic used for every delta.
     """
-    anchor = ROOT / "AnalysisScripts/anchors/merged_monash_dedup/central/per_category.csv"
+    anchor = ROOT / "evidence/merged_monash_dedup/central/per_category.csv"
     counts = read_category_counts(anchor)
     assert sum(counts.values()) == 53_662_416.0, sum(counts.values())
     fracs = category_fractions(counts)

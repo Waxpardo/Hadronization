@@ -42,16 +42,16 @@ It therefore expands to `6 * 24 + 6 * 26 = 300` signed, ordered pairs.
 The expanded registry records every filename, sign, reference meson, and publication-eligibility flag.
 
 The pair-object JSON is the sole definition of pair-file contents.
-`tools/generate_pair_object_contract.py` turns its 66 object rows and two schema tags into `AnalysisScripts/GeneratedPairObjectContract.h`.
+`tools/generate_pair_object_contract.py` turns its 66 object rows and two schema tags into `contracts/GeneratedPairObjectContract.h`.
 The pair-directory validator, closure validator, and plotting validator filter that header instead of maintaining separate lists.
 
 The 202-species ordinal axis has a separate generated contract.
-`AnalysisScripts/species_ordinals_v2.json` fixes the ordinal-to-PDG mapping and digest `646f310f78126267`.
-`tools/generate_species_ordinals_header.py` carries both values into `AnalysisScripts/GeneratedSpeciesOrdinals.h`.
+`contracts/species_ordinals_v2.json` fixes the ordinal-to-PDG mapping and digest `646f310f78126267`.
+`tools/generate_species_ordinals_header.py` carries both values into `contracts/GeneratedSpeciesOrdinals.h`.
 
 Every v3 pair file stores the species schema, labels, and digest.
 The pair-object contract marks all three values as required invariants across a central and its blocks.
-`AnalysisScripts/decay_parent_map_v2.json` also records the ordinal digest, and `extraction/apply_decay_map.py` refuses a mismatch.
+`contracts/decay_parent_map_v2.json` also records the ordinal digest, and `extraction/apply_decay_map.py` refuses a mismatch.
 
 The decay-map builders produce versioned artifacts instead of relying on hand-written lookup tables.
 `tools/build_decay_parent_map.py` builds the charge-conjugated map from a pinned PYTHIA probe and the ordinal table.
@@ -254,7 +254,7 @@ Central and ten-block tables feed block statistics.
 `extraction/decompose_with_block_sems.py` calculates structural and experiment-comparable summaries from those eleven directories.
 `extraction/three_tune_table.py` places the three tunes on a common row set.
 
-Committed extraction products live under `AnalysisScripts/anchors/` and `results/systematics/`.
+Committed extraction products live under `evidence/` and `results/systematics/`.
 These products let result and figure scripts run without external ROOT files.
 They do not recreate the raw-to-merge part of the chain.
 

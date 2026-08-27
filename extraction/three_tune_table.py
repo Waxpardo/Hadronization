@@ -26,8 +26,8 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "extraction"))
 from apply_decay_map import terminal_distribution  # noqa: E402
 
-ART = json.loads((REPO / "AnalysisScripts/species_ordinals_v2.json").read_text())
-DMAP = json.loads((REPO / "AnalysisScripts/decay_parent_map_v2.json").read_text())
+ART = json.loads((REPO / "contracts/species_ordinals_v2.json").read_text())
+DMAP = json.loads((REPO / "contracts/decay_parent_map_v2.json").read_text())
 PDG_ORD = {int(r["pdg"]): int(r["ordinal"]) for r in ART["species"]}
 CAT = {int(r["ordinal"]): r["category_name"] for r in ART["species"]}
 NAME = {int(s["ordinal"]): s["name"] for s in DMAP["species"]}

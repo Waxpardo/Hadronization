@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate AnalysisScripts/GeneratedPairObjectContract.h from the contract.
+"""Generate contracts/GeneratedPairObjectContract.h from the contract.
 
 The pair-file object contract used to exist as three hand-maintained lists
 that had drifted apart:
@@ -31,7 +31,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "config/pair_file_object_contract_v1.json"
-HEADER = ROOT / "AnalysisScripts/GeneratedPairObjectContract.h"
+HEADER = ROOT / "contracts/GeneratedPairObjectContract.h"
 SCHEMA = "hf_pair_file_object_contract_v1"
 
 PRESENCE = {"required": "kRequired", "conditional": "kConditional"}

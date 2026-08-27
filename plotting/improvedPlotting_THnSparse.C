@@ -37,9 +37,9 @@
 #include "TString.h" // TODO: can use this for the legend entry names?
 #include <TLegend.h>
 
-#include "../AnalysisScripts/GeneratedPairRegistry.h"
-#include "../AnalysisScripts/AssociateOriginCategoryContract.h"
-#include "../AnalysisScripts/GeneratedPairObjectContract.h"
+#include "../contracts/GeneratedPairRegistry.h"
+#include "../contracts/AssociateOriginCategoryContract.h"
+#include "../contracts/GeneratedPairObjectContract.h"
 #include "../generation/producer/Sha256.h"
 #include "MultiplicityBoundaryUtils.h"
 #include "StagedOutputs.h"

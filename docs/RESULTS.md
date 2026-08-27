@@ -57,7 +57,7 @@ Each entry gives the mean percentage across ten blocks and its block SEM.
 | sum | 100.0000 | 100.0000 | 100.0000 |
 
 Source: `extraction/three_tune_table.py` applied to the three
-`AnalysisScripts/anchors/merged_<tune>_dedup` central and block directories.
+`evidence/merged_<tune>_dedup` central and block directories.
 
 The experiment-comparable selection applies decay-map weights to a common ground-state row set.
 It is a selection, not a partition, and its rows do not sum to 100 percent.
@@ -76,13 +76,13 @@ It is a selection, not a partition, and its rows do not sum to 100 percent.
 | B- | 2.1431 +/- 0.0024 | 1.4868 +/- 0.0023 | 1.4020 +/- 0.0026 |
 | selection total | 93.3808 | 91.0860 | 90.6958 |
 
-Source: the same three anchors, `AnalysisScripts/decay_parent_map_v2.json`,
+Source: the same three anchors, `contracts/decay_parent_map_v2.json`,
 and `extraction/three_tune_table.py`.
 
 The integrity artifacts report exact central-to-block addition for all three tunes.
 The robust block check reports zero MONASH flags, three JUNCTIONS flags, and one CLOSEPACKING flag.
 The anchor manifests identify the flagged bins and retain the closure provenance.
-Sources: the three `AnalysisScripts/anchors/merged_<tune>_dedup/MANIFEST.md` files.
+Sources: the three `evidence/merged_<tune>_dedup/MANIFEST.md` files.
 
 Every anchor directory reports exact species-to-category self-checks and conserved regrouping.
 The same manifests bind the extractor, species axis, pair registry, and decay-map digests.
@@ -239,23 +239,23 @@ No global significance follows from the 49 passing cells because the code does n
 
 The species registry fixes a 202-entry axis and binds it to digest `646f310f78126267`.
 The current checkout cannot repeat the earlier species validation because the raw fixtures are absent.
-Source for the axis and digest: `AnalysisScripts/species_ordinals_v2.json`.
+Source for the axis and digest: `contracts/species_ordinals_v2.json`.
 
 Decay map v2 splits two species at the 0.1 percent threshold.
 The D*+ and D*- branches use fractions 0.6770 and 0.3230 with conjugate daughters.
 On corrected MONASH weights, the remaining species-level assignment risk is 0.0017 percent.
 The corresponding JUNCTIONS and CLOSEPACKING risks are 0.0012 and 0.0010 percent.
-Sources: `AnalysisScripts/decay_parent_map_v2.json` and `extraction/second_branch_weight.py` applied to each deduplicated central CSV.
+Sources: `contracts/decay_parent_map_v2.json` and `extraction/second_branch_weight.py` applied to each deduplicated central CSV.
 
 The registered split fractions and species count matched the v2 artifact.
 The registered total, D* share, and residual estimates missed by overestimating branches that converge on one ground state.
-Sources: `docs/MAP_V2_PREREGISTRATION.md`, `AnalysisScripts/anchors/f4_probe/f4b_probe.out`, and the v2 map.
+Sources: `docs/MAP_V2_PREREGISTRATION.md`, `evidence/f4_probe/f4b_probe.out`, and the v2 map.
 
 The auxiliary b-baryon checks form a three-level diagnostic ladder.
 Raw generator logs test inclusive production without the analysis chain.
 Deduplicated species tables test balancing weights before decay mapping.
 The decay map then tests redistribution onto selected ground states.
-Sources: `AnalysisScripts/anchors/sigmab_raw`, the three deduplicated central CSV files, and the v2 map.
+Sources: `evidence/sigmab_raw`, the three deduplicated central CSV files, and the v2 map.
 
 The inclusive unresolved-origin diagnostic has a deliberately limited scope.
 It applies no trigger, acceptance, pairing, multiplicity-class, or opposite-sign-minus-same-sign selection.
@@ -271,7 +271,7 @@ Their uncertainties are SEMs across ten log blocks.
 | beauty | JUNCTIONS | 0.1023 +/- 0.0011 | 32.0174 +/- 0.0115 | 32.0218 +/- 0.0115 | 0.0140 +/- 0.0008 |
 | beauty | CLOSEPACKING | 0.0983 +/- 0.0011 | 32.3720 +/- 0.0068 | 32.3766 +/- 0.0068 | 0.0143 +/- 0.0007 |
 
-Sources: `extraction/aggregate_m7.py` and the twenty block logs under `AnalysisScripts/anchors/m7_blocks` and `m7b_blocks`.
+Sources: `extraction/aggregate_m7.py` and the twenty block logs under `evidence/m7_blocks` and `m7b_blocks`.
 
 The inclusive diagnostic does not bound the pair observable.
 The pair-level unresolved-origin result uses the separate `M1` through `M5` partition and belongs outside the `c1` through `c11` budget.
@@ -285,7 +285,7 @@ The table uses pooled counts for the central value and the SEM across ten log bl
 | spin-3/2 Sigma*_b | 150309 | 121723 | 10.51 | 0.17 |
 | ground-state Lambda_b and Xi_b | 429761 | 422682 | 0.83 | 0.06 |
 
-Source: the ten `AnalysisScripts/anchors/sigmab_raw/sigmab_block_*.log` files.
+Source: the ten `evidence/sigmab_raw/sigmab_block_*.log` files.
 The earlier charge-ordering claim is withdrawn; the grouped magnitude remains an auxiliary result.
 
 The b-baryon particle-to-antiparticle pattern is advisory.

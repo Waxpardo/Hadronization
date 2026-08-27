@@ -49,7 +49,7 @@ def optional_sha256(path: Path) -> str | None:
 
 def expected_pair_filenames(checkout: Path) -> set[str]:
     header = (
-        checkout / "AnalysisScripts" / "GeneratedPairRegistry.h"
+        checkout / "contracts" / "GeneratedPairRegistry.h"
     ).read_text()
     names = set(re.findall(r'"([^"]+\.root)"', header))
     declared = re.search(

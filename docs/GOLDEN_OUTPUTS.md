@@ -32,7 +32,7 @@ input the recipe reads. **The pair is the contract.**
 
 > **The record quotes `map_sha256`; this document quotes both.** The truncated
 > `dd502a10…` in `EXTRACTION_CONVENTIONS.md`, the superseded private convention-table record, and
-> `AnalysisScripts/anchors/MANIFEST.md` is the **internal** digest, **not** the
+> `evidence/MANIFEST.md` is the **internal** digest, **not** the
 > file's sha256. They differ, they are both correct, and confusing them is a
 > live trap: a reviewer who runs `sha256sum decay_parent_map_v1_1.json` and gets
 > `ed148156…` has **not** found a discrepancy.
@@ -143,14 +143,18 @@ The recipes are not path-agnostic. Measured on `9426f38`:
 | further files carrying unquoted `Dir/...` forms (`.C`, `.h`, `.cpp`, `.sh`) | **~30** |
 
 Nearly every Python tool resolves as `REPO = Path(__file__).resolve().parents[1]`
-then a **hardcoded subdirectory string**. Moving `AnalysisScripts/` breaks
-`generate_species_ordinals_header.py`, `apply_decay_map.py`,
+then a **hardcoded subdirectory string**. Moving the generated-artifact
+directory breaks `generate_species_ordinals_header.py`, `apply_decay_map.py`,
 `second_branch_weight.py`, `extract_species_decomposition.py`,
 `decompose_with_block_sems.py` and `generate_registry_artifacts.py` — silently
 in some, fail-closed in others, and **which is which has not been established.**
 
-> **This is the cost estimate for the restructure, and it belongs in the plan,
+> **This was the cost estimate for the restructure, and it belonged in the plan,
 > not in a surprise.** See the private restructure plan, Section 4.2.
+
+**The move happened on 2026-08-27 under ruling R19.** The seven generated
+artifacts are in `contracts/`; the anchor store is `evidence/`. All six tools
+above carry the new strings and the suite stays at 86/86.
 
 ---
 
@@ -162,10 +166,17 @@ All sha256 values computed **2026-08-12 on `9426f38`**, tree clean.
 
 | id | artifact | file sha256 |
 |---|---|---|
-| **G1** | `AnalysisScripts/species_ordinals_v2.json` | `ccec0dbc70f6452d1f4a5c22a37e76ce55b357046094da207469f08534d0e4ce` |
-| **G2** | `AnalysisScripts/GeneratedSpeciesOrdinals.h` | `ca33c2ee9693fd91e228ff11660ee726aac4cd29c821adf34bd5b827dfc4be7d` |
-| **G3** | `AnalysisScripts/GeneratedPairRegistry.h` | `7d5e7bfdab80163f20f407fccfaad7543099d93a07609614b09eb6d626e985ff` |
-| **G4** | `AnalysisScripts/GeneratedPairObjectContract.h` | `f2a8c8ebb2cbbac9bd269b161cdcf05a13ae0f83679e81ee133647f80310ea10` |
+| **G1** | `contracts/species_ordinals_v2.json` | `ccec0dbc70f6452d1f4a5c22a37e76ce55b357046094da207469f08534d0e4ce` |
+| **G2** | `contracts/GeneratedSpeciesOrdinals.h` | `9f7fe1caab28552af2cb207a3bc38ac5dd3fbc61f77c60a3b652285b3efe8468` |
+| **G3** | `contracts/GeneratedPairRegistry.h` | `7d5e7bfdab80163f20f407fccfaad7543099d93a07609614b09eb6d626e985ff` |
+| **G4** | `contracts/GeneratedPairObjectContract.h` | `f2a8c8ebb2cbbac9bd269b161cdcf05a13ae0f83679e81ee133647f80310ea10` |
+
+> **G2 changed on 2026-08-27, comment only.** The generated header quotes its
+> own source path on line 6, so ruling R19's rename rewrote that comment and the
+> file digest with it (`ca33c2ee…` before, `9f7fe1ca…` after). The 202 species,
+> the table digest and every ordinal are unchanged; `make registry` and
+> `tools/generate_species_ordinals_header.py --check` both report current.
+> G1, G3 and G4 keep their 2026-08-12 digests.
 
 **Content invariants:** 202 species; `table_digest_fnv1a64 = 646f310f78126267`;
 `audit_rows_total = 219`; `hidden_heavy_excluded = 17`;
@@ -204,14 +215,14 @@ It is also, today, a live hazard — see §6, finding F1.
 
 ```bash
 # G6 — v1.1, the conjugation fix
-tools/build_decay_parent_map.py AnalysisScripts/anchors/f4_probe/f4_probe_v1.out \
-  --ordinals AnalysisScripts/species_ordinals_v2.json --out /tmp/v11.json
+tools/build_decay_parent_map.py evidence/f4_probe/f4_probe_v1.out \
+  --ordinals contracts/species_ordinals_v2.json --out /tmp/v11.json
 
 # G7 — v2, the species-level splits; built on v1.1, never on v1
-tools/build_decay_parent_map_v2.py AnalysisScripts/anchors/f4_probe/f4b_probe.out \
-  --ordinals AnalysisScripts/species_ordinals_v2.json \
-  --v1 AnalysisScripts/decay_parent_map_v1_1.json \
-  --weights AnalysisScripts/anchors/extraction_dual/per_species.csv \
+tools/build_decay_parent_map_v2.py evidence/f4_probe/f4b_probe.out \
+  --ordinals contracts/species_ordinals_v2.json \
+  --v1 contracts/decay_parent_map_v1_1.json \
+  --weights evidence/extraction_dual/per_species.csv \
   --out /tmp/v2.json
 ```
 
@@ -223,7 +234,7 @@ threshold=0.1% sha256=c9593c9c0a7c4ec2` with exactly two `SPLIT` lines
 
 | | |
 |---|---|
-| G6 status | **VERIFIED-BY-RECORD**, 2026-08-11 — `AnalysisScripts/anchors/MANIFEST.md` §1: *"the rebuild reproduces `dd502a10c5932fff…` exactly"* |
+| G6 status | **VERIFIED-BY-RECORD**, 2026-08-11 — `evidence/MANIFEST.md` §1: *"the rebuild reproduces `dd502a10c5932fff…` exactly"* |
 | G7 status | **DETERMINISTIC-BY-CONSTRUCTION** for file bytes |
 
 **Why file-level byte identity is claimable and not merely hoped for:** both
@@ -308,8 +319,8 @@ and species shares, and (ii) the **regression fixture** for
 merge_root_files.sh  →  merged MONASH central (1000 inputs, 300 pair files)
         ↓
 extraction/extract_species_decomposition.py <central_dir> --out <dir> \
-    --artifact AnalysisScripts/species_ordinals_v2.json \
-    --decay-map AnalysisScripts/decay_parent_map_v1_1.json
+    --artifact contracts/species_ordinals_v2.json \
+    --decay-map contracts/decay_parent_map_v1_1.json
         ↓
 per_species.csv / per_category.csv  (+ per_observable.csv, map-dependent)
 ```
@@ -457,7 +468,7 @@ Integer counts: unresolved_n 168,003 / 2,317,799 / 2,271,517; resolved_n
 | **G44** | `…m7_block_09.log` | `d66c9b28d08f580560241acac24570d0e5c5c3b860495118d2acc6355ba99ed7` |
 | **G45** | `…m7_block_10.log` | `339ef575a5b21025d0b3a06b98b8fc2ee2f3fb37a661f9debc6f2f4452afc647` |
 
-**Recipe:** `extraction/aggregate_m7.py AnalysisScripts/anchors/m7_blocks/*.log` —
+**Recipe:** `extraction/aggregate_m7.py evidence/m7_blocks/*.log` —
 same tool as R9, fail-closed below ten blocks and on mixed sectors.
 **Status: VERIFIED-BY-RECORD** — the commit message states the logs were
 verified against the published charm table.
@@ -495,7 +506,7 @@ Integer counts: unresolved_n 3,170 / 28,315 / 27,184; resolved_n 27,645,508 /
 | **G24** | `…block_09.log` | `b698b645b4abebc6a5108d37669786e7662872e1a0c51fdb61bcc7a626f36d90` |
 | **G25** | `…block_10.log` | `4e046cac2b0e8fa4b3307030cef497b89986cee9b425695887e36741c49a2cd5` |
 
-**Recipe:** `extraction/aggregate_m7.py AnalysisScripts/anchors/m7b_blocks/*.log`
+**Recipe:** `extraction/aggregate_m7.py evidence/m7b_blocks/*.log`
 — fail-closed below ten blocks and on mixed sectors. **Status:
 VERIFIED-BY-RECORD** (`anchors/MANIFEST.md` §2 — the aggregator reproduces the
 published table; P2 additionally reproduces the *charm* table exactly:
@@ -670,9 +681,9 @@ Totals **53,662,416 / 46,311,148 / 46,678,201**; per event **0.5366 / 0.4631 /
 
 ```bash
 extraction/three_tune_table.py \
-  MONASH=AnalysisScripts/anchors/merged_monash_dedup \
-  JUNCTIONS=AnalysisScripts/anchors/merged_junctions_dedup \
-  CLOSEPACKING=AnalysisScripts/anchors/merged_closepacking_dedup
+  MONASH=evidence/merged_monash_dedup \
+  JUNCTIONS=evidence/merged_junctions_dedup \
+  CLOSEPACKING=evidence/merged_closepacking_dedup
 ```
 
 | | |
@@ -986,11 +997,14 @@ must not orphan it. See the private cluster-disk inventory.
 Run from the repository root, tree clean. **Check the named output line, never
 `rc`** — ROOT returns 0 when it cannot find a macro's entry point.
 
-> **Paths are post-restructure (2026-08-12).** The six extraction tools moved
-> `tools/` → `extraction/`; the two map builders stayed in `tools/`. **The
-> artifacts did not move at all** — `AnalysisScripts/` keeps its name by the
-> owner's D4 override, precisely so these recipes' inputs stayed put. The
-> executed table is retained in the private rename record.
+> **Paths are post-restructure (2026-08-12) and post-rename (2026-08-27).** The
+> six extraction tools moved `tools/` → `extraction/`; the two map builders
+> stayed in `tools/`. The artifacts did not move in 2026-08-12: the owner's D4
+> override held their directory name, precisely so these recipes' inputs stayed
+> put. Ruling R19 of 2026-08-27 retired that name. The four generated headers
+> and the three JSON tables are now in `contracts/`, and the anchor store is
+> `evidence/`. The recipes below name the post-R19 paths. The executed table is
+> retained in the private rename record.
 
 | # | command | positive check |
 |---|---|---|
@@ -998,19 +1012,19 @@ Run from the repository root, tree clean. **Check the named output line, never
 | R2 | `python3 tools/generate_species_ordinals_header.py --check` | absence of `SPECIES_ORDINALS_STALE` |
 | R3 | `python3 tools/generate_pair_object_contract.py --check` | absence of the stale marker |
 | R4 | `make cards && make cards-current` | both exit 0 |
-| R5 | `tools/build_decay_parent_map.py AnalysisScripts/anchors/f4_probe/f4_probe_v1.out --ordinals AnalysisScripts/species_ordinals_v2.json --out /tmp/v11.json` | `map_sha256=dd502a10c5932fff`, `I1=PASS I2=PASS`, `artifact_rows_changed=101 table_affecting_rows=60` |
-| R6 | `tools/build_decay_parent_map_v2.py AnalysisScripts/anchors/f4_probe/f4b_probe.out --ordinals AnalysisScripts/species_ordinals_v2.json --v1 AnalysisScripts/decay_parent_map_v1_1.json --weights AnalysisScripts/anchors/extraction_dual/per_species.csv --out /tmp/v2.json` | `sha256=c9593c9c0a7c4ec2`, `split=2`, exactly two `SPLIT` lines |
-| R7 | `extraction/apply_decay_map.py --map AnalysisScripts/decay_parent_map_v2.json --weights AnalysisScripts/anchors/merged_monash_replicated/per_species.csv --mode split` | `TOTAL 1298655240 INVARIANCE CONSERVED`; D⁰ **25.2435**, D̄⁰ 25.1707, D⁺ 13.1408, D⁻ 13.1129 |
-| R8 | `extraction/second_branch_weight.py --per-species AnalysisScripts/anchors/merged_monash_replicated/per_species.csv` | `SECOND_BRANCH_DONE at_risk_pct=12.8396 concentration_top4=97.81%` — the **(C) chained history** row of §2.6, **not** "THE NUMBER" |
-| **R8b** | same, plus `--v2-map AnalysisScripts/decay_parent_map_v2.json` | `SECOND_BRANCH_V2 presplit_pct=5.7644 postsplit_residual_pct=0.0018 residual_species=2` — **THE NUMBER**, with B_c⁻/B_c⁺ named as the whole residual. (Pre-split reads 5.7644 not 5.7737 because it is recomputed on the *merged* weights, not the anchor's baked-in ones — that is the tool working, not disagreeing.) |
-| R9 | `extraction/aggregate_m7.py AnalysisScripts/anchors/m7b_blocks/*.log` | reproduces §2.8 (beauty); fail-closes below 10 blocks |
-| **R9b** | `extraction/aggregate_m7.py AnalysisScripts/anchors/m7_blocks/*.log` | reproduces §2.7 (charm) — **new: the charm logs were anchored in `b74e588`** |
-| R10 | `extraction/compare_subset_parent.py AnalysisScripts/anchors/extraction_dual/per_species.csv AnalysisScripts/anchors/merged_monash_replicated/per_species.csv --null binomial --expect-scale 9.9986` | **30** bins flagged, `rc=1` by design |
+| R5 | `tools/build_decay_parent_map.py evidence/f4_probe/f4_probe_v1.out --ordinals contracts/species_ordinals_v2.json --out /tmp/v11.json` | `map_sha256=dd502a10c5932fff`, `I1=PASS I2=PASS`, `artifact_rows_changed=101 table_affecting_rows=60` |
+| R6 | `tools/build_decay_parent_map_v2.py evidence/f4_probe/f4b_probe.out --ordinals contracts/species_ordinals_v2.json --v1 contracts/decay_parent_map_v1_1.json --weights evidence/extraction_dual/per_species.csv --out /tmp/v2.json` | `sha256=c9593c9c0a7c4ec2`, `split=2`, exactly two `SPLIT` lines |
+| R7 | `extraction/apply_decay_map.py --map contracts/decay_parent_map_v2.json --weights evidence/merged_monash_replicated/per_species.csv --mode split` | `TOTAL 1298655240 INVARIANCE CONSERVED`; D⁰ **25.2435**, D̄⁰ 25.1707, D⁺ 13.1408, D⁻ 13.1129 |
+| R8 | `extraction/second_branch_weight.py --per-species evidence/merged_monash_replicated/per_species.csv` | `SECOND_BRANCH_DONE at_risk_pct=12.8396 concentration_top4=97.81%` — the **(C) chained history** row of §2.6, **not** "THE NUMBER" |
+| **R8b** | same, plus `--v2-map contracts/decay_parent_map_v2.json` | `SECOND_BRANCH_V2 presplit_pct=5.7644 postsplit_residual_pct=0.0018 residual_species=2` — **THE NUMBER**, with B_c⁻/B_c⁺ named as the whole residual. (Pre-split reads 5.7644 not 5.7737 because it is recomputed on the *merged* weights, not the anchor's baked-in ones — that is the tool working, not disagreeing.) |
+| R9 | `extraction/aggregate_m7.py evidence/m7b_blocks/*.log` | reproduces §2.8 (beauty); fail-closes below 10 blocks |
+| **R9b** | `extraction/aggregate_m7.py evidence/m7_blocks/*.log` | reproduces §2.7 (charm) — **new: the charm logs were anchored in `b74e588`** |
+| R10 | `extraction/compare_subset_parent.py evidence/extraction_dual/per_species.csv evidence/merged_monash_replicated/per_species.csv --null binomial --expect-scale 9.9986` | **30** bins flagged, `rc=1` by design |
 | **R10b** | same, `--null mad` instead | **0** bins flagged, `sigma^ = 4.3990`, `rc=0` — the recalibrated null of 2026-08-13. **rc=0 here is NOT a clean bill of health**: see §2.11a |
 | R11 | `make test` | **45/45**, ROOT present *(was 39/39 when this row was written; the denominator moves as tests are added — what is pinned is that every test passes and ROOT is present)* |
 | **R13 retired** | historical SVG diagnostic path | Owner ruling 2026-08-21: excluded from the publication contract; its old digests remain in §2.12 only as provenance. |
 | **R12** | `tools/reconstruct_deduplicated_decomposition.py` | `charm 24x, beauty 26x`; `87 species invert exactly, 8 ... bracketed`; total `53,662,413.8 .. 53,662,827.8`; writes G14d/G15d |
-| **R14** | `extraction/three_tune_table.py MONASH=<rundir> JUNCTIONS=<rundir> CLOSEPACKING=<rundir>` | §2.9c's table; stdout sha256 `a46a7f6b96f66817…fc930d`. On the committed anchor alone (`MONASH=AnalysisScripts/anchors/merged_monash_dedup`) it reproduces §2.9b's MONASH column, which is what `test_three_tune_tables.py` pins |
+| **R14** | `extraction/three_tune_table.py MONASH=<rundir> JUNCTIONS=<rundir> CLOSEPACKING=<rundir>` | §2.9c's table; stdout sha256 `a46a7f6b96f66817…fc930d`. On the committed anchor alone (`MONASH=evidence/merged_monash_dedup`) it reproduces §2.9b's MONASH column, which is what `test_three_tune_tables.py` pins |
 | **R15** | `extraction/bbaryon_tune_advisory.py MONASH=<rundir> JUNCTIONS=<rundir> CLOSEPACKING=<rundir>` | the b-baryon advisory. MONASH Σ_b⁺ **1.6377**, Σ_b⁰ 1.5858, Ξ'_b⁰ 1.7572, Λ_b⁰ 1.0124. **`rc=0` always — it is an advisory and never fails**, so its exit status is not a verdict |
 
 **R11 has a trap of its own**, documented in `tools/run_tests.sh:13-15`: without
@@ -1116,7 +1130,7 @@ db34411a3fd06b6c6eaecdfb253e3ffe9dfa13bbfb65163bd3d61e1a8d9e1bb1  systematics_re
 70e07e49d8feeeda9cef5738b2cfaab4ef467a25db511e95e80caf2e38e4bb78  systematics_results_20260819/per_class_deltas.csv
 f507f6250e63d82c9c34e088abe4ec16b17359e3b0a54fcdb54e17cd67653d7b  vintegrated_closure.log (nominal arm, figure_deploy_20260817)
 690f2dc5694fa8639582e7ff2a5dd42f392c66ab2ccdf1268e9e5974e65afe68  render_HF_RUN3_V1.log (per-class control)
-ca33c2ee9693fd91e228ff11660ee726aac4cd29c821adf34bd5b827dfc4be7d  GeneratedSpeciesOrdinals.h
+9f7fe1caab28552af2cb207a3bc38ac5dd3fbc61f77c60a3b652285b3efe8468  GeneratedSpeciesOrdinals.h
 7d5e7bfdab80163f20f407fccfaad7543099d93a07609614b09eb6d626e985ff  GeneratedPairRegistry.h
 f2a8c8ebb2cbbac9bd269b161cdcf05a13ae0f83679e81ee133647f80310ea10  GeneratedPairObjectContract.h
 a67e8ae5f853689c010e991859242a77b913787dd30ab3d4c1b68bc05758c00c  historical_defective_decay_map
@@ -2719,14 +2733,14 @@ blocks. Recorded as a gap rather than closed by writing the number down.
 | rendered | `results/systematics/20260819/PER_CATEGORY_DELTAS.md` |
 | inputs | `/data/alice/ipardoza/sys_runs/HF_SYS_*/` on Nikhef, 165 directories |
 | instrument | the four shas of §2.4, unchanged: reader `4cd8b6fa…`, artifact `ccec0dbc…`, map v2 `58081aa2…`, registry `ea9b0232…` |
-| nominal arm | the committed anchors `AnalysisScripts/anchors/merged_{monash,junctions,closepacking}_dedup`, central and ten blocks |
+| nominal arm | the committed anchors `evidence/merged_{monash,junctions,closepacking}_dedup`, central and ten blocks |
 
 **Regeneration, from the repository plus the Nikhef run root:**
 
 ```bash
 extraction/harvest_deltas.py \
   --sys-runs /data/alice/ipardoza/sys_runs \
-  --anchors AnalysisScripts/anchors \
+  --anchors evidence \
   --campaigns HF_SYS_MUR_UP HF_SYS_MUR_DOWN HF_SYS_MUF_DOWN \
               HF_SYS_PTHAT_1 HF_SYS_PTHAT_4 \
   --json-out results/systematics/20260819/per_category_deltas.json

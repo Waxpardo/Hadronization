@@ -339,7 +339,7 @@ def main() -> int:
     )
     pair_path = root / "config/heavy_flavour_pair_registry_v1.json"
     species_header_path = root / "generation/registries/GeneratedHeavyFlavourRegistry.h"
-    pair_header_path = root / "AnalysisScripts/GeneratedPairRegistry.h"
+    pair_header_path = root / "contracts/GeneratedPairRegistry.h"
     tune_setting_header_path = (
         root / "generation/registries/GeneratedTuneSettingRegistry.h"
     )

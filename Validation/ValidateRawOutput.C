@@ -2,7 +2,7 @@
 #include "../generation/registries/GeneratedHeavyFlavourRegistry.h"
 #include "../generation/registries/GeneratedTuneSettingRegistry.h"
 #include "../generation/producer/Sha256.h"
-#include "../AnalysisScripts/GeneratedPairRegistry.h"
+#include "../contracts/GeneratedPairRegistry.h"
 
 #include "TBranch.h"
 #include "TFile.h"

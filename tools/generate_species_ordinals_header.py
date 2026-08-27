@@ -29,8 +29,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACT = ROOT / "AnalysisScripts/species_ordinals_v2.json"
-HEADER = ROOT / "AnalysisScripts/GeneratedSpeciesOrdinals.h"
+ARTIFACT = ROOT / "contracts/species_ordinals_v2.json"
+HEADER = ROOT / "contracts/GeneratedSpeciesOrdinals.h"
 SCHEMA = "hf_species_ordinal_table_v2"
 
 
@@ -77,7 +77,7 @@ def render(payload: dict) -> str:
     add("// Regenerate with:")
     add("//   python3 tools/generate_species_ordinals_header.py")
     add("//")
-    add("// Source of truth: AnalysisScripts/species_ordinals_v2.json,")
+    add("// Source of truth: contracts/species_ordinals_v2.json,")
     add("// itself derived from a raw file's heavy_stability_audit tree by")
     add("// tools/GenerateSpeciesOrdinals.C. The axis's index space comes from")
     add("// PYTHIA's own recorded state, never from a hand-written list.")

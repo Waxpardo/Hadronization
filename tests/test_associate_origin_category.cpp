@@ -1,4 +1,4 @@
-#include "../AnalysisScripts/AssociateOriginCategoryContract.h"
+#include "../contracts/AssociateOriginCategoryContract.h"
 
 #include <cstring>
 #include <iostream>

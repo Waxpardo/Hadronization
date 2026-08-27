@@ -3,7 +3,7 @@
 // Regenerate with:
 //   python3 tools/generate_species_ordinals_header.py
 //
-// Source of truth: AnalysisScripts/species_ordinals_v2.json,
+// Source of truth: contracts/species_ordinals_v2.json,
 // itself derived from a raw file's heavy_stability_audit tree by
 // tools/GenerateSpeciesOrdinals.C. The axis's index space comes from
 // PYTHIA's own recorded state, never from a hand-written list.

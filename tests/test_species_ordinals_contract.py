@@ -17,8 +17,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ARTIFACT = ROOT / "AnalysisScripts/species_ordinals_v2.json"
-HEADER = ROOT / "AnalysisScripts/GeneratedSpeciesOrdinals.h"
+ARTIFACT = ROOT / "contracts/species_ordinals_v2.json"
+HEADER = ROOT / "contracts/GeneratedSpeciesOrdinals.h"
 GENERATOR = ROOT / "tools/generate_species_ordinals_header.py"
 
 
@@ -32,7 +32,7 @@ def test_header_is_current() -> None:
         text=True, capture_output=True,
     )
     assert result.returncode == 0, (
-        "AnalysisScripts/GeneratedSpeciesOrdinals.h is stale; regenerate with "
+        "contracts/GeneratedSpeciesOrdinals.h is stale; regenerate with "
         f"tools/generate_species_ordinals_header.py\n{result.stderr}"
     )
 

@@ -35,7 +35,7 @@ from build_decay_parent_map import (  # noqa: E402
     heavy_flavour_sign,
 )
 
-ORDINALS = REPO / "AnalysisScripts/species_ordinals_v2.json"
+ORDINALS = REPO / "contracts/species_ordinals_v2.json"
 
 # The production convention, stated as values rather than as a rule, so that a
 # future "simplification" of the rule has to face the examples.

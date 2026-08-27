@@ -3,7 +3,7 @@
 
 A TOOL THAT PRODUCES A PUBLISHED NUMBER MUST REPRODUCE A KNOWN ONE. Both tools
 here fed the published central tables, so both are run against the committed
-MONASH anchor (`AnalysisScripts/anchors/merged_monash_dedup`) and required to
+MONASH anchor (`evidence/merged_monash_dedup`) and required to
 return the values those tables record. The tables are held in the internal
 repository.
 That is the same discipline test_harvest_tune.py applies to the harvest driver.
@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-ANCHOR = REPO / "AnalysisScripts/anchors/merged_monash_dedup"
+ANCHOR = REPO / "evidence/merged_monash_dedup"
 TABLE = REPO / "extraction/three_tune_table.py"
 ADVISORY = REPO / "extraction/bbaryon_tune_advisory.py"
 
@@ -109,8 +109,8 @@ import hashlib  # noqa: E402
 
 THREE = {t: ANCHOR_DIR for t, ANCHOR_DIR in (
     ("MONASH", ANCHOR),
-    ("JUNCTIONS", REPO / "AnalysisScripts/anchors/merged_junctions_dedup"),
-    ("CLOSEPACKING", REPO / "AnalysisScripts/anchors/merged_closepacking_dedup"),
+    ("JUNCTIONS", REPO / "evidence/merged_junctions_dedup"),
+    ("CLOSEPACKING", REPO / "evidence/merged_closepacking_dedup"),
 )}
 for tune, path in THREE.items():
     check(f"{tune} anchor is committed", path.is_dir(), str(path))

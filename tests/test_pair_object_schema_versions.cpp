@@ -7,7 +7,7 @@
 // that rightly carries six. These cases are the three the design was required
 // to satisfy, plus the fail-closed parse.
 
-#include "../AnalysisScripts/GeneratedPairObjectContract.h"
+#include "../contracts/GeneratedPairObjectContract.h"
 
 #include <cstdio>
 #include <set>

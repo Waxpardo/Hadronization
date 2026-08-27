@@ -1,7 +1,7 @@
 #include "../generation/registries/GeneratedHeavyFlavourRegistry.h"
 #include "../generation/registries/GeneratedTuneSettingRegistry.h"
 #include "../generation/producer/HeavyFlavourUtils.h"
-#include "../AnalysisScripts/GeneratedPairRegistry.h"
+#include "../contracts/GeneratedPairRegistry.h"
 
 #include "TFile.h"
 #include "TTree.h"

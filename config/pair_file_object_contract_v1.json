@@ -1,6 +1,6 @@
 {
   "schema": "hf_pair_file_object_contract_v1",
-  "description": "The single source of truth for what a pair file contains. Consumed through the generated header AnalysisScripts/GeneratedPairObjectContract.h by the pair-directory allowlist, the ten-block closure and the plotting-input validator, which previously held three divergent hand-maintained copies.",
+  "description": "The single source of truth for what a pair file contains. Consumed through the generated header contracts/GeneratedPairObjectContract.h by the pair-directory allowlist, the ten-block closure and the plotting-input validator, which previously held three divergent hand-maintained copies.",
   "axes": {
     "presence": "required = always written; conditional = written only under stated conditions, so absence is not an error.",
     "scope": "both | unmerged_only | merged_only.",

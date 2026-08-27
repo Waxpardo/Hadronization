@@ -1,4 +1,4 @@
-#include "../AnalysisScripts/GeneratedPairRegistry.h"
+#include "../contracts/GeneratedPairRegistry.h"
 #include "MergeAnalysisObjects.C"
 
 #include <TSystem.h>

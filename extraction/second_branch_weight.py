@@ -26,8 +26,8 @@ from collections import defaultdict
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-DECAY_MAP = REPO / "AnalysisScripts/decay_parent_map_v1_1.json"
-ARTIFACT = REPO / "AnalysisScripts/species_ordinals_v2.json"
+DECAY_MAP = REPO / "contracts/decay_parent_map_v1_1.json"
+ARTIFACT = REPO / "contracts/species_ordinals_v2.json"
 
 # The experiment-comparable table. The reimplementation must reproduce these
 # before any result is printed.

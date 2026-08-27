@@ -27,8 +27,8 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-ART = json.loads((REPO / "AnalysisScripts/species_ordinals_v2.json").read_text())
-DMAP = json.loads((REPO / "AnalysisScripts/decay_parent_map_v2.json").read_text())
+ART = json.loads((REPO / "contracts/species_ordinals_v2.json").read_text())
+DMAP = json.loads((REPO / "contracts/decay_parent_map_v2.json").read_text())
 
 NAME = {int(s["ordinal"]): s["name"] for s in DMAP["species"]}
 ORD_PDG = {int(r["ordinal"]): int(r["pdg"]) for r in ART["species"]}

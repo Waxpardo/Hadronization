@@ -22,7 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "config/pair_file_object_contract_v1.json"
-HEADER = ROOT / "AnalysisScripts/GeneratedPairObjectContract.h"
+HEADER = ROOT / "contracts/GeneratedPairObjectContract.h"
 GENERATOR = ROOT / "tools/generate_pair_object_contract.py"
 PRODUCER = ROOT / "analysis/status_analysis_THnSparse_qq.C"
 
@@ -37,7 +37,7 @@ def test_header_is_current() -> None:
         text=True, capture_output=True,
     )
     assert result.returncode == 0, (
-        "AnalysisScripts/GeneratedPairObjectContract.h is stale; regenerate "
+        "contracts/GeneratedPairObjectContract.h is stale; regenerate "
         f"with tools/generate_pair_object_contract.py\n{result.stderr}"
     )
 

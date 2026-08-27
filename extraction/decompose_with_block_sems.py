@@ -48,9 +48,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("rundir", type=Path)
     ap.add_argument("--map", dest="mapfile", type=Path,
-                    default=REPO / "AnalysisScripts/decay_parent_map_v2.json")
+                    default=REPO / "contracts/decay_parent_map_v2.json")
     ap.add_argument("--artifact", type=Path,
-                    default=REPO / "AnalysisScripts/species_ordinals_v2.json")
+                    default=REPO / "contracts/species_ordinals_v2.json")
     ap.add_argument("--tune", default="?")
     ap.add_argument("--i2-advisory", action="store_true",
                     help="downgrade I2 flags from a hard failure to an advisory. "

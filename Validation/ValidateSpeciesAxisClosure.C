@@ -22,7 +22,7 @@
 // worst offender with its bin coordinates so the discrepancy can be
 // characterised rather than absorbed.
 
-#include "../AnalysisScripts/GeneratedSpeciesOrdinals.h"
+#include "../contracts/GeneratedSpeciesOrdinals.h"
 
 #include "TFile.h"
 #include "TH1D.h"

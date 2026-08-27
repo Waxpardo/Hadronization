@@ -159,7 +159,7 @@ def check_plotter_contract() -> None:
     boundary_source = BOUNDARY_UTILS.read_text()
     standalone_source = BOUNDARY_PLOTTER.read_text()
     required_fragments = (
-        '#include "../AnalysisScripts/GeneratedPairRegistry.h"',
+        '#include "../contracts/GeneratedPairRegistry.h"',
         "ResolveReferenceAssociateSelection",
         "ReferenceFirstAssociateOrder",
         "EvaluateSubsampleTechnicalCoverage",

@@ -26,7 +26,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "extraction"))
 from compare_subset_parent import compare  # noqa: E402
 
-A = REPO / "AnalysisScripts/anchors"
+A = REPO / "evidence"
 DEDUP = A / "merged_monash_dedup"
 REPL_CENTRAL = A / "merged_monash_replicated/per_species.csv"
 REPL_BLOCKS = A / "merged_monash_replicated_blocks"

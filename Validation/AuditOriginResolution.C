@@ -1,7 +1,7 @@
 #include "../generation/registries/GeneratedHeavyFlavourRegistry.h"
 #include "../generation/producer/HeavyFlavourUtils.h"
 #include "../generation/producer/Sha256.h"
-#include "../AnalysisScripts/GeneratedPairRegistry.h"
+#include "../contracts/GeneratedPairRegistry.h"
 
 #include <TAxis.h>
 #include <TFile.h>
