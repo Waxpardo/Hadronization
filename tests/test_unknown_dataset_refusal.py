@@ -33,7 +33,8 @@ SELECTOR = ROOT / "config" / "dataset_selector.json"
 UNKNOWN = "no_such_dataset_key_20260823"
 VALID = "hf_run3_v1_candidate"
 # Every subcommand that names a dataset goes through the one resolver.
-RESOLVING_COMMANDS = ("plot", "dataset", "freeze", "merge", "systematics")
+RESOLVING_COMMANDS = ("plot", "plot-slot", "dataset", "freeze", "merge",
+                      "systematics")
 
 
 def cli(*args: str, env_extra: dict | None = None

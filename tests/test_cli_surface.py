@@ -216,6 +216,148 @@ def test_freeze_does_not_pass_the_campaign_scoped_root() -> None:
           in block, block[-400:])
 
 
+# --- Phase 2: the plot run-slot -------------------------------------------
+#
+# THE DEFECT THIS CLOSES. prepare_plot_output_plane scopes the output target
+# per campaign and commit but routes it through one checkout-local symlink,
+# plotting/Plots. A deploy that last plotted another campaign refused and named
+# no way forward. The refusal on IMPLICIT change is correct and stays; the
+# explicit `plot-slot` command is the way through, and it moves the old pointer
+# aside rather than deleting it.
+#
+# Every case below builds its own plotting/ directory. tools/run_tests.sh
+# snapshots the resolved plotting/Plots and fails the suite if a test changes
+# it, and symlinking this checkout's plotting/ would put the real link in reach.
+FULL_SELECTOR = ROOT / "config/dataset_selector.json"
+
+
+def plot_sandbox(tmp: str, cli_text: str | None = None) -> tuple[Path, Path]:
+    base = sandbox(tmp, cli_text, replace={"plotting/Plots": None}, git=True)
+    return base, Path(tmp) / "data"
+
+
+def held_slot(base: Path, data: Path, campaign: str) -> Path:
+    """Point the slot at another run, the way a previous deploy left it."""
+    commit = subprocess.run(["git", "-C", str(base), "rev-parse",
+                             "--short=12", "HEAD"],
+                            capture_output=True, text=True,
+                            check=True).stdout.strip()
+    target = data / "project/results" / campaign / commit / "plotting"
+    target.mkdir(parents=True, exist_ok=True)
+    (base / "plotting/Plots").symlink_to(target)
+    return target
+
+
+def test_an_implicit_slot_change_is_refused() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        base, data = plot_sandbox(tmp)
+        held = held_slot(base, data, "HF_SMOKE3")
+        got = run_cli(base, data, ["plot", "hf_run3_v1_candidate", "all"],
+                      {"HADRONIZATION_DATASET_SELECTOR": str(FULL_SELECTOR)})
+        link = base / "plotting/Plots"
+        # A non-zero status alone proves nothing here: plotting continues into
+        # run_paper_plots.sh, which fails on its own on a host without ROOT.
+        # Require the refusal itself, and require the slot to be unmoved.
+        check("plotting refuses to change the slot implicitly",
+              got.returncode != 0 and "Nothing was changed." in got.stderr,
+              f"rc={got.returncode} {got.stderr[:300]}")
+        check("...naming the target found and the target expected",
+              str(held) in got.stderr and "HF_RUN3_V1" in got.stderr,
+              got.stderr[:400])
+        check("...and naming the command that migrates it",
+              "plot-slot hf_run3_v1_candidate" in got.stderr, got.stderr[:400])
+        check("...leaving the slot where it was",
+              link.is_symlink() and Path(os.readlink(link)) == held,
+              str(link.is_symlink() and os.readlink(link)))
+
+
+def test_the_explicit_migration_repoints_and_records() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        base, data = plot_sandbox(tmp)
+        held = held_slot(base, data, "HF_SMOKE3")
+        commit = held.parent.name
+        got = run_cli(base, data, ["plot-slot", "hf_run3_v1_candidate"],
+                      {"HADRONIZATION_DATASET_SELECTOR": str(FULL_SELECTOR)})
+        link = base / "plotting/Plots"
+        expected = data / "project/results/HF_RUN3_V1" / commit / "plotting"
+        check("plot-slot repoints the link", got.returncode == 0,
+              f"rc={got.returncode} {got.stderr[:300]}")
+        check("...to the resolved campaign's target",
+              link.is_symlink() and Path(os.readlink(link)) == expected,
+              str(link.is_symlink() and os.readlink(link)))
+        check("...printing the target it left",
+              f"PLOT_SLOT_OLD_TARGET={held}" in got.stdout, got.stdout[:400])
+        check("...and the target it took",
+              f"PLOT_SLOT_NEW_TARGET={expected}" in got.stdout, got.stdout[:400])
+        asides = sorted(p.name for p in (base / "plotting").iterdir()
+                        if p.name.startswith("Plots."))
+        check("...moving the old pointer aside under the run it held",
+              asides == [f"Plots.HF_SMOKE3-{commit}.superseded-"
+                         f"{__import__('datetime').date.today():%Y%m%d}"],
+              str(asides))
+        check("...as a pointer to the old target, not a copy",
+              bool(asides) and Path(os.readlink(
+                  base / "plotting" / asides[0])) == held,
+              str(asides))
+
+
+def test_a_migration_does_not_touch_the_target_files() -> None:
+    """A sealed run is reachable only through its target, which never moves."""
+    with tempfile.TemporaryDirectory() as tmp:
+        base, data = plot_sandbox(tmp)
+        held = held_slot(base, data, "HF_SMOKE3")
+        sealed = held / "sealed_canvas.pdf"
+        sealed.write_bytes(b"a sealed render")
+        before = hashlib.sha256(sealed.read_bytes()).hexdigest()
+        got = run_cli(base, data, ["plot-slot", "hf_run3_v1_candidate"],
+                      {"HADRONIZATION_DATASET_SELECTOR": str(FULL_SELECTOR)})
+        check("the migration succeeds", got.returncode == 0, got.stderr[:300])
+        check("...and the superseded run's files are still there",
+              sealed.is_file()
+              and hashlib.sha256(sealed.read_bytes()).hexdigest() == before,
+              f"{sealed} changed or vanished")
+        check("...and the old target itself was not moved",
+              held.is_dir(), str(held))
+
+
+def test_the_migration_refuses_to_overwrite_a_recorded_pointer() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        base, data = plot_sandbox(tmp)
+        held = held_slot(base, data, "HF_SMOKE3")
+        commit = held.parent.name
+        aside = (base / "plotting" /
+                 f"Plots.HF_SMOKE3-{commit}.superseded-"
+                 f"{__import__('datetime').date.today():%Y%m%d}")
+        aside.symlink_to(data / "project/results/HF_SMOKE3/older/plotting")
+        got = run_cli(base, data, ["plot-slot", "hf_run3_v1_candidate"],
+                      {"HADRONIZATION_DATASET_SELECTOR": str(FULL_SELECTOR)})
+        link = base / "plotting/Plots"
+        check("the migration refuses rather than overwrite a recorded pointer",
+              got.returncode != 0, f"rc={got.returncode} {got.stdout[:200]}")
+        check("...naming the pointer it would have replaced",
+              aside.name in got.stderr, got.stderr[:300])
+        check("...and moves nothing",
+              link.is_symlink() and Path(os.readlink(link)) == held,
+              str(link.is_symlink() and os.readlink(link)))
+
+
+def test_a_migration_to_the_same_target_changes_nothing() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        base, data = plot_sandbox(tmp)
+        got = run_cli(base, data, ["plot-slot", "hf_run3_v1_candidate"],
+                      {"HADRONIZATION_DATASET_SELECTOR": str(FULL_SELECTOR)})
+        check("plot-slot creates the link when the slot is empty",
+              got.returncode == 0, got.stderr[:300])
+        again = run_cli(base, data, ["plot-slot", "hf_run3_v1_candidate"],
+                        {"HADRONIZATION_DATASET_SELECTOR": str(FULL_SELECTOR)})
+        asides = [p.name for p in (base / "plotting").iterdir()
+                  if p.name.startswith("Plots.")]
+        check("...and says so rather than superseding itself",
+              again.returncode == 0
+              and "PLOT_SLOT_UNCHANGED=" in again.stdout, again.stdout[:300])
+        check("...recording no superseded pointer", asides == [], str(asides))
+
+
 def main() -> int:
     tests = [value for name, value in sorted(globals().items())
              if name.startswith("test_") and callable(value)]

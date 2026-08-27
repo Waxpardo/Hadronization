@@ -41,6 +41,12 @@ Usage: ./hadronization COMMAND [arguments]
       Validate and merge the central sample plus ten blocks. PAIR_SCHEMA
       defaults to v3.
 
+  plot-slot DATASET_KEY
+      Point plotting/Plots at the named dataset's output target for this
+      commit. The pointer it replaces is moved aside under
+      plotting/Plots.<CAMPAIGN>-<COMMIT>.superseded-<DATE> and is never
+      deleted. Only this command repoints the link.
+
   plot DATASET_KEY [TARGET ...]
       Run the plot workflow for a named dataset. TARGET defaults to all; see
       plotting/run_paper_plots.sh help.
@@ -94,7 +100,10 @@ prepare_plot_output_plane() {
     existing_target="$(readlink "${output_link}")"
     if [[ "${existing_target}" != "${output_target}" ]]; then
       echo "ERROR: ${output_link} points to ${existing_target}, expected ${output_target}" >&2
-      echo "       Preserve or migrate the existing run before changing the link." >&2
+      echo "       This deploy's plot slot holds another run. Nothing was changed." >&2
+      echo "       Run: ./hadronization plot-slot ${HADRONIZATION_DATASET}" >&2
+      echo "       That moves the old pointer aside under a recorded name. It" >&2
+      echo "       never deletes the pointer and never touches its target." >&2
       exit 1
     fi
   elif [[ -e "${output_link}" ]]; then
@@ -105,6 +114,54 @@ prepare_plot_output_plane() {
     ln -s "${output_target}" "${output_link}"
   fi
   printf 'HADRONIZATION_PLOT_OUTPUT=%s\n' "${output_target}"
+}
+
+# The explicit slot migration.
+#
+# The plot run-slot is one checkout-local symlink, plotting/Plots, while the
+# target it points at is scoped per campaign and commit. One deploy therefore
+# holds the slot for one run at a time, and prepare_plot_output_plane refuses
+# when the resolved target differs. That refusal is correct and stays: an
+# IMPLICIT change would move a render into another campaign's tree. This is the
+# explicit path, and it is the only thing that repoints the link.
+#
+# It moves the old pointer aside under the run it held, prints both targets,
+# and never deletes anything. The target directories are untouched: only the
+# symlink moves, so a sealed run's files cannot be reached by a migration.
+migrate_plot_slot() {
+  local commit output_link output_target existing_target aside
+  local old_campaign old_commit
+  commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
+  output_link="${project_base}/plotting/Plots"
+  output_target="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/plotting"
+  mkdir -p "${output_target}"
+  if [[ -L "${output_link}" ]]; then
+    existing_target="$(readlink "${output_link}")"
+    if [[ "${existing_target}" == "${output_target}" ]]; then
+      printf 'PLOT_SLOT_UNCHANGED=%s\n' "${output_target}"
+      return 0
+    fi
+    # Name the aside for the run it held. The campaign and the commit are read
+    # back out of the target path, so the name says which run the pointer
+    # belonged to rather than only when it was superseded.
+    old_commit="$(basename "$(dirname "${existing_target}")")"
+    old_campaign="$(basename "$(dirname "$(dirname "${existing_target}")")")"
+    aside="${output_link}.${old_campaign}-${old_commit}.superseded-$(date +%Y%m%d)"
+    if [[ -e "${aside}" || -L "${aside}" ]]; then
+      echo "ERROR: a superseded pointer of that name already exists: ${aside}" >&2
+      echo "       Nothing was moved. Rename or remove that one deliberately." >&2
+      exit 1
+    fi
+    mv "${output_link}" "${aside}"
+    printf 'PLOT_SLOT_OLD_TARGET=%s\n' "${existing_target}"
+    printf 'PLOT_SLOT_SUPERSEDED=%s\n' "${aside}"
+  elif [[ -e "${output_link}" ]]; then
+    echo "ERROR: ${output_link} is checkout-local output state." >&2
+    echo "       Move it under ${HADRONIZATION_RESULTS_ROOT} before plotting." >&2
+    exit 1
+  fi
+  ln -s "${output_target}" "${output_link}"
+  printf 'PLOT_SLOT_NEW_TARGET=%s\n' "${output_target}"
 }
 
 prepare_systematics_output_plane() {
@@ -284,6 +341,11 @@ case "${command_name}" in
       exit "${chain_status}"
     fi
     exit 0
+    ;;
+  plot-slot)
+    [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }
+    resolve_dataset "$1"
+    migrate_plot_slot
     ;;
   plot)
     [[ "$#" -ge 1 ]] || { usage >&2; exit 2; }
