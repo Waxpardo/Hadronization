@@ -59,6 +59,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Same directory as this driver, so no path setup is needed.
+from sandbox_tree import tracked_paths
+
 ROOT = Path(__file__).resolve().parents[1]
 VERDICT = ROOT / "tools/environment_verdict.sh"
 SETUP_ENV = ROOT / "setupEnv.sh"
@@ -189,7 +192,7 @@ def refuses(result, source):
             and f"cannot resolve the data plane from {source}" in result.stderr)
 
 
-def check_profiles(sites_dir):
+def check_profiles(sites_dir, repository=True):
     account = subprocess.run(["id", "-un"], capture_output=True,
                              text=True).stdout.strip()
     nikhef = sites_dir / "nikhef.conf"
@@ -301,6 +304,14 @@ def check_profiles(sites_dir):
     # would miss the one file that performs it. Comments describe the failure,
     # so read the code lines only.
     scanned = sorted(list(sites_dir.glob("*.conf")) + list(sites_dir.glob("*.sh")))
+    # When `sites_dir` is this checkout's, the patterns are intersected with
+    # what git tracks: an untracked local profile can neither fail this gate
+    # falsely nor hide inside a passing one. The patterns stay, so a profile
+    # added to the repository later is still scanned. A `--sites-dir` sandbox
+    # is untracked by construction and keeps every file it was given.
+    if repository:
+        tracked = tracked_paths(ROOT, "config/sites")
+        scanned = [path for path in scanned if path in tracked]
     check("config/sites holds the guard as well as the profiles",
           any(path.suffix == ".sh" for path in scanned),
           f"{[p.name for p in scanned]} -- nothing scanned derives the account")
@@ -516,7 +527,7 @@ def main(argv):
         return 2
 
     print(f"site profiles under {sites_dir}")
-    check_profiles(sites_dir)
+    check_profiles(sites_dir, repository=repository)
     if repository:
         check_setup_env()
         check_pin_refusal()

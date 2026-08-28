@@ -6,6 +6,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+# Same directory as this driver, so no path setup is needed.
+from sandbox_tree import tracked_paths
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -35,10 +38,15 @@ def test_all_current_configs_use_the_contract() -> None:
         (row["bin"], row["percentile_min"], row["percentile_max"])
         for row in expected
     ]
+    # The three patterns stay, so a configuration added later is checked
+    # rather than ignored. They are intersected with what git tracks: `ROOT`
+    # is this checkout, not a sandbox, and an untracked local configuration
+    # can neither fail this gate falsely nor hide inside a passing one.
+    tracked = tracked_paths(ROOT, "plotting")
     paths = sorted((ROOT / "plotting").glob("configuration_HF*.json"))
     paths += sorted((ROOT / "plotting").glob("configuration_multiplicity_HF*.json"))
     paths += sorted((ROOT / "plotting/harvest_configs").glob("*.json"))
-    for path in set(paths):
+    for path in set(paths) & tracked:
         document = json.loads(path.read_text())
         rows = [row for row in document.get("histograms_to_analyse", [])
                 if row.get("hDPhi") != "hDPhiM00_100"]
@@ -75,8 +83,11 @@ def test_cr_holdout_decision_is_exact_and_scoped() -> None:
 
 
 def test_tracked_routes_are_account_independent() -> None:
-    for path in list((ROOT / "config").glob("*.json")) + list(
-            (ROOT / "plotting").glob("configuration_*.json")):
+    # Same rule as above, over both directories this sweep reads. A route
+    # this repository does not track is not one it must answer for.
+    tracked = tracked_paths(ROOT, "config") | tracked_paths(ROOT, "plotting")
+    for path in sorted(set(list((ROOT / "config").glob("*.json")) + list(
+            (ROOT / "plotting").glob("configuration_*.json"))) & tracked):
         assert "/data/alice/ipardoza" not in path.read_text(), path
 
     makefile = (ROOT / "Makefile").read_text()
