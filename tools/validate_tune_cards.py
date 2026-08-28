@@ -18,10 +18,10 @@ TUNES = PUBLISHED_TUNES
 # why a MONASH/JUNCTIONS difference in a baryon observable cannot on its own be
 # attributed to junction formation.
 #
-# JUNCTIONS_MATCHED carries the QCD-CR junction machinery on Monash
-# fragmentation, so that a MONASH-vs-JUNCTIONS_MATCHED difference is
-# attributable to colour reconnection rather than to the fragmentation retune
-# the published JUNCTIONS tune also applies.
+# JUNCTIONS_MATCHED carries the registered QCD-CR machinery on Monash
+# fragmentation. It is a configuration-level isolation check against the
+# fragmentation retune applied by the published JUNCTIONS bundle, not a claim
+# that an observed difference is caused by one switch.
 #
 # The card is built by DELETING the JUNCTIONS fragmentation overrides, not by
 # restating Monash numbers, so both cards inherit those values from
@@ -70,8 +70,8 @@ def check_matched_tune(root: Path) -> None:
     if unexpected:
         raise ValueError(
             f"{MATCHED_TUNE} differs from MONASH outside the colour-reconnection "
-            f"machinery: {sorted(unexpected)}. The attribution argument for this "
-            "card depends on that set being empty."
+            f"machinery: {sorted(unexpected)}. The matched-card isolation "
+            "contract depends on that set being empty."
         )
     # Anything the published JUNCTIONS tune retunes must be ABSENT here, so it
     # is inherited from Tune:pp = 14 exactly as MONASH inherits it.

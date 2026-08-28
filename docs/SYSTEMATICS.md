@@ -256,7 +256,8 @@ The larger-index result is larger in every JUNCTIONS and CLOSEPACKING class:
 | CLOSEPACKING | 0.0377 ± 0.0019 | 0.1012 ± 0.0049 | 0.1571 ± 0.0130 | 0.1777 ± 0.0183 | 0.2293 ± 0.0319 |
 
 The values come from `largest_MONASH.txt`, `largest_JUNCTIONS.txt`, and `largest_CLOSEPACKING.txt` in `results/a2/20260813/results/tiebreak_robustness/`.
-The smallest-index and largest-index results differ by factors from 2.0 to 5.5 across the ten reconnection-tune classes.
+The smallest-index and largest-index results differ by factors from 2.0 to 5.5
+across the ten JUNCTIONS and CLOSEPACKING bundle classes.
 
 Report S6 per multiplicity class.
 The integrated JUNCTIONS value is 0.0583%, while its largest class value is 0.1509%, a factor of 2.6 larger.

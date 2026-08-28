@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The pasted tables in RATIO_TREND.md must still match ratio_trend.json.
+"""Historical table bytes must still match the historical ratio_trend.json.
 
 RATIO_TREND.md is hand-written prose with the generator's four tables pasted
 into it. GOLDEN_OUTPUTS.md 2.16 calls the document "rendered", which invites a
@@ -9,7 +9,8 @@ did. This test is that machine.
 It cannot run the generator end to end: the generator reads
 `vintegrated_closure.log`, and that log is not in the repository. It therefore
 renders through `write_ratio_trend.render_tables`, which the generator itself
-calls, over the committed `ratio_trend.json`.
+calls, over the committed `ratio_trend.json`. This is a provenance-integrity
+regression only; agreement does not confer current or publication acceptance.
 """
 
 from __future__ import annotations
@@ -66,7 +67,7 @@ def rendered_block(payload: dict) -> list[str]:
     return lines
 
 
-def test_pasted_tables_match_the_product() -> None:
+def test_historical_pasted_tables_match_historical_product_without_acceptance() -> None:
     rendered = rendered_block(json.loads(PRODUCT.read_text()))
     committed = committed_block()
     if committed == rendered:
@@ -84,7 +85,7 @@ def test_pasted_tables_match_the_product() -> None:
     )
 
 
-def test_the_guard_can_fail() -> None:
+def test_historical_integrity_guard_can_fail_without_conferring_acceptance() -> None:
     """Negative control: a guard never seen to fail is not known to be a guard."""
     payload = json.loads(PRODUCT.read_text())
     payload["per_class"]["MONASH"][0]["ratio"] += 0.001
@@ -96,10 +97,10 @@ def test_the_guard_can_fail() -> None:
 
 
 def main() -> int:
-    test_pasted_tables_match_the_product()
-    test_the_guard_can_fail()
-    print(f"RATIO_TREND tables match ratio_trend.json: "
-          f"{len(committed_block())} lines")
+    test_historical_pasted_tables_match_historical_product_without_acceptance()
+    test_historical_integrity_guard_can_fail_without_conferring_acceptance()
+    print(f"historical RATIO_TREND integrity only (not current acceptance): "
+          f"{len(committed_block())} lines match ratio_trend.json")
     return 0
 
 

@@ -286,12 +286,12 @@ check("its significance is 2.2", round(real["significance"], 1) == 2.2,
       str(real["significance"]))
 check("and it EXCEEDS its total uncertainty", real["survives"] is True)
 
-# --- committed verdict v2 is synchronized with the corrected method -------
+# --- historical verdict v2 integrity; this does not confer current acceptance
 artifact = json.loads(
     (ROOT / "results/systematics/20260820/verdict.json").read_text()
 )
 rows = artifact["per_class"] + artifact["trend"]
-check("the committed verdict uses the two-SEM schema",
+check("historical verdict integrity uses its recorded two-SEM schema (not acceptance)",
       artifact["schema"] == "hadronization_verdict_v2" and len(rows) == 77,
       f"schema={artifact.get('schema')} rows={len(rows)}")
 artifact_errors = []
@@ -319,7 +319,7 @@ for index, item in enumerate(rows):
         artifact_errors.append(f"row {index}: systematic")
     if not math.isclose(item["total"], total, rel_tol=1e-14):
         artifact_errors.append(f"row {index}: total")
-check("all 77 committed rows recompute from their two-SEM terms",
+check("all 77 historical rows recompute (integrity only, not acceptance)",
       not artifact_errors, "; ".join(artifact_errors[:5]))
 check("the corrected per-class two-sigma count is 35 of 72",
       sum(item["significance"] > 2.0 for item in artifact["per_class"]) == 35)

@@ -323,7 +323,10 @@ These source/configuration repairs do not revalidate the external selected files
 
 The plotting harvest emits signed variation measurements.
 Extraction scripts compare each variation with nominal, select source contributions, and combine compatible sources.
-The resulting CSV and JSON products live under `results/systematics/20260819/` and `results/systematics/20260820/`.
+The surviving CSV and JSON products under `results/systematics/20260819/` and
+`results/systematics/20260820/` are retired common-axis provenance, not current
+results. Each tree's `RETIREMENT_STATUS.json` gives its machine-readable scope;
+J-b/J-c supply the tune-local successors.
 
 ## Plotting and figure production
 

@@ -2,9 +2,11 @@
 """The multiplicity trend of the Lambda_b/B- ratio, per tune, from the nominal.
 
 THE PAPER'S CENTRAL CLAIM IS A TREND, NOT A SET OF GAPS. Per-class differences
-between tunes say the tunes differ somewhere. The claim is that the baryon
-fraction RISES with multiplicity under colour reconnection and does not under
-MONASH. This module quantifies that rise.
+between bundles say the configurations differ somewhere. This module measures
+the multiplicity trend separately for the full JUNCTIONS and CLOSEPACKING
+configuration bundles, using MONASH as the reference bundle. It does not
+attribute a difference causally to one switch, and CLOSEPACKING is not a
+junction-off control.
 
 It reads the sealed nominal and nothing else, so it needs no variation campaign
 and quotes no systematic.
@@ -28,7 +30,7 @@ from ratio_trend import (block_covariance, endpoint_contrast,  # noqa: E402
 # config/multiplicity_percentile_classes_v2.json and from nowhere else.
 CLASSES = class_names()
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
-RECONNECTION = ("JUNCTIONS", "CLOSEPACKING")
+COMPARISON_BUNDLES = ("JUNCTIONS", "CLOSEPACKING")
 
 
 def series(rows: dict, tune: str) -> tuple[list[float], list[float], list[list[float]]]:
@@ -53,7 +55,7 @@ def render_tables(payload: dict) -> list[str]:
     classes = payload["classes"]
     per_class = payload["per_class"]
     enh = {t: [r["factor"] for r in payload["enhancement_over_MONASH"][t]]
-           for t in RECONNECTION}
+           for t in COMPARISON_BUNDLES}
     out: list[str] = []
     add = out.append
     add("## The Λ_b/B⁻ ratio against multiplicity, per tune\n")
@@ -92,7 +94,7 @@ def render_tables(payload: dict) -> list[str]:
     add("\n### The trend difference against MONASH\n")
     add("| tune | slope difference | stat. σ | endpoint-contrast difference | stat. σ |")
     add("|---|---|---|---|---|")
-    for t in RECONNECTION:
+    for t in COMPARISON_BUNDLES:
         g = payload["slope_difference_vs_MONASH"][t]
         e = payload["endpoint_contrast_difference_vs_MONASH"][t]
         add(f"| {t} | {g['difference']:+.6f} ± {g['sem']:.6f} "
@@ -124,14 +126,14 @@ def main() -> int:
     fits = {t: weighted_linear_fit(indices, data[t][0], data[t][1])
             for t in TUNES}
     slope_gaps = {t: slope_difference(fits[t], fits["MONASH"])
-                  for t in RECONNECTION}
+                  for t in COMPARISON_BUNDLES}
     endpoint_gaps = {t: independent_difference(
                                  endpoints[t]["difference"], endpoints[t]["sem"],
                                  endpoints["MONASH"]["difference"],
                                  endpoints["MONASH"]["sem"])
-                     for t in RECONNECTION}
+                     for t in COMPARISON_BUNDLES}
     enhancement = {t: [(v / m) for v, m in zip(data[t][0], data["MONASH"][0])]
-                   for t in RECONNECTION}
+                   for t in COMPARISON_BUNDLES}
 
     payload = {
         "schema": "hadronization_ratio_trend_v2",
@@ -149,7 +151,7 @@ def main() -> int:
         "endpoint_contrast_difference_vs_MONASH": endpoint_gaps,
         "enhancement_over_MONASH": {
             t: [{"class": c, "factor": f} for c, f in zip(CLASSES, enhancement[t])]
-            for t in RECONNECTION},
+            for t in COMPARISON_BUNDLES},
     }
     args.out_json.write_text(json.dumps(payload, indent=1, sort_keys=True) + "\n")
 

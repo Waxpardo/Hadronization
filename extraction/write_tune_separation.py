@@ -20,6 +20,10 @@ over the ten.
 THE CLASS AXIS RUNS OPPOSITE TO ITS LABEL: `c1` is the lowest-activity class
 and the last class is the highest. Every tune resolves its own N_ch edges, and
 the class set is read from the contract. See `harvest_class_axis`.
+
+JUNCTIONS and CLOSEPACKING are full configuration bundles and MONASH is the
+reference bundle. This comparison does not attribute a difference to one
+switch, and CLOSEPACKING is not a junction-off control.
 """
 
 from __future__ import annotations
@@ -82,7 +86,7 @@ def main() -> int:
     payload = {"schema": "hadronization_tune_separation_v2", "observables": {}}
     lines = []
     add = lines.append
-    add("## The reconnection tunes against MONASH, the sealed nominal\n")
+    add("## The configuration bundles against MONASH, the sealed nominal\n")
     add("**Statistical uncertainty only.** The combined systematic is not in "
         "these tables, so no column here is a verdict on whether the tunes "
         "separate. `c1` is N_ch 0 to 2 and `c11` is N_ch 33 and above.\n")

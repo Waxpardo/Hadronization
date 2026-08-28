@@ -1,10 +1,13 @@
 """The multiplicity trend of a per-class ratio, and the contrast between tunes.
 
 WHY THIS EXISTS SEPARATELY FROM THE PER-CLASS GAPS. `write_tune_separation.py`
-answers "do the tunes differ in class c?". The paper's claim is stronger and
-different: **the ratio RISES with multiplicity under colour reconnection and
-does not under MONASH**. That is a statement about the slope, not about any one
-class, and a set of per-class gaps does not establish it.
+answers "do the bundles differ in class c?". This module instead measures how
+the ratio changes with multiplicity inside each complete configuration.
+JUNCTIONS and CLOSEPACKING are full configuration bundles, and MONASH is the
+reference bundle. Their differences cannot be attributed causally to one
+switch; in particular, CLOSEPACKING is not a junction-off control. A trend is
+a statement about the slope, not about any one class, and a set of per-class
+gaps does not establish it.
 
 TWO ESTIMATORS, AND THE MODEL-FREE ONE LEADS.
 

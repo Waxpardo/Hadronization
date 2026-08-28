@@ -4,7 +4,8 @@
 WHY THIS EXISTS. The A2 pre-registration picks the winner of a contested hard
 index by SMALLEST `heavyIndex`, chosen because it is deterministic and
 uncorrelated with pT. The measured Delta exceeds the pre-registered negligible
-threshold for both colour-reconnection tunes, and the pre-registration's own
+threshold for the JUNCTIONS and CLOSEPACKING configuration bundles, and the
+pre-registration's own
 robustness clause then asks for the opposite tie-break: if the multiplicity
 SHAPE survives flipping the direction, the arbitrariness of the choice is
 bounded and the systematic stands as measured.
