@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SUPERVISOR = ROOT / "tools/merge_supervisor.sh"
 WATCHER = ROOT / "tools/supervisor_eol_watch.sh"
 SESSION_LAUNCHER = ROOT / "tools/launch_in_new_session.py"
+SIGNAL_LAUNCHER = ROOT / "tools/launch_with_reset_signals.py"
 CLI = ROOT / "hadronization"
 SMOKE_SELECTOR = ROOT / "config/dataset_selector_hf_smoke3.json"
 
@@ -156,7 +157,7 @@ def supervisor_arguments(box: dict, supervisor: Path = SUPERVISOR) -> list[str]:
     head = git_output(box["checkout"], "rev-parse", "HEAD")
     manifest_sha = hashlib.sha256(box["manifest"].read_bytes()).hexdigest()
     return [
-        "bash", str(supervisor), str(box["freeze"]),
+        sys.executable, str(SIGNAL_LAUNCHER), str(supervisor), str(box["freeze"]),
         str(box["production"]), str(box["analysis"]), str(box["merged"]),
         "CAMPAIGN_X", "pair_schema_x", head, manifest_sha,
     ]
@@ -429,9 +430,9 @@ def test_exhausted_restart_budget_fails() -> None:
     assert "restart_budget_exhausted" in result.stdout
 
 
-def test_term_and_int_end_exact_merge_group_but_not_caller() -> None:
+def test_hup_term_and_int_end_exact_merge_group_but_not_caller() -> None:
     assert_linux_zombie_is_not_running()
-    for sent_signal in (signal.SIGTERM, signal.SIGINT):
+    for sent_signal in (signal.SIGHUP, signal.SIGTERM, signal.SIGINT):
         supervisor = None
         shell_pid = None
         grandchild_pid = None
@@ -493,6 +494,96 @@ def test_term_and_int_end_exact_merge_group_but_not_caller() -> None:
                     except ProcessLookupError:
                         pass
 
+    original_sigint = signal.getsignal(signal.SIGINT)
+    caller = None
+    shell_pid = None
+    grandchild_pid = None
+    output = ""
+    try:
+        with tempfile.TemporaryDirectory() as temporary:
+            base = sandbox(temporary, git=True)
+            data = Path(temporary) / "data"
+            manifest = (
+                data / "project/runs/HF_SMOKE3/freeze/canonical_manifest.jsonl")
+            manifest.parent.mkdir(parents=True)
+            manifest.write_text('{"schema":"synthetic"}\n')
+            merge_stub = Path(temporary) / "merge_process_tree.sh"
+            precheck_stub = Path(temporary) / "precheck_stub.sh"
+            executable(merge_stub, PROCESS_TREE_STUB)
+            executable(precheck_stub, PRECHECK_STUB)
+            identities = Path(temporary) / "public_descendant_pids"
+            run_root = Path(temporary) / "public_merge_run"
+            environment = dict(os.environ)
+            environment.update({
+                "HADRONIZATION_DATA_ROOT": str(data),
+                "HADRONIZATION_DATASET_SELECTOR": str(SMOKE_SELECTOR),
+                "HADRONIZATION_MERGE_RUN_ROOT": str(run_root),
+                "HADRONIZATION_SUPERVISOR_MERGE_CMD": str(merge_stub),
+                "HADRONIZATION_SUPERVISOR_WATCH_CMD": str(WATCHER),
+                "HADRONIZATION_SUPERVISOR_SESSION_LAUNCHER":
+                    str(SESSION_LAUNCHER),
+                "HADRONIZATION_SUPERVISOR_PRECHECK_CMD": str(precheck_stub),
+                "HADRONIZATION_SUPERVISOR_PYTHON": sys.executable,
+                "HADRONIZATION_SUPERVISOR_POLL_SECONDS": "0.01",
+                "HADRONIZATION_SUPERVISOR_WATCH_MAX_POLLS": "1000",
+                "HADRONIZATION_MERGE_MAX_RESTARTS": "0",
+                "HADRONIZATION_MERGE_TERM_GRACE_POLL_SECONDS": "0.01",
+                "HADRONIZATION_MERGE_TERM_GRACE_MAX_POLLS": "5",
+                "PRECHECK_CALLS": str(Path(temporary) / "public_prechecks.log"),
+                "DESCENDANT_PIDS": str(identities),
+                "STUB_BEHAVIOR": "unused",
+            })
+            environment.pop("HADRONIZATION_BASE", None)
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
+            assert signal.getsignal(signal.SIGINT) is signal.SIG_IGN
+            caller = subprocess.Popen(
+                ["bash", str(base / "hadronization"),
+                 "merge", "hf_smoke3", "v2"],
+                env=environment, text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            deadline = time.monotonic() + 5
+            while not identities.exists() and time.monotonic() < deadline:
+                time.sleep(0.01)
+            assert identities.exists(), "public merge descendants did not start"
+            shell_pid, grandchild_pid = map(int, identities.read_text().split())
+            logs = list(run_root.glob("supervisor_*.log"))
+            assert len(logs) == 1, logs
+            supervisor_pid = int(logs[0].stem.removeprefix("supervisor_"))
+            assert signal.getsignal(signal.SIGINT) is signal.SIG_IGN
+
+            os.kill(supervisor_pid, signal.SIGINT)
+            output, _ = caller.communicate(timeout=5)
+            assert caller.returncode == 130, output
+            assert wait_pid_not_running(shell_pid), (
+                f"public shell {shell_pid} remained running "
+                f"state={linux_process_state(shell_pid)}")
+            assert wait_pid_not_running(grandchild_pid), (
+                f"public grandchild {grandchild_pid} remained running "
+                f"state={linux_process_state(grandchild_pid)}")
+            assert pid_exists(os.getpid()), "test caller was signalled"
+            assert signal.getsignal(signal.SIGINT) is signal.SIG_IGN
+            assert_watchers_reaped(output)
+            print(
+                "  inherited SIGINT: public-supervisor=130 "
+                "shell-not-running grandchild-not-running caller-alive "
+                "caller-still-ignored watcher-reaped")
+    finally:
+        signal.signal(signal.SIGINT, original_sigint)
+        if caller is not None and caller.poll() is None:
+            caller.kill()
+            caller.wait(timeout=2)
+        if shell_pid is not None:
+            try:
+                os.killpg(shell_pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        for diagnostic_pid in (grandchild_pid, shell_pid):
+            if diagnostic_pid is not None and pid_exists(diagnostic_pid):
+                try:
+                    os.kill(diagnostic_pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+
 
 def test_supervisor_pair_has_no_stale_discovery_or_campaign_pins() -> None:
     combined = SUPERVISOR.read_text() + WATCHER.read_text()
@@ -511,6 +602,8 @@ def supervised_merge_branch(text: str) -> str:
     start = text.index("\n  merge)")
     end = text.index("\n  systematics)", start)
     branch = text[start:end]
+    if "tools/launch_with_reset_signals.py" not in branch:
+        raise AssertionError("merge branch does not reset supervisor signals")
     if "tools/merge_supervisor.sh" not in branch:
         raise AssertionError("merge branch does not invoke merge_supervisor.sh")
     if "merging/merge_root_files.sh" in branch:
@@ -527,7 +620,11 @@ exit "${CLI_SUPERVISOR_EXIT:-0}"
     with tempfile.TemporaryDirectory() as temporary:
         base = sandbox(
             temporary,
-            replace={"tools/merge_supervisor.sh": supervisor_stub},
+            replace={
+                "tools/merge_supervisor.sh": supervisor_stub,
+                "tools/launch_with_reset_signals.py":
+                    SIGNAL_LAUNCHER.read_text(),
+            },
             git=True)
         data = Path(temporary) / "data"
         manifest = data / "project/runs/HF_SMOKE3/freeze/canonical_manifest.jsonl"
@@ -549,6 +646,18 @@ exit "${CLI_SUPERVISOR_EXIT:-0}"
         str(data / "hadronization_merged"),
         "HF_SMOKE3", "v2", head, digest,
     ], arguments
+
+    invalid = subprocess.run(
+        [sys.executable, str(SIGNAL_LAUNCHER)],
+        text=True, capture_output=True)
+    assert invalid.returncode == 2, invalid
+    assert "SIGNAL_LAUNCH_REFUSAL invalid invocation" in invalid.stderr
+    missing = subprocess.run(
+        [sys.executable, str(SIGNAL_LAUNCHER),
+         str(ROOT / "tools/absent-supervisor")],
+        text=True, capture_output=True)
+    assert missing.returncode == 127, missing
+    assert "SIGNAL_LAUNCH_REFUSAL exec failed" in missing.stderr
 
 
 def test_seen_to_fail_former_direct_merge_routing_mutation() -> None:

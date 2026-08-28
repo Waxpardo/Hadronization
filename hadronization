@@ -298,7 +298,8 @@ with pathlib.Path(sys.argv[1]).open("rb") as stream:
 print(digest.hexdigest())
 PY
 )"
-    "${project_base}/tools/merge_supervisor.sh" \
+    python3 "${project_base}/tools/launch_with_reset_signals.py" \
+      "${project_base}/tools/merge_supervisor.sh" \
       "${freeze_dir}" "${HADRONIZATION_PRODUCTION_ROOT}" \
       "${HADRONIZATION_ANALYSIS_ROOT}" \
       "${HADRONIZATION_ANALYZED_DATA_BASE}" \

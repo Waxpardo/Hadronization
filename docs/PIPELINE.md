@@ -232,7 +232,11 @@ It requires equal event exposure, uses the central and block slots exactly, and 
 `./hadronization merge DATASET [PAIR_SCHEMA]` is the blocking public route.
 It resolves the dataset once and passes the resolved paths, campaign, pair
 schema, launch commit, and canonical-manifest digest to
-`tools/merge_supervisor.sh`. The supervisor rechecks those pins before the
+`tools/merge_supervisor.sh`. A narrow exec wrapper first resets HUP, INT, and
+TERM to their default dispositions. The Bash supervisor can therefore install
+its traps even when a detached caller inherited those signals as ignored. The
+wrapper changes no caller disposition and adds no long-lived process. The
+supervisor rechecks those pins before the
 initial child and any signal-triggered restart, watches that exact child and
 run log, and succeeds only on child exit 0 plus the final closure marker. Its
 checkout gate is tracked-clean, matching the merge driver, so preserved
