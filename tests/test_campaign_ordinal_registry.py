@@ -35,6 +35,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Same directory as this driver, so no path setup is needed.
+from sandbox_tree import tracked_paths
+
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "config/campaign_ordinals_v1.json"
 VARIATIONS = ROOT / "config/systematics_variations_v1.json"
@@ -188,7 +191,11 @@ def test_no_tracked_config_claims_an_ordinal_the_registry_contradicts():
     rows = {entry["ordinal"]: entry["campaigns"]
             for entry in registry()["ordinals"]}
     scanned, disagreements = [], []
-    for path in sorted((ROOT / "config").glob("*.json")):
+    # The scan stays over the directory, intersected with what git tracks: an
+    # untracked local config can neither fail this gate falsely nor hide in it.
+    tracked = tracked_paths(ROOT, "config")
+    for path in sorted(p for p in (ROOT / "config").glob("*.json")
+                       if p in tracked):
         if path == REGISTRY:
             continue
         try:

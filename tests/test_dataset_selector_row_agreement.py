@@ -24,12 +24,23 @@ import json
 import sys
 from pathlib import Path
 
+# Same directory as this driver, so no path setup is needed.
+from sandbox_tree import tracked_paths
+
 ROOT = Path(__file__).resolve().parents[1]
 COMBINED = ROOT / "config" / "dataset_selector.json"
 
 
 def per_campaign_selectors() -> list[Path]:
-    return sorted(p for p in (ROOT / "config").glob("dataset_selector_*.json"))
+    """Every TRACKED per-campaign selector, found by pattern rather than name.
+
+    The pattern stays broad so a selector added later is compared rather than
+    ignored. An untracked local file is not one this repository must agree
+    with, and before the intersection one could fail this gate on its own.
+    """
+    tracked = tracked_paths(ROOT, "config")
+    return sorted(p for p in (ROOT / "config").glob("dataset_selector_*.json")
+                  if p in tracked)
 
 
 def test_every_per_campaign_row_matches_the_combined_one() -> None:

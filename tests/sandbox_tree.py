@@ -54,3 +54,16 @@ def tracked_files(root: Path, relative: str = ".") -> list[str]:
 def tracked_names(root: Path, relative: str = ".") -> set[str]:
     """The names git tracks directly inside `relative`."""
     return {path.split("/")[0] for path in tracked_files(root, relative)}
+
+
+def tracked_paths(root: Path, relative: str = ".") -> set[Path]:
+    """The absolute paths git tracks under `relative`.
+
+    For a gate that scans the real tree rather than a sandbox: intersect the
+    scan with this set. Discovery stays broad over every tracked file, so a
+    newly tracked file is still caught, and an untracked local file can
+    neither fail the gate falsely nor hide inside a passing one. Narrowing the
+    scan to a name list would buy the same isolation and destroy the breadth.
+    """
+    base = root if relative in ("", ".") else root / relative
+    return {base / path for path in tracked_files(root, relative)}

@@ -11,6 +11,9 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+# Same directory as this driver, so no path setup is needed.
+from sandbox_tree import tracked_paths
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -175,8 +178,12 @@ def _closure_call_sites() -> list[tuple[Path, str]]:
     one file. Enumerating the callers is what stops a third.
     """
     sites: list[tuple[Path, str]] = []
-    for path in sorted(ROOT.rglob("*.sh")):
-        if ".git" in path.parts or path.name == "validate_pair_block_closure.sh":
+    # Every tracked shell script, not every file on this disk. The sweep stays
+    # over the tree so a new caller is enumerated; git decides what is in it,
+    # which also drops .git without a name rule.
+    tracked = tracked_paths(ROOT)
+    for path in sorted(p for p in ROOT.rglob("*.sh") if p in tracked):
+        if path.name == "validate_pair_block_closure.sh":
             continue
         for line in path.read_text().splitlines():
             stripped = line.strip()
