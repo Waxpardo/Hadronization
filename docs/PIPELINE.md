@@ -310,9 +310,11 @@ Accepted publication bytes have one canonical destination, `results/figures/main
 The current external central and ten-block inputs, accepted bytes, and final receipts do not travel with this checkout.
 
 The runner currently creates candidates without final-plot provenance
-sidecars. `results/provenance/figure_acceptance_manifest_v1.json` records eight
-candidate roles and accepts none. A separate receipt harvest and visual review
-must close each role after the ROOT workflow completes.
+sidecars. This repository holds no figure-acceptance register. Ruling R6 of
+2026-08-22 retired `results/provenance/figure_acceptance_manifest_v1.json`, and
+session J must deliver its successor. The repository therefore accepts zero of
+the eight P1-P8 outputs. A separate receipt harvest and visual review must
+close each role after the ROOT workflow completes.
 
 Current v3 pair files already contain the trigger and associate kinematic selections.
 The ROOT plotter validates that metadata and applies the requested multiplicity projection without repeating those cuts.

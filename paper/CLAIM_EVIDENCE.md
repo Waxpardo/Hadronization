@@ -4,10 +4,10 @@
 
 This checklist maps every abstract and summary claim, each numerical claim, and
 each planned figure-caption contract to an implementation or committed
-artifact. A path is evidence only for the scope stated here. The figure
-acceptance authority is
-`results/provenance/figure_acceptance_manifest_v1.json`; it currently accepts
-zero P1-P8 outputs.
+artifact. A path is evidence only for the scope stated here. This repository
+holds no figure-acceptance authority. Ruling R6 of 2026-08-22 retired
+`results/provenance/figure_acceptance_manifest_v1.json`, and session J must
+deliver its successor. The repository accepts zero P1-P8 outputs.
 
 ## Abstract
 
@@ -67,7 +67,7 @@ supplies the status ``Candidate''; it does not mean final.
 | F6 / P6 | Integrated beauty balancing yields | Same accepted V-INTEGRATED closure as P4, with explicit combined/split packaging ruling | Candidate; not emitted. |
 | F7 / P7 | Beauty balancing yields on common classes | Same layout and identity requirements as P5 | Candidate; not emitted. |
 | F8 / P8 | Signed anti-Lambda-c/D- and Lambda-b/B- balancing-yield ratios | Signed registry, charm and beauty numerical matrices, ten blocks, accepted canvas and receipt | Candidate; not emitted. |
-| F9 | Every accepted caption names OS/SS definition, trigger denominator, angular/multiplicity scope, tune scope, and uncertainty | `results/provenance/figure_acceptance_manifest_v1.json`; `docs/FIGURE_INVENTORY.md` | Blocked globally. |
+| F9 | Every accepted caption names OS/SS definition, trigger denominator, angular/multiplicity scope, tune scope, and uncertainty | none in this repository; the caption contract is a session-J deliverable | Blocked globally. No figure is accepted, and no caption contract exists here. |
 
 ## Bibliography reconciliation
 

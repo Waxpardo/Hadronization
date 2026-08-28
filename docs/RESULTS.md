@@ -299,11 +299,13 @@ This document records the validation as unverified debt and quotes none of its t
 
 ## 9. Scientific figures and machine-readable tables
 
-`results/provenance/figure_acceptance_manifest_v1.json` is the machine-readable
-P1-P8 acceptance record. Its current overall status is `blocked`: all eight
-roles are candidates, it accepts none, and `results/figures/main/` contains no
-scientific figure bytes. Historical prose that calls a render final or signed
-off records the state of an external run; it does not override the manifest.
+This repository holds no machine-readable P1-P8 acceptance record. Ruling R6
+of 2026-08-22 retired
+`results/provenance/figure_acceptance_manifest_v1.json`, and session J must
+deliver its successor. All eight roles stay candidates, the repository accepts
+none, and `results/figures/main/` contains no scientific figure bytes.
+Historical prose that calls a render final or signed off records the state of
+an external run; it accepts no figure here.
 
 `plotting/run_paper_plots.sh` produces the scientific figure candidates.
 Publication closure places accepted bytes in the canonical destination `results/figures/main/`.

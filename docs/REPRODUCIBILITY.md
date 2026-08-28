@@ -259,21 +259,20 @@ It places those bytes under `results/figures/main/`;
 this checkout currently carries only result tables and validation records for
 that path.
 
-`results/provenance/figure_acceptance_manifest_v1.json` records the current
-fail-closed state. For each P1-P8 role, it lists the producer, configuration,
-selector, inputs, numerical source, candidate digests, visual finding, and
-retrieval requirement. It classifies all eight roles as candidates and accepts
-none.
+This repository holds no fail-closed figure-acceptance record. Ruling R6 of
+2026-08-22 retired `results/provenance/figure_acceptance_manifest_v1.json`,
+which listed the producer, configuration, selector, inputs, numerical source,
+candidate digests, visual finding, and retrieval requirement of each P1-P8
+role. Session J must deliver its successor. All eight roles stay candidates,
+and the repository accepts none.
 
-Check the machine record and its source pins locally:
+Check the plot reference contract locally:
 
 ```bash
-python3 -m json.tool \
-  results/provenance/figure_acceptance_manifest_v1.json >/dev/null
 python3 tests/test_plot_reference_multiplicity_contract.py
 ```
 
-The second command rehashes each tracked producer, configuration, selector,
+The command rehashes each tracked producer, configuration, selector,
 registry, boundary artifact, and compact numerical source named by the
 manifest. It cannot rehash the external ROOT inputs or absent candidate bytes.
 
