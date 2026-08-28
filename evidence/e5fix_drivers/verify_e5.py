@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Verify a re-extracted MONASH central against E5's predicted values."""
+"""Verify a re-extracted MONASH central against E5's predicted values.
+
+FROZEN AS RUN. `art_path` below names the deployed checkout's layout on
+2026-08-15, not this repository's: after the R19 rename that artifact is
+contracts/species_ordinals_v2.json here. The path stays as executed.
+"""
 import csv, json, sys
 from collections import defaultdict
 

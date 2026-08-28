@@ -1,8 +1,11 @@
 # The decay-policy N_ch bias, re-measured on PYTHIA 8.317 — 2026-08-17
 
 **Supersedes** the 1.3 % figure in `NCH_CALIBRATION_20260730.md` §Conclusions 2
-and in `docs/DESIGN_AND_RATIONALE.md` §3.5, both of which are **8.315**
-measurements. **On 8.317 the bias is 0.767 %, not 1.327 %.**
+and in the design record §3.5, both of which are **8.315** measurements.
+**On 8.317 the bias is 0.767 %, not 1.327 %.** The design record went internal
+on 2026-08-22. `NCH_CALIBRATION_20260730.md` preserves the 8.315 values, 7.007
+and 6.914, in the tree. The fuller dated design record is preserved in the
+internal archive.
 
 **Question answered:** by how much does the production decay policy (heavy hadrons
 stable) undercount primary charged multiplicity relative to the experimental
@@ -12,7 +15,8 @@ primary definition, *on the generator production actually uses*?
 
 The number is load-bearing twice over. It is the one consequence of the decay
 policy the paper is required to state
-(`docs/DESIGN_AND_RATIONALE.md` §3.5: "The production decay policy costs 1.3 %"),
+(the design record §3.5, quoted here as "The production decay policy costs
+1.3 %"),
 and it is the **entire input** to systematic source S5
 (`docs/SYSTEMATICS_PREREGISTRATION.md` §7), whose null holds only while the bias
 stays below the margin that separates a class boundary from the nearest integer.
@@ -90,8 +94,7 @@ any plausible re-binning of an axis whose widest boundary is 32.5.
 
 ### 2. The paper's number changes
 
-`docs/DESIGN_AND_RATIONALE.md` §3.5 and `NCH_CALIBRATION_20260730.md` both state
-1.3 %. **On the production generator it is 0.77 %.** The sentence must change, or
+The design record §3.5 and `NCH_CALIBRATION_20260730.md` both state 1.3 %. **On the production generator it is 0.77 %.** The sentence must change, or
 be dropped — the same disposition `PTHAT_MULTIPLICITY_SCAN_8317.md` reached for the
 "36 % below minimum bias" claim it superseded.
 

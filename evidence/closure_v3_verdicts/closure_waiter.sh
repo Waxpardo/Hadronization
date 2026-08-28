@@ -2,7 +2,8 @@
 # Record the moment each closure ends, and whether its log carries a summary
 # line at all. It does NOT rule on the verdict: that is the harvest driver
 # (extraction/pipeline/harvest_tune.py --stage closure), which checks the
-# emitted counts against docs/CLOSURE_V3_PREREGISTRATION.md. This exists so a
+# emitted counts against the closure v3 preregistration. The fuller dated
+# record is preserved in the internal archive. This exists so a
 # closure that finishes -- or dies -- after the session ends leaves a dated,
 # unambiguous record instead of a log whose last line is silence.
 #

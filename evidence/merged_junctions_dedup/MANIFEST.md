@@ -1,6 +1,9 @@
 # Anchor `merged_junctions_dedup` — JUNCTIONS, closure PASSED
 
-**Part of the three-tune table of record**, `docs/THREE_TUNE_CENTRAL_TABLE.md`.
+**Part of the three-tune table of record.** That document went internal on
+2026-08-22. `docs/GOLDEN_OUTPUTS.md` §2.9c carries the same closure counts and
+digests in the tree. The fuller dated record is preserved in the internal
+archive.
 Central plus all ten canonical blocks, extracted from the merged pair files with
 the **trigger-deduplicating** extractor on 2026-08-15, and promoted to FINAL on
 2026-08-16 when this tune's closure returned.
@@ -64,8 +67,9 @@ MAD null estimates one pooled σ̂ of 1.12.
 
 **`decompose_with_block_sems.py` therefore exits 4, not 0, on this anchor** —
 that is correct and expected, and the regenerate command below says so. Do not
-pass `--i2-advisory` to make it quiet. `docs/THREE_TUNE_CENTRAL_TABLE.md` §3d
-carries the full diagnosis and the open ruling.
+pass `--i2-advisory` to make it quiet. Section 3d of the retired three-tune
+table carries the full diagnosis and the open ruling. That fuller record is
+preserved in the internal archive.
 
 ## Provenance
 
