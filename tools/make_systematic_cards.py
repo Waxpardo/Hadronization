@@ -47,6 +47,12 @@ from campaign import (  # noqa: E402
 )
 
 BANNER_RULE = "! " + "=" * 68
+# The key keeps the retired path deliberately: it is what the three nominal
+# cards still say, and a card-byte pin blocks the edit there. Every generated
+# card records the nominal card's sha256 at its own line 6, and the seven
+# HF_SYS campaigns ran against those bytes, so a comment fix in a nominal card
+# would falsify 7 committed headers each. Repair the path in the copy instead.
+# Nothing under generation/cards/systematics/ names the retired directory.
 MOVED_REPORT_PATHS = {
     "ValidationReports/PTHAT_MULTIPLICITY_SCAN_8317.md":
         "results/validation/generator/PTHAT_MULTIPLICITY_SCAN_8317.md",

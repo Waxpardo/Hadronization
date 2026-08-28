@@ -15,7 +15,7 @@
       "raw_base": "${HADRONIZATION_DATA_ROOT}/hadronization_production/HF_SYS_MUR_DOWN/raw",
       "canonical_manifest": "${HADRONIZATION_DATA_ROOT}/systematics_harvest/manifests/HF_SYS_MUR_DOWN/canonical_manifest.jsonl",
       "publication_authorization": "docs/SYSTEMATICS_PREREGISTRATION.md",
-      "publication_authorization_sha256": "1e2a87ab91d72f6ef33de8615a88ee90527cb25a88f9c6a356c69c3e98e668b9",
+      "publication_authorization_sha256": "a42ef9915cf555d637f66f56aef1f120113aaa27e0a6d9a9b3dfe1e5f72d2826",
       "block_count": 10,
       "raw_schema": "hf_primary_ground_raw_v7",
       "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",

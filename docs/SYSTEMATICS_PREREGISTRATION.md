@@ -399,7 +399,8 @@ justification.
 **`PhaseSpace:pTHatMin = 2.` — read from
 `generation/cards/pythiasettings_Hard_Low_ccbb_MONASH.cmnd:47`**, with 12 lines
 of card comment recording why, and ratified as a decision in
-`ValidationReports/PTHAT_MULTIPLICITY_SCAN_8317.md` §*Decision, 2026-08-03*:
+`results/validation/generator/PTHAT_MULTIPLICITY_SCAN_8317.md`
+§*Decision, 2026-08-03*:
 "`PhaseSpace:pTHatMin` is set to 2.0 GeV in all tune cards."
 
 ### The variation points — taken FROM the scan, not invented
@@ -557,7 +558,7 @@ generation, no re-analysis, no new event loop.
 
 ### The magnitude, and where it comes from
 
-**1.33 %**, measured, not chosen: `ValidationReports/NCH_CALIBRATION_20260730.md`
+**1.33 %**, measured, not chosen: `results/validation/generator/NCH_CALIBRATION_20260730.md`
 records `dN_ch/dη` = **7.007** under the experimental decay convention
 (`tau0Max = 10 mm`, heavy decays on) against **6.914** under the exact
 production policy (`tau0Max = 0.01 mm`, heavy decays off) — a deficit of
