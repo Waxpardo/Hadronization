@@ -38,8 +38,8 @@ Usage: ./hadronization COMMAND [arguments]
       Render the canonical reduction submit file.
 
   merge DATASET_KEY [PAIR_SCHEMA]
-      Validate and merge the central sample plus ten blocks. PAIR_SCHEMA
-      defaults to v3.
+      Validate and merge the central sample plus ten blocks under the blocking
+      supervisor. PAIR_SCHEMA defaults to v3.
 
   plot-slot DATASET_KEY
       Point plotting/Plots at the named dataset's output target for this
@@ -288,12 +288,22 @@ case "${command_name}" in
     dataset_key="$1"; pair_schema="${2:-v3}"
     resolve_dataset "${dataset_key}"
     freeze_dir="$(dirname "${HADRONIZATION_CANONICAL_MANIFEST}")"
-    HADRONIZATION_EXPECTED_PAIR_SCHEMA="${pair_schema}" \
-      "${project_base}/merging/merge_root_files.sh" \
+    launch_head="$(git -C "${project_base}" rev-parse HEAD)"
+    manifest_sha="$(python3 - "${HADRONIZATION_CANONICAL_MANIFEST}" <<'PY'
+import hashlib, pathlib, sys
+digest = hashlib.sha256()
+with pathlib.Path(sys.argv[1]).open("rb") as stream:
+    for chunk in iter(lambda: stream.read(16 * 1024 * 1024), b""):
+        digest.update(chunk)
+print(digest.hexdigest())
+PY
+)"
+    "${project_base}/tools/merge_supervisor.sh" \
       "${freeze_dir}" "${HADRONIZATION_PRODUCTION_ROOT}" \
       "${HADRONIZATION_ANALYSIS_ROOT}" \
       "${HADRONIZATION_ANALYZED_DATA_BASE}" \
-      "${HADRONIZATION_CAMPAIGN}"
+      "${HADRONIZATION_CAMPAIGN}" "${pair_schema}" \
+      "${launch_head}" "${manifest_sha}"
     ;;
   systematics)
     [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }

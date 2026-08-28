@@ -229,8 +229,21 @@ Three tunes therefore produce three centrals and 30 blocks.
 It requires equal event exposure, uses the central and block slots exactly, and never discovers extra pair directories.
 `merging/MergeCanonicalAnalysis.C` performs object-aware addition under the generated pair-object contract.
 
-The caller must set `HADRONIZATION_EXPECTED_PAIR_SCHEMA`.
-The merge driver supplies no default and resolves the requested tag before expensive work begins.
+`./hadronization merge DATASET [PAIR_SCHEMA]` is the blocking public route.
+It resolves the dataset once and passes the resolved paths, campaign, pair
+schema, launch commit, and canonical-manifest digest to
+`tools/merge_supervisor.sh`. The supervisor rechecks those pins before the
+initial child and any signal-triggered restart, watches that exact child and
+run log, and succeeds only on child exit 0 plus the final closure marker. Its
+checkout gate is tracked-clean, matching the merge driver, so preserved
+untracked deployment artifacts are neither admitted to the merge nor touched.
+Each attempt runs in its own validated process group; a supervisor signal
+terminates and reaps that complete group without signalling the caller or
+watcher.
+
+The supervisor supplies `HADRONIZATION_EXPECTED_PAIR_SCHEMA` from the CLI
+argument. The merge driver itself supplies no default and resolves the
+requested tag before expensive work begins.
 Use `v3` for Run 3 and all seven systematic variations; use `v2` only for an explicit legacy reduction.
 
 Each merge leg writes to a staging directory.

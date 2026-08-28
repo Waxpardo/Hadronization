@@ -333,3 +333,5 @@ for tune in MONASH JUNCTIONS CLOSEPACKING; do
   fi
   echo "CANONICAL_PAIR_BLOCK_CLOSURE_PASS tune=${tune} report=${closure_report}"
 done
+echo "CANONICAL_SUPERVISED_MERGE_COMPLETE output_tag=${output_tag}" \
+     "pair_schema=${expected_pair_schema_tag}"
