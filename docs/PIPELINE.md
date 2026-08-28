@@ -116,6 +116,17 @@ The job metadata binds the raw file to its scientific contracts.
 It includes raw, selector, origin, stability, effective-settings, multiplicity, light-grid, registry, and tune-allowlist identifiers and digests.
 `Validation/ValidateRawOutput.C` requires those fields and rejects incomplete or inconsistent successful-event accounting.
 
+`tools/write_effective_settings_receipt.py` compares one completed raw ROOT file
+from each published tune. It reads the exhaustive post-`pythia.init()`
+`effective_settings` trees, reconstructs the producer's canonical settings
+digest, requires identical catalogues, and classifies every resolved difference
+against `config/tune_difference_allowlist_v1.json`. Each raw file's embedded
+tune-allowlist schema and digest must agree across tunes and bind exactly to
+that supplied file. A PASS receipt must be
+produced on the pinned campaign runtime from the three real raw files. No
+nominal receipt is generated on a development Mac without those inputs; the
+portable suite tests the same comparison contract with synthetic source rows.
+
 ## Campaign rendering, seeds, and attempts
 
 Stage 1 rendering fixes every job before submission.
