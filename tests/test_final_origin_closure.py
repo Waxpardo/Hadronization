@@ -129,11 +129,23 @@ class FinalOriginClosureAggregationTest(unittest.TestCase):
             "canonical_manifest_sha256": "d" * 64,
             "freeze_seal_sha256": "e" * 64,
             "jobs_per_tune": 1,
+            "campaign": "CURRENT_GRAPH_TEST",
             "repository_commit": subprocess.check_output(
                 ["git", "-C", str(ROOT), "rev-parse", "HEAD"],
                 text=True,
             ).strip(),
         }
+
+    def canonical_rows(self, freeze: dict) -> list[dict]:
+        return [
+            {
+                "campaign": freeze["campaign"],
+                "tune": tune,
+                "repository_commit": freeze["repository_commit"],
+                "producer_executable_sha256": "f" * 64,
+            }
+            for tune in module.robustness.EXPECTED_TUNES
+        ]
 
     def materialize_inputs(
         self, rows: list[dict], directory: Path
@@ -176,6 +188,43 @@ class FinalOriginClosureAggregationTest(unittest.TestCase):
     def test_complete_zero_unresolved_final_manifest_is_ready(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
+            checkout = directory / "clean_checkout"
+            subprocess.run(
+                ["git", "clone", "--no-hardlinks", str(ROOT), str(checkout)],
+                check=True,
+                capture_output=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "config", "user.name", "J-b0 Test"],
+                check=True,
+            )
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(checkout),
+                    "config",
+                    "user.email",
+                    "jb0@example.invalid",
+                ],
+                check=True,
+            )
+            (checkout / "origin-audit-stage.txt").write_text(
+                "newer audit checkout\n"
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "add", "origin-audit-stage.txt"],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "commit", "-m", "audit stage"],
+                check=True,
+                capture_output=True,
+            )
+            audit_commit = subprocess.check_output(
+                ["git", "-C", str(checkout), "rev-parse", "HEAD"],
+                text=True,
+            ).strip()
             rows = [
                 payload(tune, 0)
                 for tune in module.robustness.EXPECTED_TUNES
@@ -186,14 +235,18 @@ class FinalOriginClosureAggregationTest(unittest.TestCase):
                 rows,
                 freeze,
                 module.robustness.sha256(
-                    ROOT / "Validation/AuditOriginResolution.C"
+                    checkout / "Validation/AuditOriginResolution.C"
                 ),
-                freeze["repository_commit"],
+                audit_commit,
             )
             self.assertEqual(report["completion_state"], "PASS")
             self.assertEqual(report["publication_readiness"], "READY")
             self.assertEqual(report["audited_job_count"], 3)
             self.assertEqual(report["closure_base_count"], 3)
+            self.assertEqual(
+                report["raw_production_commit"], freeze["repository_commit"]
+            )
+            self.assertEqual(report["audit_checkout_commit"], audit_commit)
             self.assertEqual(
                 report["unresolved_trigger_candidate_count"], 0
             )
@@ -206,8 +259,9 @@ class FinalOriginClosureAggregationTest(unittest.TestCase):
             binding = (
                 module.robustness.validate_final_origin_closure_report(
                     path,
+                    self.canonical_rows(freeze),
                     freeze,
-                    ROOT,
+                    checkout,
                     json.loads(
                         (
                             ROOT
@@ -217,6 +271,58 @@ class FinalOriginClosureAggregationTest(unittest.TestCase):
                 )
             )
             self.assertEqual(binding["audited_job_count"], 3)
+            self.assertEqual(
+                binding["raw_production_commit"], freeze["repository_commit"]
+            )
+
+            macro = checkout / "Validation/AuditOriginResolution.C"
+            macro.write_text(
+                macro.read_text() + "\n// changed audit implementation\n"
+            )
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(checkout),
+                    "add",
+                    "Validation/AuditOriginResolution.C",
+                ],
+                check=True,
+            )
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(checkout),
+                    "commit",
+                    "-m",
+                    "change audit macro",
+                ],
+                check=True,
+                capture_output=True,
+            )
+            changed_commit = subprocess.check_output(
+                ["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True
+            ).strip()
+            changed_report = dict(report)
+            changed_report["audit_checkout_commit"] = changed_commit
+            changed_report.pop("payload_sha256")
+            changed_report["payload_sha256"] = module.robustness.json_sha256(
+                changed_report
+            )
+            path.write_text(json.dumps(changed_report))
+            with self.assertRaisesRegex(ValueError, "not a PASS"):
+                module.robustness.validate_final_origin_closure_report(
+                    path,
+                    self.canonical_rows(freeze),
+                    freeze,
+                    checkout,
+                    json.loads(
+                        (
+                            ROOT / "config/statistical_robustness_v1.json"
+                        ).read_text()
+                    ),
+                )
 
     def test_nonzero_final_trigger_unresolved_blocks_readiness(self) -> None:
         rows = [

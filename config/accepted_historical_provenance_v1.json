@@ -1,0 +1,53 @@
+{
+  "schema": "hadronization_accepted_historical_provenance_v1",
+  "purpose": "Provenance only. This registry changes no physics decision, method, threshold, selection, formula, result, or publication decision.",
+  "history_model": {
+    "historical_history": "The production and pair-analysis commits belong to the authenticated historical archive history. The archive is generation evidence only and is not a runtime dependency.",
+    "rebuild_history": "The public rebuild has fresh history and intentionally contains no historical production or analysis Git objects.",
+    "projection_source_commit": "2df0264e2b0ebf7f9b95025935f46b42b0d3608b",
+    "rebuild_root_commit": "23ded6bbe93a0026dda4589231fe0aa17e3b5df0",
+    "projection_boundary": "The rebuild root is a source projection from the named historical source commit. Git ancestry does not cross this boundary. Exact data-plane identities below authenticate the one accepted campaign without importing or connecting histories."
+  },
+  "campaigns": {
+    "HF_RUN3_V1": {
+      "canonical_freeze": {
+        "manifest_sha256": "fcd96eaebd4dc11f071a2c8db8849f6a4cc19b764622a796664e524b27d0fc80",
+        "seal_sha256": "e03fb1e7e38dab64fd0cf31c927da78693bb426778b02fb66dfb224114a14b61",
+        "rows": 3000,
+        "tunes": 3,
+        "jobs_per_tune": 1000,
+        "blocks": 10
+      },
+      "raw_production": {
+        "repository_commit": "e6429b779d62dba4ec0fb65628470a041ee6a5e9",
+        "producer_executable_sha256": "e54b27bb9e3fcfd42d70193e08e2eacf965cc5081eabb5c42a9971203f130659"
+      },
+      "analysis_validation_receipt": {
+        "relative_path": "validation/analysis_output_manifest_validation.json",
+        "sha256": "6f65d6622947de740cb9e0737ba24424b40d4f6a4e2ed9ee1367f0c3f0ce8be5",
+        "schema": "hf_analysis_output_validation_v3",
+        "status": "PASS",
+        "canonical_manifest_rows": 3000,
+        "validated_output_count": 3000,
+        "missing_output_count": 0
+      },
+      "pair_analysis": {
+        "repository_commit": "61fe978f66c00e8467f88c00d677462292dd5a1c",
+        "macro_sha256": "a101a0a1084a1e0a369e8bd637c1aa982641db26ba3fafa8c70bc5093b620f00",
+        "schema": "paul_pair_objects_primary_ground_v3",
+        "implementation": "one_pass_primary_ground_pair_analysis_v2",
+        "version": "status_analysis_THnSparse_qq_v2",
+        "profile": "central_primary_ground_v1"
+      },
+      "archive_generation_evidence": {
+        "raw_to_analysis_ancestor": true,
+        "ancestry_path_definition": "newline-terminated identities from git rev-list --ancestry-path --reverse --topo-order RAW..ANALYSIS; RAW is excluded and ANALYSIS is included",
+        "ancestry_path_commit_count": 49,
+        "ancestry_path_identities_sha256": "9edb1450cb49fd7c51008464360edeeda83d4bf3ff62ff57fde70b2780a645ad",
+        "analysis_macro_historical_path": "AnalysisScripts/status_analysis_THnSparse_qq.C",
+        "analysis_macro_git_blob": "862fcbe71f66ef80506f9519500dbccba5517572",
+        "analysis_to_projection_source_ancestor": false
+      }
+    }
+  }
+}

@@ -3,10 +3,14 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import importlib.util
 import json
 import math
+import os
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -29,6 +33,129 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def write_json(path: Path, value: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n")
+
+
+def build_producer_v2_freeze(directory: Path, jobs_per_tune: int = 110) -> Path:
+    campaign = "JB0_PRODUCER_V2_TEST"
+    production = directory / "production"
+    campaign_root = production / campaign
+    commit = subprocess.check_output(
+        ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+    ).strip()
+    contracts = json.loads(
+        (ROOT / "config/statistical_robustness_v1.json").read_text()
+    )["contracts"]
+    for tune_ordinal, tune in enumerate(robustness.EXPECTED_TUNES):
+        card = (
+            ROOT
+            / "generation/cards"
+            / f"pythiasettings_Hard_Low_ccbb_{tune}.cmnd"
+        )
+        for logical_id in range(jobs_per_tune):
+            raw = (
+                campaign_root
+                / "raw"
+                / tune
+                / f"hf_{tune}_job{logical_id:03d}.root"
+            )
+            raw.parent.mkdir(parents=True, exist_ok=True)
+            raw.write_bytes(f"{campaign}:{tune}:{logical_id}\n".encode())
+            raw.with_suffix(".root.sha256").write_text(
+                f"{digest(raw)}  {raw.name}\n"
+            )
+            write_json(
+                campaign_root
+                / "attempt_metadata"
+                / tune
+                / f"job{logical_id:03d}.json",
+                {
+                    "producer_exit": 0,
+                    "campaign": campaign,
+                    "campaign_ordinal": 991,
+                    "tune": tune,
+                    "tune_ordinal": tune_ordinal,
+                    "logical_id": logical_id,
+                    "attempt": 0,
+                    "role": "primary",
+                    "requested_successes": 17,
+                    "seed": tune_ordinal * 100000 + logical_id + 1,
+                    "effective_card_sha256": digest(card),
+                    "producer_executable_sha256": "7" * 64,
+                    "repository_commit": commit,
+                    "multiplicity_audit_events": 0,
+                    "pthat_min_override": "NONE",
+                },
+            )
+            validation = (
+                campaign_root
+                / "raw_validation"
+                / tune
+                / f"job{logical_id:03d}"
+                / "attempt000"
+            )
+            validation.mkdir(parents=True, exist_ok=True)
+            log = validation / "validate_raw_output.log"
+            log.write_text("RAW_OUTPUT_VALIDATION PASS\n")
+            write_json(
+                validation / "receipt.json",
+                {
+                    "schema": "hf_raw_output_validation_receipt_v2",
+                    "state": "PASS",
+                    "campaign": campaign,
+                    "tune": tune,
+                    "logical_id": logical_id,
+                    "raw_path": raw.relative_to(campaign_root).as_posix(),
+                    "raw_sha256": digest(raw),
+                    "validation_log_sha256": digest(log),
+                    "raw_schema": contracts["raw_schema"],
+                },
+            )
+    freeze = directory / "freeze"
+    command = [
+        sys.executable,
+        str(ROOT / "tools/build_canonical_manifest.py"),
+        campaign,
+        str(freeze),
+        "--production-root",
+        str(production),
+    ]
+    for tune in robustness.EXPECTED_TUNES:
+        command.extend(("--tune", tune))
+    completed = subprocess.run(
+        command, cwd=ROOT, text=True, capture_output=True, check=False
+    )
+    if completed.returncode != 0:
+        raise AssertionError(completed.stdout + completed.stderr)
+    return freeze
+
+
+def rewrite_producer_freeze(
+    freeze: Path,
+    rows: list[dict],
+    seal: dict,
+    *,
+    rewrite_blocks: bool = True,
+) -> None:
+    manifest = freeze / "canonical_manifest.jsonl"
+    manifest.write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows)
+    )
+    seal["canonical_manifest_sha256"] = digest(manifest)
+    if rewrite_blocks:
+        for block in range(10):
+            (freeze / f"block_{block + 1:02d}.jsonl").write_text(
+                "".join(
+                    json.dumps(row, sort_keys=True) + "\n"
+                    for row in rows
+                    if row["canonical_slot"] % 10 == block
+                )
+            )
+    write_json(freeze / "freeze_seal.json", seal)
+
+
 class StatisticalFormulaTest(unittest.TestCase):
     def test_predeclared_config_matches_registries(self) -> None:
         spec = json.loads(
@@ -37,6 +164,18 @@ class StatisticalFormulaTest(unittest.TestCase):
         lookup = robustness.validate_spec(spec, ROOT)
         self.assertEqual(lookup[(411, -411)]["filename"], "DplusDminus.root")
         self.assertEqual(lookup[(521, 5122)]["heavy_sign"], "OS")
+        historical, registry_sha = (
+            robustness.load_historical_provenance_entry(ROOT, "HF_RUN3_V1")
+        )
+        self.assertEqual(
+            historical["raw_production"]["repository_commit"],
+            "e6429b779d62dba4ec0fb65628470a041ee6a5e9",
+        )
+        self.assertEqual(
+            historical["pair_analysis"]["repository_commit"],
+            "61fe978f66c00e8467f88c00d677462292dd5a1c",
+        )
+        self.assertRegex(registry_sha, r"^[0-9a-f]{64}$")
 
     def test_nominal_canvases_keep_validated_headroom(self) -> None:
         configuration = json.loads(
@@ -280,6 +419,608 @@ class StatisticalFormulaTest(unittest.TestCase):
         )
 
 
+class CommitLineageTest(unittest.TestCase):
+    def test_newer_clean_checkout_is_accepted_only_with_exact_macro(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            checkout = Path(temporary) / "checkout"
+            subprocess.run(
+                ["git", "init", str(checkout)], check=True, capture_output=True
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "config", "user.name", "J-b0 Test"],
+                check=True,
+            )
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(checkout),
+                    "config",
+                    "user.email",
+                    "jb0@example.invalid",
+                ],
+                check=True,
+            )
+            macro = checkout / "analysis/status_analysis_THnSparse_qq.C"
+            macro.parent.mkdir(parents=True)
+            macro.write_text("// stable analysis implementation\n")
+            subprocess.run(
+                ["git", "-C", str(checkout), "add", "analysis"], check=True
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "commit", "-m", "raw producer"],
+                check=True,
+                capture_output=True,
+            )
+            raw_commit = subprocess.check_output(
+                ["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True
+            ).strip()
+            (checkout / "pair-stage.txt").write_text("pair analysis\n")
+            subprocess.run(
+                ["git", "-C", str(checkout), "add", "pair-stage.txt"], check=True
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "commit", "-m", "pair analysis"],
+                check=True,
+                capture_output=True,
+            )
+            analysis_commit = subprocess.check_output(
+                ["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True
+            ).strip()
+            (checkout / "audit-stage.txt").write_text("newer audit checkout\n")
+            subprocess.run(
+                ["git", "-C", str(checkout), "add", "audit-stage.txt"], check=True
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "commit", "-m", "audit checkout"],
+                check=True,
+                capture_output=True,
+            )
+            robustness_commit = subprocess.check_output(
+                ["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True
+            ).strip()
+            provenance = {
+                "analysis_repository_commit": analysis_commit,
+                "analysis_macro_sha256": digest(macro),
+            }
+            rows = [
+                {
+                    "campaign": "CURRENT_GRAPH_TEST",
+                    "tune": tune,
+                    "repository_commit": raw_commit,
+                    "producer_executable_sha256": "a" * 64,
+                }
+                for tune in robustness.EXPECTED_TUNES
+            ]
+            freeze = {
+                "campaign": "CURRENT_GRAPH_TEST",
+                "repository_commit": raw_commit,
+                "jobs_per_tune": 1,
+                "canonical_manifest_sha256": "b" * 64,
+                "freeze_seal_sha256": "c" * 64,
+            }
+            lineage = robustness.validate_analysis_checkout_lineage(
+                checkout, rows, freeze, provenance
+            )
+            self.assertEqual(lineage["raw_production_commit"], raw_commit)
+            self.assertEqual(lineage["pair_analysis_commit"], analysis_commit)
+            self.assertEqual(
+                lineage["robustness_checkout_commit"], robustness_commit
+            )
+
+            macro.write_text("// changed analysis implementation\n")
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(checkout),
+                    "add",
+                    "analysis/status_analysis_THnSparse_qq.C",
+                ],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "commit", "-m", "change macro"],
+                check=True,
+                capture_output=True,
+            )
+            with self.assertRaisesRegex(ValueError, "macro checksum"):
+                robustness.validate_analysis_checkout_lineage(
+                    checkout, rows, freeze, provenance
+                )
+
+            subprocess.run(
+                ["git", "-C", str(checkout), "checkout", "--detach", raw_commit],
+                check=True,
+                capture_output=True,
+            )
+            (checkout / "sibling.txt").write_text("sibling history\n")
+            subprocess.run(
+                ["git", "-C", str(checkout), "add", "sibling.txt"], check=True
+            )
+            subprocess.run(
+                ["git", "-C", str(checkout), "commit", "-m", "sibling"],
+                check=True,
+                capture_output=True,
+            )
+            with self.assertRaisesRegex(ValueError, "not an ancestor"):
+                robustness.validate_analysis_checkout_lineage(
+                    checkout, rows, freeze, provenance
+                )
+
+
+class HistoricalProjectionBridgeTest(unittest.TestCase):
+    def _commit(self, checkout: Path, message: str) -> str:
+        subprocess.run(
+            ["git", "-C", str(checkout), "add", "-A"], check=True
+        )
+        subprocess.run(
+            ["git", "-C", str(checkout), "commit", "-m", message],
+            check=True,
+            capture_output=True,
+        )
+        return subprocess.check_output(
+            ["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True
+        ).strip()
+
+    def _fixture(self, directory: Path) -> dict:
+        checkout = directory / "checkout"
+        subprocess.run(
+            ["git", "init", str(checkout)], check=True, capture_output=True
+        )
+        subprocess.run(
+            ["git", "-C", str(checkout), "config", "user.name", "J-b0 Test"],
+            check=True,
+        )
+        subprocess.run(
+            [
+                "git",
+                "-C",
+                str(checkout),
+                "config",
+                "user.email",
+                "jb0@example.invalid",
+            ],
+            check=True,
+        )
+        (checkout / "projection.txt").write_text("fresh-history root\n")
+        rebuild_root = self._commit(checkout, "projection root")
+
+        campaign = "HF_RUN3_V1"
+        raw_commit = "1" * 40
+        analysis_commit = "2" * 40
+        executable_hash = "3" * 64
+        macro_hash = "4" * 64
+        manifest_hash = "5" * 64
+        seal_hash = "6" * 64
+        allowlist_hash = "7" * 64
+        rows = []
+        for index, tune in enumerate(robustness.EXPECTED_TUNES):
+            rows.append(
+                {
+                    "campaign": campaign,
+                    "tune": tune,
+                    "canonical_slot": 0,
+                    "logical_id": 0,
+                    "repository_commit": raw_commit,
+                    "producer_executable_sha256": executable_hash,
+                    "raw_sha256": f"{index + 8:064x}",
+                    "raw_validation_receipt_path":
+                        f"raw_validation/{tune}/job000/attempt000/receipt.json",
+                    "raw_validation_receipt_sha256": f"{index + 11:064x}",
+                    "tune_difference_allowlist_sha256": allowlist_hash,
+                }
+            )
+        freeze = {
+            "campaign": campaign,
+            "repository_commit": raw_commit,
+            "jobs_per_tune": 1,
+            "canonical_manifest_sha256": manifest_hash,
+            "freeze_seal_sha256": seal_hash,
+        }
+        analysis = {
+            "analysis_repository_commit": analysis_commit,
+            "analysis_macro_sha256": macro_hash,
+            "analysis_schema": "paul_pair_objects_primary_ground_v3",
+            "analysis_implementation":
+                "one_pass_primary_ground_pair_analysis_v2",
+            "analysis_version": "status_analysis_THnSparse_qq_v2",
+            "analysis_profile": "central_primary_ground_v1",
+        }
+        analysis_root = directory / "analysis"
+        receipt_path = (
+            analysis_root
+            / "validation/analysis_output_manifest_validation.json"
+        )
+        receipt = {
+            "schema": "hf_analysis_output_validation_v3",
+            "status": "PASS",
+            "canonical_manifest_sha256": manifest_hash,
+            "canonical_freeze_seal_sha256": seal_hash,
+            "canonical_manifest_rows": len(rows),
+            "validated_output_count": len(rows),
+            "missing_output_count": 0,
+            "analysis_commit": analysis_commit,
+            "analysis_macro_sha256": macro_hash,
+            "validated_outputs": [
+                {
+                    "tune": row["tune"],
+                    "canonical_slot": row["canonical_slot"],
+                    "logical_id": row["logical_id"],
+                    "raw_sha256": row["raw_sha256"],
+                    "raw_validation_receipt_sha256":
+                        row["raw_validation_receipt_sha256"],
+                    "analysis_commit": analysis_commit,
+                    "analysis_macro_sha256": macro_hash,
+                    "upstream_tune_difference_allowlist_sha256":
+                        allowlist_hash,
+                }
+                for row in rows
+            ],
+        }
+        write_json(receipt_path, receipt)
+        registry = {
+            "schema": robustness.HISTORICAL_PROVENANCE_SCHEMA,
+            "purpose": (
+                "Provenance only. This fixture changes no physics decision."
+            ),
+            "history_model": {
+                "historical_history": "separate historical archive history",
+                "rebuild_history": "fresh rebuild history",
+                "projection_source_commit": "8" * 40,
+                "rebuild_root_commit": rebuild_root,
+                "projection_boundary": "No Git ancestry crosses this boundary.",
+            },
+            "campaigns": {
+                campaign: {
+                    "canonical_freeze": {
+                        "manifest_sha256": manifest_hash,
+                        "seal_sha256": seal_hash,
+                        "rows": len(rows),
+                        "tunes": len(robustness.EXPECTED_TUNES),
+                        "jobs_per_tune": 1,
+                        "blocks": 10,
+                    },
+                    "raw_production": {
+                        "repository_commit": raw_commit,
+                        "producer_executable_sha256": executable_hash,
+                    },
+                    "analysis_validation_receipt": {
+                        "relative_path": (
+                            "validation/analysis_output_manifest_validation.json"
+                        ),
+                        "sha256": digest(receipt_path),
+                        "schema": receipt["schema"],
+                        "status": receipt["status"],
+                        "canonical_manifest_rows": len(rows),
+                        "validated_output_count": len(rows),
+                        "missing_output_count": 0,
+                    },
+                    "pair_analysis": {
+                        "repository_commit": analysis_commit,
+                        "macro_sha256": macro_hash,
+                        "schema": analysis["analysis_schema"],
+                        "implementation": analysis[
+                            "analysis_implementation"
+                        ],
+                        "version": analysis["analysis_version"],
+                        "profile": analysis["analysis_profile"],
+                    },
+                    "archive_generation_evidence": {
+                        "raw_to_analysis_ancestor": True,
+                        "ancestry_path_definition": "ordered identities",
+                        "ancestry_path_commit_count": 1,
+                        "ancestry_path_identities_sha256": "9" * 64,
+                        "analysis_macro_historical_path":
+                            "AnalysisScripts/status_analysis_THnSparse_qq.C",
+                        "analysis_macro_git_blob": "a" * 40,
+                        "analysis_to_projection_source_ancestor": False,
+                    },
+                }
+            },
+        }
+        registry_path = (
+            checkout / "config/accepted_historical_provenance_v1.json"
+        )
+        write_json(registry_path, registry)
+        self._commit(checkout, "accepted historical projection")
+        return {
+            "checkout": checkout,
+            "analysis_root": analysis_root,
+            "receipt_path": receipt_path,
+            "receipt": receipt,
+            "registry_path": registry_path,
+            "rows": rows,
+            "freeze": freeze,
+            "analysis": analysis,
+            "raw_commit": raw_commit,
+            "analysis_commit": analysis_commit,
+        }
+
+    def _validate(self, fixture: dict) -> dict:
+        return robustness.validate_analysis_checkout_lineage(
+            fixture["checkout"],
+            fixture["rows"],
+            fixture["freeze"],
+            fixture["analysis"],
+            fixture["analysis_root"],
+        )
+
+    def test_exact_projection_passes_without_historical_repository(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            fixture = self._fixture(Path(temporary))
+            for commit in (
+                fixture["raw_commit"], fixture["analysis_commit"]
+            ):
+                self.assertFalse(
+                    robustness.commit_exists(fixture["checkout"], commit)
+                )
+            self.assertEqual(
+                subprocess.check_output(
+                    ["git", "-C", str(fixture["checkout"]), "remote"],
+                    text=True,
+                ),
+                "",
+            )
+            lineage = self._validate(fixture)
+            self.assertEqual(
+                lineage["provenance_mode"],
+                robustness.ACCEPTED_HISTORICAL_PROJECTION,
+            )
+            self.assertRegex(
+                lineage["accepted_historical_provenance_registry_sha256"],
+                r"^[0-9a-f]{64}$",
+            )
+            self.assertEqual(
+                lineage["analysis_validation_receipt"]["status"], "PASS"
+            )
+            raw_lineage = robustness.validate_raw_checkout_lineage(
+                fixture["checkout"],
+                fixture["rows"],
+                fixture["freeze"],
+                "origin-audit",
+            )
+            self.assertEqual(
+                raw_lineage["provenance_mode"],
+                robustness.ACCEPTED_HISTORICAL_PROJECTION,
+            )
+            for commit in (
+                fixture["raw_commit"], fixture["analysis_commit"]
+            ):
+                self.assertFalse(
+                    robustness.commit_exists(fixture["checkout"], commit)
+                )
+
+    def test_each_pinned_projection_field_is_load_bearing(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            fixture = self._fixture(Path(temporary))
+            mutations = {
+                "manifest hash": lambda value: value["freeze"].update(
+                    canonical_manifest_sha256="0" * 64
+                ),
+                "seal hash": lambda value: value["freeze"].update(
+                    freeze_seal_sha256="0" * 64
+                ),
+                "campaign": lambda value: (
+                    value["freeze"].update(campaign="UNKNOWN"),
+                    [row.update(campaign="UNKNOWN") for row in value["rows"]],
+                ),
+                "raw commit": lambda value: (
+                    value["freeze"].update(repository_commit="b" * 40),
+                    [
+                        row.update(repository_commit="b" * 40)
+                        for row in value["rows"]
+                    ],
+                ),
+                "executable hash": lambda value: [
+                    row.update(producer_executable_sha256="c" * 64)
+                    for row in value["rows"]
+                ],
+                "analysis commit": lambda value: value["analysis"].update(
+                    analysis_repository_commit="d" * 40
+                ),
+                "macro hash": lambda value: value["analysis"].update(
+                    analysis_macro_sha256="e" * 64
+                ),
+                "schema": lambda value: value["analysis"].update(
+                    analysis_schema="paul_pair_objects_primary_ground_v2"
+                ),
+                "implementation": lambda value: value["analysis"].update(
+                    analysis_implementation="other"
+                ),
+                "version": lambda value: value["analysis"].update(
+                    analysis_version="other"
+                ),
+                "profile": lambda value: value["analysis"].update(
+                    analysis_profile="other"
+                ),
+                "count": lambda value: value["freeze"].update(
+                    jobs_per_tune=2
+                ),
+            }
+            for label, mutate in mutations.items():
+                with self.subTest(field=label):
+                    candidate = {
+                        **fixture,
+                        "rows": copy.deepcopy(fixture["rows"]),
+                        "freeze": copy.deepcopy(fixture["freeze"]),
+                        "analysis": copy.deepcopy(fixture["analysis"]),
+                    }
+                    mutate(candidate)
+                    with self.assertRaises(ValueError):
+                        self._validate(candidate)
+
+            original_receipt = fixture["receipt_path"].read_text()
+            fixture["receipt_path"].write_text(original_receipt + " ")
+            with self.assertRaisesRegex(ValueError, "receipt bytes"):
+                self._validate(fixture)
+            fixture["receipt_path"].write_text(original_receipt)
+
+    def test_missing_unknown_dirty_and_wrong_projection_refuse(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary)
+
+            missing = self._fixture(base / "missing")
+            missing["registry_path"].unlink()
+            self._commit(missing["checkout"], "remove registry")
+            with self.assertRaisesRegex(ValueError, "registry is absent"):
+                self._validate(missing)
+
+            dirty = self._fixture(base / "dirty")
+            (dirty["checkout"] / "projection.txt").write_text("dirty\n")
+            with self.assertRaisesRegex(ValueError, "tracked modifications"):
+                self._validate(dirty)
+
+            wrong_root = self._fixture(base / "wrong_root")
+            registry = json.loads(wrong_root["registry_path"].read_text())
+            registry["history_model"]["rebuild_root_commit"] = "f" * 40
+            write_json(wrong_root["registry_path"], registry)
+            self._commit(wrong_root["checkout"], "wrong projection root")
+            with self.assertRaisesRegex(ValueError, "accepted rebuild root"):
+                self._validate(wrong_root)
+
+            unknown = self._fixture(base / "unknown")
+            unknown["freeze"]["campaign"] = "UNKNOWN"
+            for row in unknown["rows"]:
+                row["campaign"] = "UNKNOWN"
+            with self.assertRaisesRegex(ValueError, "not accepted"):
+                self._validate(unknown)
+
+
+class ProducerV2CanonicalFreezeTest(unittest.TestCase):
+    def test_real_builder_contract_and_fail_closed_mutants(self) -> None:
+        spec = json.loads(
+            (ROOT / "config/statistical_robustness_v1.json").read_text()
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            base = build_producer_v2_freeze(root / "base")
+            rows, provenance = robustness.validate_canonical_freeze(base, spec)
+            self.assertEqual(len(rows), 330)
+            self.assertEqual(provenance["jobs_per_tune"], 110)
+            self.assertEqual(
+                provenance["canonical_freeze_contract"], "PRODUCER_V2"
+            )
+            self.assertEqual(provenance["expanded_artifacts"]["state"], "ABSENT")
+            self.assertNotEqual(provenance["jobs_per_tune"], 100)
+
+            def copied(name: str) -> Path:
+                target = root / name
+                shutil.copytree(base, target)
+                return target
+
+            def objects(freeze: Path) -> tuple[list[dict], dict]:
+                manifest_rows = [
+                    json.loads(line)
+                    for line in (freeze / "canonical_manifest.jsonl")
+                    .read_text()
+                    .splitlines()
+                ]
+                seal = json.loads((freeze / "freeze_seal.json").read_text())
+                return manifest_rows, seal
+
+            mutants: list[tuple[str, object]] = []
+
+            def manifest_tamper(freeze: Path) -> None:
+                path = freeze / "canonical_manifest.jsonl"
+                path.write_text(path.read_text() + "{}\n")
+
+            mutants.append(("manifest_tamper", manifest_tamper))
+
+            def seal_tamper(freeze: Path) -> None:
+                seal = json.loads((freeze / "freeze_seal.json").read_text())
+                seal["canonical_manifest_sha256"] = "0" * 64
+                write_json(freeze / "freeze_seal.json", seal)
+
+            mutants.append(("seal_tamper", seal_tamper))
+
+            def wrong_campaign(freeze: Path) -> None:
+                seal = json.loads((freeze / "freeze_seal.json").read_text())
+                seal["campaign"] = "OTHER_CAMPAIGN"
+                write_json(freeze / "freeze_seal.json", seal)
+
+            mutants.append(("wrong_campaign", wrong_campaign))
+
+            def unequal_exposure(freeze: Path) -> None:
+                changed, seal = objects(freeze)
+                changed.pop()
+                seal["rows"] = len(changed)
+                rewrite_producer_freeze(freeze, changed, seal)
+
+            mutants.append(("unequal_exposure", unequal_exposure))
+
+            def duplicate_missing_slot(freeze: Path) -> None:
+                changed, seal = objects(freeze)
+                changed[-1]["canonical_slot"] = 108
+                changed[-1]["block"] = 8
+                changed[-1]["block_position"] = 10
+                rewrite_producer_freeze(freeze, changed, seal)
+
+            mutants.append(("duplicate_missing_slot", duplicate_missing_slot))
+
+            def invalid_row_provenance(freeze: Path) -> None:
+                changed, seal = objects(freeze)
+                changed[0]["repository_commit"] = "z" * 40
+                rewrite_producer_freeze(freeze, changed, seal)
+
+            mutants.append(("invalid_row_provenance", invalid_row_provenance))
+
+            def bad_total(freeze: Path) -> None:
+                seal = json.loads((freeze / "freeze_seal.json").read_text())
+                seal["total_requested_successes"] += 1
+                write_json(freeze / "freeze_seal.json", seal)
+
+            mutants.append(("bad_total", bad_total))
+
+            def corrupt_block(freeze: Path) -> None:
+                (freeze / "block_01.jsonl").write_text("not-json\n")
+
+            mutants.append(("corrupt_block", corrupt_block))
+
+            def reordered_block(freeze: Path) -> None:
+                path = freeze / "block_01.jsonl"
+                lines = path.read_text().splitlines()
+                path.write_text("\n".join(reversed(lines)) + "\n")
+
+            mutants.append(("reordered_block", reordered_block))
+
+            def missing_block(freeze: Path) -> None:
+                (freeze / "block_01.jsonl").unlink()
+
+            mutants.append(("missing_block", missing_block))
+
+            def symlink_block(freeze: Path) -> None:
+                path = freeze / "block_01.jsonl"
+                path.unlink()
+                os.symlink(freeze / "block_02.jsonl", path)
+
+            mutants.append(("symlink_block", symlink_block))
+
+            def partial_expanded(freeze: Path) -> None:
+                write_json(freeze / "freeze_summary.json", {"schema": "partial"})
+
+            mutants.append(("partial_expanded", partial_expanded))
+
+            def unrelated_schema(freeze: Path) -> None:
+                seal = json.loads((freeze / "freeze_seal.json").read_text())
+                seal["schema"] = "unrelated_freeze_schema"
+                write_json(freeze / "freeze_seal.json", seal)
+
+            mutants.append(("unrelated_schema", unrelated_schema))
+
+            def unsealed_extra(freeze: Path) -> None:
+                (freeze / "unsealed.txt").write_text("not in the v2 seal\n")
+
+            mutants.append(("unsealed_extra", unsealed_extra))
+
+            for name, mutate in mutants:
+                with self.subTest(mutant=name):
+                    freeze = copied(name)
+                    mutate(freeze)  # type: ignore[operator]
+                    with self.assertRaises(ValueError):
+                        robustness.validate_canonical_freeze(freeze, spec)
+
+
 class CanonicalFreezeTest(unittest.TestCase):
     def test_exact_sealed_300_row_freeze_is_accepted(self) -> None:
         spec = json.loads(
@@ -394,6 +1135,14 @@ class CanonicalFreezeTest(unittest.TestCase):
             self.assertEqual(
                 provenance["successful_events_per_tune"], 100_000_000
             )
+            self.assertEqual(
+                provenance["canonical_freeze_contract"],
+                "EXPANDED_CANONICAL_V3",
+            )
+            summary["schema"] = "unrelated_expanded_schema"
+            (directory / "freeze_summary.json").write_text(json.dumps(summary))
+            with self.assertRaisesRegex(ValueError, "summary differs"):
+                robustness.validate_canonical_freeze(directory, spec)
 
 
 class BoundaryReceiptTest(unittest.TestCase):
@@ -539,8 +1288,11 @@ class BoundaryReceiptTest(unittest.TestCase):
             spec, receipt = self._receipt(directory)
             path = directory / "multiplicity_boundary_receipt_v2.json"
             path.write_text(json.dumps(receipt, sort_keys=True))
-            _, ranges, _, _ = robustness.validate_boundary_receipt(
+            _, ranges, _, binding = robustness.validate_boundary_receipt(
                 path, spec, ROOT
+            )
+            self.assertEqual(
+                binding["provenance_mode"], "CURRENT_PLOTTER_SOURCE"
             )
             for tune in robustness.EXPECTED_TUNES:
                 self.assertEqual(
@@ -560,6 +1312,61 @@ class BoundaryReceiptTest(unittest.TestCase):
                 ValueError, "was not recomputed from the frozen source"
             ):
                 robustness.validate_boundary_receipt(path, spec, ROOT)
+
+    def test_exact_accepted_historical_digest_is_an_explicit_route(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            (directory / "sources").mkdir()
+            spec, receipt = self._receipt(directory / "sources")
+            checkout = directory / "checkout"
+            for relative in (
+                spec["contracts"]["boundary_configuration_path"],
+                "plotting/improvedPlotting_THnSparse.C",
+                "plotting/MultiplicityBoundaryUtils.h",
+                "config/multiplicity_percentile_classes_v2.json",
+            ):
+                source = ROOT / relative
+                target = checkout / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+            (checkout / "plotting/improvedPlotting_THnSparse.C").write_text(
+                "// a newer plotter that did not create the accepted receipt\n"
+            )
+            relative = (
+                "HF_RUN3_V1/4d309e9f99e4/plotting/THnSparse/"
+                "multiplicity_boundary_receipt_v2.json"
+            )
+            path = directory / "results" / relative
+            write_json(path, receipt)
+            accepted = {
+                "schema": "hadronization_accepted_measurements_v1",
+                "nominal": {
+                    "campaign": "HF_RUN3_V1",
+                    "accepted_root": "4d309e9f99e4",
+                    "boundary_receipt_path": relative,
+                    "boundary_receipt_sha256": digest(path),
+                },
+            }
+            write_json(
+                checkout / "config/accepted_measurements_v1.json", accepted
+            )
+            _, _, _, binding = robustness.validate_boundary_receipt(
+                path, spec, checkout
+            )
+            self.assertEqual(
+                binding["provenance_mode"],
+                "ACCEPTED_HISTORICAL_RECEIPT_DIGEST",
+            )
+            self.assertEqual(
+                binding["accepted_boundary_receipt_sha256"], digest(path)
+            )
+
+            accepted["nominal"]["boundary_receipt_sha256"] = "0" * 64
+            write_json(
+                checkout / "config/accepted_measurements_v1.json", accepted
+            )
+            with self.assertRaisesRegex(ValueError, "matches neither"):
+                robustness.validate_boundary_receipt(path, spec, checkout)
 
 
 class SyntheticRootContractTest(unittest.TestCase):
@@ -582,10 +1389,13 @@ class SyntheticRootContractTest(unittest.TestCase):
         same_sign_factor: float = 1.0,
         second_origin_category: float = 1.0,
         origin_category_labels: str | None = None,
+        analysis_commit: str = "e" * 40,
+        analysis_macro_sha256: str = "d" * 64,
+        analysis_schema: str | None = None,
     ) -> None:
         assert self.pyroot is not None
         root = self.pyroot
-        path.parent.mkdir(parents=True)
+        path.parent.mkdir(parents=True, exist_ok=True)
         output = root.TFile(str(path), "RECREATE")
         multiplicity = root.TH1D(
             "summed MULTIPLICITY", "", 4096, -0.5, 4095.5
@@ -743,7 +1553,11 @@ class SyntheticRootContractTest(unittest.TestCase):
         correlation.Write()
         correlation_by_origin.Write()
         strings = {
-            "analysis_schema": contracts["analysis_schema"],
+            "analysis_schema": (
+                contracts["analysis_schema"]
+                if analysis_schema is None
+                else analysis_schema
+            ),
             "analysis_implementation": contracts["analysis_implementation"],
             "analysis_version": contracts["analysis_version"],
             "analysis_profile": contracts["analysis_profile"],
@@ -758,8 +1572,8 @@ class SyntheticRootContractTest(unittest.TestCase):
                     else origin_category_labels
                 ),
             "event_filter_schema": "all_events_v1",
-            "analysis_macro_sha256": "d" * 64,
-            "analysis_repository_commit": "e" * 40,
+            "analysis_macro_sha256": analysis_macro_sha256,
+            "analysis_repository_commit": analysis_commit,
             "selector_version": contracts["selector"],
             "upstream_raw_schema": contracts["raw_schema"],
             "upstream_raw_sha256": row["raw_sha256"],
@@ -862,6 +1676,58 @@ class SyntheticRootContractTest(unittest.TestCase):
             self.assertAlmostEqual(values["inclusive"][0], 5.0)
             self.assertAlmostEqual(values["inclusive"][1], 5.0)
             self.assertAlmostEqual(values["inclusive"][2], 5.0)
+
+    def test_mixed_pair_provenance_is_rejected(self) -> None:
+        if self.pyroot is None:
+            self.skipTest("PyROOT is unavailable")
+        spec = json.loads(
+            (ROOT / "config/statistical_robustness_v1.json").read_text()
+        )
+        pair = robustness.validate_spec(spec, ROOT)[(411, -411)]
+        row = {
+            "tune": "MONASH",
+            "canonical_slot": 0,
+            "campaign": "synthetic",
+            "raw_sha256": "a" * 64,
+            "repository_commit": "b" * 40,
+            "producer_executable_sha256": "c" * 64,
+            "requested_successes": 2,
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            per_job = Path(temporary)
+            first = per_job / "first.root"
+            second = per_job / "second.root"
+            self._write_pair_file(first, pair, row, spec["contracts"])
+            self._write_pair_file(
+                second,
+                pair,
+                row,
+                spec["contracts"],
+                analysis_commit="f" * 40,
+            )
+            common: dict[str, str] = {}
+            inventory: dict[Path, dict] = {}
+            robustness.inspect_pair_file(
+                first,
+                per_job,
+                row,
+                pair,
+                spec["contracts"],
+                {"inclusive": (0.0, 15.0)},
+                common,
+                inventory,
+            )
+            with self.assertRaisesRegex(ValueError, "mixed analysis"):
+                robustness.inspect_pair_file(
+                    second,
+                    per_job,
+                    row,
+                    pair,
+                    spec["contracts"],
+                    {"inclusive": (0.0, 15.0)},
+                    common,
+                    inventory,
+                )
 
     def test_unresolved_associate_category_is_excluded_only_from_sensitivity(
         self,

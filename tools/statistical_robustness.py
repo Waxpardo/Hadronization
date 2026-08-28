@@ -34,6 +34,11 @@ RESULT_SCHEMA = "hf_statistical_robustness_result_v1"
 INVENTORY_SCHEMA = "hf_statistical_robustness_input_inventory_v1"
 BOUNDARY_RECEIPT_SCHEMA = "hadronization_multiplicity_boundary_receipt_v2"
 ORIGIN_CLOSURE_REPORT_SCHEMA = "hf_final_origin_closure_report_v1"
+HISTORICAL_PROVENANCE_SCHEMA = (
+    "hadronization_accepted_historical_provenance_v1"
+)
+CURRENT_GRAPH_ANCESTRY = "CURRENT_GRAPH_ANCESTRY"
+ACCEPTED_HISTORICAL_PROJECTION = "ACCEPTED_HISTORICAL_PROJECTION"
 HEX40 = re.compile(r"[0-9a-f]{40}")
 HEX64 = re.compile(r"[0-9a-f]{64}")
 EXPECTED_TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
@@ -140,6 +145,459 @@ def nearly_equal(
     return abs(first - second) <= relative_tolerance * max(
         1.0, abs(first), abs(second)
     )
+
+
+def clean_checkout_commit(checkout: Path, label: str) -> str:
+    commit = subprocess.check_output(
+        ["git", "-C", str(checkout), "rev-parse", "--verify", "HEAD^{commit}"],
+        text=True,
+    ).strip()
+    if not HEX40.fullmatch(commit):
+        raise ValueError(f"{label} checkout commit is invalid")
+    tracked_status = subprocess.check_output(
+        [
+            "git",
+            "-C",
+            str(checkout),
+            "status",
+            "--porcelain",
+            "--untracked-files=no",
+        ],
+        text=True,
+    ).strip()
+    if tracked_status:
+        raise ValueError(f"{label} checkout has tracked modifications")
+    return commit
+
+
+def require_ancestor(
+    checkout: Path, ancestor: str, descendant: str, label: str
+) -> None:
+    if not HEX40.fullmatch(ancestor) or not HEX40.fullmatch(descendant):
+        raise ValueError(f"{label} contains an invalid commit identity")
+    result = subprocess.run(
+        [
+            "git",
+            "-C",
+            str(checkout),
+            "merge-base",
+            "--is-ancestor",
+            ancestor,
+            descendant,
+        ],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    if result.returncode != 0:
+        raise ValueError(
+            f"{label}: {ancestor} is not an ancestor of {descendant}"
+        )
+
+
+def commit_exists(checkout: Path, commit: str) -> bool:
+    if not HEX40.fullmatch(commit):
+        return False
+    return subprocess.run(
+        ["git", "-C", str(checkout), "cat-file", "-e", f"{commit}^{{commit}}"],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    ).returncode == 0
+
+
+def _reject_absolute_registry_values(value: Any, label: str = "registry") -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            _reject_absolute_registry_values(child, f"{label}.{key}")
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            _reject_absolute_registry_values(child, f"{label}[{index}]")
+    elif isinstance(value, str) and Path(value).is_absolute():
+        raise ValueError(f"{label} contains an absolute path")
+
+
+def load_historical_provenance_entry(
+    checkout: Path, campaign: str
+) -> tuple[dict[str, Any], str]:
+    path = checkout / "config/accepted_historical_provenance_v1.json"
+    if path.is_symlink() or not path.is_file():
+        raise ValueError("accepted historical-provenance registry is absent")
+    registry = load_json(path)
+    _reject_absolute_registry_values(registry)
+    campaigns = registry.get("campaigns")
+    history = registry.get("history_model")
+    if (
+        registry.get("schema") != HISTORICAL_PROVENANCE_SCHEMA
+        or not isinstance(registry.get("purpose"), str)
+        or "Provenance only" not in registry["purpose"]
+        or not isinstance(history, dict)
+        or not isinstance(campaigns, dict)
+        or set(campaigns) != {"HF_RUN3_V1"}
+    ):
+        raise ValueError("accepted historical-provenance registry is invalid")
+    entry = campaigns.get(campaign)
+    if not isinstance(entry, dict):
+        raise ValueError(f"historical campaign is not accepted: {campaign}")
+    freeze = entry.get("canonical_freeze")
+    raw = entry.get("raw_production")
+    receipt = entry.get("analysis_validation_receipt")
+    analysis = entry.get("pair_analysis")
+    archive = entry.get("archive_generation_evidence")
+    if not all(
+        isinstance(value, dict)
+        for value in (freeze, raw, receipt, analysis, archive)
+    ):
+        raise ValueError("historical-provenance campaign entry is incomplete")
+    relative_receipt = receipt.get("relative_path")
+    expected_dimensions = (
+        freeze.get("rows"),
+        freeze.get("tunes"),
+        freeze.get("jobs_per_tune"),
+        freeze.get("blocks"),
+    )
+    if (
+        not HEX40.fullmatch(str(history.get("projection_source_commit", "")))
+        or not HEX40.fullmatch(str(history.get("rebuild_root_commit", "")))
+        or not HEX64.fullmatch(str(freeze.get("manifest_sha256", "")))
+        or not HEX64.fullmatch(str(freeze.get("seal_sha256", "")))
+        or any(
+            isinstance(value, bool) or not isinstance(value, int) or value < 1
+            for value in expected_dimensions
+        )
+        or freeze.get("tunes") != len(EXPECTED_TUNES)
+        or freeze.get("blocks") != 10
+        or not HEX40.fullmatch(str(raw.get("repository_commit", "")))
+        or not HEX64.fullmatch(
+            str(raw.get("producer_executable_sha256", ""))
+        )
+        or not isinstance(relative_receipt, str)
+        or not relative_receipt
+        or Path(relative_receipt).is_absolute()
+        or ".." in Path(relative_receipt).parts
+        or Path(relative_receipt).as_posix() != relative_receipt
+        or not HEX64.fullmatch(str(receipt.get("sha256", "")))
+        or receipt.get("schema") != "hf_analysis_output_validation_v3"
+        or receipt.get("status") != "PASS"
+        or receipt.get("canonical_manifest_rows") != freeze.get("rows")
+        or receipt.get("validated_output_count") != freeze.get("rows")
+        or receipt.get("missing_output_count") != 0
+        or not HEX40.fullmatch(str(analysis.get("repository_commit", "")))
+        or not HEX64.fullmatch(str(analysis.get("macro_sha256", "")))
+        or analysis.get("schema")
+        != "paul_pair_objects_primary_ground_v3"
+        or analysis.get("implementation")
+        != "one_pass_primary_ground_pair_analysis_v2"
+        or analysis.get("version") != "status_analysis_THnSparse_qq_v2"
+        or analysis.get("profile") != "central_primary_ground_v1"
+        or archive.get("raw_to_analysis_ancestor") is not True
+        or require_int(
+            archive.get("ancestry_path_commit_count"),
+            "historical ancestry-path commit count",
+            1,
+        )
+        < 1
+        or not HEX64.fullmatch(
+            str(archive.get("ancestry_path_identities_sha256", ""))
+        )
+        or not isinstance(
+            archive.get("analysis_macro_historical_path"), str
+        )
+        or Path(str(archive.get("analysis_macro_historical_path"))).is_absolute()
+        or not re.fullmatch(
+            r"[0-9a-f]{40}", str(archive.get("analysis_macro_git_blob", ""))
+        )
+        or archive.get("analysis_to_projection_source_ancestor") is not False
+    ):
+        raise ValueError("accepted historical-provenance campaign pin is invalid")
+    return entry, sha256(path)
+
+
+def _validate_projection_checkout(
+    checkout: Path, history: dict[str, Any], checkout_commit: str
+) -> str:
+    roots = subprocess.check_output(
+        ["git", "-C", str(checkout), "rev-list", "--max-parents=0", "HEAD"],
+        text=True,
+    ).splitlines()
+    rebuild_root = str(history.get("rebuild_root_commit", ""))
+    if roots != [rebuild_root]:
+        raise ValueError("checkout does not have the accepted rebuild root")
+    require_ancestor(
+        checkout,
+        rebuild_root,
+        checkout_commit,
+        "rebuild-root to current-checkout lineage",
+    )
+    return rebuild_root
+
+
+def _canonical_raw_provenance(
+    rows: Sequence[dict[str, Any]], freeze_provenance: dict[str, Any]
+) -> dict[str, Any]:
+    campaigns = {str(row.get("campaign", "")) for row in rows}
+    commits = {str(row.get("repository_commit", "")) for row in rows}
+    executable_hashes = {
+        str(row.get("producer_executable_sha256", "")) for row in rows
+    }
+    if (
+        len(campaigns) != 1
+        or len(commits) != 1
+        or len(executable_hashes) != 1
+    ):
+        raise ValueError("canonical rows do not have uniform raw provenance")
+    campaign = next(iter(campaigns))
+    raw_commit = next(iter(commits))
+    executable_hash = next(iter(executable_hashes))
+    jobs_per_tune = require_int(
+        freeze_provenance.get("jobs_per_tune"), "canonical jobs per tune", 1
+    )
+    if (
+        freeze_provenance.get("campaign") != campaign
+        or freeze_provenance.get("repository_commit") != raw_commit
+        or len(rows) != len(EXPECTED_TUNES) * jobs_per_tune
+        or not HEX40.fullmatch(raw_commit)
+        or not HEX64.fullmatch(executable_hash)
+    ):
+        raise ValueError("canonical freeze and row provenance differ")
+    return {
+        "campaign": campaign,
+        "raw_production_commit": raw_commit,
+        "producer_executable_sha256": executable_hash,
+        "rows": len(rows),
+        "tunes": len(EXPECTED_TUNES),
+        "jobs_per_tune": jobs_per_tune,
+        "blocks": 10,
+        "canonical_manifest_sha256": freeze_provenance.get(
+            "canonical_manifest_sha256"
+        ),
+        "freeze_seal_sha256": freeze_provenance.get("freeze_seal_sha256"),
+    }
+
+
+def _validate_raw_projection_entry(
+    entry: dict[str, Any], observed: dict[str, Any]
+) -> None:
+    freeze = entry["canonical_freeze"]
+    raw = entry["raw_production"]
+    expected = {
+        "canonical_manifest_sha256": freeze["manifest_sha256"],
+        "freeze_seal_sha256": freeze["seal_sha256"],
+        "rows": freeze["rows"],
+        "tunes": freeze["tunes"],
+        "jobs_per_tune": freeze["jobs_per_tune"],
+        "blocks": freeze["blocks"],
+        "raw_production_commit": raw["repository_commit"],
+        "producer_executable_sha256": raw["producer_executable_sha256"],
+    }
+    if any(observed.get(key) != value for key, value in expected.items()):
+        raise ValueError(
+            "canonical raw provenance does not match the accepted historical "
+            "projection"
+        )
+
+
+def validate_raw_checkout_lineage(
+    checkout: Path,
+    rows: Sequence[dict[str, Any]],
+    freeze_provenance: dict[str, Any],
+    label: str,
+) -> dict[str, Any]:
+    checkout_commit = clean_checkout_commit(checkout, label)
+    observed = _canonical_raw_provenance(rows, freeze_provenance)
+    raw_commit = str(observed["raw_production_commit"])
+    if commit_exists(checkout, raw_commit):
+        require_ancestor(
+            checkout,
+            raw_commit,
+            checkout_commit,
+            f"raw-production to {label} lineage",
+        )
+        return {
+            "provenance_mode": CURRENT_GRAPH_ANCESTRY,
+            "accepted_historical_provenance_registry_sha256": None,
+            "raw_production_commit": raw_commit,
+            "checkout_commit": checkout_commit,
+        }
+    entry, registry_sha = load_historical_provenance_entry(
+        checkout, str(observed["campaign"])
+    )
+    _validate_raw_projection_entry(entry, observed)
+    registry = load_json(
+        checkout / "config/accepted_historical_provenance_v1.json"
+    )
+    rebuild_root = _validate_projection_checkout(
+        checkout, registry["history_model"], checkout_commit
+    )
+    return {
+        "provenance_mode": ACCEPTED_HISTORICAL_PROJECTION,
+        "accepted_historical_provenance_registry_sha256": registry_sha,
+        "raw_production_commit": raw_commit,
+        "rebuild_root_commit": rebuild_root,
+        "checkout_commit": checkout_commit,
+    }
+
+
+def _validate_analysis_receipt(
+    analysis_root: Path,
+    rows: Sequence[dict[str, Any]],
+    freeze_provenance: dict[str, Any],
+    entry: dict[str, Any],
+) -> dict[str, Any]:
+    pin = entry["analysis_validation_receipt"]
+    relative = Path(str(pin["relative_path"]))
+    resolved_root = analysis_root.resolve()
+    path = (resolved_root / relative).resolve()
+    if (
+        resolved_root not in path.parents
+        or path.is_symlink()
+        or not path.is_file()
+        or sha256(path) != pin["sha256"]
+    ):
+        raise ValueError("historical analysis-validation receipt bytes differ")
+    receipt = load_json(path)
+    pair_analysis = entry["pair_analysis"]
+    expected_header = {
+        "schema": pin["schema"],
+        "status": pin["status"],
+        "canonical_manifest_sha256": freeze_provenance[
+            "canonical_manifest_sha256"
+        ],
+        "canonical_freeze_seal_sha256": freeze_provenance[
+            "freeze_seal_sha256"
+        ],
+        "canonical_manifest_rows": pin["canonical_manifest_rows"],
+        "validated_output_count": pin["validated_output_count"],
+        "missing_output_count": pin["missing_output_count"],
+        "analysis_commit": pair_analysis["repository_commit"],
+        "analysis_macro_sha256": pair_analysis["macro_sha256"],
+    }
+    if any(receipt.get(key) != value for key, value in expected_header.items()):
+        raise ValueError("historical analysis-validation receipt PASS fields differ")
+    outputs = receipt.get("validated_outputs")
+    if not isinstance(outputs, list) or len(outputs) != len(rows):
+        raise ValueError("historical analysis-validation inventory is incomplete")
+    for index, (output, row) in enumerate(zip(outputs, rows)):
+        expected = {
+            "tune": row.get("tune"),
+            "canonical_slot": row.get("canonical_slot"),
+            "logical_id": row.get("logical_id"),
+            "raw_sha256": row.get("raw_sha256"),
+            "raw_validation_receipt_sha256": row.get(
+                "raw_validation_receipt_sha256"
+            ),
+            "analysis_commit": pair_analysis["repository_commit"],
+            "analysis_macro_sha256": pair_analysis["macro_sha256"],
+            "upstream_tune_difference_allowlist_sha256": row.get(
+                "tune_difference_allowlist_sha256"
+            ),
+        }
+        if not isinstance(output, dict) or any(
+            output.get(key) != value for key, value in expected.items()
+        ):
+            raise ValueError(
+                f"historical analysis-validation row {index} differs from "
+                "the canonical manifest"
+            )
+    return {
+        "path": path.as_posix(),
+        "sha256": pin["sha256"],
+        "schema": receipt["schema"],
+        "status": receipt["status"],
+        "validated_output_count": receipt["validated_output_count"],
+    }
+
+
+def validate_analysis_checkout_lineage(
+    checkout: Path,
+    rows: Sequence[dict[str, Any]],
+    freeze_provenance: dict[str, Any],
+    analysis_provenance: dict[str, str],
+    analysis_root: Path | None = None,
+) -> dict[str, Any]:
+    robustness_commit = clean_checkout_commit(checkout, "robustness")
+    analysis_commit = str(
+        analysis_provenance.get("analysis_repository_commit", "")
+    )
+    analysis_macro_sha = str(
+        analysis_provenance.get("analysis_macro_sha256", "")
+    )
+    observed = _canonical_raw_provenance(rows, freeze_provenance)
+    raw_commit = str(observed["raw_production_commit"])
+    raw_present = commit_exists(checkout, raw_commit)
+    analysis_present = commit_exists(checkout, analysis_commit)
+    if raw_present or analysis_present:
+        if not (raw_present and analysis_present):
+            raise ValueError(
+                "raw and analysis provenance mix current and absent Git objects"
+            )
+        require_ancestor(
+            checkout,
+            analysis_commit,
+            robustness_commit,
+            "analysis to robustness-checkout lineage",
+        )
+        macro_path = checkout / "analysis/status_analysis_THnSparse_qq.C"
+        if (
+            macro_path.is_symlink()
+            or not macro_path.is_file()
+            or sha256(macro_path) != analysis_macro_sha
+        ):
+            raise ValueError(
+                "checked-out analysis macro checksum differs from inputs"
+            )
+        require_ancestor(
+            checkout,
+            raw_commit,
+            analysis_commit,
+            "raw-production to pair-analysis lineage",
+        )
+        return {
+            "provenance_mode": CURRENT_GRAPH_ANCESTRY,
+            "accepted_historical_provenance_registry_sha256": None,
+            "raw_production_commit": raw_commit,
+            "pair_analysis_commit": analysis_commit,
+            "robustness_checkout_commit": robustness_commit,
+        }
+
+    entry, registry_sha = load_historical_provenance_entry(
+        checkout, str(observed["campaign"])
+    )
+    _validate_raw_projection_entry(entry, observed)
+    expected_analysis = entry["pair_analysis"]
+    observed_analysis = {
+        "repository_commit": analysis_commit,
+        "macro_sha256": analysis_macro_sha,
+        "schema": analysis_provenance.get("analysis_schema"),
+        "implementation": analysis_provenance.get("analysis_implementation"),
+        "version": analysis_provenance.get("analysis_version"),
+        "profile": analysis_provenance.get("analysis_profile"),
+    }
+    if observed_analysis != expected_analysis:
+        raise ValueError(
+            "pair-analysis provenance does not match the accepted historical "
+            "projection"
+        )
+    if analysis_root is None:
+        raise ValueError("historical analysis root is required")
+    receipt = _validate_analysis_receipt(
+        analysis_root, rows, freeze_provenance, entry
+    )
+    registry = load_json(
+        checkout / "config/accepted_historical_provenance_v1.json"
+    )
+    rebuild_root = _validate_projection_checkout(
+        checkout, registry["history_model"], robustness_commit
+    )
+    return {
+        "provenance_mode": ACCEPTED_HISTORICAL_PROJECTION,
+        "accepted_historical_provenance_registry_sha256": registry_sha,
+        "raw_production_commit": raw_commit,
+        "pair_analysis_commit": analysis_commit,
+        "robustness_checkout_commit": robustness_commit,
+        "rebuild_root_commit": rebuild_root,
+        "analysis_validation_receipt": receipt,
+    }
 
 
 def validate_spec(spec: dict[str, Any], checkout: Path) -> dict[tuple[int, int], dict]:
@@ -443,14 +901,262 @@ def validate_spec(spec: dict[str, Any], checkout: Path) -> dict[tuple[int, int],
 def validate_canonical_freeze(
     directory: Path, spec: dict[str, Any]
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Validate one complete canonical-freeze contract.
+
+    The current builder emits a v2 manifest, ten blocks, and a v2 seal.
+    Expanded and superseding freezes additionally carry all three
+    campaign-level validation artifacts. A partial expanded set is invalid.
+    """
+    expanded_names = (
+        "freeze_summary.json",
+        "canonical_raw_validation_receipt.json",
+        "canonical_raw_validation.log",
+    )
+    present = [name for name in expanded_names if (directory / name).exists()]
+    if present and len(present) != len(expanded_names):
+        missing = sorted(set(expanded_names) - set(present))
+        raise ValueError(
+            "canonical freeze has partial expanded provenance: "
+            f"present={sorted(present)} missing={missing}"
+        )
+    if present:
+        return _validate_expanded_canonical_freeze(directory, spec)
+    return _validate_producer_v2_canonical_freeze(directory, spec)
+
+
+def _require_relative_path(value: Any, label: str) -> str:
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"{label} is absent")
+    path = Path(value)
+    if path.is_absolute() or ".." in path.parts or path.as_posix() != value:
+        raise ValueError(f"{label} is not a normalized relative path")
+    return value
+
+
+def _validate_producer_v2_canonical_freeze(
+    directory: Path, spec: dict[str, Any]
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    contracts = spec["contracts"]
+    manifest_path = directory / "canonical_manifest.jsonl"
+    seal_path = directory / "freeze_seal.json"
+    block_paths = [
+        directory / f"block_{block + 1:02d}.jsonl" for block in range(10)
+    ]
+    required_paths = [manifest_path, *block_paths, seal_path]
+    for path in required_paths:
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(f"sealed canonical-freeze artifact is absent: {path}")
+    observed_names = {path.name for path in directory.iterdir()}
+    required_names = {path.name for path in required_paths}
+    if observed_names != required_names:
+        raise ValueError(
+            "producer-v2 freeze contains artifacts outside its sealed "
+            f"contract: {sorted(observed_names - required_names)}"
+        )
+
+    rows = load_jsonl(manifest_path)
+    seal = load_json(seal_path)
+    manifest_sha = sha256(manifest_path)
+    jobs_per_tune = require_int(
+        seal.get("jobs_per_tune"), "canonical jobs per tune", MINIMUM_SLOTS
+    )
+    if jobs_per_tune % 10:
+        raise ValueError("canonical jobs per tune is not divisible by ten")
+    campaign = seal.get("campaign")
+    expected_seal_keys = {
+        "schema",
+        "campaign",
+        "canonical_manifest_sha256",
+        "rows",
+        "tunes",
+        "jobs_per_tune",
+        "blocks",
+        "total_requested_successes",
+    }
+    if (
+        set(seal) != expected_seal_keys
+        or seal.get("schema") != contracts["canonical_seal_schema"]
+        or not isinstance(campaign, str)
+        or not campaign
+        or seal.get("canonical_manifest_sha256") != manifest_sha
+        or seal.get("rows") != len(EXPECTED_TUNES) * jobs_per_tune
+        or seal.get("tunes") != list(EXPECTED_TUNES)
+        or seal.get("blocks") != 10
+    ):
+        raise ValueError("producer-v2 canonical freeze seal is invalid")
+    if len(rows) != len(EXPECTED_TUNES) * jobs_per_tune:
+        raise ValueError("canonical manifest row count differs from equal-tune N")
+
+    expected_identities = [
+        (tune, slot)
+        for tune in EXPECTED_TUNES
+        for slot in range(jobs_per_tune)
+    ]
+    identities: list[tuple[str, int]] = []
+    logical_ids: dict[str, list[int]] = {tune: [] for tune in EXPECTED_TUNES}
+    seeds: set[int] = set()
+    raw_paths: set[str] = set()
+    requested_successes: set[int] = set()
+    repository_commits: set[str] = set()
+    campaign_ordinals: set[int] = set()
+    producer_hashes: set[str] = set()
+    card_hashes: dict[str, set[str]] = {
+        tune: set() for tune in EXPECTED_TUNES
+    }
+    for index, row in enumerate(rows):
+        tune = row.get("tune")
+        slot = require_int(row.get("canonical_slot"), f"row {index} slot")
+        identities.append((str(tune), slot))
+        if (
+            row.get("schema") != contracts["canonical_manifest_schema"]
+            or row.get("campaign") != campaign
+            or tune not in EXPECTED_TUNES
+            or row.get("tune_ordinal") != EXPECTED_TUNES.index(str(tune))
+            or slot >= jobs_per_tune
+            or row.get("block") != slot % 10
+            or row.get("block_position") != slot // 10
+            or row.get("role") != "primary"
+            or row.get("raw_schema") != contracts["raw_schema"]
+            or row.get("selector") != contracts["selector"]
+            or row.get("origin_algorithm") != contracts["origin_algorithm"]
+            or row.get("tune_difference_allowlist_schema")
+            != contracts["tune_difference_allowlist_schema"]
+            or row.get("tune_difference_allowlist_sha256")
+            != contracts["tune_difference_allowlist_sha256"]
+        ):
+            raise ValueError(f"producer-v2 canonical row mismatch at row {index}")
+        logical_id = require_int(
+            row.get("logical_id"), f"row {index} logical_id"
+        )
+        logical_ids[str(tune)].append(logical_id)
+        require_int(row.get("attempt"), f"row {index} attempt")
+        campaign_ordinals.add(
+            require_int(
+                row.get("campaign_ordinal"), f"row {index} campaign_ordinal"
+            )
+        )
+        seed = require_int(row.get("seed"), f"row {index} seed", 1)
+        requested = require_int(
+            row.get("requested_successes"),
+            f"row {index} requested_successes",
+            1,
+        )
+        require_int(row.get("raw_bytes"), f"row {index} raw_bytes", 1)
+        pthat = require_finite(
+            row.get("effective_pthat_min"), f"row {index} effective_pthat_min"
+        )
+        if pthat < 0.0:
+            raise ValueError(f"row {index} effective_pthat_min is negative")
+        require_int(
+            row.get("multiplicity_audit_events"),
+            f"row {index} multiplicity_audit_events",
+        )
+        for key, pattern in (
+            ("repository_commit", HEX40),
+            ("raw_sha256", HEX64),
+            ("producer_executable_sha256", HEX64),
+            ("effective_card_sha256", HEX64),
+            ("raw_validation_receipt_sha256", HEX64),
+            ("raw_validation_log_sha256", HEX64),
+        ):
+            value = row.get(key)
+            if not isinstance(value, str) or not pattern.fullmatch(value):
+                raise ValueError(f"invalid producer-v2 row {index} {key}")
+        raw_path = _require_relative_path(
+            row.get("raw_path"), f"row {index} raw_path"
+        )
+        attempt_path = _require_relative_path(
+            row.get("attempt_receipt_path"),
+            f"row {index} attempt_receipt_path",
+        )
+        receipt_path = _require_relative_path(
+            row.get("raw_validation_receipt_path"),
+            f"row {index} raw_validation_receipt_path",
+        )
+        log_path = _require_relative_path(
+            row.get("raw_validation_log_path"),
+            f"row {index} raw_validation_log_path",
+        )
+        expected_raw = f"raw/{tune}/hf_{tune}_job{logical_id:03d}.root"
+        expected_attempt = f"attempt_metadata/{tune}/"
+        expected_validation = f"raw_validation/{tune}/job{logical_id:03d}/"
+        if (
+            raw_path != expected_raw
+            or not attempt_path.startswith(expected_attempt)
+            or not receipt_path.startswith(expected_validation)
+            or Path(receipt_path).name != "receipt.json"
+            or not log_path.startswith(expected_validation)
+            or Path(log_path).name != "validate_raw_output.log"
+        ):
+            raise ValueError(f"producer-v2 row {index} evidence path differs")
+        if seed in seeds or raw_path in raw_paths:
+            raise ValueError("canonical manifest has duplicate seed/raw path")
+        seeds.add(seed)
+        raw_paths.add(raw_path)
+        requested_successes.add(requested)
+        repository_commits.add(str(row["repository_commit"]))
+        producer_hashes.add(str(row["producer_executable_sha256"]))
+        card_hashes[str(tune)].add(str(row["effective_card_sha256"]))
+
+    if identities != expected_identities:
+        raise ValueError("canonical rows are not exact ordered tune/slot coverage")
+    if any(values != sorted(set(values)) for values in logical_ids.values()):
+        raise ValueError("canonical logical identities are duplicate or unordered")
+    if len(requested_successes) != 1:
+        raise ValueError("canonical files do not share one successful-event target")
+    if len(repository_commits) != 1:
+        raise ValueError("canonical freeze mixes repository commits")
+    if len(campaign_ordinals) != 1:
+        raise ValueError("canonical freeze mixes campaign ordinals")
+    if len(producer_hashes) != 1 or any(
+        len(values) != 1 for values in card_hashes.values()
+    ):
+        raise ValueError("canonical freeze mixes producer/card implementations")
+    successful_events = next(iter(requested_successes))
+    if seal.get("total_requested_successes") != len(rows) * successful_events:
+        raise ValueError("producer-v2 seal total requested successes differs")
+
+    block_hashes: dict[str, str] = {}
+    for block, path in enumerate(block_paths):
+        expected_rows = [
+            row for row in rows if row["canonical_slot"] % 10 == block
+        ]
+        if load_jsonl(path) != expected_rows:
+            raise ValueError(f"canonical primary block differs: {path.name}")
+        block_hashes[path.name] = sha256(path)
+    return rows, {
+        "canonical_freeze_contract": "PRODUCER_V2",
+        "canonical_manifest_sha256": manifest_sha,
+        "freeze_summary_sha256": None,
+        "validation_receipt_sha256": None,
+        "validation_log_sha256": None,
+        "freeze_seal_sha256": sha256(seal_path),
+        "block_manifest_sha256": block_hashes,
+        "expanded_artifacts": {"state": "ABSENT", "paths": []},
+        "campaign": campaign,
+        "campaign_ordinal": next(iter(campaign_ordinals)),
+        "repository_commit": next(iter(repository_commits)),
+        "successful_events_per_job": successful_events,
+        "successful_events_per_tune": jobs_per_tune * successful_events,
+        "jobs_per_tune": jobs_per_tune,
+    }
+
+
+def _validate_expanded_canonical_freeze(
+    directory: Path, spec: dict[str, Any]
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     contracts = spec["contracts"]
     manifest_path = directory / "canonical_manifest.jsonl"
     summary_path = directory / "freeze_summary.json"
     receipt_path = directory / "canonical_raw_validation_receipt.json"
     seal_path = directory / "freeze_seal.json"
     validation_log_path = directory / "canonical_raw_validation.log"
+    block_paths = [
+        directory / f"block_{block + 1:02d}.jsonl" for block in range(10)
+    ]
     for path in (
         manifest_path,
+        *block_paths,
         summary_path,
         receipt_path,
         seal_path,
@@ -458,6 +1164,23 @@ def validate_canonical_freeze(
     ):
         if path.is_symlink() or not path.is_file():
             raise ValueError(f"sealed canonical-freeze artifact is absent: {path}")
+    required_names = {
+        path.name
+        for path in (
+            manifest_path,
+            *block_paths,
+            summary_path,
+            receipt_path,
+            seal_path,
+            validation_log_path,
+        )
+    }
+    observed_names = {path.name for path in directory.iterdir()}
+    if observed_names != required_names:
+        raise ValueError(
+            "expanded freeze contains artifacts outside its sealed contract: "
+            f"{sorted(observed_names - required_names)}"
+        )
 
     rows = load_jsonl(manifest_path)
     summary = load_json(summary_path)
@@ -609,9 +1332,8 @@ def validate_canonical_freeze(
     block_hashes = summary.get("block_manifest_sha256")
     if not isinstance(block_hashes, dict):
         raise ValueError("canonical block checksum map is absent")
-    for block in range(10):
-        name = f"block_{block + 1:02d}.jsonl"
-        path = directory / name
+    for block, path in enumerate(block_paths):
+        name = path.name
         if (
             path.is_symlink()
             or not path.is_file()
@@ -621,11 +1343,25 @@ def validate_canonical_freeze(
         ):
             raise ValueError(f"canonical primary block differs: {name}")
     return rows, {
+        "canonical_freeze_contract": (
+            "EXPANDED_SUPERSEDING_V4"
+            if superseding
+            else "EXPANDED_CANONICAL_V3"
+        ),
         "canonical_manifest_sha256": manifest_sha,
         "freeze_summary_sha256": sha256(summary_path),
         "validation_receipt_sha256": sha256(receipt_path),
         "validation_log_sha256": sha256(validation_log_path),
         "freeze_seal_sha256": sha256(seal_path),
+        "block_manifest_sha256": block_hashes,
+        "expanded_artifacts": {
+            "state": "COMPLETE",
+            "paths": [
+                "freeze_summary.json",
+                "canonical_raw_validation_receipt.json",
+                "canonical_raw_validation.log",
+            ],
+        },
         "campaign": summary.get("campaign"),
         "campaign_ordinal": summary.get("campaign_ordinal"),
         "repository_commit": next(iter(repository_commits)),
@@ -649,11 +1385,50 @@ def validate_boundary_receipt(
     if path.is_symlink() or not path.is_file():
         raise ValueError(f"multiplicity-boundary receipt is absent: {path}")
     receipt = load_json(path)
+    receipt_sha = sha256(path)
     payload = dict(receipt)
     claimed_payload_sha = payload.pop("payload_sha256", None)
     expected_configuration = (
         checkout / str(spec["contracts"]["boundary_configuration_path"])
     )
+    accepted_path = checkout / "config/accepted_measurements_v1.json"
+    if accepted_path.is_symlink() or not accepted_path.is_file():
+        raise ValueError("accepted-measurement registry is absent")
+    accepted = load_json(accepted_path)
+    nominal = accepted.get("nominal")
+    if not isinstance(nominal, dict):
+        raise ValueError("accepted nominal boundary pin is absent")
+    accepted_root = nominal.get("accepted_root")
+    accepted_relative = nominal.get("boundary_receipt_path")
+    accepted_sha = nominal.get("boundary_receipt_sha256")
+    expected_relative = (
+        f"HF_RUN3_V1/{accepted_root}/plotting/THnSparse/"
+        "multiplicity_boundary_receipt_v2.json"
+    )
+    if (
+        accepted.get("schema") != "hadronization_accepted_measurements_v1"
+        or nominal.get("campaign") != "HF_RUN3_V1"
+        or not isinstance(accepted_root, str)
+        or not re.fullmatch(r"[0-9a-f]{12}", accepted_root)
+        or accepted_relative != expected_relative
+        or not isinstance(accepted_sha, str)
+        or not HEX64.fullmatch(accepted_sha)
+    ):
+        raise ValueError("accepted nominal boundary pin is invalid")
+    current_plotter_sha = sha256(
+        checkout / "plotting/improvedPlotting_THnSparse.C"
+    )
+    if receipt_sha == accepted_sha and path.as_posix().endswith(
+        f"/{accepted_relative}"
+    ):
+        provenance_mode = "ACCEPTED_HISTORICAL_RECEIPT_DIGEST"
+    elif receipt.get("plotter_source_sha256") == current_plotter_sha:
+        provenance_mode = "CURRENT_PLOTTER_SOURCE"
+    else:
+        raise ValueError(
+            "multiplicity-boundary receipt matches neither the current "
+            "plotter source nor the accepted historical nominal digest"
+        )
     if (
         receipt.get("schema") != BOUNDARY_RECEIPT_SCHEMA
         or receipt.get("schema_version") != 2
@@ -665,8 +1440,6 @@ def validate_boundary_receipt(
         != spec["contracts"]["boundary_configuration_path"]
         or receipt.get("configuration_sha256")
         != sha256(expected_configuration)
-        or receipt.get("plotter_source_sha256")
-        != sha256(checkout / "plotting/improvedPlotting_THnSparse.C")
         or receipt.get("boundary_utility_sha256")
         != sha256(checkout / "plotting/MultiplicityBoundaryUtils.h")
         or receipt.get("class_contract_sha256")
@@ -1044,8 +1817,13 @@ def validate_boundary_receipt(
 
     return receipt, ranges_by_tune, thresholds_by_tune, {
         "path": path.resolve().as_posix(),
-        "sha256": sha256(path),
+        "sha256": receipt_sha,
         "payload_sha256": claimed_payload_sha,
+        "provenance_mode": provenance_mode,
+        "accepted_measurements_path": accepted_path.resolve().as_posix(),
+        "accepted_measurements_sha256": sha256(accepted_path),
+        "accepted_boundary_receipt_path": accepted_relative,
+        "accepted_boundary_receipt_sha256": accepted_sha,
         "configuration_path":
             spec["contracts"]["boundary_configuration_path"],
         "configuration_sha256": receipt["configuration_sha256"],
@@ -1054,6 +1832,7 @@ def validate_boundary_receipt(
 
 def validate_final_origin_closure_report(
     path: Path,
+    rows: Sequence[dict[str, Any]],
     freeze_provenance: dict[str, Any],
     checkout: Path,
     spec: dict[str, Any],
@@ -1064,10 +1843,11 @@ def validate_final_origin_closure_report(
     audit_macro = checkout / "Validation/AuditOriginResolution.C"
     if audit_macro.is_symlink() or not audit_macro.is_file():
         raise ValueError("final origin-audit implementation is absent")
-    checkout_commit = subprocess.check_output(
-        ["git", "-C", str(checkout), "rev-parse", "HEAD"],
-        text=True,
-    ).strip()
+    checkout_commit = clean_checkout_commit(checkout, "origin-audit")
+    raw_production_commit = str(freeze_provenance["repository_commit"])
+    raw_lineage = validate_raw_checkout_lineage(
+        checkout, rows, freeze_provenance, "origin-audit"
+    )
     contracts = spec["contracts"]
     if (
         report.get("schema") != ORIGIN_CLOSURE_REPORT_SCHEMA
@@ -1084,7 +1864,13 @@ def validate_final_origin_closure_report(
         or report.get("unresolved_trigger_candidate_count") != 0
         or report.get("audit_macro_sha256") != sha256(audit_macro)
         or report.get("audit_checkout_commit") != checkout_commit
-        or checkout_commit != freeze_provenance["repository_commit"]
+        or report.get("raw_production_commit") != raw_production_commit
+        or report.get("provenance_mode")
+        != raw_lineage["provenance_mode"]
+        or report.get("accepted_historical_provenance_registry_sha256")
+        != raw_lineage[
+            "accepted_historical_provenance_registry_sha256"
+        ]
     ):
         raise ValueError(
             "final origin-closure report is not a PASS for this exact sealed "
@@ -1227,6 +2013,11 @@ def validate_final_origin_closure_report(
         "freeze_seal_sha256": report["freeze_seal_sha256"],
         "audit_macro_sha256": report["audit_macro_sha256"],
         "audit_checkout_commit": report["audit_checkout_commit"],
+        "raw_production_commit": report["raw_production_commit"],
+        "provenance_mode": report["provenance_mode"],
+        "accepted_historical_provenance_registry_sha256": report[
+            "accepted_historical_provenance_registry_sha256"
+        ],
         "input_audit_inventory_sha256":
             report["input_audit_inventory_sha256"],
         "audited_job_count": report["audited_job_count"],
@@ -1795,6 +2586,10 @@ def _validate_pair_file_contract(
     current_common = {
         "analysis_repository_commit": analysis_commit,
         "analysis_macro_sha256": macro_sha,
+        "analysis_schema": declared_schema,
+        "analysis_implementation": observed["analysis_implementation"],
+        "analysis_version": observed["analysis_version"],
+        "analysis_profile": observed["analysis_profile"],
     }
     if not common_analysis:
         common_analysis.update(current_common)
@@ -2218,7 +3013,7 @@ def run_audit(
         boundary_binding,
     ) = validate_boundary_receipt(boundary_receipt_path, spec, checkout)
     origin_closure_binding = validate_final_origin_closure_report(
-        origin_closure_report_path, freeze_provenance, checkout, spec
+        origin_closure_report_path, rows, freeze_provenance, checkout, spec
     )
     jobs_per_tune = int(freeze_provenance["jobs_per_tune"])
     alternative_blocks = next(
@@ -2471,52 +3266,26 @@ def run_audit(
     inventory_rows = [
         inventory[path] for path in sorted(inventory, key=lambda item: str(item))
     ]
-    checkout_commit = subprocess.check_output(
-        ["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True
-    ).strip()
-    tracked_status = subprocess.check_output(
-        [
-            "git",
-            "-C",
-            str(checkout),
-            "status",
-            "--porcelain",
-            "--untracked-files=no",
-        ],
-        text=True,
-    ).strip()
+    lineage = validate_analysis_checkout_lineage(
+        checkout,
+        rows,
+        freeze_provenance,
+        common_analysis,
+        per_job_root.parent,
+    )
     if (
-        checkout_commit != common_analysis.get("analysis_repository_commit")
-        or tracked_status
+        origin_closure_binding["provenance_mode"]
+        != lineage["provenance_mode"]
+        or origin_closure_binding[
+            "accepted_historical_provenance_registry_sha256"
+        ]
+        != lineage["accepted_historical_provenance_registry_sha256"]
     ):
         raise ValueError(
-            "robustness checkout is not the exact clean analysis commit"
+            "origin and pair inputs use different provenance routes"
         )
-    macro_path = checkout / "analysis/status_analysis_THnSparse_qq.C"
-    if sha256(macro_path) != common_analysis.get("analysis_macro_sha256"):
-        raise ValueError("checked-out analysis macro checksum differs from inputs")
-    for production_commit in sorted(
-        {str(row["repository_commit"]) for row in rows}
-    ):
-        ancestor = subprocess.run(
-            [
-                "git",
-                "-C",
-                str(checkout),
-                "merge-base",
-                "--is-ancestor",
-                production_commit,
-                checkout_commit,
-            ],
-            check=False,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        if ancestor.returncode != 0:
-            raise ValueError(
-                f"production commit {production_commit} is not an ancestor "
-                "of the analysis commit"
-            )
+    checkout_commit = lineage["robustness_checkout_commit"]
+    analysis_commit = lineage["pair_analysis_commit"]
     inventory_digest = json_sha256(inventory_rows)
     report = {
         "schema": REPORT_SCHEMA,
@@ -2527,12 +3296,23 @@ def run_audit(
         "specification_path": spec_path.resolve().as_posix(),
         "specification_sha256": sha256(spec_path),
         "checkout": checkout.resolve().as_posix(),
+        "robustness_checkout_commit": checkout_commit,
         "canonical_freeze": canonical_freeze.resolve().as_posix(),
         "per_job_root": per_job_root.resolve().as_posix(),
         "canonical_provenance": freeze_provenance,
         "final_origin_closure_report": origin_closure_binding,
         "multiplicity_boundary_receipt": boundary_binding,
         "analysis_provenance": common_analysis,
+        "provenance_mode": lineage["provenance_mode"],
+        "accepted_historical_provenance_registry_sha256": lineage[
+            "accepted_historical_provenance_registry_sha256"
+        ],
+        "provenance_lineage": {
+            **lineage,
+            "origin_audit_commit": origin_closure_binding[
+                "audit_checkout_commit"
+            ],
+        },
         "method": spec["method"],
         "integration": integration,
         "partition_membership": {

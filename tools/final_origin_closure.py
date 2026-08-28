@@ -332,7 +332,13 @@ def aggregate_payloads(
     freeze_provenance: dict[str, Any],
     audit_macro_sha256: str,
     checkout_commit: str,
+    provenance_binding: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    if provenance_binding is None:
+        provenance_binding = {
+            "provenance_mode": robustness.CURRENT_GRAPH_ANCESTRY,
+            "accepted_historical_provenance_registry_sha256": None,
+        }
     ordered = sorted(
         payloads,
         key=lambda payload: (
@@ -534,6 +540,12 @@ def aggregate_payloads(
         "canonical_manifest_sha256":
             freeze_provenance["canonical_manifest_sha256"],
         "freeze_seal_sha256": freeze_provenance["freeze_seal_sha256"],
+        "raw_production_commit": freeze_provenance["repository_commit"],
+        "provenance_mode": provenance_binding["provenance_mode"],
+        "accepted_historical_provenance_registry_sha256":
+            provenance_binding[
+                "accepted_historical_provenance_registry_sha256"
+            ],
         "jobs_per_tune": jobs_per_tune,
         "audited_job_count": len(ordered),
         "audit_macro_sha256": audit_macro_sha256,
@@ -676,30 +688,11 @@ def run(
     ).strip()
     if tracked_status:
         raise ValueError("origin audit checkout has tracked modifications")
-    for production_commit in sorted(
-        {str(row["repository_commit"]) for row in rows}
-    ):
-        if (
-            subprocess.run(
-                [
-                    "git",
-                    "-C",
-                    str(checkout),
-                    "merge-base",
-                    "--is-ancestor",
-                    production_commit,
-                    checkout_commit,
-                ],
-                check=False,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            ).returncode
-            != 0
-        ):
-            raise ValueError(
-                f"production commit {production_commit} is not an ancestor "
-                "of the origin-audit checkout"
-            )
+    provenance_binding = robustness.validate_raw_checkout_lineage(
+        checkout, rows, freeze_provenance, "origin-audit"
+    )
+    if provenance_binding["checkout_commit"] != checkout_commit:
+        raise ValueError("origin-audit checkout changed during preflight")
 
     output_directory.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(
@@ -741,6 +734,7 @@ def run(
             freeze_provenance,
             robustness.sha256(macro),
             checkout_commit,
+            provenance_binding,
         )
         write_report_outputs(report, staging)
         os.replace(staging, output_directory)
