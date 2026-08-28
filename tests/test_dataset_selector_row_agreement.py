@@ -64,6 +64,49 @@ def test_active_dataset_of_each_file_is_one_it_defines() -> None:
             f"{path.name} points active_dataset at {active!r}, which it does not define"
 
 
+def rows_citing_an_authorization() -> dict[str, tuple[str, object, bool]]:
+    """Every row that names an authorization document, from both file layouts.
+
+    A row that names none is absent here. `publication_authorization` is null
+    for a dataset that answers to no document, and a null is not a claim. A
+    path IS a claim, whatever the eligibility beside it.
+    """
+    rows: dict[str, tuple[str, object, bool]] = {}
+    for path in [COMBINED, *per_campaign_selectors()]:
+        for name, row in json.loads(path.read_text())["datasets"].items():
+            cited = row.get("publication_authorization")
+            if not cited:
+                continue
+            rows[name] = (cited, row.get("publication_authorization_sha256"),
+                          bool(row.get("publication_eligible")))
+    return rows
+
+
+def verify_cited_authorizations() -> set[str]:
+    """Check every cited authorization and return the rows actually checked.
+
+    The returned set is the enforcement evidence:
+    `test_the_pin_is_checked_on_rows_that_cannot_be_published` compares it
+    against the rows that carry a citation, so a guard that quietly narrows
+    this loop fails that test instead of passing silently.
+    """
+    verified: set[str] = set()
+    for name, (cited, digest, _eligible) in sorted(
+            rows_citing_an_authorization().items()):
+        assert isinstance(digest, str) and len(digest) == 64, \
+            f"{name} cites {cited} with no sha256"
+        document = ROOT / cited
+        assert document.is_file(), \
+            f"{name} cites a missing authorization: {cited}"
+        actual = hashlib.sha256(document.read_bytes()).hexdigest()
+        assert actual == digest, (
+            f"{name} authorization {cited} has changed since it was cited "
+            f"(recorded {digest[:16]}..., actual {actual[:16]}...)"
+        )
+        verified.add(name)
+    return verified
+
+
 def test_publication_eligible_rows_carry_a_real_authorization() -> None:
     """Eligibility without a resolvable, hash-matching authorization is a claim.
 
@@ -72,29 +115,45 @@ def test_publication_eligible_rows_carry_a_real_authorization() -> None:
     that its recorded digest still describes it. An authorization that has been
     edited since it was cited is worse than none: it reads as reviewed.
     """
-    for path in [COMBINED, *per_campaign_selectors()]:
-        for name, row in json.loads(path.read_text())["datasets"].items():
-            if not row.get("publication_eligible"):
-                continue
-            cited = row.get("publication_authorization")
-            digest = row.get("publication_authorization_sha256")
-            assert cited, f"{name} is publication_eligible with no authorization"
-            assert isinstance(digest, str) and len(digest) == 64, \
-                f"{name} authorization sha256 is not a sha256"
-            document = ROOT / cited
-            assert document.is_file(), \
-                f"{name} cites a missing authorization: {cited}"
-            actual = hashlib.sha256(document.read_bytes()).hexdigest()
-            assert actual == digest, (
-                f"{name} authorization {cited} has changed since it was cited "
-                f"(recorded {digest[:16]}..., actual {actual[:16]}...)"
-            )
+    cited = rows_citing_an_authorization()
+    for name, row in json.loads(COMBINED.read_text())["datasets"].items():
+        if row.get("publication_eligible"):
+            assert name in cited, \
+                f"{name} is publication_eligible with no authorization"
+    assert verify_cited_authorizations(), "no row cites an authorization"
+
+
+def test_the_pin_is_checked_on_rows_that_cannot_be_published() -> None:
+    """A pin that cannot fail is fail-open, so eligibility must not gate it.
+
+    Seven systematic-variation rows cite the pre-registration that designed
+    them and carry `publication_eligible: false`. The check above once skipped
+    every ineligible row, so those seven digests could drift with nothing to
+    catch it. They did: `382b85d` of 2026-08-21 rewrote seven `STATE.md`
+    references in `docs/SYSTEMATICS_PREREGISTRATION.md` and left the pin on the
+    superseded bytes, where it stayed unenforced until brief Q re-pinned it.
+    This test fails if that eligibility skip returns.
+    """
+    citing = rows_citing_an_authorization()
+    ineligible = {name for name, (_c, _d, eligible) in citing.items()
+                  if not eligible}
+    assert ineligible, (
+        "expected the systematic-variation rows to cite the pre-registration; "
+        "if they no longer do, this contract needs re-stating, not deleting"
+    )
+    unchecked = ineligible - verify_cited_authorizations()
+    assert not unchecked, (
+        "these rows cite an authorization that nothing verifies: "
+        f"{sorted(unchecked)}. An eligibility guard has been restored, and "
+        "their pin can no longer fail."
+    )
 
 
 def main() -> int:
     test_every_per_campaign_row_matches_the_combined_one()
     test_active_dataset_of_each_file_is_one_it_defines()
     test_publication_eligible_rows_carry_a_real_authorization()
+    test_the_pin_is_checked_on_rows_that_cannot_be_published()
     print("dataset selector row-agreement tests passed")
     return 0
 
