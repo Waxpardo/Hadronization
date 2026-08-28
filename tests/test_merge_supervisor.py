@@ -203,13 +203,59 @@ def pid_exists(pid: int) -> bool:
         return False
 
 
-def wait_pid_gone(pid: int, timeout: float = 3.0) -> bool:
+LINUX_PROCFS = Path("/proc/self/stat").is_file()
+
+
+def linux_process_state(pid: int) -> str | None:
+    if not LINUX_PROCFS:
+        return None
+    try:
+        stat = Path(f"/proc/{pid}/stat").read_text()
+    except FileNotFoundError:
+        return None
+    closing_parenthesis = stat.rfind(")")
+    if closing_parenthesis < 0:
+        raise AssertionError(f"malformed /proc stat for PID {pid}")
+    fields = stat[closing_parenthesis + 2:].split()
+    if not fields:
+        raise AssertionError(f"missing process state for PID {pid}")
+    return fields[0]
+
+
+def pid_is_running(pid: int) -> bool:
+    if not pid_exists(pid):
+        return False
+    if not LINUX_PROCFS:
+        return True
+    state = linux_process_state(pid)
+    return state is not None and state not in {"X", "Z"}
+
+
+def wait_pid_not_running(pid: int, timeout: float = 3.0) -> bool:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
-        if not pid_exists(pid):
+        if not pid_is_running(pid):
             return True
         time.sleep(0.01)
-    return not pid_exists(pid)
+    return not pid_is_running(pid)
+
+
+def assert_linux_zombie_is_not_running() -> None:
+    if not LINUX_PROCFS:
+        return
+    child = subprocess.Popen([sys.executable, "-c", "pass"])
+    try:
+        deadline = time.monotonic() + 2
+        state = linux_process_state(child.pid)
+        while state != "Z" and time.monotonic() < deadline:
+            time.sleep(0.01)
+            state = linux_process_state(child.pid)
+        assert state == "Z", f"child {child.pid} did not enter zombie state"
+        assert pid_exists(child.pid), "kill(pid, 0) did not see the zombie"
+        assert not pid_is_running(child.pid), "zombie reported as running"
+        print("  Linux zombie: kill0-present state=Z not-running")
+    finally:
+        child.wait(timeout=2)
 
 
 def test_all_resolved_arguments_and_pair_schema_arrive_unchanged() -> None:
@@ -384,6 +430,7 @@ def test_exhausted_restart_budget_fails() -> None:
 
 
 def test_term_and_int_end_exact_merge_group_but_not_caller() -> None:
+    assert_linux_zombie_is_not_running()
     for sent_signal in (signal.SIGTERM, signal.SIGINT):
         supervisor = None
         shell_pid = None
@@ -418,14 +465,18 @@ def test_term_and_int_end_exact_merge_group_but_not_caller() -> None:
                 supervisor.send_signal(sent_signal)
                 output, _ = supervisor.communicate(timeout=5)
                 assert supervisor.returncode == 130, output
-                assert wait_pid_gone(shell_pid), f"shell {shell_pid} survived"
-                assert wait_pid_gone(
-                    grandchild_pid), f"grandchild {grandchild_pid} survived"
+                assert wait_pid_not_running(shell_pid), (
+                    f"shell {shell_pid} remained running "
+                    f"state={linux_process_state(shell_pid)}")
+                assert wait_pid_not_running(grandchild_pid), (
+                    f"grandchild {grandchild_pid} remained running "
+                    f"state={linux_process_state(grandchild_pid)}")
                 assert pid_exists(caller_pid), "test caller was signalled"
                 assert_watchers_reaped(output)
                 print(
                     f"  {signal.Signals(sent_signal).name}: supervisor=130 "
-                    "shell-gone grandchild-gone caller-alive watcher-reaped")
+                    "shell-not-running grandchild-not-running "
+                    "caller-alive watcher-reaped")
         finally:
             if supervisor is not None and supervisor.poll() is None:
                 supervisor.kill()
