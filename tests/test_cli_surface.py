@@ -8,12 +8,14 @@ a surface that guessed a path, took a silent default, or refused while naming
 the wrong thing. Each check below drives the real CLI in a sandbox checkout and
 requires the derivation, the refusal, or the name.
 
-THE SANDBOX. Every entry symlinks to this checkout except `setupEnv.sh`, which
-stands in for the site and dependency planes, and whatever one file the case is
-about. That keeps each case fast, identical on every host, and unable to write
-into this working tree. `tools/run_tests.sh` fails the whole suite if a test
-mutates the resolved `plotting/Plots`, which is the reason the plot cases below
-build their own `plotting/` rather than symlinking this one.
+THE SANDBOX. Every TRACKED entry symlinks to this checkout except
+`setupEnv.sh`, which stands in for the site and dependency planes, and whatever
+one file the case is about. The tracked set is the whole rule, and
+`tests/sandbox_tree.py` records why. That keeps each case fast, identical on
+every host, and unable to write into this working tree. `tools/run_tests.sh`
+fails the whole suite if a test mutates the resolved `plotting/Plots`, which is
+the reason the plot cases below build their own `plotting/` rather than
+symlinking this one.
 """
 
 from __future__ import annotations
@@ -25,6 +27,9 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+# Same directory as this driver, so no path setup is needed.
+from sandbox_tree import tracked_names
 
 ROOT = Path(__file__).resolve().parents[1]
 UNIFIED_CLI = ROOT / "hadronization"
@@ -59,16 +64,18 @@ def sandbox(tmp: str, cli_text: str | None = None,
     base.mkdir()
     replace = replace or {}
     tops = {rel.split("/")[0] for rel in replace}
-    for entry in sorted(ROOT.iterdir()):
-        if entry.name not in ({".git", "setupEnv.sh", "hadronization"} | tops):
-            (base / entry.name).symlink_to(entry)
+    # tracked_names, never iterdir: untracked checkout-local state belongs to
+    # the host, and a case that reads it measures the host.
+    for name in sorted(tracked_names(ROOT)):
+        if name not in ({"setupEnv.sh", "hadronization"} | tops):
+            (base / name).symlink_to(ROOT / name)
     for top in sorted(tops):
         (base / top).mkdir(exist_ok=True)
         dropped = {rel.split("/", 1)[1] for rel in replace
                    if rel.startswith(top + "/") and replace[rel] is None}
-        for entry in sorted((ROOT / top).iterdir()):
-            if entry.name not in dropped:
-                (base / top / entry.name).symlink_to(entry)
+        for name in sorted(tracked_names(ROOT, top)):
+            if name not in dropped:
+                (base / top / name).symlink_to(ROOT / top / name)
     for rel, text in replace.items():
         if text is None:
             continue
@@ -135,6 +142,53 @@ def run_cli(base: Path, data: Path, args: list[str],
     env.update(env_extra or {})
     return subprocess.run(["bash", str(base / "hadronization"), *args],
                           env=env, text=True, capture_output=True)
+
+
+# --- Phase 0: the sandbox itself -------------------------------------------
+#
+# THE DEFECT THIS CLOSES. The pinned check on the cluster failed three
+# assertions in this file, and every observed list named
+# `plotting/Plots.HF_RUN3_V1-4d309e9f99e4.superseded-20260827`. `sandbox()`
+# mirrored every entry of the real `plotting/` and dropped only `Plots`, so
+# the superseded pointers `plot-slot` moves aside rode into the sandbox. The
+# same run on a checkout without that pointer passed. The case below measures
+# the sandbox, not the CLI, because the harness is what differed.
+
+def test_the_sandbox_mirrors_only_what_the_tree_tracks() -> None:
+    """The isolation rule, then the rule as this sandbox applies it."""
+    # 1. THE RULE, against a repository this case owns. An untracked entry is
+    #    invisible whatever it is named, so the rule needs no name list.
+    with tempfile.TemporaryDirectory() as tmp:
+        repo = Path(tmp) / "repo"
+        (repo / "plotting").mkdir(parents=True)
+        (repo / "plotting/run_paper_plots.sh").write_text("#!/bin/bash\n")
+        for command in (["init", "-q"], ["add", "-A"],
+                        ["-c", "user.name=t", "-c", "user.email=t@t",
+                         "commit", "-q", "-m", "tracked"]):
+            subprocess.run(["git", "-C", str(repo), *command], check=True,
+                           capture_output=True)
+        (repo / "plotting/Plots.HF_RUN3_V1-4d309e9f99e4"
+                ".superseded-20260827").symlink_to(repo / "plotting")
+        (repo / "plotting/run_paper_plots_C.so").write_bytes(b"")
+        (repo / "plotting/.DS_Store").write_bytes(b"")
+        names = tracked_names(repo, "plotting")
+        check("the tracked set holds the tracked file and nothing else",
+              names == {"run_paper_plots.sh"}, str(sorted(names)))
+
+    # 2. THE RULE HERE. Both sides are derived from the tree, so this states a
+    #    property of the sandbox on any host: it holds the tracked set, plus
+    #    the repository `git=True` creates. It fails on any host that carries
+    #    untracked state, which is exactly when the inheritance can bite.
+    with tempfile.TemporaryDirectory() as tmp:
+        base = sandbox(tmp, replace={"plotting/Plots": None}, git=True)
+        top = {entry.name for entry in base.iterdir()}
+        check("the sandbox top level carries no untracked entry",
+              top == tracked_names(ROOT) | {".git"},
+              str(sorted(top ^ (tracked_names(ROOT) | {".git"}))))
+        mirrored = {entry.name for entry in (base / "plotting").iterdir()}
+        check("the mirrored plotting/ carries no untracked entry",
+              mirrored == tracked_names(ROOT, "plotting"),
+              str(sorted(mirrored ^ tracked_names(ROOT, "plotting"))))
 
 
 # --- Phase 1: the freeze root ---------------------------------------------
@@ -232,6 +286,12 @@ FULL_SELECTOR = ROOT / "config/dataset_selector.json"
 
 
 def plot_sandbox(tmp: str, cli_text: str | None = None) -> tuple[Path, Path]:
+    """A sandbox whose `plotting/` is a directory the CLI can write into.
+
+    The tracked-set rule already excludes `plotting/Plots`, which is untracked.
+    Naming it here is what makes `plotting/` a real directory rather than a
+    symlink to this checkout, so `plot-slot` creates its pointer in the sandbox.
+    """
     base = sandbox(tmp, cli_text, replace={"plotting/Plots": None}, git=True)
     return base, Path(tmp) / "data"
 
