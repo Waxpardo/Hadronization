@@ -44,7 +44,13 @@ def check(label, condition, detail=""):
 
 
 def load(name):
-    return parse_log((FIXTURES / f"integrated_rows_{name}.log").read_text())
+    # Explicit legacy-only parsing: these byte-preserved 2026-08-19 fixtures
+    # predate the block-vector schema and exercise integrated-yield integrity,
+    # never endpoint or covariance arithmetic. Current consumers use the
+    # strict default and refuse these logs.
+    return parse_log(
+        (FIXTURES / f"integrated_rows_{name}.log").read_text(),
+        validate_block_contract=False)
 
 
 nominal, control = load("nominal"), load("control")

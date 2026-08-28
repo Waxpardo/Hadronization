@@ -20,7 +20,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from combine_per_class import baryon_meson_ratio  # noqa: E402
 from harvest_class_axis import class_names, parse_log  # noqa: E402
-from ratio_trend import contrast, slope_difference, weighted_linear_fit  # noqa: E402
+from ratio_trend import (block_covariance, endpoint_contrast,  # noqa: E402
+                         independent_difference, slope_difference,
+                         weighted_linear_fit)
 
 # Ruling R10: the class set comes from
 # config/multiplicity_percentile_classes_v2.json and from nowhere else.
@@ -29,13 +31,14 @@ TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 RECONNECTION = ("JUNCTIONS", "CLOSEPACKING")
 
 
-def series(rows: dict, tune: str) -> tuple[list[float], list[float]]:
-    values, sems = [], []
+def series(rows: dict, tune: str) -> tuple[list[float], list[float], list[list[float]]]:
+    values, sems, blocks = [], [], []
     for cls in CLASSES:
         ratio = baryon_meson_ratio(rows[("BEAUTY", "B^{+}", tune, "Lambda_b", cls)])
         values.append(ratio["ratio"])
         sems.append(ratio["ratio_sem"])
-    return values, sems
+        blocks.append(ratio["block_ratios"])
+    return values, sems, blocks
 
 
 def render_tables(payload: dict) -> list[str]:
@@ -71,11 +74,17 @@ def render_tables(payload: dict) -> list[str]:
         add(f"| {t} | {e['difference']:+.5f} ± {e['sem']:.5f} "
             f"| {e['significance']:.1f} |")
 
-    add("\n### The weighted straight line in class index\n")
+    fit_key = ("legacy_weighted_linear_fit_vs_class_index"
+               if "legacy_weighted_linear_fit_vs_class_index" in payload
+               else "weighted_linear_fit_vs_class_index")
+    fit_heading = ("### Legacy summary: weighted straight line in class index"
+                   if fit_key.startswith("legacy_")
+                   else "### The weighted straight line in class index")
+    add("\n" + fit_heading + "\n")
     add("| tune | slope per class | intercept | χ²/ndf |")
     add("|---|---|---|---|")
     for t in TUNES:
-        f = payload["weighted_linear_fit_vs_class_index"][t]
+        f = payload[fit_key][t]
         add(f"| {t} | {f['slope']:+.6f} ± {f['slope_sem']:.6f} "
             f"| {f['intercept']:.5f} "
             f"| {f['chi_square']:.1f}/{f['ndf']} = {f['chi_square_per_ndf']:.2f} |")
@@ -103,13 +112,21 @@ def main() -> int:
     data = {t: series(rows, t) for t in TUNES}
     indices = list(range(1, len(CLASSES) + 1))
 
-    endpoints = {t: contrast(data[t][0][-1], data[t][1][-1],
-                             data[t][0][0], data[t][1][0]) for t in TUNES}
+    endpoints = {t: endpoint_contrast(data[t][0][-1], data[t][2][-1],
+                                      data[t][0][0], data[t][2][0])
+                 for t in TUNES}
+    covariance = {
+        t: block_covariance(
+            {cls: blocks for cls, blocks in zip(CLASSES, data[t][2])},
+            {cls: sem for cls, sem in zip(CLASSES, data[t][1])})
+        for t in TUNES
+    }
     fits = {t: weighted_linear_fit(indices, data[t][0], data[t][1])
             for t in TUNES}
     slope_gaps = {t: slope_difference(fits[t], fits["MONASH"])
                   for t in RECONNECTION}
-    endpoint_gaps = {t: contrast(endpoints[t]["difference"], endpoints[t]["sem"],
+    endpoint_gaps = {t: independent_difference(
+                                 endpoints[t]["difference"], endpoints[t]["sem"],
                                  endpoints["MONASH"]["difference"],
                                  endpoints["MONASH"]["sem"])
                      for t in RECONNECTION}
@@ -117,14 +134,17 @@ def main() -> int:
                    for t in RECONNECTION}
 
     payload = {
-        "schema": "hadronization_ratio_trend_v1",
+        "schema": "hadronization_ratio_trend_v2",
         "observable": "Lambda_b / B- balancing-yield ratio",
         "classes": CLASSES,
-        "per_class": {t: [{"class": c, "ratio": v, "ratio_sem": s}
-                          for c, v, s in zip(CLASSES, data[t][0], data[t][1])]
+        "per_class": {t: [{"class": c, "ratio": v, "ratio_sem": s,
+                            "block_ratios": blocks}
+                          for c, v, s, blocks in zip(
+                              CLASSES, data[t][0], data[t][1], data[t][2])]
                       for t in TUNES},
         "endpoint_contrast_c11_minus_c1": endpoints,
-        "weighted_linear_fit_vs_class_index": fits,
+        "block_covariance_of_class_means": covariance,
+        "legacy_weighted_linear_fit_vs_class_index": fits,
         "slope_difference_vs_MONASH": slope_gaps,
         "endpoint_contrast_difference_vs_MONASH": endpoint_gaps,
         "enhancement_over_MONASH": {

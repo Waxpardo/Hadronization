@@ -261,8 +261,25 @@ def baryon_meson_ratio(row: dict) -> dict:
     denominator = float(row["reference_yield"])
     if denominator == 0:
         raise ZeroDivisionError("reference yield is zero; the ratio is undefined")
+    block_ratios = row.get("block_ratios")
+    if not isinstance(block_ratios, list) or len(block_ratios) < 2:
+        raise ValueError(
+            "block_ratios is absent or malformed; old logs cannot supply "
+            "current ratio-trend arithmetic")
+    if any(not math.isfinite(value) for value in block_ratios):
+        raise ValueError("block_ratios contains a non-finite value")
+    block_mean = sum(block_ratios) / len(block_ratios)
+    block_sem = math.sqrt(
+        sum((value - block_mean) ** 2 for value in block_ratios)
+        / (len(block_ratios) * (len(block_ratios) - 1)))
+    ratio_sem = float(row["ratio_sem"])
+    if not math.isclose(block_sem, ratio_sem, rel_tol=5e-15, abs_tol=0.0):
+        raise ValueError(
+            f"ratio_sem {ratio_sem:.17g} disagrees with block_ratios SEM "
+            f"{block_sem:.17g}")
     return {"ratio": numerator / denominator,
-            "ratio_sem": float(row["ratio_sem"])}
+            "ratio_sem": ratio_sem,
+            "block_ratios": block_ratios}
 
 
 def headline_ratio(separation: float, combined_absolute: float) -> float:

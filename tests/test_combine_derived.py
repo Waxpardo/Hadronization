@@ -30,41 +30,62 @@ def check(label, condition, detail=""):
         failures.append(label)
 
 
-def row(yield_, sem, reference, ratio_sem):
+def block_sem(values):
+    mean = sum(values) / len(values)
+    return math.sqrt(sum((value - mean) ** 2 for value in values)
+                     / (len(values) * (len(values) - 1)))
+
+
+def row(yield_, sem, reference, blocks):
     return {"central_yield": str(yield_), "yield_sem": str(sem),
-            "reference_yield": str(reference), "ratio_sem": str(ratio_sem),
+            "reference_yield": str(reference),
+            "ratio_sem": str(block_sem(blocks)),
+            "block_ratios": blocks,
             "ratio_status": "PASS"}
 
 
 # --- the ratio comes from the plotter, not from propagation ---------------
 # 0.05 / 0.25 = 0.2 exactly, and the SEM is the plotter's, NOT sqrt-combined
 # from the two yield SEMs -- numerator and denominator share their triggers.
-ROWS = {("BEAUTY", "B^{+}", "MONASH", "Lambda_b", "c1"): row(0.05, 9.9, 0.25, 0.004),
-        ("BEAUTY", "B^{+}", "MONASH", "Lambda_b", "c11"): row(0.09, 9.9, 0.30, 0.003),
-        ("BEAUTY", "B^{+}", "JUNCTIONS", "Lambda_b", "c1"): row(0.10, 9.9, 0.25, 0.006),
-        ("BEAUTY", "B^{+}", "JUNCTIONS", "Lambda_b", "c11"): row(0.24, 9.9, 0.30, 0.008)}
+MONASH_LOW = [1.0, 2.0, 3.0, 4.0]
+MONASH_HIGH = [3.0, 4.0, 5.0, 6.0]
+JUNCTIONS_LOW = [1.0, 2.0, 3.0, 4.0]
+JUNCTIONS_HIGH = [4.0, 4.0, 8.0, 8.0]
+ROWS = {("BEAUTY", "B^{+}", "MONASH", "Lambda_b", "c1"):
+            row(0.05, 9.9, 0.25, MONASH_LOW),
+        ("BEAUTY", "B^{+}", "MONASH", "Lambda_b", "c11"):
+            row(0.09, 9.9, 0.30, MONASH_HIGH),
+        ("BEAUTY", "B^{+}", "JUNCTIONS", "Lambda_b", "c1"):
+            row(0.10, 9.9, 0.25, JUNCTIONS_LOW),
+        ("BEAUTY", "B^{+}", "JUNCTIONS", "Lambda_b", "c11"):
+            row(0.24, 9.9, 0.30, JUNCTIONS_HIGH)}
 
 value, sem = ratio_at(ROWS, "MONASH", "c1")
 check("the ratio divides yield by reference yield", value == 0.2, str(value))
-check("its SEM is the plotter's ratio_sem, not the yield SEMs",
-      sem == 0.004, str(sem))
+check("its SEM is the plotter's block-ratio SEM, not the yield SEMs",
+      sem == block_sem(MONASH_LOW), str(sem))
 
 # c11 0.09/0.30 = 0.3;  c1 = 0.2;  contrast = 0.1
-# sqrt(0.003^2 + 0.004^2) = 0.005 exactly.
+# The aligned block differences are [2,2,2,2], so their sample SEM is zero.
+# The old independent-endpoint quadrature is positive and therefore decisive.
 contrast, contrast_sem = endpoint_contrast(ROWS, "MONASH")
 check("the endpoint contrast is R(c11) - R(c1)",
       abs(contrast - 0.1) < 1e-15, "%.17g" % contrast)
-check("its SEM adds the two class SEMs in quadrature",
-      contrast_sem == 0.005, "%.17g" % contrast_sem)
+check("its SEM is formed from aligned block endpoint differences",
+      contrast_sem == 0.0, "%.17g" % contrast_sem)
+old_quadrature = math.hypot(block_sem(MONASH_HIGH), block_sem(MONASH_LOW))
+check("seen to fail: replacing the aligned calculation with old quadrature",
+      old_quadrature != contrast_sem,
+      f"old={old_quadrature:.17g} aligned={contrast_sem:.17g}")
 
 # JUNCTIONS: 0.24/0.30 = 0.8, 0.10/0.25 = 0.4, contrast 0.4.
-# trend = 0.4 - 0.1 = 0.3.  SEM = sqrt(0.005^2 + sqrt(0.008^2+0.006^2)^2)
-#       = sqrt(0.005^2 + 0.01^2)
+# trend = 0.4 - 0.1 = 0.3. MONASH's aligned endpoint SEM is zero;
+# JUNCTIONS uses the SEM of [3,2,5,4]. Separate tune campaigns then combine.
 trend, trend_sem = trend_difference(ROWS, "JUNCTIONS")
 check("the trend difference subtracts the two contrasts",
       abs(trend - 0.3) < 1e-15, "%.17g" % trend)
-check("and its SEM combines them in quadrature",
-      abs(trend_sem - math.sqrt(0.005 ** 2 + 0.01 ** 2)) < 1e-18,
+check("and its SEM combines independent tune-level endpoint SEMs",
+      abs(trend_sem - block_sem([3.0, 2.0, 5.0, 4.0])) < 1e-18,
       "%.17g" % trend_sem)
 
 for bad, why in (
@@ -72,12 +93,23 @@ for bad, why in (
           {**ROWS[("BEAUTY", "B^{+}", "MONASH", "Lambda_b", "c1")],
            "ratio_status": "FAIL"}}, "a non-PASS ratio_status is refused"),
         ({**ROWS, ("BEAUTY", "B^{+}", "MONASH", "Lambda_b", "c1"):
-          row(0.05, 1, 0.0, 0.004)}, "a zero reference yield is refused")):
+          row(0.05, 1, 0.0, MONASH_LOW)}, "a zero reference yield is refused")):
     try:
         ratio_at(bad, "MONASH", "c1")
         check(why, False, "no exception")
     except (ValueError, ZeroDivisionError):
         check(why, True)
+
+missing_block = copy.deepcopy(ROWS)
+missing_block[("BEAUTY", "B^{+}", "MONASH", "Lambda_b", "c1")][
+    "block_ratios"].pop()
+try:
+    ratio_at(missing_block, "MONASH", "c1")
+    check("a perturbed MONASH/c1 block_ratios vector is refused", False,
+          "no exception")
+except ValueError as error:
+    check("a perturbed MONASH/c1 block_ratios vector is refused",
+          "MONASH c1" in str(error) and "ratio_sem" in str(error), str(error))
 
 # --- the combination over the included arms -------------------------------
 # nominal 100, so per cent equals absolute.

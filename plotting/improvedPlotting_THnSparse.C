@@ -55,6 +55,9 @@
 
 using json = nlohmann::json;
 
+constexpr const char* UNCERTAINTY_MATRIX_SCHEMA =
+    "hadronization_uncertainty_matrix_v2";
+
 // TODO: put structs in a header file (only after plotting is done in configuration.json)
 
 // TODO: add verbose/debug flags to configuration.json
@@ -2895,6 +2898,17 @@ Double_t safeRatio(Double_t numerator, Double_t denominator) {
 }
 
 
+std::string FormatBlockVector17(const std::vector<Double_t>& values) {
+    std::ostringstream output;
+    output << std::setprecision(17);
+    for (std::size_t index = 0; index < values.size(); ++index) {
+        if (index != 0) output << ",";
+        output << values[index];
+    }
+    return output.str();
+}
+
+
 void SetPlotPointOrThrow(
     TH1D* histogram,
     Int_t bin,
@@ -3944,6 +3958,8 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                         }
                         std::cout
                             << "UNCERTAINTY_MATRIX"
+                            << " schema=" << UNCERTAINTY_MATRIX_SCHEMA
+                            << " block_count=" << nSubSamples
                             << " flavour=" << FLAVOUR
                             << " trigger=" << trigger
                             << " tune=" << TUNE
@@ -3962,6 +3978,12 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                             << " bin=" << binFromTHnSparse.hDPhi
                             << " central_triggers=" << centralTriggerCount
                             << " block_triggers=" << blockTriggerCounts.str()
+                            << " block_yields="
+                            << FormatBlockVector17(subYieldValues)
+                            << " block_ratios="
+                            << (isReference
+                                    ? "NA"
+                                    : FormatBlockVector17(subRatioValues))
                             << " finite_yields=" << yieldStats.nValues
                             << " finite_ratios="
                             << (isReference

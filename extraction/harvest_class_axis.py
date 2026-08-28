@@ -29,6 +29,7 @@ Those labels carry the percentile edges of one retired axis.
 from __future__ import annotations
 
 import json
+import math
 import re
 from pathlib import Path
 
@@ -40,6 +41,7 @@ LEGACY_CLASS_BIN = re.compile(
     r"^hDPhi(?P<cls>c\d+)_MB(?P<lo>[0-9p]+)_(?P<hi>[0-9p]+)$")
 INTEGRATED = "MB"
 INTEGRATED_BIN = "hDPhiM00_100"
+UNCERTAINTY_MATRIX_SCHEMA = "hadronization_uncertainty_matrix_v2"
 
 
 def contract_classes() -> list[dict]:
@@ -109,9 +111,137 @@ def class_order(cls: str) -> int:
     return 999 if cls == INTEGRATED else int(cls[1:])
 
 
-def parse_log(text: str) -> dict[tuple[str, str, str, str, str], dict[str, str]]:
-    """Every UNCERTAINTY_MATRIX row, keyed on the five-field identity."""
-    rows: dict[tuple[str, str, str, str, str], dict[str, str]] = {}
+def sample_sem(values: list[float]) -> float:
+    """Sample SEM over aligned blocks: sqrt(sum((x-mean)^2) / n(n-1))."""
+    if len(values) < 2:
+        raise ValueError(f"need at least two blocks for a sample SEM, got {len(values)}")
+    mean = sum(values) / len(values)
+    return math.sqrt(
+        sum((value - mean) ** 2 for value in values)
+        / (len(values) * (len(values) - 1)))
+
+
+def _context(fields: dict[str, str], cls: str) -> str:
+    return f"{fields.get('tune', '<missing tune>')}/{cls}"
+
+
+def _block_vector(fields: dict[str, str], cls: str, field: str,
+                  block_count: int, *, allow_na: bool = False
+                  ) -> list[float] | None:
+    context = _context(fields, cls)
+    if field not in fields:
+        raise ValueError(f"{context} {field}: field is absent")
+    raw = fields[field]
+    if raw == "NA":
+        if allow_na:
+            return None
+        raise ValueError(f"{context} {field}: NA is forbidden")
+    tokens = raw.split(",")
+    if len(tokens) != block_count:
+        raise ValueError(
+            f"{context} {field}: expected {block_count} elements, got {len(tokens)}")
+    try:
+        values = [float(token) for token in tokens]
+    except ValueError as error:
+        raise ValueError(f"{context} {field}: malformed numeric vector {raw!r}") from error
+    if any(not math.isfinite(value) for value in values):
+        raise ValueError(f"{context} {field}: vector contains a non-finite value")
+    return values
+
+
+def _summary_sem(fields: dict[str, str], cls: str, field: str,
+                 values: list[float]) -> None:
+    context = _context(fields, cls)
+    try:
+        observed = float(fields[field])
+    except (KeyError, ValueError) as error:
+        raise ValueError(f"{context} {field}: absent or malformed summary SEM") from error
+    if not math.isfinite(observed) or observed < 0.0:
+        raise ValueError(f"{context} {field}: summary SEM is non-finite or negative")
+    expected = sample_sem(values)
+    if not math.isclose(observed, expected, rel_tol=5e-15, abs_tol=0.0):
+        raise ValueError(
+            f"{context} {field}: {observed:.17g} disagrees with block-vector "
+            f"SEM {expected:.17g}")
+
+
+def _validate_block_contract(fields: dict[str, str], cls: str) -> None:
+    context = _context(fields, cls)
+    if fields.get("schema") != UNCERTAINTY_MATRIX_SCHEMA:
+        raise ValueError(
+            f"{context} schema: expected {UNCERTAINTY_MATRIX_SCHEMA!r}, "
+            f"got {fields.get('schema')!r}")
+    try:
+        block_count = int(fields["block_count"])
+    except (KeyError, ValueError) as error:
+        raise ValueError(f"{context} block_count: absent or malformed") from error
+    if block_count < 2:
+        raise ValueError(f"{context} block_count: expected at least 2, got {block_count}")
+    if fields.get("is_reference") not in {"true", "false"}:
+        raise ValueError(f"{context} is_reference: expected true or false")
+
+    yields = _block_vector(fields, cls, "block_yields", block_count)
+    assert yields is not None
+    _summary_sem(fields, cls, "yield_sem", yields)
+    is_reference = fields["is_reference"] == "true"
+    ratios = _block_vector(
+        fields, cls, "block_ratios", block_count, allow_na=is_reference)
+    if is_reference:
+        if ratios is not None:
+            raise ValueError(f"{context} block_ratios: reference row must be NA")
+        if fields.get("ratio_sem") != "NA":
+            raise ValueError(f"{context} ratio_sem: reference row must be NA")
+    else:
+        assert ratios is not None
+        _summary_sem(fields, cls, "ratio_sem", ratios)
+
+    fields["block_count"] = block_count
+    fields["block_yields"] = yields
+    fields["block_ratios"] = ratios
+
+
+def _validate_ratios_against_reference(
+    rows: dict[tuple[str, str, str, str, str], dict]
+) -> None:
+    grouped: dict[tuple[str, str, str, str], list[tuple[tuple, dict]]] = {}
+    for key, row in rows.items():
+        group = (key[0], key[1], key[2], key[4])
+        grouped.setdefault(group, []).append((key, row))
+    for group, members in grouped.items():
+        references = [(key, row) for key, row in members
+                      if row["is_reference"] == "true"]
+        if len(references) != 1:
+            tune, cls = group[2], group[3]
+            raise ValueError(
+                f"{tune}/{cls} block_yields: expected exactly one reference row, "
+                f"got {len(references)}")
+        _, reference = references[0]
+        for key, row in members:
+            if row["is_reference"] == "true":
+                continue
+            for block, (numerator, denominator, ratio) in enumerate(zip(
+                    row["block_yields"], reference["block_yields"],
+                    row["block_ratios"]), start=1):
+                if denominator == 0.0:
+                    raise ValueError(
+                        f"{key[2]}/{key[4]} block_ratios: reference yield is zero "
+                        f"in block {block}")
+                expected = numerator / denominator
+                if ratio != expected:
+                    raise ValueError(
+                        f"{key[2]}/{key[4]} block_ratios: block {block} is "
+                        f"{ratio:.17g}, expected same-block ratio {expected:.17g}")
+
+
+def parse_log(text: str, *, validate_block_contract: bool = True
+              ) -> dict[tuple[str, str, str, str, str], dict]:
+    """Every UNCERTAINTY_MATRIX row, keyed on the five-field identity.
+
+    Current consumers validate the v2 block-vector contract by default. The
+    opt-out exists only for explicit integrity checks over archived logs; it
+    must never feed endpoint or covariance arithmetic.
+    """
+    rows: dict[tuple[str, str, str, str, str], dict] = {}
     for line in text.splitlines():
         if not line.startswith("UNCERTAINTY_MATRIX"):
             continue
@@ -121,11 +251,15 @@ def parse_log(text: str) -> dict[tuple[str, str, str, str, str], dict[str, str]]
         fields["percentile_low"], fields["percentile_high"] = low, high
         # Compatibility aliases for archived extraction tables.
         fields["mb_low"], fields["mb_high"] = low, high
+        if validate_block_contract:
+            _validate_block_contract(fields, cls)
         key = (fields["flavour"], fields["trigger"], fields["tune"],
                fields["associate"], cls)
         if key in rows:
             raise ValueError(f"duplicate identity in one log: {key}")
         rows[key] = fields
+    if validate_block_contract:
+        _validate_ratios_against_reference(rows)
     return rows
 
 

@@ -45,8 +45,12 @@ from combine_per_class import (SOURCES, included_campaignless_sources,  # noqa: 
 from systematics_delta import (UNRESOLVED_MAX_ABS_OR_SEM, Delta,  # noqa: E402
                                combine_quadrature, correlated_pair_choice,
                                larger_arm)
+from harvest_class_axis import class_names  # noqa: E402
+from ratio_trend import (endpoint_contrast as aligned_endpoint_contrast,  # noqa: E402
+                         independent_difference, sample_sem)
 
-LOW, HIGH = "c1", "c11"
+_CLASSES = class_names()
+LOW, HIGH = _CLASSES[0], _CLASSES[-1]
 
 
 def ratio_at(rows: dict, tune: str, cls: str) -> tuple[float, float]:
@@ -57,19 +61,37 @@ def ratio_at(rows: dict, tune: str, cls: str) -> tuple[float, float]:
     denominator = float(row["reference_yield"])
     if denominator == 0:
         raise ZeroDivisionError(f"reference yield is zero for {tune} {cls}")
-    return float(row["central_yield"]) / denominator, float(row["ratio_sem"])
+    blocks = row.get("block_ratios")
+    if not isinstance(blocks, list) or len(blocks) < 2:
+        raise ValueError(
+            f"block_ratios is absent or malformed for {tune} {cls}; "
+            "summary-SEM fallback is forbidden")
+    if any(not math.isfinite(value) for value in blocks):
+        raise ValueError(f"block_ratios contains a non-finite value for {tune} {cls}")
+    ratio_sem = float(row["ratio_sem"])
+    block_sem = sample_sem(blocks)
+    if not math.isclose(ratio_sem, block_sem, rel_tol=5e-15, abs_tol=0.0):
+        raise ValueError(
+            f"ratio_sem disagrees with block_ratios for {tune} {cls}: "
+            f"{ratio_sem:.17g} != {block_sem:.17g}")
+    return float(row["central_yield"]) / denominator, ratio_sem
+
+
+def ratio_blocks_at(rows: dict, tune: str, cls: str) -> list[float]:
+    """The canonical-index block ratio vector for one tune and class."""
+    row = rows[("BEAUTY", "B^{+}", tune, "Lambda_b", cls)]
+    ratio_at(rows, tune, cls)
+    return list(row["block_ratios"])
 
 
 def endpoint_contrast(rows: dict, tune: str) -> tuple[float, float]:
-    """R(c11) - R(c1) for one tune, SEMs in quadrature.
-
-    The two classes are disjoint sets of events, so treating them as independent
-    is right to the extent the block resampling does not correlate them. A
-    positive correlation would make this SEM conservative.
-    """
-    high, high_sem = ratio_at(rows, tune, HIGH)
-    low, low_sem = ratio_at(rows, tune, LOW)
-    return high - low, math.sqrt(high_sem ** 2 + low_sem ** 2)
+    """R(highest) - R(lowest), formed inside canonically aligned blocks."""
+    high, _ = ratio_at(rows, tune, HIGH)
+    low, _ = ratio_at(rows, tune, LOW)
+    result = aligned_endpoint_contrast(
+        high, ratio_blocks_at(rows, tune, HIGH),
+        low, ratio_blocks_at(rows, tune, LOW))
+    return result["difference"], result["sem"]
 
 
 def trend_difference(rows: dict, tune: str, reference: str = "MONASH"
@@ -77,7 +99,8 @@ def trend_difference(rows: dict, tune: str, reference: str = "MONASH"
     """contrast(tune) - contrast(reference). The paper's central quantity."""
     a, a_sem = endpoint_contrast(rows, tune)
     b, b_sem = endpoint_contrast(rows, reference)
-    return a - b, math.sqrt(a_sem ** 2 + b_sem ** 2)
+    result = independent_difference(a, a_sem, b, b_sem)
+    return result["difference"], result["sem"]
 
 
 def combined_systematic(nominal_value: float, nominal_sem: float,

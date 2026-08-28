@@ -10,9 +10,9 @@ TWO ESTIMATORS, AND THE MODEL-FREE ONE LEADS.
 
   the endpoint contrast   R(c11) - R(c1), per tune. No model, no fit, no choice
                           of x-axis. A referee recomputes it from two rows.
-  the weighted slope      a straight line in the class INDEX, weighted by the
-                          per-class SEM, with chi-square per degree of freedom
-                          so the line can be seen to fail.
+  legacy weighted slope  a straight line in the class INDEX, weighted by the
+                         per-class SEM, with chi-square per degree of freedom
+                         so the line can be seen to fail.
 
 THE X-AXIS IS THE CLASS INDEX, AND THAT IS A CONVENTION, NOT A MEASUREMENT. The
 classes are not equally spaced in N_ch, and every tune resolves its own N_ch
@@ -22,27 +22,116 @@ physical d(ratio)/dN_ch. The endpoint contrast is the number that carries no
 such convention, which is why it is quoted first.
 
 CORRELATION, STATED RATHER THAN ASSUMED. Within one tune the classes are
-disjoint sets of events, so treating them as independent is right to the extent
-that the ten-block resampling does not correlate them. If it does correlate
-them positively, then Var(A - B) = Var(A) + Var(B) - 2Cov is SMALLER than the
-quadrature sum, so every uncertainty quoted here is conservative in that
-direction.
+aligned by canonical file-block index. Endpoint differences are formed inside
+those blocks, so their SEM retains the measured covariance between classes.
+The class-index fit below remains a legacy summary until the physical-coordinate,
+covariance-aware successor is implemented.
 """
 
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping, Sequence
 
 
-def contrast(value_a: float, sem_a: float,
-             value_b: float, sem_b: float) -> dict:
-    """value_a - value_b with SEMs in quadrature. The model-free trend number."""
+def sample_sem(values: Sequence[float]) -> float:
+    """Sample SEM over aligned blocks, with n - 1 sample-variance divisor."""
+    if len(values) < 2:
+        raise ValueError(f"need at least two aligned blocks, got {len(values)}")
+    if any(not math.isfinite(value) for value in values):
+        raise ValueError("block vector contains a non-finite value")
+    mean = sum(values) / len(values)
+    return math.sqrt(sum((value - mean) ** 2 for value in values)
+                     / (len(values) * (len(values) - 1)))
+
+
+def independent_difference(value_a: float, sem_a: float,
+                           value_b: float, sem_b: float) -> dict:
+    """Difference between statistically independent generation campaigns."""
     difference = value_a - value_b
     sem = math.sqrt(sem_a ** 2 + sem_b ** 2)
     return {
         "difference": difference,
         "sem": sem,
         "significance": abs(difference) / sem if sem else math.inf,
+        "statistical_method": "independent_campaign_sem_quadrature",
+    }
+
+
+def endpoint_contrast(value_high: float, blocks_high: Sequence[float],
+                      value_low: float, blocks_low: Sequence[float]) -> dict:
+    """Full-sample endpoint difference with its aligned-block sample SEM."""
+    if len(blocks_high) != len(blocks_low):
+        raise ValueError(
+            "endpoint block vectors must have the same length: "
+            f"{len(blocks_high)} != {len(blocks_low)}")
+    contrasts = [high - low for high, low in zip(blocks_high, blocks_low)]
+    difference = value_high - value_low
+    sem = sample_sem(contrasts)
+    return {
+        "difference": difference,
+        "sem": sem,
+        "significance": abs(difference) / sem if sem else math.inf,
+        "block_contrasts": contrasts,
+        "block_count": len(contrasts),
+        "statistical_method": "aligned_block_endpoint_sample_sem_v1",
+    }
+
+
+def block_covariance(
+    blocks_by_class: Mapping[str, Sequence[float]],
+    expected_sems: Mapping[str, float] | None = None,
+) -> dict:
+    """Covariance of class means from canonically aligned block vectors.
+
+    Cov_mean(i,j) = sum_k[(R_ik-mean_i)(R_jk-mean_j)] / [n(n-1)].
+    """
+    classes = list(blocks_by_class)
+    if not classes:
+        raise ValueError("the class-vector covariance needs at least one class")
+    lengths = {len(blocks_by_class[cls]) for cls in classes}
+    if len(lengths) != 1:
+        detail = ", ".join(f"{cls}={len(blocks_by_class[cls])}" for cls in classes)
+        raise ValueError(f"class block vectors are mis-sized: {detail}")
+    block_count = lengths.pop()
+    if block_count < 2:
+        raise ValueError(f"need at least two aligned blocks, got {block_count}")
+    vectors = {cls: [float(value) for value in blocks_by_class[cls]]
+               for cls in classes}
+    for cls, values in vectors.items():
+        if any(not math.isfinite(value) for value in values):
+            raise ValueError(f"{cls} block vector contains a non-finite value")
+    means = {cls: sum(vectors[cls]) / block_count for cls in classes}
+    covariance = []
+    for class_i in classes:
+        row = []
+        for class_j in classes:
+            row.append(sum(
+                (value_i - means[class_i]) * (value_j - means[class_j])
+                for value_i, value_j in zip(vectors[class_i], vectors[class_j])
+            ) / (block_count * (block_count - 1)))
+        covariance.append(row)
+    block_sems = {cls: sample_sem(vectors[cls]) for cls in classes}
+    for index, cls in enumerate(classes):
+        if not math.isclose(covariance[index][index], block_sems[cls] ** 2,
+                            rel_tol=5e-15, abs_tol=1e-30):
+            raise ArithmeticError(
+                f"{cls} covariance diagonal disagrees with squared block SEM")
+        if expected_sems is not None:
+            if cls not in expected_sems:
+                raise ValueError(f"{cls} has no declared ratio SEM")
+            if not math.isclose(block_sems[cls], expected_sems[cls],
+                                rel_tol=5e-15, abs_tol=0.0):
+                raise ValueError(
+                    f"{cls} block SEM {block_sems[cls]:.17g} disagrees with "
+                    f"declared ratio SEM {expected_sems[cls]:.17g}")
+    return {
+        "classes": classes,
+        "block_count": block_count,
+        "block_means": means,
+        "block_sems": block_sems,
+        "covariance_of_means": covariance,
+        "formula": "sum((R_ik-mean_i)*(R_jk-mean_j))/(n*(n-1))",
     }
 
 
@@ -95,5 +184,5 @@ def slope_difference(fit_a: dict, fit_b: dict) -> dict:
     The two tunes are separate generation campaigns with their own raw files and
     their own seeds, so the two slopes are independent.
     """
-    return contrast(fit_a["slope"], fit_a["slope_sem"],
-                    fit_b["slope"], fit_b["slope_sem"])
+    return independent_difference(fit_a["slope"], fit_a["slope_sem"],
+                                  fit_b["slope"], fit_b["slope_sem"])

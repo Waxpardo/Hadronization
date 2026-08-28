@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import re
 import shutil
 import subprocess
@@ -47,15 +48,47 @@ COMMIT = "1234567890abcdef1234567890abcdef12345678"
 
 def nominal_log(path: Path) -> None:
     lines = []
+    shifts = [0.001 * (index - 4.5) for index in range(10)]
+
+    def encoded(values: list[float]) -> str:
+        return ",".join(format(value, ".17g") for value in values)
+
+    def sem(values: list[float]) -> float:
+        mean = sum(values) / len(values)
+        return math.sqrt(sum((value - mean) ** 2 for value in values)
+                         / (len(values) * (len(values) - 1)))
+
     for tune_index, tune in enumerate(TUNES):
         for index, cls in enumerate(CLASSES):
             value = 1.0 + 0.05 * index + 0.1 * tune_index
+            reference_blocks = [1.0 + shift for shift in shifts]
+            desired_ratios = [value + shift for shift in shifts]
+            numerator_blocks = [ratio * reference for ratio, reference in zip(
+                desired_ratios, reference_blocks)]
+            # Match the producer: the emitted ratio is the division of the
+            # two stored double-precision block yields, not a separately
+            # rounded desired value.
+            ratio_blocks = [numerator / reference for numerator, reference in zip(
+                numerator_blocks, reference_blocks)]
+            common = (
+                "UNCERTAINTY_MATRIX "
+                "schema=hadronization_uncertainty_matrix_v2 block_count=10 "
+                f"flavour=BEAUTY trigger=B^{{+}} tune={tune} bin={BINS[cls]} ")
             lines.append(
-                f"UNCERTAINTY_MATRIX flavour=BEAUTY trigger=B^{{+}} "
-                f"tune={tune} associate=Lambda_b bin={BINS[cls]} "
-                f"central_yield={value} yield_sem=0.02 central_triggers=1000 "
+                common + "associate=B- is_reference=true "
+                f"central_yield=1 reference_yield=1 "
+                f"block_yields={encoded(reference_blocks)} block_ratios=NA "
+                f"yield_sem={sem(reference_blocks):.17g} ratio_sem=NA "
+                "status=NOT_APPLICABLE ratio_status=NOT_APPLICABLE")
+            lines.append(
+                common + f"associate=Lambda_b is_reference=false "
+                f"central_yield={value} reference_yield=1 "
+                f"block_yields={encoded(numerator_blocks)} "
+                f"block_ratios={encoded(ratio_blocks)} "
+                f"yield_sem={sem(numerator_blocks):.17g} "
+                f"ratio_sem={sem(ratio_blocks):.17g} central_triggers=1000 "
                 f"block_triggers=100,100,100,100,100,100,100,100,100,100 "
-                f"status=PASS is_reference=false")
+                f"status=PASS ratio_status=PASS")
     path.write_text("\n".join(lines) + "\n")
 
 

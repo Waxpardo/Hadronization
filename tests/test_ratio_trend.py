@@ -21,8 +21,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "extraction"))
 
-from ratio_trend import (contrast, slope_difference,  # noqa: E402
-                         weighted_linear_fit)
+from ratio_trend import (block_covariance, endpoint_contrast,  # noqa: E402
+                         independent_difference, sample_sem,
+                         slope_difference, weighted_linear_fit)
 
 failures = []
 
@@ -89,23 +90,57 @@ for bad, why in (
     except ValueError:
         check(f"refused: {why}", True)
 
-# --- the model-free contrast ---------------------------------------------
-# 0.54317 - 0.21408 = 0.32909;  sqrt(0.0059^2 + 0.00873^2) = 0.010535...
-c = contrast(0.54317, 0.0059, 0.21408, 0.00873)
+# --- the model-free aligned-block contrast -------------------------------
+# The pooled central values remain the endpoint difference. Their block
+# vectors share a shift, so the aligned differences are constant and have
+# zero SEM. Independent endpoint quadrature would be nonzero.
+low_blocks = [1.0, 2.0, 3.0, 4.0]
+high_blocks = [3.0, 4.0, 5.0, 6.0]
+c = endpoint_contrast(0.54317, high_blocks, 0.21408, low_blocks)
 check("the endpoint contrast subtracts",
       "%.6g" % c["difference"] == "0.32909", "%.17g" % c["difference"])
-check("its SEM is the two SEMs in quadrature",
-      abs(c["sem"] - math.sqrt(0.0059 ** 2 + 0.00873 ** 2)) < 1e-18,
-      "%.17g" % c["sem"])
-check("and the significance divides",
-      abs(c["significance"] - c["difference"] / c["sem"]) < 1e-12)
-
-# 3-4-5, so this one is exact.
-clean = contrast(5.0, 3.0, 2.0, 4.0)
-check("a 3-4-5 contrast gives 3 +/- 5",
-      clean["difference"] == 3.0 and clean["sem"] == 5.0, str(clean))
+check("its SEM is the sample SEM of the aligned block contrasts",
+      c["sem"] == 0.0, "%.17g" % c["sem"])
+old_quadrature = math.hypot(sample_sem(high_blocks), sample_sem(low_blocks))
+check("seen to fail: the old endpoint-SEM quadrature is decisively different",
+      old_quadrature > 0.0 and c["sem"] == 0.0,
+      f"old={old_quadrature:.17g} aligned={c['sem']:.17g}")
 check("a zero SEM with a real difference is infinitely significant",
-      contrast(1.0, 0.0, 0.0, 0.0)["significance"] == math.inf)
+      c["significance"] == math.inf)
+
+varying = endpoint_contrast(
+    5.0, [4.0, 4.0, 8.0, 8.0],
+    2.0, [1.0, 2.0, 3.0, 4.0])
+check("a varying aligned contrast uses [3,2,5,4]",
+      varying["block_contrasts"] == [3.0, 2.0, 5.0, 4.0], str(varying))
+check("and its SEM is hand-computable",
+      varying["sem"] == math.sqrt(5.0 / 12.0), str(varying["sem"]))
+
+# The covariance helper uses the required n(n-1) denominator. The two class
+# vectors differ by a constant, so every matrix element is 5/12.
+covariance = block_covariance(
+    {"c1": low_blocks, "c2": high_blocks},
+    {"c1": sample_sem(low_blocks), "c2": sample_sem(high_blocks)})
+check("the block covariance uses the hand-computed 5/12 entries",
+      all(value == 5.0 / 12.0
+          for row in covariance["covariance_of_means"] for value in row),
+      str(covariance["covariance_of_means"]))
+check("its diagonal equals the squared per-class block SEM",
+      all(math.isclose(covariance["covariance_of_means"][i][i],
+                       covariance["block_sems"][cls] ** 2,
+                       rel_tol=5e-15, abs_tol=1e-30)
+          for i, cls in enumerate(covariance["classes"])), str(covariance))
+
+try:
+    endpoint_contrast(2.0, [1.0, 2.0, 3.0], 1.0, [1.0, 2.0])
+    check("mis-sized endpoint vectors are refused", False, "no exception")
+except ValueError:
+    check("mis-sized endpoint vectors are refused", True)
+
+# 3-4-5 is retained only for genuinely independent campaign differences.
+clean = independent_difference(5.0, 3.0, 2.0, 4.0)
+check("an independent 3-4-5 difference gives 3 +/- 5",
+      clean["difference"] == 3.0 and clean["sem"] == 5.0, str(clean))
 
 # --- the slope difference -------------------------------------------------
 diff = slope_difference({"slope": 5.0, "slope_sem": 3.0},

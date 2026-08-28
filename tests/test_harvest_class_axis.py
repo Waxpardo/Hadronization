@@ -13,9 +13,34 @@ sys.path.insert(0, str(ROOT / "extraction"))
 
 from harvest_class_axis import (  # noqa: E402
     agrees_at_recorded_precision, assert_resolved_campaign, class_order,
-    parse_bin, parse_log, percentile, resolved_campaigns,
+    parse_bin, parse_log, percentile, resolved_campaigns, sample_sem,
     significant_figures,
 )
+
+
+def vector(values: list[float]) -> str:
+    return ",".join(format(value, ".17g") for value in values)
+
+
+def current_rows() -> list[str]:
+    reference = [1.0, 2.0, 4.0, 8.0]
+    numerator = [2.0, 6.0, 8.0, 24.0]
+    ratios = [value / denominator
+              for value, denominator in zip(numerator, reference)]
+    common = (
+        "schema=hadronization_uncertainty_matrix_v2 block_count=4 "
+        "flavour=BEAUTY trigger=Bp tune=MONASH bin=hDPhiM90_100 ")
+    return [
+        "UNCERTAINTY_MATRIX " + common
+        + "associate=Bm is_reference=true "
+        + f"block_yields={vector(reference)} block_ratios=NA "
+        + f"yield_sem={sample_sem(reference):.17g} ratio_sem=NA",
+        "UNCERTAINTY_MATRIX " + common
+        + "associate=Lb is_reference=false "
+        + f"block_yields={vector(numerator)} block_ratios={vector(ratios)} "
+        + f"yield_sem={sample_sem(numerator):.17g} "
+        + f"ratio_sem={sample_sem(ratios):.17g}",
+    ]
 
 
 def test_percentile() -> None:
@@ -55,24 +80,102 @@ def test_class_order() -> None:
 
 
 def test_parse_log() -> None:
-    text = "\n".join([
-        "noise",
-        "UNCERTAINTY_MATRIX flavour=BEAUTY trigger=Bp tune=MONASH associate=Bm "
-        "bin=hDPhic1_MB88p197_100 central_yield=0.5 yield_sem=0.01",
-        "UNCERTAINTY_MATRIX flavour=BEAUTY trigger=Bp tune=MONASH associate=Bm "
-        "bin=hDPhiM00_100 central_yield=0.6 yield_sem=0.02",
-    ])
+    text = "\n".join(["noise", *current_rows()])
     rows = parse_log(text)
     assert len(rows) == 2, rows
-    assert rows[("BEAUTY", "Bp", "MONASH", "Bm", "c1")]["central_yield"] == "0.5"
-    assert rows[("BEAUTY", "Bp", "MONASH", "Bm", "MB")]["mb_high"] == 100.0
-    dup = text + "\n" + text.splitlines()[1]
+    reference = rows[("BEAUTY", "Bp", "MONASH", "Bm", "c1")]
+    assert reference["block_count"] == 4
+    assert reference["block_yields"] == [1.0, 2.0, 4.0, 8.0]
+    assert reference["block_ratios"] is None
+    assert rows[("BEAUTY", "Bp", "MONASH", "Lb", "c1")][
+        "block_ratios"] == [2.0, 3.0, 2.0, 3.0]
+    dup = text + "\n" + current_rows()[0]
     try:
         parse_log(dup)
     except ValueError:
         pass
     else:
         raise AssertionError("a duplicate identity must fail closed")
+
+
+def test_archived_log_requires_an_explicit_noncurrent_opt_out() -> None:
+    archived = (
+        "UNCERTAINTY_MATRIX flavour=BEAUTY trigger=Bp tune=MONASH "
+        "associate=Bm bin=hDPhic1_MB88p197_100 central_yield=0.5 "
+        "yield_sem=0.01")
+    try:
+        parse_log(archived)
+    except ValueError as error:
+        assert "MONASH/c1 schema" in str(error), error
+    else:
+        raise AssertionError("an old log silently passed the current contract")
+    legacy = parse_log(archived, validate_block_contract=False)
+    assert legacy[("BEAUTY", "Bp", "MONASH", "Bm", "c1")][
+        "central_yield"] == "0.5"
+
+
+def test_mis_sized_vector_names_tune_class_and_field() -> None:
+    lines = current_rows()
+    lines[1] = lines[1].replace(
+        "block_ratios=2,3,2,3", "block_ratios=2,3,2")
+    try:
+        parse_log("\n".join(lines))
+    except ValueError as error:
+        message = str(error)
+        assert "MONASH/c1" in message, message
+        assert "block_ratios" in message, message
+        assert "expected 4 elements, got 3" in message, message
+        return
+    raise AssertionError("a removed block element passed the vector contract")
+
+
+def test_nonreference_vectors_fail_closed_on_na_malformed_and_nonfinite() -> None:
+    for replacement, reason in (
+            ("NA", "NA is forbidden"),
+            ("2,3,broken,3", "malformed numeric vector"),
+            ("2,3,nan,3", "non-finite value")):
+        lines = current_rows()
+        lines[1] = lines[1].replace(
+            "block_ratios=2,3,2,3", f"block_ratios={replacement}")
+        try:
+            parse_log("\n".join(lines))
+        except ValueError as error:
+            message = str(error)
+            assert "MONASH/c1 block_ratios" in message, message
+            assert reason in message, message
+            continue
+        raise AssertionError(
+            f"non-reference block_ratios={replacement!r} passed")
+
+
+def test_same_block_ratio_is_reconstructed() -> None:
+    lines = current_rows()
+    changed = [2.5, 3.0, 2.0, 3.0]
+    lines[1] = lines[1].replace(
+        "block_ratios=2,3,2,3", f"block_ratios={vector(changed)}")
+    old_sem = f"ratio_sem={sample_sem([2.0, 3.0, 2.0, 3.0]):.17g}"
+    lines[1] = lines[1].replace(
+        old_sem, f"ratio_sem={sample_sem(changed):.17g}")
+    try:
+        parse_log("\n".join(lines))
+    except ValueError as error:
+        assert "MONASH/c1 block_ratios: block 1" in str(error), error
+        return
+    raise AssertionError("a ratio not formed from its same-block yields passed")
+
+
+def test_producer_contract_derives_the_accepted_11_by_10_shape() -> None:
+    class_contract = json.loads(CONTRACT.read_text())
+    plot_config = json.loads((
+        ROOT / "plotting/configuration_multiplicity_HF_RUN3_V1_"
+               "THREETUNE_THnSparse_complete_root.json").read_text())
+    producer = (ROOT / "plotting/improvedPlotting_THnSparse.C").read_text()
+    assert len(class_contract["classes"]) == 11
+    assert plot_config["nSubSamples"] == 10
+    assert 'block_count=" << nSubSamples' in producer
+    assert 'FormatBlockVector17(subYieldValues)' in producer
+    assert 'FormatBlockVector17(subRatioValues)' in producer
+    assert 'std::setprecision(17)' in producer
 
 
 def test_significant_figures() -> None:
