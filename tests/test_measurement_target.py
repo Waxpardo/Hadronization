@@ -20,6 +20,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Same directory as this driver, so no path setup is needed.
+from sandbox_tree import tracked_names
+
 ROOT = Path(__file__).resolve().parents[1]
 DRIVER = ROOT / "plotting" / "run_paper_plots.sh"
 WRAPPER = ROOT / "tools" / "render_measurement.sh"
@@ -213,19 +216,24 @@ exit 0
 
 def _cli_sandbox(tmp: str, cli_text: str | None = None,
                  drop_config: str | None = None) -> Path:
-    """Build a checkout that differs from this one only where it must."""
+    """Build a checkout that differs from this one only where it must.
+
+    tracked_names, never iterdir: `tests/sandbox_tree.py` states the rule and
+    the incident behind it. Before that rule this helper mirrored the resolved
+    `plotting/Plots` itself, so a sandbox run could reach the real plot plane.
+    """
     base = Path(tmp) / "checkout"
     base.mkdir()
-    replaced = {".git", "tools", "plotting", "setupEnv.sh", "hadronization"}
-    for entry in sorted(ROOT.iterdir()):
-        if entry.name not in replaced:
-            (base / entry.name).symlink_to(entry)
+    replaced = {"tools", "plotting", "setupEnv.sh", "hadronization"}
+    for entry in sorted(tracked_names(ROOT)):
+        if entry not in replaced:
+            (base / entry).symlink_to(ROOT / entry)
     for name in ("tools", "plotting"):
         (base / name).mkdir()
-        for entry in sorted((ROOT / name).iterdir()):
-            if entry.name in {"render_measurement.sh", drop_config}:
+        for entry in sorted(tracked_names(ROOT, name)):
+            if entry in {"render_measurement.sh", drop_config}:
                 continue
-            (base / name / entry.name).symlink_to(entry)
+            (base / name / entry).symlink_to(ROOT / name / entry)
     stub = base / "tools/render_measurement.sh"
     stub.write_text(_STUB_RENDER)
     stub.chmod(0o755)
@@ -263,6 +271,24 @@ def _run_cli(base: Path,
         ["bash", str(base / "hadronization"), "plot", DATASET_KEY,
          "measure-balancing"],
         env=env, text=True, capture_output=True)
+
+
+def test_the_sandbox_mirrors_only_what_the_tree_tracks() -> None:
+    """The sandbox holds the tracked set, and the repository git init creates.
+
+    Both sides come from the tree, so this states a property of the sandbox on
+    every host. It fails on any host that carries untracked state, which is
+    when the inheritance can change what the cases below measure.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        base = _cli_sandbox(tmp)
+        top = {entry.name for entry in base.iterdir()}
+        assert top == tracked_names(ROOT) | {".git"}, \
+            sorted(top ^ (tracked_names(ROOT) | {".git"}))
+        for name in ("tools", "plotting"):
+            mirrored = {entry.name for entry in (base / name).iterdir()}
+            assert mirrored == tracked_names(ROOT, name), \
+                (name, sorted(mirrored ^ tracked_names(ROOT, name)))
 
 
 def _chosen_config(result: subprocess.CompletedProcess) -> str:

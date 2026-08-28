@@ -33,6 +33,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Same directory as this driver, so no path setup is needed.
+from sandbox_tree import tracked_files, tracked_names
+
 ROOT = Path(__file__).resolve().parents[1]
 WORKER = ROOT / "generation" / "submit" / "runCondorJob.sh"
 GENERATOR = ROOT / "tools" / "make_systematic_cards.py"
@@ -207,17 +210,28 @@ def test_worker_rejects_an_unsafe_card_variant() -> None:
 
 
 def make_checkout(directory: Path) -> Path:
-    """A clean throwaway checkout holding the nominal AND variation cards."""
+    """A clean throwaway checkout: the tracked nominal AND variation cards.
+
+    The copy admits tracked cards only, at both levels. `tests/sandbox_tree.py`
+    states the rule and the incident behind it: a copytree of the real
+    `systematics/` carries every untracked card a local generator run left
+    there, and `git add -A` below commits it.
+    """
     checkout = directory / "checkout"
     cards = checkout / "generation" / "cards"
     cards.mkdir(parents=True)
-    for card in (ROOT / "generation" / "cards").glob(
+    tracked = tracked_names(ROOT, "generation/cards")
+    for card in sorted((ROOT / "generation" / "cards").glob(
         "pythiasettings_Hard_Low_ccbb_*.cmnd"
-    ):
-        shutil.copy2(card, cards / card.name)
-    shutil.copytree(
-        ROOT / "generation" / "cards" / "systematics", cards / "systematics"
-    )
+    )):
+        if card.name in tracked:
+            shutil.copy2(card, cards / card.name)
+    (cards / "systematics").mkdir()
+    for name in tracked_files(ROOT, "generation/cards/systematics"):
+        target = cards / "systematics" / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(
+            ROOT / "generation" / "cards" / "systematics" / name, target)
     for command in (
         ["git", "init", "-q"],
         ["git", "config", "user.email", "test@example.invalid"],
@@ -347,6 +361,22 @@ def test_sidecars_predating_the_variant_field_read_as_nominal() -> None:
         variant, observed = resubmit_held.card_variant_on_disk(campaign_root)
         assert variant == CARD_VARIANT_NONE, variant
         assert observed == {CARD_VARIANT_NONE}, observed
+
+
+def test_the_checkout_carries_only_tracked_cards() -> None:
+    """Both sides come from the tree, so this holds on every host."""
+    with tempfile.TemporaryDirectory() as directory:
+        checkout = make_checkout(Path(directory))
+        cards = checkout / "generation/cards"
+        got = {p.name for p in cards.iterdir()}
+        variations = {p.name for p in (cards / "systematics").iterdir()}
+    want = {name for name in tracked_names(ROOT, "generation/cards")
+            if name.startswith("pythiasettings_Hard_Low_ccbb_")
+            and name.endswith(".cmnd")} | {"systematics"}
+    assert got == want, sorted(got ^ want)
+    want_variations = set(tracked_names(ROOT, "generation/cards/systematics"))
+    assert variations == want_variations, \
+        sorted(variations ^ want_variations)
 
 
 def main() -> int:

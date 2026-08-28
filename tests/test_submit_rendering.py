@@ -16,6 +16,9 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Same directory as this driver, so no path setup is needed.
+from sandbox_tree import tracked_names
+
 ROOT = Path(__file__).resolve().parents[1]
 RENDERER = ROOT / "tools" / "render_production_submit.py"
 FAKE_SHA = "a" * 64
@@ -41,17 +44,25 @@ def assert_fixture_ordinal_is_free() -> None:
 
 
 def make_checkout(directory: Path) -> Path:
-    """A clean throwaway checkout holding the tune cards.
+    """A clean throwaway checkout holding the tracked tune cards.
 
     The renderer refuses to run from a dirty checkout, so it cannot be pointed
     at the working tree during development. Building a committed temp repo
     keeps these tests independent of local edits while still exercising the
     real git path.
+
+    The copy admits tracked cards only. `tests/sandbox_tree.py` states the
+    rule and the incident behind it: an untracked card beside the four tracked
+    ones would be committed here and would decide what these cases measure.
     """
     checkout = directory / "checkout"
     (checkout / "generation" / "cards").mkdir(parents=True)
-    for card in (ROOT / "generation" / "cards").glob("pythiasettings_Hard_Low_ccbb_*.cmnd"):
-        shutil.copy2(card, checkout / "generation" / "cards" / card.name)
+    tracked = tracked_names(ROOT, "generation/cards")
+    for card in sorted(
+            (ROOT / "generation" / "cards").glob(
+                "pythiasettings_Hard_Low_ccbb_*.cmnd")):
+        if card.name in tracked:
+            shutil.copy2(card, checkout / "generation" / "cards" / card.name)
     for command in (
         ["git", "init", "-q"],
         ["git", "config", "user.email", "test@example.invalid"],
@@ -184,8 +195,20 @@ def test_seed_ledger_refuses_burned_seed() -> None:
         assert "already burned" in result.stderr
 
 
+def test_the_checkout_carries_only_tracked_cards() -> None:
+    """Both sides come from the tree, so this holds on every host."""
+    with tempfile.TemporaryDirectory() as directory:
+        checkout = make_checkout(Path(directory))
+        got = {p.name for p in (checkout / "generation/cards").iterdir()}
+    want = {name for name in tracked_names(ROOT, "generation/cards")
+            if name.startswith("pythiasettings_Hard_Low_ccbb_")
+            and name.endswith(".cmnd")}
+    assert got == want, sorted(got ^ want)
+
+
 def main() -> int:
     assert_fixture_ordinal_is_free()
+    test_the_checkout_carries_only_tracked_cards()
     test_liveness_guard_present()
     test_deterministic_and_seeds_unique()
     test_all_four_tunes_render()
