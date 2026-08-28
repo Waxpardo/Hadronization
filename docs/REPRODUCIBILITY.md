@@ -272,9 +272,15 @@ Check the plot reference contract locally:
 python3 tests/test_plot_reference_multiplicity_contract.py
 ```
 
-The command rehashes each tracked producer, configuration, selector,
-registry, boundary artifact, and compact numerical source named by the
-manifest. It cannot rehash the external ROOT inputs or absent candidate bytes.
+The command hashes nothing. Ruling R6 removed the digest comparison at commit
+`e1efd29`, with the `hashlib` import, the `sha256` helper and the function that
+read the retired register. Four static checks remain: the configured pair
+references, the plotter contract, the runner modes, and the tune-local
+multiplicity boundary contract. The command also requires
+`Validation/TestPlotReferenceMultiplicityContracts.C` on disk. It prints `plot
+reference/multiplicity static contracts passed` and exits 0. No tracked test
+rehashes the producers, configurations, selectors, registries, boundary
+artifacts or numerical sources.
 
 The multiplicity boundaries also reproduce from committed evidence. Sum the MONASH CSV cumulatively and apply the procedure in Section 3.
 
