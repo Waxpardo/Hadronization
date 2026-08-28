@@ -161,7 +161,7 @@ Some important committed checks are:
 | object | expected value |
 |---|---|
 | Species-axis table | 202 entries; FNV-1a `646f310f78126267` |
-| Current decay map | file SHA-256 `58081aa2f87cb67141259f2b74a5057777a6c8eaa5049446fd3f47b13a1c84da` |
+| Current decay map | file SHA-256 `c7643a838fb428a99660e155ad9c0e776c989f5afc4a8f2239b30523444bde74` |
 | Three-tune table output | SHA-256 `a46a7f6b96f668177ee600746e51eadf1dfaabdaceac07c1265ef5d7d0fc930d` |
 
 ROOT-generated PDF, PNG, and macro files are not byte-stable. Their contract uses pinned inputs, pinned ROOT, a recorded command, and a numeric receipt.
@@ -234,7 +234,7 @@ python3 tools/build_decay_parent_map_v2.py \
   --out /tmp/map_v2.json
 ```
 
-The second command must report internal map digest `c9593c9c0a7c4ec2ed6b53462255d4f04dcb4a5f5bd029217f479e5eecbb85fb`.
+The first command must report internal map digest `68834dd4a87593366551b881af75c94b74a083afdb9875866004dd451b94fc29`. The second must report `12a8e62db2f09a7bdb12aa64b964ea30326f8369a7c757b66b5e1a6523d295cc`. Each value is the digest of the committed map's own body, and `tests/test_contract_digests_describe_their_bodies.py` checks that pairing on every `make check`.
 
 The committed result JSON files rebuild the integrated and class-resolved systematics tables:
 

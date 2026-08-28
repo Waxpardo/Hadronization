@@ -33,9 +33,18 @@ input the recipe reads. **The pair is the contract.**
 > **The record quotes `map_sha256`; this document quotes both.** The truncated
 > `dd502a10…` in `git show 4a007f2^:docs/EXTRACTION_CONVENTIONS.md` §2, the superseded private convention-table record, and
 > `git show 4a007f2^:AnalysisScripts/anchors/MANIFEST.md` §1 is the **internal** digest, **not** the
-> file's sha256. They differ, they are both correct, and confusing them is a
-> live trap: a reviewer who runs `sha256sum decay_parent_map_v1_1.json` and gets
-> `ed148156…` has **not** found a discrepancy.
+> file's sha256. The two kinds differ, and confusing them is a live trap: a
+> reviewer who runs `sha256sum decay_parent_map_v1_1.json` and gets
+> `0688fb11…` has **not** found a discrepancy.
+
+> **Both archived truncations name the 2026-08-11 bodies, which are
+> superseded.** Two prose commits rewrote one string inside each map and left
+> the stored `map_sha256` untouched: `2f572d5` on v2, and `c629642` on v2 and
+> v1.1. From 2026-08-23 to 2026-08-28 the field described no committed body,
+> and no test read it. The builders now state `68834dd4…` for v1.1 and
+> `12a8e62d…` for v2, and the two rows below carry those values.
+> `tests/test_contract_digests_describe_their_bodies.py` fails if a stored
+> digest and its own body part again.
 
 ### 0.2 Verification vocabulary — used strictly
 
@@ -203,8 +212,8 @@ void.
 | id | artifact | file sha256 | internal `map_sha256` |
 |---|---|---|---|
 | **G5** | historical v1 decay map (**HISTORY — defective; excluded from export**) | `a67e8ae5f853689c010e991859242a77b913787dd30ab3d4c1b68bc05758c00c` | `e343fd8872f9742b84ae3dce5085071c59eb289c1841faef3fff754effadcccb` |
-| **G6** | `decay_parent_map_v1_1.json` | `ed1481569dcf94e17a154e00a5eb5c829299d3c1502e04dd036ce5fcaccfe688` | `dd502a10c5932fffa2bb3121296a40532224b4d6910330ea5e044e045089c43f` |
-| **G7** | `decay_parent_map_v2.json` (**CURRENT**) | `58081aa2f87cb67141259f2b74a5057777a6c8eaa5049446fd3f47b13a1c84da` | `c9593c9c0a7c4ec2ed6b53462255d4f04dcb4a5f5bd029217f479e5eecbb85fb` |
+| **G6** | `decay_parent_map_v1_1.json` | `0688fb110730c39ac50b9762a900ffcc3a49260b836a6ea7e715602ba2ab4bd6` | `68834dd4a87593366551b881af75c94b74a083afdb9875866004dd451b94fc29` |
+| **G7** | `decay_parent_map_v2.json` (**CURRENT**) | `c7643a838fb428a99660e155ad9c0e776c989f5afc4a8f2239b30523444bde74` | `12a8e62db2f09a7bdb12aa64b964ea30326f8369a7c757b66b5e1a6523d295cc` |
 
 **G5 is frozen as history and must not be deleted.** It is the artifact
 `docs/MAP_V1_CONJUGATION_BUG.md` and private error-ledger entry **E1** are about; deleting
@@ -226,21 +235,21 @@ tools/build_decay_parent_map_v2.py evidence/f4_probe/f4b_probe.out \
   --out /tmp/v2.json
 ```
 
-**Positive checks, not `rc=0`:** `DECAY_PARENT_MAP … map_sha256=dd502a10c5932fff`
+**Positive checks, not `rc=0`:** `DECAY_PARENT_MAP … map_sha256=68834dd4a8759336`
 plus `CONJUGATION artifact_rows_changed=101 table_affecting_rows=60
 involution_pairs=… I1=PASS I2=PASS`; and `MAP_V2_BUILT species=202 split=2
-threshold=0.1% sha256=c9593c9c0a7c4ec2` with exactly two `SPLIT` lines
+threshold=0.1% sha256=12a8e62db2f09a7b` with exactly two `SPLIT` lines
 (`D*+ → D⁰ 0.6770 / D⁺ 0.3230`, `D*- → D̄⁰ 0.6770 / D⁻ 0.3230`).
 
 | | |
 |---|---|
-| G6 status | **VERIFIED-BY-RECORD**, 2026-08-11 — `evidence/MANIFEST.md` §1: *"the rebuild reproduces `dd502a10c5932fff…` exactly"* |
-| G7 status | **DETERMINISTIC-BY-CONSTRUCTION** for file bytes |
+| G6 status | **SELF-CHECKING** for the internal digest — `tests/test_contract_digests_describe_their_bodies.py` recomputes it from the body on every `make check`. The fuller 2026-08-11 record is preserved in the internal archive. |
+| G7 status | **SELF-CHECKING** for the internal digest, by the same test; **DETERMINISTIC-BY-CONSTRUCTION** for file bytes |
 
 **Why file-level byte identity is claimable and not merely hoped for:** both
 builders end
 `args.out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")`
-(`build_decay_parent_map.py:267`, `build_decay_parent_map_v2.py:220`). The
+(`build_decay_parent_map.py:356`, `build_decay_parent_map_v2.py:219`). The
 payload carries **no timestamp, no hostname, no path, no PRNG draw** — verified
 by reading the payload construction in both. Key order is forced by
 `sort_keys`. **The one residual dependency is CPython's float repr**, stable
@@ -1012,8 +1021,8 @@ Run from the repository root, tree clean. **Check the named output line, never
 | R2 | `python3 tools/generate_species_ordinals_header.py --check` | absence of `SPECIES_ORDINALS_STALE` |
 | R3 | `python3 tools/generate_pair_object_contract.py --check` | absence of the stale marker |
 | R4 | `make cards && make cards-current` | both exit 0 |
-| R5 | `tools/build_decay_parent_map.py evidence/f4_probe/f4_probe_v1.out --ordinals contracts/species_ordinals_v2.json --out /tmp/v11.json` | `map_sha256=dd502a10c5932fff`, `I1=PASS I2=PASS`, `artifact_rows_changed=101 table_affecting_rows=60` |
-| R6 | `tools/build_decay_parent_map_v2.py evidence/f4_probe/f4b_probe.out --ordinals contracts/species_ordinals_v2.json --v1 contracts/decay_parent_map_v1_1.json --weights evidence/extraction_dual/per_species.csv --out /tmp/v2.json` | `sha256=c9593c9c0a7c4ec2`, `split=2`, exactly two `SPLIT` lines |
+| R5 | `tools/build_decay_parent_map.py evidence/f4_probe/f4_probe_v1.out --ordinals contracts/species_ordinals_v2.json --out /tmp/v11.json` | `map_sha256=68834dd4a8759336`, `I1=PASS I2=PASS`, `artifact_rows_changed=101 table_affecting_rows=60` |
+| R6 | `tools/build_decay_parent_map_v2.py evidence/f4_probe/f4b_probe.out --ordinals contracts/species_ordinals_v2.json --v1 contracts/decay_parent_map_v1_1.json --weights evidence/extraction_dual/per_species.csv --out /tmp/v2.json` | `sha256=12a8e62db2f09a7b`, `split=2`, exactly two `SPLIT` lines |
 | R7 | `extraction/apply_decay_map.py --map contracts/decay_parent_map_v2.json --weights evidence/merged_monash_replicated/per_species.csv --mode split` | `TOTAL 1298655240 INVARIANCE CONSERVED`; D⁰ **25.2435**, D̄⁰ 25.1707, D⁺ 13.1408, D⁻ 13.1129 |
 | R8 | `extraction/second_branch_weight.py --per-species evidence/merged_monash_replicated/per_species.csv` | `SECOND_BRANCH_DONE at_risk_pct=12.8396 concentration_top4=97.81%` — the **(C) chained history** row of §2.6, **not** "THE NUMBER" |
 | **R8b** | same, plus `--v2-map contracts/decay_parent_map_v2.json` | `SECOND_BRANCH_V2 presplit_pct=5.7644 postsplit_residual_pct=0.0018 residual_species=2` — **THE NUMBER**, with B_c⁻/B_c⁺ named as the whole residual. (Pre-split reads 5.7644 not 5.7737 because it is recomputed on the *merged* weights, not the anchor's baked-in ones — that is the tool working, not disagreeing.) |
@@ -1134,8 +1143,8 @@ f507f6250e63d82c9c34e088abe4ec16b17359e3b0a54fcdb54e17cd67653d7b  vintegrated_cl
 7d5e7bfdab80163f20f407fccfaad7543099d93a07609614b09eb6d626e985ff  GeneratedPairRegistry.h
 f2a8c8ebb2cbbac9bd269b161cdcf05a13ae0f83679e81ee133647f80310ea10  GeneratedPairObjectContract.h
 a67e8ae5f853689c010e991859242a77b913787dd30ab3d4c1b68bc05758c00c  historical_defective_decay_map
-ed1481569dcf94e17a154e00a5eb5c829299d3c1502e04dd036ce5fcaccfe688  decay_parent_map_v1_1.json
-58081aa2f87cb67141259f2b74a5057777a6c8eaa5049446fd3f47b13a1c84da  decay_parent_map_v2.json
+0688fb110730c39ac50b9762a900ffcc3a49260b836a6ea7e715602ba2ab4bd6  decay_parent_map_v1_1.json
+c7643a838fb428a99660e155ad9c0e776c989f5afc4a8f2239b30523444bde74  decay_parent_map_v2.json
 f2d30a345bd8bed278062296d007f2dc5a4f101cf54f54b719e8caccd7d7cd76  f4_probe/f4_probe_v1.out
 1525a0e5985b6969ed2cdda616560b8d5222ac338b089fe2343026e806adeb1c  f4_probe/f4b_probe.out
 42a88913b4087691c9797bc3baf4212515020ab293ded4dbd3db7d45a4ee2d34  f4_probe/pdgs.txt
