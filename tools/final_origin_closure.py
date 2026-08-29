@@ -327,6 +327,38 @@ def read_audit_root(record: dict[str, Any]) -> dict[str, Any]:
         root_file.Close()
 
 
+def bind_promoted_audit_paths(
+    payloads: Iterable[dict[str, Any]],
+    staging: Path,
+    output_directory: Path,
+) -> list[dict[str, Any]]:
+    """Replace staging-only audit names with their final absolute names.
+
+    ROOT aggregation must read the files while they still live in ``staging``.
+    The report is written before the atomic directory promotion, so its input
+    inventory must name the paths that the promotion will create.
+    """
+    staging_root = staging.resolve()
+    final_root = output_directory.resolve()
+    rebound: list[dict[str, Any]] = []
+    for payload in payloads:
+        copied = dict(payload)
+        record = dict(payload["input"])
+        for key in ("audit_path", "audit_log_path"):
+            staged_path = Path(str(record[key])).resolve()
+            try:
+                relative = staged_path.relative_to(staging_root)
+            except ValueError as error:
+                raise ValueError(
+                    f"{key} is outside the final-origin staging directory: "
+                    f"{staged_path}"
+                ) from error
+            record[key] = (final_root / relative).as_posix()
+        copied["input"] = record
+        rebound.append(copied)
+    return rebound
+
+
 def aggregate_payloads(
     payloads: Iterable[dict[str, Any]],
     freeze_provenance: dict[str, Any],
@@ -728,7 +760,13 @@ def run(
                     f"slot={int(slot):03d}",
                     flush=True,
                 )
+        # Keep staging paths until every ROOT file has been read. Only the
+        # serialized inventory is rebound to the directory that os.replace()
+        # promotes below.
         payloads = [read_audit_root(record) for record in records]
+        payloads = bind_promoted_audit_paths(
+            payloads, staging, output_directory
+        )
         report = aggregate_payloads(
             payloads,
             freeze_provenance,

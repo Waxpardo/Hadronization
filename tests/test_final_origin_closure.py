@@ -10,6 +10,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -346,6 +347,140 @@ class FinalOriginClosureAggregationTest(unittest.TestCase):
                 "f" * 64,
                 "1" * 40,
             )
+
+    def test_promotion_serializes_existing_final_audit_paths(self) -> None:
+        """The report must survive removal of its staging directory."""
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            checkout = directory / "clean_checkout"
+            subprocess.run(
+                ["git", "clone", "--no-hardlinks", str(ROOT), str(checkout)],
+                check=True,
+                capture_output=True,
+            )
+            checkout_commit = subprocess.check_output(
+                ["git", "-C", str(checkout), "rev-parse", "HEAD"],
+                text=True,
+            ).strip()
+            freeze = self.freeze()
+            freeze["repository_commit"] = checkout_commit
+            inputs = directory / "inputs"
+            rows = []
+            for tune in module.robustness.EXPECTED_TUNES:
+                raw = inputs / tune / "raw.root"
+                receipt = inputs / tune / "receipt.json"
+                raw.parent.mkdir(parents=True, exist_ok=True)
+                raw.write_text(f"{tune} raw\n")
+                receipt.write_text(f"{tune} receipt\n")
+                rows.append({
+                    "campaign": freeze["campaign"],
+                    "tune": tune,
+                    "canonical_slot": 0,
+                    "repository_commit": checkout_commit,
+                    "producer_executable_sha256": "f" * 64,
+                    "raw_path": raw.resolve().as_posix(),
+                    "raw_sha256": module.robustness.sha256(raw),
+                    "raw_validation_receipt_path": receipt.resolve().as_posix(),
+                    "raw_validation_receipt_sha256":
+                        module.robustness.sha256(receipt),
+                })
+
+            contracts = json.loads(
+                (ROOT / "config/statistical_robustness_v1.json").read_text()
+            )["contracts"]
+
+            def synthetic_audit(_checkout, _production, staging, row):
+                tune = row["tune"]
+                audit_dir = staging / "per_job" / tune / "slot_000"
+                audit_dir.mkdir(parents=True)
+                audit = audit_dir / "origin_resolution.root"
+                log = audit_dir / "origin_resolution.log"
+                audit.write_text(f"{tune} synthetic audit\n")
+                log.write_text(f"{tune} synthetic log\n")
+                return {
+                    "tune": tune,
+                    "canonical_slot": 0,
+                    "raw_path": row["raw_path"],
+                    "raw_sha256": row["raw_sha256"],
+                    "raw_validation_receipt_path":
+                        row["raw_validation_receipt_path"],
+                    "raw_validation_receipt_sha256":
+                        row["raw_validation_receipt_sha256"],
+                    "audit_path": audit.resolve().as_posix(),
+                    "audit_sha256": module.robustness.sha256(audit),
+                    "audit_log_path": log.resolve().as_posix(),
+                    "audit_log_sha256": module.robustness.sha256(log),
+                }
+
+            def synthetic_read(record):
+                row = payload(record["tune"], record["canonical_slot"])
+                row["input"] = record
+                row["metadata"]["species_registry_sha256"] = contracts[
+                    "species_registry_sha256"
+                ]
+                row["metadata"]["raw_input_sha256"] = record["raw_sha256"]
+                row["metadata"]["raw_validation_receipt_sha256"] = record[
+                    "raw_validation_receipt_sha256"
+                ]
+                return row
+
+            output = directory / "final-evidence"
+            lineage = {
+                "checkout_commit": checkout_commit,
+                "provenance_mode": module.robustness.CURRENT_GRAPH_ANCESTRY,
+                "accepted_historical_provenance_registry_sha256": None,
+            }
+            spec = json.loads(
+                (ROOT / "config/statistical_robustness_v1.json").read_text()
+            )
+            with (
+                mock.patch.object(module.robustness, "load_json", return_value=spec),
+                mock.patch.object(module.robustness, "validate_spec"),
+                mock.patch.object(
+                    module.robustness,
+                    "validate_canonical_freeze",
+                    return_value=(rows, freeze),
+                ),
+                mock.patch.object(
+                    module.robustness,
+                    "validate_raw_checkout_lineage",
+                    return_value=lineage,
+                ),
+                mock.patch.object(module, "run_one_audit", side_effect=synthetic_audit),
+                mock.patch.object(module, "read_audit_root", side_effect=synthetic_read),
+            ):
+                module.run(
+                    directory / "synthetic-freeze",
+                    directory / "production",
+                    output,
+                    checkout,
+                    ROOT / "config/statistical_robustness_v1.json",
+                    2,
+                )
+
+            report_path = output / "final_origin_closure_report_v1.json"
+            report = json.loads(report_path.read_text())
+            for record in report["input_audits"]:
+                audit = Path(record["audit_path"])
+                audit_log = Path(record["audit_log_path"])
+                self.assertTrue(audit.is_absolute())
+                self.assertTrue(audit_log.is_absolute())
+                self.assertTrue(audit.is_file(), audit)
+                self.assertTrue(audit_log.is_file(), audit_log)
+                self.assertIn(output.resolve(), audit.parents)
+                self.assertIn(output.resolve(), audit_log.parents)
+
+            body = dict(report)
+            claimed = body.pop("payload_sha256")
+            self.assertEqual(claimed, module.robustness.json_sha256(body))
+            binding = module.robustness.validate_final_origin_closure_report(
+                report_path,
+                self.canonical_rows(freeze),
+                freeze,
+                checkout,
+                spec,
+            )
+            self.assertEqual(binding["audited_job_count"], 3)
 
 
 if __name__ == "__main__":

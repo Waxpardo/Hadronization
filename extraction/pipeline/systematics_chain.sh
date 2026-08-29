@@ -115,8 +115,8 @@ fi
 
 # ---- 3. the extraction chain ----------------------------------------------
 REPORT="${OUT_DIR}/per_class_deltas.json"
-NOMINAL_LOG="${HADRONIZATION_SYSTEMATICS_NOMINAL_LOG:?set HADRONIZATION_SYSTEMATICS_NOMINAL_LOG to the sealed nominal render log}"
-CONTROL_LOG="${HADRONIZATION_SYSTEMATICS_CONTROL_LOG:?set HADRONIZATION_SYSTEMATICS_CONTROL_LOG to the control render log}"
+NOMINAL_LOG="${HADRONIZATION_SYSTEMATICS_NOMINAL_LOG:?set HADRONIZATION_SYSTEMATICS_NOMINAL_LOG to the new nominal v2 measurement render log}"
+CONTROL_LOG="${HADRONIZATION_SYSTEMATICS_CONTROL_LOG:?set HADRONIZATION_SYSTEMATICS_CONTROL_LOG to the accepted historical shared-field control log}"
 
 variation_args=()
 while IFS='=' read -r campaign path; do
@@ -146,6 +146,7 @@ fi
 # exported value may agree with that answer; it may not replace it.
 BOUNDARY_SHA="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["nominal_boundary"]["boundary_receipt_sha256"])' "${PLAN}")"
 BOUNDARY_ROOT="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["nominal_boundary"]["root"])' "${PLAN}")"
+BOUNDARY_PATH="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["nominal_boundary"]["path"])' "${PLAN}")"
 if [[ -z "${BOUNDARY_SHA}" ]]; then
   refuse 3 "the request plan resolved no nominal boundary receipt; the envelope cannot be bound to the render it applies to"
 fi
@@ -164,6 +165,7 @@ python3 "${CHECKOUT}/tools/systematics_envelope.py" \
   --resolver-tags "${TAGS}" \
   --accepted-roots "${ROOTS}" \
   --boundary-receipt-sha "${BOUNDARY_SHA}" \
+  --boundary-receipt "${BOUNDARY_PATH}" \
   --out "${ENVELOPE}" || ENVELOPE_RC=$?
 echo "SYSTEMATICS_CHAIN campaign=${CAMPAIGN} envelope=${ENVELOPE} rc=${ENVELOPE_RC}"
 if [[ "${ENVELOPE_RC}" -ne 0 ]]; then

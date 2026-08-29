@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Control comparison and per-class deltas from measurement render logs.
 
-INPUTS. One nominal log (the sealed central's closure render), one control log
-(the sealed central re-rendered through the measurement target), and one log per
-variation campaign. Every log is parsed by `harvest_class_axis.parse_log`, which
-keys each row on (flavour, trigger, tune, associate, class).
+INPUTS. One new nominal measurement log, one accepted historical control log,
+and one log per variation campaign. New numerical inputs require the v2 block
+contract. The historical log is parsed only for shared-field reproduction.
+Every log is keyed on (flavour, trigger, tune, associate, class).
 
-THE CONTROL LICENSES THE ARITHMETIC. The control render reads the same sealed
-data as the nominal, so every shared row must agree at the precision the logs
-record, with NO tolerance. A control that drifts means the instrument moved, and
-no delta taken with it means anything.
+THE CONTROL LICENSES THE ARITHMETIC. Every shared row must agree at the
+precision the logs record, with NO tolerance. The historical control supplies
+no endpoint, covariance, count, or systematic arithmetic.
 
 THE DELTAS follow the registered definition: Delta = variation - nominal, SEMs in
 quadrature, flagged below 2 SEM. See `harvest_yield_deltas`.
@@ -18,6 +17,7 @@ quadrature, flagged below 2 SEM. See `harvest_yield_deltas`.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -49,7 +49,7 @@ def compare_rows(nominal: dict, control: dict) -> dict:
         "only_in_nominal": [list(k) for k in sorted(set(nominal) - set(control))],
         "only_in_control": [list(k) for k in sorted(set(control) - set(nominal))],
         "disagreements": disagreements,
-        "agree": not disagreements,
+        "agree": bool(shared) and not disagreements,
     }
 
 
@@ -103,8 +103,22 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
-    nominal = parse_log(args.nominal.read_text(errors="replace"))
-    control = parse_log(args.control.read_text(errors="replace"))
+    nominal_path = args.nominal.resolve()
+    control_path = args.control.resolve()
+    nominal_digest = hashlib.sha256(nominal_path.read_bytes()).hexdigest()
+    control_digest = hashlib.sha256(control_path.read_bytes()).hexdigest()
+    if nominal_path == control_path or nominal_digest == control_digest:
+        raise ValueError(
+            "the new nominal numerical source and historical reproduction "
+            "control must be different files with different digests"
+        )
+    # New arithmetic requires the v2 block-vector contract. The accepted
+    # historical render is parsed only for the three shared comparison fields.
+    nominal = parse_log(nominal_path.read_text(errors="replace"))
+    control = parse_log(
+        control_path.read_text(errors="replace"),
+        validate_block_contract=False,
+    )
     comparison = compare_rows(nominal, control)
 
     variations, delta_rows, checks = {}, [], count_checks(nominal, "NOMINAL")

@@ -133,16 +133,41 @@ def resolve_receipt(results_root: Path, campaign: str, dataset: str,
     return entry
 
 
-def resolve_nominal_boundary(results_root: Path, campaign: str, commit: str,
-                             pins: dict) -> dict:
+def resolve_nominal_boundary(results_root: Path, campaign: str, dataset: str,
+                             commit: str, pins: dict) -> dict:
     """The boundary receipt of the render this envelope will be bound to.
 
     The receipt is located, never guessed: exactly one file of that name may
     stand under a plotting plane, which is the plotter's own invariant. Two
     receipts are a refusal and never a reason to fall through to the pin.
     """
+    measurement = (
+        results_root / campaign / commit / "measurements" / dataset
+    )
+    measurement_found = (
+        sorted(measurement.rglob(BOUNDARY_RECEIPT_NAME))
+        if measurement.is_dir() else []
+    )
+    if len(measurement_found) > 1:
+        raise RequestRefused(
+            f"{campaign}: {len(measurement_found)} "
+            f"{BOUNDARY_RECEIPT_NAME} files under {measurement}; exactly one "
+            "is required"
+        )
+    if len(measurement_found) == 1:
+        return {
+            "path": str(measurement_found[0]),
+            "root": commit,
+            "source": CURRENT_ROOT,
+            "boundary_receipt_sha256": sha256(measurement_found[0]),
+            "verified": True,
+        }
+
     plane = results_root / campaign / commit / "plotting"
-    found = sorted(plane.rglob(BOUNDARY_RECEIPT_NAME)) if plane.is_dir() else []
+    found = (
+        sorted(plane.rglob(BOUNDARY_RECEIPT_NAME))
+        if plane.is_dir() else []
+    )
     if len(found) > 1:
         raise RequestRefused(
             f"{campaign}: {len(found)} {BOUNDARY_RECEIPT_NAME} files under "
@@ -263,7 +288,9 @@ def plan(selector: Path, checkout: Path, dataset: str, results_root: Path,
         raise RequestRefused(
             "cannot resolve every declared source: " + "; ".join(unresolved))
 
-    boundary = resolve_nominal_boundary(results_root, campaign, commit, pins)
+    boundary = resolve_nominal_boundary(
+        results_root, campaign, nominal_key, commit, pins
+    )
 
     out_dir = results_root / campaign / commit / "systematics"
     if "plotting" in out_dir.parts:
@@ -277,6 +304,9 @@ def plan(selector: Path, checkout: Path, dataset: str, results_root: Path,
         "nominal_status": nominal["status"],
         "nominal_complete_root_tag": nominal["complete_root_tag"],
         "nominal_plot_plane": str(results_root / campaign / commit / "plotting"),
+        "nominal_measurement_root": str(
+            results_root / campaign / commit / "measurements" / nominal_key
+        ),
         "commit": commit,
         "resolver_tags": resolver_tags,
         "receipts": receipts,

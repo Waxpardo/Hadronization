@@ -474,7 +474,9 @@ def producing_commit() -> str:
 def build(report_path: Path, receipt_paths: dict[str, Path],
           resolver_tags: dict[str, str], campaign: str, nominal_dataset: str,
           boundary_receipt_sha: str,
-          accepted_roots: dict[str, dict]) -> tuple[dict, list[str], str]:
+          accepted_roots: dict[str, dict],
+          boundary_receipt_path: Path | None = None,
+          ) -> tuple[dict, list[str], str]:
     """(envelope, reasons, status). Never raises for a declared refusal."""
     reasons: list[str] = []
     status = "COMPLETE"
@@ -547,6 +549,17 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
             "no nominal boundary-receipt sha256 was supplied; the envelope "
             "cannot be bound to the render it applies to")
         status = "INCOMPLETE"
+    if status == "COMPLETE" and boundary_receipt_path is not None:
+        if (
+            boundary_receipt_path.is_symlink()
+            or not boundary_receipt_path.is_file()
+            or sha256(boundary_receipt_path) != boundary_receipt_sha
+        ):
+            reasons.append(
+                "the exact nominal boundary-receipt path is absent, a "
+                "symlink, or disagrees with its supplied sha256"
+            )
+            status = "FAIL"
 
     envelope = {
         "schema": ENVELOPE_SCHEMA,
@@ -573,6 +586,10 @@ def build(report_path: Path, receipt_paths: dict[str, Path],
                                 "source": r.get("source")}
                             for c, r in sorted(accepted_roots.items())},
             "nominal_boundary_receipt_sha256": boundary_receipt_sha,
+            "nominal_boundary_receipt_path": (
+                boundary_receipt_path.resolve().as_posix()
+                if boundary_receipt_path is not None else ""
+            ),
             "nominal_dataset": nominal_dataset,
             "nominal_campaign": campaign,
         },
@@ -608,6 +625,8 @@ def main() -> int:
                     help="JSON object: campaign -> declared complete-root tag")
     ap.add_argument("--boundary-receipt-sha", default="",
                     help="sha256 of the nominal render's boundary receipt")
+    ap.add_argument("--boundary-receipt", type=Path,
+                    help="exact nominal render boundary receipt path")
     ap.add_argument("--accepted-roots", type=Path, required=True,
                     help="JSON object: campaign -> the request plan's "
                          "resolved {root, source, receipt_sha256}")
@@ -625,7 +644,8 @@ def main() -> int:
     try:
         envelope, reasons, status = build(
             args.report, receipt_paths, resolver_tags, args.campaign,
-            args.nominal_dataset, args.boundary_receipt_sha, accepted_roots)
+            args.nominal_dataset, args.boundary_receipt_sha, accepted_roots,
+            args.boundary_receipt)
     except EnvelopeRefused as error:
         envelope = {
             "schema": ENVELOPE_SCHEMA,

@@ -20,10 +20,9 @@ FOUR THINGS MUST HOLD, and each refusal names the field that failed:
               describes different class edges, so its band would sit on the
               wrong classes.
 
-The boundary receipt is located, never guessed: exactly one
-`multiplicity_boundary_receipt_v2.json` must exist under the nominal plotting
-plane, which is the plotter's own invariant -- it refuses to run unless
-exactly one global-canvas output directory holds the receipt.
+New envelopes record the exact nominal measurement boundary path. Older
+envelopes remain readable through the existing one-receipt nominal-plane
+lookup.
 """
 
 from __future__ import annotations
@@ -101,9 +100,24 @@ def main() -> int:
             "provenance.nominal_boundary_receipt_sha256",
             "envelope names no nominal boundary receipt")
 
-    receipt, problem = find_boundary_receipt(args.nominal_plot_plane)
-    if receipt is None:
-        return refuse("provenance.nominal_boundary_receipt_sha256", problem)
+    recorded_path = provenance.get("nominal_boundary_receipt_path")
+    if recorded_path:
+        receipt = Path(str(recorded_path))
+        if (
+            not receipt.is_absolute()
+            or receipt.is_symlink()
+            or not receipt.is_file()
+        ):
+            return refuse(
+                "provenance.nominal_boundary_receipt_path",
+                f"recorded nominal boundary receipt is absent: {receipt}",
+            )
+    else:
+        receipt, problem = find_boundary_receipt(args.nominal_plot_plane)
+        if receipt is None:
+            return refuse(
+                "provenance.nominal_boundary_receipt_sha256", problem
+            )
 
     actual = sha256(receipt)
     if actual != claimed:

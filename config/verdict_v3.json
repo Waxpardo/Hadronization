@@ -1,0 +1,83 @@
+{
+  "schema": "hadronization_verdict_contract_v3",
+  "definition": "The fail-closed input and output contract for the corrected seven-render result. The new nominal render supplies every new numerical value. The accepted historical render is used only to compare fields shared with the new render.",
+  "nominal": {
+    "campaign": "HF_RUN3_V1",
+    "dataset": "hf_run3_v1_candidate"
+  },
+  "rendered_configurations": [
+    {
+      "campaign": "HF_RUN3_V1",
+      "dataset": "hf_run3_v1_candidate",
+      "role": "nominal_numerical_source"
+    },
+    {
+      "campaign": "HF_SYS_MUR_UP",
+      "dataset": "hf_sys_mur_up_variation",
+      "role": "included_systematic_variation"
+    },
+    {
+      "campaign": "HF_SYS_MUR_DOWN",
+      "dataset": "hf_sys_mur_down_variation",
+      "role": "included_systematic_variation"
+    },
+    {
+      "campaign": "HF_SYS_MUF_UP",
+      "dataset": "hf_sys_muf_up_variation",
+      "role": "included_systematic_variation"
+    },
+    {
+      "campaign": "HF_SYS_MUF_DOWN",
+      "dataset": "hf_sys_muf_down_variation",
+      "role": "included_systematic_variation"
+    },
+    {
+      "campaign": "HF_SYS_PDF_CTEQ6L1",
+      "dataset": "hf_sys_pdf_cteq6l1_variation",
+      "role": "included_systematic_variation"
+    },
+    {
+      "campaign": "HF_SYS_PTHAT_4",
+      "dataset": "hf_sys_pthat_4_variation",
+      "role": "included_systematic_variation"
+    }
+  ],
+  "excluded_rendered_configurations": [
+    {
+      "campaign": "HF_SYS_PTHAT_1",
+      "dataset": "hf_sys_pthat_1_variation",
+      "reason": "R9 excludes the empty-class arm from the per-class envelope."
+    }
+  ],
+  "historical_control": {
+    "role": "shared_field_reproduction_control_only",
+    "results_root_relative_path": "HF_RUN3_V1/4d309e9f99e4/run-logs/nominal-all.log",
+    "sha256": "fc3747209c17e43b89788b80f47958f95a85d74f81ab225abdbfc910fecef991",
+    "shared_fields": [
+      "central_yield",
+      "yield_sem",
+      "central_triggers"
+    ],
+    "numerical_use": "forbidden"
+  },
+  "principal_count_identity": {
+    "flavour": "BEAUTY",
+    "trigger": "B^{+}",
+    "associate": "Lambda_b",
+    "observable": "B+ - Lambda_b balancing yield"
+  },
+  "class_contract": "config/multiplicity_percentile_classes_v2.json",
+  "systematics_sources_contract": "config/systematics_sources_v1.json",
+  "effective_settings_allowlist": "config/tune_difference_allowlist_v1.json",
+  "output_paths_relative_to_results_root": {
+    "effective_settings_receipt": "HF_RUN3_V1/{commit}/effective-settings/effective_tune_settings_receipt_v1.json",
+    "systematics_envelope": "HF_RUN3_V1/{commit}/systematics/systematics_envelope.json",
+    "verdict_json": "HF_RUN3_V1/{commit}/systematics/verdict_v3.json",
+    "verdict_markdown": "HF_RUN3_V1/{commit}/systematics/VERDICT_V3.md"
+  },
+  "supporting_fit_status": {
+    "status": "DEFERRED_PENDING_OWNER_AUTHORIZATION",
+    "physical_coordinate_fit_produced": false,
+    "reason": "No physical activity coordinate has owner authorization. The within-block c11-minus-c1 endpoint contrast is the primary model-free trend statistic."
+  }
+}

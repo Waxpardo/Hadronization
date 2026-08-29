@@ -330,6 +330,28 @@ def test_the_request_tool_resolves_every_declared_campaign() -> None:
     assert "/plotting" not in plan["out_dir"]
 
 
+def test_request_prefers_the_new_nominal_measurement_boundary() -> None:
+    """The new nominal measurement, not the historical pin, owns the band."""
+    with tempfile.TemporaryDirectory() as tmp:
+        results = Path(tmp) / "results"
+        boundary = (
+            results / "HF_RUN3_V1" / "aaaaaaaaaaaa" / "measurements"
+            / NOMINAL / "plots" / "multiplicity_boundary_receipt_v2.json"
+        )
+        boundary.parent.mkdir(parents=True)
+        boundary.write_text("new nominal tune-local boundary\n")
+        expected_sha = hashlib.sha256(boundary.read_bytes()).hexdigest()
+        plan_path = Path(tmp) / "plan.json"
+        result = request(results, "--out", str(plan_path))
+        assert result.returncode == 0, result.stdout + result.stderr
+        plan = json.loads(plan_path.read_text())
+    resolved = plan["nominal_boundary"]
+    assert resolved["source"] == "current_commit_root", resolved
+    assert resolved["root"] == "aaaaaaaaaaaa", resolved
+    assert Path(resolved["path"]).resolve() == boundary.resolve(), resolved
+    assert resolved["boundary_receipt_sha256"] == expected_sha
+
+
 # ---- the flag validation gate ---------------------------------------------
 
 def test_a_complete_envelope_validates() -> None:
