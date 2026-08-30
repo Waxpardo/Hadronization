@@ -215,9 +215,12 @@ void.
 | **G6** | `decay_parent_map_v1_1.json` | `0688fb110730c39ac50b9762a900ffcc3a49260b836a6ea7e715602ba2ab4bd6` | `68834dd4a87593366551b881af75c94b74a083afdb9875866004dd451b94fc29` |
 | **G7** | `decay_parent_map_v2.json` (**CURRENT**) | `c7643a838fb428a99660e155ad9c0e776c989f5afc4a8f2239b30523444bde74` | `12a8e62db2f09a7bdb12aa64b964ea30326f8369a7c757b66b5e1a6523d295cc` |
 
-**G5 is frozen as history and must not be deleted.** It is the artifact
-`docs/MAP_V1_CONJUGATION_BUG.md` and private error-ledger entry **E1** are about; deleting
+**G5 is frozen as history and must not be deleted.** It is the artifact private error-ledger entry **E1** is about; deleting
 it would delete the evidence for the project's most instructive published error.
+The write-up `docs/MAP_V1_CONJUGATION_BUG.md` did not survive the rebuild. What
+survives in this tree is the conjugation record at
+`contracts/decay_parent_map_v1_1.json:2-8` and the explanation at
+`tools/build_decay_parent_map.py:50-58`.
 It is also, today, a live hazard — see §6, finding F1.
 
 **Recipes** (all local, pure Python, no ROOT, no PYTHIA):
@@ -526,9 +529,14 @@ published table; P2 additionally reproduces the *charm* table exactly:
 (`0d03d191231163a5…` parametrised, `d7be6731b44f5b95…` counts) identical across
 all ten.
 
-> **G16–G25 are load-bearing beyond M7b:** P2's charm reproduction is currently
-> the *only* repo-local evidence for the charm table of §2.7, whose own logs are
-> not committed.
+> **G16–G25 are load-bearing beyond M7b:** P2's charm reproduction is a second,
+> independent line of evidence for the charm table of §2.7.
+>
+> **Correction, 2026-08-30.** The charm logs ARE committed. The ten files
+> `evidence/m7_blocks/m7_block_01.log` … `m7_block_10.log` are in the tree and
+> this document pins each one by SHA-256 in its digest list below. The
+> "not committed" clause dated from the pre-rebuild layout and contradicted
+> the same document's own pins.
 
 ### 2.9 Σ_b raw-count leg
 
@@ -613,7 +621,7 @@ reached a committed document.**
 
 | | |
 |---|---|
-| `kMultiplyHeavy` selector | `HeavyFlavourUtils.h:357-359` — `|q_c| > 1 \|\| |q_b| > 1` |
+| `kMultiplyHeavy` selector | `HeavyFlavourUtils.h:359-361` — `|q_c| > 1 \|\| |q_b| > 1` |
 | species carrying it | **36** in the ordinal table, catching **192** entries — represented on the axis, rare in the physics |
 | B_c⁺ (541) | ordinal 119, `central_registry: 1`, **`kCentralGround`** — inside the primary bin, not a separate one |
 
@@ -727,7 +735,10 @@ markdown document, whose prose will be edited.
 > exactly the content v3 exists to validate.
 
 **Derived, not asserted**, from `config/pair_file_object_contract_v1.json` at
-`1de9bfe`. The derivation is the recipe: count objects with
+`1de9bfe` OF THE PRE-REBUILD HISTORY. That hash resolves in the pre-rebuild
+repository and in nothing this repository carries, so `git cat-file -t 1de9bfe`
+here returns `Not a valid object name`. The resolvable content pin is the G4
+digest recorded in section 2 of this document. The derivation is the recipe: count objects with
 `closure == "checked"` **and** a histogram-like `root_class` (→ 7), and objects
 with `identity_checked == "true"` (→ 5), each × 300 pair files.
 
@@ -736,8 +747,11 @@ with `identity_checked == "true"` (→ 5), each × 300 pair files.
 closure-checked histogram or an identity-checked string **moves them legitimately**.
 What is frozen is that **the derivation is re-run rather than the numbers
 re-quoted.** A restructure that moves
-`config/pair_file_object_contract_v1.json` (13 referencing files) must keep the
-derivation runnable.
+`config/pair_file_object_contract_v1.json` must keep the derivation runnable.
+Derive the referencing-file count rather than quoting one:
+`grep -rl pair_file_object_contract_v1.json . | grep -v '^./.git/'`
+returned **16** on 2026-08-30, against the **13** this line carried. A quoted
+count is the failure this entry's own freeze condition exists to prevent.
 
 ### 2.11 The bin-level audit trail
 
@@ -1083,8 +1097,10 @@ aggregate check missed it the first time.
 map-independent, so **G14/G15 are unaffected**. The map-dependent output is
 `per_observable.csv` — precisely the file the anchor manifest already flags as
 superseded-because-computed-under-v1. **The live pipeline is safe**:
-`extraction/pipeline/tune_extract.sh` passes `--decay-map …/decay_parent_map_v1_1.json`
-explicitly. **The hazard is an interactive or reviewer invocation**, which would
+`extraction/pipeline/tune_extract.sh` passes `--decay-map …/decay_parent_map_v2.json`
+explicitly (`extraction/pipeline/tune_extract.sh:13`, `:60`; the manifest field is
+`map_v2_sha` at `:32`). The safety claim holds — the script does pass a map
+explicitly — but the map it names is v2. **The hazard is an interactive or reviewer invocation**, which would
 silently regenerate the 45.95 % table with every check green.
 
 > ### ✅ RULED 2026-08-12 — the v1 default is a reproduction hazard
@@ -2734,6 +2750,15 @@ blocks. Recorded as a gap rather than closed by writing the number down.
 
 
 ### 2.10 The five closed variation campaigns — decomposition, 2026-08-19
+
+> **RETIRED PROVENANCE — THIS SECTION AND THE FOUR THAT FOLLOW IT.** Every
+> `results/systematics/20260819` and `results/systematics/20260820` artifact
+> named in the recipes from here to the Λ_b/B⁻ multiplicity trend is
+> `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per its `RETIREMENT_STATUS.json`.
+> The recipes stay because they record how each artifact was made, which is
+> what a provenance record is for. Current successors land under the RUN-N
+> result roots.
 
 | | |
 |---|---|

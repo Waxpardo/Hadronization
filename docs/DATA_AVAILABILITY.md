@@ -11,8 +11,11 @@ validation records, digests, and source-contract tests. Those files support
 the committed-evidence recipes in `README.md` and `docs/REPRODUCIBILITY.md`.
 
 The committed evidence can reproduce selected species-decomposition tables,
-the multiplicity boundaries, stored systematics reports, and source-contract
-verdicts. It cannot recreate the publication dataset or an accepted scientific
+the RETIRED common-axis multiplicity boundaries, stored systematics reports,
+and source-contract verdicts. It cannot reproduce the CURRENT tune-local
+class thresholds: each tune resolves those from its own external merged
+`summed MULTIPLICITY` histogram, and the tracked b4 files are minimum-bias
+calibration samples. It cannot recreate the publication dataset or an accepted scientific
 figure set. The figure-acceptance manifest currently accepts none of P1--P8.
 
 ## External merged and reduced products

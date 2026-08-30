@@ -6,6 +6,28 @@ The sources test theory inputs, one generation cut, and conventions chosen by th
 The current combined values exclude S4.
 Therefore, S4's absence makes every total and verdict in this document provisional.
 
+> **RULINGS R9 AND R11 OF 2026-08-23 ARE NOT YET FOLDED INTO THIS TEXT.**
+> Two statements below disagree with the executable contract, and the
+> contract is authoritative:
+>
+> - **S3 is measured ONE-SIDED, not two-sided.** `HF_SYS_PTHAT_1` is
+>   `included: false` under R9 in `config/systematics_sources_v1.json`
+>   (source `S3_pthat`), because the MONASH p80 and p90 quantiles both
+>   resolve to `N_ch = 2` and the 80–90 % class would need the empty range
+>   [3,2]. `extraction/combine_per_class.py:72` carries the one-element
+>   tuple `('HF_SYS_PTHAT_4',)`. S3 is quoted as measured and is never
+>   symmetrised.
+> - **S5 is EXCLUDED, not a retained exact zero.** `S5_class_migration` is
+>   `included: false` under R11, `exclusion_reason` "unresolved;
+>   re-derivation on the percentile axis pending". Its structural zero was
+>   measured on the RETIRED common absolute axis and does not carry to the
+>   v2 percentile axis. `CAMPAIGNLESS_TERMS` is the empty tuple
+>   (`extraction/combine_per_class.py:80`), so `combine_cell` adds no S5
+>   term at all.
+>
+> The paused-module status is `docs2/systematics/STATUS.md`; the reactivation
+> work list is `docs2/systematics/REACTIVATION.md`.
+
 ## Scope, status, and notation
 
 The six sources test distinct choices in the generator and analysis chain.
@@ -16,9 +38,9 @@ S1 has separate renormalisation-scale and factorisation-scale components.
 | S1a | theory input | `SigmaProcess:renormMultFac`, 1.0 to 2.0 and 0.5 | How strongly does the leading-order scale for the coupling affect the result? | measured on `c1` through `c11` |
 | S1b | theory input | `SigmaProcess:factorMultFac`, 1.0 to 2.0 and 0.5 | How strongly does the factorisation scale affect the initial-state parton flux? | measured on `c1` through `c11` |
 | S2 | theory input | `PDF:pSet`, NNPDF2.3 LO to CTEQ6L1 | How strongly does the chosen parton distribution affect the result? | measured on `c1` through `c11` |
-| S3 | generation cut | `PhaseSpace:pTHatMin`, 2.0 GeV to 1.0 and 4.0 GeV | Does the selected hard-process threshold define the observed result? | measured on `c1` through `c11` |
+| S3 | generation cut | `PhaseSpace:pTHatMin`, 2.0 GeV to 1.0 and 4.0 GeV, **registered two-sided, measured ONE-SIDED under R9** | Does the selected hard-process threshold define the observed result? | measured on `c1` through `c11`, `HF_SYS_PTHAT_4` arm only |
 | S4 | analysis convention | event-activity counter, `|η| <= 1` to `|η| <= 4` | Does a wider activity window change class-resolved results? | boundary calibration complete; per-class measurement absent |
-| S5 | analysis convention | include the measured decay-daughter bias in class assignment | Does the production decay policy move events between multiplicity classes? | measured exact zero on `c1` through `c11` |
+| S5 | analysis convention | include the measured decay-daughter bias in class assignment | Does the production decay policy move events between multiplicity classes? | **EXCLUDED under R11**: the exact zero was measured on the retired common absolute axis and awaits re-derivation on the percentile axis |
 | S6 | analysis convention | resolve duplicate hard-carrier claimants by two deterministic orderings | How much does the strict unresolved-origin rule suppress the pair yield? | measured separately on `M1` through `M5` |
 
 Generated events do not determine scale and parton-distribution choices.
@@ -41,6 +63,12 @@ A source contribution is non-negative.
 The combination uses `max(|Delta|, SEM(Delta))` for each source and multiplicity class.
 
 ## Common variation and control design
+
+> **RETIRED PROVENANCE.** The `results/systematics/20260819` artifacts cited in this
+> section are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots.
 
 The generation-dependent method repeats the complete measurement with one setting changed.
 It regenerates events, reduces them to pair files, merges central and block products, and repeats extraction and plotting.
@@ -95,6 +123,12 @@ The committed artifacts record these checks:
 
 ## S1: renormalization and factorization scales
 
+> **RETIRED PROVENANCE.** The `results/systematics/20260820` artifacts cited in this
+> section are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots.
+
 S1 varies both scales independently by factors of two and one half.
 `config/systematics_variations_v1.json` records this leading-order two-point convention.
 
@@ -128,6 +162,12 @@ It selects S1b ×0.5 in 81 cells and ×2 in 63 cells.
 `results/systematics/20260820/per_class_combination.json` records every class-resolved selection.
 
 ## S2: parton distribution
+
+> **RETIRED PROVENANCE.** The `results/systematics/20260820` artifacts cited in this
+> section are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots.
 
 S2 changes `PDF:pSet` from 13 to 8.
 The settings identify NNPDF2.3 QCD+QED LO as nominal and CTEQ6L1 as the variation.
@@ -178,6 +218,12 @@ The class and integrated combination selects 4.0 GeV in 92 cells and 1.0 GeV in 
 Therefore, neither variation can replace the required per-cell selection.
 
 ## S4: event-activity counter window
+
+> **RETIRED PROVENANCE.** The `results/systematics/20260820` artifacts cited in this
+> section are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots.
 
 S4 changes the operational final-charged-non-heavy event-activity counter from `|η| <= 1` to `|η| <= 4`.
 The raw schema stores both counters for every event.
@@ -273,6 +319,13 @@ A sum across different partitions would combine quantities that do not refer to 
 
 ## Source selection and combination
 
+> **RETIRED PROVENANCE.** The `results/systematics/20260820` artifacts cited in this
+> section are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots. The 107 / 30 / 7 cell counts below describe
+> `results/systematics/20260820` and carry the same status.
+
 Two-sided sources select the variation with the larger `|Delta|` in each class.
 The method does not use half the variation spread and does not call two points an envelope.
 
@@ -288,7 +341,7 @@ The continuous maximum also avoids a jump at the two-SEM reporting threshold.
 The per-class combination applies a special S1b-S2 rule.
 It drops S2 in 107 cells, drops S1b in 30 cells, and drops neither in seven cells.
 
-The current sum contains S1a, S3, the exact S5 zero, and the retained S1b and S2 terms.
+The current sum contains S1a, the one-sided S3, and the retained S1b and S2 terms. It contains NO S5 term: R11 removed it, and `CAMPAIGNLESS_TERMS` is the empty tuple.
 It can retain both S1b and S2 when the special drop rule does not apply.
 
 The sum excludes S4 because no per-class delta exists.
@@ -310,6 +363,12 @@ The S1b-S2 rule handles one known overlap but does not establish independence el
 The unmeasured source correlations limit every combined value.
 
 ## Effect on tune separations and trend
+
+> **RETIRED PROVENANCE.** The `results/systematics/20260820` artifacts cited in this
+> section are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots.
 
 The code recomputes each tune separation and trend inside every variation render.
 It then subtracts the corresponding nominal derived quantity before source selection.
@@ -340,6 +399,14 @@ term. The correction changes four of 77 two-sigma classifications while leaving
 central values and all one-sigma classifications unchanged.
 
 ## Coverage limits and evidence index
+
+> **RETIRED PROVENANCE.** The `results/systematics/20260819` and
+> `results/systematics/20260820` artifacts cited in this
+> section are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots. The evidence table below is an
+> index of how each retired artifact was produced, and stays as written.
 
 The evidence for each source remains separate from this summary.
 

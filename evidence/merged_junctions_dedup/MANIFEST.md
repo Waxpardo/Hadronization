@@ -78,7 +78,7 @@ preserved in the internal archive.
 | extractor | `extract_species_decomposition.py`, sha256 `4cd8b6fa8493529624b33de81e67764c07c2126465d7ae921e5970919f0ad960` |
 | ordinal artifact | `species_ordinals_v2.json`, sha256 `ccec0dbc70f6452d…d0e4ce`, digest `646f310f78126267` |
 | pair registry | `heavy_flavour_pair_registry_v1.json`, sha256 `ea9b0232c1be8415…ddee23` |
-| decay map | `decay_parent_map_v2.json`, sha256 `58081aa2f87cb671…1c84da` |
+| decay map | `decay_parent_map_v2.json`, sha256 `58081aa2f87cb671…1c84da` — the DEPLOYED copy at `/data/alice/ipardoza/extractor_e5fix/AnalysisScripts/`, not `contracts/decay_parent_map_v2.json`. No commit in this repository's history has ever held that digest for the tracked file; see `evidence/e5fix_drivers/run_extract.sh:6-9`, which records the same deployed layout |
 | **all four** | **identical to `merged_monash_dedup`'s** — the same instrument, not a re-implementation |
 | sources | `hadronization_merged/complete_root_HF_RUN3_V1_JUNCTIONS`, `…/combined_root_subSamples_JUNCTIONS/combined_root_{1..10}` |
 | merged inputs | `analysis_commit 61fe978f…`, freeze seal `e03fb1e7…`, **1000 input files** |
@@ -93,8 +93,12 @@ the frozen `Hadronization` checkout, which the canonical merge reads live.
 
 ```bash
 extraction/decompose_with_block_sems.py \
-  AnalysisScripts/anchors/merged_junctions_dedup --tune JUNCTIONS
+  evidence/merged_junctions_dedup --tune JUNCTIONS
 ```
 
 Expect `I3 … PASS` and the values above. **It exits 4, not 0** — the I2 flags
 above are real and reported rather than suppressed.
+
+The input path above is the tracked one. Ruling R19 moved the anchors from
+`AnalysisScripts/anchors/` to `evidence/`, and the old path this command
+carried no longer exists in the tree.

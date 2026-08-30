@@ -172,6 +172,12 @@ That harvest therefore uses the absolute means-first difference from the precedi
 It reports a relative shift beside the difference when the nominal value is nonzero.
 `results/systematics/20260820/per_class_deltas_seven.json` records this estimator's outputs.
 
+> **RETIRED PROVENANCE.** The `results/systematics/20260820` artifacts cited here are
+> `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots.
+
 The two delta estimators are not algebraically equivalent when block denominators differ.
 The class-resolved artifact does not verify the registered block-relative estimator.
 
@@ -246,6 +252,12 @@ finite upper boundary; the absolute widths are tune-dependent.
 A slope per class is therefore not a physical derivative `d(ratio)/dN_ch`.
 The artifact `results/systematics/20260819/ratio_trend.json` records both the endpoint and fit summaries.
 
+> **RETIRED PROVENANCE.** The `results/systematics/20260819` artifacts cited here are
+> `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots.
+
 ## Closure and integrity checks
 
 Exact extracted-count closure establishes accounting by addition.
@@ -297,6 +309,13 @@ Different partitions do not define addable cells.
 
 The tune-bundle spread is not a systematic source.
 It does not enter the uncertainty budget in `results/systematics/20260820/per_class_combination.json` or `verdict.json`.
+
+> **RETIRED PROVENANCE.** The `results/systematics/20260820` artifacts cited here are
+> `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots. The same applies to the
+> `verdict.json` cited later in this section.
 
 The total reported uncertainty combines statistical and included systematic terms:
 

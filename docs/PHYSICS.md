@@ -8,6 +8,13 @@ The pair registry, `config/heavy_flavour_pair_registry_v1.json`, defines those c
 
 The published quantities are angular correlations, integrated balancing yields, yield ratios, and species decompositions.
 The artifacts `results/systematics/20260819/tune_separation.json` and `results/systematics/20260819/ratio_trend.json` contain the derived observables.
+
+> **RETIRED PROVENANCE.** The `results/systematics/20260819` artifacts cited
+> here are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots.
+
 Accepted scientific canvases are ROOT-derived by `plotting/run_paper_plots.sh` and enter `results/figures/main/` only with exact dataset identity, ten-block uncertainties, a receipt, and visual review.
 The required campaign inputs are external, and no complete accepted figure-byte set travels with this checkout.
 
@@ -25,7 +32,7 @@ It is therefore not a minimum-bias sample.
 The three nominal cards under `generation/cards/` define the complete MONASH, JUNCTIONS, and CLOSEPACKING tune bundles.
 
 The multiplicity labels come from a separate MONASH minimum-bias sample.
-The minimum-bias manifest, `evidence/b4_multiplicity_mb/MANIFEST.md`, records that sample and its generator settings.
+`evidence/b4_multiplicity_mb/run_meta.txt` records that sample and its generator settings; the directory holds no `MANIFEST.md`. The record covers the minimum-bias calibration only. It does not establish the current tune-local thresholds, which resolve from the external per-tune merged inputs.
 
 ## Heavy-flavour signs, species, and roles
 
@@ -124,6 +131,14 @@ exhaustive, so every accepted event belongs to exactly one class. The artifact
 `config/multiplicity_percentile_classes_v2.json` is the single class-window
 definition; a v2 run receipt records the tune-specific thresholds.
 
+**The committed minimum-bias evidence does not reproduce these thresholds.**
+Summing the MONASH minimum-bias CSV under `evidence/b4_multiplicity_mb/`
+reproduces the RETIRED common-axis calibration boundaries. The current
+tune-local thresholds resolve from each tune's own external merged
+`summed MULTIPLICITY` histogram, so they need those external inputs and are
+bound to the v2 boundary receipts a run writes. Do not present the retired
+calibration as the current boundary source.
+
 Class `c1` is the lowest-activity class (`90-100%` from the most-active end),
 while `c11` is the highest (`0-1%`). Equal percentile labels compare equal
 activity fractions across tune bundles, not equal absolute `N_ch` intervals.
@@ -204,8 +219,9 @@ The map reader implements this fallback.
 ## Interpretation of tune differences
 
 The comparison is bundle-to-bundle among three full tune configurations.
-The cards differ in 28 parameters across nine setting families.
+The allowlist admits 28 settings in nine families, and the cards name exactly those 28.
 Eight parameters belong to `ColourReconnection`.
+**28 is a count of allowlist entries, not of resolved value differences.** `tools/validate_tune_cards.py:122` gives an absent key the sentinel `<PYTHIA_DEFAULT>`, which never equals a literal, so a setting written to the value the tune already supplies still counts. MONASH sets none of the 28 and prints the sentinel on every row. Of the 28, eight carry differing literals between JUNCTIONS and CLOSEPACKING, eight carry identical literals in both, and twelve are set by only one of the two (measured 2026-08-30 by running the validator). A count of RESOLVED differences comes from `tools/write_effective_settings_receipt.py:396`, over the post-init effective-settings snapshots; no such count is quoted here.
 The allowlist `config/tune_difference_allowlist_v1.json` records every permitted difference, and `tools/validate_tune_cards.py` checks the cards.
 
 | setting family | differing parameters |
@@ -241,15 +257,15 @@ Committed evidence establishes only the scope named in its row and does not repl
 
 | scientific claim | editable source | generated contract | implementation | source-contract test | committed evidence | manuscript consequence |
 |---|---|---|---|---|---|---|
-| Proton-proton collisions at 13.6 TeV | three nominal cards in `generation/cards/`; `config/tune_difference_allowlist_v1.json` | `generation/registries/GeneratedTuneSettingRegistry.h` | `generation/producer/heavyflavourcorrelations_status.cpp` records and checks effective settings | `tests/test_registry.py`; `tests/test_systematics_variation_cards.py` | `docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md`; `evidence/closure_v3_verdicts/MANIFEST.md` | State pp at 13.6 TeV; do not inherit the historical 14 TeV label. |
+| Proton-proton collisions at 13.6 TeV | three nominal cards in `generation/cards/`; `config/tune_difference_allowlist_v1.json` | `generation/registries/GeneratedTuneSettingRegistry.h` | `generation/producer/heavyflavourcorrelations_status.cpp` records and checks effective settings | `tests/test_registry.py`; `tests/test_systematics_variation_cards.py` | `docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md`; the closure logs under `evidence/closure_v3_verdicts/` (that directory carries logs and verdict lines, and no `MANIFEST.md`) | State pp at 13.6 TeV; do not inherit the historical 14 TeV label. |
 | PYTHIA 8.317 and ROOT 6.30.01 | `config/dependencies.conf` | none; both are runtime assertions rather than generated headers | `setupEnv.sh`; `tools/environment_verdict.sh` | `tests/test_pythia_runtime_contract.py`; `tests/test_environment_verdict.py` | `results/validation/plotting/hf_run3_v1_kinematics_20260817/RUN_RECORD.md`; closure logs under `evidence/closure_v3_verdicts/` | Quote both pins with every accepted result; an off-pin render is diagnostic. |
 | Forced hard-heavy sample with `HardQCD:hardccbar`, `HardQCD:hardbbbar`, and `pTHatMin = 2.0 GeV` | nominal cards; common values in `config/tune_difference_allowlist_v1.json` | `generation/registries/GeneratedTuneSettingRegistry.h` | producer requires exactly one signed selected-hard pair in every successful event | `tests/test_heavy_flavour_utils.cpp`; `tests/test_registry.py` | `results/validation/generator/PTHAT_MULTIPLICITY_SCAN_8317.md`; campaign authorization | Call this a forced hard-heavy sample, never minimum bias. |
 | Species roles and heavy-flavour signs follow signed quark content | `config/heavy_flavour_species_v1.json`; `config/heavy_flavour_pair_registry_v1.json` | `contracts/GeneratedPairRegistry.h`; `contracts/GeneratedSpeciesOrdinals.h` | `generation/producer/HeavyFlavourUtils.h`; reduction registry lookup | `tests/test_registry.py`; `tests/test_heavy_sign_production_convention.py` | central and block `per_species.csv` products under `evidence/merged_*_dedup/` | OS and SS mean opposite and equal heavy-flavour sign, not electric charge. |
 | Trigger: final direct-primary central ground state, `pT > 1.0 GeV/c`, `|eta| <= 4`; associate: the same status/state rules, `pT > 0.15 GeV/c`, `|eta| <= 4` | species registry and constants in `generation/producer/HeavyFlavourUtils.h` | pair-file metadata fields in `contracts/GeneratedPairObjectContract.h` | `EligibleBase` in `analysis/status_analysis_THnSparse_qq.C` | `tests/test_pair_contract_schema_prefix.py`; `tests/test_heavy_flavour_utils.cpp` | v3 closure logs and the three extraction-anchor manifests | Describe status 81--89 as direct primary, not prompt. |
 | Trigger ancestry must resolve to the selected hard process; associate origin is unrestricted and recorded in six categories | origin rules in `generation/producer/HeavyFlavourUtils.h`; `contracts/AssociateOriginCategoryContract.h` | none; the shared category header is compiled directly by producer-adjacent and reduction code | producer origin graph and reduction trigger-only origin cut | `tests/test_associate_origin_category_contract.py`; `tests/test_final_origin_closure.py` | `results/a2/20260813/results/tiebreak_robustness/smallest_MONASH.txt` and its JUNCTIONS and CLOSEPACKING siblings; origin-resolved extraction anchors | Do not impose a prompt or selected-hard associate requirement in prose. |
-| Self-pairs and pairs sharing the same selected hard parton are excluded | `generation/producer/HeavyFlavourUtils.h` | pair identity and selected-hard indices in the raw/pair contracts | pair loop in `analysis/status_analysis_THnSparse_qq.C` | `tests/test_observable_contract.py`; `tests/test_heavy_flavour_utils.cpp` | v3 closure and extraction anchors | The conditional yield never counts one carrier twice. |
+| Self-pairs and pairs sharing the same selected hard parton are excluded | `analysis/status_analysis_THnSparse_qq.C:1081-1083` (self-pair, by stored index) and `:1107-1121` (shared hard parton) | pair identity and selected-hard indices in the raw/pair contracts | the pair loop, at those two sites | NONE pins either predicate. The nearest gate is `tests/test_pthat_sensitivity.py:549-554`, which asserts a nonzero `same_hard_pairs` diagnostic is a finding | v3 closure and extraction anchors | The conditional yield never counts one carrier twice. |
 | `OS`, `SS`, and `OS-SS` are registry-selected ordered conditional pairs; the SS factor is exactly 1 | pair registry; plotting configurations | `contracts/GeneratedPairRegistry.h`; pair metadata `same_sign_pair_factor` | `ResolveConfiguredPairFromRegistry` and `calculateOneYield` in the ROOT plotter | `tests/test_plot_reference_multiplicity_contract.py`; `tests/test_observable_contract.py` | three-tune plotting run record and central tables | Write `(OS-SS)/N_trig`; never use the legacy one-half factor. |
-| Trigger normalization comes only from a dedicated trigger count | `config/pair_file_object_contract_v1.json` | `contracts/GeneratedPairObjectContract.h` requires additive `hTrKinematics` and `hFlavourClosureSummary` | the balancing plotter projects `hTrKinematics` and requires matching OS/SS denominators; the closure diagnostic uses the summary's trigger bin; pair projections supply numerators only | `tests/test_pair_object_contract.py`; `tests/test_plot_reference_multiplicity_contract.py` | plotting run record; ten-block uncertainty logs | Do not normalize a yield by a trigger projection from `hCorrelations`. |
+| Trigger normalization comes only from a dedicated trigger count | `config/pair_file_object_contract_v1.json` | `contracts/GeneratedPairObjectContract.h` requires additive `hTrKinematics` and PERMITS conditional `hFlavourClosureSummary`, whose absence is not an error: it is written only when `trigger.weightedTriggers > 0`, so requiring it would fail every rare species | the balancing plotter projects `hTrKinematics` and requires matching OS/SS denominators; the closure diagnostic uses the summary's trigger bin; pair projections supply numerators only | `tests/test_pair_object_contract.py`; `tests/test_plot_reference_multiplicity_contract.py` | plotting run record; ten-block uncertainty logs | Do not normalize a yield by a trigger projection from `hCorrelations`. |
 | The stored angular axis is `-pi/2 <= Delta phi < 3pi/2`; the reported integrated yield covers that full axis | pair-object configuration | generated pair-object contract identifies `hCorrelations` but declares no regional boundary | `MakeCorrelation` in the reduction and full-histogram `Integral()` in `calculateOneYield` | `tests/test_statistical_robustness.py`; `tests/test_pair_object_contract.py` | ROOT plotting run record | Near-side and away-side may describe features of the distribution, but no near-side or away-side integrated yield is currently defined or evidenced. |
 | Event activity counts final charged non-heavy particles with `pT > 0.15 GeV/c` and `|eta| <= 1`; eleven percentile windows are resolved independently per tune | `config/multiplicity_percentile_classes_v2.json`; multiplicity utility | generated class labels and v2 receipt schema | producer counter; ROOT per-tune threshold resolution and partition validation | `tests/test_multiplicity_inset_boundary_source.py`; `tests/test_plot_reference_multiplicity_contract.py`; `tests/test_harvest_class_axis.py`; `tests/test_supervisor_decisions.py` | tune-level merged `summed MULTIPLICITY`; v2 plotting boundary receipt | Use `c1` through `c11` as equal-fraction activity classes. Do not require common absolute `N_ch` thresholds. |
 | Central values use the complete pooled union; uncertainty is the standard error across ten disjoint equal-exposure block estimators | `config/statistical_robustness_v1.json`; `docs/STATISTICS.md` | pair-object additive/identity scopes in `contracts/GeneratedPairObjectContract.h` | manifest merge, ROOT block estimator, and extraction block combiners | `tests/test_statistical_robustness.py`; `tests/test_pair_object_contract.py`; `tests/test_decompose_exit_status.py` | three central plus thirty block extraction products; v3 closure logs | Do not call the central value a mean of blocks; form nonlinear ratios inside each block. |
@@ -278,6 +294,12 @@ variation SEMs in `extraction/combine_derived.py` and regenerates
 `results/systematics/20260820/verdict.json` as schema v2. Four two-sigma
 classifications change. The remaining S4 and hang-selection blockers still
 prohibit a final derived-systematic significance claim.
+
+> **RETIRED PROVENANCE.** The `results/systematics/20260820` artifacts cited
+> here are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots.
 
 ### Pair-schema sidecar
 
@@ -311,6 +333,13 @@ The files `results/systematics/20260819/ratio_trend.json` and `results/systemati
 The final uncertainty calculation combines systematic sources in quadrature.
 The repository has not tested their independence.
 The artifact `results/systematics/20260820/verdict.json` records the per-source terms and their quadrature totals.
+
+> **RETIRED PROVENANCE.** The `results/systematics/20260819` and
+> `results/systematics/20260820` artifacts cited here are
+> `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`. Current successors land under the RUN-N result
+> roots.
 
 The OS-minus-SS construction follows the logic of identified-particle correlation studies that compare unlike-sign and like-sign pairs.
 The hard heavy-flavour trigger and forced generator sample make this observable different from an experimental balance function.

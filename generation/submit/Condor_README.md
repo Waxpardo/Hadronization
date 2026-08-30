@@ -18,7 +18,10 @@ configuration and do not belong in tracked instructions.
 ```bash
 # from the checkout root
 make doctor                       # must report 0 blocking
-make submit-full CAMPAIGN=HF_RUN3_V1
+make submit-full CAMPAIGN=HF_RUN3_V1 ORDINAL=<ordinal>
+# ORDINAL has no default. `make submit-full` depends on `require-ordinal`,
+# which exits 1 and prints where the live claims are (Makefile:152-177).
+# The claim list is config/campaign_ordinals_v1.json; HF_RUN3_V1 is ordinal 3.
 
 # on the authorized submit host, from the same checkout root
 OUT=$(condor_submit submit_HF_RUN3_V1_full.sub)
@@ -40,11 +43,15 @@ Smaller runs: `make submit-smoke` (10 jobs/tune) and `make submit-prelim`
 MAX_CPU= MAX_RUNTIME=`.
 
 Rendering refuses to proceed if the checkout has tracked modifications, and
-refuses any seed the ledger (`config/burned_seeds.txt`) has already burned.
+refuses any seed the ledger has already burned. That ledger is
+`$HADRONIZATION_DATA_ROOT/project/runs/seed_ledgers/burned_seeds.txt`
+(`Makefile:35-36`), and it is NOT inside the checkout. A ledger path that
+resolves inside the checkout means `setupEnv.sh` was not sourced in this
+shell (`Makefile:169-174`).
 
 ## Submitted jobs are HELD. Release is a separate act
 
-`render_production_submit.py:286` emits `hold = True` unconditionally, so a
+`render_production_submit.py:327` emits `hold = True` unconditionally, so a
 freshly submitted campaign sits **entirely held** and **nothing runs** until:
 
 ```bash
@@ -56,12 +63,20 @@ condor_q                                # expect: 0 held
 Check the reasons **before** releasing — a job held at t=0 for anything other
 than code 15 has a real problem that a release would mask.
 
-### Two hold classes, identical in `condor_q`, opposite in meaning
+### Two hold classes, identical in a bare `condor_q` count, opposite in meaning
+
+They are told apart by the hold reason, which the recipe above already reads:
+`HoldReasonCode` 15 is the submit-time parking brake, and a periodic hold
+carries the literal `HF_HANG_GUARD` in its `HoldReason`. That marker string is
+what the retry path matches: `tools/resubmit_held.py:55` reads `HoldReason` and
+`:271-274` splits the held jobs on whether the marker is present.
 
 | hold | when | means | do |
 |---|---|---|---|
 | `HoldReasonCode 15` "at user's request" | at submit, **all** jobs | the parking brake | **release** |
-| `HF_HANG_GUARD suspected generator hang` | after >3600 s CPU or >14400 s wall | wedged generator, ~2.7 % | **retry** |
+| `HF_HANG_GUARD suspected generator hang` | after >3600 s CPU or >14400 s wall | wedged generator; see the rate note below | **retry** |
+
+**The rate is measured, not quoted from here.** `make status` computes the live rate from worker outputs (`tools/campaign_status.py:264`, printed at `:271-274`). The recorded nominal-campaign attrition is in `config/cr_holdout_policy_v1.json`: 0/1000 MONASH, 63/1063 JUNCTIONS (5.93 %), 64/1064 CLOSEPACKING (6.02 %) — 127 of 3,127 attempts, 4.06 % campaign-wide. An earlier form of this table carried an unsourced "~2.7 %", which no artifact in this repository supports and which the recorded observations contradict. `docs/GOLDEN_OUTPUTS.md:1053` row N5 requires the discard rate to be reported rather than corrected away, so it must never be quotable from an unsourced runbook line.
 
 **"N held" is evidence of nothing until you read the reason.**
 
@@ -100,12 +115,15 @@ four such jobs once burned 34 CPU-hours unnoticed.
 **The guard is on CPU time, not wall clock.** A wedged job burns CPU
 continuously (the four historical hangs ran at CPU/wall = 0.97); a healthy job
 on a contended node does not -- one smoke-test job sat at CPU/wall = 0.33, 1787s
-of wall clock for 598s of work, behaving perfectly. A wall-clock guard cannot
+of wall clock for 598s of work, behaving perfectly (a smoke-test observation
+with no dated record under `results/validation/` in this repository; read it as
+the reason for the design, not as a citable measurement). A wall-clock guard cannot
 tell those apart, and killing slow-but-valid jobs would bias the discard rate
 toward whichever nodes happen to be busy.
 
 3600s is about 4.7x the slowest normal job (CLOSEPACKING, 762s), and above a
-2398s outlier seen in the smoke test that was not a classic hang. It is
+2398s outlier seen in the same smoke test, likewise unrecorded here, that was not a
+classic hang. It is
 deliberately generous: the hang is unbounded so any threshold catches it, while
 a tight cut would also discard slow-but-legitimate jobs -- and dense-junction
 events are both slower AND the ones producing the baryons being measured, so
@@ -137,9 +155,11 @@ condor_release <new cluster>
 
 Retries use **fresh seeds**. PYTHIA is deterministic given its seed, so
 re-running a wedged job unchanged risks wedging in the same place -- which is
-also why `periodic_release` is the wrong mechanism. `seed_for(tune, job,
-attempt)` keeps every attempt reproducible and non-colliding, and the new seeds
-are burned to the ledger.
+also why `periodic_release` is the wrong mechanism. `seed_for(tune, job_index, attempt=0, tunes=ALL_TUNES, *,
+campaign_ordinal)` (`tools/campaign.py:111-117`) keeps every attempt reproducible
+and non-colliding, and the new seeds are burned to the ledger. The `campaign_ordinal`
+argument is what makes non-colliding true ACROSS campaigns rather than only
+within one.
 
 Only jobs held by `HF_HANG_GUARD` are auto-resubmitted. Anything held for
 another reason is reported and left alone, because resubmitting it blindly
@@ -181,7 +201,9 @@ detached-process and mount policy before starting a long merge or extraction.
 
 ## Legacy
 
-`submitCondor_*.sub` and the historical `RootFiles/`, `Jobs/` trees are kept
-for regression only. They use discovery, seed modifiers and retry conventions
-this workflow does not accept. `runCondorJob.sh` refuses any invocation that is
+The historical `submitCondor_*.sub` files and the `RootFiles/` and `Jobs/`
+trees are NOT in this repository: `git ls-files` matches none of them. They
+were removed in the 2026-08-22 rebuild and survive only in the history of the
+pre-rebuild repository. They used discovery, seed modifiers and retry
+conventions this workflow does not accept. `runCondorJob.sh` refuses any invocation that is
 not `--campaign`; reconstruct an old run from the commit that produced it.

@@ -45,6 +45,14 @@ rulings R7 and R9 to R11.
 
 The full Nikhef chain uses the same command:
 
+The first line below is illustrative of the command SHAPE only. `HF_RUN3_V2`
+is not a claimed campaign, and ordinal 4 is held by `HF_SYS_MUR_UP`
+(`config/campaign_ordinals_v1.json`), so
+`tools/render_production_submit.py` refuses that pair before it writes a
+submit file. A real run names an owner-approved campaign and an ordinal
+recorded in that file first; nobody may invent one here. The completed
+campaign's own command is in `docs2/pipeline/PRODUCE.md`.
+
 ```bash
 ./hadronization render-production HF_RUN3_V2 4 1000 100000
 condor_submit submit_HF_RUN3_V2_full.sub
@@ -54,7 +62,11 @@ condor_submit submit_HF_RUN3_V2_full.sub
 condor_submit submit_analysis_HF_RUN3_V1.sub
 
 ./hadronization merge hf_run3_v1_candidate v3
-./hadronization plot hf_run3_v1_candidate all
+# `all` is NOT runnable for HF_RUN3_V1: it expands to a `thnsparse` target
+# that derives configuration_multiplicity_HF_RUN3_V1_THREETUNE_THnSparse.json,
+# which does not exist, so the run exits 2 at preflight. The paper figures are
+# invoked by explicit target -- see docs2/pipeline/RENDER.md.
+./hadronization plot hf_run3_v1_candidate multiplicity-spectrum
 
 # Non-publication systematic measurement; staged config, log, figures,
 # output assertion, and receipt all stay in its commit-scoped measurement root.

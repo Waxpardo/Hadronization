@@ -66,6 +66,26 @@ observable is deliberately outside the mutually exclusive partition
 Use `c1` through `c11` as equal-fraction activity classes. Do not require common
 absolute thresholds.
 
+### Which fields of the class contract are load-bearing
+
+`classes` and `counter` are read. Four fields are narrative provenance with no
+consumer anywhere in the tree: `historical_contract.merge_commit`,
+`historical_contract.implementation`, `counter` as a cross-check, and
+`tie_rule`. Two of them exist a SECOND time as C++ string literals in the
+boundary receipt — `tie_rule` at
+`plotting/improvedPlotting_THnSparse.C:1948-1950` and the PR-13 merge commit at
+`:1958-1959` — and nothing compares the two copies. Treat the JSON strings as
+the statement of record and the C++ literals as what a run actually writes.
+
+`historical_contract.implementation` reads
+PlottingScripts/improvedPlotting_THnSparse.C, written here without a code span
+because nothing in this repository resolves it. **That path is the upstream
+PR-13 tree, not this repository**, where there is no `PlottingScripts/`
+directory; the workflow lives at `plotting/improvedPlotting_THnSparse.C`. The
+sibling `github_pr` and `merge_commit` fields make the upstream intent clear,
+and `tests/test_multiplicity_inset_boundary_source.py:28` checks `github_pr`
+alone.
+
 **The retired recipe is not a reproduction of these classes.** Summing the
 MONASH minimum-bias CSV under `evidence/b4_multiplicity_mb/` reproduces the
 retired common-axis calibration, not the current tune-local thresholds. The

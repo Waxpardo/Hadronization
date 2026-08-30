@@ -95,7 +95,7 @@ The stored axis is `-π/2 <= Δφ < 3π/2` and the reported integrated yield cov
 that full axis: `calculateOneYield` integrates the whole histogram
 (`plotting/improvedPlotting_THnSparse.C:3238-3240`). The owner ruling of 2026-08-21
 selects the full axis as the supported integrated observable
-(`docs/PHYSICS.md:266-272`).
+(`docs/PHYSICS.md:282-288`).
 
 No editable configuration, generated contract, test or accepted artifact defines
 near-side or away-side boundaries. Near-side and away-side may describe features

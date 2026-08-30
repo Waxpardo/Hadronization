@@ -82,7 +82,7 @@ when `trigger.weightedTriggers > 0`, so requiring it would fail every rare
 species. Row C8 says *permits*.
 
 **Nothing under `tests/` pins the self-pair and shared-parton exclusions**
-(ledger DA1-B070). `docs/PHYSICS.md:250` names
+(ledger DA1-B070). `docs/PHYSICS.md:266` names
 `generation/producer/HeavyFlavourUtils.h` as their contract and
 `tests/test_heavy_flavour_utils.cpp` as their test; neither file contains either
 predicate. Row C6 states the gap instead of citing a test that does not test it.

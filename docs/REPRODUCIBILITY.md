@@ -66,6 +66,8 @@ The scientific contracts use generated headers, validators, and digests. Each co
 | Systematic variations | `config/systematics_variations_v1.json` | `tools/make_systematic_cards.py --check` |
 | Decay regrouping | `contracts/decay_parent_map_v2.json` | Map builders, extraction tests, and the species-axis pin |
 
+Not every field of an artifact above is a gate. In `species_ordinals_v2.json`, five of the thirteen top-level keys have no reader anywhere in the tree — `source_raw`, `selection`, `ordinal_order`, `unmapped_policy` and `category_source`. The other eight are read: `schema`, `species_count`, `audit_rows_total`, `hidden_heavy_excluded`, `table_digest_fnv1a64`, `category_counts`, `species`, and `derived_from`. In the decay maps the ENFORCED fields are `ordinal_table_digest_fnv1a64`, `split_species_count`, `split`, `species_level_branches`, `dominant_products`, `dominant_branching_ratio`, `name`, `ordinal`, `pdg`, and the map's own `map_sha256` in the test. Every other field — `species_count`, `unmapped_policy`, the conjugation and gate blocks, `derived_from`, `br_source`, `scope_note`, `supersedes`, `pythia_version`, and the per-species `channels`, `status`, `reassigned_by_v1`, `br_sum_raw`, `br_weight_without_in_table_daughter`, `species_level_nondominant_weight` and `species_level_nondominant_pct_of_total` — is PROVENANCE, read by no runtime or test consumer. Do not mistake a provenance string for a gate.
+
 The species axis has 202 entries. Its FNV-1a digest is `646f310f78126267`, which each v3 merged file must carry.
 
 The multiplicity contract fixes percentile windows `90-100, 80-90, ...,
@@ -236,6 +238,13 @@ python3 tools/build_decay_parent_map_v2.py \
 
 The first command must report internal map digest `68834dd4a87593366551b881af75c94b74a083afdb9875866004dd451b94fc29`. The second must report `12a8e62db2f09a7bdb12aa64b964ea30326f8369a7c757b66b5e1a6523d295cc`. Each value is the digest of the committed map's own body, and `tests/test_contract_digests_describe_their_bodies.py` checks that pairing on every `make check`.
 
+> **RETIRED PROVENANCE.** The `results/systematics/20260820` inputs of the two
+> commands below are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per
+> `results/systematics/20260820/RETIREMENT_STATUS.json`. The commands rebuild
+> a retired table from retired inputs. Current successors land under the RUN-N
+> result roots.
+
 The committed result JSON files rebuild the integrated and class-resolved systematics tables:
 
 ```bash
@@ -282,7 +291,7 @@ reference/multiplicity static contracts passed` and exits 0. No tracked test
 rehashes the producers, configurations, selectors, registries, boundary
 artifacts or numerical sources.
 
-The multiplicity boundaries also reproduce from committed evidence. Sum the MONASH CSV cumulatively and apply the procedure in Section 3.
+The RETIRED common-axis multiplicity boundaries reproduce from committed evidence. Sum the MONASH minimum-bias CSV cumulatively and apply the procedure in Section 3. This reproduces the retired calibration only. The CURRENT tune-local thresholds resolve from each tune's own external merged `summed MULTIPLICITY` histogram and are bound to the v2 boundary receipts a run writes, so the tracked b4 files cannot establish them.
 
 The cumulative crossings reproduce all 11 boundaries exactly. The CSV SHA-256 is `6027dc0076cf48eb9b0e13c12014c20228ee63a8a2e0acba424bda7ed409475e`.
 
@@ -450,7 +459,7 @@ Without those files, a reader can do the following work:
 
 - Inspect every stage and contract.
 - Regenerate selected tables from anchors.
-- Reproduce the multiplicity boundaries.
+- Reproduce the retired common-axis multiplicity boundaries.
 - Inspect the planned figure programme, its blocked acceptance manifest, and
   the committed numerical inputs that are present.
 - Verify committed digests and source-contract tests.
@@ -499,4 +508,4 @@ The legacy generated heavy-flavour summary is not recoverable from current input
 
 The old counting macro cannot read raw-v7 files. A replacement must count all 3,000 raw files again.
 
-The site-bound extraction wrapper weakens recovery. A portable rebuild must replace its external path and stop on every failed stage.
+That site-bound extraction wrapper is superseded. The tracked chain requires explicit external roots, carries no site-specific default, resolves its entrypoint from the checkout, and stops when closure or extraction fails (section 8). Recovery is limited by the absent external inputs, not by the wrapper.

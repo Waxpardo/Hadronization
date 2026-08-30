@@ -71,7 +71,7 @@ the analysis requires trigger `pT > 1` GeV and much of the charm produced below
 
 **1,000 canonical slots per tune × 100,000 successful events per job × 3
 tunes.** Smaller jobs limit the work lost to a generator hang
-(`docs/REPRODUCIBILITY.md:131`). `HF_RUN3_V1` holds campaign ordinal 3
+(`docs/REPRODUCIBILITY.md:133`). `HF_RUN3_V1` holds campaign ordinal 3
 (`config/campaign_ordinals_v1.json`, the ordinal-3 row).
 
 ## Hang disclosure (ruling R41)
@@ -104,12 +104,36 @@ sealed canonical manifest enter reduction
 The attrition is **disclosed as measured and is not corrected away or converted
 into an event weight** (same field). The hang hits dense-junction topologies —
 exactly the configurations under study — which is why the discard rate must be
-reported rather than corrected (`docs/GOLDEN_OUTPUTS.md:1053`, row N5).
+reported rather than corrected (`docs/GOLDEN_OUTPUTS.md:1067`, row N5).
 
 Ruling R41 accepts these rates. Whether the disclosure reads "unmeasured" or
 "bounded, negligible" is the owner's editorial call in Overleaf; the architect's
 completed-file conditioning bound is on record if the stronger wording is
 wanted.
+
+## The publication authorization's stale links (ledger DA1-040)
+
+`docs/HF_RUN3_V1_PUBLICATION_AUTHORIZATION.md` is the campaign's authorization
+record. **It is FROZEN.** Its sha256
+`309bd99caeab0e929e0b5dee322d68771b642445486c4a812699ca1e0e8cf46f` is pinned as
+`publication_authorization_sha256` in `config/dataset_selector.json` and
+`config/dataset_selector_hf_run3_v1.json`, so editing one byte turns the suite
+red. The corrections therefore live here, not there.
+
+Three of its present-tense links do not resolve at HEAD:
+
+| the authorization says | what is true at HEAD |
+|---|---|
+| the independent closure logs are committed at `AnalysisScripts/anchors/closure_v3_verdicts/` | ruling R19 moved them; they are at `evidence/closure_v3_verdicts/` |
+| docs/FIGURE_INVENTORY.md §4 carries open owner decisions | that file does not exist in this repository, so the path is written here without a code span: nothing resolves it |
+| plotting/PAPER_FIGURE_PROVENANCE.md carries stale captions | absent likewise |
+
+**The authorization's substance is unaffected.** The closure logs it relies on
+are present under their new path, and the two absent files were manuscript-side
+notes it explicitly does not touch. Read the paths through this table.
+
+The current figure and caption record is
+[CLAIM_MAP.md](CLAIM_MAP.md) and [DELIVERABLES.md](DELIVERABLES.md).
 
 ## Trigger and associate scope (ruling R40)
 

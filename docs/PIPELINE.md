@@ -227,7 +227,7 @@ Three tunes therefore produce three centrals and 30 blocks.
 
 `merging/merge_root_files.sh` derives this shape from the sealed manifests.
 It requires equal event exposure, uses the central and block slots exactly, and never discovers extra pair directories.
-`merging/MergeCanonicalAnalysis.C` performs object-aware addition under the generated pair-object contract.
+`merging/MergeCanonicalAnalysis.C` performs object-aware addition under a hardcoded per-name rule, NOT under the generated pair-object contract. It includes `contracts/GeneratedPairRegistry.h` and nothing else from `contracts/`; the additive-versus-invariant decision is the hardcoded twelve-name chain at `merging/MergeAnalysisObjects.C:164-176`. `tests/test_pair_object_contract.py:94-106` pins ten of those names in `KNOWN_ENUMERATIONS`, so the chain cannot silently gain, lose or rename a member, and `test_every_known_enumeration_still_exists` removes the exemption the day the defect is repaired. Deriving that decision from `contracts/GeneratedPairObjectContract.h` is recorded post-paper work.
 
 `./hadronization merge DATASET [PAIR_SCHEMA]` is the blocking public route.
 It resolves the dataset once and passes the resolved paths, campaign, pair
@@ -327,10 +327,12 @@ These source/configuration repairs do not revalidate the external selected files
 
 The plotting harvest emits signed variation measurements.
 Extraction scripts compare each variation with nominal, select source contributions, and combine compatible sources.
-The surviving CSV and JSON products under `results/systematics/20260819/` and
-`results/systematics/20260820/` are retired common-axis provenance, not current
-results. Each tree's `RETIREMENT_STATUS.json` gives its machine-readable scope;
-J-b/J-c supply the tune-local successors.
+> **RETIRED PROVENANCE.** The surviving CSV and JSON products under
+> `results/systematics/20260819` and `results/systematics/20260820` are
+> `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their `RETIREMENT_STATUS.json`.
+> They are retired common-axis provenance, not current results. Current
+> successors land under the RUN-N result roots.
 
 ## Plotting and figure production
 

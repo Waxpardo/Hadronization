@@ -4,7 +4,22 @@
 > this file were produced on the retired common absolute multiplicity axis.
 > They remain historical provenance and are not results of the 2026-08-22
 > rebuild. Regeneration requires tune-local v2 boundary receipts; see
-> `paper/CLAIM_EVIDENCE.md` row A3 and `docs/REPRODUCIBILITY.md` section 3.
+> `paper/CLAIM_EVIDENCE.md` row A3, `docs2/physics/MULTIPLICITY.md`, and
+> `docs/REPRODUCIBILITY.md` section 3.
+>
+> **RETIRED PROVENANCE — SECTIONS 1, 4, 5, 6, 7 AND 9.** Those six sections
+> take their numbers from `results/systematics/20260819` and
+> `results/systematics/20260820`, either by a `Source:` line naming the tree
+> or by a bare `ratio_trend.json` / `verdict.json` field reference to the same
+> artifacts. Both trees are `HISTORICAL_PROVENANCE_ONLY` with
+> `current_or_publication_use: PROHIBITED` per their
+> `RETIREMENT_STATUS.json`, so no number in those sections may enter a current
+> or published claim. Current successors land under the RUN-N result roots, and
+> the current claim map is `docs2/paper/CLAIM_MAP.md`.
+>
+> Sections 2, 3, 8 and 10 do not cite either tree. Their sources are tracked
+> `evidence/` anchors, `contracts/`, and `tests/fixtures/`, which this note
+> does not label.
 
 ## 1. Scope and claim hierarchy
 
