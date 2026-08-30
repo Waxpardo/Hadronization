@@ -119,6 +119,14 @@ GENERATORS: dict[str, dict] = {
         "replace": "HADRONIZATION_GENERATED_SPECIES_ORDINALS_H_DRIFTED",
         "why": "the include guard of the generated header the macro includes",
     },
+    "make_strict_control_fixtures": {
+        "generator": "tools/make_strict_control_fixtures.py",
+        "artifact": "tests/fixtures/strict_control/nominal_144.log",
+        "find": "tag=complete_root_HF_RUN3_V1",
+        "replace": "tag=complete_root_HF_SYS_MUR_UP",
+        "why": ("the campaign tag this generator writes into every resolver "
+                "line, and the line DA1-031's resolver assertion reads"),
+    },
     "normalize_site_paths": {
         "generator": "tools/normalize_site_paths.py",
         "artifact": "plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED.json",
