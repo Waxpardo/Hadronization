@@ -1,0 +1,14 @@
+# Round-2 measured 144v132_only_one_shared: a control sharing ONE row with the nominal. compare_rows reports agree=True on it.
+Beauty central resolver MONASH: base=/data/alice/ipardoza/hadronization_merged, tag=complete_root_HF_RUN3_V1
+Beauty subsample resolver MONASH: base=/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples
+Beauty central resolver JUNCTIONS: base=/data/alice/ipardoza/hadronization_merged, tag=complete_root_HF_RUN3_V1
+Beauty subsample resolver JUNCTIONS: base=/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples
+Beauty central resolver CLOSEPACKING: base=/data/alice/ipardoza/hadronization_merged, tag=complete_root_HF_RUN3_V1
+Beauty subsample resolver CLOSEPACKING: base=/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples
+Charm central resolver MONASH: base=/data/alice/ipardoza/hadronization_merged, tag=complete_root_HF_RUN3_V1
+Charm subsample resolver MONASH: base=/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples
+Charm central resolver JUNCTIONS: base=/data/alice/ipardoza/hadronization_merged, tag=complete_root_HF_RUN3_V1
+Charm subsample resolver JUNCTIONS: base=/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples
+Charm central resolver CLOSEPACKING: base=/data/alice/ipardoza/hadronization_merged, tag=complete_root_HF_RUN3_V1
+Charm subsample resolver CLOSEPACKING: base=/data/alice/ipardoza/hadronization_merged/SUBSAMPLES_HF_RUN3_V1/combined_root_subSamples
+UNCERTAINTY_MATRIX schema=hadronization_uncertainty_matrix_v2 flavour=BEAUTY trigger=B^{+} tune=MONASH associate=B- bin=hDPhiM90_100 is_reference=true block_count=10 block_yields=0.10223145,0.10411335000000001,0.10599525000000001,0.10787715,0.10975905000000001,0.11164095,0.11352285000000002,0.11540475,0.11728665000000002,0.11916855000000001 yield_sem=0.0018017820740866535 central_yield=0.11070000000000002 central_triggers=1424510 block_triggers=142001,142101,142201,142301,142401,142501,142601,142701,142801,142901 finite_yields=10 block_ratios=NA ratio_sem=NA finite_ratios=NA yield_status=PASS ratio_status=PASS status=PASS

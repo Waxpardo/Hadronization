@@ -1,0 +1,50 @@
+{
+    "PYTHIA_TUNES": [
+        "MONASH",
+        "JUNCTIONS",
+        "CLOSEPACKING"
+    ],
+    "beauty_correlations_to_analyse": [
+        {
+            "trigger": "B^{+}",
+            "configs": [
+                {
+                    "trigger": "B^{+}",
+                    "associateOS": "B-",
+                    "associateSS": "B^{+}",
+                    "OS": "BplusBminus.root",
+                    "SS": "BplusBplus.root"
+                },
+                {
+                    "trigger": "B^{+}",
+                    "associateOS": "Lambda_b",
+                    "associateSS": "Lambda_b-bar",
+                    "OS": "BplusLb.root",
+                    "SS": "BplusLbbar.root"
+                }
+            ]
+        }
+    ],
+    "charm_correlations_to_analyse": [
+        {
+            "trigger": "D^{+}",
+            "configs": [
+                {
+                    "trigger": "D^{+}",
+                    "associateOS": "D-",
+                    "associateSS": "D^{+}",
+                    "OS": "DplusDminus.root",
+                    "SS": "DplusDplus.root"
+                },
+                {
+                    "trigger": "D^{+}",
+                    "associateOS": "Lambda_c(+)-bar",
+                    "associateSS": "Lambda_c(+)",
+                    "OS": "DplusLambdacplusbar.root",
+                    "SS": "DplusLambdacplus.root"
+                }
+            ]
+        }
+    ],
+    "_comment_fixture": "PINNED closure configuration for tests/test_vintegrated_closure.py. Copied from plotting/configuration_multiplicity_HF_RUN3_V1_VINTEGRATED_CLOSURE.json at pin 2751e08c: three tunes x four configured associates = twelve identities. The fixture logs below are written against THIS file, so extending the tracked configuration's pair set does not silently rewrite what these tests assert."
+}

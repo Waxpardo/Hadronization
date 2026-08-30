@@ -1,0 +1,2 @@
+# LEDGER D4. One row carrying only the integrated bin: keys=0 used to print EXACT and exit 0.
+PAIR_COUNTS tune=MONASH flavour=BEAUTY trigger=B^{+} associate=B- os_file=BplusBminus.root bin=M00_100 n_os=12345 n_ss=678 n_trig=9012
