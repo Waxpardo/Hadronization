@@ -91,16 +91,15 @@ def class_names() -> list[str]:
 # code the pair registry carries (improvedPlotting_THnSparse.C:1535-1553), so
 # the axis text has one source and these strings only have to route.
 #
-# TWO OF THE LEGACY BEAUTY ASSOCIATES HAVE NO ENTRY IN THAT TABLE. It carries
-# 411, 421, 431, 521, 511, 4122 and 5122 with their conjugates, and Sigma_b^0.
-# It does NOT carry 531 (B_s^0) or 541 (B_c). Those two associates therefore
-# reach the axis as the raw routing keys `B_s^0-bar` and `Bc-`, and the render
-# writes one "WARNING: no physics notation for associate PDG" line per point --
-# visible in the log, deliberately, rather than silently ugly on a paper figure.
-# The repair is two rows in that table, which is a C++ edit and re-render: it is
-# outside this generator and outside the consolidation's scope, and it is
-# recorded here so the next reader of the axis knows why two bins differ.
-MISSING_ASSOCIATE_NOTATION_PDGS = (-531, -541)
+# TWO OF THE LEGACY BEAUTY ASSOCIATES ONCE HAD NO ENTRY IN THAT TABLE, and now
+# do. At the R40 extension it carried 411, 421, 431, 521, 511, 4122 and 5122
+# with their conjugates, and Sigma_b^0, but not 531 (B_s^0) or 541 (B_c), so
+# those two reached the axis as the raw routing keys `B_s^0-bar` and `Bc-` with
+# one "WARNING: no physics notation for associate PDG" line per point. CON-1B
+# item 3 added the four rows (+-531, +-541) in TLatex, and
+# `tests/test_associate_display_labels.py` now asserts that every associateOS
+# PDG a tracked configuration registers has an entry -- so a future associate
+# set cannot reintroduce the raw-key axis silently.
 #
 # THE PROHIBITION AT build_correlations, AND WHY THIS IS NOT IT. That function's
 # docstring records a mid-campaign decision: registering pairs changes the

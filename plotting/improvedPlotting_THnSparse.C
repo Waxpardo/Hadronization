@@ -1541,6 +1541,8 @@ std::string DisplayLabelForAssociatePdg(Int_t pdg, const std::string& fallback)
         {431, "D_{s}^{+}"},    {-431, "D_{s}^{-}"},
         {521, "B^{+}"},        {-521, "B^{-}"},
         {511, "B^{0}"},        {-511, "#bar{B}^{0}"},
+        {531, "B_{s}^{0}"},    {-531, "#bar{B}_{s}^{0}"},
+        {541, "B_{c}^{+}"},    {-541, "B_{c}^{-}"},
         {4122, "#Lambda_{c}^{+}"}, {-4122, "#bar{#Lambda}_{c}^{-}"},
         {5122, "#Lambda_{b}^{0}"}, {-5122, "#bar{#Lambda}_{b}^{0}"},
         {5212, "#Sigma_{b}^{0}"},  {-5212, "#bar{#Sigma}_{b}^{0}"},
