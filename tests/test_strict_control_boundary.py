@@ -20,6 +20,7 @@ message text.
 from __future__ import annotations
 
 import json
+import math
 import sys
 import tempfile
 from pathlib import Path
@@ -29,7 +30,7 @@ FIXTURES = ROOT / "tests" / "fixtures" / "strict_control"
 
 sys.path.insert(0, str(ROOT / "extraction"))
 import harvest_class_report as report  # noqa: E402
-from harvest_class_axis import parse_log  # noqa: E402
+from harvest_class_axis import parse_log, sample_sem  # noqa: E402
 
 NOMINAL = FIXTURES / "nominal_144.log"
 CONTROL = FIXTURES / "control_132.log"
@@ -215,6 +216,55 @@ def test_a_variation_that_resolved_its_own_campaign_passes() -> None:
                    "--strict-control", *STRICT_CONFIG) == 0
 
 
+def test_every_fixture_sem_is_at_physical_scale_and_summation_robust() -> None:
+    """The fixtures must not decide the verdict by floating-point dust.
+
+    Architect acceptance review of CON-1, finding #1. The first fixture set
+    carried block ratios constant to within one ulp, so `ratio_sem` recorded
+    2.3405556457178006e-17 -- cancellation noise. CPython 3.12 moved `sum()`
+    over floats to compensated summation and `sample_sem` sums twice, so that
+    vector recomputes to 2.8665835232995051e-17 on 3.11: a 22% disagreement
+    against the validator's rel_tol of 5e-15 at harvest_class_axis.py:163. The
+    driver was therefore green on one interpreter and red on another.
+
+    The production validator is correct and is not edited; the fixture was the
+    defect. This asserts the two properties that close it, on the committed
+    bytes rather than on the generator: every recomputed SEM is at physical
+    scale, and none of them moves when the same vector is summed a different
+    way. `tools/make_strict_control_fixtures.py` enforces both at build time --
+    this is the copy that runs in the suite.
+    """
+    floor = 1e-6
+    seen = 0
+    for log in sorted(FIXTURES.glob("*.log")):
+        for row in parse_log(log.read_text()).values():
+            vectors = [("yield_sem", row["block_yields"])]
+            if row["block_ratios"] is not None:
+                vectors.append(("ratio_sem", row["block_ratios"]))
+            for field, values in vectors:
+                plain = sample_sem(values)
+                central = sum(values) / len(values)
+                assert plain >= floor, f"{log.name} {field}: {plain:.17g}"
+                assert abs(plain / central) >= 1e-6, (
+                    f"{log.name} {field}: {plain:.17g} on central {central:.17g}")
+
+                # The same vector, summed differently. `math.fsum` is exactly
+                # rounded, so this brackets any interpreter's summation.
+                mean = math.fsum(values) / len(values)
+                compensated = math.sqrt(
+                    math.fsum((v - mean) ** 2 for v in values)
+                    / (len(values) * (len(values) - 1)))
+                reverse = sample_sem(list(reversed(values)))
+                for name, other in (("fsum", compensated),
+                                    ("reversed", reverse)):
+                    assert math.isclose(plain, other, rel_tol=5e-15,
+                                        abs_tol=0.0), (
+                        f"{log.name} {field}: {plain:.17g} as the validator "
+                        f"sums it, {other:.17g} {name}")
+                seen += 1
+    assert seen > 1000, seen
+
+
 def test_the_default_comparator_is_unchanged_for_existing_callers() -> None:
     """`compare_rows` keeps its two-argument shape.
 
@@ -239,8 +289,10 @@ def main() -> int:
     test_the_generic_two_block_parser_still_accepts_two_blocks()
     test_a_variation_that_resolved_another_campaign_is_refused()
     test_a_variation_that_resolved_its_own_campaign_passes()
+    test_every_fixture_sem_is_at_physical_scale_and_summation_robust()
     test_the_default_comparator_is_unchanged_for_existing_callers()
-    print("strict CONTROL boundary: 144/132 derived, five shapes refused")
+    print("strict CONTROL boundary: 144/132 derived, five shapes refused, "
+          "every fixture SEM at physical scale and summation-robust")
     return 0
 
 
