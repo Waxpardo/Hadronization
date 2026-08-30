@@ -401,8 +401,8 @@ def main() -> int:
         raise ValueError("tune setting allowlist contains an invalid key")
     configured_card_keys: set[str] = set()
     card_values: dict[str, dict[str, str]] = {}
-    # PUBLISHED_TUNES, not ALL_TUNES: adding JUNCTIONS_MATCHED here would change
-    # the generated registry header, and the producer embeds its checksum.
+    # PUBLISHED_TUNES, deliberately: any tune added here changes the generated
+    # registry header, and the producer embeds its checksum.
     for tune in PUBLISHED_TUNES:
         card = (
             root

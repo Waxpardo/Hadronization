@@ -16,29 +16,10 @@ TUNES = PUBLISHED_TUNES
 
 # JUNCTIONS retunes the Lund and diquark parameters away from Monash, which is
 # why a MONASH/JUNCTIONS difference in a baryon observable cannot on its own be
-# attributed to junction formation.
-#
-# JUNCTIONS_MATCHED carries the registered QCD-CR machinery on Monash
-# fragmentation. It is a configuration-level isolation check against the
-# fragmentation retune applied by the published JUNCTIONS bundle, not a claim
-# that an observed difference is caused by one switch.
-#
-# The card is built by DELETING the JUNCTIONS fragmentation overrides, not by
-# restating Monash numbers, so both cards inherit those values from
-# Tune:pp = 14. The check below is therefore the real one: MONASH and
-# JUNCTIONS_MATCHED must differ by nothing except these keys.
-MATCHED_TUNE = "JUNCTIONS_MATCHED"
-MATCHED_ALLOWED_DIFFERENCES = {
-    "BeamRemnants:remnantMode",
-    "BeamRemnants:saturation",
-    "ColourReconnection:mode",
-    "ColourReconnection:allowDoubleJunRem",
-    "ColourReconnection:m0",
-    "ColourReconnection:allowJunctions",
-    "ColourReconnection:junctionCorrection",
-    "ColourReconnection:timeDilationMode",
-    "ColourReconnection:timeDilationPar",
-}
+# attributed to junction formation. The paper states that limit rather than
+# separating the two effects: ruling R32 of 2026-08-30 removed the matched
+# fourth tune that would have isolated them, and the check that compared it
+# with MONASH went with it.
 
 
 def parse_card(path: Path) -> dict[str, str]:
@@ -54,45 +35,6 @@ def parse_card(path: Path) -> dict[str, str]:
             raise ValueError(f"{path}:{number}: duplicate key {key}")
         values[key] = value
     return values
-
-
-def check_matched_tune(root: Path) -> None:
-    """MONASH and JUNCTIONS_MATCHED may differ only in the CR machinery."""
-    def card(name: str) -> dict[str, str]:
-        return parse_card(
-            root / "generation" / "cards" / f"pythiasettings_Hard_Low_ccbb_{name}.cmnd"
-        )
-
-    monash, matched = card("MONASH"), card(MATCHED_TUNE)
-    keys = set(monash) | set(matched)
-    differing = {key for key in keys if monash.get(key) != matched.get(key)}
-    unexpected = differing - MATCHED_ALLOWED_DIFFERENCES
-    if unexpected:
-        raise ValueError(
-            f"{MATCHED_TUNE} differs from MONASH outside the colour-reconnection "
-            f"machinery: {sorted(unexpected)}. The matched-card isolation "
-            "contract depends on that set being empty."
-        )
-    # Anything the published JUNCTIONS tune retunes must be ABSENT here, so it
-    # is inherited from Tune:pp = 14 exactly as MONASH inherits it.
-    junctions = card("JUNCTIONS")
-    retuned = {
-        key
-        for key in junctions
-        if key.startswith(("StringZ:", "StringPT:", "StringFlav:"))
-        or key == "MultipartonInteractions:pT0Ref"
-    }
-    leaked = retuned & set(matched)
-    if leaked:
-        raise ValueError(
-            f"{MATCHED_TUNE} restates tuned parameters instead of inheriting them "
-            f"from Tune:pp: {sorted(leaked)}"
-        )
-    print(
-        f"TUNE_MATCHED_OK {MATCHED_TUNE} differs from MONASH only in "
-        f"{len(differing)} colour-reconnection/beam-remnant keys; "
-        f"{len(retuned)} tuned parameters inherited from Tune:pp"
-    )
 
 
 def main() -> int:
@@ -127,7 +69,6 @@ def main() -> int:
     unused = allowed - actual_differences
     if unused:
         raise ValueError(f"allowlist entries are not actual card differences: {sorted(unused)}")
-    check_matched_tune(root)
     print(
         "TUNE_CARD_ALLOWLIST_VALID "
         f"keys={len(all_keys)} differences={len(actual_differences)}"

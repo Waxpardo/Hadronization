@@ -24,34 +24,24 @@ from pathlib import Path
 # --------------------------------------------------------------------------
 # Tunes
 #
-# The three published configurations that production compares, plus an
-# optional matched variant that is available but not run. There is no cap here
-# on how many tunes may exist -- but note that the producer's event-ID still
-# packs the tune ordinal into two bits and throws above three, so a fifth
+# The three published configurations that production compares. There is no cap
+# here on how many tunes may exist -- but note that the producer's event-ID
+# still packs the tune ordinal into two bits and throws above three, so a fifth
 # configuration needs that widened first.
 # --------------------------------------------------------------------------
 
 PUBLISHED_TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 
-# JUNCTIONS_MATCHED is the QCD-CR junction machinery on Monash fragmentation:
-# the JUNCTIONS card with its StringZ/StringPT/StringFlav and pT0Ref overrides
-# deleted, so those values come from Tune:pp = 14 exactly as MONASH's do. It
-# separates "junctions did this" from "the fragmentation retune did this",
-# which the published JUNCTIONS tune confounds.
-#
-# It is NOT part of production. The card and the producer support it, so it can
-# be requested explicitly with --tune, but eight downstream components
-# (MergeCanonicalAnalysis.C, ValidateCanonicalRawManifest.C, the plotting and
-# statistics tools) still assume exactly the three published tunes. Running it
-# through production would produce raw output nothing downstream can merge or
-# analyse. Propagating the tune list there is a prerequisite for using it.
-OPTIONAL_TUNES = ("JUNCTIONS_MATCHED",)
-
 # What production runs.
 CAMPAIGN_TUNES = PUBLISHED_TUNES
 
-# What the tooling will accept if asked explicitly.
-ALL_TUNES = PUBLISHED_TUNES + OPTIONAL_TUNES
+# What the tooling accepts if asked explicitly. Ruling R32 of 2026-08-30
+# removed the fourth, optional tune, so the two sets now coincide. The name
+# stays: the seed arithmetic below is written on it, and a later optional tune
+# re-enters the tree here and nowhere else. MAX_CAMPAIGN_ORDINAL is derived
+# from len(ALL_TUNES) and is unchanged at 79 by the removal -- the tune term
+# shrinks by one TUNE_STRIDE, which does not cross a CAMPAIGN_STRIDE boundary.
+ALL_TUNES = PUBLISHED_TUNES
 
 # --------------------------------------------------------------------------
 # Seeds

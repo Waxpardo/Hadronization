@@ -16,8 +16,8 @@ ROOT_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 # Override the campaign shape on the command line.
 #   make submit-full CAMPAIGN=HF_RUN3_V1 JOBS=1000 EVENTS=100000
-# Production compares the three published tunes. JUNCTIONS_MATCHED exists as
-# a tune card, but the publication chain enumerates the three published tunes.
+# Production compares the three published tunes, and the publication chain
+# enumerates the same three.
 TUNES        ?= MONASH JUNCTIONS CLOSEPACKING
 JOBS         ?= 1000
 EVENTS       ?= 100000

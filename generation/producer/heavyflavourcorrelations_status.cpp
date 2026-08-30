@@ -110,18 +110,18 @@ ULong64_t PeakRssKiB() {
 #endif
 }
 
-// The three published tunes, plus JUNCTIONS_MATCHED: the QCD-CR junction
-// machinery running on Monash fragmentation. The published JUNCTIONS tune
-// retunes StringZ, StringFlav and pT0Ref away from Monash, and those settings
-// govern baryon production, so a MONASH-vs-JUNCTIONS difference in a baryon
-// observable cannot be attributed to junction formation on its own.
-// JUNCTIONS_MATCHED removes that confound.
+// The three published tunes. The published JUNCTIONS tune retunes StringZ,
+// StringFlav and pT0Ref away from Monash, and those settings govern baryon
+// production, so a MONASH-vs-JUNCTIONS difference in a baryon observable cannot
+// be attributed to junction formation on its own. Ruling R32 of 2026-08-30
+// states that limit in the paper rather than isolating it with a fourth,
+// matched configuration.
 //
 // Adding a configuration means one entry here and one card. There is
 // deliberately no fixed-width tune ordinal anywhere in the pipeline.
 const std::vector<std::string>& KnownTunes() {
   static const std::vector<std::string> tunes = {
-      "MONASH", "JUNCTIONS", "CLOSEPACKING", "JUNCTIONS_MATCHED"};
+      "MONASH", "JUNCTIONS", "CLOSEPACKING"};
   return tunes;
 }
 

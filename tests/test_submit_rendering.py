@@ -23,6 +23,9 @@ ROOT = Path(__file__).resolve().parents[1]
 RENDERER = ROOT / "tools" / "render_production_submit.py"
 FAKE_SHA = "a" * 64
 
+sys.path.insert(0, str(ROOT / "tools"))
+from campaign import PUBLISHED_TUNES  # noqa: E402
+
 # A campaign this test invents must not take an ordinal the project has
 # claimed: tools/render_production_submit.py reads
 # config/campaign_ordinals_v1.json and refuses one, which is the point of the
@@ -52,7 +55,7 @@ def make_checkout(directory: Path) -> Path:
     real git path.
 
     The copy admits tracked cards only. `tests/sandbox_tree.py` states the
-    rule and the incident behind it: an untracked card beside the four tracked
+    rule and the incident behind it: an untracked card beside the tracked
     ones would be committed here and would decide what these cases measure.
     """
     checkout = directory / "checkout"
@@ -136,24 +139,32 @@ def test_deterministic_and_seeds_unique() -> None:
         }
 
 
-def test_all_four_tunes_render() -> None:
-    """MONASH, JUNCTIONS, CLOSEPACKING and the matched JUNCTIONS variant."""
+def test_every_published_tune_renders_with_its_own_card() -> None:
+    """One row set per published tune, each carrying a distinct effective card.
+
+    Ruling R32 of 2026-08-30 removed the fourth, matched tune, so this covers
+    three rather than four. What it protects is unchanged and is why the case
+    exists: a tune must not silently reuse another tune's effective card, which
+    is the `effective_card_sha256` column the renderer writes.
+
+    The tune list comes from `campaign.PUBLISHED_TUNES`, so a tune added or
+    removed there is covered here without a second edit.
+    """
     with tempfile.TemporaryDirectory() as directory:
         checkout = make_checkout(Path(directory))
         submit = Path(directory) / "variants.sub"
-        render(
-            checkout, submit,
-            "--tune", "JUNCTIONS", "--tune", "JUNCTIONS_MATCHED",
-            "--tune", "CLOSEPACKING", "--tune", "MONASH",
-        )
+        arguments: list[str] = []
+        for tune in PUBLISHED_TUNES:
+            arguments += ["--tune", tune]
+        render(checkout, submit, *arguments)
+
         rows = queue_rows(submit)
-        assert len({row.split(",")[2] for row in rows}) == 4
+        assert {row.split(",")[2] for row in rows} == set(PUBLISHED_TUNES)
         seeds = [row.split(",")[6] for row in rows]
         assert len(set(seeds)) == len(seeds)
-        # A variant must not silently reuse its parent's effective card.
+
         cards = {row.split(",")[2]: row.split(",")[12] for row in rows}
-        assert cards["JUNCTIONS"] != cards["JUNCTIONS_MATCHED"]
-        assert cards["MONASH"] != cards["JUNCTIONS_MATCHED"]
+        assert len(set(cards.values())) == len(PUBLISHED_TUNES), cards
 
 
 def test_cpu_guard_must_be_reachable() -> None:
@@ -211,7 +222,7 @@ def main() -> int:
     test_the_checkout_carries_only_tracked_cards()
     test_liveness_guard_present()
     test_deterministic_and_seeds_unique()
-    test_all_four_tunes_render()
+    test_every_published_tune_renders_with_its_own_card()
     test_cpu_guard_must_be_reachable()
     test_write_once()
     test_seed_ledger_refuses_burned_seed()

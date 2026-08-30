@@ -85,9 +85,8 @@ for name in effective_card_sha256 producer_executable_sha256; do
   fi
 done
 
-# Published tunes plus JUNCTIONS_MATCHED. The producer derives its mode and its
-# card name from the tune, so a new configuration needs one entry here and one
-# card file.
+# The published tunes. The producer derives its mode and its card name from the
+# tune, so a new configuration needs one entry here and one card file.
 #
 # card_name is the name the PRODUCER opens, and it is deliberately NOT
 # variant-dependent: the producer derives its settings filename from the tune
@@ -96,7 +95,7 @@ done
 # nominal filename, with variant CONTENT. The producer needs no change, and
 # what the job ran is identified by effective_card_sha256, not by a filename.
 case "${tune}" in
-  MONASH|JUNCTIONS|CLOSEPACKING|JUNCTIONS_MATCHED)
+  MONASH|JUNCTIONS|CLOSEPACKING)
     mode="$(printf '%s' "${tune}" | tr '[:upper:]' '[:lower:]')"
     card_name="pythiasettings_Hard_Low_ccbb_${tune}.cmnd"
     ;;
