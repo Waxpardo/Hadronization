@@ -106,8 +106,16 @@ def expanded_pairs(definition: dict, by_pdg: dict[int, dict]) -> list[dict]:
             for associate in associates:
                 associate_pdg = int(associate["pdg"])
                 associate_charge = int(associate["qc" if sector == "charm" else "qb"])
+                # DA1-A007. This was a silent `continue`, while the trigger
+                # side of the same test raises at :99-100. A skipped associate
+                # drops a pair from the registry without a word, so the
+                # asymmetry could only ever hide a defect. Unreachable at this
+                # pin -- every charm state carries qc != 0 and every beauty
+                # state qb != 0 -- and a state that reached it would be one the
+                # sector's own definition says has no heavy content.
                 if associate_charge == 0:
-                    continue
+                    raise ValueError(
+                        f"associate {associate_pdg} has zero {sector} content")
                 key = f"{trigger},{associate_pdg}"
                 pair_identity = (sector, trigger, associate_pdg)
                 if pair_identity in used_pairs:

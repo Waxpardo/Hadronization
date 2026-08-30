@@ -20,7 +20,8 @@ Recomputing history under a new null and keeping the old caption would be a
 quiet rewrite. So the historical computation stays pinned, by name, and the
 recalibrated count is pinned separately in check 4.
 
-Six checks, and each can fail independently:
+Eight checks, and each can fail independently (ledger DA1-A189: this said six
+while eight ran, so two were described by nothing):
   1. the known case          -- reproduces the recorded 30-bin flagged set;
   2. a negative control      -- parent against itself flags nothing;
   3. an injected positive    -- a synthetic 10 sigma bin is caught;
@@ -28,10 +29,18 @@ Six checks, and each can fail independently:
                                 the headline bins survive the wider null;
   5. MAD negative control    -- parent against itself flags nothing (this one
                                 exercises the degenerate sigma^ = 0 branch);
-  6. MAD injected positive   -- the synthetic bin is still caught.
+  6. MAD injected positive   -- the synthetic bin is still caught;
+  7. calibration            -- on synthetic data drawn from the binomial null,
+                                the MAD estimator recovers sigma^ near 1, so a
+                                wider null is not simply a looser one;
+  8. the counting floor      -- on a deterministic split, sigma^ collapses
+                                toward zero and the floor must lift sigma_eff
+                                to 1, or every bin would flag.
 
 Without (2)/(5) a tool that flags everything would pass (1)/(4); without
-(3)/(6) a tool that flags nothing would pass (2)/(5).
+(3)/(6) a tool that flags nothing would pass (2)/(5). Without (7) a badly
+scaled sigma^ would pass all six, and without (8) the degenerate case would
+divide by something arbitrarily small.
 """
 import csv
 import json

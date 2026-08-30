@@ -66,6 +66,70 @@ def test_closure_wrapper_derives_its_count_instead_of_pinning_it() -> None:
     )
 
 
+def enumerating_units(text: str) -> list[str]:
+    """The units a restated list can live in: statements and braced blocks.
+
+    Splitting on `;` is crude and deliberately so. It is the cheapest unit
+    that contains a whole `const bool additive = a || b || ...;` chain, which
+    is the shape DA1-A072 measured the braced-block detector to be blind to.
+    Braced blocks stay as well, because an initialiser list carries no `;`.
+    """
+    return re.split(r";", text) + re.findall(r"\{[^{}]*\}", text)
+
+
+# ONE ENUMERATION STANDS, AND IS PINNED BY NAME (ledger DA1-A072).
+#
+# merging/MergeAnalysisObjects.C:165-177 decides additivity with a twelve-name
+# `objectName == ... || ...` chain instead of filtering the contract. The
+# detector above now SEES it, which is what the repair was for; removing it is
+# a change to the merge path and is dispatched separately. Ten of the twelve
+# names appear here: `input_file_count` and `source_input_events` are labelled
+# `invariant` in the contract while this chain treats them as additive, so the
+# `content` set excludes them -- that mislabelling is its own ledger row.
+#
+# This is a PIN, not a pass. The set is exact, so the chain cannot gain, lose
+# or rename a member without failing this gate, and
+# `test_every_known_enumeration_still_exists` fails once the defect is
+# repaired, so the exemption cannot outlive it.
+KNOWN_ENUMERATIONS = {
+    "MergeAnalysisObjects.C": {
+        "central_ground_state_count",
+        "central_hard_trigger_count",
+        "direct_primary_heavy_count",
+        "input_events",
+        "input_sum_weights",
+        "pair_count",
+        "pair_sum_weights",
+        "primary_all_heavy_closure_failures",
+        "trigger_count",
+        "trigger_sum_weights",
+    },
+}
+
+
+def test_every_known_enumeration_still_exists() -> None:
+    """A pinned defect that has been repaired must lose its exemption.
+
+    Without this, the entry above would sit in the file forever, reading like
+    a live defect long after the merge tool started filtering the contract.
+    """
+    for name, pinned in KNOWN_ENUMERATIONS.items():
+        matches = [path for path in ROOT.rglob(name) if path.is_file()]
+        assert matches, f"{name} is pinned here but is not in the tree"
+        text = matches[0].read_text()
+        text = re.sub(r"//[^\n]*", "", text)
+        text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+        found = any(
+            {n for n in pinned if f'"{n}"' in unit} == pinned
+            for unit in enumerating_units(text)
+        )
+        assert found, (
+            f"{name} no longer carries the enumeration pinned in "
+            "KNOWN_ENUMERATIONS; the defect is repaired, so remove the "
+            "exemption rather than leaving it to describe code that is gone"
+        )
+
+
 def test_no_consumer_restates_the_list() -> None:
     """The consumers must filter the contract, not restate names.
 
@@ -79,6 +143,9 @@ def test_no_consumer_restates_the_list() -> None:
         ROOT / "Validation/ValidatePairBlockClosure.C",
         ROOT / "Validation/validate_pair_block_closure.sh",
         ROOT / "plotting/Validate_THnSparse_Production.C",
+        # DA1-A072. The merge tool was never in scope, and it holds the
+        # largest hand-maintained restatement of the list.
+        ROOT / "merging/MergeAnalysisObjects.C",
     ]
     # Objects whose names may legitimately appear for reasons other than
     # rebuilding the list: the closure names two invariants it compares
@@ -104,11 +171,23 @@ def test_no_consumer_restates_the_list() -> None:
         # checks each sparse's own dimensionality and Sumw2 contract, and the
         # closure reads "input_events" to compare against the expected event
         # count. What must not recur is a second *enumeration* of which
-        # objects exist, so the check is for a braced initialiser holding two
-        # or more contract names.
-        for block in re.findall(r"\{[^{}]*\}", text):
-            named = {name for name in content if f'"{name}"' in block}
-            assert len(named) < 2, (
+        # objects exist.
+        #
+        # DA1-A072. This looked only inside INNERMOST BRACED BLOCKS, so it
+        # could not see an enumeration written as an expression. Measured at
+        # the time: MergeAnalysisObjects.C quotes 16 contract object names,
+        # including a twelve-name chain, and the detector found 0 in any
+        # braced block of that file -- the gate would have passed it even
+        # once listed. Statements are counted too now, which is the unit a
+        # `const bool additive = a || b || ...;` chain lives in.
+        for unit in enumerating_units(text):
+            named = {name for name in content if f'"{name}"' in unit}
+            if len(named) < 2:
+                continue
+            pinned = KNOWN_ENUMERATIONS.get(path.name)
+            if pinned is not None and named == pinned:
+                continue
+            assert False, (
                 f"{path.name} enumerates contract objects "
                 f"{sorted(named)} in a literal list instead of filtering the "
                 "generated contract"
@@ -123,8 +202,14 @@ def test_contract_matches_the_producer() -> None:
     reads the producer instead.
     """
     text = PRODUCER.read_text()
-    written = set(re.findall(r'->Write\("([^"]+)"\)', text))
-    written |= set(re.findall(r'Write\("([^"]+)"\)', text))
+    # DA1-B092. The pair of patterns here matched `Write("` with the quote on
+    # the same line and nothing else, so it saw 39 of the 64 objects the
+    # producer writes. Every scalar written through a `TParameter<T>("name",
+    # value)` constructor was invisible, and so was any `Write(` whose string
+    # had been wrapped onto the next line by a formatter. Both forms are
+    # matched now, and the count goes 39 -> 64.
+    written = set(re.findall(r'Write\(\s*"([^"]+)"', text))
+    written |= set(re.findall(r'TParameter<[^>]+>\(\s*"([^"]+)"', text))
     known = {row["name"] for row in objects()}
     missing = {
         name for name in written
@@ -133,6 +218,20 @@ def test_contract_matches_the_producer() -> None:
     assert not missing, (
         "status_analysis_THnSparse_qq.C writes objects absent from the "
         f"contract: {sorted(missing)}"
+    )
+
+    # THE REVERSE DIRECTION (DA1-B092). Above asserts the producer writes
+    # nothing the contract does not know. This asserts the contract declares
+    # nothing the producer does not write: a row for an object no longer
+    # emitted would otherwise sit in the contract unnoticed, and every
+    # consumer would go on requiring it. `merged_only` rows are excluded --
+    # the merge step creates them and the producer never does.
+    declared = {row["name"] for row in objects()
+                if row["scope"] in ("both", "unmerged_only")}
+    unwritten = declared - written
+    assert not unwritten, (
+        "the contract declares objects status_analysis_THnSparse_qq.C does "
+        f"not write: {sorted(unwritten)}"
     )
 
 

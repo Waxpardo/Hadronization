@@ -108,6 +108,32 @@ def make_pythia_csv(path: Path) -> None:
 
 
 
+def audit_module():
+    """The tool loaded as a module, so its constants are READ, not copied.
+
+    `MASS_TOLERANCE_FLOOR_GEV` decides whether the mass branch fires. Writing
+    0.005 down here would be a second copy of the rule, and a loosened
+    tolerance would then leave the case below asserting nothing.
+    """
+    spec = importlib.util.spec_from_file_location("pdg_2025_species_audit", TOOL)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def mass_tolerance(mass: dict) -> float:
+    """The tool's own tolerance for one measured state.
+
+    Mirrors tools/pdg_2025_species_audit.py:754-762: the floor, or five times
+    the larger of the two asymmetric errors, whichever is greater.
+    """
+    return max(
+        audit_module().MASS_TOLERANCE_FLOOR_GEV,
+        5.0 * max(float(mass["error_positive_gev"]),
+                  float(mass["error_negative_gev"])),
+    )
+
+
 def restore_permissions(path: Path) -> None:
     for item in sorted(path.rglob("*"), key=lambda value: len(value.parts)):
         if item.is_dir():
@@ -223,6 +249,42 @@ def main() -> int:
             "PYTHIA audit charge3 mismatch" in failure
             for failure in failed_report["technical_failures"]
         )
+
+        # DA1-A030. The mass branch at tools/pdg_2025_species_audit.py:765-769
+        # had never been reached with a non-zero delta by any test in this
+        # repository: make_pythia_csv copies each reference mass, so the delta
+        # is exactly zero on every row and the gate ran green without ever
+        # being exercised. This drives ONE state past its own tolerance and
+        # asserts the report reaches FAIL by that failure's name, mirroring the
+        # charge3 case above. The CSV is rebuilt first so the mass is the only
+        # thing wrong with it.
+        make_pythia_csv(pythia_csv)
+        measured = {
+            int(row["signed_pdg"]): row["mass"]
+            for row in reference["signed_species"]
+            if row["mass"]["status"] == "MEASURED_PDG_2025"
+        }
+        assert 421 in measured, sorted(measured)
+        drifted_mass = (float(measured[421]["value_gev"])
+                        + 10.0 * mass_tolerance(measured[421]))
+        csv_rows = list(csv.DictReader(pythia_csv.open(newline="")))
+        next(row for row in csv_rows
+             if int(row["pdg"]) == 421)["mass_gev"] = repr(drifted_mass)
+        with pythia_csv.open("w", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=csv_rows[0].keys())
+            writer.writeheader()
+            writer.writerows(csv_rows)
+        failed = run_check(
+            "--pythia-csv", str(pythia_csv), "--require-pythia"
+        )
+        assert failed.returncode == 1
+        failed_report = json.loads(failed.stdout)
+        assert failed_report["state"] == "FAIL"
+        assert any(
+            "installed-PYTHIA mass differs from measured PDG 2025 mass"
+            in failure
+            for failure in failed_report["technical_failures"]
+        ), failed_report["technical_failures"]
 
         tampered_reference = temporary / "reference.json"
         tampered = json.loads(REFERENCE.read_text())

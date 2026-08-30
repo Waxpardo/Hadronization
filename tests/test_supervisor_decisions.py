@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 # Same directory as this driver, so no path setup is needed.
@@ -24,7 +25,13 @@ def test_per_tune_class_contract() -> None:
         (1.0, 10.0), (0.0, 1.0),
     ]
     plotter = (ROOT / "plotting/improvedPlotting_THnSparse.C").read_text()
-    assert "ThresholdForPercentile(\n                                        centralIdentity" in plotter
+    # DA1-A029. This matched the call and its continuation with the exact run
+    # of spaces between them, so any reformat of that line -- a change with no
+    # behaviour in it -- would have failed the supervisor contract. What the
+    # decision requires is that the threshold is taken for the CENTRAL
+    # identity, so the gate matches the call and its argument and lets the
+    # whitespace between them be whatever the formatter leaves (R30(2)).
+    assert re.search(r"ThresholdForPercentile\(\s*centralIdentity", plotter)
     assert "MULTIPLICITY_PER_TUNE_BOUNDARIES" in plotter
     assert "identical_across_tunes" not in plotter
     assert "CommonMultiplicityBoundaries.h" not in plotter

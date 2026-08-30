@@ -132,9 +132,13 @@ def digest_fields(document: dict) -> dict[str, object]:
 
     Only the top level. A self-describing digest covers the document its key
     belongs to, and a nested key belongs to a member rather than to the file.
-    Measured on this checkout: all fourteen nested `*sha256` names -- among them
+    Measured 2026-08-30, session CON-1B, over the tracked JSON of this
+    checkout: all TWENTY-FOUR distinct nested `*sha256` names -- among them
     `publication_authorization_sha256`, `receipt_sha256` and `macro_sha256` --
-    name a separate object, and none is self-describing.
+    name a separate object, and none is self-describing. The count was written
+    as fourteen and had been stale since (ledger DA1-A083); it is dated here
+    the way docs/GOLDEN_OUTPUTS.md dates its digest table, because it is a
+    measurement of a tree that grows and not an invariant.
     """
     return {name: value for name, value in document.items()
             if name.endswith("sha256")}

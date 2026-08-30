@@ -5,6 +5,13 @@ stopping a merge: *"`/proc/108654/environ` confirms `HADRONIZATION_BASE` **is**
 exported. That, and only that, is what keeps the `merge_root_files.sh:27`
 `project_base` fallback from killing this run."*
 
+The `:27` in that quotation is the run record's own, and stays: the quote is
+verbatim. The line has since moved, and a line number is what went stale here
+(ledger DA1-B059), so the anchor below is the assignment TEXT rather than a
+number -- `project_base="${HADRONIZATION_BASE:-$(cd "${script_dir}/.." &&
+pwd)}"`, which `test_the_fallback_line_is_present_and_uses_the_parent` matches
+exactly. It sat at :33 when this note was written on 2026-08-30.
+
 The fallback read `${HADRONIZATION_BASE:-${script_dir}}`. The script lives in
 `merging/`, so `${script_dir}` is `merging/`, and the next line sources
 `${project_base}/setupEnv.sh` -- `merging/setupEnv.sh`, which does not exist.
