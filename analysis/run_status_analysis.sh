@@ -65,7 +65,7 @@ done
 #
 # Discovery stays the default. A tree that is neither a checkout nor carries an
 # injected sha is a hard error: an unknown provenance is never guessed.
-analysis_macro_sha256="$(sha256sum "${macro}" | awk '{print $1}')"
+analysis_macro_sha256="$(shasum -a 256 "${macro}" | awk '{print $1}')"
 analysis_schema="$(python3 - "${macro}" \
   "${project_base}/config/pair_file_object_contract_v1.json" <<'PY'
 import json
@@ -125,13 +125,13 @@ if [[ -n "${expected_macro_sha256}" &&
   exit 3
 fi
 if [[ -n "${expected_raw_sha256}" ]]; then
-  input_sha256="$(sha256sum "${input_file}" | awk '{print $1}')"
+  input_sha256="$(shasum -a 256 "${input_file}" | awk '{print $1}')"
   if [[ "${input_sha256}" != "${expected_raw_sha256}" ]]; then
     echo "ERROR: raw input checksum differs from submitted checksum" >&2
     exit 3
   fi
 else
-  input_sha256="$(sha256sum "${input_file}" | awk '{print $1}')"
+  input_sha256="$(shasum -a 256 "${input_file}" | awk '{print $1}')"
 fi
 if [[ -n "${expected_logical_id}" &&
       ! "${expected_logical_id}" =~ ^[0-9]+$ ]]; then
@@ -154,7 +154,7 @@ if [[ -n "${raw_validation_receipt}" ]]; then
     exit 3
   fi
   actual_raw_validation_receipt_sha256="$(
-    sha256sum "${raw_validation_receipt}" | awk '{print $1}'
+    shasum -a 256 "${raw_validation_receipt}" | awk '{print $1}'
   )"
   if [[ "${actual_raw_validation_receipt_sha256}" != "${expected_raw_validation_receipt_sha256}" ]]; then
     echo "ERROR: raw-validation receipt checksum differs from submission" >&2
@@ -198,7 +198,7 @@ source "${project_base}/setupEnv.sh"
 
 verify_analysis_checkout() {
   local current_commit current_macro_sha256
-  current_macro_sha256="$(sha256sum "${macro}" | awk '{print $1}')"
+  current_macro_sha256="$(shasum -a 256 "${macro}" | awk '{print $1}')"
   if [[ "${current_macro_sha256}" != "${analysis_macro_sha256}" ]]; then
     echo "ERROR: analysis macro changed after worker provenance was pinned" >&2
     return 1

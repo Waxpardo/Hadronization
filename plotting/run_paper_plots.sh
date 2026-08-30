@@ -227,6 +227,17 @@ for target in "$@"; do
       usage
       exit 0
       ;;
+    # `all` IS NOT RUNNABLE FOR HF_RUN3_V1 without an explicit
+    # THNSPARSE_CONFIG (finding F57). The `thnsparse` target below resolves a
+    # configuration named after the campaign, and
+    # configuration_multiplicity_HF_RUN3_V1_THREETUNE_THnSparse.json does not
+    # exist, so `all` exits 2 at preflight for this campaign.
+    #
+    # The paper figures are therefore invoked BY EXPLICIT TARGET, never through
+    # `all`: G1 is `multiplicity-spectrum` and G9 is `kinematic-spectra`, and
+    # `all` expands to neither G1 nor any balancing configuration. That is the
+    # invocation rule rather than a defect to route around, and widening this
+    # expansion would be tidiness: it would not make `all` runnable on its own.
     all|paper)
       expanded_targets+=("freeze-boundaries" "thnsparse" "multiplicity-boundaries" "kinematic-spectra")
       ;;

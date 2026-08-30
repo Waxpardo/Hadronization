@@ -24,9 +24,9 @@ if [[ -L "${rebuilt_producer}" || ! -x "${rebuilt_producer}" ]]; then
   echo "ERROR: forced producer rebuild did not create an executable: ${rebuilt_producer}" >&2
   exit 3
 fi
-rebuilt_sha256="$(sha256sum "${rebuilt_producer}" | awk '{print $1}')"
+rebuilt_sha256="$(shasum -a 256 "${rebuilt_producer}" | awk '{print $1}')"
 install -m 0755 "${rebuilt_producer}" "${staged_producer}"
-staged_sha256="$(sha256sum "${staged_producer}" | awk '{print $1}')"
+staged_sha256="$(shasum -a 256 "${staged_producer}" | awk '{print $1}')"
 if [[ "${staged_sha256}" != "${rebuilt_sha256}" ]]; then
   echo "ERROR: staged producer checksum differs from forced rebuild" >&2
   exit 3
@@ -36,7 +36,7 @@ if [[ -L "${producer}" || ! -x "${producer}" ]]; then
   echo "ERROR: producer build did not create an executable: ${producer}" >&2
   exit 3
 fi
-installed_sha256="$(sha256sum "${producer}" | awk '{print $1}')"
+installed_sha256="$(shasum -a 256 "${producer}" | awk '{print $1}')"
 if [[ "${installed_sha256}" != "${rebuilt_sha256}" ]]; then
   echo "ERROR: installed producer checksum differs from forced rebuild" >&2
   exit 3

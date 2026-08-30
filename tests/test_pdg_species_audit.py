@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""The 50 signed heavy-flavour states match the PDG 2025 reference.
+
+Protects the species set every pair identity is built on. The reference
+artifact's two source digests are pinned here, so a regenerated reference has to
+declare itself; the per-state assertions cover the cases that carry a
+measurement status rather than a mass -- unmeasured model predictions,
+generator-only masses, and states with no official MC id.
+"""
 import csv
 import importlib.util
 import json

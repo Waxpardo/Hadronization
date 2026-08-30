@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Validate verbose improvedPlotting_THnSparse subsample-statistics output."""
+"""Validate verbose improvedPlotting_THnSparse subsample-statistics output.
+
+PRODUCTION INPUT ONLY (ledger D14). This reads a render log written with
+SUBSAMPLE_COVERAGE_AUDIT = 1. The measurement configurations set it to 0, so a
+measurement render log carries no subsample-statistics line and this script
+exits 1 on it. That exit is the correct refusal for the wrong input, not a
+defect: run it against a subsample-audit render.
+"""
 
 from __future__ import annotations
 

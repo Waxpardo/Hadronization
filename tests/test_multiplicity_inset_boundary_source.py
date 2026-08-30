@@ -85,6 +85,12 @@ def test_minimum_bias_is_not_a_boundary_input() -> None:
 
 def main() -> int:
     test_contract_is_pr13_tune_local_axis()
+    # Ledger DA1-045: this case was defined and never called, so the only
+    # assertions in this driver about the generated header -- that the raw
+    # macro includes it, that the header carries the contract's class count and
+    # every window, and that no percentile literal survives in the macro --
+    # never ran. A stale or missing header dependency passed this gate.
+    test_the_raw_macro_takes_its_classes_from_the_generated_header()
     test_plotters_derive_thresholds_from_their_tune_histogram()
     test_minimum_bias_is_not_a_boundary_input()
     print("tune-local multiplicity boundary-source tests passed")

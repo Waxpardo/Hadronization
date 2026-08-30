@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""The dataset selector exports the tag and the authorization it derives.
+
+Protects the sealed-dataset boundary: the selector is the one place a campaign
+tag becomes HADRONIZATION_COMPLETE_ROOT_TAG and the publication-eligibility
+flag, and every downstream reader takes both from it. The cases assert what the
+selector EXPORTS, and that an unknown or unauthorized dataset is refused with a
+non-zero exit rather than exported as empty.
+"""
 import json
 import subprocess
 import sys

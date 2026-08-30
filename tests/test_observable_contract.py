@@ -1,4 +1,20 @@
 #!/usr/bin/env python3
+"""Hand-computed anchors for the observable and SEM definitions.
+
+WHAT THIS IS, PLAINLY. Four arithmetic anchors, computed here from `math` and
+`statistics` alone: the directed-conditional pair count, the legacy half-SS
+form, the sample SEM on dof n-1, and the fact that a ratio SEM formed inside
+blocks differs from linear error propagation.
+
+WHAT IT DOES NOT DO. It imports NO repository implementation and reads no
+repository file. Every asserted quantity is constructed in this file, so it
+stays green if the C++ OS/SS arithmetic, the extraction SEM, or the
+ratios-inside-blocks implementation drifts. It is documentation of the
+definitions, not a guard on the code that implements them (ledger DA1-042; the
+R30 classification is corrected to KEEP-CHEAP on that ground). Binding these
+same inputs to the load-bearing functions is separate work, and only that would
+earn KEEP-PAPER.
+"""
 import math
 import statistics
 

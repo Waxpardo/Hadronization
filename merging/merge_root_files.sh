@@ -117,7 +117,7 @@ echo "CANONICAL_MERGE_SHAPE inputs_per_tune=${canonical_inputs_per_tune}" \
      "events_per_tune=${canonical_events_per_tune}"
 
 analysis_report="${analysis_root}/validation/analysis_output_manifest_validation.json"
-canonical_manifest_sha="$(sha256sum "${freeze_dir}/canonical_manifest.jsonl" \
+canonical_manifest_sha="$(shasum -a 256 "${freeze_dir}/canonical_manifest.jsonl" \
   | awk '{print $1}')"
 
 # Reuse a complete validation report only when it names the current manifest digest.
@@ -158,7 +158,7 @@ if not isinstance(outputs, list) or len(outputs) != expected:
 raise SystemExit(0)
 PY
 then
-  report_sha="$(sha256sum "${analysis_report}" | awk '{print $1}')"
+  report_sha="$(shasum -a 256 "${analysis_report}" | awk '{print $1}')"
   report_time="$(date -r "${analysis_report}" '+%Y-%m-%dT%H:%M:%S%z')"
   echo "ANALYSIS_OUTPUT_MANIFEST_SKIPPED status=PASS" \
        "reason=existing_report_matches_manifest" \
@@ -181,7 +181,7 @@ merge_one() {
   local expected_inputs="$3"
   local final_directory="$4"
   local manifest_sha
-  manifest_sha="$(sha256sum "${manifest}" | awk '{print $1}')"
+  manifest_sha="$(shasum -a 256 "${manifest}" | awk '{print $1}')"
 
   if [[ -e "${final_directory}" ]]; then
     # Exit 126 or 127 means the validator did not run, not that the data failed.

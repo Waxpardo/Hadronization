@@ -189,7 +189,13 @@ def _closure_call_sites() -> list[tuple[Path, str]]:
             stripped = line.strip()
             if "validate_pair_block_closure.sh" not in stripped:
                 continue
-            if stripped.startswith("#") or "sha256sum" in stripped:
+            # A line that HASHES the closure script is not a line that RUNS it.
+            # Both spellings are matched: the tree uses `shasum -a 256` (macOS
+            # ships no `sha256sum`), and an archived caller may still use the
+            # other, so neither spelling can turn a digest line into a site.
+            if (stripped.startswith("#")
+                    or "shasum" in stripped
+                    or "sha256sum" in stripped):
                 continue
             sites.append((path, line))
     return sites

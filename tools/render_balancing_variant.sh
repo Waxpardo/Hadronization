@@ -23,7 +23,7 @@ BASE="${HADRONIZATION_BASE:?HADRONIZATION_BASE must be set}"
 cd "${BASE}"
 [ -f "${CONFIG}" ] || { echo "FATAL: no such config: ${CONFIG}" >&2; exit 2; }
 
-INTENDED="$(sha256sum "${CONFIG}" | cut -d' ' -f1)"
+INTENDED="$(shasum -a 256 "${CONFIG}" | cut -d' ' -f1)"
 echo "RENDER_VARIANT config=${CONFIG}"
 echo "RENDER_VARIANT intended_sha256=${INTENDED}"
 

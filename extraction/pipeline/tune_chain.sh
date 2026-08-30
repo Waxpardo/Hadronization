@@ -54,8 +54,8 @@ if [[ -z "$SCHEMA" ]]; then
 fi
 echo "=== CLOSURE $TUNE ===" >> "$LOG"
 echo "# closure_expected_schema=$SCHEMA" >> "$LOG"
-echo "# closure_script_sha=$(sha256sum Validation/validate_pair_block_closure.sh | awk '{print $1}')" >> "$LOG"
-echo "# closure_macro_sha=$(sha256sum Validation/ValidatePairBlockClosure.C | awk '{print $1}')" >> "$LOG"
+echo "# closure_script_sha=$(shasum -a 256 Validation/validate_pair_block_closure.sh | awk '{print $1}')" >> "$LOG"
+echo "# closure_macro_sha=$(shasum -a 256 Validation/ValidatePairBlockClosure.C | awk '{print $1}')" >> "$LOG"
 set +e
 bash Validation/validate_pair_block_closure.sh "$CENTRAL" "$BLOCKS" "$SCHEMA" >> "$LOG" 2>&1
 rc=$?

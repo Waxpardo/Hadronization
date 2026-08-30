@@ -170,7 +170,7 @@ if [[ -n "$(git -C "${project_base}" diff --name-only HEAD --)" ]]; then
   echo "ERROR: checkout has tracked modifications; refusing to produce" >&2
   exit 3
 fi
-actual_producer_sha256="$(sha256sum "${producer}" | awk '{print $1}')"
+actual_producer_sha256="$(shasum -a 256 "${producer}" | awk '{print $1}')"
 if [[ "${actual_producer_sha256}" != "${producer_executable_sha256}" ]]; then
   echo "ERROR: producer binary is ${actual_producer_sha256}, submit recorded ${producer_executable_sha256}" >&2
   echo "       rebuild happened after submission; resubmit rather than continue" >&2
@@ -266,7 +266,7 @@ end_utc="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 partial_sha=""
 partial_bytes=0
 if [[ -f "${partial_output}" ]]; then
-  partial_sha="$(sha256sum "${partial_output}" | awk '{print $1}')"
+  partial_sha="$(shasum -a 256 "${partial_output}" | awk '{print $1}')"
   partial_bytes="$(wc -c < "${partial_output}" | tr -d '[:space:]')"
 fi
 
@@ -388,7 +388,7 @@ if [[ -e "${stable_output}" ]]; then
   exit 7
 fi
 mv -n "${partial_output}" "${stable_output}"
-promoted_sha="$(sha256sum "${stable_output}" | awk '{print $1}')"
+promoted_sha="$(shasum -a 256 "${stable_output}" | awk '{print $1}')"
 if [[ "${promoted_sha}" != "${partial_sha}" ]]; then
   echo "ERROR: promoted output changed during promotion" >&2
   exit 7

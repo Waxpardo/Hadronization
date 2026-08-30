@@ -1,4 +1,13 @@
 #!/usr/bin/env python3
+"""The generated species and pair registries are current and self-consistent.
+
+Protects the contract layer the reduction macro includes: 50 signed states and
+300 pair rows, generated rather than hand-maintained. It runs the generator's
+own `--check` first, so a hand-edit to either artifact fails here, then asserts
+the identities that a regeneration must preserve -- distinct names for the
+easily-confused Xi states, the signed charm and beauty quantum numbers of B_c,
+and one registry row per pair filename.
+"""
 import copy
 import json
 import subprocess

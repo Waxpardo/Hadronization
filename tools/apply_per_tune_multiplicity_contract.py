@@ -20,7 +20,19 @@ import argparse
 import hashlib
 import json
 import re
+import sys
 from pathlib import Path
+
+# The THIRD writer of display_name on these documents. The precision constant
+# and the formatting function live in one module so two owners cannot render the
+# same percentile differently (ledger DA1-A021): this file used to carry its own
+# ':g' expression, which agrees with the shared '%.0f' on every integral edge
+# and disagrees on a non-integral one -- 59.8 prints as '59.8' under ':g' and
+# '60' under the contract's own precision. Every contract edge is integral
+# today, so the two never diverged in the tree; the import removes the way they
+# could.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from class_label_format import format_percentile_range  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTRACT = ROOT / "config" / "multiplicity_percentile_classes_v2.json"
@@ -141,8 +153,8 @@ def build(document: dict, classes: list[dict]) -> dict:
         row["multiplicityMax"] = contract["percentile_max"]
 
     labels = {
-        "hDPhi" + row["bin"]:
-            f"{row['percentile_min']:g}-{row['percentile_max']:g}%"
+        "hDPhi" + row["bin"]: format_percentile_range(
+            row["percentile_min"], row["percentile_max"])
         for row in classes
     }
 

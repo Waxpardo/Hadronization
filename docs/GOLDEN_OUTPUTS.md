@@ -34,7 +34,7 @@ input the recipe reads. **The pair is the contract.**
 > `dd502a10…` in `git show 4a007f2^:docs/EXTRACTION_CONVENTIONS.md` §2, the superseded private convention-table record, and
 > `git show 4a007f2^:AnalysisScripts/anchors/MANIFEST.md` §1 is the **internal** digest, **not** the
 > file's sha256. The two kinds differ, and confusing them is a live trap: a
-> reviewer who runs `sha256sum decay_parent_map_v1_1.json` and gets
+> reviewer who runs `shasum -a 256 decay_parent_map_v1_1.json` and gets
 > `0688fb11…` has **not** found a discrepancy.
 
 > **Both archived truncations name the 2026-08-11 bodies, which are
@@ -2773,7 +2773,7 @@ digit.
 | instrument | `plotting/improvedPlotting_THnSparse.C` sha256 `6dace2025d1edf37…`, through the `measure-balancing` target |
 | nominal arm | `figure_deploy_20260817/vintegrated_closure.log`, sha256 `f507f6250e63d82c9c34e088abe4ec16b17359e3b0a54fcdb54e17cd67653d7b`, 144 rows, 2026-08-18 10:18 |
 | control | `sys_runs_plot5/render_HF_RUN3_V1.log`, sha256 `690f2dc5694fa8639582e7ff2a5dd42f392c66ab2ccdf1268e9e5974e65afe68` |
-| integrated bin | `config/integrated_multiplicity_bin_v1.json`, copied from the closure configuration `793344f36257e72f…` |
+| integrated bin | `config/integrated_multiplicity_bin_v1.json`, copied from the closure configuration; the digest was re-recorded 2026-08-30 against the current bytes, `09ca1667cdae2ac8…` (ledger DA1-001) |
 | inputs | `complete_root_HF_SYS_*_<TUNE>` and their ten `combined_root_subSamples_<TUNE>` directories, in `/data/alice/ipardoza/hadronization_merged` |
 
 **Regeneration, in two stages.** The renders need Nikhef; the arithmetic does
