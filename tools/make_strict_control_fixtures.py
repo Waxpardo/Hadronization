@@ -29,18 +29,22 @@ The two properties that close it, both enforced below rather than hoped for:
    variation, so the sums that form a SEM are not cancellation. `assert_scale`
    refuses any vector whose recomputed SEM falls under `SEM_FLOOR`; the set
    this file writes today runs four to five orders of magnitude above it.
-2. ONE SOURCE OF ARITHMETIC. Every recomputed summary is written by calling
-   the validator's own routine -- `sample_sem` for both SEMs, the same
-   `numerator / denominator` expression `_validate_ratios_against_reference`
-   checks, and `trigger_consistency` for the trigger sum. Builder and validator
-   cannot disagree by construction, rather than by luck.
+2. BUILDER AND VALIDATOR ARE COMPARED, PER VECTOR. Every ratio is written with
+   the same `numerator / denominator` expression
+   `_validate_ratios_against_reference` checks, and every trigger sum is
+   checked with `trigger_consistency`. The two SEMs are formed by `stable_sem`
+   -- exactly-rounded summation, so the committed bytes do not depend on which
+   interpreter generated them -- and `assert_summation_robust` then asserts,
+   for EVERY vector this file writes, that the validator's own `sample_sem`
+   agrees with what is written, both in block order and reversed, inside the
+   validator's own tolerance. See `stable_sem` for why that is stronger than
+   computing both sides the same way and never comparing them.
 
 `assert_summation_robust` measures the sensitivity that caused the defect
-directly: it re-forms each SEM with `math.fsum` and with the block order
-reversed, and refuses the vector unless all three agree inside the validator's
-own tolerance. That is the same class of change CPython made, applied here at
-build time on one interpreter, so the fixtures do not need every interpreter
-present to be shown robust on them.
+directly. That is the same class of change CPython made, applied here at build
+time, so the fixtures do not need every interpreter present to be shown robust
+on them -- though this set was in fact checked on 3.9.6, 3.11.15 and 3.14.7,
+which bracket the change.
 
 THE SEED IS A FUNCTION OF THE IDENTITY, never of emission order: the control
 drops the MB bin, and a running counter would shift every number after it so
@@ -155,9 +159,41 @@ def reference_level(seed: int) -> float:
     return 0.30 + 0.0015 * seed
 
 
+def stable_mean(values: list[float]) -> float:
+    """The mean by exactly-rounded summation."""
+    return math.fsum(values) / len(values)
+
+
+def stable_sem(values: list[float]) -> float:
+    """The block SEM, formed with exactly-rounded summation.
+
+    WHY NOT `sample_sem` DIRECTLY, when one source of arithmetic is this
+    file's whole point. `sample_sem` sums with `sum()`, and CPython 3.12
+    changed `sum()` over floats to compensated summation, so its LAST BIT
+    moves with the interpreter. Regenerating this set on Python 3.9 and on
+    3.14 gave yield_sem, ratio_sem and central_yield values differing by about
+    2e-16 relative -- harmless to the validator, whose rel_tol is 5e-15, but
+    enough that the COMMITTED fixture bytes would depend on whoever generated
+    them. `tests/test_generator_check_exit_status.py` requires every
+    generator's --check to exit 0 in the committed tree, and it caught exactly
+    that: 95/96 on 3.9 and 3.11, 96/96 on 3.14.
+
+    `math.fsum` is correctly rounded, so what this writes is a property of the
+    input and not of the interpreter. The validator's own routine remains the
+    definition of correct: `assert_summation_robust` asserts, for every vector
+    this file writes, that `sample_sem` agrees with this value inside the
+    validator's own tolerance -- which is a stronger statement than computing
+    both the same way and never comparing them.
+    """
+    mean = stable_mean(values)
+    return math.sqrt(
+        math.fsum((value - mean) ** 2 for value in values)
+        / (len(values) * (len(values) - 1)))
+
+
 def assert_scale(context: str, values: list[float], sem: float) -> None:
     """Physical scale, not floating-point dust."""
-    central = sum(values) / len(values)
+    central = stable_mean(values)
     if not math.isfinite(sem) or sem < SEM_FLOOR:
         raise SystemExit(
             f"{context}: recomputed SEM {sem:.17g} is below the {SEM_FLOOR:g} "
@@ -169,29 +205,25 @@ def assert_scale(context: str, values: list[float], sem: float) -> None:
             f"central {central:.17g}; the block vector is effectively constant")
 
 
-def assert_summation_robust(context: str, values: list[float]) -> None:
-    """The SEM must not depend on the order or method of summation.
+def assert_summation_robust(context: str, values: list[float],
+                            written: float) -> None:
+    """What is written must survive any interpreter's summation.
 
-    `sample_sem` is called three ways on the same vector: as the validator
-    calls it, on the reversed vector, and re-formed with `math.fsum`. CPython
-    3.12's move to compensated summation in `sum()` is precisely a change
-    between the first and the third, so a vector that survives all three
-    recomputes the same on either side of it.
+    The VALIDATOR's own routine is called two ways on the same vector -- as it
+    calls it, and on the reversed vector -- and both must agree with the value
+    this generator writes, inside the validator's own tolerance. CPython
+    3.12's move to compensated summation in `sum()` is a change of exactly
+    this kind, so a vector that survives here recomputes acceptably on either
+    side of it. The old fixture set failed this by twenty-two percent.
     """
-    plain = sample_sem(values)
-    reversed_order = sample_sem(list(reversed(values)))
-    mean = math.fsum(values) / len(values)
-    compensated = math.sqrt(
-        math.fsum((value - mean) ** 2 for value in values)
-        / (len(values) * (len(values) - 1)))
-    for name, other in (("reversed", reversed_order),
-                        ("fsum", compensated)):
-        if not math.isclose(plain, other, rel_tol=VALIDATOR_REL_TOL,
+    for name, other in (("as the validator sums it", sample_sem(values)),
+                        ("summed in reverse", sample_sem(list(reversed(values))))):
+        if not math.isclose(written, other, rel_tol=VALIDATOR_REL_TOL,
                             abs_tol=0.0):
             raise SystemExit(
-                f"{context}: SEM is summation-sensitive -- {plain:.17g} as the "
-                f"validator sums it, {other:.17g} {name}; the validator's "
-                f"rel_tol is {VALIDATOR_REL_TOL:g}")
+                f"{context}: SEM is summation-sensitive -- {written:.17g} "
+                f"written, {other:.17g} {name}; the validator's rel_tol is "
+                f"{VALIDATOR_REL_TOL:g}")
 
 
 def render_row(flavour: str, trigger: str, tune: str, associate: str,
@@ -199,12 +231,12 @@ def render_row(flavour: str, trigger: str, tune: str, associate: str,
                triggers: list[float], reference: bool, observed: list) -> str:
     """One UNCERTAINTY_MATRIX line, every summary from the validator's own code."""
     context = f"{tune}/{flavour}/{trigger}/{associate}/{binname}"
-    yield_sem = sample_sem(blocks)
+    yield_sem = stable_sem(blocks)
     assert_scale(f"{context} block_yields", blocks, yield_sem)
-    assert_summation_robust(f"{context} block_yields", blocks)
+    assert_summation_robust(f"{context} block_yields", blocks, yield_sem)
     observed.append(yield_sem)
 
-    central_triggers = sum(triggers)
+    central_triggers = math.fsum(triggers)
     check = trigger_consistency(central_triggers, triggers,
                                 [g17(t) for t in triggers])
     if not check["agrees_exactly"]:
@@ -222,7 +254,7 @@ def render_row(flavour: str, trigger: str, tune: str, associate: str,
         f"block_count={len(blocks)}",
         "block_yields=" + ",".join(g17(v) for v in blocks),
         f"yield_sem={g17(yield_sem)}",
-        f"central_yield={g17(sum(blocks) / len(blocks))}",
+        f"central_yield={g17(stable_mean(blocks))}",
         f"central_triggers={g17(central_triggers)}",
         "block_triggers=" + ",".join(g17(v) for v in triggers),
         f"finite_yields={len(blocks)}",
@@ -230,9 +262,9 @@ def render_row(flavour: str, trigger: str, tune: str, associate: str,
     if reference:
         fields += ["block_ratios=NA", "ratio_sem=NA", "finite_ratios=NA"]
     else:
-        ratio_sem = sample_sem(ratios)
+        ratio_sem = stable_sem(ratios)
         assert_scale(f"{context} block_ratios", ratios, ratio_sem)
-        assert_summation_robust(f"{context} block_ratios", ratios)
+        assert_summation_robust(f"{context} block_ratios", ratios, ratio_sem)
         observed.append(ratio_sem)
         fields += ["block_ratios=" + ",".join(g17(v) for v in ratios),
                    f"ratio_sem={g17(ratio_sem)}",
