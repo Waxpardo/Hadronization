@@ -25,7 +25,7 @@ ratios**, and calling it one is a misstatement of the method.
 degrees of freedom.** The contract writes it as
 `sqrt(sum((x_k-mean(x))^2)/(K*(K-1)))`
 (`config/statistical_robustness_v1.json`, `method.block_standard_error`) and the
-implementation is that formula exactly (`extraction/harvest_class_axis.py:113-119`).
+implementation is that formula exactly (`extraction/harvest_class_axis.py:114-121`).
 With `K = 10` the denominator is `10 × 9`.
 
 **4. Nonlinear quantities are formed inside each block, before the standard

@@ -18,7 +18,7 @@ sum over the eleven classes of N_trig ==   N_trig of the M00_100 bin
 The two sides come from different routes — eleven restricted THnSparse
 projections summed, against one unrestricted projection — so agreement is a real
 check that the classes tile the multiplicity axis, not an identity
-(`tools/vintegrated_closure.py:3-13`).
+(`tools/vintegrated_closure.py:4-13`).
 
 **Integer-exact, no tolerance.** The counts are unweighted for this campaign, so
 the contents are exact integers in doubles. A mismatch means the classes do not
@@ -50,7 +50,7 @@ Per identity the bin set must be exactly the eleven contract classes plus
 | no integrated bin anywhere | rows present but no identity carrying `M00_100` raised at the summary line (ledger D3, and the final review's `NameError` path) |
 | non-integral count | +0.5 and −0.5 in two classes of one identity cancel into an integral sum and passed unreported (ledger DA1-016) |
 
-Every refusal exits nonzero (`tools/vintegrated_closure.py:23-49`).
+Every refusal exits nonzero (`tools/vintegrated_closure.py:22-47`).
 
 ## Strict CONTROL
 

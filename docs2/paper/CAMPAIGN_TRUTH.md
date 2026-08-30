@@ -47,7 +47,7 @@ repair waits for the systematics reactivation, because
 and stopped rather than re-pin.
 
 **The real basis for 2.0 is empirical, and it is measured.**
-`results/validation/generator/PTHAT_MULTIPLICITY_SCAN_8317.md:26-33`,
+`results/validation/generator/PTHAT_MULTIPLICITY_SCAN_8317.md:27-33`,
 20,000 events per point on PYTHIA 8.317:
 
 | sample | `dN_ch/dη` | against minimum bias |
@@ -60,7 +60,7 @@ and stopped rather than re-pin.
 At 1.0 the percentile classes would slice a distribution whose mean is nearly a
 third below the one an experiment slices. At 2.0 they mean what they say. The
 minimum-bias reference reproduces ALICE 13 TeV INEL>0 (6.94 ± 0.10), so the
-counter is sound and the deficit is physical (`:34-36`).
+counter is sound and the deficit is physical (`:35-36`).
 
 The choice costs no trigger statistics: moving 1.0 → 2.0 **raised** charm
 triggers per event from 0.990 to 1.196 and beauty from 0.126 to 0.212, because
