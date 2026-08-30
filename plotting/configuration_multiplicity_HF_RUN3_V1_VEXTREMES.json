@@ -46,10 +46,71 @@
                 },
                 {
                     "trigger": "B^{+}",
+                    "associateOS": "B^{0}-bar",
+                    "associateSS": "B^{0}",
+                    "OS": "BplusBzerobar.root",
+                    "SS": "BplusBzero.root"
+                },
+                {
+                    "trigger": "B^{+}",
+                    "associateOS": "B_s^0-bar",
+                    "associateSS": "B_s^0",
+                    "OS": "BplusBszerobar.root",
+                    "SS": "BplusBszero.root"
+                },
+                {
+                    "trigger": "B^{+}",
+                    "associateOS": "Bc-",
+                    "associateSS": "Bc+",
+                    "OS": "BplusBcminus.root",
+                    "SS": "BplusBcplus.root"
+                },
+                {
+                    "trigger": "B^{+}",
                     "associateOS": "Lambda_b",
                     "associateSS": "Lambda_b-bar",
                     "OS": "BplusLb.root",
                     "SS": "BplusLbbar.root"
+                }
+            ]
+        },
+        {
+            "trigger": "Lambda_b-bar",
+            "configs": [
+                {
+                    "trigger": "Lambda_b-bar",
+                    "associateOS": "B-",
+                    "associateSS": "B^{+}",
+                    "OS": "LbbarBminus.root",
+                    "SS": "LbbarBplus.root"
+                },
+                {
+                    "trigger": "Lambda_b-bar",
+                    "associateOS": "B^{0}-bar",
+                    "associateSS": "B^{0}",
+                    "OS": "LbbarBzerobar.root",
+                    "SS": "LbbarBzero.root"
+                },
+                {
+                    "trigger": "Lambda_b-bar",
+                    "associateOS": "B_s^0-bar",
+                    "associateSS": "B_s^0",
+                    "OS": "LbbarBszerobar.root",
+                    "SS": "LbbarBszero.root"
+                },
+                {
+                    "trigger": "Lambda_b-bar",
+                    "associateOS": "Bc-",
+                    "associateSS": "Bc+",
+                    "OS": "LbbarBcminus.root",
+                    "SS": "LbbarBcplus.root"
+                },
+                {
+                    "trigger": "Lambda_b-bar",
+                    "associateOS": "Lambda_b",
+                    "associateSS": "Lambda_b-bar",
+                    "OS": "LbbarLb.root",
+                    "SS": "LbbarLbbar.root"
                 }
             ]
         }
@@ -67,10 +128,43 @@
                 },
                 {
                     "trigger": "D^{+}",
+                    "associateOS": "D^{0}-bar",
+                    "associateSS": "D^{0}",
+                    "OS": "DplusDzerobar.root",
+                    "SS": "DplusDzero.root"
+                },
+                {
+                    "trigger": "D^{+}",
                     "associateOS": "Lambda_c(+)-bar",
                     "associateSS": "Lambda_c(+)",
                     "OS": "DplusLambdacplusbar.root",
                     "SS": "DplusLambdacplus.root"
+                }
+            ]
+        },
+        {
+            "trigger": "Lambda_c(+)",
+            "configs": [
+                {
+                    "trigger": "Lambda_c(+)",
+                    "associateOS": "D-",
+                    "associateSS": "D^{+}",
+                    "OS": "LambdacplusDminus.root",
+                    "SS": "LambdacplusDplus.root"
+                },
+                {
+                    "trigger": "Lambda_c(+)",
+                    "associateOS": "D^{0}-bar",
+                    "associateSS": "D^{0}",
+                    "OS": "LambdacplusDzerobar.root",
+                    "SS": "LambdacplusDzero.root"
+                },
+                {
+                    "trigger": "Lambda_c(+)",
+                    "associateOS": "Lambda_c(+)-bar",
+                    "associateSS": "Lambda_c(+)",
+                    "OS": "LambdacplusLambdacplusbar.root",
+                    "SS": "LambdacplusLambdacplus.root"
                 }
             ]
         }
@@ -288,7 +382,7 @@
     ],
     "canvases_to_be_drawn": [
         {
-            "canvas_name": "mini_beauty_balancing_MONASH",
+            "canvas_name": "mini_beauty_balancing_monash_meson_trigger",
             "draw_function_to_use": "drawBalancingPlots",
             "TUNES": [
                 "MONASH"
@@ -301,15 +395,15 @@
             "write": false,
             "write_path": "NONE",
             "write_name": "NONE",
-            "canvas_title": "MONASH, pp #sqrt{s} = 13.6 TeV",
+            "canvas_title": "MONASH, B^{+} trigger, pp #sqrt{s} = 13.6 TeV",
             "x_axis_title": "associate species",
             "y_axis_title": "balancing yield per trigger",
             "x_size_canvas": 800,
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.38,
-            "y_max_mini_pad": 0.569,
+            "y_min_mini_pad": 0.237,
+            "y_max_mini_pad": 0.475,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -432,7 +526,7 @@
             "legend_columns": 1
         },
         {
-            "canvas_name": "mini_beauty_balancing_JUNCTIONS",
+            "canvas_name": "mini_beauty_balancing_junctions_meson_trigger",
             "draw_function_to_use": "drawBalancingPlots",
             "TUNES": [
                 "JUNCTIONS"
@@ -445,15 +539,15 @@
             "write": false,
             "write_path": "NONE",
             "write_name": "NONE",
-            "canvas_title": "JUNCTIONS, pp #sqrt{s} = 13.6 TeV",
+            "canvas_title": "JUNCTIONS, B^{+} trigger, pp #sqrt{s} = 13.6 TeV",
             "x_axis_title": "associate species",
             "y_axis_title": "balancing yield per trigger",
             "x_size_canvas": 800,
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.57,
-            "y_max_mini_pad": 0.759,
+            "y_min_mini_pad": 0.475,
+            "y_max_mini_pad": 0.712,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -576,7 +670,7 @@
             "legend_columns": 1
         },
         {
-            "canvas_name": "mini_beauty_balancing_CLOSEPACKING",
+            "canvas_name": "mini_beauty_balancing_closepacking_meson_trigger",
             "draw_function_to_use": "drawBalancingPlots",
             "TUNES": [
                 "CLOSEPACKING"
@@ -589,740 +683,14 @@
             "write": false,
             "write_path": "NONE",
             "write_name": "NONE",
-            "canvas_title": "CLOSEPACKING, pp #sqrt{s} = 13.6 TeV",
+            "canvas_title": "CLOSEPACKING, B^{+} trigger, pp #sqrt{s} = 13.6 TeV",
             "x_axis_title": "associate species",
             "y_axis_title": "balancing yield per trigger",
             "x_size_canvas": 800,
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.76,
-            "y_max_mini_pad": 0.95,
-            "top_margin_mini_pad": 0.1,
-            "bottom_margin_mini_pad": 0.12,
-            "left_margin_mini_pad": 0.13,
-            "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.01,
-            "y_max_axis": 0.42,
-            "histogram_minimum": -1,
-            "histogram_maximum": -1,
-            "set_log_y": true,
-            "x_min_legend": 0.14,
-            "x_max_legend": 0.99,
-            "y_min_legend": 0.7,
-            "y_max_legend": 0.9,
-            "legend_entries": [
-                {
-                    "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
-                },
-                {
-                    "object_name": "hDPhiM80_90",
-                    "display_name": "80-90%"
-                },
-                {
-                    "object_name": "hDPhiM70_80",
-                    "display_name": "70-80%"
-                },
-                {
-                    "object_name": "hDPhiM60_70",
-                    "display_name": "60-70%"
-                },
-                {
-                    "object_name": "hDPhiM50_60",
-                    "display_name": "50-60%"
-                },
-                {
-                    "object_name": "hDPhiM40_50",
-                    "display_name": "40-50%"
-                },
-                {
-                    "object_name": "hDPhiM30_40",
-                    "display_name": "30-40%"
-                },
-                {
-                    "object_name": "hDPhiM20_30",
-                    "display_name": "20-30%"
-                },
-                {
-                    "object_name": "hDPhiM10_20",
-                    "display_name": "10-20%"
-                },
-                {
-                    "object_name": "hDPhiM1_10",
-                    "display_name": "1-10%"
-                },
-                {
-                    "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
-                }
-            ],
-            "TUNE_colours": [],
-            "dependency_line_styles": [
-                {
-                    "dependency_name": "hDPhiM90_100",
-                    "line_style": 1
-                },
-                {
-                    "dependency_name": "hDPhiM80_90",
-                    "line_style": 10
-                },
-                {
-                    "dependency_name": "hDPhiM70_80",
-                    "line_style": 9
-                },
-                {
-                    "dependency_name": "hDPhiM60_70",
-                    "line_style": 8
-                },
-                {
-                    "dependency_name": "hDPhiM50_60",
-                    "line_style": 7
-                },
-                {
-                    "dependency_name": "hDPhiM40_50",
-                    "line_style": 6
-                },
-                {
-                    "dependency_name": "hDPhiM30_40",
-                    "line_style": 5
-                },
-                {
-                    "dependency_name": "hDPhiM20_30",
-                    "line_style": 4
-                },
-                {
-                    "dependency_name": "hDPhiM10_20",
-                    "line_style": 3
-                },
-                {
-                    "dependency_name": "hDPhiM1_10",
-                    "line_style": 2
-                },
-                {
-                    "dependency_name": "hDPhiM0_1",
-                    "line_style": 1
-                }
-            ],
-            "baryon_line_styles": [],
-            "bins_to_ignore": [
-                "hDPhiM80_90",
-                "hDPhiM70_80",
-                "hDPhiM60_70",
-                "hDPhiM50_60",
-                "hDPhiM40_50",
-                "hDPhiM30_40",
-                "hDPhiM20_30",
-                "hDPhiM10_20",
-                "hDPhiM1_10"
-            ],
-            "nominator_TUNES": [],
-            "legend_columns": 4
-        },
-        {
-            "canvas_name": "mini_beauty_balancing_JUNCTIONS_over_MONASH",
-            "draw_function_to_use": "drawBalancingPlotsTUNERatios",
-            "TUNES": [
-                "MONASH",
-                "JUNCTIONS"
-            ],
-            "FLAVOUR": "BEAUTY",
-            "TriggerToUse": "B^{+}",
-            "denominator_TUNE": "MONASH",
-            "baryons_to_plot_in_baryon/meson_ratio": [],
-            "use_hard_coded_settings": false,
-            "write": false,
-            "write_path": "NONE",
-            "write_name": "NONE",
-            "canvas_title": "JUNCTIONS / MONASH",
-            "x_axis_title": "associate species",
-            "y_axis_title": "JUNCTIONS / MONASH balancing yield",
-            "x_size_canvas": 800,
-            "y_size_canvas": 600,
-            "x_min_mini_pad": 0.05,
-            "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.0,
-            "y_max_mini_pad": 0.189,
-            "top_margin_mini_pad": 0.1,
-            "bottom_margin_mini_pad": 0.12,
-            "left_margin_mini_pad": 0.13,
-            "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.6,
-            "y_max_axis": 2.5,
-            "histogram_minimum": -1,
-            "histogram_maximum": -1,
-            "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
-            "legend_entries": [
-                {
-                    "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
-                },
-                {
-                    "object_name": "hDPhiM80_90",
-                    "display_name": "80-90%"
-                },
-                {
-                    "object_name": "hDPhiM70_80",
-                    "display_name": "70-80%"
-                },
-                {
-                    "object_name": "hDPhiM60_70",
-                    "display_name": "60-70%"
-                },
-                {
-                    "object_name": "hDPhiM50_60",
-                    "display_name": "50-60%"
-                },
-                {
-                    "object_name": "hDPhiM40_50",
-                    "display_name": "40-50%"
-                },
-                {
-                    "object_name": "hDPhiM30_40",
-                    "display_name": "30-40%"
-                },
-                {
-                    "object_name": "hDPhiM20_30",
-                    "display_name": "20-30%"
-                },
-                {
-                    "object_name": "hDPhiM10_20",
-                    "display_name": "10-20%"
-                },
-                {
-                    "object_name": "hDPhiM1_10",
-                    "display_name": "1-10%"
-                },
-                {
-                    "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
-                }
-            ],
-            "TUNE_colours": [],
-            "dependency_line_styles": [
-                {
-                    "dependency_name": "hDPhiM90_100",
-                    "line_style": 1
-                },
-                {
-                    "dependency_name": "hDPhiM80_90",
-                    "line_style": 10
-                },
-                {
-                    "dependency_name": "hDPhiM70_80",
-                    "line_style": 9
-                },
-                {
-                    "dependency_name": "hDPhiM60_70",
-                    "line_style": 8
-                },
-                {
-                    "dependency_name": "hDPhiM50_60",
-                    "line_style": 7
-                },
-                {
-                    "dependency_name": "hDPhiM40_50",
-                    "line_style": 6
-                },
-                {
-                    "dependency_name": "hDPhiM30_40",
-                    "line_style": 5
-                },
-                {
-                    "dependency_name": "hDPhiM20_30",
-                    "line_style": 4
-                },
-                {
-                    "dependency_name": "hDPhiM10_20",
-                    "line_style": 3
-                },
-                {
-                    "dependency_name": "hDPhiM1_10",
-                    "line_style": 2
-                },
-                {
-                    "dependency_name": "hDPhiM0_1",
-                    "line_style": 1
-                }
-            ],
-            "baryon_line_styles": [],
-            "bins_to_ignore": [
-                "hDPhiM80_90",
-                "hDPhiM70_80",
-                "hDPhiM60_70",
-                "hDPhiM50_60",
-                "hDPhiM40_50",
-                "hDPhiM30_40",
-                "hDPhiM20_30",
-                "hDPhiM10_20",
-                "hDPhiM1_10"
-            ],
-            "nominator_TUNES": [
-                "JUNCTIONS"
-            ],
-            "legend_columns": 1
-        },
-        {
-            "canvas_name": "mini_beauty_balancing_CLOSEPACKING_over_MONASH",
-            "draw_function_to_use": "drawBalancingPlotsTUNERatios",
-            "TUNES": [
-                "MONASH",
-                "CLOSEPACKING"
-            ],
-            "FLAVOUR": "BEAUTY",
-            "TriggerToUse": "B^{+}",
-            "denominator_TUNE": "MONASH",
-            "baryons_to_plot_in_baryon/meson_ratio": [],
-            "use_hard_coded_settings": false,
-            "write": false,
-            "write_path": "NONE",
-            "write_name": "NONE",
-            "canvas_title": "CLOSEPACKING / MONASH",
-            "x_axis_title": "associate species",
-            "y_axis_title": "CLOSEPACKING / MONASH balancing yield",
-            "x_size_canvas": 800,
-            "y_size_canvas": 600,
-            "x_min_mini_pad": 0.05,
-            "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.19,
-            "y_max_mini_pad": 0.379,
-            "top_margin_mini_pad": 0.1,
-            "bottom_margin_mini_pad": 0.12,
-            "left_margin_mini_pad": 0.13,
-            "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.6,
-            "y_max_axis": 2.5,
-            "histogram_minimum": -1,
-            "histogram_maximum": -1,
-            "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
-            "legend_entries": [
-                {
-                    "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
-                },
-                {
-                    "object_name": "hDPhiM80_90",
-                    "display_name": "80-90%"
-                },
-                {
-                    "object_name": "hDPhiM70_80",
-                    "display_name": "70-80%"
-                },
-                {
-                    "object_name": "hDPhiM60_70",
-                    "display_name": "60-70%"
-                },
-                {
-                    "object_name": "hDPhiM50_60",
-                    "display_name": "50-60%"
-                },
-                {
-                    "object_name": "hDPhiM40_50",
-                    "display_name": "40-50%"
-                },
-                {
-                    "object_name": "hDPhiM30_40",
-                    "display_name": "30-40%"
-                },
-                {
-                    "object_name": "hDPhiM20_30",
-                    "display_name": "20-30%"
-                },
-                {
-                    "object_name": "hDPhiM10_20",
-                    "display_name": "10-20%"
-                },
-                {
-                    "object_name": "hDPhiM1_10",
-                    "display_name": "1-10%"
-                },
-                {
-                    "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
-                }
-            ],
-            "TUNE_colours": [],
-            "dependency_line_styles": [
-                {
-                    "dependency_name": "hDPhiM90_100",
-                    "line_style": 1
-                },
-                {
-                    "dependency_name": "hDPhiM80_90",
-                    "line_style": 10
-                },
-                {
-                    "dependency_name": "hDPhiM70_80",
-                    "line_style": 9
-                },
-                {
-                    "dependency_name": "hDPhiM60_70",
-                    "line_style": 8
-                },
-                {
-                    "dependency_name": "hDPhiM50_60",
-                    "line_style": 7
-                },
-                {
-                    "dependency_name": "hDPhiM40_50",
-                    "line_style": 6
-                },
-                {
-                    "dependency_name": "hDPhiM30_40",
-                    "line_style": 5
-                },
-                {
-                    "dependency_name": "hDPhiM20_30",
-                    "line_style": 4
-                },
-                {
-                    "dependency_name": "hDPhiM10_20",
-                    "line_style": 3
-                },
-                {
-                    "dependency_name": "hDPhiM1_10",
-                    "line_style": 2
-                },
-                {
-                    "dependency_name": "hDPhiM0_1",
-                    "line_style": 1
-                }
-            ],
-            "baryon_line_styles": [],
-            "bins_to_ignore": [
-                "hDPhiM80_90",
-                "hDPhiM70_80",
-                "hDPhiM60_70",
-                "hDPhiM50_60",
-                "hDPhiM40_50",
-                "hDPhiM30_40",
-                "hDPhiM20_30",
-                "hDPhiM10_20",
-                "hDPhiM1_10"
-            ],
-            "nominator_TUNES": [
-                "CLOSEPACKING"
-            ],
-            "legend_columns": 1
-        },
-        {
-            "canvas_name": "mini_charm_balancing_MONASH",
-            "draw_function_to_use": "drawBalancingPlots",
-            "TUNES": [
-                "MONASH"
-            ],
-            "FLAVOUR": "CHARM",
-            "TriggerToUse": "D^{+}",
-            "denominator_TUNE": "NONE",
-            "baryons_to_plot_in_baryon/meson_ratio": [],
-            "use_hard_coded_settings": false,
-            "write": false,
-            "write_path": "NONE",
-            "write_name": "NONE",
-            "canvas_title": "MONASH, pp #sqrt{s} = 13.6 TeV",
-            "x_axis_title": "associate species",
-            "y_axis_title": "balancing yield per trigger",
-            "x_size_canvas": 800,
-            "y_size_canvas": 600,
-            "x_min_mini_pad": 0.501,
-            "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.38,
-            "y_max_mini_pad": 0.569,
-            "top_margin_mini_pad": 0.1,
-            "bottom_margin_mini_pad": 0.12,
-            "left_margin_mini_pad": 0.13,
-            "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.01,
-            "y_max_axis": 0.42,
-            "histogram_minimum": -1,
-            "histogram_maximum": -1,
-            "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
-            "legend_entries": [
-                {
-                    "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
-                },
-                {
-                    "object_name": "hDPhiM80_90",
-                    "display_name": "80-90%"
-                },
-                {
-                    "object_name": "hDPhiM70_80",
-                    "display_name": "70-80%"
-                },
-                {
-                    "object_name": "hDPhiM60_70",
-                    "display_name": "60-70%"
-                },
-                {
-                    "object_name": "hDPhiM50_60",
-                    "display_name": "50-60%"
-                },
-                {
-                    "object_name": "hDPhiM40_50",
-                    "display_name": "40-50%"
-                },
-                {
-                    "object_name": "hDPhiM30_40",
-                    "display_name": "30-40%"
-                },
-                {
-                    "object_name": "hDPhiM20_30",
-                    "display_name": "20-30%"
-                },
-                {
-                    "object_name": "hDPhiM10_20",
-                    "display_name": "10-20%"
-                },
-                {
-                    "object_name": "hDPhiM1_10",
-                    "display_name": "1-10%"
-                },
-                {
-                    "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
-                }
-            ],
-            "TUNE_colours": [],
-            "dependency_line_styles": [
-                {
-                    "dependency_name": "hDPhiM90_100",
-                    "line_style": 1
-                },
-                {
-                    "dependency_name": "hDPhiM80_90",
-                    "line_style": 10
-                },
-                {
-                    "dependency_name": "hDPhiM70_80",
-                    "line_style": 9
-                },
-                {
-                    "dependency_name": "hDPhiM60_70",
-                    "line_style": 8
-                },
-                {
-                    "dependency_name": "hDPhiM50_60",
-                    "line_style": 7
-                },
-                {
-                    "dependency_name": "hDPhiM40_50",
-                    "line_style": 6
-                },
-                {
-                    "dependency_name": "hDPhiM30_40",
-                    "line_style": 5
-                },
-                {
-                    "dependency_name": "hDPhiM20_30",
-                    "line_style": 4
-                },
-                {
-                    "dependency_name": "hDPhiM10_20",
-                    "line_style": 3
-                },
-                {
-                    "dependency_name": "hDPhiM1_10",
-                    "line_style": 2
-                },
-                {
-                    "dependency_name": "hDPhiM0_1",
-                    "line_style": 1
-                }
-            ],
-            "baryon_line_styles": [],
-            "bins_to_ignore": [
-                "hDPhiM80_90",
-                "hDPhiM70_80",
-                "hDPhiM60_70",
-                "hDPhiM50_60",
-                "hDPhiM40_50",
-                "hDPhiM30_40",
-                "hDPhiM20_30",
-                "hDPhiM10_20",
-                "hDPhiM1_10"
-            ],
-            "nominator_TUNES": [],
-            "legend_columns": 1
-        },
-        {
-            "canvas_name": "mini_charm_balancing_JUNCTIONS",
-            "draw_function_to_use": "drawBalancingPlots",
-            "TUNES": [
-                "JUNCTIONS"
-            ],
-            "FLAVOUR": "CHARM",
-            "TriggerToUse": "D^{+}",
-            "denominator_TUNE": "NONE",
-            "baryons_to_plot_in_baryon/meson_ratio": [],
-            "use_hard_coded_settings": false,
-            "write": false,
-            "write_path": "NONE",
-            "write_name": "NONE",
-            "canvas_title": "JUNCTIONS, pp #sqrt{s} = 13.6 TeV",
-            "x_axis_title": "associate species",
-            "y_axis_title": "balancing yield per trigger",
-            "x_size_canvas": 800,
-            "y_size_canvas": 600,
-            "x_min_mini_pad": 0.501,
-            "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.57,
-            "y_max_mini_pad": 0.759,
-            "top_margin_mini_pad": 0.1,
-            "bottom_margin_mini_pad": 0.12,
-            "left_margin_mini_pad": 0.13,
-            "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.01,
-            "y_max_axis": 0.42,
-            "histogram_minimum": -1,
-            "histogram_maximum": -1,
-            "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
-            "legend_entries": [
-                {
-                    "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
-                },
-                {
-                    "object_name": "hDPhiM80_90",
-                    "display_name": "80-90%"
-                },
-                {
-                    "object_name": "hDPhiM70_80",
-                    "display_name": "70-80%"
-                },
-                {
-                    "object_name": "hDPhiM60_70",
-                    "display_name": "60-70%"
-                },
-                {
-                    "object_name": "hDPhiM50_60",
-                    "display_name": "50-60%"
-                },
-                {
-                    "object_name": "hDPhiM40_50",
-                    "display_name": "40-50%"
-                },
-                {
-                    "object_name": "hDPhiM30_40",
-                    "display_name": "30-40%"
-                },
-                {
-                    "object_name": "hDPhiM20_30",
-                    "display_name": "20-30%"
-                },
-                {
-                    "object_name": "hDPhiM10_20",
-                    "display_name": "10-20%"
-                },
-                {
-                    "object_name": "hDPhiM1_10",
-                    "display_name": "1-10%"
-                },
-                {
-                    "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
-                }
-            ],
-            "TUNE_colours": [],
-            "dependency_line_styles": [
-                {
-                    "dependency_name": "hDPhiM90_100",
-                    "line_style": 1
-                },
-                {
-                    "dependency_name": "hDPhiM80_90",
-                    "line_style": 10
-                },
-                {
-                    "dependency_name": "hDPhiM70_80",
-                    "line_style": 9
-                },
-                {
-                    "dependency_name": "hDPhiM60_70",
-                    "line_style": 8
-                },
-                {
-                    "dependency_name": "hDPhiM50_60",
-                    "line_style": 7
-                },
-                {
-                    "dependency_name": "hDPhiM40_50",
-                    "line_style": 6
-                },
-                {
-                    "dependency_name": "hDPhiM30_40",
-                    "line_style": 5
-                },
-                {
-                    "dependency_name": "hDPhiM20_30",
-                    "line_style": 4
-                },
-                {
-                    "dependency_name": "hDPhiM10_20",
-                    "line_style": 3
-                },
-                {
-                    "dependency_name": "hDPhiM1_10",
-                    "line_style": 2
-                },
-                {
-                    "dependency_name": "hDPhiM0_1",
-                    "line_style": 1
-                }
-            ],
-            "baryon_line_styles": [],
-            "bins_to_ignore": [
-                "hDPhiM80_90",
-                "hDPhiM70_80",
-                "hDPhiM60_70",
-                "hDPhiM50_60",
-                "hDPhiM40_50",
-                "hDPhiM30_40",
-                "hDPhiM20_30",
-                "hDPhiM10_20",
-                "hDPhiM1_10"
-            ],
-            "nominator_TUNES": [],
-            "legend_columns": 1
-        },
-        {
-            "canvas_name": "mini_charm_balancing_CLOSEPACKING",
-            "draw_function_to_use": "drawBalancingPlots",
-            "TUNES": [
-                "CLOSEPACKING"
-            ],
-            "FLAVOUR": "CHARM",
-            "TriggerToUse": "D^{+}",
-            "denominator_TUNE": "NONE",
-            "baryons_to_plot_in_baryon/meson_ratio": [],
-            "use_hard_coded_settings": false,
-            "write": false,
-            "write_path": "NONE",
-            "write_name": "NONE",
-            "canvas_title": "CLOSEPACKING, pp #sqrt{s} = 13.6 TeV",
-            "x_axis_title": "associate species",
-            "y_axis_title": "balancing yield per trigger",
-            "x_size_canvas": 800,
-            "y_size_canvas": 600,
-            "x_min_mini_pad": 0.501,
-            "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.76,
+            "y_min_mini_pad": 0.712,
             "y_max_mini_pad": 0.95,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
@@ -1446,29 +814,30 @@
             "legend_columns": 1
         },
         {
-            "canvas_name": "mini_charm_balancing_JUNCTIONS_over_MONASH",
+            "canvas_name": "mini_beauty_balancing_junctions_closepacking_over_monash_meson_trigger",
             "draw_function_to_use": "drawBalancingPlotsTUNERatios",
             "TUNES": [
                 "MONASH",
-                "JUNCTIONS"
+                "JUNCTIONS",
+                "CLOSEPACKING"
             ],
-            "FLAVOUR": "CHARM",
-            "TriggerToUse": "D^{+}",
+            "FLAVOUR": "BEAUTY",
+            "TriggerToUse": "B^{+}",
             "denominator_TUNE": "MONASH",
             "baryons_to_plot_in_baryon/meson_ratio": [],
             "use_hard_coded_settings": false,
             "write": false,
             "write_path": "NONE",
             "write_name": "NONE",
-            "canvas_title": "JUNCTIONS / MONASH",
+            "canvas_title": "JUNCTIONS and CLOSEPACKING / MONASH, B^{+} trigger",
             "x_axis_title": "associate species",
-            "y_axis_title": "JUNCTIONS / MONASH balancing yield",
+            "y_axis_title": "tune / MONASH balancing yield",
             "x_size_canvas": 800,
             "y_size_canvas": 600,
-            "x_min_mini_pad": 0.501,
-            "x_max_mini_pad": 0.95,
+            "x_min_mini_pad": 0.05,
+            "x_max_mini_pad": 0.5,
             "y_min_mini_pad": 0.0,
-            "y_max_mini_pad": 0.189,
+            "y_max_mini_pad": 0.237,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1588,15 +957,1030 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [
-                "JUNCTIONS"
+                "JUNCTIONS",
+                "CLOSEPACKING"
             ],
             "legend_columns": 1
         },
         {
-            "canvas_name": "mini_charm_balancing_CLOSEPACKING_over_MONASH",
+            "canvas_name": "mini_beauty_balancing_monash_baryon_trigger",
+            "draw_function_to_use": "drawBalancingPlots",
+            "TUNES": [
+                "MONASH"
+            ],
+            "FLAVOUR": "BEAUTY",
+            "TriggerToUse": "Lambda_b-bar",
+            "denominator_TUNE": "NONE",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "MONASH, Lambda_b-bar trigger, pp #sqrt{s} = 13.6 TeV",
+            "x_axis_title": "associate species",
+            "y_axis_title": "balancing yield per trigger",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.501,
+            "x_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.237,
+            "y_max_mini_pad": 0.475,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.0001,
+            "y_max_axis": 0.8,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": true,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_beauty_balancing_junctions_baryon_trigger",
+            "draw_function_to_use": "drawBalancingPlots",
+            "TUNES": [
+                "JUNCTIONS"
+            ],
+            "FLAVOUR": "BEAUTY",
+            "TriggerToUse": "Lambda_b-bar",
+            "denominator_TUNE": "NONE",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "JUNCTIONS, Lambda_b-bar trigger, pp #sqrt{s} = 13.6 TeV",
+            "x_axis_title": "associate species",
+            "y_axis_title": "balancing yield per trigger",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.501,
+            "x_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.475,
+            "y_max_mini_pad": 0.712,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.0001,
+            "y_max_axis": 0.8,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": true,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_beauty_balancing_closepacking_baryon_trigger",
+            "draw_function_to_use": "drawBalancingPlots",
+            "TUNES": [
+                "CLOSEPACKING"
+            ],
+            "FLAVOUR": "BEAUTY",
+            "TriggerToUse": "Lambda_b-bar",
+            "denominator_TUNE": "NONE",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "CLOSEPACKING, Lambda_b-bar trigger, pp #sqrt{s} = 13.6 TeV",
+            "x_axis_title": "associate species",
+            "y_axis_title": "balancing yield per trigger",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.501,
+            "x_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.712,
+            "y_max_mini_pad": 0.95,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.0001,
+            "y_max_axis": 0.8,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": true,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_beauty_balancing_junctions_closepacking_over_monash_baryon_trigger",
             "draw_function_to_use": "drawBalancingPlotsTUNERatios",
             "TUNES": [
                 "MONASH",
+                "JUNCTIONS",
+                "CLOSEPACKING"
+            ],
+            "FLAVOUR": "BEAUTY",
+            "TriggerToUse": "Lambda_b-bar",
+            "denominator_TUNE": "MONASH",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "JUNCTIONS and CLOSEPACKING / MONASH, Lambda_b-bar trigger",
+            "x_axis_title": "associate species",
+            "y_axis_title": "tune / MONASH balancing yield",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.501,
+            "x_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.0,
+            "y_max_mini_pad": 0.237,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.0,
+            "y_max_axis": 2.5,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": false,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [
+                "JUNCTIONS",
+                "CLOSEPACKING"
+            ],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_charm_balancing_monash_meson_trigger",
+            "draw_function_to_use": "drawBalancingPlots",
+            "TUNES": [
+                "MONASH"
+            ],
+            "FLAVOUR": "CHARM",
+            "TriggerToUse": "D^{+}",
+            "denominator_TUNE": "NONE",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "MONASH, D^{+} trigger, pp #sqrt{s} = 13.6 TeV",
+            "x_axis_title": "associate species",
+            "y_axis_title": "balancing yield per trigger",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.05,
+            "x_max_mini_pad": 0.5,
+            "y_min_mini_pad": 0.237,
+            "y_max_mini_pad": 0.475,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.01,
+            "y_max_axis": 0.42,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": true,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_charm_balancing_junctions_meson_trigger",
+            "draw_function_to_use": "drawBalancingPlots",
+            "TUNES": [
+                "JUNCTIONS"
+            ],
+            "FLAVOUR": "CHARM",
+            "TriggerToUse": "D^{+}",
+            "denominator_TUNE": "NONE",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "JUNCTIONS, D^{+} trigger, pp #sqrt{s} = 13.6 TeV",
+            "x_axis_title": "associate species",
+            "y_axis_title": "balancing yield per trigger",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.05,
+            "x_max_mini_pad": 0.5,
+            "y_min_mini_pad": 0.475,
+            "y_max_mini_pad": 0.712,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.01,
+            "y_max_axis": 0.42,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": true,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_charm_balancing_closepacking_meson_trigger",
+            "draw_function_to_use": "drawBalancingPlots",
+            "TUNES": [
+                "CLOSEPACKING"
+            ],
+            "FLAVOUR": "CHARM",
+            "TriggerToUse": "D^{+}",
+            "denominator_TUNE": "NONE",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "CLOSEPACKING, D^{+} trigger, pp #sqrt{s} = 13.6 TeV",
+            "x_axis_title": "associate species",
+            "y_axis_title": "balancing yield per trigger",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.05,
+            "x_max_mini_pad": 0.5,
+            "y_min_mini_pad": 0.712,
+            "y_max_mini_pad": 0.95,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.01,
+            "y_max_axis": 0.42,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": true,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_charm_balancing_junctions_closepacking_over_monash_meson_trigger",
+            "draw_function_to_use": "drawBalancingPlotsTUNERatios",
+            "TUNES": [
+                "MONASH",
+                "JUNCTIONS",
                 "CLOSEPACKING"
             ],
             "FLAVOUR": "CHARM",
@@ -1607,15 +1991,15 @@
             "write": false,
             "write_path": "NONE",
             "write_name": "NONE",
-            "canvas_title": "CLOSEPACKING / MONASH",
+            "canvas_title": "JUNCTIONS and CLOSEPACKING / MONASH, D^{+} trigger",
             "x_axis_title": "associate species",
-            "y_axis_title": "CLOSEPACKING / MONASH balancing yield",
+            "y_axis_title": "tune / MONASH balancing yield",
             "x_size_canvas": 800,
             "y_size_canvas": 600,
-            "x_min_mini_pad": 0.501,
-            "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.19,
-            "y_max_mini_pad": 0.379,
+            "x_min_mini_pad": 0.05,
+            "x_max_mini_pad": 0.5,
+            "y_min_mini_pad": 0.0,
+            "y_max_mini_pad": 0.237,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1735,6 +2119,588 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [
+                "JUNCTIONS",
+                "CLOSEPACKING"
+            ],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_charm_balancing_monash_baryon_trigger",
+            "draw_function_to_use": "drawBalancingPlots",
+            "TUNES": [
+                "MONASH"
+            ],
+            "FLAVOUR": "CHARM",
+            "TriggerToUse": "Lambda_c(+)",
+            "denominator_TUNE": "NONE",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "MONASH, Lambda_c(+) trigger, pp #sqrt{s} = 13.6 TeV",
+            "x_axis_title": "associate species",
+            "y_axis_title": "balancing yield per trigger",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.501,
+            "x_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.237,
+            "y_max_mini_pad": 0.475,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.0001,
+            "y_max_axis": 0.8,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": true,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_charm_balancing_junctions_baryon_trigger",
+            "draw_function_to_use": "drawBalancingPlots",
+            "TUNES": [
+                "JUNCTIONS"
+            ],
+            "FLAVOUR": "CHARM",
+            "TriggerToUse": "Lambda_c(+)",
+            "denominator_TUNE": "NONE",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "JUNCTIONS, Lambda_c(+) trigger, pp #sqrt{s} = 13.6 TeV",
+            "x_axis_title": "associate species",
+            "y_axis_title": "balancing yield per trigger",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.501,
+            "x_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.475,
+            "y_max_mini_pad": 0.712,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.0001,
+            "y_max_axis": 0.8,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": true,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_charm_balancing_closepacking_baryon_trigger",
+            "draw_function_to_use": "drawBalancingPlots",
+            "TUNES": [
+                "CLOSEPACKING"
+            ],
+            "FLAVOUR": "CHARM",
+            "TriggerToUse": "Lambda_c(+)",
+            "denominator_TUNE": "NONE",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "CLOSEPACKING, Lambda_c(+) trigger, pp #sqrt{s} = 13.6 TeV",
+            "x_axis_title": "associate species",
+            "y_axis_title": "balancing yield per trigger",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.501,
+            "x_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.712,
+            "y_max_mini_pad": 0.95,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.0001,
+            "y_max_axis": 0.8,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": true,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [],
+            "legend_columns": 1
+        },
+        {
+            "canvas_name": "mini_charm_balancing_junctions_closepacking_over_monash_baryon_trigger",
+            "draw_function_to_use": "drawBalancingPlotsTUNERatios",
+            "TUNES": [
+                "MONASH",
+                "JUNCTIONS",
+                "CLOSEPACKING"
+            ],
+            "FLAVOUR": "CHARM",
+            "TriggerToUse": "Lambda_c(+)",
+            "denominator_TUNE": "MONASH",
+            "baryons_to_plot_in_baryon/meson_ratio": [],
+            "use_hard_coded_settings": false,
+            "write": false,
+            "write_path": "NONE",
+            "write_name": "NONE",
+            "canvas_title": "JUNCTIONS and CLOSEPACKING / MONASH, Lambda_c(+) trigger",
+            "x_axis_title": "associate species",
+            "y_axis_title": "tune / MONASH balancing yield",
+            "x_size_canvas": 800,
+            "y_size_canvas": 600,
+            "x_min_mini_pad": 0.501,
+            "x_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.0,
+            "y_max_mini_pad": 0.237,
+            "top_margin_mini_pad": 0.1,
+            "bottom_margin_mini_pad": 0.12,
+            "left_margin_mini_pad": 0.13,
+            "right_margin_mini_pad": 0.03,
+            "y_min_axis": 0.0,
+            "y_max_axis": 2.5,
+            "histogram_minimum": -1,
+            "histogram_maximum": -1,
+            "set_log_y": false,
+            "x_min_legend": -1,
+            "x_max_legend": -1,
+            "y_min_legend": -1,
+            "y_max_legend": -1,
+            "legend_entries": [
+                {
+                    "object_name": "hDPhiM90_100",
+                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                },
+                {
+                    "object_name": "hDPhiM80_90",
+                    "display_name": "80-90%"
+                },
+                {
+                    "object_name": "hDPhiM70_80",
+                    "display_name": "70-80%"
+                },
+                {
+                    "object_name": "hDPhiM60_70",
+                    "display_name": "60-70%"
+                },
+                {
+                    "object_name": "hDPhiM50_60",
+                    "display_name": "50-60%"
+                },
+                {
+                    "object_name": "hDPhiM40_50",
+                    "display_name": "40-50%"
+                },
+                {
+                    "object_name": "hDPhiM30_40",
+                    "display_name": "30-40%"
+                },
+                {
+                    "object_name": "hDPhiM20_30",
+                    "display_name": "20-30%"
+                },
+                {
+                    "object_name": "hDPhiM10_20",
+                    "display_name": "10-20%"
+                },
+                {
+                    "object_name": "hDPhiM1_10",
+                    "display_name": "1-10%"
+                },
+                {
+                    "object_name": "hDPhiM0_1",
+                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                }
+            ],
+            "TUNE_colours": [],
+            "dependency_line_styles": [
+                {
+                    "dependency_name": "hDPhiM90_100",
+                    "line_style": 1
+                },
+                {
+                    "dependency_name": "hDPhiM80_90",
+                    "line_style": 10
+                },
+                {
+                    "dependency_name": "hDPhiM70_80",
+                    "line_style": 9
+                },
+                {
+                    "dependency_name": "hDPhiM60_70",
+                    "line_style": 8
+                },
+                {
+                    "dependency_name": "hDPhiM50_60",
+                    "line_style": 7
+                },
+                {
+                    "dependency_name": "hDPhiM40_50",
+                    "line_style": 6
+                },
+                {
+                    "dependency_name": "hDPhiM30_40",
+                    "line_style": 5
+                },
+                {
+                    "dependency_name": "hDPhiM20_30",
+                    "line_style": 4
+                },
+                {
+                    "dependency_name": "hDPhiM10_20",
+                    "line_style": 3
+                },
+                {
+                    "dependency_name": "hDPhiM1_10",
+                    "line_style": 2
+                },
+                {
+                    "dependency_name": "hDPhiM0_1",
+                    "line_style": 1
+                }
+            ],
+            "baryon_line_styles": [],
+            "bins_to_ignore": [
+                "hDPhiM80_90",
+                "hDPhiM70_80",
+                "hDPhiM60_70",
+                "hDPhiM50_60",
+                "hDPhiM40_50",
+                "hDPhiM30_40",
+                "hDPhiM20_30",
+                "hDPhiM10_20",
+                "hDPhiM1_10"
+            ],
+            "nominator_TUNES": [
+                "JUNCTIONS",
                 "CLOSEPACKING"
             ],
             "legend_columns": 1
@@ -1742,23 +2708,40 @@
     ],
     "global_canvases_to_be_drawn": [
         {
-            "canvas_name": "global_balancing_plots",
-            "canvas_title": "balancing in beauty and charm, three tunes -- pp #sqrt{s} = 13.6 TeV",
+            "canvas_name": "global_balancing_plots_beauty",
+            "canvas_title": "beauty balancing yield in the lowest and highest #it{N}_{ch} classes, meson and baryon triggers, three tunes -- pp #sqrt{s} = 13.6 TeV",
             "mini_canvases": [
-                "mini_beauty_balancing_MONASH",
-                "mini_beauty_balancing_JUNCTIONS",
-                "mini_beauty_balancing_CLOSEPACKING",
-                "mini_beauty_balancing_JUNCTIONS_over_MONASH",
-                "mini_beauty_balancing_CLOSEPACKING_over_MONASH",
-                "mini_charm_balancing_MONASH",
-                "mini_charm_balancing_JUNCTIONS",
-                "mini_charm_balancing_CLOSEPACKING",
-                "mini_charm_balancing_JUNCTIONS_over_MONASH",
-                "mini_charm_balancing_CLOSEPACKING_over_MONASH"
+                "mini_beauty_balancing_monash_meson_trigger",
+                "mini_beauty_balancing_junctions_meson_trigger",
+                "mini_beauty_balancing_closepacking_meson_trigger",
+                "mini_beauty_balancing_junctions_closepacking_over_monash_meson_trigger",
+                "mini_beauty_balancing_monash_baryon_trigger",
+                "mini_beauty_balancing_junctions_baryon_trigger",
+                "mini_beauty_balancing_closepacking_baryon_trigger",
+                "mini_beauty_balancing_junctions_closepacking_over_monash_baryon_trigger"
             ],
             "write": true,
             "write_path": "plotting/Plots/VariantExtremes",
-            "write_name": "global_balancing_plots_multiplicity_HF_RUN3_V1_THREETUNE_VEXTREMES_POLISH_PROPOSAL",
+            "write_name": "global_balancing_plots_multiplicity_beauty",
+            "x_size_canvas": 2200,
+            "y_size_canvas": 2050
+        },
+        {
+            "canvas_name": "global_balancing_plots_charm",
+            "canvas_title": "charm balancing yield in the lowest and highest #it{N}_{ch} classes, meson and baryon triggers, three tunes -- pp #sqrt{s} = 13.6 TeV",
+            "mini_canvases": [
+                "mini_charm_balancing_monash_meson_trigger",
+                "mini_charm_balancing_junctions_meson_trigger",
+                "mini_charm_balancing_closepacking_meson_trigger",
+                "mini_charm_balancing_junctions_closepacking_over_monash_meson_trigger",
+                "mini_charm_balancing_monash_baryon_trigger",
+                "mini_charm_balancing_junctions_baryon_trigger",
+                "mini_charm_balancing_closepacking_baryon_trigger",
+                "mini_charm_balancing_junctions_closepacking_over_monash_baryon_trigger"
+            ],
+            "write": true,
+            "write_path": "plotting/Plots/VariantExtremes",
+            "write_name": "global_balancing_plots_multiplicity_charm",
             "x_size_canvas": 2200,
             "y_size_canvas": 2050
         }
@@ -1766,5 +2749,5 @@
     "subsample_coverage_audit": false,
     "label_owner": "tools/make_variant_configs.py",
     "axis_declaration": "2 of 11 #it{N}_{ch} classes shown: lowest (90-100%), highest (0-1%)",
-    "_comment_variant": "V-EXTREMES. The FULL eleven-class axis is configured and validated; only the lowest and highest N_ch classes are DRAWN, through the same bins_to_ignore mechanism the other canvas families use. Removing a class from histograms_to_analyse would still be refused by the axis contract, and that refusal is deliberate. Rank comes from the contract order, not from comparing percentile magnitudes. GENERATED; do not hand-edit."
+    "_comment_variant": "V-EXTREMES. The FULL eleven-class axis is configured and validated; only the lowest and highest N_ch classes are DRAWN, through the same bins_to_ignore mechanism the other canvas families use. Removing a class from histograms_to_analyse would still be refused by the axis contract, and that refusal is deliberate. Rank comes from the contract order, not from comparing percentile magnitudes. TWO TRIGGER COLUMNS PER FLAVOUR under ruling R40 as amended: meson trigger left, baryon trigger right, each column carrying the three tune panels and one combined tune/MONASH ratio panel. Associates are the legacy set in both columns. The pad rectangles are computed by the generator, because the base's are authored for a two-column layout whose columns are the FLAVOURS. The incumbent combined global is REPLACED, not kept: the macro holds one TPad per mini name and Draw() re-parents, so a mini named by two globals leaves the first canvas blank without an error. Y windows are set PER TRIGGER COLUMN; they are hard refusals through SetPlotPointOrThrow, and a clipped-envelope throw at the deployment is repaired by widening the range in the generator and re-rendering (the RUN-N F63 protocol), never by cropping the data. GENERATED; do not hand-edit."
 }

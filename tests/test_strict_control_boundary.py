@@ -34,6 +34,18 @@ from harvest_class_axis import parse_log  # noqa: E402
 NOMINAL = FIXTURES / "nominal_144.log"
 CONTROL = FIXTURES / "control_132.log"
 
+# The four-associate pair set the 144/132 shape belongs to, pinned beside the
+# fixture logs. Ruling R40 gave the BALANCING configurations a second trigger
+# group and the legacy associate set, so the tracked closure configuration now
+# derives 48 identities rather than 12. That is the correct expectation for a
+# render made from it, and it is NOT the shape of the accepted historical
+# 132-row control, which was rendered from the four-associate set. Strict mode
+# takes the configuration it is given, so the boundary is exercised here against
+# the configuration the control actually came from.
+PINNED_CONFIG = (ROOT / "tests" / "fixtures" / "vintegrated_closure"
+                 / "closure_config_12keys.json")
+STRICT_CONFIG = ["--strict-config", str(PINNED_CONFIG)]
+
 
 class Devnull:
     def write(self, _text: str) -> int:
@@ -85,7 +97,7 @@ def test_the_strict_shape_is_derived_and_is_the_recorded_144_132() -> None:
     configuration's pair set changes. At the pin the derivation reproduces the
     recorded shape exactly, so both facts are asserted together.
     """
-    shape = report.strict_control_shape()
+    shape = report.strict_control_shape(PINNED_CONFIG)
     assert len(shape["identities"]) == 12, sorted(shape["identities"])
     assert shape["classes"] == 11
     assert shape["nominal_rows"] == 144
@@ -109,7 +121,7 @@ def test_a_correct_pair_passes_in_both_modes() -> None:
     """144 against 132, every shared row reproducing."""
     assert run_cli("--nominal", str(NOMINAL), "--control", str(CONTROL)) == 0
     assert run_cli("--nominal", str(NOMINAL), "--control", str(CONTROL),
-                   "--strict-control") == 0
+                   "--strict-control", *STRICT_CONFIG) == 0
 
 
 def test_one_shared_row_is_accepted_by_default_and_refused_by_strict() -> None:
@@ -118,7 +130,7 @@ def test_one_shared_row_is_accepted_by_default_and_refused_by_strict() -> None:
     assert run_cli("--nominal", str(NOMINAL), "--control", str(one_shared)) == 0
     refuses(report.StrictControlRefusal,
             "--nominal", str(NOMINAL), "--control", str(one_shared),
-            "--strict-control")
+            "--strict-control", *STRICT_CONFIG)
 
 
 def test_a_thirteenth_identity_is_refused() -> None:
@@ -129,7 +141,25 @@ def test_a_thirteenth_identity_is_refused() -> None:
     """
     refuses(report.StrictControlRefusal,
             "--nominal", str(FIXTURES / "nominal_thirteenth_identity.log"),
-            "--control", str(CONTROL), "--strict-control")
+            "--control", str(CONTROL), "--strict-control", *STRICT_CONFIG)
+
+
+def test_the_tracked_configuration_derives_its_own_larger_shape() -> None:
+    """The expectation follows the configuration, which is the point of deriving.
+
+    Ruling R40 gave the balancing configurations a second trigger group and the
+    legacy associate set, so the tracked closure configuration now registers
+    sixteen pairs and the derived shape is 48 identities, not 12. A hard-coded
+    144 would have gone on asserting a shape no render produces. RUN-N reads the
+    numbers from here, not from the recorded 144/132 of the four-associate era.
+    """
+    shape = report.strict_control_shape()
+    tunes = 3
+    pairs = len(shape["identities"]) // tunes
+    assert len(shape["identities"]) == pairs * tunes
+    assert shape["nominal_rows"] == len(shape["identities"]) * 12
+    assert shape["control_rows"] == len(shape["identities"]) * 11
+    assert len(shape["only_in_nominal"]) == len(shape["identities"])
 
 
 def test_a_two_block_pair_is_accepted_by_default_and_refused_by_strict() -> None:
@@ -144,7 +174,7 @@ def test_a_two_block_pair_is_accepted_by_default_and_refused_by_strict() -> None
     assert run_cli("--nominal", str(nominal), "--control", str(control)) == 0
     refuses(report.StrictControlRefusal,
             "--nominal", str(nominal), "--control", str(control),
-            "--strict-control")
+            "--strict-control", *STRICT_CONFIG)
 
 
 def test_the_generic_two_block_parser_still_accepts_two_blocks() -> None:
@@ -164,7 +194,7 @@ def test_a_variation_that_resolved_another_campaign_is_refused() -> None:
                    "--variation", f"HF_SYS_MUR_UP={wrong}") == 0
     refuses(ValueError,
             "--nominal", str(NOMINAL), "--control", str(CONTROL),
-            "--variation", f"HF_SYS_MUR_UP={wrong}", "--strict-control")
+            "--variation", f"HF_SYS_MUR_UP={wrong}", "--strict-control", *STRICT_CONFIG)
 
 
 def test_a_variation_that_resolved_its_own_campaign_passes() -> None:
@@ -172,7 +202,7 @@ def test_a_variation_that_resolved_its_own_campaign_passes() -> None:
     right = FIXTURES / "variation_right_resolver.log"
     assert run_cli("--nominal", str(NOMINAL), "--control", str(CONTROL),
                    "--variation", f"HF_SYS_MUR_UP={right}",
-                   "--strict-control") == 0
+                   "--strict-control", *STRICT_CONFIG) == 0
 
 
 def test_the_default_comparator_is_unchanged_for_existing_callers() -> None:
@@ -194,6 +224,7 @@ def main() -> int:
     test_a_correct_pair_passes_in_both_modes()
     test_one_shared_row_is_accepted_by_default_and_refused_by_strict()
     test_a_thirteenth_identity_is_refused()
+    test_the_tracked_configuration_derives_its_own_larger_shape()
     test_a_two_block_pair_is_accepted_by_default_and_refused_by_strict()
     test_the_generic_two_block_parser_still_accepts_two_blocks()
     test_a_variation_that_resolved_another_campaign_is_refused()
