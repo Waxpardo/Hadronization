@@ -14,8 +14,10 @@ The fixture logs are written against a PINNED copy of the closure configuration
 (tests/fixtures/vintegrated_closure/closure_config_12keys.json), not against the
 tracked one. The tool derives its expected identity set from whichever
 configuration it is given, so pinning the fixture's configuration keeps these
-cases meaning what they meant when they were written while the tracked
-configuration's pair set grows.
+cases meaning what they meant when they were written, whatever the tracked pair
+set later does. The two agree today: ruling R40 widened the balancing FIGURE
+configurations only, and the tracked closure stays on the same base four series
+(tests/test_strict_control_boundary.py asserts that equality).
 """
 
 from __future__ import annotations

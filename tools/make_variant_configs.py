@@ -163,6 +163,39 @@ ASSOCIATE_SETS = {
 }
 DEFAULT_ASSOCIATE_SET = "legacy"
 
+# THE CLOSURE CONFIGURATION STAYS ON THE BASE PAIR SET (architect ledger #11).
+#
+# R40 widened the FIGURE configurations to two trigger groups and the legacy
+# associate set. It does not widen the CLOSURE configuration, and that is a
+# design decision rather than an omission: the closure and CONTROL instruments
+# verify the class axis against the accepted J-c1.1 log -- 132 rows over twelve
+# identities -- and the boundary receipts they certify are shared by every
+# figure render, so the wider figure scope loses nothing. A widened closure
+# derives 48 identities and a 576-row render instead, a shape no accepted log
+# carries, and the 144/132 contract that licenses the published arithmetic
+# stops being checkable at all.
+#
+# `None` is the value that leaves the base document's registrations and
+# canvases untouched, and the base document IS the four series: B+ -> B-,
+# B+ -> Lambda_b, D+ -> D-, D+ -> Lambda_c(+)-bar. V-CORRELATIONS passes the
+# same value for a different reason (see build_correlations), so the two
+# decisions are named separately rather than sharing one bare literal.
+CLOSURE_ASSOCIATE_SET = None
+
+# What the generated closure configuration says about its own pair set, for a
+# reader who opens it beside a figure configuration and finds four series where
+# the figure has sixteen.
+CLOSURE_PAIR_SET_COMMENT = (
+    "THE BASE PAIR SET, NOT THE FIGURES' R40 SET: four series -- B+ -> B-, "
+    "B+ -> Lambda_b, D+ -> D-, D+ -> Lambda_c(+)-bar -- so three tunes give "
+    "twelve identities, and with the integrated bin that is 144 nominal rows "
+    "against a 132-row CONTROL. The closure and CONTROL instruments verify the "
+    "class axis against the accepted J-c1.1 log, which carries those same 132 "
+    "rows over those same twelve identities, and the boundary receipts they "
+    "certify are shared by every figure render -- so the wider figure scope "
+    "loses nothing here, while a widened closure would assert a shape no "
+    "accepted log has.")
+
 FLAVOUR_SECTION = {
     "BEAUTY": "beauty_correlations_to_analyse",
     "CHARM": "charm_correlations_to_analyse",
@@ -622,14 +655,16 @@ def build_integrated(base: dict, percentiles: list[float], closure: bool,
 
     `closure=True` keeps the eleven classes alongside the integrated bin so the
     macro emits both sides of the closure in one pass. That configuration is for
-    verification only and is not a figure, so it takes the trigger groups -- the
-    closure must cover the pair set the figure renders -- and keeps the single
-    incumbent global rather than the per-flavour composites.
+    verification only and is not a figure, and it keeps the single incumbent
+    global rather than the per-flavour composites. `variant_documents` emits it
+    with `CLOSURE_ASSOCIATE_SET`, not with the figures' R40 set; that constant
+    records why the closure stays on the base four series.
 
     `associate_set=None` leaves the base's own pair registrations and canvases
-    alone. V-CORRELATIONS builds on this function and then adds its own two
-    baryon-triggered groups; registering them here as well would make that
-    function refuse its own input.
+    alone. Two callers ask for that: the closure configuration, for the reason
+    `CLOSURE_ASSOCIATE_SET` gives, and V-CORRELATIONS, which builds on this
+    function and then adds its own two baryon-triggered groups -- registering
+    them here as well would make that function refuse its own input.
     """
     document = json.loads(json.dumps(base))
     if associate_set is not None:
@@ -721,7 +756,8 @@ def build_integrated(base: dict, percentiles: list[float], closure: bool,
         % (" closure configuration (verification only, not a figure): carries "
            "the eleven classes AND the integrated bin so one pass emits both "
            "sides of the integer-exact closure" if closure else "",
-           "" if closure else TRIGGER_COLUMN_COMMENT + " "))
+           CLOSURE_PAIR_SET_COMMENT + " " if closure
+           else TRIGGER_COLUMN_COMMENT + " "))
     return document
 
 
@@ -1060,6 +1096,11 @@ def variant_documents(base: dict, percentiles: list[float],
     under a version-suffixed filename and is otherwise unused, so a wider
     associate axis is a new configuration version rather than an edit to the
     paper's own files (ruling R40's switch).
+
+    `associate_set` moves the FIGURE configurations only. The closure takes
+    `CLOSURE_ASSOCIATE_SET` whatever is asked for, so a suffixed run emits a
+    closure identical to the tracked one: its shape answers to the accepted
+    control log, not to the associate axis under evaluation.
     """
     suffix = ("" if associate_set == DEFAULT_ASSOCIATE_SET
               else "_" + associate_set)
@@ -1072,7 +1113,7 @@ def variant_documents(base: dict, percentiles: list[float],
         path("VINTEGRATED"):
             build_integrated(base, percentiles, False, associate_set),
         path("VINTEGRATED_CLOSURE"):
-            build_integrated(base, percentiles, True, associate_set),
+            build_integrated(base, percentiles, True, CLOSURE_ASSOCIATE_SET),
         path("VBARYONMESON"): build_baryonmeson(base, percentiles),
         path("VCORRELATIONS"): build_correlations(base, percentiles),
     }

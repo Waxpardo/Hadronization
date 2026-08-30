@@ -35,13 +35,15 @@ NOMINAL = FIXTURES / "nominal_144.log"
 CONTROL = FIXTURES / "control_132.log"
 
 # The four-associate pair set the 144/132 shape belongs to, pinned beside the
-# fixture logs. Ruling R40 gave the BALANCING configurations a second trigger
-# group and the legacy associate set, so the tracked closure configuration now
-# derives 48 identities rather than 12. That is the correct expectation for a
-# render made from it, and it is NOT the shape of the accepted historical
-# 132-row control, which was rendered from the four-associate set. Strict mode
-# takes the configuration it is given, so the boundary is exercised here against
-# the configuration the control actually came from.
+# fixture logs. Ruling R40 gave the BALANCING FIGURE configurations a second
+# trigger group and the legacy associate set; the closure configuration stays on
+# the base four series, because the shape it certifies is the accepted J-c1.1
+# control's (see CLOSURE_ASSOCIATE_SET in tools/make_variant_configs.py). Tracked
+# and pinned therefore derive the same twelve identities today, and
+# `test_the_tracked_configuration_derives_the_same_shape` asserts exactly that.
+# The fixture stays a separate file anyway: strict mode takes whichever
+# configuration it is given, and these crafted logs must keep meaning what they
+# meant when they were written even if the tracked pair set is revisited.
 PINNED_CONFIG = (ROOT / "tests" / "fixtures" / "vintegrated_closure"
                  / "closure_config_12keys.json")
 STRICT_CONFIG = ["--strict-config", str(PINNED_CONFIG)]
@@ -144,22 +146,30 @@ def test_a_thirteenth_identity_is_refused() -> None:
             "--control", str(CONTROL), "--strict-control", *STRICT_CONFIG)
 
 
-def test_the_tracked_configuration_derives_its_own_larger_shape() -> None:
-    """The expectation follows the configuration, which is the point of deriving.
+def test_the_tracked_configuration_derives_the_same_shape() -> None:
+    """The TRACKED closure configuration derives 12 identities and 144/132/132.
 
-    Ruling R40 gave the balancing configurations a second trigger group and the
-    legacy associate set, so the tracked closure configuration now registers
-    sixteen pairs and the derived shape is 48 identities, not 12. A hard-coded
-    144 would have gone on asserting a shape no render produces. RUN-N reads the
-    numbers from here, not from the recorded 144/132 of the four-associate era.
+    Ruling R40 gave the balancing FIGURE configurations a second trigger group
+    and the legacy associate set. It does not reach the closure configuration:
+    the closure and CONTROL instruments answer to the accepted J-c1.1 log, which
+    carries 132 rows over these twelve identities, so widening them would assert
+    a shape no accepted log has (architect ledger #11; the design rationale is
+    recorded at CLOSURE_ASSOCIATE_SET in tools/make_variant_configs.py).
+
+    Asserted on the TRACKED file, not on PINNED_CONFIG, so a builder change that
+    let R40 reach the closure again fails here rather than at RUN-N's boundary.
+    The identity SET is compared as well as the counts: twelve wrong identities
+    also count to twelve.
     """
     shape = report.strict_control_shape()
-    tunes = 3
-    pairs = len(shape["identities"]) // tunes
-    assert len(shape["identities"]) == pairs * tunes
-    assert shape["nominal_rows"] == len(shape["identities"]) * 12
-    assert shape["control_rows"] == len(shape["identities"]) * 11
-    assert len(shape["only_in_nominal"]) == len(shape["identities"])
+    pinned = report.strict_control_shape(PINNED_CONFIG)
+    assert len(shape["identities"]) == 12, sorted(shape["identities"])
+    assert shape["nominal_rows"] == 144
+    assert shape["control_rows"] == 132
+    assert shape["shared_rows"] == 132
+    assert len(shape["only_in_nominal"]) == 12
+    assert shape["identities"] == pinned["identities"], sorted(
+        shape["identities"] ^ pinned["identities"])
 
 
 def test_a_two_block_pair_is_accepted_by_default_and_refused_by_strict() -> None:
@@ -224,7 +234,7 @@ def main() -> int:
     test_a_correct_pair_passes_in_both_modes()
     test_one_shared_row_is_accepted_by_default_and_refused_by_strict()
     test_a_thirteenth_identity_is_refused()
-    test_the_tracked_configuration_derives_its_own_larger_shape()
+    test_the_tracked_configuration_derives_the_same_shape()
     test_a_two_block_pair_is_accepted_by_default_and_refused_by_strict()
     test_the_generic_two_block_parser_still_accepts_two_blocks()
     test_a_variation_that_resolved_another_campaign_is_refused()
