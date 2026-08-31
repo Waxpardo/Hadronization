@@ -1503,6 +1503,24 @@ YieldsAndErrors YieldsAndErrorsForGivenTrigger(const std::string& trigger, const
     return yieldsAndErrors;
 }
 
+// A TUNE-RATIO PANEL CARRIES A DASHED REFERENCE AT 1 (ruling R45, checklist
+// item 10). G1's ratio pad has carried one since it was authored; no composite
+// ratio panel did, so a reader had to find the line where the tunes agree
+// instead of being shown it. Drawn immediately after the frame and before any
+// point, so the data sits on top of it, and only when 1 is inside the drawn
+// window -- a panel that does not contain 1 would otherwise get a line on its
+// own edge.
+void DrawTuneRatioReferenceLine(Double_t xMin, Double_t xMax,
+                                Double_t yMinAxis, Double_t yMaxAxis)
+{
+    if (!(yMinAxis < 1.0 && 1.0 < yMaxAxis)) return;
+    TLine* reference = new TLine(xMin, 1.0, xMax, 1.0);
+    reference->SetLineStyle(2);
+    reference->SetLineColor(kGray + 2);
+    reference->SetLineWidth(1);
+    reference->Draw();
+}
+
 void ApplyTuneVisualStyle(TH1D* hist, const std::string& tune,
                           bool applyTuneLineStyle = false,
                           bool openMarker = false)
@@ -4758,6 +4776,9 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
     if (canvasConfigs.setLogy) { gPad->SetLogy(); }
     hYieldsTemplate->SetStats(0);
     hYieldsTemplate->Draw("PE");
+    DrawTuneRatioReferenceLine(
+        0.0, static_cast<Double_t>(nAssociates),
+        canvasConfigs.yMinAxis, canvasConfigs.yMaxAxis);
 
     // Draw mini pad for global canvas (only used if asked in configurations)
     TPad* cMiniPad = nullptr;
@@ -4777,6 +4798,9 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
         if (canvasConfigs.setLogy) { gPad->SetLogy(); }
         hYieldsTemplate->SetStats(0);
         hYieldsTemplate->Draw("PE");
+        DrawTuneRatioReferenceLine(
+            0.0, static_cast<Double_t>(nAssociates),
+            canvasConfigs.yMinAxis, canvasConfigs.yMaxAxis);
     }
 
     std::map<std::string, Int_t> lineStyleDependencyMap = canvasConfigs.lineStyleDependencyMap;
@@ -5306,6 +5330,9 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
     if (canvasConfigs.setLogy) { gPad->SetLogy(); }
     hYieldsTemplate->SetStats(0);
     hYieldsTemplate->Draw("PE");
+    DrawTuneRatioReferenceLine(
+        0.0, static_cast<Double_t>(nDependencies),
+        canvasConfigs.yMinAxis, canvasConfigs.yMaxAxis);
 
     // Draw mini pad for global canvas (only used if asked in configurations)
     TPad* cMiniPad = nullptr;
@@ -5325,6 +5352,9 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
         if (canvasConfigs.setLogy) { gPad->SetLogy(); }
         hYieldsTemplate->SetStats(0);
         hYieldsTemplate->Draw("PE");
+        DrawTuneRatioReferenceLine(
+            0.0, static_cast<Double_t>(nDependencies),
+            canvasConfigs.yMinAxis, canvasConfigs.yMaxAxis);
     }
 
     std::map<std::string, Int_t> lineStyleBaryonMap = canvasConfigs.lineStyleBaryonMap;
