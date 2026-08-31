@@ -29,13 +29,13 @@ path.
 
 `calculateOneYield` normalises each angular spectrum by the integral of its own
 `hTrKinematics` projection, never by a trigger projection of `hCorrelations`
-(`plotting/improvedPlotting_THnSparse.C:3215-3216`, `:3231-3232`).
+(`plotting/improvedPlotting_THnSparse.C:3260-3261`, `:3276-3277`).
 
 It then refuses when the two denominators disagree. The OS and SS denominators
 must match to a relative tolerance of `1e-10`, and a difference throws
 `OS/SS trigger denominators differ` with both values printed
-(`plotting/improvedPlotting_THnSparse.C:3226-3230`). A zero denominator returns `NaN` with a warning rather than a
-silent division (`plotting/improvedPlotting_THnSparse.C:3217-3221`).
+(`plotting/improvedPlotting_THnSparse.C:3271-3275`). A zero denominator returns `NaN` with a warning rather than a
+silent division (`plotting/improvedPlotting_THnSparse.C:3262-3266`).
 
 The contract that makes this checkable: `contracts/GeneratedPairObjectContract.h`
 **requires** additive `hTrKinematics` and **permits** conditional
@@ -93,7 +93,7 @@ No driver under `tests/` pins those two predicates. The nearest gate is
 
 The stored axis is `-π/2 <= Δφ < 3π/2` and the reported integrated yield covers
 that full axis: `calculateOneYield` integrates the whole histogram
-(`plotting/improvedPlotting_THnSparse.C:3238-3240`). The owner ruling of 2026-08-21
+(`plotting/improvedPlotting_THnSparse.C:3283-3285`). The owner ruling of 2026-08-21
 selects the full axis as the supported integrated observable
 (`docs/PHYSICS.md:282-288`).
 

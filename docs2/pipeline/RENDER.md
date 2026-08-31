@@ -124,7 +124,7 @@ V-CORRELATIONS is the only tracked paper-campaign configuration with
 `draw_correlation_plots: true` (finding F59; verified across all seventeen
 tracked plotting configurations). Its correlation canvas writes to the
 hard-coded directory `plotting/Plots/THnSparse/Correlations`
-(`plotting/improvedPlotting_THnSparse.C:4239-4241`).
+(`plotting/improvedPlotting_THnSparse.C:4284-4286`).
 
 **One render per stem per session.** Promotion from the staging directory is
 `::rename` (`plotting/StagedOutputs.h:123`), which overwrites silently. A second

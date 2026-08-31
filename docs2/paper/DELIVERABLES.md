@@ -73,7 +73,7 @@ V-INTEGRATED still references all 32.
 The correlation canvas builds its stem from the flavour token, which is
 upper case in the macro:
 `Form("%sCorrelations_MONASH", FLAVOUR)`
-(`plotting/improvedPlotting_THnSparse.C:4241`). The render therefore writes
+(`plotting/improvedPlotting_THnSparse.C:4286`). The render therefore writes
 `CHARMCorrelations_MONASH_PDF.pdf` and `BEAUTYCorrelations_MONASH_PDF.pdf`,
 while the manuscript includes `Charm…` and `Beauty…`.
 

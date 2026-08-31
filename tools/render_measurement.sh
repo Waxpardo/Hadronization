@@ -84,8 +84,8 @@ for section in ("canvases_to_be_drawn", "global_canvases_to_be_drawn"):
 # axis that starts at 0.6.
 #
 # Widening the frame cannot move a measured value. Every UNCERTAINTY_MATRIX row
-# is emitted at improvedPlotting_THnSparse.C:3739, and the first canvas is drawn
-# at :4015 -- the numbers are printed before any axis is applied. The control
+# is emitted at improvedPlotting_THnSparse.C:3784, and the first canvas is drawn
+# at :4060 -- the numbers are printed before any axis is applied. The control
 # re-rendered with these widened axes reproduces all 144 rows unchanged, which
 # is the check rather than the claim.
 if widen:

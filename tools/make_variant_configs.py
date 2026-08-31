@@ -26,13 +26,13 @@ repository's other generators.
 TWO EMITTED BLOCKS ARE INERT AND STAY THAT WAY. Every canvas carries
 `TUNE_colours` and `dependency_line_styles`. Both are PARSED and neither is
 READ. `TUNE_colours` is parsed into `colourTUNEMap`
-(improvedPlotting_THnSparse.C:2685-2696), which nothing reads, and a known
+(improvedPlotting_THnSparse.C:2730-2741), which nothing reads, and a known
 tune's value is overwritten by the compiled constant before it is even stored
-(`:2689-2691`); the palette lives in `plotting/TunePlotStyle.h:24-27`.
-`dependency_line_styles` is parsed into `lineStyleDependencyMap` (`:2697-2705`)
-and copied into a local at `:4341` and `:4608` that no later line reads: the
+(`:2734-2736`); the palette lives in `plotting/TunePlotStyle.h:24-27`.
+`dependency_line_styles` is parsed into `lineStyleDependencyMap` (`:2742-2750`)
+and copied into a local at `:4386` and `:4653` that no later line reads: the
 class line-style ladder moved into `TunePlotStyle.h` because the configuration's
-copy had drifted and gave c1 and c11 the same style (`:3169-3174`). The blocks
+copy had drifted and gave c1 and c11 the same style (`:3214-3219`). The blocks
 are still EMITTED because the parse sites index them with nlohmann's const
 `operator[]`, which asserts the key is present -- absence is an assertion
 failure or undefined behaviour, not a tolerated default. So they are carried
@@ -451,9 +451,9 @@ def hdphi_names(bins: list[dict]) -> list[str]:
 # THE COMBINED-RATIO PANEL IS A TEMPLATE COPY, NOT NEW PLOTTING CODE. The legacy
 # `mini_*_JUNCTIONS_CLOSEPACKING_over_MONASH` block sets `nominator_TUNES` to a
 # LIST and `denominator_TUNE` to MONASH. The parse site reads the list
-# (improvedPlotting_THnSparse.C:2616-2626) and the draw loop iterates it,
+# (improvedPlotting_THnSparse.C:2661-2671) and the draw loop iterates it,
 # colouring each numerator through `ApplyTuneVisualStyle` and writing one legend
-# entry per numerator (`:4694-4746`). Both ratios therefore land in one pad with
+# entry per numerator (`:4739-4791`). Both ratios therefore land in one pad with
 # the tunes distinguishable, and the macro is not touched.
 #
 # THE PAD RECTANGLES ARE COMPUTED HERE. The base's ten minis are authored for a
@@ -471,6 +471,30 @@ def hdphi_names(bins: list[dict]) -> list[str]:
 TUNE_PANEL_ORDER = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 COMBINED_RATIO_NUMERATORS = ["JUNCTIONS", "CLOSEPACKING"]
 COMBINED_RATIO_DENOMINATOR = "MONASH"
+
+# THE RATIO PANELS' Y TITLE, AND THE ONE PLACE IT IS WRITTEN (owner ruling
+# 2026-08-31). Every balancing ratio panel in every configuration takes this
+# string. The wording the panels carried before was 29 to 37 characters --
+# `tune / MONASH balancing yield` where a builder authored it, and
+# `CLOSEPACKING / MONASH balancing yield` where the panel was inherited from
+# the base -- and no ratio pad can render that at the publication text metric.
+# Measured on the replayed certified canvases: the 37-character wording is
+# complete only to about 18 px, the metric is 33 px, and at 33 px the panel
+# lost 237 px of its own title
+# (`FIG1B_EVIDENCE_34708a5_20260831/replay/MEASUREMENTS.md`, sections 1, 3, 4).
+# The shorter string loses nothing. Each panel's own title already names its
+# numerators (`JUNCTIONS and CLOSEPACKING / MONASH, ...`), so the y axis has
+# only the denominator left to name.
+RATIO_PANEL_Y_TITLE = "ratio to MONASH"
+
+# The ratio family, named by the macro's OWN dispatch key and never by title
+# text, so the pass below cannot drift onto matching wording. These two values
+# are every ratio panel in all five configurations; the macro dispatches on
+# them at improvedPlotting_THnSparse.C:5716 and :5724.
+RATIO_PANEL_DRAW_FUNCTIONS = (
+    "drawBalancingPlotsTUNERatios",
+    "drawBalancingBaryonMesonRatioPlotsTUNERatios",
+)
 
 COLUMN_X = {
     "meson_trigger": (0.05, 0.5),
@@ -881,8 +905,6 @@ def build_trigger_column_canvases(
             ratio["canvas_title"] = (
                 f"{' and '.join(COMBINED_RATIO_NUMERATORS)} / "
                 f"{COMBINED_RATIO_DENOMINATOR}, {group['label']} trigger")
-            ratio["y_axis_title"] = (
-                f"tune / {COMBINED_RATIO_DENOMINATOR} balancing yield")
             ratio["x_min_mini_pad"], ratio["x_max_mini_pad"] = x_min, x_max
             ratio["y_min_mini_pad"], ratio["y_max_mini_pad"] = rows[0]
             apply_window(ratio, windows[(column, "ratio")])
@@ -900,7 +922,7 @@ def composite_globals(base: dict, write_names: dict[str, str],
     the distinct output directories of the writing globals and throws "Exactly
     one global-canvas output directory is required to store the
     multiplicity-boundary receipt" on anything but one
-    (improvedPlotting_THnSparse.C:2756-2766).
+    (improvedPlotting_THnSparse.C:2801-2811).
     """
     template = base["global_canvases_to_be_drawn"][0]
     minis = [c["canvas_name"] for c in build_trigger_column_canvases(base)]
@@ -1446,11 +1468,6 @@ def build_baryonmeson(base: dict, percentiles: list[float]) -> dict:
         elif function == "drawBalancingPlotsTUNERatios":
             canvas["draw_function_to_use"] = \
                 "drawBalancingBaryonMesonRatioPlotsTUNERatios"
-            denominator = canvas.get("denominator_TUNE", "?")
-            # One pad now carries both numerators, so the axis names the
-            # denominator and the legend identifies each numerator.
-            canvas["y_axis_title"] = \
-                f"tune / {denominator} baryon/meson ratio"
             # The window comes from the measured envelope. See
             # BARYONMESON_TUNE_RATIO_ENVELOPE above for the render that set it.
             canvas["y_min_axis"] = BARYONMESON_TUNE_RATIO_WINDOW[0]
@@ -1620,6 +1637,26 @@ def build_correlations(base: dict, percentiles: list[float]) -> dict:
     return document
 
 
+def normalize_ratio_titles(document: dict) -> None:
+    """Give every ratio panel of one configuration the one ratio y title.
+
+    ONE MECHANISM WHERE THERE WERE THREE. The inline assignments this replaces
+    each reached only the canvases their own builder authored, so the two
+    configurations that INHERIT their ratio panels -- the closure and
+    V-CORRELATIONS, both built by `build_integrated` with `associate_set=None`
+    -- kept the base's 34- and 37-character wording and were clipped in the
+    delivered renders, on a path no title site in this file could see. Running
+    over the emitted document covers inherited and authored panels by one rule.
+
+    The frozen base is not touched. Every builder deep-copies it
+    (`json.loads(json.dumps(base))`), so this writes only on emitted copies and
+    `tests/test_vfull_base_config.py` stays green.
+    """
+    for canvas in document.get("canvases_to_be_drawn", []):
+        if canvas.get("draw_function_to_use") in RATIO_PANEL_DRAW_FUNCTIONS:
+            canvas["y_axis_title"] = RATIO_PANEL_Y_TITLE
+
+
 def variant_documents(base: dict, percentiles: list[float],
                       associate_set: str) -> dict[Path, dict]:
     """Path -> document for one associate set.
@@ -1640,7 +1677,7 @@ def variant_documents(base: dict, percentiles: list[float],
     def path(stem: str) -> Path:
         return PLOTTING / f"configuration_multiplicity_HF_RUN3_V1_{stem}{suffix}.json"
 
-    return {
+    documents = {
         path("VEXTREMES"): build_extremes(base, percentiles, associate_set),
         path("VINTEGRATED"):
             build_integrated(base, percentiles, False, associate_set),
@@ -1649,6 +1686,13 @@ def variant_documents(base: dict, percentiles: list[float],
         path("VBARYONMESON"): build_baryonmeson(base, percentiles),
         path("VCORRELATIONS"): build_correlations(base, percentiles),
     }
+
+    # THE ONE PLACE THE RATIO Y TITLE IS SET, for every configuration this
+    # function emits and every ratio panel each of them carries, authored or
+    # inherited. Everything `main` writes or checks comes through here.
+    for document in documents.values():
+        normalize_ratio_titles(document)
+    return documents
 
 
 def main() -> int:

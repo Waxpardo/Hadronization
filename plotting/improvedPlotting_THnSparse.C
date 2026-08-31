@@ -1589,38 +1589,83 @@ constexpr Double_t kSpeciesBinLabelSize = 0.055;
 // the 19 px the delivered figures carried.
 constexpr Double_t kPublicationLabelFraction = 0.0150;
 
-// THE TITLE FRACTION IS SMALLER, AND THE PAD GEOMETRY IS WHY. A four-row
-// composite mini pad is 0.2375 of a 2050 px canvas, 487 px tall, and a
-// ROOT y-axis title is centred on the frame, so it may use 0.45 of the pad
-// height each way -- 438 px. The longest y title this macro draws is the
-// combined-ratio panel's "tune / MONASH balancing yield", 29 characters,
-// whose rendered length is about 0.58 em per character. It therefore fits
-// only while 29 x 0.58 x size <= 438, that is size <= 26 px, and measurement
-// on the replayed G7 canvas puts the last complete size at 24: at 26 the
-// final "d" is clipped and at 30 the last word is gone
-// (`FIG1_EVIDENCE_1db46d9_20260831/audit/`).
+// THE TITLE FRACTION IS THE LABEL FRACTION, AND THE CAP IS RELEASED (FIG-1B,
+// owner ruling 2026-08-31). It was held at 0.0109 -- below G1's 0.01336 floor
+// -- because the ratio panels' y title was 29 characters, "tune / MONASH
+// balancing yield", which a four-row composite ratio pad cannot carry above
+// 24 px. The cap protected a wording that no longer exists: the generator now
+// writes ONE 15-character title, "ratio to MONASH", on every ratio panel of
+// every configuration (`RATIO_PANEL_Y_TITLE` and `normalize_ratio_titles` in
+// tools/make_variant_configs.py). With the wording gone the constraint is
+// gone, and titles join labels at one metric.
 //
-// 24 px is 0.0109 of the canvas width, BELOW G1's 0.01336 floor. That
-// shortfall is reported rather than hidden: the four-row composite cannot
-// carry this y-title wording at G1's scale, and the three ways out -- shorter
-// wording, fewer rows, a taller canvas -- are the owner's or the architect's,
-// not this session's. Item 4 reserves the wording explicitly. The LABELS,
-// which are what the checklist's floor names, clear the floor.
-constexpr Double_t kPublicationTitleFraction = 0.0109;
+// THE CAP WAS ALSO NEVER SUFFICIENT. The pass below runs on EVERY assembled
+// global canvas, so it reached the closure and V-CORRELATIONS composites too.
+// Their ratio pads are five-row, 382 px against the four-row 479 px, and they
+// inherited 34- and 37-character titles from the base. Those were clipped in
+// the DELIVERED renders at 24 px, not only at a raised metric: the panel read
+// "LOSEPACKING / MONASH balancing", with no leading C and no trailing "yield".
+// Retitling and raising are one change because either alone leaves a clipped
+// panel.
+//
+// MEASURED AT 33 px ON THE REPLAYED CERTIFIED CANVASES, not rescaled; the
+// records are `FIG1B_EVIDENCE_34708a5_20260831/replay/MEASUREMENTS.md` and
+// its `v3/replay/MEASUREMENTS_v3.md`. "ratio to MONASH" renders complete and
+// clear of both pad edges in all three geometries this macro assembles: the
+// four-row composite pad, the five-row closure and V-CORRELATIONS pad, and
+// the two-row baryon/meson pad -- 228 px of ink in each, tightest and
+// roomiest alike. Rescaling the offsets would have left 1 px to the labels.
+//
+// THE BINDING CONSTRAINT IS NOW THE YIELD TITLE, and it is recorded here
+// rather than changed. "balancing yield per trigger" is 27 characters and
+// FIG-1B does not retitle it. At 33 px its ink measures 343 px, the SAME on
+// the four-row pad and on the five-row one, so it is complete on both; on the
+// five-row closure and V-CORRELATIONS pads that leaves 5 px above it and
+// 35 px below. Nothing is clipped today and no headroom is left: a further
+// metric raise, or a longer yield wording, clips this panel first, and the
+// ratio panels are no longer the ones to measure.
+constexpr Double_t kPublicationTitleFraction = 0.0150;
 
 // OFFSETS ARE MULTIPLES OF THE TITLE SIZE, so they move with it: the same
-// offset places a 24 px title nearer the axis than a 32 px one. These are
-// measured against the title fraction below and the margins the generator now
-// writes (0.20 left, 0.20 bottom), on the replayed G7 canvas. At 2.30 the y
-// title overprinted the "2x10^{-1}" tick label; 3.05 clears it.
-constexpr Double_t kPublicationXTitleOffset = 1.95;
-constexpr Double_t kPublicationYTitleOffset = 3.05;
+// offset places a 24 px title nearer the axis than a 33 px one. All three are
+// measured at 33 px on the replayed certified canvases, against the margins
+// the generator writes (0.20 left, 0.20 bottom).
+//
+// THE Y TITLE clears the pad edge on one side and the y tick labels on the
+// other. On the composite ratio pad the edge is x=109.8 and the tick-label ink
+// starts at x=205; at 2.86 the title ink is x[146,169], 36 px from each.
+//
+// THE X TITLE clears the x tick labels above and the pad edge below. The
+// labels end at y=1974 and the edge is y=2022; at 1.35 the 29 px title ink is
+// y[1984,2012], 10 px from each. At the previous 1.95 only 6 px of those 29
+// survived: the x title was lost on the delivered composites.
+constexpr Double_t kPublicationXTitleOffset = 1.35;
+constexpr Double_t kPublicationYTitleOffset = 2.86;
 
 // A VERTICAL LABEL BAND IS DEEPER, so the title below it sits further out.
 // The baryon/meson composite is the only canvas that turns its labels
 // vertical; the offset is selected from the axis itself rather than from the
-// canvas name, so it follows the labels wherever they are used.
-constexpr Double_t kPublicationXTitleOffsetVerticalLabels = 3.60;
+// canvas name, so it follows the labels wherever they are used. Its vertical
+// labels end at y=1890 and its pad edge is y=2022; at 2.36 the title ink is
+// y[1942,1970], 52 px from each. At the previous 3.60 only 15 px of the 29
+// survived.
+constexpr Double_t kPublicationXTitleOffsetVerticalLabels = 2.36;
+
+// THE STYLE SYSTEM, IN ONE PLACE (owner directive 2026-08-31: the repository
+// leaves the plotting layer after this change). Where each decision lives:
+//   sizes     kPublicationLabelFraction and kPublicationTitleFraction above,
+//             applied to every assembled canvas by the one pass at :5756
+//   titles    the GENERATOR owns them -- RATIO_PANEL_Y_TITLE and
+//             normalize_ratio_titles in tools/make_variant_configs.py,
+//             parsed here at :2876
+//   offsets   the three constants above, chosen in ApplyPublicationAxisStyle
+//   legends   rectangles in the configuration (parsed :2893), built once
+//             per draw function, first at :4608
+//   reference the dashed unity line at :1517
+// DEFERRED, recorded and not repaired here (post-paper): the four template
+// sites :4567, :4852, :5139 and :5416 are near-duplicates, each carrying its
+// own copy of the title, legend and style block; MultiplicityClassLineStyle
+// (:3398) matches a bin prefix no configuration emits, returning 1 always.
 
 Int_t PublicationTextPixels(Double_t fraction, Double_t canvasWidthPx)
 {
