@@ -20,6 +20,12 @@ The live Overleaf document may have moved since. The handoff package therefore
 carries this manifest as an **owner-facing checklist against Overleaf**, not as
 a gate.
 
+**The `source` column is read on the bench only.** Those `paper/…` anchors
+resolve against the owner's uncommitted Overleaf snapshot in the bench working
+tree, the snapshot whose digests are the two above, and the deployment's
+committed `paper/` is an older state where the anchors miss
+(`RUNN2_REPORT_20260831.md` section 9.5).
+
 ## The manifest
 
 | id | Overleaf path | producer name | source |

@@ -531,47 +531,69 @@ BARYON_COLUMN_RATIO_WINDOW = (0.0, 3.0)
 # integrated bin never shows, and one shared window cannot hold both without
 # being loose where the integrated figure needs it tight.
 #
-# THE FLOORS ARE PROVISIONAL, and the caveat is the point.
-# `render_VEXTREMES.log` holds 46 `UNCERTAINTY_MATRIX` rows and stops: the
-# render aborted inside the beauty baryon column on the structurally empty
-# Lambda_b-bar -> B_c- cell of RUN-N report §5.3. Counting the rows the R43
-# exclusion leaves, 38 of 84 were measured and 46 were not. CHARM is absent
-# from both columns, and the beauty baryon column is missing its eight
-# CLOSEPACKING rows and two JUNCTIONS Lambda_b rows.
+# THE FLOORS ARE MEASURED. This is the record of the replacement; they were
+# provisional through exactly one render.
 #
-# Both measured minima belong to B_c- rows that R43 removes:
+# CON-1C set both to 1e-06 because the only log it had was truncated.
+# `render_VEXTREMES.log` at RUN-N held 46 `UNCERTAINTY_MATRIX` rows and
+# stopped: the render aborted inside the beauty baryon column on the
+# structurally empty Lambda_b-bar -> B_c- cell of RUN-N report §5.3. Of the
+# rows the R43 exclusion leaves, 38 of 84 were measured and 46 were not, and
+# CHARM was absent from both columns. Both minima that log showed belong to
+# B_c- rows R43 removes:
 #
 #   meson  column  1.567022511e-05  MONASH BEAUTY B^{+}        Bc- hDPhiM90_100
 #   baryon column  7.092474723e-06  MONASH BEAUTY Lambda_b-bar Bc- hDPhiM90_100
 #
-# The smallest SURVIVING rows the truncated log holds are 0.01468236894 (meson)
-# and 0.01277887175 (baryon), both JUNCTIONS BEAUTY B_s^0-bar in hDPhiM0_1. A
-# floor derived from those would be derived from beauty alone, with charm
-# unrendered, so it would be a guess wearing a measurement's clothes. The floor
-# is 1e-06 instead: far below anything this render can plausibly produce, so it
-# refuses broken data and nothing else. RUN-N2's completed render measures the
-# surviving minimum, and that measurement replaces these two numbers.
+# A floor from the surviving beauty rows alone, with charm unrendered, would
+# have been a guess wearing a measurement's clothes. 1e-06 sat far below
+# anything the render could produce, so it refused broken data and nothing
+# else.
+#
+# RUN-N2 RENDERED ONCE ON THOSE FLOORS and delivered G5 and G7 as candidates,
+# `status=candidate_pending_axis_approval`. That render completed. It measures
+# all 84 surviving rows -- 24+24 beauty, 18+18 charm -- with zero
+# `SUBSAMPLE_COVERAGE_FAILURE` lines and no row at central zero
+# (`RUNN2_EVIDENCE_e6bd02b_20260831/extremes/vextremes_measured_range.txt`).
+# The charm rows are the new information. They raise both measured maxima from
+# about 0.127 to about 0.217, and they sit above the beauty minima, so each
+# column's floor is still its beauty edge.
+#
+# THE OWNER RULED ON 2026-08-31 to tighten now; the ruling of record is in
+# `ARCHITECT_REVIEW_RUNN2_20260831.md`. The surviving data spans about one
+# decade, and the provisional meson axis spanned 5.62, so two-thirds of a
+# published log axis would have been empty. Each floor becomes its measured
+# envelope edge over 3 -- the margin CON-1C set for
+# `MESON_COLUMN_YIELD_WINDOW`, whose floor 5e-05 sits 3.15x below that
+# column's envelope edge (`:469`, `:474`). The quotient stays at full
+# precision, so each floor below is exactly the `_ENVELOPE[0] / 3` of the
+# constant above it and a later reader recomputes it in one division. The
+# meson panel goes from 5.62 decades to 1.93 and the baryon panel from 5.90 to
+# 2.27. Neither ceiling moves. RUN-N3 re-renders V-EXTREMES on these floors,
+# and its records supersede the candidates.
 #
 # THE ENVELOPES RECORDED HERE ARE THE SURVIVING ONES, not the logged ones. The
 # B_c- rows leave V-EXTREMES with R43, so a guard against a B_c- envelope would
 # guard a row this configuration no longer draws.
-EXTREMES_MESON_COLUMN_YIELD_ENVELOPE = (0.01468236894, 0.1247582854)
+EXTREMES_MESON_COLUMN_YIELD_ENVELOPE = (0.014682368941172011, 0.21695803533110744)
 EXTREMES_MESON_COLUMN_YIELD_ENVELOPE_SOURCE = (
-    "PROVISIONAL, truncated log. "
-    "CON1C_EVIDENCE_fe3262c_20260831/derive/window_bounds.out, "
+    "RUNN2_EVIDENCE_e6bd02b_20260831/extremes/vextremes_measured_range.txt, "
     "render_VEXTREMES.log meson column with associate=Bc- excluded per R43; "
-    "24 of 24 surviving BEAUTY rows measured, all 18 surviving CHARM rows "
-    "unmeasured")
-EXTREMES_MESON_COLUMN_YIELD_WINDOW = (1e-06, 0.42)
+    "complete log, 84 of 84 surviving rows read, zero coverage failures; this "
+    "column is 24 of 24 surviving BEAUTY rows and 18 of 18 CHARM rows; lower "
+    "edge JUNCTIONS BEAUTY B^{+} associate=B_s^0-bar bin=hDPhiM0_1, upper "
+    "edge MONASH CHARM D^{+} associate=D^{0}-bar bin=hDPhiM0_1")
+EXTREMES_MESON_COLUMN_YIELD_WINDOW = (0.0048941229803906704, 0.42)
 
-EXTREMES_BARYON_COLUMN_YIELD_ENVELOPE = (0.01277887175, 0.1270878535)
+EXTREMES_BARYON_COLUMN_YIELD_ENVELOPE = (0.012778871747754926, 0.21691162789358753)
 EXTREMES_BARYON_COLUMN_YIELD_ENVELOPE_SOURCE = (
-    "PROVISIONAL, truncated log. "
-    "CON1C_EVIDENCE_fe3262c_20260831/derive/window_bounds.out, "
+    "RUNN2_EVIDENCE_e6bd02b_20260831/extremes/vextremes_measured_range.txt, "
     "render_VEXTREMES.log baryon column with associate=Bc- excluded per R43; "
-    "14 of 24 surviving BEAUTY rows measured, all 18 surviving CHARM rows "
-    "unmeasured")
-EXTREMES_BARYON_COLUMN_YIELD_WINDOW = (1e-06, 0.8)
+    "complete log, 84 of 84 surviving rows read, zero coverage failures; 24 "
+    "of 24 surviving BEAUTY rows and 18 of 18 CHARM rows measured; lower edge "
+    "JUNCTIONS BEAUTY Lambda_b-bar associate=B_s^0-bar bin=hDPhiM0_1, upper "
+    "edge MONASH CHARM Lambda_c(+) associate=D- bin=hDPhiM0_1")
+EXTREMES_BARYON_COLUMN_YIELD_WINDOW = (0.004259623915918309, 0.8)
 
 # THE MESON RATIO FLOOR CANNOT BE 0.6 HERE, and this one is not provisional.
 # The BEAUTY meson column of `render_VEXTREMES.log` is COMPLETE at 30 of 30
@@ -938,12 +960,13 @@ def build_extremes(base: dict, percentiles: list[float],
         "contract, and that refusal is deliberate. Rank comes from the contract "
         "order, not from comparing percentile magnitudes. "
         + EXTREMES_EXCLUSION_COMMENT + " "
-        "THIS CONFIGURATION'S TWO YIELD FLOORS ARE PROVISIONAL: the RUN-N "
-        "render aborted after 46 of its rows, so charm was never measured in "
-        "either column and the surviving minimum is not known. Both floors are "
-        "1e-06, far below anything this render can produce, so they refuse "
-        "broken data and nothing else until a completed render measures the "
-        "surviving minimum. "
+        "THIS CONFIGURATION'S TWO YIELD FLOORS ARE MEASURED. The RUN-N2 "
+        "render completed and measured all 84 surviving rows across both "
+        "columns, charm included, with zero coverage failures. Each floor is "
+        "now that column's measured envelope minimum over 3 -- meson "
+        "0.0048941229803906704, baryon 0.004259623915918309 -- which replaces "
+        "the 1e-06 pair that a single candidate render used, under the "
+        "owner's ruling of 2026-08-31. "
         + TRIGGER_COLUMN_COMMENT + " GENERATED; do not hand-edit.")
     return document
 
