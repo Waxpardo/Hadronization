@@ -2214,7 +2214,18 @@ void Plot_InclusiveKinematicSpectra_Raw(const char* inputBaseDir = "RootFiles/HF
     DrawOverlay(tuneData,
                 &species,
                 "phi",
-                "#phi",
+                // UNITS, AND ONE GLYPH FOR ONE QUANTITY (ruling R45, checklist
+                // item 4). The ten phi stems were delivered with a bare
+                // "#phi". Azimuth is an angle in radians and the pT axis two
+                // calls above already states its unit; eta at the call between
+                // them is correctly bare, being dimensionless.
+                //
+                // The glyph changes with it. This producer wrote "#phi" while
+                // the correlation canvas writes "#Delta#varphi" and
+                // Plot_FlavourClosure.C writes "#Delta#varphi (rad)", so the
+                // same quantity carried two symbols across the paper's
+                // figures. The plotting layer's form is #varphi.
+                "#varphi (rad)",
                 JoinPath({resolvedOutput, "Inclusive", "phi"}),
                 "Inclusive_phi_" + species.key + "_" + suffix,
                 normalizeShape,

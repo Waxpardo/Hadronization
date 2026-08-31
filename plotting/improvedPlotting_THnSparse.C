@@ -1830,10 +1830,20 @@ TPad* createMiniPad(const char* name,
 
     pad->SetTickx(1);
     pad->SetTicky(1);
-    pad->SetTopMargin(0.05);
-    pad->SetBottomMargin(0.12);
-    pad->SetLeftMargin(0.14);
-    pad->SetRightMargin(0.02);
+    // MARGINS FOR THE CORRELATION PADS (ruling R45, checklist items 8 and 12).
+    //
+    // The top margin was 0.05. ROOT draws the pad title in that band, and on a
+    // half-height pad 0.05 is less than the title needs: the delivered G2 and
+    // G3 have the title baseline ON the frame's top axis, with the tick marks
+    // running through the glyphs and the overbar and subscript of
+    // "#bar{#Lambda}_{b}^{0} trigger" both bisected. 0.10 clears it.
+    //
+    // Left and bottom grow with the text metric, for the same reason the
+    // composite margins do: labels here go from 9 px to 15 px.
+    pad->SetTopMargin(0.10);
+    pad->SetBottomMargin(0.16);
+    pad->SetLeftMargin(0.18);
+    pad->SetRightMargin(0.03);
 
     pad->Draw();
 
@@ -4301,7 +4311,22 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                         hDPhiSS->SetMarkerStyle(24);
                         hDPhiSS->SetLineStyle(2);
                         hDPhiOS->SetTitle(title);
-                        hDPhiOS->GetXaxis()->SetTitle("#Delta#varphi");
+                        // UNITS ON THE AZIMUTHAL AXIS (checklist item 4). The
+                        // repository already had the intended form at
+                        // Plot_FlavourClosure.C:158; the correlation canvas
+                        // did not carry it.
+                        hDPhiOS->GetXaxis()->SetTitle("#Delta#varphi (rad)");
+                        // THE SS TITLE IS SET HERE, NOT INHERITED. Until FIG-1
+                        // this histogram carried "#Delta#phi" -- a different
+                        // glyph from the OS histogram it is drawn on top of --
+                        // because the macro never set it and the THnSparse axis
+                        // title comes from analysis/status_analysis_THnSparse_qq.C
+                        // (:663, :713). OS draws first so its title is the one
+                        // painted, which made the disagreement latent rather
+                        // than visible; one draw-order change would have shown
+                        // it. `analysis/` is not this brief's to edit, so the
+                        // plotting layer states the title it wants.
+                        hDPhiSS->GetXaxis()->SetTitle("#Delta#varphi (rad)");
                         hDPhiOS->GetYaxis()->SetTitle(
                             "pairs per trigger / bin");
                         hDPhiOS->GetYaxis()->SetRangeUser(1e-6, 1e-2);
@@ -4343,7 +4368,7 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                         hSub->SetMarkerColor(kBlue + 1);
                         hSub->SetMarkerStyle(20);
                         hSub->SetTitle("");
-                        hSub->GetXaxis()->SetTitle("#Delta#varphi");
+                        hSub->GetXaxis()->SetTitle("#Delta#varphi (rad)");
                         hSub->GetYaxis()->SetTitle(
                             "(OS-SS) pairs per trigger / bin");
                         hSub->SetStats(0);
@@ -4395,6 +4420,14 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
 
     if (DRAW_CORRELATION_PLOTS) {
         const std::string correlationPlotDir = ResolvePathFromBase("plotting/Plots/THnSparse/Correlations", FindHadronizationBase());
+        // The correlation canvas is written straight from here and never
+        // passes through the global-canvas loop, so it takes the publication
+        // text metric on its own (ruling R45, checklist item 8). Its width is
+        // read from the canvas rather than from a configuration because this
+        // canvas is constructed in code, not configured.
+        ApplyPublicationTextStyleToPad(
+            cAngularCorrelations,
+            static_cast<Double_t>(cAngularCorrelations->GetWw()));
         writeCanvasToFiles(VERBOSE, cAngularCorrelations, correlationPlotDir, Form("%sCorrelations_MONASH", FLAVOUR));
     }
 
