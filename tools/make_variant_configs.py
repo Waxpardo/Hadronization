@@ -26,13 +26,13 @@ repository's other generators.
 TWO EMITTED BLOCKS ARE INERT AND STAY THAT WAY. Every canvas carries
 `TUNE_colours` and `dependency_line_styles`. Both are PARSED and neither is
 READ. `TUNE_colours` is parsed into `colourTUNEMap`
-(improvedPlotting_THnSparse.C:2730-2741), which nothing reads, and a known
+(improvedPlotting_THnSparse.C:2743-2754), which nothing reads, and a known
 tune's value is overwritten by the compiled constant before it is even stored
-(`:2734-2736`); the palette lives in `plotting/TunePlotStyle.h:24-27`.
-`dependency_line_styles` is parsed into `lineStyleDependencyMap` (`:2742-2750`)
-and copied into a local at `:4386` and `:4653` that no later line reads: the
+(`:2747-2749`); the palette lives in `plotting/TunePlotStyle.h:24-27`.
+`dependency_line_styles` is parsed into `lineStyleDependencyMap` (`:2755-2763`)
+and copied into a local at `:4401` and `:4668` that no later line reads: the
 class line-style ladder moved into `TunePlotStyle.h` because the configuration's
-copy had drifted and gave c1 and c11 the same style (`:3214-3219`). The blocks
+copy had drifted and gave c1 and c11 the same style (`:3229-3234`). The blocks
 are still EMITTED because the parse sites index them with nlohmann's const
 `operator[]`, which asserts the key is present -- absence is an assertion
 failure or undefined behaviour, not a tolerated default. So they are carried
@@ -88,7 +88,7 @@ def class_names() -> list[str]:
 #
 # EVERY ROUTING NAME BELOW IS A KEY, NOT NOTATION. `associateOS` reaches
 # `SetBinLabel` through `DisplayLabelForAssociatePdg`, which is keyed on the PDG
-# code the pair registry carries (improvedPlotting_THnSparse.C:1535-1553), so
+# code the pair registry carries (improvedPlotting_THnSparse.C:1536-1554), so
 # the axis text has one source and these strings only have to route.
 #
 # TWO OF THE LEGACY BEAUTY ASSOCIATES ONCE HAD NO ENTRY IN THAT TABLE, and now
@@ -131,7 +131,7 @@ def class_names() -> list[str]:
 # The labels are the same strings the AXIS already uses, so a panel title and
 # its own axis cannot disagree: they are the `DisplayLabelForAssociatePdg`
 # entries of the trigger's PDG code
-# (`plotting/improvedPlotting_THnSparse.C:1536-1556`) -- 521, -5122, 411, 4122.
+# (`plotting/improvedPlotting_THnSparse.C:1537-1557`) -- 521, -5122, 411, 4122.
 # The two meson labels are equal to the routing key by coincidence of it
 # already being notation; they are written out anyway so every group carries
 # both fields and a later reader does not have to know which is which.
@@ -245,7 +245,7 @@ def trigger_group_configs(flavour: str, group: dict, associates,
 
     `ResolveReferenceAssociateSelection` throws unless exactly one configured
     associate carries the group's signed `referenceMesonPdg`
-    (improvedPlotting_THnSparse.C:597-644), so the invariant is asserted HERE,
+    (improvedPlotting_THnSparse.C:598-645), so the invariant is asserted HERE,
     at emission, rather than discovered by a render that has already started.
     """
     configs, reference_hits = [], []
@@ -451,9 +451,9 @@ def hdphi_names(bins: list[dict]) -> list[str]:
 # THE COMBINED-RATIO PANEL IS A TEMPLATE COPY, NOT NEW PLOTTING CODE. The legacy
 # `mini_*_JUNCTIONS_CLOSEPACKING_over_MONASH` block sets `nominator_TUNES` to a
 # LIST and `denominator_TUNE` to MONASH. The parse site reads the list
-# (improvedPlotting_THnSparse.C:2661-2671) and the draw loop iterates it,
+# (improvedPlotting_THnSparse.C:2674-2684) and the draw loop iterates it,
 # colouring each numerator through `ApplyTuneVisualStyle` and writing one legend
-# entry per numerator (`:4739-4791`). Both ratios therefore land in one pad with
+# entry per numerator (`:4754-4806`). Both ratios therefore land in one pad with
 # the tunes distinguishable, and the macro is not touched.
 #
 # THE PAD RECTANGLES ARE COMPUTED HERE. The base's ten minis are authored for a
@@ -490,11 +490,27 @@ RATIO_PANEL_Y_TITLE = "ratio to MONASH"
 # The ratio family, named by the macro's OWN dispatch key and never by title
 # text, so the pass below cannot drift onto matching wording. These two values
 # are every ratio panel in all five configurations; the macro dispatches on
-# them at improvedPlotting_THnSparse.C:5716 and :5724.
+# them at improvedPlotting_THnSparse.C:5731 and :5739.
 RATIO_PANEL_DRAW_FUNCTIONS = (
     "drawBalancingPlotsTUNERatios",
     "drawBalancingBaryonMesonRatioPlotsTUNERatios",
 )
+
+# PANEL TITLES ARE SWITCHABLE, AND THEY STAY ON (FIG-1C, owner ruling
+# 2026-08-31). Every figure embeds in the paper under a caption, so a title
+# drawn inside the panel can repeat the caption beside it. `false` blanks every
+# panel title the balancing macro draws -- its four template sites and its
+# correlation canvas -- and the caption then carries the identification alone.
+#
+# THE DEFAULT IS `true`, AND THIS COMMIT DOES NOT CHANGE IT. RUN-N4 renders the
+# same titles as every certified figure, and the owner rules on the title at
+# the post-RUN-N4 look, with real figures beside real captions. Flipping this
+# constant and regenerating is the whole change.
+#
+# THE MACRO DEFAULTS THE KEY TO `true` WHEN IT IS ABSENT, so the frozen base
+# and the four hand-maintained configurations -- none of which this generator
+# writes -- parse and render exactly as they do today.
+DRAW_CANVAS_TITLES = True
 
 COLUMN_X = {
     "meson_trigger": (0.05, 0.5),
@@ -922,7 +938,7 @@ def composite_globals(base: dict, write_names: dict[str, str],
     the distinct output directories of the writing globals and throws "Exactly
     one global-canvas output directory is required to store the
     multiplicity-boundary receipt" on anything but one
-    (improvedPlotting_THnSparse.C:2801-2811).
+    (improvedPlotting_THnSparse.C:2814-2824).
     """
     template = base["global_canvases_to_be_drawn"][0]
     minis = [c["canvas_name"] for c in build_trigger_column_canvases(base)]
@@ -1003,7 +1019,7 @@ def apply_display_filter(document: dict, drawn: list[dict],
 # `reference_meson_pdg` and stays in the set, so `trigger_group_configs` still
 # finds exactly one reference associate per group and
 # `ResolveReferenceAssociateSelection` still has one to resolve
-# (improvedPlotting_THnSparse.C:597-644). The exclusion is checked by that
+# (improvedPlotting_THnSparse.C:598-645). The exclusion is checked by that
 # function on the FILTERED set, at emission.
 EXTREMES_EXCLUDED_ASSOCIATES = {"BEAUTY": ("Bc-",)}
 EXTREMES_EXCLUSION_COMMENT = (
@@ -1687,11 +1703,14 @@ def variant_documents(base: dict, percentiles: list[float],
         path("VCORRELATIONS"): build_correlations(base, percentiles),
     }
 
-    # THE ONE PLACE THE RATIO Y TITLE IS SET, for every configuration this
-    # function emits and every ratio panel each of them carries, authored or
-    # inherited. Everything `main` writes or checks comes through here.
+    # THE ONE PLACE THE TITLE DECISIONS ARE WRITTEN, for every configuration
+    # this function emits: the ratio y title on every ratio panel each of them
+    # carries, authored or inherited, and the document-level switch that keeps
+    # or blanks every panel title. Everything `main` writes or checks comes
+    # through here.
     for document in documents.values():
         normalize_ratio_titles(document)
+        document["draw_canvas_titles"] = DRAW_CANVAS_TITLES
     return documents
 
 

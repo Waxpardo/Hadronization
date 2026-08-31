@@ -289,6 +289,7 @@ struct CONFIGS {
     Double_t SAME_SIGN_PAIR_FACTOR;
     PairInputSelectionContract PAIR_INPUT_SELECTION_CONTRACT;
     bool DRAW_CORRELATION_PLOTS;
+    bool DRAW_CANVAS_TITLES;
     bool SUBSAMPLE_COVERAGE_AUDIT;
     std::string base_dir;
     std::vector<std::string> vSubsampleErrorBinsToExclude;
@@ -1654,18 +1655,23 @@ constexpr Double_t kPublicationXTitleOffsetVerticalLabels = 2.36;
 // THE STYLE SYSTEM, IN ONE PLACE (owner directive 2026-08-31: the repository
 // leaves the plotting layer after this change). Where each decision lives:
 //   sizes     kPublicationLabelFraction and kPublicationTitleFraction above,
-//             applied to every assembled canvas by the one pass at :5756
+//             applied to every assembled canvas by the one pass at :5771
 //   titles    the GENERATOR owns them -- RATIO_PANEL_Y_TITLE and
 //             normalize_ratio_titles in tools/make_variant_configs.py,
-//             parsed here at :2876
+//             parsed here at :2889
 //   offsets   the three constants above, chosen in ApplyPublicationAxisStyle
-//   legends   rectangles in the configuration (parsed :2893), built once
-//             per draw function, first at :4608
-//   reference the dashed unity line at :1517
+//   legends   rectangles in the configuration (parsed :2906), built once
+//             per draw function, first at :4623
+//   reference the dashed unity line at :1518
+//   switch    panel titles, on by default: one configuration key
+//             `draw_canvas_titles` (FIG-1C), parsed at :2620. False hands
+//             the empty string to the four template sites :4579, :4864,
+//             :5152 and :5429 and to the correlation title :4382, and
+//             ROOT then draws no title pad.
 // DEFERRED, recorded and not repaired here (post-paper): the four template
-// sites :4567, :4852, :5139 and :5416 are near-duplicates, each carrying its
+// sites :4582, :4867, :5154 and :5431 are near-duplicates, each carrying its
 // own copy of the title, legend and style block; MultiplicityClassLineStyle
-// (:3398) matches a bin prefix no configuration emits, returning 1 always.
+// (:3413) matches a bin prefix no configuration emits, returning 1 always.
 
 Int_t PublicationTextPixels(Double_t fraction, Double_t canvasWidthPx)
 {
@@ -2605,6 +2611,13 @@ CONFIGS readConfig(const char* configurations) {
             PAIR_COMBINATORICS_MODE);
     }
     bool DRAW_CORRELATION_PLOTS = config["draw_correlation_plots"].get<bool>();
+    // PANEL TITLES, ON UNLESS THE CONFIGURATION TURNS THEM OFF (FIG-1C, owner
+    // ruling 2026-08-31). `false` blanks every panel title this macro draws,
+    // so the paper caption carries the identification alone. Read with `value`
+    // and defaulted to `true`: the generator writes the key into the five
+    // figure configurations, and the frozen base and the four hand-maintained
+    // configurations do not carry it and must render as they do today.
+    bool DRAW_CANVAS_TITLES = config.value("draw_canvas_titles", true);
     bool SUBSAMPLE_COVERAGE_AUDIT =
         config.value("subsample_coverage_audit", false);
     const std::vector<std::string> vSubsampleErrorBinsToExclude =
@@ -3007,6 +3020,7 @@ CONFIGS readConfig(const char* configurations) {
     configs_from_json.PAIR_INPUT_SELECTION_CONTRACT =
         PAIR_INPUT_SELECTION_CONTRACT;
     configs_from_json.DRAW_CORRELATION_PLOTS = DRAW_CORRELATION_PLOTS;
+    configs_from_json.DRAW_CANVAS_TITLES = DRAW_CANVAS_TITLES;
     configs_from_json.SUBSAMPLE_COVERAGE_AUDIT = SUBSAMPLE_COVERAGE_AUDIT;
     configs_from_json.base_dir = base_dir;
     configs_from_json.vSubsampleErrorBinsToExclude = vSubsampleErrorBinsToExclude;
@@ -3047,6 +3061,7 @@ CONFIGS readConfig(const char* configurations) {
     std::cout << "- PAIR_INPUT_SELECTION_CONTRACT = "
               << PAIR_INPUT_SELECTION_CONTRACT.mode << std::endl;
     std::cout << "- DRAW_CORRELATION_PLOTS = " << DRAW_CORRELATION_PLOTS << std::endl;
+    std::cout << "- DRAW_CANVAS_TITLES = " << DRAW_CANVAS_TITLES << std::endl;
     std::cout << "- SUBSAMPLE_COVERAGE_AUDIT = "
               << SUBSAMPLE_COVERAGE_AUDIT << std::endl;
     std::cout << "- base_dir = " << base_dir << std::endl;
@@ -4364,7 +4379,7 @@ YieldsAndErrorsMap calculateYieldsVector(CONFIGS configs_from_json, const char* 
                         hDPhiSS->SetMarkerColor(kRed + 1);
                         hDPhiSS->SetMarkerStyle(24);
                         hDPhiSS->SetLineStyle(2);
-                        hDPhiOS->SetTitle(title);
+                        hDPhiOS->SetTitle(configs_from_json.DRAW_CANVAS_TITLES ? title.Data() : "");
                         // UNITS ON THE AZIMUTHAL AXIS (checklist item 4). The
                         // repository already had the intended form at
                         // Plot_FlavourClosure.C:158; the correlation canvas
@@ -4561,7 +4576,7 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
 
     // Define a template for this plot to set titles, stats, etc.
     TH1D *hYieldsTemplate = new TH1D(Form("hYieldsTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), Form("hYieldsTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
-    hYieldsTemplate->SetTitle(canvasConfigs.canvasTitle.c_str());
+    hYieldsTemplate->SetTitle(configs_from_json.DRAW_CANVAS_TITLES ? canvasConfigs.canvasTitle.c_str() : "");
     hYieldsTemplate->GetXaxis()->SetLabelSize(kSpeciesBinLabelSize);  // amendment (ii)
     hYieldsTemplate->GetXaxis()->SetTitle(canvasConfigs.xAxisTitle.c_str());
     hYieldsTemplate->GetYaxis()->SetTitle(canvasConfigs.yAxisTitle.c_str());
@@ -4846,7 +4861,7 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
 
     // Define a template for this plot to set titles, stats, etc.
     TH1D *hYieldsTemplate = new TH1D(Form("hYieldsTUNERatiosTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), Form("hYieldsTUNERatiosTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), nAssociates, 0, nAssociates);
-    hYieldsTemplate->SetTitle(canvasConfigs.canvasTitle.c_str());
+    hYieldsTemplate->SetTitle(configs_from_json.DRAW_CANVAS_TITLES ? canvasConfigs.canvasTitle.c_str() : "");
     hYieldsTemplate->GetXaxis()->SetLabelSize(kSpeciesBinLabelSize);  // amendment (ii)
     hYieldsTemplate->GetXaxis()->SetTitle(canvasConfigs.xAxisTitle.c_str());
     hYieldsTemplate->GetYaxis()->SetTitle(canvasConfigs.yAxisTitle.c_str());
@@ -5134,7 +5149,7 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
 
     // Define a template for this plot to set titles, stats, etc.
     TH1D *hYieldsTemplate = new TH1D(Form("hYieldsBaryonMesonRatioTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatioTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
-    hYieldsTemplate->SetTitle(canvasConfigs.canvasTitle.c_str());
+    hYieldsTemplate->SetTitle(configs_from_json.DRAW_CANVAS_TITLES ? canvasConfigs.canvasTitle.c_str() : "");
     hYieldsTemplate->GetXaxis()->SetTitle(canvasConfigs.xAxisTitle.c_str());
     hYieldsTemplate->GetYaxis()->SetTitle(canvasConfigs.yAxisTitle.c_str());
     // ELEVEN CLASS LABELS ON ONE AXIS (ruling R45, checklist item 5). This
@@ -5411,7 +5426,7 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
 
     // Define a template for this plot to set titles, stats, etc.
     TH1D *hYieldsTemplate = new TH1D(Form("hYieldsBaryonMesonRatioTUNERatioTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), Form("hYieldsBaryonMesonRatioTUNERatioTemplate_%s_%s", FLAVOUR, (canvasConfigs.canvasName).c_str()), nDependencies, 0, nDependencies);
-    hYieldsTemplate->SetTitle(canvasConfigs.canvasTitle.c_str());
+    hYieldsTemplate->SetTitle(configs_from_json.DRAW_CANVAS_TITLES ? canvasConfigs.canvasTitle.c_str() : "");
     hYieldsTemplate->GetXaxis()->SetTitle(canvasConfigs.xAxisTitle.c_str());
     hYieldsTemplate->GetYaxis()->SetTitle(canvasConfigs.yAxisTitle.c_str());
     // ELEVEN CLASS LABELS ON ONE AXIS (ruling R45, checklist item 5). This

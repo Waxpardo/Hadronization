@@ -71,8 +71,8 @@ COUNT_FIELDS = ("n_os", "n_ss", "n_trig")
 
 # The configuration key that carries each flavour's trigger groups, and the
 # FLAVOUR string the macro prints beside it. `calculateYieldsVector` is called
-# once per flavour with these literals (improvedPlotting_THnSparse.C:5400-5401)
-# and selects the matching configuration block (:3336-3339), so the pairing is
+# once per flavour with these literals (improvedPlotting_THnSparse.C:5415-5416)
+# and selects the matching configuration block (:3351-3354), so the pairing is
 # the macro's own and not a convention invented here.
 FLAVOUR_KEYS = {
     "BEAUTY": "beauty_correlations_to_analyse",

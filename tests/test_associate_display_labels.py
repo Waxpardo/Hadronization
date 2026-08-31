@@ -11,9 +11,9 @@ keys are not notation, and these are paper-figure axes.
 
 WHAT THIS ASSERTS. The label table is parsed out of the macro source, and every
 `associateOS` a tracked V-configuration registers must have an entry in it. The
-PDG is the key on both sides: `improvedPlotting_THnSparse.C:584` sets
+PDG is the key on both sides: `improvedPlotting_THnSparse.C:585` sets
 `associateOSPdg` from the OS file's pair-registry row, and both `SetBinLabel`
-call sites (`:4449`, `:4692`) hand exactly that to the table. So this test
+call sites (`:4464`, `:4707`) hand exactly that to the table. So this test
 walks the same path the render does -- configuration to OS filename, filename
 to registry row, row to `associate_pdg` -- instead of matching on the
 identifier strings, which are routing keys and would be a second spelling of
