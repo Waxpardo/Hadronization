@@ -1616,6 +1616,12 @@ constexpr Double_t kPublicationTitleFraction = 0.0109;
 constexpr Double_t kPublicationXTitleOffset = 1.95;
 constexpr Double_t kPublicationYTitleOffset = 3.05;
 
+// A VERTICAL LABEL BAND IS DEEPER, so the title below it sits further out.
+// The baryon/meson composite is the only canvas that turns its labels
+// vertical; the offset is selected from the axis itself rather than from the
+// canvas name, so it follows the labels wherever they are used.
+constexpr Double_t kPublicationXTitleOffsetVerticalLabels = 3.60;
+
 Int_t PublicationTextPixels(Double_t fraction, Double_t canvasWidthPx)
 {
     const Int_t pixels =
@@ -1644,7 +1650,10 @@ void ApplyPublicationAxisStyle(TH1* frame, Double_t canvasWidthPx)
         axis->SetTitleSize(titlePixels);
         axis->CenterTitle(true);
     }
-    frame->GetXaxis()->SetTitleOffset(kPublicationXTitleOffset);
+    frame->GetXaxis()->SetTitleOffset(
+        frame->GetXaxis()->TestBit(TAxis::kLabelsVert)
+            ? kPublicationXTitleOffsetVerticalLabels
+            : kPublicationXTitleOffset);
     frame->GetYaxis()->SetTitleOffset(kPublicationYTitleOffset);
 }
 
@@ -5083,6 +5092,16 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
     hYieldsTemplate->SetTitle(canvasConfigs.canvasTitle.c_str());
     hYieldsTemplate->GetXaxis()->SetTitle(canvasConfigs.xAxisTitle.c_str());
     hYieldsTemplate->GetYaxis()->SetTitle(canvasConfigs.yAxisTitle.c_str());
+    // ELEVEN CLASS LABELS ON ONE AXIS (ruling R45, checklist item 5). This
+    // composite puts the multiplicity class on x, so the axis carries eleven
+    // labels like "90-100%" across a pad about 990 px wide -- 69 px of
+    // horizontal room each. ROOT's slanted default needs about 116 px of that
+    // room per label at the publication text size, so the labels overprint one
+    // another; the delivered figure avoided it only by drawing the labels
+    // small, and its x TITLE was overprinted by their descenders instead.
+    // Vertical labels take no horizontal room at all, so eleven of them stay
+    // separate at full size and the title clears them.
+    hYieldsTemplate->GetXaxis()->LabelsOption("v");
     std::cout << "- Setting y-axis range: (" << canvasConfigs.yMinAxis << "," << canvasConfigs.yMaxAxis << ")" << std::endl;
     hYieldsTemplate->GetYaxis()->SetRangeUser(canvasConfigs.yMinAxis,canvasConfigs.yMaxAxis);
     // A log range that spans less than a decade boundary gets exactly one
@@ -5350,6 +5369,16 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
     hYieldsTemplate->SetTitle(canvasConfigs.canvasTitle.c_str());
     hYieldsTemplate->GetXaxis()->SetTitle(canvasConfigs.xAxisTitle.c_str());
     hYieldsTemplate->GetYaxis()->SetTitle(canvasConfigs.yAxisTitle.c_str());
+    // ELEVEN CLASS LABELS ON ONE AXIS (ruling R45, checklist item 5). This
+    // composite puts the multiplicity class on x, so the axis carries eleven
+    // labels like "90-100%" across a pad about 990 px wide -- 69 px of
+    // horizontal room each. ROOT's slanted default needs about 116 px of that
+    // room per label at the publication text size, so the labels overprint one
+    // another; the delivered figure avoided it only by drawing the labels
+    // small, and its x TITLE was overprinted by their descenders instead.
+    // Vertical labels take no horizontal room at all, so eleven of them stay
+    // separate at full size and the title clears them.
+    hYieldsTemplate->GetXaxis()->LabelsOption("v");
     std::cout << "- Setting y-axis range: (" << canvasConfigs.yMinAxis << "," << canvasConfigs.yMaxAxis << ")" << std::endl;
     hYieldsTemplate->GetYaxis()->SetRangeUser(canvasConfigs.yMinAxis,canvasConfigs.yMaxAxis);
     // A log range that spans less than a decade boundary gets exactly one

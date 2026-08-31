@@ -1365,12 +1365,17 @@ def build_baryonmeson(base: dict, percentiles: list[float]) -> dict:
     document["canvases_to_be_drawn"] = keep
 
     # The baryon/meson composite takes the same pad margins as the
-    # trigger-column composites, for the same reason and with one addition of
-    # its own: this canvas puts the multiplicity CLASS on the x axis, its bin
-    # labels are rotated, and the delivered figure overprinted the descenders
-    # of "20-30%" and "10-20%" with the x title (checklist item 5).
+    # trigger-column composites, with a DEEPER bottom band of its own. This
+    # canvas puts the multiplicity CLASS on the x axis, so it carries eleven
+    # labels where the others carry three to five, and the macro draws them
+    # vertically because eleven slanted labels overprint one another at the
+    # publication text size (checklist item 5). A vertical label is as deep as
+    # it is long, so the band that holds it and the title below it is 0.32
+    # rather than 0.20. Measured on the replayed G8 canvas: at 0.20 the labels
+    # leave the pad, at 0.32 the eleven labels and the title all sit inside it.
     for canvas in keep:
         apply_composite_margins(canvas)
+        canvas["bottom_margin_mini_pad"] = 0.32
 
     # Two retained rows per flavour, spread over the original extent.
     TOP, ROWS = 0.95, 2
