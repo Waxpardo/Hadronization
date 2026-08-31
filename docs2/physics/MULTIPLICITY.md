@@ -51,17 +51,17 @@ windows, `c1` (90–100 %) through `c11` (0–1 %), each with its bin name `M90_
 `N_ch` boundary defines another tune's classes
 (`config/multiplicity_percentile_classes_v2.json`, `definition`; receipt
 `boundary_source.mode` is `per_tune`,
-`plotting/improvedPlotting_THnSparse.C:2006-2008`; histogram `summed MULTIPLICITY` at `:2008`). Absolute `N_ch` thresholds
+`plotting/improvedPlotting_THnSparse.C:2505-2507`; histogram `summed MULTIPLICITY` at `:2008`). Absolute `N_ch` thresholds
 are therefore allowed to differ between tunes, and they do.
 
 The tie rule: a threshold integer belongs to the **lower**-activity class, and
 the adjacent higher-activity class starts at the threshold plus one
 (`config/multiplicity_percentile_classes_v2.json`, `tie_rule`; the same rule as
-a receipt literal at `plotting/improvedPlotting_THnSparse.C:1999-2001`).
+a receipt literal at `plotting/improvedPlotting_THnSparse.C:2498-2500`).
 
 Class bounds are inclusive integer `N_ch`, and the integrated 0–100 %
 observable is deliberately outside the mutually exclusive partition
-(`plotting/improvedPlotting_THnSparse.C:2002-2004`).
+(`plotting/improvedPlotting_THnSparse.C:2501-2503`).
 
 Use `c1` through `c11` as equal-fraction activity classes. Do not require common
 absolute thresholds.
@@ -73,7 +73,7 @@ consumer anywhere in the tree: `historical_contract.merge_commit`,
 `historical_contract.implementation`, `counter` as a cross-check, and
 `tie_rule`. Two of them exist a SECOND time as C++ string literals in the
 boundary receipt — `tie_rule` at
-`plotting/improvedPlotting_THnSparse.C:1999-2001` and the PR-13 merge commit at
+`plotting/improvedPlotting_THnSparse.C:2498-2500` and the PR-13 merge commit at
 `:2009-2010` — and nothing compares the two copies. Treat the JSON strings as
 the statement of record and the C++ literals as what a run actually writes.
 

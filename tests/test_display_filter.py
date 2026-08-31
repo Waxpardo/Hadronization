@@ -35,6 +35,28 @@ sys.path.insert(0, str(ROOT / "tools"))
 from class_label_format import format_percentile_range  # noqa: E402
 GENERATOR = ROOT / "tools" / "make_variant_configs.py"
 
+def information_block_text(document: dict) -> str:
+    """The information block of one configuration, as one searchable string.
+
+    UNDER R46 THE KEY HOLDS A STACK, NOT A SENTENCE. `axis_declaration` used
+    to be the single axis-coverage line; it is now a list whose first element
+    states the generator, system and beam energy and whose second is that same
+    coverage line, unchanged (`information_block` in the generator). The
+    assertions below are about the COVERAGE line's content, so they read the
+    block joined rather than a single string. Nothing is relaxed: every class
+    label the contract defines must still appear, and it must still appear in
+    the configuration the generator wrote.
+
+    A plain string is still accepted, because the frozen base and the
+    hand-maintained configurations may carry one and the macro still parses
+    one.
+    """
+    declaration = document.get("axis_declaration", "")
+    if isinstance(declaration, str):
+        return declaration
+    return "\n".join(declaration)
+
+
 def artifact_class_count() -> int:
     return len(json.loads(BOUNDARIES.read_text())["classes"])
 
@@ -95,7 +117,7 @@ def main() -> int:
                 f"{name}: draws {len(drawn)} bins, expected {expected_drawn}")
 
         # the declaration exists whenever something is filtered
-        declaration = doc.get("axis_declaration", "")
+        declaration = information_block_text(doc)
         if len(drawn) < len(bins) and not declaration:
             failures.append(f"{name}: filtered but carries no axis_declaration")
 
@@ -103,7 +125,7 @@ def main() -> int:
     closure = json.loads(
         (PLOTTING / "configuration_multiplicity_HF_RUN3_V1_VINTEGRATED_CLOSURE.json"
          ).read_text())
-    decl = closure.get("axis_declaration", "")
+    decl = information_block_text(closure)
     for row in artifact_classes():
         label = format_percentile_range(row["percentile_min"],
                                         row["percentile_max"])
@@ -132,10 +154,9 @@ def main() -> int:
                 "generator failed on a perturbed artifact: "
                 + run.stdout.decode(errors="replace")[-400:])
         else:
-            moved = json.loads(
+            moved = information_block_text(json.loads(
                 (sandbox / "plotting" /
-                 "configuration_multiplicity_HF_RUN3_V1_VEXTREMES.json").read_text()
-            ).get("axis_declaration", "")
+                 "configuration_multiplicity_HF_RUN3_V1_VEXTREMES.json").read_text()))
             if moved == declaration_baseline():
                 failures.append(
                     "axis_declaration did not change when the boundary "
@@ -157,9 +178,9 @@ def main() -> int:
 
 
 def declaration_baseline() -> str:
-    return json.loads(
+    return information_block_text(json.loads(
         (PLOTTING / "configuration_multiplicity_HF_RUN3_V1_VEXTREMES.json"
-         ).read_text())["axis_declaration"]
+         ).read_text()))
 
 
 if __name__ == "__main__":

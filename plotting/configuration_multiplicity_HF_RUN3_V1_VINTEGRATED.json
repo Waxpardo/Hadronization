@@ -421,21 +421,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.237,
-            "y_max_mini_pad": 0.475,
+            "y_min_mini_pad": 0.2245,
+            "y_max_mini_pad": 0.45,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
             "y_min_axis": 5e-05,
-            "y_max_axis": 0.42,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -548,7 +544,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "MONASH"
         },
         {
             "canvas_name": "mini_beauty_balancing_junctions_meson_trigger",
@@ -571,21 +567,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.475,
-            "y_max_mini_pad": 0.712,
+            "y_min_mini_pad": 0.45,
+            "y_max_mini_pad": 0.6745,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
             "y_min_axis": 5e-05,
-            "y_max_axis": 0.42,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -698,7 +690,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_beauty_balancing_closepacking_meson_trigger",
@@ -721,21 +713,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.712,
-            "y_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.6745,
+            "y_max_mini_pad": 0.9,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
             "y_min_axis": 5e-05,
-            "y_max_axis": 0.42,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -848,7 +836,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "CLOSEPACKING"
         },
         {
             "canvas_name": "mini_beauty_balancing_junctions_closepacking_over_monash_meson_trigger",
@@ -866,7 +854,7 @@
             "write": false,
             "write_path": "NONE",
             "write_name": "NONE",
-            "canvas_title": "JUNCTIONS and CLOSEPACKING / MONASH, B^{+} trigger",
+            "canvas_title": "tune / MONASH, B^{+} trigger",
             "x_axis_title": "associate species",
             "y_axis_title": "ratio to MONASH",
             "x_size_canvas": 800,
@@ -874,7 +862,7 @@
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
             "y_min_mini_pad": 0.0,
-            "y_max_mini_pad": 0.237,
+            "y_max_mini_pad": 0.2245,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
@@ -884,10 +872,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1003,7 +987,7 @@
                 "JUNCTIONS",
                 "CLOSEPACKING"
             ],
-            "legend_columns": 1
+            "panel_label": ""
         },
         {
             "canvas_name": "mini_beauty_balancing_monash_baryon_trigger",
@@ -1026,21 +1010,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.237,
-            "y_max_mini_pad": 0.475,
+            "y_min_mini_pad": 0.2245,
+            "y_max_mini_pad": 0.45,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.0001,
-            "y_max_axis": 0.8,
+            "y_min_axis": 5e-05,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1153,7 +1133,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "MONASH"
         },
         {
             "canvas_name": "mini_beauty_balancing_junctions_baryon_trigger",
@@ -1176,21 +1156,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.475,
-            "y_max_mini_pad": 0.712,
+            "y_min_mini_pad": 0.45,
+            "y_max_mini_pad": 0.6745,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.0001,
-            "y_max_axis": 0.8,
+            "y_min_axis": 5e-05,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1303,7 +1279,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_beauty_balancing_closepacking_baryon_trigger",
@@ -1326,21 +1302,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.712,
-            "y_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.6745,
+            "y_max_mini_pad": 0.9,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.0001,
-            "y_max_axis": 0.8,
+            "y_min_axis": 5e-05,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1453,7 +1425,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "CLOSEPACKING"
         },
         {
             "canvas_name": "mini_beauty_balancing_junctions_closepacking_over_monash_baryon_trigger",
@@ -1471,7 +1443,7 @@
             "write": false,
             "write_path": "NONE",
             "write_name": "NONE",
-            "canvas_title": "JUNCTIONS and CLOSEPACKING / MONASH, #bar{#Lambda}_{b}^{0} trigger",
+            "canvas_title": "tune / MONASH, #bar{#Lambda}_{b}^{0} trigger",
             "x_axis_title": "associate species",
             "y_axis_title": "ratio to MONASH",
             "x_size_canvas": 800,
@@ -1479,7 +1451,7 @@
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
             "y_min_mini_pad": 0.0,
-            "y_max_mini_pad": 0.237,
+            "y_max_mini_pad": 0.2245,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
@@ -1489,10 +1461,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1608,7 +1576,7 @@
                 "JUNCTIONS",
                 "CLOSEPACKING"
             ],
-            "legend_columns": 1
+            "panel_label": ""
         },
         {
             "canvas_name": "mini_charm_balancing_monash_meson_trigger",
@@ -1631,21 +1599,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.237,
-            "y_max_mini_pad": 0.475,
+            "y_min_mini_pad": 0.2245,
+            "y_max_mini_pad": 0.45,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
-            "y_min_axis": 5e-05,
-            "y_max_axis": 0.42,
+            "y_min_axis": 0.01,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1758,7 +1722,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "MONASH"
         },
         {
             "canvas_name": "mini_charm_balancing_junctions_meson_trigger",
@@ -1781,21 +1745,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.475,
-            "y_max_mini_pad": 0.712,
+            "y_min_mini_pad": 0.45,
+            "y_max_mini_pad": 0.6745,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
-            "y_min_axis": 5e-05,
-            "y_max_axis": 0.42,
+            "y_min_axis": 0.01,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1908,7 +1868,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_charm_balancing_closepacking_meson_trigger",
@@ -1931,21 +1891,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.712,
-            "y_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.6745,
+            "y_max_mini_pad": 0.9,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
-            "y_min_axis": 5e-05,
-            "y_max_axis": 0.42,
+            "y_min_axis": 0.01,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -2058,7 +2014,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "CLOSEPACKING"
         },
         {
             "canvas_name": "mini_charm_balancing_junctions_closepacking_over_monash_meson_trigger",
@@ -2076,7 +2032,7 @@
             "write": false,
             "write_path": "NONE",
             "write_name": "NONE",
-            "canvas_title": "JUNCTIONS and CLOSEPACKING / MONASH, D^{+} trigger",
+            "canvas_title": "tune / MONASH, D^{+} trigger",
             "x_axis_title": "associate species",
             "y_axis_title": "ratio to MONASH",
             "x_size_canvas": 800,
@@ -2084,7 +2040,7 @@
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
             "y_min_mini_pad": 0.0,
-            "y_max_mini_pad": 0.237,
+            "y_max_mini_pad": 0.2245,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
@@ -2094,10 +2050,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -2213,7 +2165,7 @@
                 "JUNCTIONS",
                 "CLOSEPACKING"
             ],
-            "legend_columns": 1
+            "panel_label": ""
         },
         {
             "canvas_name": "mini_charm_balancing_monash_baryon_trigger",
@@ -2236,21 +2188,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.237,
-            "y_max_mini_pad": 0.475,
+            "y_min_mini_pad": 0.2245,
+            "y_max_mini_pad": 0.45,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.0001,
-            "y_max_axis": 0.8,
+            "y_min_axis": 0.01,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -2363,7 +2311,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "MONASH"
         },
         {
             "canvas_name": "mini_charm_balancing_junctions_baryon_trigger",
@@ -2386,21 +2334,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.475,
-            "y_max_mini_pad": 0.712,
+            "y_min_mini_pad": 0.45,
+            "y_max_mini_pad": 0.6745,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.0001,
-            "y_max_axis": 0.8,
+            "y_min_axis": 0.01,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -2513,7 +2457,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_charm_balancing_closepacking_baryon_trigger",
@@ -2536,21 +2480,17 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.712,
-            "y_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.6745,
+            "y_max_mini_pad": 0.9,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
             "right_margin_mini_pad": 0.03,
-            "y_min_axis": 0.0001,
-            "y_max_axis": 0.8,
+            "y_min_axis": 0.01,
+            "y_max_axis": 0.4,
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -2663,7 +2603,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "CLOSEPACKING"
         },
         {
             "canvas_name": "mini_charm_balancing_junctions_closepacking_over_monash_baryon_trigger",
@@ -2681,7 +2621,7 @@
             "write": false,
             "write_path": "NONE",
             "write_name": "NONE",
-            "canvas_title": "JUNCTIONS and CLOSEPACKING / MONASH, #Lambda_{c}^{+} trigger",
+            "canvas_title": "tune / MONASH, #Lambda_{c}^{+} trigger",
             "x_axis_title": "associate species",
             "y_axis_title": "ratio to MONASH",
             "x_size_canvas": 800,
@@ -2689,7 +2629,7 @@
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
             "y_min_mini_pad": 0.0,
-            "y_max_mini_pad": 0.237,
+            "y_max_mini_pad": 0.2245,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.2,
             "left_margin_mini_pad": 0.2,
@@ -2699,10 +2639,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -2818,7 +2754,7 @@
                 "JUNCTIONS",
                 "CLOSEPACKING"
             ],
-            "legend_columns": 1
+            "panel_label": ""
         }
     ],
     "global_canvases_to_be_drawn": [
@@ -2839,7 +2775,33 @@
             "write_path": "plotting/Plots/VariantIntegrated",
             "write_name": "global_balancing_plots_integrated_beauty",
             "x_size_canvas": 2200,
-            "y_size_canvas": 2050
+            "y_size_canvas": 2050,
+            "column_headers": [
+                {
+                    "text": "B^{+} trigger",
+                    "x_min": 0.14,
+                    "x_max": 0.4865
+                },
+                {
+                    "text": "#bar{#Lambda}_{b}^{0} trigger",
+                    "x_min": 0.5908,
+                    "x_max": 0.9365
+                }
+            ],
+            "canvas_legend": [
+                {
+                    "kind": "tune",
+                    "tune": "MONASH"
+                },
+                {
+                    "kind": "tune",
+                    "tune": "JUNCTIONS"
+                },
+                {
+                    "kind": "tune",
+                    "tune": "CLOSEPACKING"
+                }
+            ]
         },
         {
             "canvas_name": "global_balancing_plots_charm",
@@ -2858,12 +2820,41 @@
             "write_path": "plotting/Plots/VariantIntegrated",
             "write_name": "global_balancing_plots_integrated_charm",
             "x_size_canvas": 2200,
-            "y_size_canvas": 2050
+            "y_size_canvas": 2050,
+            "column_headers": [
+                {
+                    "text": "D^{+} trigger",
+                    "x_min": 0.14,
+                    "x_max": 0.4865
+                },
+                {
+                    "text": "#Lambda_{c}^{+} trigger",
+                    "x_min": 0.5908,
+                    "x_max": 0.9365
+                }
+            ],
+            "canvas_legend": [
+                {
+                    "kind": "tune",
+                    "tune": "MONASH"
+                },
+                {
+                    "kind": "tune",
+                    "tune": "JUNCTIONS"
+                },
+                {
+                    "kind": "tune",
+                    "tune": "CLOSEPACKING"
+                }
+            ]
         }
     ],
     "subsample_coverage_audit": false,
     "label_owner": "tools/make_variant_configs.py",
-    "axis_declaration": "multiplicity integrated, 0-100%",
+    "axis_declaration": [
+        "PYTHIA 8.317, pp #sqrt{s} = 13.6 TeV",
+        "multiplicity integrated, 0-100%"
+    ],
     "_comment_variant": "V-INTEGRATED. ONE bin spanning multiplicityMin=0 to multiplicityMax=100, so the counts are integrated by the SELECTION and calculateOneYield forms the ratio exactly once -- never an average of per-class ratios. TWO TRIGGER COLUMNS PER FLAVOUR under ruling R40 as amended: meson trigger left, baryon trigger right, each column carrying the three tune panels and one combined tune/MONASH ratio panel. Associates are the legacy set in both columns, less any exclusion this configuration names above. The pad rectangles are computed by the generator, because the base's are authored for a two-column layout whose columns are the FLAVOURS. The incumbent combined global is REPLACED, not kept: the macro holds one TPad per mini name and Draw() re-parents, so a mini named by two globals leaves the first canvas blank without an error. Y windows are set PER TRIGGER COLUMN; they are hard refusals through SetPlotPointOrThrow, and a clipped-envelope throw at the deployment is repaired by widening the range in the generator and re-rendering (the RUN-N F63 protocol), never by cropping the data. GENERATED by tools/make_variant_configs.py; do not hand-edit.",
-    "draw_canvas_titles": true
+    "draw_canvas_titles": false
 }

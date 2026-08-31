@@ -351,8 +351,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.38,
-            "y_max_mini_pad": 0.569,
+            "y_min_mini_pad": 0.36,
+            "y_max_mini_pad": 0.5391,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -362,10 +362,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -478,7 +474,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "MONASH"
         },
         {
             "canvas_name": "mini_beauty_balancing_JUNCTIONS",
@@ -501,8 +497,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.57,
-            "y_max_mini_pad": 0.759,
+            "y_min_mini_pad": 0.54,
+            "y_max_mini_pad": 0.7191,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -512,10 +508,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -628,7 +620,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_beauty_balancing_CLOSEPACKING",
@@ -651,8 +643,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.76,
-            "y_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.72,
+            "y_max_mini_pad": 0.9,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -662,10 +654,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": 0.14,
-            "x_max_legend": 0.99,
-            "y_min_legend": 0.7,
-            "y_max_legend": 0.9,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -778,7 +766,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 4
+            "panel_label": "CLOSEPACKING"
         },
         {
             "canvas_name": "mini_beauty_balancing_JUNCTIONS_over_MONASH",
@@ -803,7 +791,7 @@
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
             "y_min_mini_pad": 0.0,
-            "y_max_mini_pad": 0.189,
+            "y_max_mini_pad": 0.1791,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -813,10 +801,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -931,7 +915,7 @@
             "nominator_TUNES": [
                 "JUNCTIONS"
             ],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_beauty_balancing_CLOSEPACKING_over_MONASH",
@@ -955,8 +939,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.19,
-            "y_max_mini_pad": 0.379,
+            "y_min_mini_pad": 0.18,
+            "y_max_mini_pad": 0.3591,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -966,10 +950,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1084,7 +1064,7 @@
             "nominator_TUNES": [
                 "CLOSEPACKING"
             ],
-            "legend_columns": 1
+            "panel_label": "CLOSEPACKING"
         },
         {
             "canvas_name": "mini_charm_balancing_MONASH",
@@ -1107,8 +1087,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.38,
-            "y_max_mini_pad": 0.569,
+            "y_min_mini_pad": 0.36,
+            "y_max_mini_pad": 0.5391,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1118,10 +1098,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1234,7 +1210,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "MONASH"
         },
         {
             "canvas_name": "mini_charm_balancing_JUNCTIONS",
@@ -1257,8 +1233,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.57,
-            "y_max_mini_pad": 0.759,
+            "y_min_mini_pad": 0.54,
+            "y_max_mini_pad": 0.7191,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1268,10 +1244,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1384,7 +1356,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_charm_balancing_CLOSEPACKING",
@@ -1407,8 +1379,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.76,
-            "y_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.72,
+            "y_max_mini_pad": 0.9,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1418,10 +1390,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1534,7 +1502,7 @@
                 "hDPhiM0_1"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "CLOSEPACKING"
         },
         {
             "canvas_name": "mini_charm_balancing_JUNCTIONS_over_MONASH",
@@ -1559,7 +1527,7 @@
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
             "y_min_mini_pad": 0.0,
-            "y_max_mini_pad": 0.189,
+            "y_max_mini_pad": 0.1791,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1569,10 +1537,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1687,7 +1651,7 @@
             "nominator_TUNES": [
                 "JUNCTIONS"
             ],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_charm_balancing_CLOSEPACKING_over_MONASH",
@@ -1711,8 +1675,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.19,
-            "y_max_mini_pad": 0.379,
+            "y_min_mini_pad": 0.18,
+            "y_max_mini_pad": 0.3591,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1722,10 +1686,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1840,7 +1800,7 @@
             "nominator_TUNES": [
                 "CLOSEPACKING"
             ],
-            "legend_columns": 1
+            "panel_label": "CLOSEPACKING"
         }
     ],
     "global_canvases_to_be_drawn": [
@@ -1863,12 +1823,41 @@
             "write_path": "plotting/Plots/VariantCorrelations",
             "write_name": "global_balancing_plots_multiplicity_HF_RUN3_V1_THREETUNE_VCORRELATIONS_POLISH_PROPOSAL",
             "x_size_canvas": 2200,
-            "y_size_canvas": 2050
+            "y_size_canvas": 2050,
+            "column_headers": [
+                {
+                    "text": "beauty",
+                    "x_min": 0.14,
+                    "x_max": 0.4865
+                },
+                {
+                    "text": "charm",
+                    "x_min": 0.5908,
+                    "x_max": 0.9365
+                }
+            ],
+            "canvas_legend": [
+                {
+                    "kind": "tune",
+                    "tune": "MONASH"
+                },
+                {
+                    "kind": "tune",
+                    "tune": "JUNCTIONS"
+                },
+                {
+                    "kind": "tune",
+                    "tune": "CLOSEPACKING"
+                }
+            ]
         }
     ],
     "subsample_coverage_audit": false,
     "label_owner": "tools/make_variant_configs.py",
-    "axis_declaration": "multiplicity integrated, 0-100%",
+    "axis_declaration": [
+        "PYTHIA 8.317, pp #sqrt{s} = 13.6 TeV",
+        "multiplicity integrated, 0-100%"
+    ],
     "_comment_variant": "V-CORRELATIONS. Delta-phi angular correlations, MONASH only -- the macro gates the draw on TUNE == MONASH, so the hard-coded <FLAVOUR>Correlations_MONASH stem is honest. Registers exactly the four OS pair files that gate names, which means TWO BARYON-TRIGGERED PAIRS the balancing family does not carry; that is why this configuration is separate and why the balancing files are untouched. Its balancing canvases are a by-product of the same pass and are written to their own directory. GENERATED by tools/make_variant_configs.py; do not hand-edit.",
-    "draw_canvas_titles": true
+    "draw_canvas_titles": false
 }

@@ -26,7 +26,7 @@ repository's other generators.
 TWO EMITTED BLOCKS ARE INERT AND STAY THAT WAY. Every canvas carries
 `TUNE_colours` and `dependency_line_styles`. Both are PARSED and neither is
 READ. `TUNE_colours` is parsed into `colourTUNEMap`
-(improvedPlotting_THnSparse.C:2743-2754), which nothing reads, and a known
+(improvedPlotting_THnSparse.C:3242-3253), which nothing reads, and a known
 tune's value is overwritten by the compiled constant before it is even stored
 (`:2747-2749`); the palette lives in `plotting/TunePlotStyle.h:24-27`.
 `dependency_line_styles` is parsed into `lineStyleDependencyMap` (`:2755-2763`)
@@ -65,10 +65,97 @@ from class_label_format import (  # noqa: E402
     format_percentile_range, top_percentiles)
 
 
+DEPENDENCIES_CONF = ROOT / "config" / "dependencies.conf"
+TUNE_CARD_DIR = ROOT / "generation" / "cards"
+
+
 def class_names() -> list[str]:
     """Class names in ascending event activity."""
     artifact = json.loads(BOUNDARIES.read_text())
     return [row["class"] for row in artifact["classes"]]
+
+
+# THE INFORMATION BLOCK'S FIRST LINE IS DERIVED, NEVER TYPED (ruling R46,
+# item 2). It states the generator, the collision system and the beam energy
+# once per figure, and each of those three facts is READ from the artifact
+# that already owns it:
+#
+#   generator version  config/dependencies.conf, `HF_PYTHIA8_VERSION`
+#   beam energy        generation/cards/pythiasettings_*.cmnd, `Beams:eCM`
+#
+# WHY READ RATHER THAN TYPE. Before R46 the string `pp #sqrt{s} = 13.6 TeV`
+# was typed into three separate title templates in this file. Three copies of
+# a number that the cards own is three chances to disagree with the campaign
+# that produced the points. The block is now the ONE place the figures state
+# it, and it cannot state an energy the cards do not carry.
+#
+# THE THREE CARDS MUST AGREE, and disagreement is a refusal rather than a
+# choice: the tunes differ in hadronisation, not in beam. A fourth card added
+# with a different `Beams:eCM` stops the generator instead of silently
+# labelling every figure with one tune's beam.
+
+def pythia_version() -> str:
+    """The generator version the campaign pins, from the dependency file."""
+    for line in DEPENDENCIES_CONF.read_text().splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            continue
+        if "HF_PYTHIA8_VERSION" not in stripped:
+            continue
+        _, _, tail = stripped.partition("HF_PYTHIA8_VERSION")
+        version = tail.strip().lstrip(":=").strip().strip('"}').strip()
+        if version:
+            return version
+    raise SystemExit(
+        f"{DEPENDENCIES_CONF.name}: no HF_PYTHIA8_VERSION; the information "
+        f"block cannot state a generator version this repository does not pin")
+
+
+def beam_energy_tev() -> str:
+    """`Beams:eCM` from the tune cards, in TeV, with the tunes required equal."""
+    cards = sorted(TUNE_CARD_DIR.glob("pythiasettings_Hard_Low_ccbb_*.cmnd"))
+    if not cards:
+        raise SystemExit(f"{TUNE_CARD_DIR}: no tune cards to read Beams:eCM from")
+    energies: dict[str, str] = {}
+    for card in cards:
+        for line in card.read_text().splitlines():
+            head = line.split("!", 1)[0].strip()
+            if not head.startswith("Beams:eCM"):
+                continue
+            _, _, value = head.partition("=")
+            energies[card.name] = value.strip()
+            break
+    if len(energies) != len(cards):
+        missing = sorted(c.name for c in cards if c.name not in energies)
+        raise SystemExit(f"tune cards carry no Beams:eCM: {', '.join(missing)}")
+    distinct = set(energies.values())
+    if len(distinct) != 1:
+        raise SystemExit(
+            f"tune cards disagree on Beams:eCM ({energies}); the information "
+            f"block states one beam energy for the whole figure and will not "
+            f"choose between them")
+    gev = float(distinct.pop())
+    tev = gev / 1000.0
+    # 13600 GeV prints as 13.6, not 13.60: the trailing zero is not measured.
+    return f"{tev:g}"
+
+
+def information_block_line() -> str:
+    """Line 1 of every figure's information block: generator, system, energy."""
+    return (f"PYTHIA {pythia_version()}, "
+            f"pp #sqrt{{s}} = {beam_energy_tev()} TeV")
+
+
+def information_block(coverage: str) -> list[str]:
+    """The whole block, top-left of a canvas, one line per element.
+
+    Line 1 identifies the campaign; line 2 is the axis-coverage sentence the
+    figure already carried, unchanged. The macro draws the list as a stack at
+    the anchor the single line used (`improvedPlotting_THnSparse.C:2097-2127`)
+    and echoes every line on `AXIS_DECLARATION`, so a style-delta proof still
+    reads the coverage sentence it read before.
+    """
+    return [information_block_line(), coverage]
 
 
 # ---------------------------------------------------------------------------
@@ -88,7 +175,7 @@ def class_names() -> list[str]:
 #
 # EVERY ROUTING NAME BELOW IS A KEY, NOT NOTATION. `associateOS` reaches
 # `SetBinLabel` through `DisplayLabelForAssociatePdg`, which is keyed on the PDG
-# code the pair registry carries (improvedPlotting_THnSparse.C:1536-1554), so
+# code the pair registry carries (improvedPlotting_THnSparse.C:1569-1587), so
 # the axis text has one source and these strings only have to route.
 #
 # TWO OF THE LEGACY BEAUTY ASSOCIATES ONCE HAD NO ENTRY IN THAT TABLE, and now
@@ -131,7 +218,7 @@ def class_names() -> list[str]:
 # The labels are the same strings the AXIS already uses, so a panel title and
 # its own axis cannot disagree: they are the `DisplayLabelForAssociatePdg`
 # entries of the trigger's PDG code
-# (`plotting/improvedPlotting_THnSparse.C:1537-1557`) -- 521, -5122, 411, 4122.
+# (`plotting/improvedPlotting_THnSparse.C:1570-1590`) -- 521, -5122, 411, 4122.
 # The two meson labels are equal to the routing key by coincidence of it
 # already being notation; they are written out anyway so every group carries
 # both fields and a later reader does not have to know which is which.
@@ -245,7 +332,7 @@ def trigger_group_configs(flavour: str, group: dict, associates,
 
     `ResolveReferenceAssociateSelection` throws unless exactly one configured
     associate carries the group's signed `referenceMesonPdg`
-    (improvedPlotting_THnSparse.C:598-645), so the invariant is asserted HERE,
+    (improvedPlotting_THnSparse.C:631-678), so the invariant is asserted HERE,
     at emission, rather than discovered by a render that has already started.
     """
     configs, reference_hits = [], []
@@ -340,6 +427,18 @@ def apply_trigger_groups(document: dict, associate_set: str,
 def percentile_label(index: int, percentiles: list[float]) -> str:
     """Delegates to the shared primitive; see tools/class_label_format.py."""
     return class_percentile_range(index, percentiles)
+
+
+def legend_wording(index: int, total: int, percentiles: list[float]) -> str:
+    """The one spelling of a drawn class, used wherever a class is named.
+
+    Both the panel entries `build_extremes` rewrites and the canvas legend
+    L1 introduced take this function, so the figure cannot carry two wordings
+    of the same class.
+    """
+    words = rank_words(index, total)
+    pct = percentile_label(index, percentiles)
+    return f"{words}, {pct}" if words else pct
 
 
 def rank_words(index: int, total: int) -> str | None:
@@ -451,7 +550,7 @@ def hdphi_names(bins: list[dict]) -> list[str]:
 # THE COMBINED-RATIO PANEL IS A TEMPLATE COPY, NOT NEW PLOTTING CODE. The legacy
 # `mini_*_JUNCTIONS_CLOSEPACKING_over_MONASH` block sets `nominator_TUNES` to a
 # LIST and `denominator_TUNE` to MONASH. The parse site reads the list
-# (improvedPlotting_THnSparse.C:2674-2684) and the draw loop iterates it,
+# (improvedPlotting_THnSparse.C:3173-3183) and the draw loop iterates it,
 # colouring each numerator through `ApplyTuneVisualStyle` and writing one legend
 # entry per numerator (`:4754-4806`). Both ratios therefore land in one pad with
 # the tunes distinguishable, and the macro is not touched.
@@ -472,6 +571,26 @@ TUNE_PANEL_ORDER = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 COMBINED_RATIO_NUMERATORS = ["JUNCTIONS", "CLOSEPACKING"]
 COMBINED_RATIO_DENOMINATOR = "MONASH"
 
+# A RATIO LABEL NEVER ENUMERATES ITS NUMERATORS (ruling L2, owner,
+# 2026-09-01). A combined-ratio panel draws two numerator tunes against
+# MONASH, and the label used to join their names: `JUNCTIONS and CLOSEPACKING
+# / MONASH`, 36 characters that grow with every tune added. The generic form
+# names the ROLE, and the canvas legend names which tunes fill it -- one entry
+# per series, each naming its own tune, which is not the enumerated form and
+# is what a reader needs to tell two curves apart.
+#
+# THE Y AXIS IS UNCHANGED. It already reads `ratio to MONASH` (FIG-1B,
+# `RATIO_PANEL_Y_TITLE`), so the denominator is stated by the axis and the
+# panel label states only the numerator role.
+#
+# THIS CONSTANT IS SWEPT, NOT SPOT-FIXED. The two label sites that joined the
+# names are the trigger-column composites' combined-ratio panel and G8's; both
+# take this constant now. The `_`-joined CANVAS NAMES keep the enumeration
+# because they are routing keys, not labels: renaming one renames a delivered
+# mini. Titles-off already silences both labels, and they are corrected anyway
+# so that switching titles back on cannot bring the enumerated form back.
+RATIO_PANEL_GENERIC_NUMERATOR = "tune"
+
 # THE RATIO PANELS' Y TITLE, AND THE ONE PLACE IT IS WRITTEN (owner ruling
 # 2026-08-31). Every balancing ratio panel in every configuration takes this
 # string. The wording the panels carried before was 29 to 37 characters --
@@ -490,27 +609,36 @@ RATIO_PANEL_Y_TITLE = "ratio to MONASH"
 # The ratio family, named by the macro's OWN dispatch key and never by title
 # text, so the pass below cannot drift onto matching wording. These two values
 # are every ratio panel in all five configurations; the macro dispatches on
-# them at improvedPlotting_THnSparse.C:5731 and :5739.
+# them at improvedPlotting_THnSparse.C:6418 and :5739.
 RATIO_PANEL_DRAW_FUNCTIONS = (
     "drawBalancingPlotsTUNERatios",
     "drawBalancingBaryonMesonRatioPlotsTUNERatios",
 )
 
-# PANEL TITLES ARE SWITCHABLE, AND THEY STAY ON (FIG-1C, owner ruling
-# 2026-08-31). Every figure embeds in the paper under a caption, so a title
-# drawn inside the panel can repeat the caption beside it. `false` blanks every
+# PANEL TITLES ARE SWITCHABLE, AND THEY ARE NOW OFF (ruling R46, owner,
+# 2026-09-01). Every figure embeds in the paper under a caption, so a title
+# drawn inside the panel repeats the caption beside it. `false` blanks every
 # panel title the balancing macro draws -- its four template sites and its
-# correlation canvas -- and the caption then carries the identification alone.
+# correlation canvas -- and the identification is stated once instead.
 #
-# THE DEFAULT IS `true`, AND THIS COMMIT DOES NOT CHANGE IT. RUN-N4 renders the
-# same titles as every certified figure, and the owner rules on the title at
-# the post-RUN-N4 look, with real figures beside real captions. Flipping this
-# constant and regenerating is the whole change.
+# WHAT A TITLE STATED SIX TIMES NOW STATES ONCE. An eight-panel composite
+# carried `TUNE, TRIGGER trigger, pp #sqrt{s} = 13.6 TeV` in every panel, so
+# it printed the beam energy six times, the trigger eight and the tune six.
+# Under R46 each fact has exactly one home: the beam energy and the generator
+# go to the information block (`INFORMATION_BLOCK_LINE`), the trigger or the
+# flavour to a column header (`column_headers`), the tune to an in-frame row
+# label (`panel_label`) and to the one canvas legend (`canvas_legend`), and
+# the rest to the caption. The Phase-A map of
+# `FIG1D_EVIDENCE_0e98a5b_20260901/phaseA/INFORMATION_LOSS_MAP.md` lists every
+# fact and its destination; no fact was dropped.
+#
+# THE SWITCH STAYS. FIG-1C built it so the decision is one constant, and R46
+# flips that constant rather than deleting the five title sites.
 #
 # THE MACRO DEFAULTS THE KEY TO `true` WHEN IT IS ABSENT, so the frozen base
 # and the four hand-maintained configurations -- none of which this generator
 # writes -- parse and render exactly as they do today.
-DRAW_CANVAS_TITLES = True
+DRAW_CANVAS_TITLES = False
 
 COLUMN_X = {
     "meson_trigger": (0.05, 0.5),
@@ -735,6 +863,55 @@ EXTREMES_MESON_COLUMN_RATIO_ENVELOPE_SOURCE = (
 EXTREMES_MESON_COLUMN_RATIO_WINDOW = (0.0, 3.0)
 
 
+# ONE YIELD WINDOW PER FIGURE (architect finding F5, 2026-09-01).
+#
+# THE DEFECT. G4 and G6 put their two trigger columns side by side on
+# DIFFERENT y windows for the same quantity: the meson column ran
+# 5e-05 to 0.42 and the baryon column 1e-04 to 0.8. A reader comparing the
+# left panel with the right one was comparing two scales, and nothing on the
+# figure said so. The windows were per COLUMN because baryon-trigger yields
+# were expected to differ in magnitude from meson-trigger ones; the measured
+# envelopes say they do not.
+#
+# THE MEASUREMENT, from the delivered macros of RUN-N4's mirror
+# (`DELIVERABLES_REVIEW_20260901/G4_G6/*_MACRO.C`), over every drawn point of
+# both columns including its error bar:
+#
+#   BEAUTY  meson  [0.00015764688, 0.1168291368]
+#           baryon [0.00012484148, 0.1172078342]   both columns: 1.25e-04 .. 0.1172
+#   CHARM   meson  [0.0188761542,  0.1935681496]
+#           baryon [0.0197802746,  0.1931478546]   both columns: 1.888e-02 .. 0.1936
+#
+# The two columns of one flavour agree to better than 1 % at the top and
+# within a factor 1.3 at the bottom. The two FLAVOURS do not: beauty reaches
+# two decades lower, because B_c- is in the integrated associate set (R43) and
+# charm has no comparable rare associate. So the window is harmonized PER
+# FIGURE, which is what F5 asks and what the flavours support; one window
+# across both flavours would put charm's whole decade in the top quarter of a
+# four-decade axis, which is the defect F8 names on G8.
+#
+# THE FLOORS AND CEILINGS ARE ROUND NUMBERS THAT CONTAIN THE ENVELOPE, not the
+# envelope itself: a window equal to its data crops the error bar of the
+# extreme point at the frame. Beauty takes 5e-05, 2.5x below its measured
+# floor; charm takes 1e-02, 1.9x below its own. Both take 0.4, about 2x above
+# the higher of the two measured ceilings. `COLUMN_WINDOW_GUARDS` checks each
+# against its envelope at import.
+#
+# WHAT DECADE-ONLY LABELLING THEN GIVES (ruling L3). Beauty spans 3.9 decades
+# and labels four. CHARM SPANS 1.6 DECADES AND LABELS TWO, below the three the
+# brief asks for, because charm's data spans one decade and no honest window
+# around it spans three. The alternative is recorded rather than taken: a
+# charm floor of 1e-03 labels three decades and leaves the lower half of the
+# panel empty. The report states this and proposes it; it is the owner's call,
+# not a number this generator should guess.
+INTEGRATED_BEAUTY_YIELD_ENVELOPE = (0.00012484148, 0.1172078342)
+INTEGRATED_CHARM_YIELD_ENVELOPE = (0.0188761542, 0.1935681496)
+INTEGRATED_YIELD_ENVELOPE_SOURCE = (
+    "RUN-N4 delivered macros, DELIVERABLES_REVIEW_20260901/G4_G6, measured "
+    "over both trigger columns by FIG-1D's replay probe")
+INTEGRATED_BEAUTY_YIELD_WINDOW = (5e-05, 0.4)
+INTEGRATED_CHARM_YIELD_WINDOW = (1e-02, 0.4)
+
 # EVERY WINDOW IS GUARDED AGAINST ITS OWN MEASUREMENT, here, at import. A
 # window edited below its envelope raises before any document is built, so the
 # generator cannot write a configuration whose window crops its own recorded
@@ -764,6 +941,12 @@ COLUMN_WINDOW_GUARDS = (
      EXTREMES_MESON_COLUMN_RATIO_WINDOW,
      EXTREMES_MESON_COLUMN_RATIO_ENVELOPE,
      EXTREMES_MESON_COLUMN_RATIO_ENVELOPE_SOURCE),
+    ("INTEGRATED_BEAUTY_YIELD_WINDOW",
+     INTEGRATED_BEAUTY_YIELD_WINDOW, INTEGRATED_BEAUTY_YIELD_ENVELOPE,
+     INTEGRATED_YIELD_ENVELOPE_SOURCE),
+    ("INTEGRATED_CHARM_YIELD_WINDOW",
+     INTEGRATED_CHARM_YIELD_WINDOW, INTEGRATED_CHARM_YIELD_ENVELOPE,
+     INTEGRATED_YIELD_ENVELOPE_SOURCE),
 )
 
 for _name, _window, _envelope, _source in COLUMN_WINDOW_GUARDS:
@@ -781,9 +964,31 @@ INTEGRATED_COLUMN_WINDOWS = {
     ("meson_trigger", "ratio"): MESON_COLUMN_RATIO_WINDOW,
     ("baryon_trigger", "yield"): BARYON_COLUMN_YIELD_WINDOW,
     ("baryon_trigger", "ratio"): BARYON_COLUMN_RATIO_WINDOW,
+    # The per-flavour entries take precedence for `yield`; see `window_for`.
+    ("BEAUTY", "yield"): INTEGRATED_BEAUTY_YIELD_WINDOW,
+    ("CHARM", "yield"): INTEGRATED_CHARM_YIELD_WINDOW,
 }
+
+
+def window_for(windows: dict, flavour: str, column: str,
+               kind: str) -> tuple[float, float]:
+    """The window for one panel: per FIGURE where one is given, else per column.
+
+    A configuration that harmonizes a quantity across its columns registers
+    `(FLAVOUR, kind)`; one that still separates them registers
+    `(column, kind)`. V-EXTREMES keeps per-column yield windows because its
+    two columns carry different associate sets under R43.
+    """
+    return windows.get((flavour, kind)) or windows[(column, kind)]
+# V-EXTREMES KEEPS PER-COLUMN YIELD WINDOWS, and the spread below drops the
+# per-FIGURE entries F5 added rather than inheriting them. The two columns of
+# an extremes canvas do not carry the same associates -- R43 removes B_c- from
+# both beauty columns and charm never had it -- and their floors are each that
+# column's own measured envelope minimum over three. Inheriting a per-flavour
+# yield window here would silently replace two measured floors with one.
 EXTREMES_COLUMN_WINDOWS = {
-    **INTEGRATED_COLUMN_WINDOWS,
+    **{key: value for key, value in INTEGRATED_COLUMN_WINDOWS.items()
+       if key[0] not in FLAVOUR_SECTION},
     ("meson_trigger", "yield"): EXTREMES_MESON_COLUMN_YIELD_WINDOW,
     ("meson_trigger", "ratio"): EXTREMES_MESON_COLUMN_RATIO_WINDOW,
     ("baryon_trigger", "yield"): EXTREMES_BARYON_COLUMN_YIELD_WINDOW,
@@ -900,7 +1105,8 @@ def build_trigger_column_canvases(
                     f"pp #sqrt{{s}} = 13.6 TeV")
                 canvas["x_min_mini_pad"], canvas["x_max_mini_pad"] = x_min, x_max
                 canvas["y_min_mini_pad"], canvas["y_max_mini_pad"] = rows[row]
-                apply_window(canvas, windows[(column, "yield")])
+                apply_window(canvas,
+                             window_for(windows, flavour, column, "yield"))
                 apply_composite_margins(canvas)
                 canvases.append(canvas)
 
@@ -919,26 +1125,93 @@ def build_trigger_column_canvases(
             ratio["TUNES"] = [COMBINED_RATIO_DENOMINATOR] + list(
                 COMBINED_RATIO_NUMERATORS)
             ratio["canvas_title"] = (
-                f"{' and '.join(COMBINED_RATIO_NUMERATORS)} / "
+                f"{RATIO_PANEL_GENERIC_NUMERATOR} / "
                 f"{COMBINED_RATIO_DENOMINATOR}, {group['label']} trigger")
             ratio["x_min_mini_pad"], ratio["x_max_mini_pad"] = x_min, x_max
             ratio["y_min_mini_pad"], ratio["y_max_mini_pad"] = rows[0]
-            apply_window(ratio, windows[(column, "ratio")])
+            apply_window(ratio,
+                         window_for(windows, flavour, column, "ratio"))
             apply_composite_margins(ratio)
             canvases.append(ratio)
 
     return canvases
 
 
+# THE COLUMN HEADER AND THE CANVAS LEGEND, THE TWO CANVAS-LEVEL LABELS
+# (ruling R46 items 3 and 5, refined by L1).
+#
+# A HEADER IS A RECTANGLE, NOT AN X POSITION. The macro centres the text in
+# the band this gives it, so the header follows the column when a rectangle
+# moves and no second copy of the layout has to be kept in step.
+#
+# THE CANVAS LEGEND CARRIES CONVENTIONS, NOT SERIES (L1). A convention every
+# panel of the canvas shares is named ONCE, on the global canvas, top-right,
+# opposite the information block -- outside every pad, so it cannot overlap
+# data and no clearance has to be measured against the points. The entries
+# name TUNES rather than colours: the palette lives in
+# `plotting/TunePlotStyle.h` (owner decision O3) and the macro resolves each
+# tune's colour and marker from that header, so a colour change stays a header
+# edit and this configuration never carries a second copy of it.
+
+def column_header(text: str, column: str) -> dict:
+    """One header above one column, spanning that column's FRAME.
+
+    THE RECTANGLE IS THE FRAME, NOT THE PAD. A composite pad carries a 0.20
+    left margin for its y title and 0.03 on the right, so its rectangle's
+    centre sits 0.038 of the canvas -- 83 px at the delivered width -- to the
+    left of the plot the header names. The macro centres the text in whatever
+    band it is given, so the band is the data area and the header lands over
+    the panel rather than over the panel's y axis.
+    """
+    x_min, x_max = COLUMN_X[column]
+    span = x_max - x_min
+    return {
+        "text": text,
+        "x_min": round(x_min + COMPOSITE_PAD_MARGINS["left_margin_mini_pad"] * span, 4),
+        "x_max": round(x_max - COMPOSITE_PAD_MARGINS["right_margin_mini_pad"] * span, 4),
+    }
+
+
+def flavour_column_headers() -> list[dict]:
+    """Headers for the canvases whose columns are the two FLAVOURS.
+
+    G8 and the closure and correlation composites put beauty in the left
+    column and charm in the right, in the order `FLAVOUR_SECTION` iterates.
+    Those canvases state the flavour nowhere else once titles are off.
+    """
+    columns = ("meson_trigger", "baryon_trigger")
+    return [column_header(flavour.lower(), column)
+            for flavour, column in zip(FLAVOUR_SECTION, columns)]
+
+
+def canvas_legend_entries(class_fills: list[tuple[str, str]] | None = None
+                          ) -> list[dict]:
+    """The conventions the panels of one canvas share.
+
+    Always the three tunes, which every composite draws. The extremes
+    canvases add the marker FILL that separates the two N_ch classes -- the
+    one convention a reader cannot infer, and the reason R46 item 5 asked for
+    a legend at all. The class wording is PASSED IN rather than written here,
+    because `build_extremes` derives it from the boundary contract and the
+    figure must not carry a second spelling of a class label.
+    """
+    entries = [{"kind": "tune", "tune": tune} for tune in TUNE_PANEL_ORDER]
+    for fill, label in (class_fills or []):
+        entries.append({"kind": "class_fill", "fill": fill, "label": label})
+    return entries
+
+
 def composite_globals(base: dict, write_names: dict[str, str],
-                      write_path: str, title: str) -> list[dict]:
+                      write_path: str, title: str,
+                      class_fills: list[tuple[str, str]] | None = None
+                      ) -> list[dict]:
     """One global per flavour, each naming only its own eight minis.
 
     Every configuration's composites share ONE `write_path`: the macro collects
     the distinct output directories of the writing globals and throws "Exactly
     one global-canvas output directory is required to store the
     multiplicity-boundary receipt" on anything but one
-    (improvedPlotting_THnSparse.C:2814-2824).
+    (improvedPlotting_THnSparse.C:3313-3323).
     """
     template = base["global_canvases_to_be_drawn"][0]
     minis = [c["canvas_name"] for c in build_trigger_column_canvases(base)]
@@ -957,6 +1230,16 @@ def composite_globals(base: dict, write_names: dict[str, str],
         canvas["write"] = True
         canvas["write_path"] = write_path
         canvas["write_name"] = write_names[flavour]
+        # THE COLUMN HEADERS ARE BUILT FROM THE COLUMNS (R46 item 3). They are
+        # read out of the SAME `TRIGGER_GROUPS` entry and the SAME `COLUMN_X`
+        # rectangle that placed the panels of that column, in the order the
+        # loop above placed them, so a header cannot name a column the canvas
+        # does not draw and cannot drift out of left-to-right order.
+        canvas["column_headers"] = [
+            column_header(f"{group['label']} trigger", group["column"])
+            for group in TRIGGER_GROUPS[flavour]
+        ]
+        canvas["canvas_legend"] = canvas_legend_entries(class_fills)
         globals_out.append(canvas)
 
     shared = {canvas["write_path"] for canvas in globals_out}
@@ -987,7 +1270,7 @@ def apply_display_filter(document: dict, drawn: list[dict],
         raise SystemExit("display filter would leave no bins drawn")
     for canvas in document.get("canvases_to_be_drawn", []):
         canvas["bins_to_ignore"] = list(ignore)
-    document["axis_declaration"] = declaration
+    document["axis_declaration"] = information_block(declaration)
     # Declared, so apply_class_labels.py can tell whose file this is instead of
     # inferring ownership from a filename glob.
     document[OWNER_KEY] = OWNER_VARIANTS
@@ -1019,7 +1302,7 @@ def apply_display_filter(document: dict, drawn: list[dict],
 # `reference_meson_pdg` and stays in the set, so `trigger_group_configs` still
 # finds exactly one reference associate per group and
 # `ResolveReferenceAssociateSelection` still has one to resolve
-# (improvedPlotting_THnSparse.C:598-645). The exclusion is checked by that
+# (improvedPlotting_THnSparse.C:631-678). The exclusion is checked by that
 # function on the FILTERED set, at emission.
 EXTREMES_EXCLUDED_ASSOCIATES = {"BEAUTY": ("Bc-",)}
 EXTREMES_EXCLUSION_COMMENT = (
@@ -1071,10 +1354,8 @@ def build_extremes(base: dict, percentiles: list[float],
                         if name not in {"hDPhi" + key for key in class_index}:
                             continue
                         index = class_index[name[len("hDPhi"):]]
-                        words = rank_words(index, total)
-                        pct = percentile_label(index, percentiles)
-                        entry["display_name"] = (
-                            f"{words}, {pct}" if words else pct)
+                        entry["display_name"] = legend_wording(
+                            index, total, percentiles)
                 else:
                     rewrite_legend(value)
         elif isinstance(node, list):
@@ -1085,49 +1366,22 @@ def build_extremes(base: dict, percentiles: list[float],
     apply_display_filter(document, drawn,
                          axis_declaration(classes, drawn, percentiles))
 
-    # THE CLASS LEGEND IS SWITCHED ON HERE (ruling R45, checklist items 1
-    # and 6). The macro builds a legend only when all four legend coordinates
-    # differ from -1; every V-EXTREMES panel carried -1, so the delivered G5
-    # and G7 held no TLegend at all and nothing named the two classes.
-    #
-    # THE RECTANGLE CLEARS THE DATA, and the clearance is measured rather than
-    # eyeballed. The delivered macros carry every drawn point, so the lowest
-    # ink on each yield panel is known exactly: over the twelve panels of G5
-    # and G7 the lowest is 0.0127788696, on the beauty JUNCTIONS baryon column,
-    # which with that column's window (0.004259623915918309, 0.8) sits at 0.347
-    # of the pad. The frame floor is the 0.20 bottom margin, so the clear band
-    # is 0.147 of the pad and this rectangle uses 0.08 of it. The charm panels
-    # and the meson columns are all higher, so 0.347 is the binding case.
-    #
-    # TWO COLUMNS, ONE ROW, because two rows do not fit that band at the label
-    # metric. One row of two short entries needs 0.08; two rows need 0.16.
-    #
-    # THE RATIO PANELS GET NO LEGEND, and the same arithmetic is why. They draw
-    # four series -- two classes by two numerator tunes -- so their legend is
-    # two rows, 0.16 of the pad. Above the data there is 0.109 (the drawn
-    # maximum is 2.5314253, the window ceiling 3.0) and below it 0.108; neither
-    # holds two rows without dropping the text under the size floor or moving a
-    # window that a measurement fixed. Those panels are covered by checklist
-    # item 6's other clause, a shared legend on the same canvas: the class
-    # convention is named in the legends this block adds to the yield panels
-    # directly above them, and each tune is named and coloured by the three
-    # tune panels of its own column.
-    for canvas in document.get("canvases_to_be_drawn", []):
-        if canvas.get("draw_function_to_use") != "drawBalancingPlots":
-            continue
-        canvas["x_min_legend"] = 0.21
-        canvas["x_max_legend"] = 0.97
-        canvas["y_min_legend"] = 0.205
-        canvas["y_max_legend"] = 0.285
-        canvas["legend_columns"] = 2
-
+    # The fill convention, worded from the SAME contract helpers that wrote
+    # the panels' own entries before L1 removed them: the lowest-activity
+    # class draws the open marker, the highest the filled one
+    # (`plotting/TunePlotStyle.h`, ruling R45 checklist item 1).
+    class_fills = [
+        ("open", legend_wording(lowest, total, percentiles)),
+        ("filled", legend_wording(highest, total, percentiles)),
+    ]
     document["global_canvases_to_be_drawn"] = composite_globals(
         base,
         {"BEAUTY": "global_balancing_plots_multiplicity_beauty",
          "CHARM": "global_balancing_plots_multiplicity_charm"},
         "plotting/Plots/VariantExtremes",
         "%s balancing yield in the lowest and highest #it{N}_{ch} classes, "
-        "meson and baryon triggers, three tunes -- pp #sqrt{s} = 13.6 TeV")
+        "meson and baryon triggers, three tunes -- pp #sqrt{s} = 13.6 TeV",
+        class_fills=class_fills)
     document["_comment_variant"] = (
         "V-EXTREMES. The FULL eleven-class axis is configured and validated; "
         "only the lowest and highest N_ch classes are DRAWN, through the same "
@@ -1296,12 +1550,66 @@ def build_integrated(base: dict, percentiles: list[float], closure: bool,
 # not chosen in a configuration file.
 BARYON_NUMERATOR = {"BEAUTY": "Lambda_b", "CHARM": "Lambda_c(+)-bar"}
 
-# Physics notation for the legend, in the same style the species panels use
-# (#Lambda_{b}^{0}, #bar{#Lambda}_{c}^{-}) rather than the routing identifiers
-# the legacy baryon/meson canvas printed. The DENOMINATOR is deliberately absent:
-# it is resolved at run time from the registry, so naming it here would be a
-# transcription that could drift from the quantity actually divided. The y-axis
-# title already says the panel shows a baryon/meson ratio.
+# G8'S GEOMETRY AND ITS COMMON YIELD WINDOW (architect findings F7 and F8,
+# measured on the replayed delivered canvas 2026-09-01).
+#
+# F8 -- THE YIELD ROW RAN 0 TO 1 and left the charm panel's data in the lowest
+# 17 % of its frame. The two flavours keep ONE window, because the whole point
+# of the canvas is to compare them, and it is tightened to what the pair
+# needs. Measured over every drawn point and error bar of the delivered
+# macros:
+#
+#   BEAUTY  0.142951885 .. 0.55330896
+#   CHARM   0.0939992324 .. 0.16895974      the pair: 0.0940 .. 0.5533
+#
+# (0.08, 0.58) holds both with margin. Charm's data then spans 15 % of the
+# frame instead of 7.5 %, and the empty band below it falls from 9.4 % to
+# 2.8 %. Charm still sits in the lower part of the frame, and that is the
+# measurement rather than a defect: its baryon/meson ratio is about four times
+# beauty's, which is what the shared window exists to show.
+#
+# THE TUNE-RATIO ROW IS NOT CHANGED HERE. Its measured pair is
+# 0.959618567 .. 3.8073786 against a (0, 4) window, so it too has an empty
+# lower quarter. F8 names the 0-1 range only, and the report states the
+# measurement and proposes (0.8, 4.0) rather than taking a range decision the
+# brief did not ask for.
+BARYONMESON_YIELD_ENVELOPE = (0.0939992324, 0.55330896)
+BARYONMESON_YIELD_ENVELOPE_SOURCE = (
+    "RUN-N4 delivered macro, DELIVERABLES_REVIEW_20260901/G8, measured over "
+    "both flavour columns by FIG-1D's replay probe")
+BARYONMESON_YIELD_WINDOW = (0.08, 0.58)
+
+# F7 -- THE PADS FILL THE CANVAS. The rows stop at 0.93 rather than 0.95 so the
+# column headers and the canvas legend have a band of their own above them,
+# and the bottom margin drops from 0.32 to 0.22 because the labels below it
+# are now vertical rather than slanted (the macro's `LabelsOption` ordering
+# defect, R3). Measured on the replay: the blank band between the rows falls
+# from 240 px to 86 px and the one below the lower row from 221 px to 66 px,
+# on a 2022 px canvas.
+BARYONMESON_ROW_TOP = 0.93
+BARYONMESON_BOTTOM_MARGIN = 0.22
+BARYONMESON_TOP_MARGIN = 0.06
+
+# Guarded at import, like every other window in this file: a tightened window
+# that no longer holds its own measurement raises before a document is built.
+if not (BARYONMESON_YIELD_WINDOW[0] <= BARYONMESON_YIELD_ENVELOPE[0]
+        and BARYONMESON_YIELD_ENVELOPE[1] <= BARYONMESON_YIELD_WINDOW[1]):
+    raise SystemExit(
+        "BARYONMESON_YIELD_WINDOW %s does not contain the measured envelope "
+        "%s (%s)" % (BARYONMESON_YIELD_WINDOW, BARYONMESON_YIELD_ENVELOPE,
+                     BARYONMESON_YIELD_ENVELOPE_SOURCE))
+
+# THE BARYON SPECIES IS A CAPTION ITEM NOW (ruling R46 item 3, refined by L1).
+# It used to be the display name of G8's per-panel legend entry
+# (#Lambda_{b}^{0}, #bar{#Lambda}_{c}^{-}). L1 removed that legend, and R46
+# item 3 gives this canvas the FLAVOUR as its column header, not the species,
+# so nothing on the figure states which baryon the numerator is. The notation
+# is kept HERE, unread by the generator, as the record the caption is written
+# from: `FIG1D_EVIDENCE_0e98a5b_20260901/phaseA/INFORMATION_LOSS_MAP.md`
+# lists it among G8's caption items, and HANDOFF's editorial notes take it
+# from there. Deleting it would leave the caption writer to re-derive the
+# notation from the routing keys in `BARYON_NUMERATOR` above, which is exactly
+# the transcription this pair of constants exists to prevent.
 BARYON_LEGEND_LABEL = {"BEAUTY": "#Lambda_{b}^{0}", "CHARM": "#bar{#Lambda}_{c}^{-}"}
 
 # Use only the four registered associates.
@@ -1397,26 +1705,37 @@ def build_baryonmeson(base: dict, percentiles: list[float]) -> dict:
             canvas["TUNES"] = [COMBINED_RATIO_DENOMINATOR] + list(
                 COMBINED_RATIO_NUMERATORS)
             canvas["canvas_title"] = (
-                f"{' and '.join(COMBINED_RATIO_NUMERATORS)} / "
+                f"{RATIO_PANEL_GENERIC_NUMERATOR} / "
                 f"{COMBINED_RATIO_DENOMINATOR}")
         keep.append(canvas)
     document["canvases_to_be_drawn"] = keep
 
-    # The baryon/meson composite takes the same pad margins as the
-    # trigger-column composites, with a DEEPER bottom band of its own. This
-    # canvas puts the multiplicity CLASS on the x axis, so it carries eleven
-    # labels where the others carry three to five, and the macro draws them
-    # vertically because eleven slanted labels overprint one another at the
-    # publication text size (checklist item 5). A vertical label is as deep as
-    # it is long, so the band that holds it and the title below it is 0.32
-    # rather than 0.20. Measured on the replayed G8 canvas: at 0.20 the labels
-    # leave the pad, at 0.32 the eleven labels and the title all sit inside it.
+    # THE BOTTOM BAND IS RE-MEASURED AGAINST LABELS THAT ARE ACTUALLY VERTICAL
+    # (architect finding F7, with regression R3).
+    #
+    # This canvas puts the multiplicity CLASS on the x axis, so it carries
+    # eleven labels where the others carry three to five, and the macro draws
+    # them vertically because eleven slanted labels overprint one another at
+    # the publication text size. FIG-1 sized this band at 0.32 for a vertical
+    # label band -- but the macro's `LabelsOption("v")` ran before the labels
+    # existed and did nothing, so the delivered figure has SLANTED labels and a
+    # band sized for vertical ones. That is most of the 461 px of blank canvas
+    # F7 measured: 240 px between the rows and 221 px below the lower one.
+    #
+    # With the macro's ordering repaired the labels are vertical, and the band
+    # they need is re-measured in the second commit of this session, together
+    # with the macro change that makes the labels vertical at all. This commit
+    # keeps 0.22 and the rows stop at the canvas label band, which is already
+    # most of the recovery: the blank bands fall from 240 px and 221 px.
     for canvas in keep:
         apply_composite_margins(canvas)
-        canvas["bottom_margin_mini_pad"] = 0.32
+        canvas["bottom_margin_mini_pad"] = BARYONMESON_BOTTOM_MARGIN
+        canvas["top_margin_mini_pad"] = BARYONMESON_TOP_MARGIN
 
-    # Two retained rows per flavour, spread over the original extent.
-    TOP, ROWS = 0.95, 2
+    # Two retained rows per flavour. The rows stop below the canvas top to
+    # leave the band the column headers and the canvas legend now use; the
+    # rest of the height goes to the pads (F7).
+    TOP, ROWS = BARYONMESON_ROW_TOP, 2
     for flavour_x in sorted({c["x_min_mini_pad"] for c in keep}):
         column = sorted((c for c in keep if c["x_min_mini_pad"] == flavour_x),
                         key=lambda c: c["y_min_mini_pad"])
@@ -1454,33 +1773,29 @@ def build_baryonmeson(base: dict, percentiles: list[float]) -> dict:
         if function == "drawBalancingPlots":
             canvas["draw_function_to_use"] = "drawBalancingBaryonMesonRatioPlots"
             canvas["y_axis_title"] = "baryon / meson balancing yield"
-            canvas["y_min_axis"] = 0.0
-            canvas["y_max_axis"] = 1.0
+            canvas["y_min_axis"] = BARYONMESON_YIELD_WINDOW[0]
+            canvas["y_max_axis"] = BARYONMESON_YIELD_WINDOW[1]
             canvas["set_log_y"] = False
             # The x axis is the multiplicity class, not the associate species --
             # the inherited title described the base canvas, where each point was
             # a different associate. Here every point is a class and the single
             # associate is the one named in the legend.
             canvas["x_axis_title"] = "multiplicity class"
-            # This function keys its legend on the ASSOCIATE name, while the
-            # inherited entries are keyed on bin names, so the lookup missed and
-            # the panel printed "Not drawing legend" -- three tunes on one pad
-            # with nothing to tell them apart. One entry per drawn baryon; the
-            # function appends " (TUNE)" itself, which is what identifies them.
-            # APPEND, never replace. The same map is read twice for two
-            # different purposes: this function looks up the ASSOCIATE name to
-            # build the legend, and DisplayLabelForMultiplicityBin looks up the
-            # BIN name to label the x axis. Replacing the eleven class entries
-            # with the one baryon entry produced a correct legend and sent the
-            # axis back to printing c1_MB88p197_100.
-            canvas["legend_entries"] = list(canvas.get("legend_entries", [])) + [{
-                "object_name": baryon,
-                "display_name": BARYON_LEGEND_LABEL[flavour],
-            }]
-            canvas["x_min_legend"] = 0.20
-            canvas["x_max_legend"] = 0.52
-            canvas["y_min_legend"] = 0.62
-            canvas["y_max_legend"] = 0.88
+            # THE PER-PANEL LEGEND IS GONE FROM THIS CANVAS (ruling L1). FIG-1
+            # gave both G8 rows a legend keyed on the ASSOCIATE name, and both
+            # rendered their marker samples with no text at all -- three
+            # markers floating at y = 0.9, 0.74 and 0.60 INSIDE the data area,
+            # which a reader takes for data (architect regression R1). The
+            # cause was never the rectangle; it is diagnosed and repaired in
+            # the macro. The convention those legends carried, colour and
+            # marker per tune, is now named once on the global canvas.
+            #
+            # The appended baryon row goes with them: it existed only to give
+            # that legend a species name. The eleven CLASS entries stay,
+            # because DisplayLabelForMultiplicityBin reads the same map by BIN
+            # name for the x axis and dropping them sends it back to printing
+            # c1_MB88p197_100. The baryon species is a caption item; the
+            # Phase-A map records it.
         elif function == "drawBalancingPlotsTUNERatios":
             canvas["draw_function_to_use"] = \
                 "drawBalancingBaryonMesonRatioPlotsTUNERatios"
@@ -1489,36 +1804,8 @@ def build_baryonmeson(base: dict, percentiles: list[float]) -> dict:
             canvas["y_min_axis"] = BARYONMESON_TUNE_RATIO_WINDOW[0]
             canvas["y_max_axis"] = BARYONMESON_TUNE_RATIO_WINDOW[1]
             canvas["x_axis_title"] = "multiplicity class"
-            # THIS PANEL DRAWS TWO SERIES AND NAMED NEITHER (ruling R45,
-            # checklist item 6). It carried legend=(-1,-1,-1,-1), the macro's
-            # switch for "no legend", so the delivered G8 left its two ratio
-            # panels with nothing mapping colour to tune -- on the canvas that
-            # carries the paper's headline number.
-            #
-            # The entry is appended exactly as the yield panel above appends
-            # its own, and for the same reason: this function keys the legend
-            # on the ASSOCIATE name while DisplayLabelForMultiplicityBin reads
-            # the same map by BIN name for the x labels, so replacing the class
-            # entries would send the axis back to printing routing keys. The
-            # draw loop appends " (NUMERATOR/DENOMINATOR)" itself, so two
-            # entries come out of one appended row.
-            #
-            # THE RECTANGLE IS BELOW THE DATA, and the clearance is measured
-            # from the delivered macros: the lower edge of the drawn envelope
-            # is 1.08488807 on the beauty panel and 0.959618567 on the charm
-            # one, which in the (0, 4) window with a 0.32 bottom margin sit at
-            # 0.477 and 0.459 of the pad. The band from the frame floor to
-            # 0.459 is 0.139 and this rectangle uses 0.11. Above the data there
-            # is only 0.028, the beauty panel reaching 3.8073786, so the top is
-            # not available.
-            canvas["legend_entries"] = list(canvas.get("legend_entries", [])) + [{
-                "object_name": baryon,
-                "display_name": BARYON_LEGEND_LABEL[flavour],
-            }]
-            canvas["x_min_legend"] = 0.22
-            canvas["x_max_legend"] = 0.78
-            canvas["y_min_legend"] = 0.335
-            canvas["y_max_legend"] = 0.445
+            # THE SAME REMOVAL, for the same reason, on the ratio row: its
+            # two floating markers sat at 0.67 and 0.30 above the 90-100 % bin.
         else:
             raise SystemExit(f"unexpected draw function {function!r}")
 
@@ -1536,7 +1823,7 @@ def build_baryonmeson(base: dict, percentiles: list[float]) -> dict:
 
     # Every class is drawn, so the declaration is a count taken from the axis
     # itself rather than a sentence about a subset.
-    document["axis_declaration"] = (
+    document["axis_declaration"] = information_block(
         f"all {len(percentiles)} #it{{N}}_{{ch}} classes shown")
     # Declare the generator so apply_class_labels.py does not infer it from the filename.
     document[OWNER_KEY] = OWNER_VARIANTS
@@ -1673,6 +1960,128 @@ def normalize_ratio_titles(document: dict) -> None:
             canvas["y_axis_title"] = RATIO_PANEL_Y_TITLE
 
 
+# THE THREE CANVAS-LEVEL PASSES R46 AND L1 ADD, and the one they replace.
+#
+# Until this session a composite identified itself panel by panel. Every
+# panel carried a ROOT title, and a legend appeared wherever a builder had
+# measured room for one -- which on the delivered set meant all six yield
+# panels of G5/G7, one panel of ten on the closure and correlation canvases,
+# all four of G8, and none at all on G4/G6. That is four different answers to
+# one question. R46 states each fact once per canvas and L1 states each shared
+# convention once per canvas, so the three passes below are canvas-level and
+# the per-panel legend goes away.
+
+# THE CANVAS-LABEL BAND (ruling R46 with L1), and why it costs plot height.
+#
+# R46 puts three things on the canvas that no composite carried before: the
+# information block, the column headers and the one canvas legend. The pads
+# used to reach 0.95 and the band above them, 0.05 of the height, held the
+# single-line axis declaration and nothing else.
+#
+# THE THREE DO NOT FIT IN 0.05, AND THE MEASUREMENT SAYS SO. At the
+# publication metric a line of the block is 33 px on a 2022 px canvas and the
+# stack is two lines, 78 px -- 0.039 of the height by itself. The canvas
+# legend of an extremes canvas carries five entries and measures 0.66 of the
+# WIDTH, so it cannot share a row with the coverage line, which reaches 0.46
+# on V-EXTREMES and further on the closure. Replayed at 0.05 the three
+# overprint one another; the crop is in the evidence store.
+#
+# SO THE BAND IS 0.10 AND THE PADS STOP AT 0.90. L1 asks for a legend that
+# costs no plot height, and a horizontal legend is what makes 0.10 enough
+# rather than 0.20 -- but it is not free, and saying it is would be false.
+# The cost is 5 % of the height, taken once per canvas, against identification
+# that was previously repeated in every panel.
+#
+# ONE PASS RESCALES EVERY CONFIGURATION, because the five do not agree on
+# where their rows end: the composites author 0.95, the baryon/meson canvas
+# computes its own, and the closure and correlation canvases inherit the
+# base's. The pass reads each document's own maximum and scales to the band,
+# so a configuration added later is covered and none of them carries a second
+# copy of this number.
+CANVAS_LABEL_BAND_TOP = 0.90
+
+
+def reserve_canvas_label_band(document: dict) -> None:
+    """Scale the mini pads so they end at `CANVAS_LABEL_BAND_TOP`."""
+    canvases = document.get("canvases_to_be_drawn", [])
+    tops = [c["y_max_mini_pad"] for c in canvases if "y_max_mini_pad" in c]
+    if not tops:
+        return
+    highest = max(tops)
+    if highest <= 0:
+        raise SystemExit("mini pads have no positive extent to rescale")
+    scale = CANVAS_LABEL_BAND_TOP / highest
+    for canvas in canvases:
+        if "y_min_mini_pad" not in canvas or "y_max_mini_pad" not in canvas:
+            continue
+        canvas["y_min_mini_pad"] = round(canvas["y_min_mini_pad"] * scale, 4)
+        canvas["y_max_mini_pad"] = round(canvas["y_max_mini_pad"] * scale, 4)
+
+
+PANEL_LEGEND_RECTANGLE_KEYS = (
+    "x_min_legend", "x_max_legend", "y_min_legend", "y_max_legend",
+    "legend_columns",
+)
+
+
+def strip_panel_legends(document: dict) -> None:
+    """No panel claims a legend, because no panel draws one (ruling L1).
+
+    THE RECTANGLES GO, NOT JUST THEIR VALUES. Leaving `-1` behind would say
+    "a legend was considered here and declined", which is not what happened:
+    the convention moved to the canvas. A reader of the configuration should
+    not have to know the macro's sentinel to learn that.
+
+    `legend_entries` STAYS. It is read twice for two purposes -- this macro
+    builds a legend from it by ASSOCIATE name and labels the multiplicity axis
+    from it by BIN name (`DisplayLabelForMultiplicityBin`) -- so removing it
+    would blank G8's x axis. Only the rectangles are legend-only.
+    """
+    for canvas in document.get("canvases_to_be_drawn", []):
+        for key in PANEL_LEGEND_RECTANGLE_KEYS:
+            canvas.pop(key, None)
+
+
+def apply_panel_labels(document: dict) -> None:
+    """The in-frame row label: the tune alone, where the row IS one tune.
+
+    DERIVED FROM THE PANEL'S OWN TUNE LIST, never from its name or title. A
+    yield panel configured with exactly one tune is that tune's row; a ratio
+    panel with exactly one numerator is that numerator's row. Anything else --
+    the combined-ratio row, which draws two numerators, and G8's yield row,
+    which overlays all three tunes -- does not vary by tune, so it takes no
+    row label and the canvas legend carries the tune identity instead. R46
+    item 4 asks for the label; this rule is why some panels have none.
+    """
+    for canvas in document.get("canvases_to_be_drawn", []):
+        tunes = canvas.get("TUNES", [])
+        numerators = canvas.get("nominator_TUNES", [])
+        if numerators:
+            label = numerators[0] if len(numerators) == 1 else ""
+        else:
+            label = tunes[0] if len(tunes) == 1 else ""
+        canvas["panel_label"] = label
+
+
+def apply_canvas_identification(document: dict) -> None:
+    """Every global canvas states its columns and its shared conventions.
+
+    The composites set their own headers in `composite_globals`, from the
+    trigger groups that built their columns. Every other global in this
+    repository puts the two FLAVOURS side by side -- G8, the closure canvas
+    and the V-CORRELATIONS composite -- so a global that has not already been
+    given headers takes the flavour pair. The default is stated here rather
+    than in three builders.
+
+    The canvas legend defaults to the three tunes, which every one of these
+    canvases draws. Only the extremes canvases add the marker-fill convention,
+    and `build_extremes` has already put it on theirs.
+    """
+    for canvas in document.get("global_canvases_to_be_drawn", []):
+        canvas.setdefault("column_headers", flavour_column_headers())
+        canvas.setdefault("canvas_legend", canvas_legend_entries())
+
+
 def variant_documents(base: dict, percentiles: list[float],
                       associate_set: str) -> dict[Path, dict]:
     """Path -> document for one associate set.
@@ -1703,14 +2112,27 @@ def variant_documents(base: dict, percentiles: list[float],
         path("VCORRELATIONS"): build_correlations(base, percentiles),
     }
 
-    # THE ONE PLACE THE TITLE DECISIONS ARE WRITTEN, for every configuration
-    # this function emits: the ratio y title on every ratio panel each of them
-    # carries, authored or inherited, and the document-level switch that keeps
-    # or blanks every panel title. Everything `main` writes or checks comes
-    # through here.
+    # THE ONE PLACE THE IDENTIFICATION DECISIONS ARE WRITTEN, for every
+    # configuration this function emits: the ratio y title on every ratio
+    # panel each of them carries, authored or inherited; the document-level
+    # switch that keeps or blanks every panel title; and, under R46 and L1,
+    # the three canvas-level replacements for the titles that go off.
+    # Everything `main` writes or checks comes through here.
+    #
+    # THESE PASSES ARE CENTRAL, NOT PER-BUILDER, because the five documents do
+    # not build their canvases the same way: two author trigger-column
+    # composites, two inherit the base's ten panels, and one rewrites the
+    # base's four. A rule applied in each builder would be four rules that can
+    # disagree. Applied here it is one rule over whatever each builder
+    # produced, and a configuration added later is covered the day it is
+    # emitted.
     for document in documents.values():
         normalize_ratio_titles(document)
         document["draw_canvas_titles"] = DRAW_CANVAS_TITLES
+        strip_panel_legends(document)
+        apply_panel_labels(document)
+        apply_canvas_identification(document)
+        reserve_canvas_label_band(document)
     return documents
 
 

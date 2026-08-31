@@ -23,7 +23,7 @@
 #
 # THE OUTPUT PATH, specifically. `writeCanvasToFiles` takes `writePath` from a
 # NESTED configuration field -- one per entry of `canvases_to_be_drawn` and of
-# `global_canvases_to_be_drawn` (improvedPlotting_THnSparse.C:215,265). A
+# `global_canvases_to_be_drawn` (improvedPlotting_THnSparse.C:216,265). A
 # top-level `write_path` key is read by nothing.
 set -uo pipefail
 
@@ -84,7 +84,7 @@ for section in ("canvases_to_be_drawn", "global_canvases_to_be_drawn"):
 # axis that starts at 0.6.
 #
 # Widening the frame cannot move a measured value. Every UNCERTAINTY_MATRIX row
-# is emitted at improvedPlotting_THnSparse.C:3799, and the first canvas is drawn
+# is emitted at improvedPlotting_THnSparse.C:4331, and the first canvas is drawn
 # at :4075 -- the numbers are printed before any axis is applied. The control
 # re-rendered with these widened axes reproduces all 144 rows unchanged, which
 # is the check rather than the claim.

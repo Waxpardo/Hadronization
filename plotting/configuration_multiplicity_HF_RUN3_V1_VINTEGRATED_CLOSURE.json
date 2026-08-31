@@ -327,8 +327,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.38,
-            "y_max_mini_pad": 0.569,
+            "y_min_mini_pad": 0.36,
+            "y_max_mini_pad": 0.5391,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -338,10 +338,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -442,7 +438,7 @@
             "baryon_line_styles": [],
             "bins_to_ignore": [],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "MONASH"
         },
         {
             "canvas_name": "mini_beauty_balancing_JUNCTIONS",
@@ -465,8 +461,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.57,
-            "y_max_mini_pad": 0.759,
+            "y_min_mini_pad": 0.54,
+            "y_max_mini_pad": 0.7191,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -476,10 +472,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -580,7 +572,7 @@
             "baryon_line_styles": [],
             "bins_to_ignore": [],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_beauty_balancing_CLOSEPACKING",
@@ -603,8 +595,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.76,
-            "y_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.72,
+            "y_max_mini_pad": 0.9,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -614,10 +606,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": 0.14,
-            "x_max_legend": 0.99,
-            "y_min_legend": 0.7,
-            "y_max_legend": 0.9,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -718,7 +706,7 @@
             "baryon_line_styles": [],
             "bins_to_ignore": [],
             "nominator_TUNES": [],
-            "legend_columns": 4
+            "panel_label": "CLOSEPACKING"
         },
         {
             "canvas_name": "mini_beauty_balancing_JUNCTIONS_over_MONASH",
@@ -743,7 +731,7 @@
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
             "y_min_mini_pad": 0.0,
-            "y_max_mini_pad": 0.189,
+            "y_max_mini_pad": 0.1791,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -753,10 +741,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -859,7 +843,7 @@
             "nominator_TUNES": [
                 "JUNCTIONS"
             ],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_beauty_balancing_CLOSEPACKING_over_MONASH",
@@ -883,8 +867,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.05,
             "x_max_mini_pad": 0.5,
-            "y_min_mini_pad": 0.19,
-            "y_max_mini_pad": 0.379,
+            "y_min_mini_pad": 0.18,
+            "y_max_mini_pad": 0.3591,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -894,10 +878,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1000,7 +980,7 @@
             "nominator_TUNES": [
                 "CLOSEPACKING"
             ],
-            "legend_columns": 1
+            "panel_label": "CLOSEPACKING"
         },
         {
             "canvas_name": "mini_charm_balancing_MONASH",
@@ -1023,8 +1003,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.38,
-            "y_max_mini_pad": 0.569,
+            "y_min_mini_pad": 0.36,
+            "y_max_mini_pad": 0.5391,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1034,10 +1014,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1138,7 +1114,7 @@
             "baryon_line_styles": [],
             "bins_to_ignore": [],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "MONASH"
         },
         {
             "canvas_name": "mini_charm_balancing_JUNCTIONS",
@@ -1161,8 +1137,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.57,
-            "y_max_mini_pad": 0.759,
+            "y_min_mini_pad": 0.54,
+            "y_max_mini_pad": 0.7191,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1172,10 +1148,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1276,7 +1248,7 @@
             "baryon_line_styles": [],
             "bins_to_ignore": [],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_charm_balancing_CLOSEPACKING",
@@ -1299,8 +1271,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.76,
-            "y_max_mini_pad": 0.95,
+            "y_min_mini_pad": 0.72,
+            "y_max_mini_pad": 0.9,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1310,10 +1282,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1414,7 +1382,7 @@
             "baryon_line_styles": [],
             "bins_to_ignore": [],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "panel_label": "CLOSEPACKING"
         },
         {
             "canvas_name": "mini_charm_balancing_JUNCTIONS_over_MONASH",
@@ -1439,7 +1407,7 @@
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
             "y_min_mini_pad": 0.0,
-            "y_max_mini_pad": 0.189,
+            "y_max_mini_pad": 0.1791,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1449,10 +1417,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1555,7 +1519,7 @@
             "nominator_TUNES": [
                 "JUNCTIONS"
             ],
-            "legend_columns": 1
+            "panel_label": "JUNCTIONS"
         },
         {
             "canvas_name": "mini_charm_balancing_CLOSEPACKING_over_MONASH",
@@ -1579,8 +1543,8 @@
             "y_size_canvas": 600,
             "x_min_mini_pad": 0.501,
             "x_max_mini_pad": 0.95,
-            "y_min_mini_pad": 0.19,
-            "y_max_mini_pad": 0.379,
+            "y_min_mini_pad": 0.18,
+            "y_max_mini_pad": 0.3591,
             "top_margin_mini_pad": 0.1,
             "bottom_margin_mini_pad": 0.12,
             "left_margin_mini_pad": 0.13,
@@ -1590,10 +1554,6 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": false,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
@@ -1696,7 +1656,7 @@
             "nominator_TUNES": [
                 "CLOSEPACKING"
             ],
-            "legend_columns": 1
+            "panel_label": "CLOSEPACKING"
         }
     ],
     "global_canvases_to_be_drawn": [
@@ -1719,12 +1679,41 @@
             "write_path": "plotting/Plots/VariantIntegratedClosure",
             "write_name": "global_balancing_plots_multiplicity_HF_RUN3_V1_THREETUNE_VINTEGRATED_CLOSURE_POLISH_PROPOSAL",
             "x_size_canvas": 2200,
-            "y_size_canvas": 2050
+            "y_size_canvas": 2050,
+            "column_headers": [
+                {
+                    "text": "beauty",
+                    "x_min": 0.14,
+                    "x_max": 0.4865
+                },
+                {
+                    "text": "charm",
+                    "x_min": 0.5908,
+                    "x_max": 0.9365
+                }
+            ],
+            "canvas_legend": [
+                {
+                    "kind": "tune",
+                    "tune": "MONASH"
+                },
+                {
+                    "kind": "tune",
+                    "tune": "JUNCTIONS"
+                },
+                {
+                    "kind": "tune",
+                    "tune": "CLOSEPACKING"
+                }
+            ]
         }
     ],
     "subsample_coverage_audit": false,
     "label_owner": "tools/make_variant_configs.py",
-    "axis_declaration": "11 of 11 #it{N}_{ch} classes shown: lowest (90-100%), 80-90%, 70-80%, 60-70%, 50-60%, 40-50%, 30-40%, 20-30%, 10-20%, 1-10%, highest (0-1%)",
+    "axis_declaration": [
+        "PYTHIA 8.317, pp #sqrt{s} = 13.6 TeV",
+        "11 of 11 #it{N}_{ch} classes shown: lowest (90-100%), 80-90%, 70-80%, 60-70%, 50-60%, 40-50%, 30-40%, 20-30%, 10-20%, 1-10%, highest (0-1%)"
+    ],
     "_comment_variant": "V-INTEGRATED closure configuration (verification only, not a figure): carries the eleven classes AND the integrated bin so one pass emits both sides of the integer-exact closure. ONE bin spanning multiplicityMin=0 to multiplicityMax=100, so the counts are integrated by the SELECTION and calculateOneYield forms the ratio exactly once -- never an average of per-class ratios. THE BASE PAIR SET, NOT THE FIGURES' R40 SET: four series -- B+ -> B-, B+ -> Lambda_b, D+ -> D-, D+ -> Lambda_c(+)-bar -- so three tunes give twelve identities, and with the integrated bin that is 144 nominal rows against a 132-row CONTROL. The closure and CONTROL instruments verify the class axis against the accepted J-c1.1 log, which carries those same 132 rows over those same twelve identities, and the boundary receipts they certify are shared by every figure render -- so the wider figure scope loses nothing here, while a widened closure would assert a shape no accepted log has. GENERATED by tools/make_variant_configs.py; do not hand-edit.",
-    "draw_canvas_titles": true
+    "draw_canvas_titles": false
 }
