@@ -263,20 +263,50 @@ def trigger_group_configs(flavour: str, group: dict, associates,
     return configs
 
 
-def apply_trigger_groups(document: dict, associate_set: str) -> None:
-    """Register both trigger groups per flavour, with the selected associates."""
+def without_associates(associates, excluded, where: str):
+    """`associates` minus the routing names in `excluded`, refusing a miss.
+
+    An exclusion that matches nothing is a typo, not a no-op: it would leave
+    the associate it meant to drop in the configuration and say nothing. So a
+    name that is not in the set stops the generator.
+    """
+    names = {row[0] for row in associates}
+    unknown = sorted(set(excluded) - names)
+    if unknown:
+        raise SystemExit(
+            f"{where}: cannot exclude {', '.join(unknown)}; the associate set "
+            f"carries {', '.join(sorted(names))}")
+    return tuple(row for row in associates if row[0] not in excluded)
+
+
+def apply_trigger_groups(document: dict, associate_set: str,
+                         exclude: dict[str, tuple[str, ...]] | None = None) -> None:
+    """Register both trigger groups per flavour, with the selected associates.
+
+    `exclude` drops routing names from ONE configuration without touching
+    `ASSOCIATE_SETS`, which every builder shares. It applies to both roles of
+    the named flavour, so the two trigger columns keep the same associates and
+    the composite's two halves stay comparable.
+    """
     if associate_set not in ASSOCIATE_SETS:
         raise SystemExit(
             f"unknown associate set {associate_set!r}; "
             f"known: {', '.join(sorted(ASSOCIATE_SETS))}")
     registry = registry_rows()
     chosen = ASSOCIATE_SETS[associate_set]
+    exclude = exclude or {}
     for flavour, groups in TRIGGER_GROUPS.items():
+        dropped = exclude.get(flavour, ())
         document[FLAVOUR_SECTION[flavour]] = [
             {
                 "trigger": group["trigger"],
                 "configs": trigger_group_configs(
-                    flavour, group, chosen[flavour][group["role"]], registry),
+                    flavour, group,
+                    without_associates(
+                        chosen[flavour][group["role"]], dropped,
+                        f"{flavour} {group['trigger']!r}")
+                    if dropped else chosen[flavour][group["role"]],
+                    registry),
             }
             for group in groups
         ]
@@ -400,8 +430,7 @@ COLUMN_X = {
 COMPOSITE_TOP, COMPOSITE_ROWS = 0.95, 4
 
 # Y WINDOWS ARE PER TRIGGER COLUMN, because baryon-trigger yields differ in
-# magnitude from meson-trigger yields. The meson column keeps the window the
-# signed-off base carries. The baryon column starts from the legacy
+# magnitude from meson-trigger yields. The baryon column starts from the legacy
 # `*_lambda_trigger` minis' own windows
 # (plotting/configuration_multiplicity_reduced_JUNCTIONS_THnSparse.json).
 #
@@ -411,15 +440,229 @@ COMPOSITE_TOP, COMPOSITE_ROWS = 0.95, 4
 # clipped-envelope throw at the deployment is therefore owned by RUN-N under the
 # F63 protocol: widen the range HERE, regenerate, re-render -- one iteration, and
 # the data is never cropped to the window.
+#
+# THE MESON COLUMN NO LONGER INHERITS. Until RUN-N it carried the base's own
+# `(0.01, 0.42)` yield and `(0.6, 2.5)` ratio windows by omission, and RUN-N
+# refused two renders on exactly those two inherited numbers (report §5.1 and
+# §5.2). Both columns now name their windows here, so no window reaches a
+# render without a measured envelope beside it.
+#
+# EVERY WINDOW BELOW CARRIES THREE THINGS, in the style
+# `BARYONMESON_TUNE_RATIO_WINDOW` established: the measured envelope, the
+# source that measured it, and a guard that the window contains it. A bare
+# number tells a later reader nothing about what it must hold.
+
+# --- the meson trigger column ------------------------------------------------
+#
+# THE YIELD FLOOR, and the measurement that sets it (RUN-N refusal §5.2).
+# The V-INTEGRATED render refused the inherited floor 0.01 and named the point:
+#
+#   ERROR: Plotted uncertainty envelope [0.00023709204475633864,
+#   0.00026345126205427503] is clipped by configured y-axis [0.01, 0.42]:
+#   BEAUTY yield, tune=MONASH, associate=Bc-, bin=hDPhiM00_100
+#
+# Ruling R40 widened the figure configurations to the legacy associate set,
+# which adds B_c-. B_c- is orders of magnitude rarer than the other beauty
+# associates, and the inherited window was tuned before it. The envelope below
+# is the minimum and maximum over ALL 48 logged rows of that render, not just
+# the refused one, so the floor is set once rather than by bounces.
+MESON_COLUMN_YIELD_ENVELOPE = (0.0001576469004, 0.1935681066)
+MESON_COLUMN_YIELD_ENVELOPE_SOURCE = (
+    "RUNN_EVIDENCE_fe3262c_20260830/verify/f63_measured_extremes.txt, "
+    "VINTEGRATED block, BEAUTY/B^{+} and CHARM/D^{+} rows unioned; minimum "
+    "at JUNCTIONS BEAUTY B^{+} associate=Bc- bin=hDPhiM00_100")
+MESON_COLUMN_YIELD_WINDOW = (5e-05, 0.42)
+
+# THE RATIO CEILING, and the measurement that sets it (RUN-N refusal §5.1).
+# The V-INTEGRATED_CLOSURE render refused the inherited ceiling 2.5:
+#
+#   ERROR: Plotted uncertainty envelope [2.3705630324775111,
+#   2.5314256389680088] is clipped by configured y-axis [0.6, 2.5]: BEAUTY
+#   tune ratio JUNCTIONS/MONASH, associate=Lambda_b, bin=hDPhiM0_1
+#
+# `hDPhiM0_1` is c11, the HIGHEST-activity class, not c1. The contract stores
+# c1 through c11 in ascending activity and the percentiles are TOP percentiles,
+# so 0.0-1.0 % is the top class; this file's header states the trap.
+#
+# 3.0 was checked before it was locked (brief CON-1C item 1.2). Over the 96
+# tune-ratio comparisons of the closure render, the largest value of the
+# conservative cross-tune bound (Y_tune + SEM)/(Y_MONASH - SEM) is
+# 2.5671199529898105, at the same identity as the refusal. No bound exceeds
+# 3.0, so 3.0 holds the base series with a factor 1.17 in hand.
+MESON_COLUMN_RATIO_ENVELOPE = (0.6215702019, 2.5314256389680088)
+MESON_COLUMN_RATIO_ENVELOPE_SOURCE = (
+    "CON1C_EVIDENCE_fe3262c_20260831/derive/window_bounds.out; upper edge is "
+    "the RUN-N §5.1 throw, JUNCTIONS/MONASH associate=Lambda_b bin=hDPhiM0_1, "
+    "render.log; lower edge is JUNCTIONS BEAUTY B^{+} associate=Bc- "
+    "bin=hDPhiM00_100, render_VINTEGRATED.log")
+MESON_COLUMN_RATIO_WINDOW = (0.6, 3.0)
+
+# --- the baryon trigger column -----------------------------------------------
+#
+# The floor 0.0001 already held the baryon column's measured minimum when RUN-N
+# ran: 0.0001248414791, at CLOSEPACKING BEAUTY Lambda_b-bar associate=Bc-
+# bin=hDPhiM00_100. RUN-N refused nothing in this column, so the window stands.
+BARYON_COLUMN_YIELD_ENVELOPE = (0.0001248414791, 0.1931479021)
+BARYON_COLUMN_YIELD_ENVELOPE_SOURCE = (
+    "RUNN_EVIDENCE_fe3262c_20260830/verify/f63_measured_extremes.txt, "
+    "VINTEGRATED block, BEAUTY/Lambda_b-bar and CHARM/Lambda_c(+) rows unioned")
 BARYON_COLUMN_YIELD_WINDOW = (0.0001, 0.8)
-BARYON_COLUMN_RATIO_WINDOW = (0.0, 2.5)
+
+# THE RATIO CEILING RISES WITH THE MESON COLUMN'S, from 2.5 to 3.0. The two
+# columns render the same eleven classes over the same three tunes, and the
+# meson column measured 2.5314256389680088 in c11. A baryon ceiling below the
+# meson column's measured maximum is a window that happens not to have been
+# hit yet. The window's job is refusing broken data, and 3.0 still does that:
+# this column's own measured maximum is 2.062089884, so 3.0 holds it by 1.45.
+BARYON_COLUMN_RATIO_ENVELOPE = (0.4025148267, 2.062089884)
+BARYON_COLUMN_RATIO_ENVELOPE_SOURCE = (
+    "CON1C_EVIDENCE_fe3262c_20260831/derive/window_bounds.out, "
+    "render_VINTEGRATED.log baryon column; maximum at JUNCTIONS BEAUTY "
+    "Lambda_b-bar associate=Lambda_b bin=hDPhiM00_100, minimum at "
+    "CLOSEPACKING BEAUTY Lambda_b-bar associate=Bc- bin=hDPhiM00_100")
+BARYON_COLUMN_RATIO_WINDOW = (0.0, 3.0)
+
+# --- V-EXTREMES takes its own windows -----------------------------------------
+#
+# WHY THIS CONFIGURATION IS SEPARATE. V-EXTREMES draws the two extreme classes
+# of the legacy associate set. V-INTEGRATED draws one integrated bin of the
+# same set. Integrating over the whole multiplicity axis averages away the
+# class-to-class spread, so the extreme classes reach yields and ratios the
+# integrated bin never shows, and one shared window cannot hold both without
+# being loose where the integrated figure needs it tight.
+#
+# THE FLOORS ARE PROVISIONAL, and the caveat is the point.
+# `render_VEXTREMES.log` holds 46 `UNCERTAINTY_MATRIX` rows and stops: the
+# render aborted inside the beauty baryon column on the structurally empty
+# Lambda_b-bar -> B_c- cell of RUN-N report §5.3. Counting the rows the R43
+# exclusion leaves, 38 of 84 were measured and 46 were not. CHARM is absent
+# from both columns, and the beauty baryon column is missing its eight
+# CLOSEPACKING rows and two JUNCTIONS Lambda_b rows.
+#
+# Both measured minima belong to B_c- rows that R43 removes:
+#
+#   meson  column  1.567022511e-05  MONASH BEAUTY B^{+}        Bc- hDPhiM90_100
+#   baryon column  7.092474723e-06  MONASH BEAUTY Lambda_b-bar Bc- hDPhiM90_100
+#
+# The smallest SURVIVING rows the truncated log holds are 0.01468236894 (meson)
+# and 0.01277887175 (baryon), both JUNCTIONS BEAUTY B_s^0-bar in hDPhiM0_1. A
+# floor derived from those would be derived from beauty alone, with charm
+# unrendered, so it would be a guess wearing a measurement's clothes. The floor
+# is 1e-06 instead: far below anything this render can plausibly produce, so it
+# refuses broken data and nothing else. RUN-N2's completed render measures the
+# surviving minimum, and that measurement replaces these two numbers.
+#
+# THE ENVELOPES RECORDED HERE ARE THE SURVIVING ONES, not the logged ones. The
+# B_c- rows leave V-EXTREMES with R43, so a guard against a B_c- envelope would
+# guard a row this configuration no longer draws.
+EXTREMES_MESON_COLUMN_YIELD_ENVELOPE = (0.01468236894, 0.1247582854)
+EXTREMES_MESON_COLUMN_YIELD_ENVELOPE_SOURCE = (
+    "PROVISIONAL, truncated log. "
+    "CON1C_EVIDENCE_fe3262c_20260831/derive/window_bounds.out, "
+    "render_VEXTREMES.log meson column with associate=Bc- excluded per R43; "
+    "24 of 24 surviving BEAUTY rows measured, all 18 surviving CHARM rows "
+    "unmeasured")
+EXTREMES_MESON_COLUMN_YIELD_WINDOW = (1e-06, 0.42)
+
+EXTREMES_BARYON_COLUMN_YIELD_ENVELOPE = (0.01277887175, 0.1270878535)
+EXTREMES_BARYON_COLUMN_YIELD_ENVELOPE_SOURCE = (
+    "PROVISIONAL, truncated log. "
+    "CON1C_EVIDENCE_fe3262c_20260831/derive/window_bounds.out, "
+    "render_VEXTREMES.log baryon column with associate=Bc- excluded per R43; "
+    "14 of 24 surviving BEAUTY rows measured, all 18 surviving CHARM rows "
+    "unmeasured")
+EXTREMES_BARYON_COLUMN_YIELD_WINDOW = (1e-06, 0.8)
+
+# THE MESON RATIO FLOOR CANNOT BE 0.6 HERE, and this one is not provisional.
+# The BEAUTY meson column of `render_VEXTREMES.log` is COMPLETE at 30 of 30
+# rows, so its measurements are final. Four surviving rows carry a ratio
+# envelope whose lower edge falls below 0.6, and one of them is in this column:
+#
+#   JUNCTIONS BEAUTY B^{+} associate=B_s^0-bar bin=hDPhiM0_1
+#   JUNCTIONS central_yield=0.015639725922718357 yield_sem=0.00095735698154634607
+#   MONASH    central_yield=0.027041881939100801 yield_sem=0.00091119728725690575
+#   ratio=0.57835197853239395 error=0.040412097763219836
+#   envelope=[0.53793988076917409, 0.61876407629561381]
+#
+# `MESON_COLUMN_RATIO_WINDOW`'s floor of 0.6 would refuse that point. The floor
+# is 0.0 here, which is the physical floor of a yield ratio and the value
+# `BARYON_COLUMN_RATIO_WINDOW` already uses for the same reason. The ceiling
+# stays 3.0, shared with both other ratio windows; this column's measured
+# surviving maximum is 2.531425639, so 3.0 holds it by 1.19.
+#
+# The extremes BARYON ratio panel needs no entry of its own:
+# `BARYON_COLUMN_RATIO_WINDOW` is already (0.0, 3.0), and this configuration's
+# measured surviving baryon envelope is [0.4628089817, 0.9088271401], inside it.
+EXTREMES_MESON_COLUMN_RATIO_ENVELOPE = (0.53793988076917409, 2.5314256389680088)
+EXTREMES_MESON_COLUMN_RATIO_ENVELOPE_SOURCE = (
+    "CON1C_EVIDENCE_fe3262c_20260831/derive/window_bounds.out, "
+    "render_VEXTREMES.log meson column with associate=Bc- excluded per R43; "
+    "lower edge JUNCTIONS associate=B_s^0-bar bin=hDPhiM0_1, upper edge "
+    "JUNCTIONS associate=Lambda_b bin=hDPhiM0_1; BEAUTY complete at 30/30 rows")
+EXTREMES_MESON_COLUMN_RATIO_WINDOW = (0.0, 3.0)
+
+
+# EVERY WINDOW IS GUARDED AGAINST ITS OWN MEASUREMENT, here, at import. A
+# window edited below its envelope raises before any document is built, so the
+# generator cannot write a configuration whose window crops its own recorded
+# data. The three-tuple per row is (window, measured envelope, source).
+COLUMN_WINDOW_GUARDS = (
+    ("MESON_COLUMN_YIELD_WINDOW",
+     MESON_COLUMN_YIELD_WINDOW, MESON_COLUMN_YIELD_ENVELOPE,
+     MESON_COLUMN_YIELD_ENVELOPE_SOURCE),
+    ("MESON_COLUMN_RATIO_WINDOW",
+     MESON_COLUMN_RATIO_WINDOW, MESON_COLUMN_RATIO_ENVELOPE,
+     MESON_COLUMN_RATIO_ENVELOPE_SOURCE),
+    ("BARYON_COLUMN_YIELD_WINDOW",
+     BARYON_COLUMN_YIELD_WINDOW, BARYON_COLUMN_YIELD_ENVELOPE,
+     BARYON_COLUMN_YIELD_ENVELOPE_SOURCE),
+    ("BARYON_COLUMN_RATIO_WINDOW",
+     BARYON_COLUMN_RATIO_WINDOW, BARYON_COLUMN_RATIO_ENVELOPE,
+     BARYON_COLUMN_RATIO_ENVELOPE_SOURCE),
+    ("EXTREMES_MESON_COLUMN_YIELD_WINDOW",
+     EXTREMES_MESON_COLUMN_YIELD_WINDOW,
+     EXTREMES_MESON_COLUMN_YIELD_ENVELOPE,
+     EXTREMES_MESON_COLUMN_YIELD_ENVELOPE_SOURCE),
+    ("EXTREMES_BARYON_COLUMN_YIELD_WINDOW",
+     EXTREMES_BARYON_COLUMN_YIELD_WINDOW,
+     EXTREMES_BARYON_COLUMN_YIELD_ENVELOPE,
+     EXTREMES_BARYON_COLUMN_YIELD_ENVELOPE_SOURCE),
+    ("EXTREMES_MESON_COLUMN_RATIO_WINDOW",
+     EXTREMES_MESON_COLUMN_RATIO_WINDOW,
+     EXTREMES_MESON_COLUMN_RATIO_ENVELOPE,
+     EXTREMES_MESON_COLUMN_RATIO_ENVELOPE_SOURCE),
+)
+
+for _name, _window, _envelope, _source in COLUMN_WINDOW_GUARDS:
+    if not (_window[0] <= _envelope[0] and _envelope[1] <= _window[1]):
+        raise SystemExit(
+            "%s %s does not contain the measured envelope %s (%s)"
+            % (_name, _window, _envelope, _source))
+
+
+# WHICH WINDOW SET A CONFIGURATION USES. `build_trigger_column_canvases` reads
+# one of these two, so the choice is named at the call site rather than decided
+# inside the loop that writes the canvases.
+INTEGRATED_COLUMN_WINDOWS = {
+    ("meson_trigger", "yield"): MESON_COLUMN_YIELD_WINDOW,
+    ("meson_trigger", "ratio"): MESON_COLUMN_RATIO_WINDOW,
+    ("baryon_trigger", "yield"): BARYON_COLUMN_YIELD_WINDOW,
+    ("baryon_trigger", "ratio"): BARYON_COLUMN_RATIO_WINDOW,
+}
+EXTREMES_COLUMN_WINDOWS = {
+    **INTEGRATED_COLUMN_WINDOWS,
+    ("meson_trigger", "yield"): EXTREMES_MESON_COLUMN_YIELD_WINDOW,
+    ("meson_trigger", "ratio"): EXTREMES_MESON_COLUMN_RATIO_WINDOW,
+    ("baryon_trigger", "yield"): EXTREMES_BARYON_COLUMN_YIELD_WINDOW,
+}
 
 
 TRIGGER_COLUMN_COMMENT = (
     "TWO TRIGGER COLUMNS PER FLAVOUR under ruling R40 as amended: meson "
     "trigger left, baryon trigger right, each column carrying the three tune "
     "panels and one combined tune/MONASH ratio panel. Associates are the "
-    "legacy set in both columns. The pad rectangles are computed by the "
+    "legacy set in both columns, less any exclusion this configuration names "
+    "above. The pad rectangles are computed by the "
     "generator, because the base's are authored for a two-column layout whose "
     "columns are the FLAVOURS. The incumbent combined global is REPLACED, not "
     "kept: the macro holds one TPad per mini name and Draw() re-parents, so a "
@@ -452,8 +695,28 @@ def _template_canvases(base: dict) -> dict[str, dict]:
     return templates
 
 
-def build_trigger_column_canvases(base: dict) -> list[dict]:
-    """Sixteen minis: two flavours, two trigger columns, four rows each."""
+def apply_window(canvas: dict, window: tuple[float, float]) -> None:
+    """Write one y window onto one canvas.
+
+    Every panel this generator emits is given its window HERE. Before CON-1C
+    the meson column inherited the base's, which is how RUN-N met two windows
+    that no measurement had ever been checked against (report §5.1, §5.2).
+    """
+    canvas["y_min_axis"], canvas["y_max_axis"] = window
+
+
+def build_trigger_column_canvases(
+        base: dict,
+        windows: dict[tuple[str, str], tuple[float, float]] | None = None,
+) -> list[dict]:
+    """Sixteen minis: two flavours, two trigger columns, four rows each.
+
+    `windows` maps (column, panel kind) to the y window that column's panels
+    take. `composite_globals` calls this function only to read canvas NAMES,
+    which no window affects, so the default keeps that call site unchanged.
+    """
+    if windows is None:
+        windows = INTEGRATED_COLUMN_WINDOWS
     templates = _template_canvases(base)
     rows = column_rectangles()
     canvases: list[dict] = []
@@ -462,7 +725,6 @@ def build_trigger_column_canvases(base: dict) -> list[dict]:
         for group in groups:
             column = group["column"]
             x_min, x_max = COLUMN_X[column]
-            baryon = group["role"] == "baryon"
 
             for row, tune in enumerate(TUNE_PANEL_ORDER, start=1):
                 canvas = json.loads(json.dumps(templates["drawBalancingPlots"]))
@@ -476,9 +738,7 @@ def build_trigger_column_canvases(base: dict) -> list[dict]:
                     f"pp #sqrt{{s}} = 13.6 TeV")
                 canvas["x_min_mini_pad"], canvas["x_max_mini_pad"] = x_min, x_max
                 canvas["y_min_mini_pad"], canvas["y_max_mini_pad"] = rows[row]
-                if baryon:
-                    canvas["y_min_axis"] = BARYON_COLUMN_YIELD_WINDOW[0]
-                    canvas["y_max_axis"] = BARYON_COLUMN_YIELD_WINDOW[1]
+                apply_window(canvas, windows[(column, "yield")])
                 canvases.append(canvas)
 
             ratio = json.loads(
@@ -502,9 +762,7 @@ def build_trigger_column_canvases(base: dict) -> list[dict]:
                 f"tune / {COMBINED_RATIO_DENOMINATOR} balancing yield")
             ratio["x_min_mini_pad"], ratio["x_max_mini_pad"] = x_min, x_max
             ratio["y_min_mini_pad"], ratio["y_max_mini_pad"] = rows[0]
-            if baryon:
-                ratio["y_min_axis"] = BARYON_COLUMN_RATIO_WINDOW[0]
-                ratio["y_max_axis"] = BARYON_COLUMN_RATIO_WINDOW[1]
+            apply_window(ratio, windows[(column, "ratio")])
             canvases.append(ratio)
 
     return canvases
@@ -573,6 +831,47 @@ def apply_display_filter(document: dict, drawn: list[dict],
     document[OWNER_KEY] = OWNER_VARIANTS
 
 
+# B_C- LEAVES THE EXTREME-CLASS BEAUTY COLUMNS (ruling R43, owner, 2026-08-31).
+#
+# RUN-N's V-EXTREMES render refused a structurally empty cell (report §5.3):
+#
+#   SUBSAMPLE_COVERAGE_FAILURE kind=yield flavour=BEAUTY trigger=Lambda_b-bar
+#   tune=JUNCTIONS pair=LbbarBcminus.root bin=hDPhiM90_100 message=yield zero
+#   in all blocks (coverage complete): central=0 n=10/10 stdDev=0 stdError=0
+#   positive_required=true
+#
+# In 10^8 JUNCTIONS events no Lambda_b-bar trigger has a B_c- associate in the
+# lowest-activity class. Coverage is complete and the yield is exactly zero, so
+# the cell is empty by physics and no y-window edit reaches it. The gate that
+# requires a positive yield is correct and is NOT weakened: R43 removes the
+# associate instead of admitting the empty cell, and no empty-cell admission
+# code is written (R35).
+#
+# THE SCOPE IS THIS CONFIGURATION ONLY. `ASSOCIATE_SETS` is untouched, because
+# `build_integrated` shares it and R43 keeps B_c- in the integrated figures
+# with a lowered yield floor. The exclusion covers BOTH beauty trigger columns
+# so the two halves of each composite carry the same associates. CHARM is
+# untouched.
+#
+# THE REFERENCE-MESON INVARIANT STILL RESOLVES. B- carries the signed
+# `reference_meson_pdg` and stays in the set, so `trigger_group_configs` still
+# finds exactly one reference associate per group and
+# `ResolveReferenceAssociateSelection` still has one to resolve
+# (improvedPlotting_THnSparse.C:597-644). The exclusion is checked by that
+# function on the FILTERED set, at emission.
+EXTREMES_EXCLUDED_ASSOCIATES = {"BEAUTY": ("Bc-",)}
+EXTREMES_EXCLUSION_COMMENT = (
+    "B_c- IS OMITTED FROM BOTH BEAUTY COLUMNS under ruling R43: in 10^8 "
+    "JUNCTIONS events the Lambda_b-bar trigger has no B_c- associate in the "
+    "90-100 % class, so that cell holds zero counts with coverage complete and "
+    "the render's positive-yield gate refuses it. The cell is empty by physics, "
+    "not by configuration. The gate is not weakened and no empty-cell "
+    "admission is written; the associate leaves these two columns instead. The "
+    "integrated configurations keep B_c- with a lowered yield floor. Charm is "
+    "unchanged. The omission is disclosed in the figure captions, which are "
+    "editorial and live in docs2/paper/DELIVERABLES.md, not here.")
+
+
 def build_extremes(base: dict, percentiles: list[float],
                    associate_set: str = DEFAULT_ASSOCIATE_SET) -> dict:
     """V-EXTREMES: the whole axis configured, the two extreme classes drawn."""
@@ -581,8 +880,10 @@ def build_extremes(base: dict, percentiles: list[float],
     keep = {lowest, highest}
 
     document = json.loads(json.dumps(base))
-    apply_trigger_groups(document, associate_set)
-    document["canvases_to_be_drawn"] = build_trigger_column_canvases(base)
+    apply_trigger_groups(document, associate_set,
+                         exclude=EXTREMES_EXCLUDED_ASSOCIATES)
+    document["canvases_to_be_drawn"] = build_trigger_column_canvases(
+        base, EXTREMES_COLUMN_WINDOWS)
     classes = document["histograms_to_analyse"]
 
     class_index = {
@@ -636,6 +937,13 @@ def build_extremes(base: dict, percentiles: list[float],
         "class from histograms_to_analyse would still be refused by the axis "
         "contract, and that refusal is deliberate. Rank comes from the contract "
         "order, not from comparing percentile magnitudes. "
+        + EXTREMES_EXCLUSION_COMMENT + " "
+        "THIS CONFIGURATION'S TWO YIELD FLOORS ARE PROVISIONAL: the RUN-N "
+        "render aborted after 46 of its rows, so charm was never measured in "
+        "either column and the surviving minimum is not known. Both floors are "
+        "1e-06, far below anything this render can produce, so they refuse "
+        "broken data and nothing else until a completed render measures the "
+        "surviving minimum. "
         + TRIGGER_COLUMN_COMMENT + " GENERATED; do not hand-edit.")
     return document
 
@@ -716,6 +1024,27 @@ def build_integrated(base: dict, percentiles: list[float], closure: bool,
     drawn = classes + [integrated] if closure else [integrated]
     apply_display_filter(document, drawn,
                          axis_declaration(classes, drawn, percentiles))
+
+    # THE CLOSURE'S PANELS ARE MESON-COLUMN PANELS, so they take the meson
+    # column's windows. It builds with `associate_set=None`, which keeps the
+    # base's own canvases, and the base pair set is meson-triggered throughout:
+    # B+ -> B-, B+ -> Lambda_b, D+ -> D-, D+ -> Lambda_c(+)-bar. Those
+    # inherited canvases carried the base's `(0.01, 0.42)` and `(0.6, 2.5)`,
+    # and RUN-N refused this configuration on the second of them (report §5.1).
+    #
+    # THE CONDITION IS `closure`, NOT `associate_set is None`. V-CORRELATIONS
+    # takes the same None and inherits the same canvases, and it is a delivered
+    # configuration whose bytes are pinned by an acceptance record. Its own
+    # measured envelopes, [0.01887615718, 0.1935681066] in yield and
+    # [0.7328185643, 1.899396585] in ratio, sit inside the base windows it
+    # already carries, so it needs no widening and must not be given one.
+    if closure:
+        for canvas in document.get("canvases_to_be_drawn", []):
+            function = canvas.get("draw_function_to_use")
+            if function == "drawBalancingPlots":
+                apply_window(canvas, MESON_COLUMN_YIELD_WINDOW)
+            elif function == "drawBalancingPlotsTUNERatios":
+                apply_window(canvas, MESON_COLUMN_RATIO_WINDOW)
 
     if closure or associate_set is None:
         tag = "VINTEGRATED_CLOSURE" if closure else "VINTEGRATED"

@@ -38,6 +38,30 @@ G1 is delivered as a **`.png`**. Every balancing figure is delivered as a
 **`.pdf`** and carries the writer's `_PDF` tag before the extension
 (`plotting/improvedPlotting_THnSparse.C:1328-1330`).
 
+## G5 and G7 omit B_c-, and the caption must say so
+
+Ruling R43 (owner, 2026-08-31) removed the B_c- associate from both beauty
+columns of V-EXTREMES, so G5 and G7 carry four beauty associates where G4 and
+G6 carry five. G4 and G6 keep B_c-.
+
+**Why.** RUN-N's V-EXTREMES render refused the Lambda_b-bar trigger's B_c-
+associate in the 90-100 % class: the yield is exactly zero across all ten
+blocks with coverage complete, and the render requires a positive yield
+(`SUBSAMPLE_COVERAGE_FAILURE`, RUN-N report §5.3). In 10^8 JUNCTIONS events no
+Lambda_b-bar trigger has a B_c- associate in that class. The cell is empty by
+physics, so no y-window edit reaches it. R43 removed the associate rather than
+weakening the gate.
+
+**The disclosure line is HANDOFF's to write, not the generator's.** No figure
+carries it and no configuration emits it. The captions of G5 and G7 must state
+that B_c- is omitted and that the reason is zero counts in the 90-100 % class.
+The same sentence is not needed on G4 or G6, which keep the associate.
+
+**One consequence for the pair-file inventory.** V-EXTREMES no longer requires
+`BplusBcminus.root`, `BplusBcplus.root`, `LbbarBcminus.root` or
+`LbbarBcplus.root`. It references 28 pair files where it referenced 32.
+V-INTEGRATED still references all 32.
+
 ## The G2 / G3 rename rule
 
 The correlation canvas builds its stem from the flavour token, which is

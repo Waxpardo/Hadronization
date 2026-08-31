@@ -2798,7 +2798,7 @@ digit.
 | instrument | `plotting/improvedPlotting_THnSparse.C` sha256 `6dace2025d1edf37…`, through the `measure-balancing` target |
 | nominal arm | `figure_deploy_20260817/vintegrated_closure.log`, sha256 `f507f6250e63d82c9c34e088abe4ec16b17359e3b0a54fcdb54e17cd67653d7b`, 144 rows, 2026-08-18 10:18 |
 | control | `sys_runs_plot5/render_HF_RUN3_V1.log`, sha256 `690f2dc5694fa8639582e7ff2a5dd42f392c66ab2ccdf1268e9e5974e65afe68` |
-| integrated bin | `config/integrated_multiplicity_bin_v1.json`, copied from the closure configuration; the digest was re-recorded 2026-08-30 against the current bytes, `a92ec01dea3fc2d6…` (ledger DA1-001, re-recorded again in CON-1B when the closure configuration returned to the base four series) |
+| integrated bin | `config/integrated_multiplicity_bin_v1.json`, copied from the closure configuration; the digest was re-recorded 2026-08-31 against the current bytes, `09d83a7ad87a3cf0…` (ledger DA1-001; re-recorded in CON-1B when the closure configuration returned to the base four series, and again in CON-1C for the F63 window widening, RUN-N refusal §5.1) |
 | inputs | `complete_root_HF_SYS_*_<TUNE>` and their ten `combined_root_subSamples_<TUNE>` directories, in `/data/alice/ipardoza/hadronization_merged` |
 
 **Regeneration, in two stages.** The renders need Nikhef; the arithmetic does
