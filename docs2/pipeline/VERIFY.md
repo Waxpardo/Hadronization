@@ -90,3 +90,38 @@ word the same exception differently (`tests/test_strict_control_boundary.py:16-1
 seen-to-fail direction: for the shapes the default comparator accepts, the
 driver asserts that it accepts them, so the test fails if the defect returns
 under another name (`tests/test_strict_control_boundary.py:11-14`).
+
+## Receipt equality: compare the boundary payload, not `payload_sha256`
+
+Finding F46 asks whether every configuration's render agrees on the class axis.
+The boundary receipt carries a top-level `payload_sha256`, and that field is
+**not** the answer. It folds per-configuration bookkeeping into the digest, so
+two receipts with an identical class axis hash differently there.
+
+RUN-N measured this on the two receipts its session produced. Their
+`payload_sha256` fields differ — `ffc83232…` for V-CORRELATIONS against
+`54936b31…` for V-BARYONMESON — while every quantity that defines the axis
+agrees, including a per-tune `histogram_identity_sha256` of `dbdae57e…` on both.
+What differs is how many pair files each configuration validated the histogram
+against: `block_files_validated` 120 against 80, `central_files_validated` 12
+against 8, `central_exact_comparisons` 11 against 7, and the same counts inside
+`blocks[]`. Those are properties of the pair set a configuration carries, not of
+the class axis.
+
+**Check axis equality on the class-boundary payload instead.** Take each
+receipt's `tunes` block, drop the five bookkeeping keys — `block_files_validated`,
+`central_files_validated` and `central_exact_comparisons` per tune, plus
+`files_validated` and `exact_comparisons` inside each entry of `blocks[]` — and
+digest what remains. That payload keeps `histogram_identity_sha256`,
+`histogram_name`, `classes`, `thresholds`, `partition` and the per-tune
+fractions, which is everything the axis is made of. Both RUN-N receipts give
+`2eb41c675790…` under that recipe.
+
+`RUNN_EVIDENCE_fe3262c_20260830/gate/runn_f46.py` is the script that did it, and
+it is the reference for any later check. Whether the receipt should carry an
+axis-only digest of its own is post-paper design work, recorded under ruling R35
+and not scheduled.
+
+RUN-N tested two receipts, not five: three renders refused before
+`WriteMultiplicityBoundaryReceipt`, which the macro calls only after every
+global canvas is drawn. Five-way equality is still untested.

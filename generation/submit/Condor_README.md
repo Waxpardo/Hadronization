@@ -76,7 +76,7 @@ what the retry path matches: `tools/resubmit_held.py:55` reads `HoldReason` and
 | `HoldReasonCode 15` "at user's request" | at submit, **all** jobs | the parking brake | **release** |
 | `HF_HANG_GUARD suspected generator hang` | after >3600 s CPU or >14400 s wall | wedged generator; see the rate note below | **retry** |
 
-**The rate is measured, not quoted from here.** `make status` computes the live rate from worker outputs (`tools/campaign_status.py:264`, printed at `:271-274`). The recorded nominal-campaign attrition is in `config/cr_holdout_policy_v1.json`: 0/1000 MONASH, 63/1063 JUNCTIONS (5.93 %), 64/1064 CLOSEPACKING (6.02 %) — 127 of 3,127 attempts, 4.06 % campaign-wide. An earlier form of this table carried an unsourced "~2.7 %", which no artifact in this repository supports and which the recorded observations contradict. `docs/GOLDEN_OUTPUTS.md:1053` row N5 requires the discard rate to be reported rather than corrected away, so it must never be quotable from an unsourced runbook line.
+**The rate is measured, not quoted from here.** `make status` computes the live rate from worker outputs (`tools/campaign_status.py:264`, printed at `:271-274`). The recorded nominal-campaign attrition is in `config/cr_holdout_policy_v1.json`: 0/1000 MONASH, 63/1063 JUNCTIONS (5.93 %), 64/1064 CLOSEPACKING (6.02 %) — 127 of 3,127 attempts, 4.06 % campaign-wide. An earlier form of this table carried an unsourced "~2.7 %", which no artifact in this repository supports and which the recorded observations contradict. `docs/GOLDEN_OUTPUTS.md:1067` row N5 requires the discard rate to be reported rather than corrected away, so it must never be quotable from an unsourced runbook line.
 
 **"N held" is evidence of nothing until you read the reason.**
 
