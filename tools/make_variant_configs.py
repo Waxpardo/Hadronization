@@ -112,18 +112,43 @@ def class_names() -> list[str]:
 # and trigger-column composites". This is that re-authoring, under that ruling.
 # The accepted hand-maintained configurations are still not edited, and
 # V-CORRELATIONS still builds on the base's own pair set.
+#
+# `trigger` IS A ROUTING KEY. `label` IS NOTATION. They are separate fields
+# because they have different jobs and only one of them may change.
+#
+# `trigger` reaches the render as `TriggerToUse`
+# (`build_trigger_column_canvases`, the `canvas["TriggerToUse"]` assignment),
+# which selects the trigger. Two of the four values are not notation --
+# `Lambda_b-bar` and `Lambda_c(+)` -- and until FIG-1 the panel TITLE was built
+# from the same value, so G4 to G7 printed "Lambda_c(+) trigger" in plain text
+# on eight panel titles per composite (ruling R45, checklist item 2).
+#
+# The routing key is NOT renamed. It is the selector, and the delivered
+# configurations, the pair registry and the render logs all spell it this way.
+# The title takes `label` instead, so notation is fixed where notation is read
+# and the selector stays byte-identical.
+#
+# The labels are the same strings the AXIS already uses, so a panel title and
+# its own axis cannot disagree: they are the `DisplayLabelForAssociatePdg`
+# entries of the trigger's PDG code
+# (`plotting/improvedPlotting_THnSparse.C:1536-1556`) -- 521, -5122, 411, 4122.
+# The two meson labels are equal to the routing key by coincidence of it
+# already being notation; they are written out anyway so every group carries
+# both fields and a later reader does not have to know which is which.
 TRIGGER_GROUPS = {
     "BEAUTY": (
-        {"role": "meson", "trigger": "B^{+}", "prefix": "Bplus",
-         "column": "meson_trigger"},
-        {"role": "baryon", "trigger": "Lambda_b-bar", "prefix": "Lbbar",
-         "column": "baryon_trigger"},
+        {"role": "meson", "trigger": "B^{+}", "label": "B^{+}",
+         "prefix": "Bplus", "column": "meson_trigger"},
+        {"role": "baryon", "trigger": "Lambda_b-bar",
+         "label": "#bar{#Lambda}_{b}^{0}",
+         "prefix": "Lbbar", "column": "baryon_trigger"},
     ),
     "CHARM": (
-        {"role": "meson", "trigger": "D^{+}", "prefix": "Dplus",
-         "column": "meson_trigger"},
-        {"role": "baryon", "trigger": "Lambda_c(+)", "prefix": "Lambdacplus",
-         "column": "baryon_trigger"},
+        {"role": "meson", "trigger": "D^{+}", "label": "D^{+}",
+         "prefix": "Dplus", "column": "meson_trigger"},
+        {"role": "baryon", "trigger": "Lambda_c(+)",
+         "label": "#Lambda_{c}^{+}",
+         "prefix": "Lambdacplus", "column": "baryon_trigger"},
     ),
 }
 
@@ -756,7 +781,7 @@ def build_trigger_column_canvases(
                 canvas["TriggerToUse"] = group["trigger"]
                 canvas["TUNES"] = [tune]
                 canvas["canvas_title"] = (
-                    f"{tune}, {group['trigger']} trigger, "
+                    f"{tune}, {group['label']} trigger, "
                     f"pp #sqrt{{s}} = 13.6 TeV")
                 canvas["x_min_mini_pad"], canvas["x_max_mini_pad"] = x_min, x_max
                 canvas["y_min_mini_pad"], canvas["y_max_mini_pad"] = rows[row]
@@ -779,7 +804,7 @@ def build_trigger_column_canvases(
                 COMBINED_RATIO_NUMERATORS)
             ratio["canvas_title"] = (
                 f"{' and '.join(COMBINED_RATIO_NUMERATORS)} / "
-                f"{COMBINED_RATIO_DENOMINATOR}, {group['trigger']} trigger")
+                f"{COMBINED_RATIO_DENOMINATOR}, {group['label']} trigger")
             ratio["y_axis_title"] = (
                 f"tune / {COMBINED_RATIO_DENOMINATOR} balancing yield")
             ratio["x_min_mini_pad"], ratio["x_max_mini_pad"] = x_min, x_max
