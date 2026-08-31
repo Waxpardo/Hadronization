@@ -514,13 +514,35 @@ MESON_COLUMN_YIELD_WINDOW = (5e-05, 0.42)
 # conservative cross-tune bound (Y_tune + SEM)/(Y_MONASH - SEM) is
 # 2.5671199529898105, at the same identity as the refusal. No bound exceeds
 # 3.0, so 3.0 holds the base series with a factor 1.17 in hand.
+#
+# THE FLOOR IS 0.0, AND THAT IS THE POLICY FOR EVERY RATIO PANEL (ruling R45,
+# checklist item 3). One composite draws two trigger columns side by side. A
+# reader compares them, so the two columns must share one y-range or the
+# comparison is a reading error waiting to happen: until FIG-1 this column
+# drew [0.6, 3.0] beside the baryon column's [0.0, 3.0], and G4 and G6 were
+# delivered with mismatched ratio panels.
+#
+# THE POLICY, stated once for all four ratio windows this file holds: every
+# combined-ratio panel of every composite draws [0.0, 3.0]. 0.0 is the
+# physical floor of a yield ratio, so the floor costs no resolution that a
+# measurement could occupy; 3.0 is the ceiling all three ratio windows already
+# shared. `BARYON_COLUMN_RATIO_WINDOW` and
+# `EXTREMES_MESON_COLUMN_RATIO_WINDOW` were already (0.0, 3.0), so this
+# constant is the only one that moves and the policy holds across G4/G6 and
+# G5/G7 with no other edit.
+#
+# THIS WIDENS THE WINDOW; IT CANNOT CROP DATA. The window is a hard refusal
+# through `SetPlotPointOrThrow`, and lowering a floor can only admit points
+# that the old floor would have refused. The guard below still checks this
+# window against its own measured envelope, whose lower edge 0.6215702019 is
+# unchanged and still inside.
 MESON_COLUMN_RATIO_ENVELOPE = (0.6215702019, 2.5314256389680088)
 MESON_COLUMN_RATIO_ENVELOPE_SOURCE = (
     "CON1C_EVIDENCE_fe3262c_20260831/derive/window_bounds.out; upper edge is "
     "the RUN-N §5.1 throw, JUNCTIONS/MONASH associate=Lambda_b bin=hDPhiM0_1, "
     "render.log; lower edge is JUNCTIONS BEAUTY B^{+} associate=Bc- "
     "bin=hDPhiM00_100, render_VINTEGRATED.log")
-MESON_COLUMN_RATIO_WINDOW = (0.6, 3.0)
+MESON_COLUMN_RATIO_WINDOW = (0.0, 3.0)
 
 # --- the baryon trigger column -----------------------------------------------
 #
