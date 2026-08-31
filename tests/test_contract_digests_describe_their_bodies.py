@@ -44,7 +44,7 @@ two input files of the pair registry
 variation the sentinel compared (`tools/a2_record_regression.py:180`).
 `configuration_sha256`, `plotter_source_sha256` and `boundary_utility_sha256`
 name source and configuration files that the plotting stage digests by path
-(`plotting/improvedPlotting_THnSparse.C:1386-1393` and `:1979`). Recomputing
+(`plotting/improvedPlotting_THnSparse.C:1387-1394` and `:1979`). Recomputing
 any of these from the enclosing body would assert something nobody claimed.
 
 WHAT A NEW FIELD MUST DO. The classification below is required to be complete:

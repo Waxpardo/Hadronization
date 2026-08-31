@@ -26,7 +26,7 @@ repository's other generators.
 TWO EMITTED BLOCKS ARE INERT AND STAY THAT WAY. Every canvas carries
 `TUNE_colours` and `dependency_line_styles`. Both are PARSED and neither is
 READ. `TUNE_colours` is parsed into `colourTUNEMap`
-(improvedPlotting_THnSparse.C:3242-3253), which nothing reads, and a known
+(improvedPlotting_THnSparse.C:3326-3337), which nothing reads, and a known
 tune's value is overwritten by the compiled constant before it is even stored
 (`:2747-2749`); the palette lives in `plotting/TunePlotStyle.h:24-27`.
 `dependency_line_styles` is parsed into `lineStyleDependencyMap` (`:2755-2763`)
@@ -151,7 +151,7 @@ def information_block(coverage: str) -> list[str]:
 
     Line 1 identifies the campaign; line 2 is the axis-coverage sentence the
     figure already carried, unchanged. The macro draws the list as a stack at
-    the anchor the single line used (`improvedPlotting_THnSparse.C:2097-2127`)
+    the anchor the single line used (`improvedPlotting_THnSparse.C:2137-2167`)
     and echoes every line on `AXIS_DECLARATION`, so a style-delta proof still
     reads the coverage sentence it read before.
     """
@@ -175,7 +175,7 @@ def information_block(coverage: str) -> list[str]:
 #
 # EVERY ROUTING NAME BELOW IS A KEY, NOT NOTATION. `associateOS` reaches
 # `SetBinLabel` through `DisplayLabelForAssociatePdg`, which is keyed on the PDG
-# code the pair registry carries (improvedPlotting_THnSparse.C:1569-1587), so
+# code the pair registry carries (improvedPlotting_THnSparse.C:1570-1588), so
 # the axis text has one source and these strings only have to route.
 #
 # TWO OF THE LEGACY BEAUTY ASSOCIATES ONCE HAD NO ENTRY IN THAT TABLE, and now
@@ -218,7 +218,7 @@ def information_block(coverage: str) -> list[str]:
 # The labels are the same strings the AXIS already uses, so a panel title and
 # its own axis cannot disagree: they are the `DisplayLabelForAssociatePdg`
 # entries of the trigger's PDG code
-# (`plotting/improvedPlotting_THnSparse.C:1570-1590`) -- 521, -5122, 411, 4122.
+# (`plotting/improvedPlotting_THnSparse.C:1571-1591`) -- 521, -5122, 411, 4122.
 # The two meson labels are equal to the routing key by coincidence of it
 # already being notation; they are written out anyway so every group carries
 # both fields and a later reader does not have to know which is which.
@@ -332,7 +332,7 @@ def trigger_group_configs(flavour: str, group: dict, associates,
 
     `ResolveReferenceAssociateSelection` throws unless exactly one configured
     associate carries the group's signed `referenceMesonPdg`
-    (improvedPlotting_THnSparse.C:631-678), so the invariant is asserted HERE,
+    (improvedPlotting_THnSparse.C:632-679), so the invariant is asserted HERE,
     at emission, rather than discovered by a render that has already started.
     """
     configs, reference_hits = [], []
@@ -550,7 +550,7 @@ def hdphi_names(bins: list[dict]) -> list[str]:
 # THE COMBINED-RATIO PANEL IS A TEMPLATE COPY, NOT NEW PLOTTING CODE. The legacy
 # `mini_*_JUNCTIONS_CLOSEPACKING_over_MONASH` block sets `nominator_TUNES` to a
 # LIST and `denominator_TUNE` to MONASH. The parse site reads the list
-# (improvedPlotting_THnSparse.C:3173-3183) and the draw loop iterates it,
+# (improvedPlotting_THnSparse.C:3257-3267) and the draw loop iterates it,
 # colouring each numerator through `ApplyTuneVisualStyle` and writing one legend
 # entry per numerator (`:4754-4806`). Both ratios therefore land in one pad with
 # the tunes distinguishable, and the macro is not touched.
@@ -609,7 +609,7 @@ RATIO_PANEL_Y_TITLE = "ratio to MONASH"
 # The ratio family, named by the macro's OWN dispatch key and never by title
 # text, so the pass below cannot drift onto matching wording. These two values
 # are every ratio panel in all five configurations; the macro dispatches on
-# them at improvedPlotting_THnSparse.C:6418 and :5739.
+# them at improvedPlotting_THnSparse.C:6546 and :5739.
 RATIO_PANEL_DRAW_FUNCTIONS = (
     "drawBalancingPlotsTUNERatios",
     "drawBalancingBaryonMesonRatioPlotsTUNERatios",
@@ -1211,7 +1211,7 @@ def composite_globals(base: dict, write_names: dict[str, str],
     the distinct output directories of the writing globals and throws "Exactly
     one global-canvas output directory is required to store the
     multiplicity-boundary receipt" on anything but one
-    (improvedPlotting_THnSparse.C:3313-3323).
+    (improvedPlotting_THnSparse.C:3397-3407).
     """
     template = base["global_canvases_to_be_drawn"][0]
     minis = [c["canvas_name"] for c in build_trigger_column_canvases(base)]
@@ -1302,7 +1302,7 @@ def apply_display_filter(document: dict, drawn: list[dict],
 # `reference_meson_pdg` and stays in the set, so `trigger_group_configs` still
 # finds exactly one reference associate per group and
 # `ResolveReferenceAssociateSelection` still has one to resolve
-# (improvedPlotting_THnSparse.C:631-678). The exclusion is checked by that
+# (improvedPlotting_THnSparse.C:632-679). The exclusion is checked by that
 # function on the FILTERED set, at emission.
 EXTREMES_EXCLUDED_ASSOCIATES = {"BEAUTY": ("Bc-",)}
 EXTREMES_EXCLUSION_COMMENT = (
@@ -1587,7 +1587,7 @@ BARYONMESON_YIELD_WINDOW = (0.08, 0.58)
 # from 240 px to 86 px and the one below the lower row from 221 px to 66 px,
 # on a 2022 px canvas.
 BARYONMESON_ROW_TOP = 0.93
-BARYONMESON_BOTTOM_MARGIN = 0.22
+BARYONMESON_BOTTOM_MARGIN = 0.24
 BARYONMESON_TOP_MARGIN = 0.06
 
 # Guarded at import, like every other window in this file: a tightened window
@@ -1723,10 +1723,10 @@ def build_baryonmeson(base: dict, percentiles: list[float]) -> dict:
     # F7 measured: 240 px between the rows and 221 px below the lower one.
     #
     # With the macro's ordering repaired the labels are vertical, and the band
-    # they need is re-measured in the second commit of this session, together
-    # with the macro change that makes the labels vertical at all. This commit
-    # keeps 0.22 and the rows stop at the canvas label band, which is already
-    # most of the recovery: the blank bands fall from 240 px and 221 px.
+    # they need is measured again on the replayed canvas: 0.24 holds the eleven
+    # vertical labels and the axis title, with the title 35 px clear of the
+    # labels above it and 24 px clear of the pad edge below. The blank bands
+    # fall from 240 px and 221 px to about 100 px and 60 px.
     for canvas in keep:
         apply_composite_margins(canvas)
         canvas["bottom_margin_mini_pad"] = BARYONMESON_BOTTOM_MARGIN

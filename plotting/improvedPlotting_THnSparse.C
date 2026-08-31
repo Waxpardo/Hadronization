@@ -37,6 +37,7 @@
 #include "TString.h" // TODO: can use this for the legend entry names?
 #include <TLegend.h>
 #include <TLegendEntry.h> // the publication pass styles entries, not only the box
+#include <THashList.h>   // TAxis::GetLabels() is a THashList; VerticalClassLabels counts it
 #include <TLine.h>
 #include <TPaveText.h>
 
@@ -1679,23 +1680,35 @@ constexpr Double_t kPublicationYTitleOffset = 2.86;
 // A VERTICAL LABEL BAND IS DEEPER, so the title below it sits further out.
 // The baryon/meson composite is the only canvas that turns its labels
 // vertical; the offset is selected from the axis itself rather than from the
-// canvas name, so it follows the labels wherever they are used. Its vertical
-// labels end at y=1890 and its pad edge is y=2022; at 2.36 the title ink is
-// y[1942,1970], 52 px from each. At the previous 3.60 only 15 px of the 29
-// survived.
-constexpr Double_t kPublicationXTitleOffsetVerticalLabels = 2.36;
+// canvas name, so it follows the labels wherever they are used.
+//
+// RE-MEASURED ON LABELS THAT ARE ACTUALLY VERTICAL (brief item F6). The 2.36
+// this constant carried was measured on the delivered G8, whose labels were
+// SLANTED: `LabelsOption("v")` ran before the labels existed and did nothing,
+// so `kLabelsVert` was false and this branch was never taken in the render it
+// was measured against. With the ordering repaired the band is 128 px deep
+// instead of the slanted band's 78, and 2.36 puts the title inside the
+// labels.
+//
+// MEASURED ON THE REPLAYED G8 at the publication metric, with the 0.24 bottom
+// margin the generator now writes: the vertical labels end 131 px below the
+// frame and the pad edge is 218 px below it. At 3.4 the title ink is 167 to
+// 195 px below the frame -- 35 px clear of the labels above and 24 px clear
+// of the pad edge below. At 4.0 it touches the pad edge; at 4.5 it is clipped
+// out of the pad entirely.
+constexpr Double_t kPublicationXTitleOffsetVerticalLabels = 3.4;
 
 // THE STYLE SYSTEM, IN ONE PLACE (owner directive 2026-08-31: the repository
 // leaves the plotting layer after this change). Where each decision lives:
 //   sizes     kPublicationLabelFraction and kPublicationTitleFraction above,
-//             applied to every assembled canvas by the one pass at :6458
+//             applied to every assembled canvas by the one pass at :6586
 //   titles    the GENERATOR owns them -- RATIO_PANEL_Y_TITLE and
 //             normalize_ratio_titles in tools/make_variant_configs.py,
-//             parsed here at :3388
+//             parsed here at :3472
 //   offsets   the three constants above, chosen in ApplyPublicationAxisStyle
 //   legends   rectangles in the configuration (parsed :2906), built once
-//             per draw function, first at :5233
-//   reference the dashed unity line at :1551
+//             per draw function, first at :5317
+//   reference the dashed unity line at :1552
 //   switch    panel titles, OFF by default since ruling R46: one
 //             configuration key `draw_canvas_titles` (FIG-1C), parsed beside
 //             `draw_correlation_plots`. False hands the empty string to the
@@ -1801,6 +1814,33 @@ std::vector<std::string> ParseInformationBlock(const json& config)
         "axis_declaration must be a string or an array of strings");
 }
 
+// A CATEGORICAL AXIS TURNS ITS LABELS VERTICAL ONLY AFTER IT HAS SOME
+// (architect regression R3, brief item F6).
+//
+// `TAxis::LabelsOption` reads `fLabels` and returns early when it is empty,
+// warning `Cannot sort. No labels`. Calling it on a freshly constructed
+// template therefore does nothing at all, silently as far as the figure is
+// concerned -- the warning goes to the render log and the labels come out
+// slanted. Wrapping the call in a named function that REFUSES on an empty
+// axis turns that silent no-op into a stated one: a caller that moves the
+// call back above `SetBinLabel` gets a message naming the axis instead of a
+// figure with overlapping labels.
+void VerticalClassLabels(TH1* frame)
+{
+    if (!frame) return;
+    TAxis* axis = frame->GetXaxis();
+    if (!axis) return;
+    if (!axis->GetLabels() || axis->GetLabels()->GetSize() == 0) {
+        std::cerr << "WARNING: VerticalClassLabels called on an axis with no "
+                     "bin labels; the labels stay slanted and will overlap. "
+                     "Call it after SetBinLabel." << std::endl;
+        return;
+    }
+    axis->LabelsOption("v");
+    std::cout << "CLASS_LABELS vertical=" << (axis->TestBit(TAxis::kLabelsVert) ? 1 : 0)
+              << " count=" << axis->GetLabels()->GetSize() << std::endl;
+}
+
 // THE LEGEND'S ENTRIES TAKE THE METRIC TOO, AND THIS IS WHY THEY MUST
 // (architect regressions R1/F1, brief items F2 and F3, measured 2026-09-01).
 //
@@ -1820,12 +1860,12 @@ std::vector<std::string> ParseInformationBlock(const json& config)
 // error bars floating in the data area and no text beside them. A reader
 // takes them for data.
 //
-// THE PAINT THAT STAMPS THEM IS THE RE-PARENTING, at `:6449`:
+// THE PAINT THAT STAMPS THEM IS THE RE-PARENTING, at `:6577`:
 // `miniCanvasIt->second->Draw()` paints the mini pad as it attaches it, and
 // this pass runs after that loop. Measured by bisection; the record is
 // `FIG1D_EVIDENCE_0e98a5b_20260901/replay/LEGEND_DIAGNOSIS.md`. The
-// correlation canvas escaped because it is styled at `:5065` before its only
-// paint at `:5097`, and its delivered entries carry font 43 -- the same
+// correlation canvas escaped because it is styled at `:5149` before its only
+// paint at `:5181`, and its delivered entries carry font 43 -- the same
 // mechanism, the other way round.
 //
 // SO THE PASS IS MADE AUTHORITATIVE INSTEAD OF EARLY. Reordering the paint
@@ -2269,6 +2309,50 @@ std::string DisplayLabelForAssociatePdg(Int_t pdg, const std::string& fallback)
               << "; axis will show the raw identifier '" << fallback << "'"
               << std::endl;
     return fallback;
+}
+
+// EVERY SPECIES LABEL SITS ON ONE BASELINE (owner-reported, architect-
+// confirmed on G4-G7; brief item 5).
+//
+// THE DEFECT, MEASURED. ROOT places an axis bin label by the TOP of its
+// bounding box, so a label's visible glyph sits as far down as its own ascent
+// pushes it. The species labels have unequal ascents: an overline adds about
+// ten pixels above the cap at the publication metric, a full-height
+// superscript about twelve, and `B^{-}` has neither -- its superscript is a
+// dash that fits inside the cap height. Rendered as bin labels at 33 px and
+// measured by ink extent, the baselines of the labels without a subscript
+// were `B^{-}` 463, `#bar{B}^{0}` 477, `D^{-}` 463, `#bar{D}^{0}` 477: the
+// unbarred labels float fourteen pixels above the barred ones. That is what
+// the owner saw and reported as "B^{-} sits above the others".
+//
+// THE FIX IS ONE STRUT, PREPENDED TO EVERY LABEL, not a per-species nudge. It
+// is drawn on the same TLatex line as the label, so it fixes the BASELINE for
+// whatever follows it, and its ascent and descent exceed every species' own.
+// Three properties make it safe, all measured
+// (`FIG1D_EVIDENCE_0e98a5b_20260901/replay/LEGEND_DIAGNOSIS.md`):
+//
+//   zero width     `#kern[-1.0]{...}` returns the pen to where it started, so
+//                  the label's own width -- and therefore its centring in the
+//                  bin -- is unchanged. Measured over all ten species: every
+//                  width identical to the bare label.
+//   invisible      `#color[0]{...}` is white, drawn under the black label on
+//                  a white pad.
+//   uniform        one string for every species, so nothing has to be tuned
+//                  per label and a species added later is covered.
+//
+// After it, the four unsubscripted labels share a baseline of 478 exactly.
+//
+// THE VISIBLE TEXT IS UNCHANGED, which is the constraint the brief sets: the
+// strut adds no glyph. `DisplayLabelForAssociatePdg` still returns the bare
+// notation, so `tests/test_associate_display_labels.py` parses and asserts on
+// exactly the strings it did before -- the strut is applied at the two
+// `SetBinLabel` sites, not in the table.
+const char* const kSpeciesLabelBaselineStrut =
+    "#kern[-1.0]{#color[0]{#bar{B}_{s}^{0}}}";
+
+std::string UniformSpeciesAxisLabel(const std::string& notation)
+{
+    return std::string(kSpeciesLabelBaselineStrut) + notation;
 }
 
 std::string DisplayLabelForMultiplicityBin(
@@ -5287,9 +5371,10 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
                 // Define associate label names for yield plots
                 hYieldsTemplate->GetXaxis()->SetBinLabel(
                     1+j,
-                    DisplayLabelForAssociatePdg(
-                        fileNamesOSandSS.associateOSPdg,
-                        associateName).c_str());
+                    UniformSpeciesAxisLabel(
+                        DisplayLabelForAssociatePdg(
+                            fileNamesOSandSS.associateOSPdg,
+                            associateName)).c_str());
             }
 
             // Loop over DEPENDENCIES
@@ -5576,8 +5661,9 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
         // Define associate label names for yield plots
         hYieldsTemplate->GetXaxis()->SetBinLabel(
             1+j,
-            DisplayLabelForAssociatePdg(
-                fileNamesOSandSS.associateOSPdg, associateName).c_str());
+            UniformSpeciesAxisLabel(
+                DisplayLabelForAssociatePdg(
+                    fileNamesOSandSS.associateOSPdg, associateName)).c_str());
 
 
         // Loop over DEPENDENCIES
@@ -5793,16 +5879,30 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
     hYieldsTemplate->SetTitle(configs_from_json.DRAW_CANVAS_TITLES ? canvasConfigs.canvasTitle.c_str() : "");
     hYieldsTemplate->GetXaxis()->SetTitle(canvasConfigs.xAxisTitle.c_str());
     hYieldsTemplate->GetYaxis()->SetTitle(canvasConfigs.yAxisTitle.c_str());
-    // ELEVEN CLASS LABELS ON ONE AXIS (ruling R45, checklist item 5). This
-    // composite puts the multiplicity class on x, so the axis carries eleven
-    // labels like "90-100%" across a pad about 990 px wide -- 69 px of
-    // horizontal room each. ROOT's slanted default needs about 116 px of that
-    // room per label at the publication text size, so the labels overprint one
-    // another; the delivered figure avoided it only by drawing the labels
-    // small, and its x TITLE was overprinted by their descenders instead.
-    // Vertical labels take no horizontal room at all, so eleven of them stay
-    // separate at full size and the title clears them.
-    hYieldsTemplate->GetXaxis()->LabelsOption("v");
+    // ELEVEN CLASS LABELS ON ONE AXIS (ruling R45 checklist item 5; the
+    // ordering defect is architect regression R3, brief item F6).
+    //
+    // This composite puts the multiplicity class on x, so the axis carries
+    // eleven labels like "90-100%" across a pad about 990 px wide -- 69 px of
+    // horizontal room each. ROOT's slanted default needs about 116 px per
+    // label at the publication text size, so the labels overprint one another
+    // and their descenders reach the axis title. Vertical labels take no
+    // horizontal room at all, so eleven of them stay separate at full size.
+    //
+    // THE CALL USED TO BE HERE AND DID NOTHING. `TAxis::LabelsOption` returns
+    // early when the axis has no labels yet, with
+    // `Warning in <TAxis::Sort>: Cannot sort. No labels` -- and this template
+    // has none: `SetBinLabel` runs later, inside the associate loop. RUN-N4's
+    // own render log carries that warning FOUR times, once per G8 panel
+    // (`RUNN4_EVIDENCE_0e98a5b_20260901/render_logs/render_VBARYONMESON.log`),
+    // so the delivered labels were never vertical and FIG-1 traded a
+    // horizontal collision for the slanted default. The second consequence is
+    // the axis title: `ApplyPublicationAxisStyle` picks the deeper offset from
+    // `TestBit(TAxis::kLabelsVert)`, which was false, so the title took the
+    // shallow offset meant for horizontal labels.
+    //
+    // The call is made after the labels exist instead; see `VerticalClassLabels`
+    // at the end of this function.
     std::cout << "- Setting y-axis range: (" << canvasConfigs.yMinAxis << "," << canvasConfigs.yMaxAxis << ")" << std::endl;
     hYieldsTemplate->GetYaxis()->SetRangeUser(canvasConfigs.yMinAxis,canvasConfigs.yMaxAxis);
     // A LOG AXIS LABELS DECADES ONLY (ruling L3, owner, 2026-09-01).
@@ -5988,6 +6088,13 @@ TPad* drawBalancingBaryonMesonRatioPlots(CONFIGS configs_from_json, const char* 
     } // Loop over TUNES
 
 
+    // THE CLASS LABELS TURN VERTICAL HERE, WHERE THEY EXIST (brief item F6).
+    // `TAxis::LabelsOption` needs the labels already set, and the associate
+    // loop above has set all eleven. Called here the bit takes, and
+    // `ApplyPublicationAxisStyle` then reads `kLabelsVert` as true and gives
+    // the axis title the deeper offset the vertical band needs.
+    VerticalClassLabels(hYieldsTemplate);
+
 
     // THE ROW LABEL IS DRAWN ON THE MINI PAD (R46 item 4), because that is the
     // pad the composite re-parents; a label drawn on cYields would be left
@@ -6093,16 +6200,30 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
     hYieldsTemplate->SetTitle(configs_from_json.DRAW_CANVAS_TITLES ? canvasConfigs.canvasTitle.c_str() : "");
     hYieldsTemplate->GetXaxis()->SetTitle(canvasConfigs.xAxisTitle.c_str());
     hYieldsTemplate->GetYaxis()->SetTitle(canvasConfigs.yAxisTitle.c_str());
-    // ELEVEN CLASS LABELS ON ONE AXIS (ruling R45, checklist item 5). This
-    // composite puts the multiplicity class on x, so the axis carries eleven
-    // labels like "90-100%" across a pad about 990 px wide -- 69 px of
-    // horizontal room each. ROOT's slanted default needs about 116 px of that
-    // room per label at the publication text size, so the labels overprint one
-    // another; the delivered figure avoided it only by drawing the labels
-    // small, and its x TITLE was overprinted by their descenders instead.
-    // Vertical labels take no horizontal room at all, so eleven of them stay
-    // separate at full size and the title clears them.
-    hYieldsTemplate->GetXaxis()->LabelsOption("v");
+    // ELEVEN CLASS LABELS ON ONE AXIS (ruling R45 checklist item 5; the
+    // ordering defect is architect regression R3, brief item F6).
+    //
+    // This composite puts the multiplicity class on x, so the axis carries
+    // eleven labels like "90-100%" across a pad about 990 px wide -- 69 px of
+    // horizontal room each. ROOT's slanted default needs about 116 px per
+    // label at the publication text size, so the labels overprint one another
+    // and their descenders reach the axis title. Vertical labels take no
+    // horizontal room at all, so eleven of them stay separate at full size.
+    //
+    // THE CALL USED TO BE HERE AND DID NOTHING. `TAxis::LabelsOption` returns
+    // early when the axis has no labels yet, with
+    // `Warning in <TAxis::Sort>: Cannot sort. No labels` -- and this template
+    // has none: `SetBinLabel` runs later, inside the associate loop. RUN-N4's
+    // own render log carries that warning FOUR times, once per G8 panel
+    // (`RUNN4_EVIDENCE_0e98a5b_20260901/render_logs/render_VBARYONMESON.log`),
+    // so the delivered labels were never vertical and FIG-1 traded a
+    // horizontal collision for the slanted default. The second consequence is
+    // the axis title: `ApplyPublicationAxisStyle` picks the deeper offset from
+    // `TestBit(TAxis::kLabelsVert)`, which was false, so the title took the
+    // shallow offset meant for horizontal labels.
+    //
+    // The call is made after the labels exist instead; see `VerticalClassLabels`
+    // at the end of this function.
     std::cout << "- Setting y-axis range: (" << canvasConfigs.yMinAxis << "," << canvasConfigs.yMaxAxis << ")" << std::endl;
     hYieldsTemplate->GetYaxis()->SetRangeUser(canvasConfigs.yMinAxis,canvasConfigs.yMaxAxis);
     // A LOG AXIS LABELS DECADES ONLY (ruling L3, owner, 2026-09-01).
@@ -6296,6 +6417,13 @@ TPad* drawBalancingBaryonMesonRatioPlotsTUNERatios(CONFIGS configs_from_json, co
 
     } // Loop over ASSOCIATES
 
+
+    // THE CLASS LABELS TURN VERTICAL HERE, WHERE THEY EXIST (brief item F6).
+    // `TAxis::LabelsOption` needs the labels already set, and the associate
+    // loop above has set all eleven. Called here the bit takes, and
+    // `ApplyPublicationAxisStyle` then reads `kLabelsVert` as true and gives
+    // the axis title the deeper offset the vertical band needs.
+    VerticalClassLabels(hYieldsTemplate);
 
 
     // THE ROW LABEL IS DRAWN ON THE MINI PAD (R46 item 4), because that is the
