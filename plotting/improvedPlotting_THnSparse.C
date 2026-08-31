@@ -1503,12 +1503,36 @@ YieldsAndErrors YieldsAndErrorsForGivenTrigger(const std::string& trigger, const
     return yieldsAndErrors;
 }
 
-void ApplyTuneVisualStyle(TH1D* hist, const std::string& tune, bool applyTuneLineStyle = false)
+void ApplyTuneVisualStyle(TH1D* hist, const std::string& tune,
+                          bool applyTuneLineStyle = false,
+                          bool openMarker = false)
 {
     if (!hist) return;
-    HadronizationPlotStyle::ApplyTuneLineAndMarker(hist, tune, applyTuneLineStyle);
+    HadronizationPlotStyle::ApplyTuneLineAndMarker(hist, tune,
+                                                   applyTuneLineStyle,
+                                                   openMarker);
     hist->SetLineWidth(2);
     hist->SetMarkerSize(1.0);
+}
+
+// THE DRAWN BINS OF ONE CANVAS, in configured order (ruling R45, item 1).
+//
+// The configuration lists the whole axis and names the bins this canvas does
+// not draw, so the drawn set is the difference and its ORDER is the
+// contract's own ascending-activity order. The first element is therefore the
+// lowest-activity class the canvas shows, which is the one that takes the open
+// marker. Deriving it from the configured order rather than from a table means
+// a canvas that draws a different pair of classes keeps the same rule.
+std::vector<std::string> DrawnBinNames(
+    const std::vector<BinsFromTHnSparse>& bins,
+    const std::vector<std::string>& binsToIgnore)
+{
+    std::vector<std::string> drawn;
+    for (const auto& bin : bins) {
+        if (isInVector(bin.hDPhi, binsToIgnore)) continue;
+        drawn.push_back(bin.hDPhi);
+    }
+    return drawn;
 }
 
 // AMENDMENT (ii), recorded 2026-08-17. The species bin labels are the
@@ -1566,10 +1590,13 @@ constexpr Double_t kPublicationLabelFraction = 0.0150;
 // which are what the checklist's floor names, clear the floor.
 constexpr Double_t kPublicationTitleFraction = 0.0109;
 
-// Offsets are in ROOT's own units and were chosen against the delivered
-// geometry with the margins the generator now writes (0.20 left, 0.20 bottom).
-constexpr Double_t kPublicationXTitleOffset = 1.45;
-constexpr Double_t kPublicationYTitleOffset = 2.30;
+// OFFSETS ARE MULTIPLES OF THE TITLE SIZE, so they move with it: the same
+// offset places a 24 px title nearer the axis than a 32 px one. These are
+// measured against the title fraction below and the margins the generator now
+// writes (0.20 left, 0.20 bottom), on the replayed G7 canvas. At 2.30 the y
+// title overprinted the "2x10^{-1}" tick label; 3.05 clears it.
+constexpr Double_t kPublicationXTitleOffset = 1.95;
+constexpr Double_t kPublicationYTitleOffset = 3.05;
 
 Int_t PublicationTextPixels(Double_t fraction, Double_t canvasWidthPx)
 {
@@ -4389,6 +4416,21 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
     std::vector<BinsFromTHnSparse> vBinsFromTHnSparse = configs_from_json.vBinsFromTHnSparse;
     std::vector<std::string> vBinsToIgnore = canvasConfigs.vBinsToIgnore;
 
+    // CLASS FILL (ruling R45, checklist item 1). When this canvas draws more
+    // than one multiplicity class the classes land on the SAME x position, one
+    // pair per associate, and need an attribute of their own; the
+    // lowest-activity class drawn takes the open counterpart of its tune's
+    // marker. A canvas that draws one class -- every V-INTEGRATED panel --
+    // keeps the filled marker, so nothing outside V-EXTREMES changes.
+    //
+    // The baryon/meson composite is deliberately NOT given this: it puts the
+    // multiplicity class on the x axis, so its classes never overlay.
+    const std::vector<std::string> vDrawnBins =
+        DrawnBinNames(vBinsFromTHnSparse, vBinsToIgnore);
+    const bool classesOverlayOnThisCanvas = vDrawnBins.size() > 1;
+    const std::string lowestDrawnBin =
+        vDrawnBins.empty() ? std::string() : vDrawnBins.front();
+
     // Function that transforms the map storing trigger and vYieldsAndErrors into just vYieldsAndErrors
     auto vYieldsAndErrors = YieldsAndErrorsForGivenTrigger(canvasConfigs.TriggerToUse, mapYieldsAndErrors, CALCULATE_ERRORS);
 
@@ -4573,7 +4615,10 @@ TPad* drawBalancingPlots(CONFIGS configs_from_json, const char* FLAVOUR, YieldsA
                     canvasConfigs.yMinAxis, canvasConfigs.yMaxAxis,
                     Form("%s yield, tune=%s, associate=%s, bin=%s",
                          FLAVOUR, TUNE.c_str(), associateName.c_str(), binFromTHnSparse.hDPhi.c_str()));
-                ApplyTuneVisualStyle(vHists[i][k], TUNE, true);
+                ApplyTuneVisualStyle(
+                    vHists[i][k], TUNE, true,
+                    classesOverlayOnThisCanvas &&
+                        binFromTHnSparse.hDPhi == lowestDrawnBin);
                 cYields->cd();
                 vHists[i][k]->Draw("same PE");
                 if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {
@@ -4653,6 +4698,21 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
     std::vector<HistogramAndTriggerPtHistogramNames> vHistogramAndTriggerPtHistogramNames = configs_from_json.vHistogramAndTriggerPtHistogramNames;
     std::vector<BinsFromTHnSparse> vBinsFromTHnSparse = configs_from_json.vBinsFromTHnSparse;
     std::vector<std::string> vBinsToIgnore = canvasConfigs.vBinsToIgnore;
+
+    // CLASS FILL (ruling R45, checklist item 1). When this canvas draws more
+    // than one multiplicity class the classes land on the SAME x position, one
+    // pair per associate, and need an attribute of their own; the
+    // lowest-activity class drawn takes the open counterpart of its tune's
+    // marker. A canvas that draws one class -- every V-INTEGRATED panel --
+    // keeps the filled marker, so nothing outside V-EXTREMES changes.
+    //
+    // The baryon/meson composite is deliberately NOT given this: it puts the
+    // multiplicity class on the x axis, so its classes never overlay.
+    const std::vector<std::string> vDrawnBins =
+        DrawnBinNames(vBinsFromTHnSparse, vBinsToIgnore);
+    const bool classesOverlayOnThisCanvas = vDrawnBins.size() > 1;
+    const std::string lowestDrawnBin =
+        vDrawnBins.empty() ? std::string() : vDrawnBins.front();
 
     for (const auto& indexNominatorTUNE : vIndexNominatorTUNES) { std::cout << " and TUNE = " << vTUNES[indexNominatorTUNE] << "/" << vTUNES[indexDenominatorTUNE] << " ***" << std::endl; }
     // Int_t indexNominatorTUNE = vIndexNominatorTUNES[0];
@@ -4831,7 +4891,10 @@ TPad* drawBalancingPlotsTUNERatios(CONFIGS configs_from_json, const char* FLAVOU
                          vTUNES[indexDenominatorTUNE].c_str(), associateName.c_str(),
                          binFromTHnSparse.hDPhi.c_str()));
                 cYields->cd();
-                ApplyTuneVisualStyle(vHists[k][iTUNE], vTUNES[indexNominatorTUNE], true);
+                ApplyTuneVisualStyle(
+                    vHists[k][iTUNE], vTUNES[indexNominatorTUNE], true,
+                    classesOverlayOnThisCanvas &&
+                        binFromTHnSparse.hDPhi == lowestDrawnBin);
 
                 vHists[k][iTUNE]->Draw("same PE");
                 if (canvasConfigs.xMinPad != -1 && canvasConfigs.xMaxPad != -1 && canvasConfigs.yMinPad != -1 && canvasConfigs.yMaxPad != -1) {

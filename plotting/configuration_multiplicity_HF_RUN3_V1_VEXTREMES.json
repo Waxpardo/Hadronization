@@ -399,14 +399,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -446,7 +446,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -509,7 +509,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_beauty_balancing_junctions_meson_trigger",
@@ -543,14 +543,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -590,7 +590,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -653,7 +653,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_beauty_balancing_closepacking_meson_trigger",
@@ -687,14 +687,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -734,7 +734,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -797,7 +797,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_beauty_balancing_junctions_closepacking_over_monash_meson_trigger",
@@ -840,7 +840,7 @@
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -880,7 +880,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -980,14 +980,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -1027,7 +1027,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -1090,7 +1090,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_beauty_balancing_junctions_baryon_trigger",
@@ -1124,14 +1124,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -1171,7 +1171,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -1234,7 +1234,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_beauty_balancing_closepacking_baryon_trigger",
@@ -1268,14 +1268,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -1315,7 +1315,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -1378,7 +1378,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_beauty_balancing_junctions_closepacking_over_monash_baryon_trigger",
@@ -1421,7 +1421,7 @@
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -1461,7 +1461,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -1561,14 +1561,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -1608,7 +1608,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -1671,7 +1671,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_charm_balancing_junctions_meson_trigger",
@@ -1705,14 +1705,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -1752,7 +1752,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -1815,7 +1815,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_charm_balancing_closepacking_meson_trigger",
@@ -1849,14 +1849,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -1896,7 +1896,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -1959,7 +1959,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_charm_balancing_junctions_closepacking_over_monash_meson_trigger",
@@ -2002,7 +2002,7 @@
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -2042,7 +2042,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -2142,14 +2142,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -2189,7 +2189,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -2252,7 +2252,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_charm_balancing_junctions_baryon_trigger",
@@ -2286,14 +2286,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -2333,7 +2333,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -2396,7 +2396,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_charm_balancing_closepacking_baryon_trigger",
@@ -2430,14 +2430,14 @@
             "histogram_minimum": -1,
             "histogram_maximum": -1,
             "set_log_y": true,
-            "x_min_legend": -1,
-            "x_max_legend": -1,
-            "y_min_legend": -1,
-            "y_max_legend": -1,
+            "x_min_legend": 0.21,
+            "x_max_legend": 0.97,
+            "y_min_legend": 0.205,
+            "y_max_legend": 0.285,
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -2477,7 +2477,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],
@@ -2540,7 +2540,7 @@
                 "hDPhiM1_10"
             ],
             "nominator_TUNES": [],
-            "legend_columns": 1
+            "legend_columns": 2
         },
         {
             "canvas_name": "mini_charm_balancing_junctions_closepacking_over_monash_baryon_trigger",
@@ -2583,7 +2583,7 @@
             "legend_entries": [
                 {
                     "object_name": "hDPhiM90_100",
-                    "display_name": "lowest #it{N}_{ch} class, 90-100%"
+                    "display_name": "lowest, 90-100%"
                 },
                 {
                     "object_name": "hDPhiM80_90",
@@ -2623,7 +2623,7 @@
                 },
                 {
                     "object_name": "hDPhiM0_1",
-                    "display_name": "highest #it{N}_{ch} class, 0-1%"
+                    "display_name": "highest, 0-1%"
                 }
             ],
             "TUNE_colours": [],

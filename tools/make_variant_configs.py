@@ -343,11 +343,35 @@ def percentile_label(index: int, percentiles: list[float]) -> str:
 
 
 def rank_words(index: int, total: int) -> str | None:
-    """Plain-language rank, derived from position in ascending N_ch."""
+    """Plain-language rank, derived from position in ascending N_ch.
+
+    THE WORDS ARE SHORT BECAUSE THEY NOW GO IN A PANEL (ruling R45, checklist
+    item 1). Until FIG-1 these labels were written into `legend_entries` and
+    never drawn: every V-EXTREMES panel carried `legend=(-1,-1,-1,-1)`, which
+    is the macro's switch for "no legend on this canvas", so the two classes
+    reached the reader with no name at all.
+
+    A legend that names them has to fit inside a mini pad of a four-row
+    composite. Measured against the delivered geometry, the band below the
+    lowest drawn point is 0.147 of the pad, and two rows of legend at the
+    label metric need more than that; two SHORT entries side by side in one
+    row need 0.08 and fit with room to spare. "lowest #it{N}_{ch} class,
+    90-100%" is 30 characters and does not fit a half-width column; "lowest,
+    90-100%" is 15 and does.
+
+    NOTHING IS LOST FROM THE FIGURE. The canvas header states the long form
+    in full -- "2 of 11 #it{N}_{ch} classes shown: lowest (90-100%), highest
+    (0-1%)" -- and item 11 keeps that line. The legend's job is to bind a
+    marker to a class, and the short form does that.
+
+    The shape stays what `tests/test_variant_configs.py` pins: the word
+    "lowest" or "highest" is present, and the percentile is the last
+    comma-separated field, which is what its inversion check parses.
+    """
     if index == 1:
-        return "lowest #it{N}_{ch} class"
+        return "lowest"
     if index == total:
-        return "highest #it{N}_{ch} class"
+        return "highest"
     return None
 
 
@@ -1022,6 +1046,42 @@ def build_extremes(base: dict, percentiles: list[float],
     rewrite_legend(document)
     apply_display_filter(document, drawn,
                          axis_declaration(classes, drawn, percentiles))
+
+    # THE CLASS LEGEND IS SWITCHED ON HERE (ruling R45, checklist items 1
+    # and 6). The macro builds a legend only when all four legend coordinates
+    # differ from -1; every V-EXTREMES panel carried -1, so the delivered G5
+    # and G7 held no TLegend at all and nothing named the two classes.
+    #
+    # THE RECTANGLE CLEARS THE DATA, and the clearance is measured rather than
+    # eyeballed. The delivered macros carry every drawn point, so the lowest
+    # ink on each yield panel is known exactly: over the twelve panels of G5
+    # and G7 the lowest is 0.0127788696, on the beauty JUNCTIONS baryon column,
+    # which with that column's window (0.004259623915918309, 0.8) sits at 0.347
+    # of the pad. The frame floor is the 0.20 bottom margin, so the clear band
+    # is 0.147 of the pad and this rectangle uses 0.08 of it. The charm panels
+    # and the meson columns are all higher, so 0.347 is the binding case.
+    #
+    # TWO COLUMNS, ONE ROW, because two rows do not fit that band at the label
+    # metric. One row of two short entries needs 0.08; two rows need 0.16.
+    #
+    # THE RATIO PANELS GET NO LEGEND, and the same arithmetic is why. They draw
+    # four series -- two classes by two numerator tunes -- so their legend is
+    # two rows, 0.16 of the pad. Above the data there is 0.109 (the drawn
+    # maximum is 2.5314253, the window ceiling 3.0) and below it 0.108; neither
+    # holds two rows without dropping the text under the size floor or moving a
+    # window that a measurement fixed. Those panels are covered by checklist
+    # item 6's other clause, a shared legend on the same canvas: the class
+    # convention is named in the legends this block adds to the yield panels
+    # directly above them, and each tune is named and coloured by the three
+    # tune panels of its own column.
+    for canvas in document.get("canvases_to_be_drawn", []):
+        if canvas.get("draw_function_to_use") != "drawBalancingPlots":
+            continue
+        canvas["x_min_legend"] = 0.21
+        canvas["x_max_legend"] = 0.97
+        canvas["y_min_legend"] = 0.205
+        canvas["y_max_legend"] = 0.285
+        canvas["legend_columns"] = 2
 
     document["global_canvases_to_be_drawn"] = composite_globals(
         base,
