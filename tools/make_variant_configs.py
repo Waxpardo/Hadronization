@@ -774,6 +774,35 @@ def apply_window(canvas: dict, window: tuple[float, float]) -> None:
     canvas["y_min_axis"], canvas["y_max_axis"] = window
 
 
+# PAD MARGINS FOR THE COMPOSITE PANELS (ruling R45, checklist items 5 and 12).
+#
+# The inherited margins are 0.13 left and 0.12 bottom, authored for text at
+# ROOT's pad-relative default. The macro now sizes text against the FINAL
+# canvas width (`kPublicationLabelFraction`), which on a 2200 px composite is
+# 33 px where the default gave about 19, and a label that is 1.7x taller needs
+# the band it is drawn in to grow with it. Left unchanged, the enlarged y title
+# overprints the y tick labels and the enlarged x title leaves the pad.
+#
+# 0.20 was measured, not guessed: the delivered G5 and G7 canvases were
+# replayed on the bench with this metric and these margins, and the y title
+# clears the widest tick label while the centred x title sits inside the pad
+# below the species labels (`FIG1_EVIDENCE_1db46d9_20260831/audit/`).
+#
+# The top and right margins do not move. The top carries the panel title,
+# which is unchanged in position, and the right carries nothing.
+COMPOSITE_PAD_MARGINS = {
+    "left_margin_mini_pad": 0.20,
+    "right_margin_mini_pad": 0.03,
+    "bottom_margin_mini_pad": 0.20,
+    "top_margin_mini_pad": 0.10,
+}
+
+
+def apply_composite_margins(canvas: dict) -> None:
+    """Give one composite mini pad the margins its text size needs."""
+    canvas.update(COMPOSITE_PAD_MARGINS)
+
+
 def build_trigger_column_canvases(
         base: dict,
         windows: dict[tuple[str, str], tuple[float, float]] | None = None,
@@ -808,6 +837,7 @@ def build_trigger_column_canvases(
                 canvas["x_min_mini_pad"], canvas["x_max_mini_pad"] = x_min, x_max
                 canvas["y_min_mini_pad"], canvas["y_max_mini_pad"] = rows[row]
                 apply_window(canvas, windows[(column, "yield")])
+                apply_composite_margins(canvas)
                 canvases.append(canvas)
 
             ratio = json.loads(
@@ -832,6 +862,7 @@ def build_trigger_column_canvases(
             ratio["x_min_mini_pad"], ratio["x_max_mini_pad"] = x_min, x_max
             ratio["y_min_mini_pad"], ratio["y_max_mini_pad"] = rows[0]
             apply_window(ratio, windows[(column, "ratio")])
+            apply_composite_margins(ratio)
             canvases.append(ratio)
 
     return canvases
@@ -1272,6 +1303,14 @@ def build_baryonmeson(base: dict, percentiles: list[float]) -> dict:
                 f"{COMBINED_RATIO_DENOMINATOR}")
         keep.append(canvas)
     document["canvases_to_be_drawn"] = keep
+
+    # The baryon/meson composite takes the same pad margins as the
+    # trigger-column composites, for the same reason and with one addition of
+    # its own: this canvas puts the multiplicity CLASS on the x axis, its bin
+    # labels are rotated, and the delivered figure overprinted the descenders
+    # of "20-30%" and "10-20%" with the x title (checklist item 5).
+    for canvas in keep:
+        apply_composite_margins(canvas)
 
     # Two retained rows per flavour, spread over the original extent.
     TOP, ROWS = 0.95, 2

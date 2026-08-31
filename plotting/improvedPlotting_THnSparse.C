@@ -36,6 +36,8 @@
 #include "TLatex.h"
 #include "TString.h" // TODO: can use this for the legend entry names?
 #include <TLegend.h>
+#include <TLine.h>
+#include <TPaveText.h>
 
 #include "../contracts/GeneratedPairRegistry.h"
 #include "../contracts/AssociateOriginCategoryContract.h"
@@ -1517,6 +1519,116 @@ void ApplyTuneVisualStyle(TH1D* hist, const std::string& tune, bool applyTuneLin
 // One constant, applied at every yields-template site, so the species axis is
 // the same size on the yield panels and on the ratio panels below them.
 constexpr Double_t kSpeciesBinLabelSize = 0.055;
+
+// PUBLICATION TEXT METRIC (ruling R45, checklist item 8). This GENERALISES
+// amendment (ii) above. The two calls above are left alone and still set the
+// species labels on a mini pad written on its own; on an ASSEMBLED global
+// canvas -- which is what every delivered figure is -- the pass below runs
+// afterwards and overrides them with the canvas-derived size.
+//
+// Amendment (ii) found the defect and fixed one symptom: a size expressed as a
+// fraction of the PAD renders small on a mini pad, because a mini pad of a
+// four-row composite is about a quarter of the canvas. Every other text
+// element on these canvases still took ROOT's pad-relative default, so the
+// delivered composites carried tick labels at 0.0087 of canvas width and axis
+// titles at 0.0055 against G1's smallest label at 0.0134 -- G1 being the
+// reference figure the checklist measures against.
+//
+// SIZES ARE ABSOLUTE HERE, in pixels, through font precision 3 (the "3" of
+// font 43), and the pixel count is derived from the FINAL canvas width. Two
+// consequences the pad-relative form cannot give: a mini pad authored at
+// 800 px but rendered on a 2200 px composite carries the size the composite
+// needs, and every figure this macro writes carries the same PRINTED size
+// whatever its pad layout.
+//
+// THE LABEL FRACTION IS ABOVE G1'S FLOOR, which is what the checklist asks
+// for. G1's smallest label is 24 px on a 1796 px canvas, 0.01336 of the width;
+// 0.0150 clears it by 1.12x. On the 2200 px composites that is 33 px, against
+// the 19 px the delivered figures carried.
+constexpr Double_t kPublicationLabelFraction = 0.0150;
+
+// THE TITLE FRACTION IS SMALLER, AND THE PAD GEOMETRY IS WHY. A four-row
+// composite mini pad is 0.2375 of a 2050 px canvas, 487 px tall, and a
+// ROOT y-axis title is centred on the frame, so it may use 0.45 of the pad
+// height each way -- 438 px. The longest y title this macro draws is the
+// combined-ratio panel's "tune / MONASH balancing yield", 29 characters,
+// whose rendered length is about 0.58 em per character. It therefore fits
+// only while 29 x 0.58 x size <= 438, that is size <= 26 px, and measurement
+// on the replayed G7 canvas puts the last complete size at 24: at 26 the
+// final "d" is clipped and at 30 the last word is gone
+// (`FIG1_EVIDENCE_1db46d9_20260831/audit/`).
+//
+// 24 px is 0.0109 of the canvas width, BELOW G1's 0.01336 floor. That
+// shortfall is reported rather than hidden: the four-row composite cannot
+// carry this y-title wording at G1's scale, and the three ways out -- shorter
+// wording, fewer rows, a taller canvas -- are the owner's or the architect's,
+// not this session's. Item 4 reserves the wording explicitly. The LABELS,
+// which are what the checklist's floor names, clear the floor.
+constexpr Double_t kPublicationTitleFraction = 0.0109;
+
+// Offsets are in ROOT's own units and were chosen against the delivered
+// geometry with the margins the generator now writes (0.20 left, 0.20 bottom).
+constexpr Double_t kPublicationXTitleOffset = 1.45;
+constexpr Double_t kPublicationYTitleOffset = 2.30;
+
+Int_t PublicationTextPixels(Double_t fraction, Double_t canvasWidthPx)
+{
+    const Int_t pixels =
+        static_cast<Int_t>(std::lround(fraction * canvasWidthPx));
+    return pixels > 1 ? pixels : 1;
+}
+
+// THE X TITLE IS CENTRED (checklist item 5). ROOT right-aligns an axis title
+// by default. On an axis whose ticks carry SPECIES names rather than numbers,
+// a right-aligned title lands beside the last species label with no gap, and
+// the delivered composites read "#bar{#Lambda}_{c} associate species" as one
+// string. Centring moves the title away from every label instead of tuning an
+// offset against the longest one.
+void ApplyPublicationAxisStyle(TH1* frame, Double_t canvasWidthPx)
+{
+    if (!frame) return;
+    const Int_t labelPixels =
+        PublicationTextPixels(kPublicationLabelFraction, canvasWidthPx);
+    const Int_t titlePixels =
+        PublicationTextPixels(kPublicationTitleFraction, canvasWidthPx);
+    for (TAxis* axis : {frame->GetXaxis(), frame->GetYaxis()}) {
+        if (!axis) continue;
+        axis->SetLabelFont(43);
+        axis->SetLabelSize(labelPixels);
+        axis->SetTitleFont(43);
+        axis->SetTitleSize(titlePixels);
+        axis->CenterTitle(true);
+    }
+    frame->GetXaxis()->SetTitleOffset(kPublicationXTitleOffset);
+    frame->GetYaxis()->SetTitleOffset(kPublicationYTitleOffset);
+}
+
+// Applied on the ASSEMBLED global canvas, and only there, because that is
+// where the final width is known. The mini pads have already been re-parented
+// by then, so one walk reaches every frame, legend and pad title the delivered
+// figure actually shows.
+void ApplyPublicationTextStyleToPad(TPad* pad, Double_t canvasWidthPx)
+{
+    if (!pad) return;
+    if (TPaveText* padTitle =
+            dynamic_cast<TPaveText*>(pad->GetPrimitive("title"))) {
+        padTitle->SetTextFont(43);
+        padTitle->SetTextSize(
+            PublicationTextPixels(kPublicationTitleFraction, canvasWidthPx));
+    }
+    TIter nextPrimitive(pad->GetListOfPrimitives());
+    while (TObject* primitive = nextPrimitive()) {
+        if (TPad* child = dynamic_cast<TPad*>(primitive)) {
+            ApplyPublicationTextStyleToPad(child, canvasWidthPx);
+        } else if (TH1* frame = dynamic_cast<TH1*>(primitive)) {
+            ApplyPublicationAxisStyle(frame, canvasWidthPx);
+        } else if (TLegend* legend = dynamic_cast<TLegend*>(primitive)) {
+            legend->SetTextFont(43);
+            legend->SetTextSize(
+                PublicationTextPixels(kPublicationLabelFraction, canvasWidthPx));
+        }
+    }
+}
 
 // PROPOSAL (canvas polish, defect a). Physics notation for an associate axis
 // label, keyed on the PDG code the pair configuration already carries.
@@ -5435,6 +5547,15 @@ int improvedPlotting_THnSparse(const char* configuration) {
             miniCanvasIt->second->Draw();
         } // Loop over mini canvas names
 
+        // THE TEXT METRIC IS APPLIED HERE (ruling R45, checklist item 8),
+        // after every mini pad has been re-parented and before anything is
+        // written. This is the only point at which the FINAL canvas width is
+        // known: a mini pad is authored at 800 px and rendered on a 2200 px
+        // composite, so a size derived from the mini's own canvas would be a
+        // third of what the composite needs.
+        ApplyPublicationTextStyleToPad(globalCanvas,
+                                       globalCanvasConfig.xSizeCanvas);
+
         // The figure declares its own axis coverage. Drawn last so it sits over
         // the assembled pads, and only when the configuration carries one --
         // an unfiltered canvas shows the whole axis and has nothing to disclose.
@@ -5442,8 +5563,14 @@ int improvedPlotting_THnSparse(const char* configuration) {
             globalCanvas->cd();
             TLatex* declaration = new TLatex();
             declaration->SetNDC();
-            declaration->SetTextFont(42);
-            declaration->SetTextSize(0.011);
+            // The class-scope line is an asset of the figure (checklist item
+            // 11), so it is rendered on the same metric as everything else
+            // rather than on its own fraction: 0.011 of canvas HEIGHT was
+            // 0.0102 of canvas width, below the G1 floor the metric clears.
+            declaration->SetTextFont(43);
+            declaration->SetTextSize(
+                PublicationTextPixels(kPublicationLabelFraction,
+                                      globalCanvasConfig.xSizeCanvas));
             declaration->SetTextAlign(11);
             declaration->DrawLatex(
                 0.035, 0.985, configs_from_json.axisDeclaration.c_str());
