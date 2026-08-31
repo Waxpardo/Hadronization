@@ -1456,6 +1456,36 @@ def build_baryonmeson(base: dict, percentiles: list[float]) -> dict:
             canvas["y_min_axis"] = BARYONMESON_TUNE_RATIO_WINDOW[0]
             canvas["y_max_axis"] = BARYONMESON_TUNE_RATIO_WINDOW[1]
             canvas["x_axis_title"] = "multiplicity class"
+            # THIS PANEL DRAWS TWO SERIES AND NAMED NEITHER (ruling R45,
+            # checklist item 6). It carried legend=(-1,-1,-1,-1), the macro's
+            # switch for "no legend", so the delivered G8 left its two ratio
+            # panels with nothing mapping colour to tune -- on the canvas that
+            # carries the paper's headline number.
+            #
+            # The entry is appended exactly as the yield panel above appends
+            # its own, and for the same reason: this function keys the legend
+            # on the ASSOCIATE name while DisplayLabelForMultiplicityBin reads
+            # the same map by BIN name for the x labels, so replacing the class
+            # entries would send the axis back to printing routing keys. The
+            # draw loop appends " (NUMERATOR/DENOMINATOR)" itself, so two
+            # entries come out of one appended row.
+            #
+            # THE RECTANGLE IS BELOW THE DATA, and the clearance is measured
+            # from the delivered macros: the lower edge of the drawn envelope
+            # is 1.08488807 on the beauty panel and 0.959618567 on the charm
+            # one, which in the (0, 4) window with a 0.32 bottom margin sit at
+            # 0.477 and 0.459 of the pad. The band from the frame floor to
+            # 0.459 is 0.139 and this rectangle uses 0.11. Above the data there
+            # is only 0.028, the beauty panel reaching 3.8073786, so the top is
+            # not available.
+            canvas["legend_entries"] = list(canvas.get("legend_entries", [])) + [{
+                "object_name": baryon,
+                "display_name": BARYON_LEGEND_LABEL[flavour],
+            }]
+            canvas["x_min_legend"] = 0.22
+            canvas["x_max_legend"] = 0.78
+            canvas["y_min_legend"] = 0.335
+            canvas["y_max_legend"] = 0.445
         else:
             raise SystemExit(f"unexpected draw function {function!r}")
 
