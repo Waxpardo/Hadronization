@@ -138,7 +138,14 @@ shell in both cases:
 | interpreter | invocation | result |
 |---|---|---|
 | 3.14.7 (`/opt/homebrew/bin/python3`) | `tools/run_tests.sh .` | **97/97**, exit 0 |
+| 3.11.15 (a miniforge environment) | `PYTHON=<path> tools/run_tests.sh .` | **97/97**, exit 0 |
 | 3.9.6 (`/usr/bin/python3`) | `PYTHON=/usr/bin/python3 tools/run_tests.sh .` | **97/97**, exit 0 |
+
+Three interpreters, not one, because CPython 3.12 changed `sum()` over floats to
+compensated summation. 3.9 and 3.11 sit on the pre-3.12 side of that change and
+3.14 on the post- side, so the three bracket it. A gate whose verdict moves with
+the interpreter, or a generator whose committed bytes do, shows up here and
+nowhere else.
 
 **The gap that remains, stated exactly.** Session HANDOFF added
 `tests/test_handoff_package.py` and established its Python 3.9 compatibility
