@@ -1,3 +1,35 @@
+> **REFERENCE ONLY — SUPERSEDED. Do not cite this file for any paper claim.**
+>
+> Its successor is [`docs2/paper/CLAIM_MAP.md`](../docs2/paper/CLAIM_MAP.md),
+> which carries the current claim-to-evidence mapping. This file is kept as the
+> historical record of an earlier release state and is **not maintained**.
+> Ruling R38 makes `paper/` reference-only: the paper lives in Overleaf and this
+> directory is not edited to track it. This annotation is the single exception,
+> and it changes no row below.
+>
+> **Three reasons it cannot be used as evidence**, each measured at HEAD rather
+> than asserted:
+>
+> 1. **Four rows take their evidence from retired systematics trees.** Rows
+>    **A4**, **M3**, **R2** and **R3** cite the two 2026-08-19 and 2026-08-20
+>    trees. Both are `HISTORICAL_PROVENANCE_ONLY` with
+>    `current_or_publication_use: PROHIBITED`, so citing either would license a
+>    paper claim on a retired axis. `CLAIM_MAP.md` names those rows without
+>    repeating the paths, so that a scan of the successor finds no retired-tree
+>    citation to follow.
+> 2. **Three of its cited paths do not resolve.** `References.bib` (moved to the
+>    project archive by ruling R23); `paper/references.bib` (tracked at HEAD but
+>    removed in the owner's working state); and
+>    `results/provenance/figure_acceptance_manifest_v1.json` (retired by ruling
+>    R6). The first and third are absent from the tree entirely.
+> 3. **Its release state is stale.** The banner below reads `PUBLIC-BLOCKED` and
+>    the file says "the repository accepts zero P1-P8 outputs". Since then RUN-N
+>    through RUN-N4b certified all eleven deliverable rows, and the accepted
+>    bytes and their acceptance records are in
+>    `deliverables/20260901/MANIFEST.md`.
+>
+> Annotated by session HANDOFF, 2026-09-01. Nothing below this line was changed.
+
 # Manuscript claim-evidence checklist
 
 **Release state:** `PUBLIC-BLOCKED`.

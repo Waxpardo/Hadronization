@@ -105,10 +105,33 @@ G1, G2, G3, G9 and T1 are outside that gate: G1 and G9 come from stems in
 correlation canvas, and T1 from `tools/count_generated_sample.C`. Check those
 five by enumerating the delivery directory after the render.
 
-## Two figures in the snapshot that this manifest does not produce
+## Three figures in the snapshot that this manifest does not produce
 
-`paper/Results.tex:170` and `:182` include `globalCanvasYieldsPDF_215.pdf` and
-`globalCanvasRelativeYieldsPDF_215.pdf`. These are thesis figures. No G-row
-produces them, and no repository target names them. They are an Overleaf-side
-editorial matter for the owner, listed here so nobody hunts for a producer that
-does not exist.
+Listed so that the coverage statement is exact and nobody hunts for a producer
+that does not exist. All three are Overleaf-side editorial matters for the
+owner.
+
+| figure | included at | what it is |
+|---|---|---|
+| `figures/YieldsBalancing/globalCanvasYieldsPDF_215.pdf` | `paper/Results.tex:170` | thesis-era, two tunes |
+| `figures/BaryonMesonRelativeYieldsBalancing/globalCanvasRelativeYieldsPDF_215.pdf` | `paper/Results.tex:182` | thesis-era, two tunes |
+| `figures/Introduction-figures/runningCouplingQCD.png` | `paper/Introduction.tex:8`, **commented out** | owner-supplied illustrative material |
+
+**The two `_215` figures** are thesis figures. No G-row produces them and no
+repository target names them.
+
+**`runningCouplingQCD.png` is owner-supplied and is not a repository product.**
+It is the running-coupling schematic in the Introduction: a summary of
+measurements of the strong coupling, taken from the literature. Nothing in this
+repository renders it and nothing should try. Its figure environment is
+currently commented out — `paper/Introduction.tex:6-11` each begin with `%` —
+so the draft includes ten figures, not eleven. The file is present in the
+owner's bench snapshot at
+`paper/figures/Introduction-figures/runningCouplingQCD.png`. Recorded on the
+architect's finding P1, `ARCHITECT_FIGURE_VERIFICATION_20260901.md`.
+
+**The exact coverage statement.** The snapshot carries eleven
+`\includegraphics` paths, ten of them active. **Eight are campaign products,
+and all eight are delivered**: G1-G8. G9's thirty kinematic stems are produced
+and are included by nothing. The three rows above are not products of this
+repository.

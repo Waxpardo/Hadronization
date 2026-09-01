@@ -803,10 +803,10 @@ BARYON_COLUMN_RATIO_WINDOW = (0.0, 3.0)
 # decade, and the provisional meson axis spanned 5.62, so two-thirds of a
 # published log axis would have been empty. Each floor becomes its measured
 # envelope edge over 3 -- the margin CON-1C set for
-# `MESON_COLUMN_YIELD_WINDOW`, whose floor 5e-05 sits 3.15x below that
-# column's envelope edge (`:469`, `:474`). The quotient stays at full
-# precision, so each floor below is exactly the `_ENVELOPE[0] / 3` of the
-# constant above it and a later reader recomputes it in one division. The
+# `MESON_COLUMN_YIELD_WINDOW` (this file, `:691`), whose floor 5e-05 sits
+# 3.15x below `MESON_COLUMN_YIELD_ENVELOPE` (this file, `:686`). The
+# quotient stays at full precision, so each floor below is exactly the
+# `_ENVELOPE[0] / 3` of the constant above it, recomputed in one division. The
 # meson panel goes from 5.62 decades to 1.93 and the baryon panel from 5.90 to
 # 2.27. Neither ceiling moves. RUN-N3 re-renders V-EXTREMES on these floors,
 # and its records supersede the candidates.

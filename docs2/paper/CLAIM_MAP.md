@@ -6,23 +6,31 @@ which acceptance record carries its bytes.
 
 **Three rules govern this file.**
 
-1. **No PROHIBITED-scope citation.** Nothing here cites
-   `results/systematics/20260819` or `results/systematics/20260820`. Both trees
-   are `HISTORICAL_PROVENANCE_ONLY` with
+1. **No PROHIBITED-scope citation.** Nothing here cites either of the two
+   retired systematics trees, the ones dated 2026-08-19 and 2026-08-20. Both are
+   `HISTORICAL_PROVENANCE_ONLY` with
    `current_or_publication_use: PROHIBITED`, so a citation of either would
-   license a paper claim on a retired axis.
-2. **No absent file.** Every path was checked to exist at HEAD `f44e038`.
+   license a paper claim on a retired axis. **Their paths are deliberately not
+   written out in this rule**, for the same reason they are not written below: a
+   scan of this file must find no retired-tree path to follow, and a rule that
+   spelled out what it forbids would itself be the first hit. Session HANDOFF
+   measured that this was so and corrected it.
+2. **No absent file.** Every path this file cites was checked to exist at
+   HEAD, most recently by session HANDOFF on 2026-09-01: 76 repository
+   paths, none absent, every line anchor within its file's length.
 3. **A test is evidence only for what it actually asserts.** A test that pins a
    definition in its own arithmetic is not evidence about the code that
    implements it.
 
-`paper/CLAIM_EVIDENCE.md` breaks both rules and is **superseded, not edited**.
-Four of its rows — A4, M3, R2 and R3 — take their evidence from the two retired
-systematics trees, and three of its cited paths do not exist at HEAD (one
-bibliography copy the archive holds, one the owner's Overleaf state removed, and
-the figure-acceptance manifest ruling R6 retired). Those paths are named in the
-DOC-1 session report rather than repeated here, so that a scan of this file
-finds no retired-tree citation to follow.
+`paper/CLAIM_EVIDENCE.md` breaks the first two rules and is **superseded, not
+edited**. Four of its rows — A4, M3, R2 and R3 — take their evidence from the
+two retired systematics trees, and three of its cited paths do not exist at
+HEAD (one bibliography copy the archive holds, one the owner's Overleaf state
+removed, and the figure-acceptance manifest ruling R6 retired). Those paths are
+named in the DOC-1 session report rather than repeated here, so that a scan of
+this file finds no retired-tree citation to follow. That file now carries a
+reference-only annotation saying the same thing at its head, written by session
+HANDOFF; it is the only file under `paper/` this consolidation ever wrote.
 
 ## Claims
 
@@ -47,19 +55,27 @@ finds no retired-tree citation to follow.
 
 ## Deliverables
 
-Every row's acceptance record is written by RUN-N. Until then the column reads
-`pending RUN-N`, and that is a statement of fact, not a placeholder.
+Every row's acceptance record is written by RUN-N. **They are now written**, and
+the column below names the record that is CURRENT for each row.
+
+Nine of the eleven rows were re-rendered after RUN-N and their earlier records
+are superseded; the mirror keeps all 38 records the campaign wrote, so the
+current one has to be resolved rather than assumed. Session HANDOFF did that two
+ways, by session ordinal and by the `supersedes` chain, and the two agree on
+every record. The records live in the RUN-N4b mirror
+`DELIVERABLES_REVIEW_20260901B/records/`, and the sha256 of every delivered file
+is in [../../deliverables/20260901/MANIFEST.md](../../deliverables/20260901/MANIFEST.md).
 
 | id | producer | contract | acceptance record |
 |---|---|---|---|
-| G1 | `plotting/Plot_InclusiveKinematicSpectra_Raw.C:1795`, target `multiplicity-spectrum` | stem `MultiplicitySpectrum_Shared_shape` (`:2192`) | pending RUN-N |
-| G2, G3 | the V-CORRELATIONS canvas, `plotting/improvedPlotting_THnSparse.C:5181` | `plotting/configuration_multiplicity_HF_RUN3_V1_VCORRELATIONS.json` | pending RUN-N |
-| G4, G6 | V-INTEGRATED globals | `tests/test_delivery_names.py`, `VINTEGRATED` | pending RUN-N |
-| G5, G7 | V-EXTREMES globals | `tests/test_delivery_names.py`, `VEXTREMES` | pending RUN-N |
-| G8 | V-BARYONMESON global | `tests/test_delivery_names.py`, `VBARYONMESON` | pending RUN-N |
-| G9 | `plotting/Plot_InclusiveKinematicSpectra_Raw.C:2196-2221`, target `kinematic-spectra` | thirty stems, ten species × three observables | pending RUN-N |
-| T1 | `tools/count_generated_sample.C`; `tools/read_merged_event_counts.C` | `hadronization_generated_sample_count_v1` (`tools/count_generated_sample.C:232`) | pending RUN-N |
-| V1 | `tools/vintegrated_closure.py`; `extraction/harvest_class_report.py --strict-control` | 12 identities; 144 / 132 / 132 | pending RUN-N |
+| G1 | `plotting/Plot_InclusiveKinematicSpectra_Raw.C:1795`, target `multiplicity-spectrum` | stem `MultiplicitySpectrum_Shared_shape` (`:2192`) | `RUNN4B_G1.json` (RUN-N4b) |
+| G2, G3 | the V-CORRELATIONS canvas, `plotting/improvedPlotting_THnSparse.C:5181` | `plotting/configuration_multiplicity_HF_RUN3_V1_VCORRELATIONS.json` | `RUNN4B_G2.json`, `RUNN4B_G3.json` (RUN-N4b) |
+| G4, G6 | V-INTEGRATED globals | `tests/test_delivery_names.py`, `VINTEGRATED` | `RUNN4B_G4.json`, `RUNN4B_G6.json` (RUN-N4b) |
+| G5, G7 | V-EXTREMES globals | `tests/test_delivery_names.py`, `VEXTREMES` | `RUNN4B_G5.json`, `RUNN4B_G7.json` (RUN-N4b) |
+| G8 | V-BARYONMESON global | `tests/test_delivery_names.py`, `VBARYONMESON` | `RUNN4B_G8.json` (RUN-N4b) |
+| G9 | `plotting/Plot_InclusiveKinematicSpectra_Raw.C:2196-2233`, target `kinematic-spectra` | thirty stems, ten species × three observables | `RUNN4B_G9.json` (RUN-N4b) |
+| T1 | `tools/count_generated_sample.C`; `tools/read_merged_event_counts.C` | `hadronization_generated_sample_count_v1` (`tools/count_generated_sample.C:232`) | `RUNN_T1.json` (RUN-N, never re-counted) |
+| V1 | `tools/vintegrated_closure.py`; `extraction/harvest_class_report.py --strict-control` | 12 identities; 144 / 132 / 132 | `RUNN4B_V1.json` (RUN-N4b). Not a paper figure, so it is not in the handoff package |
 
 Delivery names are in [DELIVERABLES.md](DELIVERABLES.md).
 
