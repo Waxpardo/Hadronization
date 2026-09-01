@@ -42,7 +42,7 @@ committed `paper/` is an older state where the anchors miss
 
 G1 is delivered as a **`.png`**. Every balancing figure is delivered as a
 **`.pdf`** and carries the writer's `_PDF` tag before the extension
-(`plotting/improvedPlotting_THnSparse.C:1363-1365`).
+(`plotting/improvedPlotting_THnSparse.C:1365`).
 
 ## G5 and G7 omit B_c-, and the caption must say so
 
@@ -73,7 +73,7 @@ V-INTEGRATED still references all 32.
 The correlation canvas builds its stem from the flavour token, which is
 upper case in the macro:
 `Form("%sCorrelations_MONASH", FLAVOUR)`
-(`plotting/improvedPlotting_THnSparse.C:4886`). The render therefore writes
+(`plotting/improvedPlotting_THnSparse.C:5181`). The render therefore writes
 `CHARMCorrelations_MONASH_PDF.pdf` and `BEAUTYCorrelations_MONASH_PDF.pdf`,
 while the manuscript includes `Charm…` and `Beauty…`.
 

@@ -16,9 +16,12 @@ producer fills the counter at
 `generation/producer/heavyflavourcorrelations_status.cpp:1058-1063` and writes
 it as `multiplicity_primary_charged_eta10_v1` (`:713-714`).
 
-A second, wider counter at `kMultiplicityEtaWide = 4.0` (`:525`) is written as
-`multiplicity_primary_charged_eta40_v1` (`:715-716`). **It does not define the
-classes.** `config/multiplicity_percentile_classes_v2.json` names
+A second, wider counter at `kMultiplicityEtaWide = 4.0`
+(`generation/producer/HeavyFlavourUtils.h:525`) is written as
+`multiplicity_primary_charged_eta40_v1`
+(`generation/producer/heavyflavourcorrelations_status.cpp:715-716`). **It
+does not define the classes.**
+`config/multiplicity_percentile_classes_v2.json` names
 `multiplicity_primary_charged_eta10_v1` as its counter.
 
 **The figure captions must state |η| ≤ 1.** The observable's own acceptance is
@@ -51,17 +54,18 @@ windows, `c1` (90–100 %) through `c11` (0–1 %), each with its bin name `M90_
 `N_ch` boundary defines another tune's classes
 (`config/multiplicity_percentile_classes_v2.json`, `definition`; receipt
 `boundary_source.mode` is `per_tune`,
-`plotting/improvedPlotting_THnSparse.C:2589-2591`; histogram `summed MULTIPLICITY` at `:2008`). Absolute `N_ch` thresholds
-are therefore allowed to differ between tunes, and they do.
+`plotting/improvedPlotting_THnSparse.C:2765-2766`; histogram
+`summed MULTIPLICITY` at `:2767`). Absolute `N_ch` thresholds are therefore
+allowed to differ between tunes, and they do.
 
 The tie rule: a threshold integer belongs to the **lower**-activity class, and
 the adjacent higher-activity class starts at the threshold plus one
 (`config/multiplicity_percentile_classes_v2.json`, `tie_rule`; the same rule as
-a receipt literal at `plotting/improvedPlotting_THnSparse.C:2582-2584`).
+a receipt literal at `plotting/improvedPlotting_THnSparse.C:2758-2760`).
 
 Class bounds are inclusive integer `N_ch`, and the integrated 0–100 %
 observable is deliberately outside the mutually exclusive partition
-(`plotting/improvedPlotting_THnSparse.C:2585-2587`).
+(`plotting/improvedPlotting_THnSparse.C:2761-2763`).
 
 Use `c1` through `c11` as equal-fraction activity classes. Do not require common
 absolute thresholds.
@@ -73,8 +77,8 @@ consumer anywhere in the tree: `historical_contract.merge_commit`,
 `historical_contract.implementation`, `counter` as a cross-check, and
 `tie_rule`. Two of them exist a SECOND time as C++ string literals in the
 boundary receipt — `tie_rule` at
-`plotting/improvedPlotting_THnSparse.C:2582-2584` and the PR-13 merge commit at
-`:2009-2010` — and nothing compares the two copies. Treat the JSON strings as
+`plotting/improvedPlotting_THnSparse.C:2758-2760` and the PR-13 merge commit at
+`:2769` — and nothing compares the two copies. Treat the JSON strings as
 the statement of record and the C++ literals as what a run actually writes.
 
 `historical_contract.implementation` reads

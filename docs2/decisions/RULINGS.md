@@ -1,8 +1,9 @@
 # Rulings — an index
 
 The ledgers are canonical. They live in the project archive outside this
-repository, as `DECISION_ENTRIES_20260827.md` (R19–R30) and
-`DECISION_ENTRIES_20260830.md` (R31–R42). This page is an index, not a copy: it
+repository, as `DECISION_ENTRIES_20260827.md` (R19–R30),
+`DECISION_ENTRIES_20260830.md` (R31–R42) and
+`DECISION_ENTRIES_20260831.md` (R43–R47). This page is an index, not a copy: it
 gives one line per ruling so a reader can tell which ledger entry to open.
 
 Do not quote a ruling from this page. Open the ledger entry.
@@ -41,8 +42,18 @@ Do not quote a ruling from this page. Open the ledger entry.
 | R41 | The hang rates are acceptable and are disclosed |
 | R42 | The `N_ch` decay-policy mismatch stays as measured and is disclosed; a validation campaign is noted for after the paper |
 
-Both ranges are listed complete: twelve entries in R19–R30 and twelve in
-R31–R42.
+## R43–R47 (2026-08-31 to 2026-09-01)
+
+| id | one line |
+|---|---|
+| R43 | B_c⁻ leaves the two extreme-class beauty columns (G5/G7); the integrated figures keep it |
+| R44 | Deliverables are reviewed locally, then published to GitHub; the owner pushes, after the archive branch exists |
+| R45 | One session performs every figure correction and a full style pass, against a written checklist |
+| R46 | Figure identification: panel titles off, each fact stated once — information block, column header, row label, one canvas legend |
+| R47 | Sequencing: RUN-N4 → owner figure review → ARCH-1 → HANDOFF → WRAP → PHYS-1 → final adversarial review |
+
+All three ranges are listed complete: twelve entries in R19–R30, twelve in
+R31–R42 and five in R43–R47.
 
 ## Where each ruling is applied in `docs2/`
 
@@ -57,6 +68,8 @@ R31–R42.
 | R40 | [../pipeline/RENDER.md](../pipeline/RENDER.md), [../pipeline/VERIFY.md](../pipeline/VERIFY.md) |
 | R41 | [../pipeline/PRODUCE.md](../pipeline/PRODUCE.md), [CAMPAIGN_TRUTH.md](../paper/CAMPAIGN_TRUTH.md) |
 | R42 | [../physics/MULTIPLICITY.md](../physics/MULTIPLICITY.md) |
+| R43 | [../paper/DELIVERABLES.md](../paper/DELIVERABLES.md) |
+| R45, R46 | [../pipeline/STYLE.md](../pipeline/STYLE.md) |
 
 ## Owner decisions O1–O5
 

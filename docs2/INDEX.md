@@ -16,6 +16,7 @@ Read the page whose subject you need. Nothing here repeats another page.
 | [pipeline/FIGURES.md](pipeline/FIGURES.md) | G1–G9 and T1: producer, output stem, delivery name |
 | [pipeline/VERIFY.md](pipeline/VERIFY.md) | closure and strict CONTROL, and the shapes they assert |
 | [pipeline/COUNT.md](pipeline/COUNT.md) | T1: the counting macro and the merged-counter helper |
+| [pipeline/STYLE.md](pipeline/STYLE.md) | the five configurations, the generator's style seams, and the recorded debt |
 
 ## What the numbers mean
 
@@ -40,7 +41,7 @@ Read the page whose subject you need. Nothing here repeats another page.
 |---|---|
 | [systematics/STATUS.md](systematics/STATUS.md) | the module is paused under ruling R31 |
 | [systematics/REACTIVATION.md](systematics/REACTIVATION.md) | the work list for the session that switches it on |
-| [decisions/RULINGS.md](decisions/RULINGS.md) | an index of rulings R19–R42 |
+| [decisions/RULINGS.md](decisions/RULINGS.md) | an index of rulings R19–R47 |
 
 ## Two rules that decide where a correction goes
 

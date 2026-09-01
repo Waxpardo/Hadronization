@@ -39,7 +39,8 @@ it. Read the hold reasons before releasing.
 
 Two hold classes look identical in a bare `condor_q` count and mean opposite
 things. The submit-time parking brake carries `HoldReasonCode` 15, and the
-correct action is release (`generation/submit/Condor_README.md:51,63`). A
+correct action is release
+(`generation/submit/Condor_README.md:54-61`, `:63-64`). A
 periodic hold carries the literal marker `HF_HANG_GUARD` in its `HoldReason`,
 written by `tools/render_production_submit.py:339` from
 `HANG_GUARD_MARKER` (`tools/campaign.py:98`), and the correct action is retry.

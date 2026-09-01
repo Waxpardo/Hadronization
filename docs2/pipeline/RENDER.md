@@ -76,8 +76,8 @@ different targets (VERIFIED by reading both call sites):
 
 | site | enclosing function | target that calls it | role |
 |---|---|---|---|
-| `:2271` | `Plot_InclusiveMultiplicitySpectrum_Raw` | `multiplicity-spectrum` (`plotting/run_paper_plots.sh:711`) | G1's own write |
-| `:2192` | `Plot_InclusiveKinematicSpectra_Raw` | `kinematic-spectra` (`plotting/run_paper_plots.sh:688`) | a by-product |
+| `plotting/Plot_InclusiveKinematicSpectra_Raw.C:2282` | `Plot_InclusiveMultiplicitySpectrum_Raw` | `multiplicity-spectrum` (`plotting/run_paper_plots.sh:711`) | G1's own write |
+| `plotting/Plot_InclusiveKinematicSpectra_Raw.C:2192` | `Plot_InclusiveKinematicSpectra_Raw` | `kinematic-spectra` (`plotting/run_paper_plots.sh:688`) | a by-product |
 
 A `kinematic-spectra` run therefore rewrites G1's three files whether or not
 the operator asked for G1, and promotion overwrites silently
@@ -124,7 +124,7 @@ V-CORRELATIONS is the only tracked paper-campaign configuration with
 `draw_correlation_plots: true` (finding F59; verified across all seventeen
 tracked plotting configurations). Its correlation canvas writes to the
 hard-coded directory `plotting/Plots/THnSparse/Correlations`
-(`plotting/improvedPlotting_THnSparse.C:4915-4917`).
+(`plotting/improvedPlotting_THnSparse.C:5143`, written at `:5181`).
 
 **One render per stem per session.** Promotion from the staging directory is
 `::rename` (`plotting/StagedOutputs.h:123`), which overwrites silently. A second
