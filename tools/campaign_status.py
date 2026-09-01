@@ -10,11 +10,17 @@ separate bookkeeping database to fall out of step with reality:
   raw/<TUNE>/hf_<TUNE>_jobNNN.root  one per attempt that SUCCEEDED
 
 An attempt that started and left no receipt neither succeeded nor failed
-cleanly: it was killed. That is the wall-time guard firing on a suspected
-generator hang, and it is the number that matters most, because those events
-are lost non-randomly -- the hang happens on dense-junction topologies, which
-are exactly the configurations under study. The loss is irreducible (PYTHIA
-cannot generate those events) so it has to be counted and reported, not fixed.
+cleanly: it was killed. The CPU-time arm targets suspected generator hangs; the
+wall-time arm is its backstop (`tools/render_production_submit.py:84-92`). Both
+arms use one static hold-reason string, so the reason alone does not show which
+arm fired (`tools/render_production_submit.py:333-341`).
+
+The campaign record attributes the loss to a hang that hits dense-junction
+topologies -- the configurations under study (`docs/GOLDEN_OUTPUTS.md:1067`).
+Per-attempt termination metadata is absent (`docs/REPRODUCIBILITY.md:145-147`),
+and the mechanism study used PYTHIA 8.315 while production used 8.317
+(`docs2/physics/DISCARD_BIAS.md:117-124`). The discard rate must be reported,
+not corrected away. See `docs2/physics/DISCARD_BIAS.md` for the full argument.
 """
 
 from __future__ import annotations
