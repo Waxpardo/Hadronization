@@ -96,7 +96,7 @@ struct TriggerAssociateOSandSS {
     // Why a per-pair field and not the global subsample_error_bins_to_exclude:
     // that list is matched on bin name alone, so it descopes a bin for EVERY
     // observable, and the audit target deliberately zeroes it
-    // (run_paper_plots.sh:366) so the scan sees everything. Neither can express
+    // (run_paper_plots.sh:610) so the scan sees everything. Neither can express
     // "this pair, these bins", which is exactly what G2 declares for B_c --
     // multiplicity-integrated and top-class only, because B_c's low
     // multiplicity classes are empty at ANY campaign size. That emptiness is
@@ -1706,7 +1706,7 @@ constexpr Double_t kPublicationXTitleOffsetVerticalLabels = 3.4;
 //             normalize_ratio_titles in tools/make_variant_configs.py,
 //             parsed here at :3472
 //   offsets   the three constants above, chosen in ApplyPublicationAxisStyle
-//   legends   rectangles in the configuration (parsed :2906), built once
+//   legends   rectangles in the configuration (parsed :3495), built once
 //             per draw function, first at :5317
 //   reference the dashed unity line at :1552
 //   switch    panel titles, OFF by default since ruling R46: one
@@ -1739,9 +1739,9 @@ constexpr Double_t kPublicationXTitleOffsetVerticalLabels = 3.4;
 //                   FIG1D_EVIDENCE_0e98a5b_20260901/phaseA/, and it is what
 //                   HANDOFF's editorial notes are written from.
 // DEFERRED, recorded and not repaired here (post-paper): the four template
-// sites :4582, :4867, :5154 and :5431 are near-duplicates, each carrying its
+// sites :5260, :5568, :5879 and :6200 are near-duplicates, each carrying its
 // own copy of the title, legend and style block; MultiplicityClassLineStyle
-// (:3413) matches a bin prefix no configuration emits, returning 1 always.
+// (:4023) matches a bin prefix no configuration emits, returning 1 always.
 
 Int_t PublicationTextPixels(Double_t fraction, Double_t canvasWidthPx)
 {

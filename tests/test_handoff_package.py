@@ -15,10 +15,28 @@ Three assertions, and each one catches a different way the package can rot:
   2. THE DIRECTORY HOLDS NOTHING THE MANIFEST DOES NOT NAME. Set equality, not
      containment. This catches a figure added by hand, or one deleted while its
      row stayed behind.
-  3. NO PROHIBITED-SCOPE PATH APPEARS ANYWHERE IN THE PACKAGE. The two retired
-     systematics trees are `HISTORICAL_PROVENANCE_ONLY` with
-     `current_or_publication_use: PROHIBITED`. A citation of either inside the
-     handoff package would license a paper claim on a retired axis.
+  3. NO PROHIBITED-SCOPE PATH APPEARS IN THE PACKAGE OR IN `docs2/paper/`. The
+     two retired systematics trees are `HISTORICAL_PROVENANCE_ONLY` with
+     `current_or_publication_use: PROHIBITED`. A citation of either would
+     license a paper claim on a retired axis.
+
+     THE SECOND SCOPE IS THE POINT OF THE WIDENING (session WRAP). Until now
+     this scan read only `deliverables/<date>/`, so nothing in the suite stopped
+     a later session reintroducing a retired-tree citation into
+     `docs2/paper/` -- which is where the claim map, the deliverables manifest
+     and the campaign-truth page live, and which a referee reads. The package is
+     assembled from those pages; guarding the output and not the source guards
+     the wrong end.
+
+     NO FILE IS EXEMPT, AND THAT IS DELIBERATE. `docs2/paper/CLAIM_MAP.md`
+     states this very rule, and a rule that spelled out the paths it forbids
+     would be the scan's first hit. Session HANDOFF had already rewritten that
+     statement to name the trees by DATE -- "the ones dated 2026-08-19 and
+     2026-08-20" -- and not by path, and it says so in its own text. So the
+     widened scan needs no carve-out: measured at WRAP, `docs2/paper/` contains
+     no literal retired-tree path. If a later session writes one into the rule
+     statement, this gate goes red, and that is the correct outcome rather than
+     a false positive to be suppressed.
 
 THE DIRECTORY IS ENUMERATED FROM THE FILESYSTEM, NEVER FROM `git ls-files`
 (finding F58). An earlier delivery check listed a directory and compared it
@@ -48,6 +66,11 @@ PROHIBITED = tuple(
 
 # Directories inside a package whose every file the manifest must name.
 MANIFESTED = ("figures", "tables")
+
+# The second PROHIBITED-scope scope, relative to the repository root. The
+# package scan below enumerates a package directory; this one is a fixed tree
+# and is scanned whether or not a package exists.
+PROHIBITED_SCOPE_TREES = ("docs2/paper",)
 
 # Top-level package files that are prose about the package, not package content.
 PROSE = {"MANIFEST.md", "EDITORIAL_NOTES.md", "REPRODUCE.md"}
@@ -97,6 +120,24 @@ def manifest_rows(manifest: Path) -> dict[str, str]:
         if len(digests) == 1 and len(paths) == 1:
             rows[paths[0]] = digests[0]
     return rows
+
+
+def prohibited_offenders(base: Path) -> list[str]:
+    """Every `<file> -> <token>` under `base` that cites a retired tree.
+
+    One predicate for both scopes, so the package and `docs2/paper/` cannot
+    drift apart on what counts as a citation. Only text suffixes are read: a
+    PDF or PNG cannot carry a repository path a reader would follow.
+    """
+    offenders: list[str] = []
+    for path in sorted(base.rglob("*")):
+        if not path.is_file() or path.suffix.lower() not in TEXT_SUFFIXES:
+            continue
+        text = path.read_text(errors="replace")
+        for token in PROHIBITED:
+            if token in text:
+                offenders.append(f"{path.relative_to(base)} -> {token}")
+    return offenders
 
 
 def check_package(package: Path) -> None:
@@ -151,14 +192,7 @@ def check_package(package: Path) -> None:
     check(f"{name}: the manifest names figures at all", bool(figures))
 
     # 3. no PROHIBITED-scope citation anywhere in the package
-    offenders = []
-    for path in sorted(package.rglob("*")):
-        if not path.is_file() or path.suffix.lower() not in TEXT_SUFFIXES:
-            continue
-        text = path.read_text(errors="replace")
-        for token in PROHIBITED:
-            if token in text:
-                offenders.append(f"{path.relative_to(package)} -> {token}")
+    offenders = prohibited_offenders(package)
     check(f"{name}: cites no PROHIBITED-scope systematics tree",
           not offenders, f"{len(offenders)}: {offenders[:3]}")
 
@@ -180,6 +214,16 @@ def main() -> int:
 
     for package in packages:
         check_package(package)
+
+    # the same rule, applied to the pages the package is assembled from
+    for tree in PROHIBITED_SCOPE_TREES:
+        base = ROOT / tree
+        check(f"{tree}/ exists", base.is_dir(), str(base))
+        if not base.is_dir():
+            continue
+        offenders = prohibited_offenders(base)
+        check(f"{tree}/ cites no PROHIBITED-scope systematics tree",
+              not offenders, f"{len(offenders)}: {offenders[:3]}")
 
     print()
     if failures:

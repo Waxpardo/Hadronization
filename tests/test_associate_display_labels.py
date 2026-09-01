@@ -11,7 +11,7 @@ keys are not notation, and these are paper-figure axes.
 
 WHAT THIS ASSERTS. The label table is parsed out of the macro source, and every
 `associateOS` a tracked V-configuration registers must have an entry in it. The
-PDG is the key on both sides: `improvedPlotting_THnSparse.C:619` sets
+PDG is the key on both sides: `improvedPlotting_THnSparse.C:621` sets
 `associateOSPdg` from the OS file's pair-registry row, and both `SetBinLabel`
 call sites (`:5372`, `:5662`) hand exactly that to the table, now through
 `UniformSpeciesAxisLabel`, which prepends an invisible zero-width strut so

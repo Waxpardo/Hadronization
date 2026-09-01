@@ -33,6 +33,41 @@ run's files cannot be reached by a migration
 A non-symlink at `plotting/Plots` is checkout-local output state and is also
 refused (`hadronization:110-113`).
 
+## `HADRONIZATION_DATASET` is required to render and must be unset to test
+
+This is a trap, and it is stated here because a reader who follows the render
+instructions and then runs the suite sees three failures that are not defects.
+
+**Rendering requires it.** `plotting/run_paper_plots.sh` refuses at minute zero
+when no dataset is named and `config/dataset_selector.json` declares no default
+(`plotting/run_paper_plots.sh:155-170`). `tools/render_balancing_variant.sh`
+names no dataset of its own — it sets `THNSPARSE_COMPLETE_ROOT_CONFIG` and calls
+that launcher (`tools/render_balancing_variant.sh:32-33`) — so the variable must
+already be exported in the shell that runs it. The `./hadronization` launcher
+exports it for you when you go through `plot` (`hadronization:90`); a direct
+`run_paper_plots.sh` or `render_balancing_variant.sh` call does not.
+
+**The suite requires it unset.** `tools/run_tests.sh` must run in a shell where
+`HADRONIZATION_DATASET` is **not** exported. Measured at WRAP on 2026-09-01, at
+HEAD `6c53dc7`, with `HADRONIZATION_DATASET=hf_run3_v1_candidate` exported: the
+suite reports **94/97** and exactly three drivers go red.
+
+| driver | why exporting the variable turns it red |
+|---|---|
+| `tests/test_dataset_selector.py` | asserts selector behaviour from an unset environment |
+| `tests/test_dataset_selector_hf_pt2.py` | the same, for the HF pT2 selector path |
+| `tests/test_measurement_target.py` | resolves its target with no dataset preselected |
+
+`tests/test_unknown_dataset_refusal.py` and `tests/test_cli_surface.py` read the
+variable but **do not** fail when it is exported; they were candidates and were
+measured not to be. The count is three and the names are the three above.
+
+The same measurement is recorded in `deliverables/20260901/REPRODUCE.md:30-33`,
+written by session HANDOFF. WRAP re-measured it rather than repeating it.
+
+**So: two shells.** Export the dataset in the shell you render from; open a
+clean shell, or `unset HADRONIZATION_DATASET`, before `make test`.
+
 ## Targets are explicit. `all` does not run this campaign
 
 **`all` is not runnable for `HF_RUN3_V1` without an explicit

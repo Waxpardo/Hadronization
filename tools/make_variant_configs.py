@@ -26,13 +26,15 @@ repository's other generators.
 TWO EMITTED BLOCKS ARE INERT AND STAY THAT WAY. Every canvas carries
 `TUNE_colours` and `dependency_line_styles`. Both are PARSED and neither is
 READ. `TUNE_colours` is parsed into `colourTUNEMap`
-(improvedPlotting_THnSparse.C:3326-3337), which nothing reads, and a known
+(improvedPlotting_THnSparse.C:3513-3524), which nothing reads, and a known
 tune's value is overwritten by the compiled constant before it is even stored
-(`:2747-2749`); the palette lives in `plotting/TunePlotStyle.h:24-27`.
-`dependency_line_styles` is parsed into `lineStyleDependencyMap` (`:2755-2763`)
-and copied into a local at `:4401` and `:4668` that no later line reads: the
-class line-style ladder moved into `TunePlotStyle.h` because the configuration's
-copy had drifted and gave c1 and c11 the same style (`:3229-3234`). The blocks
+(`improvedPlotting_THnSparse.C:3517-3519`); the palette lives in
+`plotting/TunePlotStyle.h:24-27`.
+`dependency_line_styles` is parsed into `lineStyleDependencyMap`
+(`improvedPlotting_THnSparse.C:3525-3533`) and copied into a local at `:5311`
+and `:5625` that no later line reads: the class line-style ladder moved into
+`TunePlotStyle.h` because the configuration's copy had drifted and gave c1 and
+c11 the same style (`:4016-4022`). The blocks
 are still EMITTED because the parse sites index them with nlohmann's const
 `operator[]`, which asserts the key is present -- absence is an assertion
 failure or undefined behaviour, not a tolerated default. So they are carried
@@ -175,7 +177,7 @@ def information_block(coverage: str) -> list[str]:
 #
 # EVERY ROUTING NAME BELOW IS A KEY, NOT NOTATION. `associateOS` reaches
 # `SetBinLabel` through `DisplayLabelForAssociatePdg`, which is keyed on the PDG
-# code the pair registry carries (improvedPlotting_THnSparse.C:1570-1588), so
+# code the pair registry carries (improvedPlotting_THnSparse.C:2292-2305), so
 # the axis text has one source and these strings only have to route.
 #
 # TWO OF THE LEGACY BEAUTY ASSOCIATES ONCE HAD NO ENTRY IN THAT TABLE, and now
@@ -218,7 +220,7 @@ def information_block(coverage: str) -> list[str]:
 # The labels are the same strings the AXIS already uses, so a panel title and
 # its own axis cannot disagree: they are the `DisplayLabelForAssociatePdg`
 # entries of the trigger's PDG code
-# (`plotting/improvedPlotting_THnSparse.C:1571-1591`) -- 521, -5122, 411, 4122.
+# (`plotting/improvedPlotting_THnSparse.C:2294-2305`) -- 521, -5122, 411, 4122.
 # The two meson labels are equal to the routing key by coincidence of it
 # already being notation; they are written out anyway so every group carries
 # both fields and a later reader does not have to know which is which.
@@ -550,10 +552,11 @@ def hdphi_names(bins: list[dict]) -> list[str]:
 # THE COMBINED-RATIO PANEL IS A TEMPLATE COPY, NOT NEW PLOTTING CODE. The legacy
 # `mini_*_JUNCTIONS_CLOSEPACKING_over_MONASH` block sets `nominator_TUNES` to a
 # LIST and `denominator_TUNE` to MONASH. The parse site reads the list
-# (improvedPlotting_THnSparse.C:3257-3267) and the draw loop iterates it,
-# colouring each numerator through `ApplyTuneVisualStyle` and writing one legend
-# entry per numerator (`:4754-4806`). Both ratios therefore land in one pad with
-# the tunes distinguishable, and the macro is not touched.
+# (improvedPlotting_THnSparse.C:3435-3441) and the draw loop iterates it,
+# colouring each numerator through `ApplyTuneVisualStyle` (`:5738-5741`) and
+# writing one legend entry per numerator (`:5762`). Both ratios therefore
+# land in one pad with the tunes distinguishable, and the macro is not
+# touched.
 #
 # THE PAD RECTANGLES ARE COMPUTED HERE. The base's ten minis are authored for a
 # two-column by five-row layout in which the columns are the two FLAVOURS. A
@@ -609,7 +612,7 @@ RATIO_PANEL_Y_TITLE = "ratio to MONASH"
 # The ratio family, named by the macro's OWN dispatch key and never by title
 # text, so the pass below cannot drift onto matching wording. These two values
 # are every ratio panel in all five configurations; the macro dispatches on
-# them at improvedPlotting_THnSparse.C:6546 and :5739.
+# them at improvedPlotting_THnSparse.C:6546 and :6554.
 RATIO_PANEL_DRAW_FUNCTIONS = (
     "drawBalancingPlotsTUNERatios",
     "drawBalancingBaryonMesonRatioPlotsTUNERatios",
@@ -1211,7 +1214,7 @@ def composite_globals(base: dict, write_names: dict[str, str],
     the distinct output directories of the writing globals and throws "Exactly
     one global-canvas output directory is required to store the
     multiplicity-boundary receipt" on anything but one
-    (improvedPlotting_THnSparse.C:3397-3407).
+    (improvedPlotting_THnSparse.C:3596-3615).
     """
     template = base["global_canvases_to_be_drawn"][0]
     minis = [c["canvas_name"] for c in build_trigger_column_canvases(base)]
