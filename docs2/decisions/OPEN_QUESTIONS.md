@@ -183,6 +183,16 @@ on top of that.
 **Why it is a question.** That is a recoverable position, not a safe one. It is
 worth being a decision rather than a discovery.
 
+**Provenance of the size figure (session PHYS-1).** `/data/alice/ipardoza` is
+not reachable from this checkout, and no artifact in this repository carries a
+byte total for the raw plane. The "3,000 files, 265 GiB" figure is the
+architect's, from the open-issues list held outside this repository; the exact
+byte count above is more precise than that list and its measurement is not
+recorded anywhere a reader here can check. Treat it as REPORTED, not VERIFIED,
+and re-measure on the storage host before sizing a backup against it. The
+562.5 CPU-hours is different: it is cited to `docs/REPRODUCIBILITY.md:302`,
+which is in this repository.
+
 **Owner.** The owner.
 
 ---
