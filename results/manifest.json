@@ -1,0 +1,1184 @@
+{
+  "accepted_identities": {
+    "figure_render_head_g1_g9": "6729b3f0b7b94278b06a21943da669d6df737cc0",
+    "result_root_key": "HF_RUN3_V1/6729b3f0b7b9",
+    "sample_count_head_t1": "fe3262c729ec5a6b942309da45a70efdb2fe7fb4",
+    "source_freeze_sha256": "fcd96eaebd4dc11f071a2c8db8849f6a4cc19b764622a796664e524b27d0fc80"
+  },
+  "artifacts": [
+    {
+      "bytes": 802336,
+      "consumer": "canonical measurement parity and analysis consumers",
+      "path": "results/measurement/balancing.csv",
+      "producer": "pipeline/analyze/import_accepted.py",
+      "sha256": "fb8ff54af46905daf913b09af86b3536e6c854d58532945d2ad2e2f4ce2e0a3e"
+    },
+    {
+      "bytes": 194628,
+      "consumer": "canonical measurement parity and analysis consumers",
+      "path": "results/measurement/correlations.csv",
+      "producer": "pipeline/analyze/import_accepted.py",
+      "sha256": "d35d9d46c6c3bf70d561253e6b809e5da72c68659ace9f0e97dba01998478a33"
+    },
+    {
+      "bytes": 977092,
+      "consumer": "canonical measurement parity and analysis consumers",
+      "path": "results/measurement/kinematics.csv",
+      "producer": "pipeline/analyze/import_accepted.py",
+      "sha256": "49b6e2ef4d65addab3928f8d5e0d2453f2e8021c302c25fa687bf2958244a428"
+    },
+    {
+      "bytes": 606246,
+      "consumer": "canonical measurement parity and analysis consumers",
+      "path": "results/measurement/multiplicity.csv",
+      "producer": "pipeline/analyze/import_accepted.py",
+      "sha256": "f0fb9231e14312881bdadee19ab461e15ef9857766cb797621d54e4aaf5ca02c"
+    },
+    {
+      "bytes": 3324,
+      "consumer": "canonical measurement parity and analysis consumers",
+      "path": "results/measurement/sample_counts.csv",
+      "producer": "pipeline/analyze/import_accepted.py",
+      "sha256": "6e14d8468607e1260597e69f814e59d138e8696bc07997533d639b028b08e9a3"
+    },
+    {
+      "bytes": 23181,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "VariantExtremes/global_balancing_plots_multiplicity_beauty_PDF.pdf",
+      "path": "results/plots/balancing_activity_beauty.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "baa1aa32954b58c7e9e73a63aa6e5c6f50568b2c18a273acb9f6003e50a70056"
+    },
+    {
+      "bytes": 21731,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "VariantExtremes/global_balancing_plots_multiplicity_charm_PDF.pdf",
+      "path": "results/plots/balancing_activity_charm.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "941901ca08ceceb19238fd0ad381736baedd92c0d323502e9cc012820f491dc4"
+    },
+    {
+      "bytes": 23156,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "VariantBaryonMeson/global_balancing_baryon_over_meson_ratio_multiplicity_PDF.pdf",
+      "path": "results/plots/balancing_baryon_meson_ratio_activity.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "a17ff527233112f64fdb57ee9649489a11339ca7f6bb171596e39a2d33c87bd5"
+    },
+    {
+      "bytes": 24277,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "VariantIntegrated/global_balancing_plots_integrated_beauty_PDF.pdf",
+      "path": "results/plots/balancing_integrated_beauty.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "9231bf9fe36dbad5e7572ff568b44d80a2380b6b3e0deab1946db84d9b752828"
+    },
+    {
+      "bytes": 19585,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "VariantIntegrated/global_balancing_plots_integrated_charm_PDF.pdf",
+      "path": "results/plots/balancing_integrated_charm.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "821badb7a1c3247ca68dac0bff1997758f8907cfac615ab44df8caa5a1ff6404"
+    },
+    {
+      "bytes": 47935,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "THnSparse/Correlations/BEAUTYCorrelations_MONASH_PDF.pdf",
+      "path": "results/plots/correlation_beauty_monash.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "525ada3955f3c1a149e592e81abec4f2aa4efe627ef6b8aa24d74cd5346e7d38"
+    },
+    {
+      "bytes": 37698,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "THnSparse/Correlations/CHARMCorrelations_MONASH_PDF.pdf",
+      "path": "results/plots/correlation_charm_monash.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "d3ce9d7821a98f71985dc4a36e94505205c2577688de0cc4db3088b955c65126"
+    },
+    {
+      "bytes": 30201,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Bminus_shape.pdf",
+      "path": "results/plots/kinematics_eta_bminus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "493a4b118b9e2a6a504fb3edafe9769379eeb28f530e9caecae2ef90b8c06c7c"
+    },
+    {
+      "bytes": 30298,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Bplus_shape.pdf",
+      "path": "results/plots/kinematics_eta_bplus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "f84fac233428686c80b7287e1c3b1f897b8497f224853bcbe7a1c631333b512a"
+    },
+    {
+      "bytes": 29963,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Dminus_shape.pdf",
+      "path": "results/plots/kinematics_eta_dminus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "5f20b66c9279f7dd6ed7595d65036338ed71acf38f078c26954b5d99e0fb3b47"
+    },
+    {
+      "bytes": 29915,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Dplus_shape.pdf",
+      "path": "results/plots/kinematics_eta_dplus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "53038184fb9c682c8d4c272568ecefaad39045fb1a000a85f665b1d5a70d9497"
+    },
+    {
+      "bytes": 30324,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdab_shape.pdf",
+      "path": "results/plots/kinematics_eta_lambdab.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "7450ea82f17b507aa9cb95c4d890d42a0c3cda1b9484f12fb9fd4c2be1b87729"
+    },
+    {
+      "bytes": 30334,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdabbar_shape.pdf",
+      "path": "results/plots/kinematics_eta_lambdabbar.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "8768e54e0a5aa249112f1b6bec605b02a9c05dfdd863a17c536844ad92999d51"
+    },
+    {
+      "bytes": 30256,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdacplus_shape.pdf",
+      "path": "results/plots/kinematics_eta_lambdacplus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "e9ec6a58a2a4ced317d80eba1da43785ab170b600668d7f3544b8063f19b4dd6"
+    },
+    {
+      "bytes": 30283,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdacplusbar_shape.pdf",
+      "path": "results/plots/kinematics_eta_lambdacplusbar.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "412992437f972c93ed6bd24aa15564671cb49d0199e4e0b00c1cbccea80d3621"
+    },
+    {
+      "bytes": 30364,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Sigmabzero_shape.pdf",
+      "path": "results/plots/kinematics_eta_sigmabzero.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "3d5a3061cd0be5a6e25e701ed5062f6ce5e8fa354ccba98a1e3430c3a6f07634"
+    },
+    {
+      "bytes": 30256,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Sigmabzerobar_shape.pdf",
+      "path": "results/plots/kinematics_eta_sigmabzerobar.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "3d98a8491344d38ec54f9e4facabe318aa612c4b86467671c2e95e648d80cdfe"
+    },
+    {
+      "bytes": 29631,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Bminus_shape.pdf",
+      "path": "results/plots/kinematics_phi_bminus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "8325cd029e76421cb8ee443136cb4eb1cbcc74d4314c59131585a75b91a47a07"
+    },
+    {
+      "bytes": 29642,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Bplus_shape.pdf",
+      "path": "results/plots/kinematics_phi_bplus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "11ec6729efd3924252a0d203e7cb52cf336fa9ff44473ea09997351dcbcd3a29"
+    },
+    {
+      "bytes": 29280,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Dminus_shape.pdf",
+      "path": "results/plots/kinematics_phi_dminus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "388e8458c6a5e94ad85829d5d2fb5d4b7ffec89d3d2d9f4d4476d43b52e9a3ca"
+    },
+    {
+      "bytes": 29306,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Dplus_shape.pdf",
+      "path": "results/plots/kinematics_phi_dplus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "eec5008c0b034e9ceefe048cb792b54406e70b2e614e8f9a6bfc3b7b7c3a8fcb"
+    },
+    {
+      "bytes": 29636,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdab_shape.pdf",
+      "path": "results/plots/kinematics_phi_lambdab.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "55c049d51dd8e5cbfe785eb5c4634025dc33e9969433b003d49ac16dff7e7466"
+    },
+    {
+      "bytes": 29563,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdabbar_shape.pdf",
+      "path": "results/plots/kinematics_phi_lambdabbar.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "a3726b799dbd2f298ed0593a96f4cf1e15b52433ccc596f1a0e2bd26a1823889"
+    },
+    {
+      "bytes": 29739,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdacplus_shape.pdf",
+      "path": "results/plots/kinematics_phi_lambdacplus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "f3c701bb871b00b75471abf7a878738938034d5e31c946e9d2975ad2f4c6e818"
+    },
+    {
+      "bytes": 29779,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdacplusbar_shape.pdf",
+      "path": "results/plots/kinematics_phi_lambdacplusbar.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "094164e85dda24f70b5091c96854116af4bb8a153ad455ecb39096338d5201a8"
+    },
+    {
+      "bytes": 29450,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Sigmabzero_shape.pdf",
+      "path": "results/plots/kinematics_phi_sigmabzero.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "7ca31977fe4cee273396562408f9df6547018a16974238375e6566e58c5fa4f1"
+    },
+    {
+      "bytes": 29624,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Sigmabzerobar_shape.pdf",
+      "path": "results/plots/kinematics_phi_sigmabzerobar.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "d498626c79e0c383b0340af434a1f67baf83d705bad21d82cb14a9907d394a24"
+    },
+    {
+      "bytes": 31146,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Bminus_shape.pdf",
+      "path": "results/plots/kinematics_pt_bminus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "0a776c0b3a379a8063e532d3eb37166c0399c98912557f619bbf06771a8a62b3"
+    },
+    {
+      "bytes": 31142,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Bplus_shape.pdf",
+      "path": "results/plots/kinematics_pt_bplus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "16db858475792de9252243967df72503550e91119abb1050765479fb90040854"
+    },
+    {
+      "bytes": 31395,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Dminus_shape.pdf",
+      "path": "results/plots/kinematics_pt_dminus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "c443109934a790f9675f7ac9841a9bc920d1f4a83f1dd470b2b069cc4dd2d6ed"
+    },
+    {
+      "bytes": 31333,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Dplus_shape.pdf",
+      "path": "results/plots/kinematics_pt_dplus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "620e781e1f20ad15556a4af8e88e030f38dd09ef2b2bc4d36bd235ec1924d1cd"
+    },
+    {
+      "bytes": 30753,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdab_shape.pdf",
+      "path": "results/plots/kinematics_pt_lambdab.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "a659250ae951853a2681a27da016140ad83e69959f889f674da5293ffd256449"
+    },
+    {
+      "bytes": 30839,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdabbar_shape.pdf",
+      "path": "results/plots/kinematics_pt_lambdabbar.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "133fbe43a77116bed79703a7113dfc97f83b827a77b983aa5bc564239588cedd"
+    },
+    {
+      "bytes": 29848,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdacplus_shape.pdf",
+      "path": "results/plots/kinematics_pt_lambdacplus.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "fed54b8d4d2a5d90934e3be2141b007e4d62d3fe2ad9e9c3d91060523da378e3"
+    },
+    {
+      "bytes": 29755,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdacplusbar_shape.pdf",
+      "path": "results/plots/kinematics_pt_lambdacplusbar.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "ba44d727c89c732d1c6cd9b43ccfc1b45780c236f28081badb68861002263c34"
+    },
+    {
+      "bytes": 27955,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Sigmabzero_shape.pdf",
+      "path": "results/plots/kinematics_pt_sigmabzero.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "dfff2d850b0672457da5afeee4d989d193eedd55ffe3fbfacb219244924b4b4e"
+    },
+    {
+      "bytes": 28124,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Sigmabzerobar_shape.pdf",
+      "path": "results/plots/kinematics_pt_sigmabzerobar.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "49ce1b5fbb64dc00c87568b5f53e6131c42d53eed4fd6ea8e31316eb0e822b0a"
+    },
+    {
+      "bytes": 66151,
+      "consumer": "reviewed figure and publication consumers",
+      "old_accepted_name": "KinematicSpectra/Multiplicity/MultiplicitySpectrum_Shared_shape.pdf",
+      "path": "results/plots/multiplicity_distribution.pdf",
+      "producer": "accepted render 6729b3f0b7b94278b06a21943da669d6df737cc0",
+      "sha256": "1b770a948154a5bd833005fe64705bb6a1024f6cad99a42a73b89808294c3623"
+    },
+    {
+      "bytes": 847,
+      "consumer": "sample-count table presentation",
+      "path": "results/tables/sample_counts.tex",
+      "producer": "pipeline/analyze/import_accepted.py",
+      "sha256": "da00695699ec5ac3962b2b3265573e1537c0bfdb0a3821d39ba80ddc32341ab4"
+    }
+  ],
+  "campaign": {
+    "data_files": {
+      "data/attempts.csv": {
+        "bytes": 355659,
+        "sha256": "c550fffb652d0ff71945ee128cfc8fe475d9b1d64433454e9073fd2076c5d8d9"
+      },
+      "data/campaign.json": {
+        "bytes": 4182,
+        "sha256": "9240320c05a895324ac7107e036f2e849470a4a0cb85e43be7a7c5b7914aa3c2"
+      },
+      "data/raw_manifest.jsonl": {
+        "bytes": 1379970,
+        "sha256": "5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f8f247585912e2df247"
+      }
+    },
+    "id": "HF_RUN3_V1"
+  },
+  "discarded_attempts": "recorded_no_correction",
+  "import_commit": {
+    "manifest_self_hash": null,
+    "starting_head": "149ddd2a5fa9bf0b11c8d571c18cd10a92d28208",
+    "strategy": "git_commit_containing_this_manifest"
+  },
+  "migration_limitations": [
+    "balancing block rows expose yields and trigger denominators but not block OS/SS component counts",
+    "accepted logs expose one trigger denominator only after the renderer's OS/SS-denominator equality guard",
+    "correlation bins expose central values and ten-block SEM, not the ten block-bin values",
+    "multiplicity and kinematic canvas macros expose normalized content/error, not underlying raw counts",
+    "portable raw rows omit common campaign fields, derivable block/seed fields, and nonportable source paths",
+    "this baseline preserves accepted historical values and does not claim the current import head rendered them"
+  ],
+  "numeric_schema": "migration_accepted_double_text_v1",
+  "observable_version": "hf_balancing_and_correlations_frozen_v1",
+  "plot_name_mapping": [
+    {
+      "new_name": "results/plots/multiplicity_distribution.pdf",
+      "old_name": "KinematicSpectra/Multiplicity/MultiplicitySpectrum_Shared_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/correlation_charm_monash.pdf",
+      "old_name": "THnSparse/Correlations/CHARMCorrelations_MONASH_PDF.pdf"
+    },
+    {
+      "new_name": "results/plots/correlation_beauty_monash.pdf",
+      "old_name": "THnSparse/Correlations/BEAUTYCorrelations_MONASH_PDF.pdf"
+    },
+    {
+      "new_name": "results/plots/balancing_integrated_charm.pdf",
+      "old_name": "VariantIntegrated/global_balancing_plots_integrated_charm_PDF.pdf"
+    },
+    {
+      "new_name": "results/plots/balancing_activity_charm.pdf",
+      "old_name": "VariantExtremes/global_balancing_plots_multiplicity_charm_PDF.pdf"
+    },
+    {
+      "new_name": "results/plots/balancing_integrated_beauty.pdf",
+      "old_name": "VariantIntegrated/global_balancing_plots_integrated_beauty_PDF.pdf"
+    },
+    {
+      "new_name": "results/plots/balancing_activity_beauty.pdf",
+      "old_name": "VariantExtremes/global_balancing_plots_multiplicity_beauty_PDF.pdf"
+    },
+    {
+      "new_name": "results/plots/balancing_baryon_meson_ratio_activity.pdf",
+      "old_name": "VariantBaryonMeson/global_balancing_baryon_over_meson_ratio_multiplicity_PDF.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_pt_bplus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Bplus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_pt_bminus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Bminus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_pt_lambdab.pdf",
+      "old_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdab_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_pt_lambdabbar.pdf",
+      "old_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdabbar_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_pt_sigmabzero.pdf",
+      "old_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Sigmabzero_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_pt_sigmabzerobar.pdf",
+      "old_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Sigmabzerobar_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_pt_dplus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Dplus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_pt_dminus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Dminus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_pt_lambdacplus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdacplus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_pt_lambdacplusbar.pdf",
+      "old_name": "KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdacplusbar_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_eta_bplus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Bplus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_eta_bminus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Bminus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_eta_lambdab.pdf",
+      "old_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdab_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_eta_lambdabbar.pdf",
+      "old_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdabbar_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_eta_sigmabzero.pdf",
+      "old_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Sigmabzero_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_eta_sigmabzerobar.pdf",
+      "old_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Sigmabzerobar_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_eta_dplus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Dplus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_eta_dminus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Dminus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_eta_lambdacplus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdacplus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_eta_lambdacplusbar.pdf",
+      "old_name": "KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdacplusbar_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_phi_bplus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Bplus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_phi_bminus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Bminus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_phi_lambdab.pdf",
+      "old_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdab_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_phi_lambdabbar.pdf",
+      "old_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdabbar_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_phi_sigmabzero.pdf",
+      "old_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Sigmabzero_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_phi_sigmabzerobar.pdf",
+      "old_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Sigmabzerobar_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_phi_dplus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Dplus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_phi_dminus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Dminus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_phi_lambdacplus.pdf",
+      "old_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdacplus_shape.pdf"
+    },
+    {
+      "new_name": "results/plots/kinematics_phi_lambdacplusbar.pdf",
+      "old_name": "KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdacplusbar_shape.pdf"
+    }
+  ],
+  "schema": "hadronization_result_package_v1",
+  "source_artifacts": [
+    {
+      "bytes": 3328,
+      "name": "acceptance_records/RUNN4B_G1.json",
+      "role": "acceptance_record",
+      "sha256": "327c53ef437f9187ac0f44686f005564f436ef1d0fd76959abdf795a3bf5f83d"
+    },
+    {
+      "bytes": 3875,
+      "name": "acceptance_records/RUNN4B_G2.json",
+      "role": "acceptance_record",
+      "sha256": "63e9bb368564ce6d87f93376bdfb76c92ddb467484474a21d5163948319e3134"
+    },
+    {
+      "bytes": 3878,
+      "name": "acceptance_records/RUNN4B_G3.json",
+      "role": "acceptance_record",
+      "sha256": "52ef213981ef765b2887618f0e3b5316840411173414ecfc34975f2dc5d505cf"
+    },
+    {
+      "bytes": 3900,
+      "name": "acceptance_records/RUNN4B_G4.json",
+      "role": "acceptance_record",
+      "sha256": "5f5b96c63ff30cbdddfa5cfbdad4a9bc2e45b292464dbcc56f3bab3b8a6d1110"
+    },
+    {
+      "bytes": 3894,
+      "name": "acceptance_records/RUNN4B_G5.json",
+      "role": "acceptance_record",
+      "sha256": "a56cab75ed6f0410e379a6f39b540fcbdefc4ec9889d0d9282361b5ba38233fb"
+    },
+    {
+      "bytes": 3903,
+      "name": "acceptance_records/RUNN4B_G6.json",
+      "role": "acceptance_record",
+      "sha256": "011ab3cfa59d9c014889a183f13f70a97bf0ec72b3554d67ad7a1c7ef3c714c2"
+    },
+    {
+      "bytes": 3897,
+      "name": "acceptance_records/RUNN4B_G7.json",
+      "role": "acceptance_record",
+      "sha256": "a22565763ac58e2587c8792c67a6475723de6d1e526e707ac4626ae846a6c1de"
+    },
+    {
+      "bytes": 3948,
+      "name": "acceptance_records/RUNN4B_G8.json",
+      "role": "acceptance_record",
+      "sha256": "fa56866b0c90e2dd778f900d04cbf3674bc42aed52bbd8f711d62b14c750fb6c"
+    },
+    {
+      "bytes": 20570,
+      "name": "acceptance_records/RUNN4B_G9.json",
+      "role": "acceptance_record",
+      "sha256": "66bf3737535e6dfda66d5d437c18ad9c55666c63ed3653c4976fe5974141e8ba"
+    },
+    {
+      "bytes": 1894,
+      "name": "acceptance_records/RUNN_T1.json",
+      "role": "acceptance_record",
+      "sha256": "fd0f98620c8484b5c629cb044303104381ebc3acc110ca4ef13f1d8e9e78e7a4"
+    },
+    {
+      "bytes": 657484,
+      "name": "accepted_logs/render_VBARYONMESON.log",
+      "role": "accepted_render_log",
+      "sha256": "66d757e85779468dd3c1931f780797de1bffbf980702b742a1559e38b123a47b"
+    },
+    {
+      "bytes": 438663,
+      "name": "accepted_logs/render_VCORRELATIONS.log",
+      "role": "accepted_render_log",
+      "sha256": "cbb50cf370d16c69719e2c8c1c58aa674cedfbd981e9e39786dd47465471840e"
+    },
+    {
+      "bytes": 682278,
+      "name": "accepted_logs/render_VEXTREMES.log",
+      "role": "accepted_render_log",
+      "sha256": "fa1e4b06aea7782fe9a2fed90f1e9746d904f5563178f5c4c9f9eee415961e2c"
+    },
+    {
+      "bytes": 604459,
+      "name": "accepted_logs/render_VINTEGRATED.log",
+      "role": "accepted_render_log",
+      "sha256": "8582a83555c63ddf717e7a10ae2dd9d88cb9c448310ed382308e256257c2cbd2"
+    },
+    {
+      "bytes": 720415,
+      "name": "accepted_logs/render_VINTEGRATED_CLOSURE.log",
+      "role": "accepted_render_log",
+      "sha256": "dbd78904eacb2d179eb1ea90f37b76a2f939ba398778f26d0ccdaa55e8a499cf"
+    },
+    {
+      "bytes": 28689,
+      "name": "accepted_logs/target_kinematic_spectra.log",
+      "role": "accepted_render_log",
+      "sha256": "4ff7c0346e78f7263f59f37a4db972bb41f5151df3bd11e70bc0c774186b9358"
+    },
+    {
+      "bytes": 2204,
+      "name": "accepted_logs/target_multiplicity_spectrum.log",
+      "role": "accepted_render_log",
+      "sha256": "6f97ed6cdfc23cd612e40e1762ad7ee0e57a80f4c28723f60a5c8d87d567c613"
+    },
+    {
+      "bytes": 58991,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Bminus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "d125c5008e5b5955c2a525b78f220b38a265dbb1e43a847b5435a8cbae4fb73d"
+    },
+    {
+      "bytes": 30201,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Bminus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "493a4b118b9e2a6a504fb3edafe9769379eeb28f530e9caecae2ef90b8c06c7c"
+    },
+    {
+      "bytes": 58295,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Bplus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "fc4be709879161bdb8b6cf1f17cfe72705639a86b2f335caee9945cc01b90045"
+    },
+    {
+      "bytes": 30298,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Bplus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "f84fac233428686c80b7287e1c3b1f897b8497f224853bcbe7a1c631333b512a"
+    },
+    {
+      "bytes": 59008,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Dminus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "22c663285196b2a916eb45d58dc383530346ba7ba37b3d67c5ba59012a38b28e"
+    },
+    {
+      "bytes": 29963,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Dminus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "5f20b66c9279f7dd6ed7595d65036338ed71acf38f078c26954b5d99e0fb3b47"
+    },
+    {
+      "bytes": 58294,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Dplus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "9584d79b3fd54bd179e8ddc6e0f538547a26bcaeef952e7ffcd62de85294426a"
+    },
+    {
+      "bytes": 29915,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Dplus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "53038184fb9c682c8d4c272568ecefaad39045fb1a000a85f665b1d5a70d9497"
+    },
+    {
+      "bytes": 59713,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdab_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "01e3eae72528abd587524a0d0b870f2997c66026283dc00adec9cf44ed456c8d"
+    },
+    {
+      "bytes": 30324,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdab_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "7450ea82f17b507aa9cb95c4d890d42a0c3cda1b9484f12fb9fd4c2be1b87729"
+    },
+    {
+      "bytes": 61834,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdabbar_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "ba6dd78ff8b25958d1b16d7d39db09a772d8c5a4b4b23b1f750bc1c9bfe6009a"
+    },
+    {
+      "bytes": 30334,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdabbar_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "8768e54e0a5aa249112f1b6bec605b02a9c05dfdd863a17c536844ad92999d51"
+    },
+    {
+      "bytes": 62550,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdacplus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "ef9880f315f8da3c3b6c69a88ab9d58b0407ca1409be50ed6827868a3db6f3e3"
+    },
+    {
+      "bytes": 30256,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdacplus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "e9ec6a58a2a4ced317d80eba1da43785ab170b600668d7f3544b8063f19b4dd6"
+    },
+    {
+      "bytes": 64685,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdacplusbar_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "94f9b2d12a3686987d19e097af93b264ad11133591242a56e87b5423fbe52e7a"
+    },
+    {
+      "bytes": 30283,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Lambdacplusbar_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "412992437f972c93ed6bd24aa15564671cb49d0199e4e0b00c1cbccea80d3621"
+    },
+    {
+      "bytes": 61832,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Sigmabzero_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "0b26adb0c3b15a464f68bf1cd43bed8e3c4f5a334184ec9029b76a48354c4af3"
+    },
+    {
+      "bytes": 30364,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Sigmabzero_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "3d5a3061cd0be5a6e25e701ed5062f6ce5e8fa354ccba98a1e3430c3a6f07634"
+    },
+    {
+      "bytes": 63973,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Sigmabzerobar_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "b658f4a125caa9569fe72307ac6049e66dcf7e686730329c0ff6629085415efd"
+    },
+    {
+      "bytes": 30256,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/eta/Inclusive_eta_Sigmabzerobar_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "3d98a8491344d38ec54f9e4facabe318aa612c4b86467671c2e95e648d80cdfe"
+    },
+    {
+      "bytes": 63095,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Bminus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "aea134933d41633a6e8d938194ddb1c300b3ef850a1836bac6464e83813dea73"
+    },
+    {
+      "bytes": 31146,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Bminus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "0a776c0b3a379a8063e532d3eb37166c0399c98912557f619bbf06771a8a62b3"
+    },
+    {
+      "bytes": 62351,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Bplus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "68a1e0041497552cb0f970d756020109984895bcc258be316e36833718e9df75"
+    },
+    {
+      "bytes": 31142,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Bplus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "16db858475792de9252243967df72503550e91119abb1050765479fb90040854"
+    },
+    {
+      "bytes": 63167,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Dminus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "9f81cd4023875b597fed5d9c077b4621becb6eeb81ec28985e7e6b1595e77fa0"
+    },
+    {
+      "bytes": 31395,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Dminus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "c443109934a790f9675f7ac9841a9bc920d1f4a83f1dd470b2b069cc4dd2d6ed"
+    },
+    {
+      "bytes": 62420,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Dplus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "59765170a627a0614f749db10215c416d38d10f3b3c5b5e36fe50b039736fbff"
+    },
+    {
+      "bytes": 31333,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Dplus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "620e781e1f20ad15556a4af8e88e030f38dd09ef2b2bc4d36bd235ec1924d1cd"
+    },
+    {
+      "bytes": 63019,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdab_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "76e655c10efe13272da3eb85ea9f150fab8b1750ae03950b6cad0344a4673238"
+    },
+    {
+      "bytes": 30753,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdab_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "a659250ae951853a2681a27da016140ad83e69959f889f674da5293ffd256449"
+    },
+    {
+      "bytes": 65242,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdabbar_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "50470663646e11a5505acf402bfc59fc6f2038d8c861a79fe3cedab70a74ff5c"
+    },
+    {
+      "bytes": 30839,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdabbar_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "133fbe43a77116bed79703a7113dfc97f83b827a77b983aa5bc564239588cedd"
+    },
+    {
+      "bytes": 62550,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdacplus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "f030f2d4dc49c925f9fdd41580b26794512a51c09d2cce8886b4cb4ee3ee4ac0"
+    },
+    {
+      "bytes": 29848,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdacplus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "fed54b8d4d2a5d90934e3be2141b007e4d62d3fe2ad9e9c3d91060523da378e3"
+    },
+    {
+      "bytes": 64760,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdacplusbar_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "c4ecde2c27a6f75d636791c68e32f0f29715b68daf3219606e829df7e60b54c3"
+    },
+    {
+      "bytes": 29755,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Lambdacplusbar_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "ba44d727c89c732d1c6cd9b43ccfc1b45780c236f28081badb68861002263c34"
+    },
+    {
+      "bytes": 57464,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Sigmabzero_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "46b95df6bc91d7758480a04bc6fc9f9f78019107e9abb51b6033be9f1cf2f941"
+    },
+    {
+      "bytes": 27955,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Sigmabzero_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "dfff2d850b0672457da5afeee4d989d193eedd55ffe3fbfacb219244924b4b4e"
+    },
+    {
+      "bytes": 60088,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Sigmabzerobar_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "c1e1ad8dcbfa2c9c6633e51be2cef4d6de7519b359872832502c4d227ff79131"
+    },
+    {
+      "bytes": 28124,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/pT/Inclusive_pT_Sigmabzerobar_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "49ce1b5fbb64dc00c87568b5f53e6131c42d53eed4fd6ea8e31316eb0e822b0a"
+    },
+    {
+      "bytes": 60840,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Bminus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "d22d5f8b8fa62fff8bb796a151a0ae64d8bd866f616e351d9329c6f95e586455"
+    },
+    {
+      "bytes": 29631,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Bminus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "8325cd029e76421cb8ee443136cb4eb1cbcc74d4314c59131585a75b91a47a07"
+    },
+    {
+      "bytes": 60117,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Bplus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "ad4ef749496301a0693f855b6c4e1e07f39c90d7a361a535ad72f75ebf530933"
+    },
+    {
+      "bytes": 29642,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Bplus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "11ec6729efd3924252a0d203e7cb52cf336fa9ff44473ea09997351dcbcd3a29"
+    },
+    {
+      "bytes": 60854,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Dminus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "b4c8bc732ca7c63ea45804301d234a518d4707641cd810eadb52cc83b821abbb"
+    },
+    {
+      "bytes": 29280,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Dminus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "388e8458c6a5e94ad85829d5d2fb5d4b7ffec89d3d2d9f4d4476d43b52e9a3ca"
+    },
+    {
+      "bytes": 60112,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Dplus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "14ace07f91088446803c2e4503019ec227ea1718096858e1909fd2c01085539c"
+    },
+    {
+      "bytes": 29306,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Dplus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "eec5008c0b034e9ceefe048cb792b54406e70b2e614e8f9a6bfc3b7b7c3a8fcb"
+    },
+    {
+      "bytes": 61557,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdab_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "fc92b6f5b5ad2bd8e3f36aa47ebeb9858a6a4f92250479a227c02f3c512fbefa"
+    },
+    {
+      "bytes": 29636,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdab_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "55c049d51dd8e5cbfe785eb5c4634025dc33e9969433b003d49ac16dff7e7466"
+    },
+    {
+      "bytes": 63765,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdabbar_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "1bcb0140e27fa1385da672b30117d858c91478f7c27bcda4260d4d71c90e23b0"
+    },
+    {
+      "bytes": 29563,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdabbar_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "a3726b799dbd2f298ed0593a96f4cf1e15b52433ccc596f1a0e2bd26a1823889"
+    },
+    {
+      "bytes": 64449,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdacplus_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "fbf2ff09a9a52190bbd1693c40783542ed30ab17fe95fe6ed71660a3f3224f95"
+    },
+    {
+      "bytes": 29739,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdacplus_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "f3c701bb871b00b75471abf7a878738938034d5e31c946e9d2975ad2f4c6e818"
+    },
+    {
+      "bytes": 67141,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdacplusbar_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "6003df860140871188f87750363c8455aadaa479216498cb85f744168719f4a1"
+    },
+    {
+      "bytes": 29779,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Lambdacplusbar_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "094164e85dda24f70b5091c96854116af4bb8a153ad455ecb39096338d5201a8"
+    },
+    {
+      "bytes": 63740,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Sigmabzero_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "97c9a5aabf7e6fbd5b5cf1f19581d8abebeab6a255171f0ec91210922af5c80c"
+    },
+    {
+      "bytes": 29450,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Sigmabzero_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "7ca31977fe4cee273396562408f9df6547018a16974238375e6566e58c5fa4f1"
+    },
+    {
+      "bytes": 65913,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Sigmabzerobar_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "646370555d7e99809dc83f2f4af1fa96bb243c72c49147749bb02d69bd6e81ce"
+    },
+    {
+      "bytes": 29624,
+      "name": "accepted_outputs/KinematicSpectra/Inclusive/phi/Inclusive_phi_Sigmabzerobar_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "d498626c79e0c383b0340af434a1f67baf83d705bad21d82cb14a9907d394a24"
+    },
+    {
+      "bytes": 309625,
+      "name": "accepted_outputs/KinematicSpectra/Multiplicity/MultiplicitySpectrum_Shared_shape.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "d08024c4033fe2387902f249202b9670960e5be2214a89e6d66d220d4f8a7ca1"
+    },
+    {
+      "bytes": 66151,
+      "name": "accepted_outputs/KinematicSpectra/Multiplicity/MultiplicitySpectrum_Shared_shape.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "1b770a948154a5bd833005fe64705bb6a1024f6cad99a42a73b89808294c3623"
+    },
+    {
+      "bytes": 80015,
+      "name": "accepted_outputs/THnSparse/Correlations/BEAUTYCorrelations_MONASH_MACRO.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "9e862482312166b1978803e18dd28d27ece9914c8d2797ec694261ac06263f20"
+    },
+    {
+      "bytes": 47935,
+      "name": "accepted_outputs/THnSparse/Correlations/BEAUTYCorrelations_MONASH_PDF.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "525ada3955f3c1a149e592e81abec4f2aa4efe627ef6b8aa24d74cd5346e7d38"
+    },
+    {
+      "bytes": 82651,
+      "name": "accepted_outputs/THnSparse/Correlations/CHARMCorrelations_MONASH_MACRO.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "5be2fdad998438a233275f24dae036ea7b77049e02b28646c28035cbadf3cb17"
+    },
+    {
+      "bytes": 37698,
+      "name": "accepted_outputs/THnSparse/Correlations/CHARMCorrelations_MONASH_PDF.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "d3ce9d7821a98f71985dc4a36e94505205c2577688de0cc4db3088b955c65126"
+    },
+    {
+      "bytes": 387825,
+      "name": "accepted_outputs/VariantBaryonMeson/global_balancing_baryon_over_meson_ratio_multiplicity_MACRO.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "6f284cbeb0e8c3cfd2be3989be26bf72e9e89f1c9886e2a0e06f0df42571c292"
+    },
+    {
+      "bytes": 23156,
+      "name": "accepted_outputs/VariantBaryonMeson/global_balancing_baryon_over_meson_ratio_multiplicity_PDF.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "a17ff527233112f64fdb57ee9649489a11339ca7f6bb171596e39a2d33c87bd5"
+    },
+    {
+      "bytes": 279074,
+      "name": "accepted_outputs/VariantExtremes/global_balancing_plots_multiplicity_beauty_MACRO.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "9f73962e4a724df5f0d52c910aae0b172d41131e1008125ae782af565eaebc72"
+    },
+    {
+      "bytes": 23181,
+      "name": "accepted_outputs/VariantExtremes/global_balancing_plots_multiplicity_beauty_PDF.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "baa1aa32954b58c7e9e73a63aa6e5c6f50568b2c18a273acb9f6003e50a70056"
+    },
+    {
+      "bytes": 217589,
+      "name": "accepted_outputs/VariantExtremes/global_balancing_plots_multiplicity_charm_MACRO.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "d946b31778a66105e3d0c5bf62396481283ba2b1f54fe70e80ead1308447d499"
+    },
+    {
+      "bytes": 21731,
+      "name": "accepted_outputs/VariantExtremes/global_balancing_plots_multiplicity_charm_PDF.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "941901ca08ceceb19238fd0ad381736baedd92c0d323502e9cc012820f491dc4"
+    },
+    {
+      "bytes": 193274,
+      "name": "accepted_outputs/VariantIntegrated/global_balancing_plots_integrated_beauty_MACRO.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "872016e247869d936b27554a96890c95dc4d2ffdf3dd327cfc5896ebb007e173"
+    },
+    {
+      "bytes": 24277,
+      "name": "accepted_outputs/VariantIntegrated/global_balancing_plots_integrated_beauty_PDF.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "9231bf9fe36dbad5e7572ff568b44d80a2380b6b3e0deab1946db84d9b752828"
+    },
+    {
+      "bytes": 130287,
+      "name": "accepted_outputs/VariantIntegrated/global_balancing_plots_integrated_charm_MACRO.C",
+      "role": "accepted_canvas_macro",
+      "sha256": "0b68496bf75c361ef4e5a04efbc8e37031dc120862cc7b34361b27fac803ace7"
+    },
+    {
+      "bytes": 19585,
+      "name": "accepted_outputs/VariantIntegrated/global_balancing_plots_integrated_charm_PDF.pdf",
+      "role": "accepted_plot_pdf",
+      "sha256": "821badb7a1c3247ca68dac0bff1997758f8907cfac615ab44df8caa5a1ff6404"
+    },
+    {
+      "bytes": 42870,
+      "name": "accepted_outputs/multiplicity_boundary_receipt_v2.json",
+      "role": "activity_boundary_receipt",
+      "sha256": "3df0a2059953cadeebcae00612e770a0d536c4f0b782f1b28445a626ff7d6e0e"
+    },
+    {
+      "bytes": 1524,
+      "name": "accepted_outputs/t1_CLOSEPACKING.json",
+      "role": "accepted_sample_count",
+      "sha256": "20aeedb56e404b77ffa73d51c9a9706dc8cd3d2a8a552a0cf1c0be3ce36caa72"
+    },
+    {
+      "bytes": 1518,
+      "name": "accepted_outputs/t1_JUNCTIONS.json",
+      "role": "accepted_sample_count",
+      "sha256": "2934065b751426791e09ba5742d40502999878ada13f2abe58a1beb80a83ea2e"
+    },
+    {
+      "bytes": 1512,
+      "name": "accepted_outputs/t1_MONASH.json",
+      "role": "accepted_sample_count",
+      "sha256": "67ef257475689c958c1261327ae219724dc847231d032a76cb7f0859bc66d73c"
+    },
+    {
+      "bytes": 4863693,
+      "name": "freeze/canonical_manifest.jsonl",
+      "role": "sealed_raw_freeze",
+      "sha256": "fcd96eaebd4dc11f071a2c8db8849f6a4cc19b764622a796664e524b27d0fc80"
+    },
+    {
+      "bytes": 340,
+      "name": "freeze/freeze_seal.json",
+      "role": "sealed_raw_freeze_seal",
+      "sha256": "e03fb1e7e38dab64fd0cf31c927da78693bb426778b02fb66dfb224114a14b61"
+    }
+  ],
+  "source_locator": "/data/alice/ipardoza/hf/project/results/HF_RUN3_V1/6729b3f0b7b9",
+  "statistics_version": "ten_block_sample_sem_v1",
+  "status": "migration_baseline",
+  "systematics": "disabled_not_included",
+  "validation": {
+    "attempt_rows": 3127,
+    "diagnostics": {
+      "balancing": {
+        "activity_closure_identities": 48,
+        "conflicts": 0,
+        "exact_duplicates": 182,
+        "output_rows": 5016,
+        "pair_count_exact_duplicates": 954,
+        "reported_entries": 422,
+        "shared_trigger_denominator_identities": 144,
+        "unique_identities": 240,
+        "unique_pair_count_identities": 576
+      },
+      "correlations": {
+        "macro_crosscheck_values": 120,
+        "rows": 1200,
+        "unique_identities": 1200
+      },
+      "kinematics": {
+        "rows": 9300,
+        "source_macros": 30
+      },
+      "multiplicity": {
+        "bins_per_tune": 4096,
+        "rows": 12288
+      },
+      "sample_counts": {
+        "quantities_per_tune": 12,
+        "rows": 36
+      }
+    },
+    "discarded_by_tune": {
+      "CLOSEPACKING": 64,
+      "JUNCTIONS": 63,
+      "MONASH": 0
+    },
+    "raw_rows": 3000
+  },
+  "version": 1
+}

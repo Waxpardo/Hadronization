@@ -1,0 +1,37 @@
+tune,quantity,quantity_label,pdg,value,unit,status
+MONASH,events,Successful generated events,,100000000,events,available_exact_count
+MONASH,final_heavy_hadrons,Final heavy hadrons,,226634887,hadrons,available_exact_count
+MONASH,charm_constituent_sum,Charm plus anticharm constituent sum,,199648398,constituents,available_exact_count
+MONASH,beauty_constituent_sum,Beauty plus antibeauty constituent sum,,27691828,constituents,available_exact_count
+MONASH,bplus_hadrons,B+ hadrons,521,1857083,hadrons,available_exact_count
+MONASH,bminus_hadrons,B- hadrons,-521,1843831,hadrons,available_exact_count
+MONASH,lambdab_hadrons,Lambda_b hadrons,5122,314865,hadrons,available_exact_count
+MONASH,lambdabbar_hadrons,anti-Lambda_b hadrons,-5122,310189,hadrons,available_exact_count
+MONASH,dplus_hadrons,D+ hadrons,411,22716269,hadrons,available_exact_count
+MONASH,dminus_hadrons,D- hadrons,-411,22793762,hadrons,available_exact_count
+MONASH,lambdacplus_hadrons,Lambda_c+ hadrons,4122,2278887,hadrons,available_exact_count
+MONASH,lambdacplusbar_hadrons,anti-Lambda_c hadrons,-4122,2239173,hadrons,available_exact_count
+JUNCTIONS,events,Successful generated events,,100000000,events,available_exact_count
+JUNCTIONS,final_heavy_hadrons,Final heavy hadrons,,229459415,hadrons,available_exact_count
+JUNCTIONS,charm_constituent_sum,Charm plus anticharm constituent sum,,202657198,constituents,available_exact_count
+JUNCTIONS,beauty_constituent_sum,Beauty plus antibeauty constituent sum,,27742702,constituents,available_exact_count
+JUNCTIONS,bplus_hadrons,B+ hadrons,521,1354421,hadrons,available_exact_count
+JUNCTIONS,bminus_hadrons,B- hadrons,-521,1341686,hadrons,available_exact_count
+JUNCTIONS,lambdab_hadrons,Lambda_b hadrons,5122,613275,hadrons,available_exact_count
+JUNCTIONS,lambdabbar_hadrons,anti-Lambda_b hadrons,-5122,613880,hadrons,available_exact_count
+JUNCTIONS,dplus_hadrons,D+ hadrons,411,20150781,hadrons,available_exact_count
+JUNCTIONS,dminus_hadrons,D- hadrons,-411,20284640,hadrons,available_exact_count
+JUNCTIONS,lambdacplus_hadrons,Lambda_c+ hadrons,4122,3160250,hadrons,available_exact_count
+JUNCTIONS,lambdacplusbar_hadrons,anti-Lambda_c hadrons,-4122,3143875,hadrons,available_exact_count
+CLOSEPACKING,events,Successful generated events,,100000000,events,available_exact_count
+CLOSEPACKING,final_heavy_hadrons,Final heavy hadrons,,228403184,hadrons,available_exact_count
+CLOSEPACKING,charm_constituent_sum,Charm plus anticharm constituent sum,,201607172,constituents,available_exact_count
+CLOSEPACKING,beauty_constituent_sum,Beauty plus antibeauty constituent sum,,27711410,constituents,available_exact_count
+CLOSEPACKING,bplus_hadrons,B+ hadrons,521,1325027,hadrons,available_exact_count
+CLOSEPACKING,bminus_hadrons,B- hadrons,-521,1315871,hadrons,available_exact_count
+CLOSEPACKING,lambdab_hadrons,Lambda_b hadrons,5122,561765,hadrons,available_exact_count
+CLOSEPACKING,lambdabbar_hadrons,anti-Lambda_b hadrons,-5122,565638,hadrons,available_exact_count
+CLOSEPACKING,dplus_hadrons,D+ hadrons,411,19922694,hadrons,available_exact_count
+CLOSEPACKING,dminus_hadrons,D- hadrons,-411,20038470,hadrons,available_exact_count
+CLOSEPACKING,lambdacplus_hadrons,Lambda_c+ hadrons,4122,2702197,hadrons,available_exact_count
+CLOSEPACKING,lambdacplusbar_hadrons,anti-Lambda_c hadrons,-4122,2695266,hadrons,available_exact_count

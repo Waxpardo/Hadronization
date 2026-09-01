@@ -1,0 +1,121 @@
+{
+  "accepted_source": {
+    "origin_algorithm": "signed_heavy_constituent_complete_mothers_unique_v4",
+    "producer_executable_sha256": "e54b27bb9e3fcfd42d70193e08e2eacf965cc5081eabb5c42a9971203f130659",
+    "producer_repository_commit": "e6429b779d62dba4ec0fb65628470a041ee6a5e9",
+    "raw_manifest_schema": "hf_canonical_raw_manifest_v2",
+    "raw_manifest_sha256": "fcd96eaebd4dc11f071a2c8db8849f6a4cc19b764622a796664e524b27d0fc80",
+    "raw_schema": "hf_primary_ground_raw_v7",
+    "selector": "hard_trigger_primary_ground__primary_ground_associate_v1",
+    "tune_cards": {
+      "CLOSEPACKING": {
+        "accepted_effective_sha256": "0a3bca5525e8a06dd9e5d9b34fed2e0d460e9b9945f3bd4df51f927dd89a6378",
+        "current_definition_sha256": "dd0755ae85c340f7e3a438931bed14afa433220f164f84fcb0e18d4ae6f2f4de"
+      },
+      "JUNCTIONS": {
+        "accepted_effective_sha256": "db1c64736ae984f4e6496bbedeba9816f65ed8f3c668d67adfcfc87a58a70878",
+        "current_definition_sha256": "bbadecf78528637b1d80edd5594d0f3ea4d3ab73d0d44bc1e7e07c7bc25a41d8"
+      },
+      "MONASH": {
+        "accepted_effective_sha256": "8dfa3ea896e8358cece4e3270133efe310b114724bd8cf06fa477fe7cd46b1f9",
+        "current_definition_sha256": "defd7f5dff774e790ffa773b3186341e89bd1fe7a5101f8fb491e3b10b156b23"
+      }
+    },
+    "tune_difference_allowlist": {
+      "schema": "pythia_tune_difference_allowlist_v2",
+      "sha256": "2b35e52a589ddb488ed4230592203578228425ecac42733f685f90bdd20283c9"
+    }
+  },
+  "attempt_evidence_inventory": {
+    "file_count": 3127,
+    "sha256": "a8921ab6b6013a0cba8e82ba93a60662cb0a3af0f44fb33e7ead7108dc22c5a5"
+  },
+  "blocks": {
+    "count": 10,
+    "logical_id_domain": [
+      0,
+      999
+    ],
+    "logical_id_rule": "block=(logical_id%10)+1"
+  },
+  "campaign": "HF_RUN3_V1",
+  "current_interpretation_definitions": {
+    "files": [
+      {
+        "bytes": 2229,
+        "path": "generation/cards/pythiasettings_Hard_Low_ccbb_MONASH.cmnd",
+        "sha256": "defd7f5dff774e790ffa773b3186341e89bd1fe7a5101f8fb491e3b10b156b23"
+      },
+      {
+        "bytes": 2806,
+        "path": "generation/cards/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd",
+        "sha256": "bbadecf78528637b1d80edd5594d0f3ea4d3ab73d0d44bc1e7e07c7bc25a41d8"
+      },
+      {
+        "bytes": 3226,
+        "path": "generation/cards/pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd",
+        "sha256": "dd0755ae85c340f7e3a438931bed14afa433220f164f84fcb0e18d4ae6f2f4de"
+      },
+      {
+        "bytes": 9152,
+        "path": "config/campaign_ordinals_v1.json",
+        "sha256": "b3c6f6123f4536b246d056cd0defb5318f9b6248742ea566b12a70a7fc5af70d"
+      },
+      {
+        "bytes": 3694,
+        "path": "config/dependencies.conf",
+        "sha256": "ed8332c0f59fccecafb64687d87c9cdaeaca1563b0609c98ae8cfbe3eb19dc46"
+      },
+      {
+        "bytes": 17928,
+        "path": "tools/campaign.py",
+        "sha256": "8ddf150e2b9dbbf366b37fb77b9fcf0cefab879436a62654919880aab1fff3d2"
+      },
+      {
+        "bytes": 72842,
+        "path": "generation/producer/heavyflavourcorrelations_status.cpp",
+        "sha256": "c06ded5723a7939fdce1e2f6cdd91a698322d5767c5e4a5cba481b6c95c4e25d"
+      }
+    ],
+    "role": "interpretation_only_not_claimed_as_accepted_producer"
+  },
+  "held_attempt_policy": "record_and_disclose_no_correction",
+  "logical_jobs_per_tune": 1000,
+  "physics": {
+    "beam": "pp",
+    "hard_processes": [
+      "ccbar",
+      "bbbar"
+    ],
+    "heavy_hadron_decays": "disabled",
+    "pthat_min_gev": 2.0,
+    "sqrt_s_gev": 13600
+  },
+  "runtime": {
+    "pythia_version": "8.317"
+  },
+  "schema": "hadronization_campaign_record_v1",
+  "seed": {
+    "attempt_domain": [
+      0,
+      9
+    ],
+    "campaign_ordinal": 3,
+    "formula": "100000001+campaign_ordinal*10000000+tune_ordinal*1000000+attempt*100000+logical_id",
+    "schema": "seed_derivation_v2",
+    "tune_ordinals": {
+      "CLOSEPACKING": 2,
+      "JUNCTIONS": 1,
+      "MONASH": 0
+    }
+  },
+  "successful_events_per_logical_job": 100000,
+  "successful_events_per_tune": 100000000,
+  "systematic_uncertainties": "disabled",
+  "tune_order": [
+    "MONASH",
+    "JUNCTIONS",
+    "CLOSEPACKING"
+  ],
+  "version": 1
+}

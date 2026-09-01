@@ -80,6 +80,8 @@ base_path.txt
 config/dependencies.local.conf
 config/site.local.conf
 /.local-data/
+/data/raw/
+/data/work/
 
 # Rendered batch submit files.
 submit_*_smoke.sub
