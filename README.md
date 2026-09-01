@@ -51,9 +51,10 @@ the physics is [docs2/physics/MULTIPLICITY.md](docs2/physics/MULTIPLICITY.md).
 
 **Attrition is disclosed, not corrected away** (ruling R41). 63 of 1,063
 JUNCTIONS attempts and 64 of 1,064 CLOSEPACKING attempts were discarded — 127
-of 3,127, **4.06 %**, none in MONASH. Every one is a PYTHIA junction-splitting
-hang, and the policy is
-[`config/cr_holdout_policy_v1.json`](config/cr_holdout_policy_v1.json).
+of 3,127, **4.06 %**, none in MONASH. The campaign record attributes the
+mechanism to a PYTHIA junction-splitting hang; the per-attempt termination
+metadata is not in this repository (`docs/REPRODUCIBILITY.md:147`). The policy
+is [`config/cr_holdout_policy_v1.json`](config/cr_holdout_policy_v1.json).
 Whether that can bias the measurement is argued, as an unratified draft, in
 [docs2/physics/DISCARD_BIAS.md](docs2/physics/DISCARD_BIAS.md).
 
