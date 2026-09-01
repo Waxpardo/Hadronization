@@ -41,7 +41,11 @@ Read the page whose subject you need. Nothing here repeats another page.
 |---|---|
 | [systematics/STATUS.md](systematics/STATUS.md) | the module is paused under ruling R31 |
 | [systematics/REACTIVATION.md](systematics/REACTIVATION.md) | the work list for the session that switches it on |
-| [decisions/RULINGS.md](decisions/RULINGS.md) | an index of rulings R19–R47 |
+| [decisions/RULINGS.md](decisions/RULINGS.md) | an index of rulings R19–R50 |
+| [decisions/DEFERRED.md](decisions/DEFERRED.md) | the post-paper work list: every deferred audit row, grouped and explained |
+| [decisions/OPEN_QUESTIONS.md](decisions/OPEN_QUESTIONS.md) | what is unresolved, what the repository can show, and who owns each decision |
+| [decisions/ARCHITECT_LEDGER.md](decisions/ARCHITECT_LEDGER.md) | the process defects this project found in its own direction, and the rules they produced |
+| [physics/DISCARD_BIAS.md](physics/DISCARD_BIAS.md) | draft: whether the discarded jobs can bias the measured observable |
 
 ## Two rules that decide where a correction goes
 

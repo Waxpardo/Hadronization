@@ -2,8 +2,9 @@
 
 The ledgers are canonical. They live in the project archive outside this
 repository, as `DECISION_ENTRIES_20260827.md` (R19–R30),
-`DECISION_ENTRIES_20260830.md` (R31–R42) and
-`DECISION_ENTRIES_20260831.md` (R43–R47). This page is an index, not a copy: it
+`DECISION_ENTRIES_20260830.md` (R31–R42),
+`DECISION_ENTRIES_20260831.md` (R43–R47) and
+`DECISION_ENTRIES_20260901.md` (R48–R50). This page is an index, not a copy: it
 gives one line per ruling so a reader can tell which ledger entry to open.
 
 Do not quote a ruling from this page. Open the ledger entry.
@@ -52,8 +53,16 @@ Do not quote a ruling from this page. Open the ledger entry.
 | R46 | Figure identification: panel titles off, each fact stated once — information block, column header, row label, one canvas legend |
 | R47 | Sequencing: RUN-N4 → owner figure review → ARCH-1 → HANDOFF → WRAP → PHYS-1 → final adversarial review |
 
-All three ranges are listed complete: twelve entries in R19–R30, twelve in
-R31–R42 and five in R43–R47.
+## R48–R50 (2026-09-01)
+
+| id | one line |
+|---|---|
+| R48 | One session at a time on a checkout; a brief that follows another names the predecessor's exit commit as its entry pin |
+| R49 | Three process rules from ARCH-1, now binding: lock records are evidence; a stale `.git/index.lock` is an entry-gate item; the bare-anchor convention is adopted |
+| R50 | The manuscript's Model section is the highest item on the paper's path — `paper/Model.tex` states a beam energy, a `pTHatMin` and a job factorisation the campaign contradicts |
+
+All four ranges are listed complete: twelve entries in R19–R30, twelve in
+R31–R42, five in R43–R47 and three in R48–R50.
 
 ## Where each ruling is applied in `docs2/`
 
@@ -70,6 +79,8 @@ R31–R42 and five in R43–R47.
 | R42 | [../physics/MULTIPLICITY.md](../physics/MULTIPLICITY.md) |
 | R43 | [../paper/DELIVERABLES.md](../paper/DELIVERABLES.md) |
 | R45, R46 | [../pipeline/STYLE.md](../pipeline/STYLE.md) |
+| R48, R49 | recorded as practice in the project's `PRACTICE.md` §15.5, outside this repository; the defects that produced them are in [ARCHITECT_LEDGER.md](ARCHITECT_LEDGER.md) |
+| R50 | [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) |
 
 ## Owner decisions O1–O5
 
