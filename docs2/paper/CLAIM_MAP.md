@@ -32,6 +32,14 @@ this file finds no retired-tree citation to follow. That file now carries a
 reference-only annotation saying the same thing at its head, written by session
 HANDOFF; it is the only file under `paper/` this consolidation ever wrote.
 
+**Every row below carries a statistical uncertainty only.** No systematic
+uncertainty is evaluated for any claim in this map. What that permits a reader
+to conclude, which comparisons the shared tune configuration protects, and which
+it does not, are set out in [LIMITATIONS.md](LIMITATIONS.md). A related and
+separate limit — whether the discarded generation attempts can bias the
+observable — is argued, as an unratified draft, in
+[../physics/DISCARD_BIAS.md](../physics/DISCARD_BIAS.md).
+
 ## Claims
 
 | id | claim | producer or source | contract | source-contract test |

@@ -34,6 +34,7 @@ Read the page whose subject you need. Nothing here repeats another page.
 | [paper/CLAIM_MAP.md](paper/CLAIM_MAP.md) | every claim and figure mapped to its producer and contract |
 | [paper/DELIVERABLES.md](paper/DELIVERABLES.md) | the byte-exact delivery-name manifest |
 | [paper/CAMPAIGN_TRUTH.md](paper/CAMPAIGN_TRUTH.md) | the campaign parameters, as measured from the cards |
+| [paper/LIMITATIONS.md](paper/LIMITATIONS.md) | what the paper may and may not claim with statistical uncertainties only |
 
 ## Governance
 
@@ -46,6 +47,21 @@ Read the page whose subject you need. Nothing here repeats another page.
 | [decisions/OPEN_QUESTIONS.md](decisions/OPEN_QUESTIONS.md) | what is unresolved, what the repository can show, and who owns each decision |
 | [decisions/ARCHITECT_LEDGER.md](decisions/ARCHITECT_LEDGER.md) | the process defects this project found in its own direction, and the rules they produced |
 | [physics/DISCARD_BIAS.md](physics/DISCARD_BIAS.md) | draft: whether the discarded jobs can bias the measured observable |
+
+## The architecture map
+
+The pipeline map is not in this repository. It lives in the project archive
+beside this checkout as **`PIPELINE_MAP_20260827.md`**, revision **r14**, sha256
+
+```
+894ce5f90d3011f98a68b559d8585ad7de33e64ff516ad21828b1d19ed25df23
+```
+
+Ruling R20 makes it a living document, revised at every acceptance review, so a
+successor holding a copy has no way to tell a current one from a stale one
+without this digest. Re-measure before trusting a copy: `shasum -a 256` on the
+file must reproduce the string above, and its revision log must end at r14.
+Session PHYS-1 re-measured it at HEAD rather than copying the value forward.
 
 ## Two rules that decide where a correction goes
 

@@ -56,11 +56,19 @@ claim without systematics. WRAP measured this: the only mentions of
 "systematic" in `docs2/paper/` concern the two retired trees and a card-digest
 repair, not the scope of the claim.
 
-**What closing it requires.** A limitations paragraph. The argument is
-available and is probably right — the three tunes share the generator, the
-cuts, the counter and the class definition, so common systematics largely
-cancel in a tune-to-tune double ratio — but it must be made, not assumed. It is
-a framing decision, not new computation.
+**What closing it requires.** A limitations paragraph. It is a framing
+decision, not new computation.
+
+**Written, 2026-09-01 (session PHYS-1).**
+[../paper/LIMITATIONS.md](../paper/LIMITATIONS.md) states the limit and is
+linked from [../paper/CLAIM_MAP.md](../paper/CLAIM_MAP.md). The cancellation
+argument is made rather than assumed: the settings the three cards share are
+enumerated from the cards, and three things that do **not** cancel are named —
+the tune parameters themselves (which the systematics contract already records
+as `tune_bundle_spread`, "the measurement, not a systematic uncertainty"), the
+per-tune mapping of a percentile class to absolute `N_ch`, and any response that
+couples to the hadronization settings under study. **The wording the manuscript
+uses remains the owner's decision**; the page records the limit, not the prose.
 
 **Owner.** The owner, with the supervisor.
 
@@ -79,14 +87,28 @@ approval lives only in the decision ledger outside this repository.
 **The discrepancy.** The repository publishes numbers under a contract whose
 own status field says it is not cleared to support publication.
 
-**What closing it requires.** One of two acts, and the choice is not a
-session's to make: either the contract's status field moves — it is a
-`config/` file, and the R31 paused list names `tools/statistical_robustness.py`
-rather than this config, so it may be editable — or `docs2/` records precisely
-why it cannot move and where the approval actually lives. **WRAP did not edit
-the contract.**
+**Resolved in the record, 2026-09-01 (session PHYS-1). The field cannot
+move now.** WRAP left this open on the reading that the R31 paused list names
+`tools/statistical_robustness.py` rather than this config, "so it may be
+editable". The literal reading is right and it is not sufficient. Measured:
+`validate_spec` refuses any value except the pending string, and
+`tests/test_statistical_robustness.py:164` calls it on the real file, so moving
+the field alone turns the suite red — and the co-edit it requires is inside the
+paused module. R39 had already ruled that the field and its tool "are updated
+together on the systematics reactivation checklist". **No edit is proposed.**
 
-**Owner.** The owner, with the supervisor who made the R39 approval.
+**What the pending item actually governs: nothing the paper publishes.**
+`tools/statistical_robustness.py` is invoked by no `Makefile` target, no
+`hadronization` subcommand and no pipeline script, and the published uncertainty
+is computed by `extraction/harvest_class_axis.py:114-121`, which never reads the
+contract. A further finding: `hf_final_scientific_review_v1`, the review record
+the contract points at, **does not exist in this repository**. The four
+determinations are written up in
+[../physics/STATISTICS.md](../physics/STATISTICS.md).
+
+**Owner.** The owner, with the supervisor who made the R39 approval — for
+whether the reactivation checklist is the right place to leave it, which is the
+only question left.
 
 ---
 
