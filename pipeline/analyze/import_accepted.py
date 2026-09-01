@@ -123,6 +123,13 @@ def fmt(value: float | int | str | None) -> str:
     return str(value)
 
 
+def exact_count_token(token: str, *, source: str) -> str:
+    """Return an exact non-negative decimal count without numeric coercion."""
+    if not re.fullmatch(r"[0-9]+", token):
+        raise ValueError(f"{source} is not an exact decimal integer token: {token!r}")
+    return token
+
+
 def source_entry(name: str, role: str, path: Path) -> dict[str, object]:
     return {"name": name, "role": role, **file_identity(path)}
 
@@ -335,6 +342,8 @@ def build_balancing(logs_dir: Path, boundary_path: Path, path: Path) -> dict[str
     emitted_central: set[tuple[str, str, str, str, str]] = set()
     yield_blocks: dict[tuple[str, str, str, str, str], list[float]] = {}
     reference_blocks: dict[tuple[str, str, str, str], list[float]] = {}
+    rounded_block_trigger_rows = 0
+    rounded_block_trigger_identities: set[tuple[str, str, str, str, str]] = set()
     for matrix in matrices:
         if matrix["is_reference"] == "true":
             bin_id = matrix["bin"].removeprefix("hDPhi")
@@ -352,12 +361,15 @@ def build_balancing(logs_dir: Path, boundary_path: Path, path: Path) -> dict[str
             raise ValueError(f"missing PAIR_COUNTS for {matrix}")
         trigger, os_associate, ss_associate = pair_particles(count["os_file"])
         central = float(matrix["central_yield"])
-        count_yield = (int(count["n_os"]) - int(count["n_ss"])) / int(count["n_trig"])
+        n_os = exact_count_token(count["n_os"], source="PAIR_COUNTS n_os")
+        n_ss = exact_count_token(count["n_ss"], source="PAIR_COUNTS n_ss")
+        n_trigger = exact_count_token(count["n_trig"], source="PAIR_COUNTS n_trig")
+        count_yield = (int(n_os) - int(n_ss)) / int(n_trigger)
         if not close(central, count_yield):
             raise ValueError(f"central balancing arithmetic mismatch: {matrix}")
         block_yields = [float(value) for value in matrix["block_yields"].split(",")]
-        block_triggers = [float(value) for value in matrix["block_triggers"].split(",")]
-        if len(block_yields) != 10 or len(block_triggers) != 10:
+        block_trigger_tokens = matrix["block_triggers"].split(",")
+        if len(block_yields) != 10 or len(block_trigger_tokens) != 10:
             raise ValueError("balancing estimator does not expose ten blocks")
         sem = statistics.stdev(block_yields) / math.sqrt(10.0)
         if not close(sem, float(matrix["yield_sem"])):
@@ -372,12 +384,34 @@ def build_balancing(logs_dir: Path, boundary_path: Path, path: Path) -> dict[str
             "nch_low": nch_low, "nch_high": nch_high,
         }
         output.append({**common, "quantity": "balancing_yield", "estimator": "central",
-                       "n_os": count["n_os"], "n_ss": count["n_ss"], "n_trigger": count["n_trig"],
+                       "n_os": n_os, "n_ss": n_ss, "n_trigger": n_trigger,
                        "value": fmt(central), "status": "available_count_backed"})
-        for index, (block_yield, block_trigger) in enumerate(zip(block_yields, block_triggers), 1):
+        for index, (block_yield, block_trigger_token) in enumerate(
+                zip(block_yields, block_trigger_tokens), 1):
+            if re.fullmatch(r"[0-9]+", block_trigger_token):
+                block_trigger = block_trigger_token
+                block_status = "available_derived_no_component_counts"
+            else:
+                # Exactness is a property of the accepted source representation.
+                # A rounded floating/scientific token must not become an apparent
+                # integer merely because its parsed float happens to be integral.
+                if not re.fullmatch(
+                        r"(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?",
+                        block_trigger_token):
+                    raise ValueError(
+                        f"unsupported non-integer block trigger token: {block_trigger_token!r}")
+                parsed_block_trigger = float(block_trigger_token)
+                if not math.isfinite(parsed_block_trigger) or parsed_block_trigger < 0:
+                    raise ValueError(
+                        f"invalid non-negative block trigger token: {block_trigger_token!r}")
+                block_trigger = ""
+                block_status = (
+                    "available_derived_no_component_counts_trigger_count_rounded_in_source")
+                rounded_block_trigger_rows += 1
+                rounded_block_trigger_identities.add(identity)
             output.append({**common, "quantity": "balancing_yield", "estimator": f"block_{index:02d}",
-                           "n_os": "", "n_ss": "", "n_trigger": fmt(block_trigger),
-                           "value": fmt(block_yield), "status": "available_derived_no_component_counts"})
+                           "n_os": "", "n_ss": "", "n_trigger": block_trigger,
+                           "value": fmt(block_yield), "status": block_status})
         output.append({**common, "quantity": "balancing_yield_sem", "estimator": "central",
                        "n_os": "", "n_ss": "", "n_trigger": "", "value": matrix["yield_sem"],
                        "status": "available_derived"})
@@ -412,14 +446,17 @@ def build_balancing(logs_dir: Path, boundary_path: Path, path: Path) -> dict[str
         identity = (count["tune"], count["flavour"].lower(), trigger, os_associate, activity_id)
         if identity in emitted_central:
             continue
-        value = (int(count["n_os"]) - int(count["n_ss"])) / int(count["n_trig"])
+        n_os = exact_count_token(count["n_os"], source="PAIR_COUNTS n_os")
+        n_ss = exact_count_token(count["n_ss"], source="PAIR_COUNTS n_ss")
+        n_trigger = exact_count_token(count["n_trig"], source="PAIR_COUNTS n_trig")
+        value = (int(n_os) - int(n_ss)) / int(n_trigger)
         output.append({
             "tune": count["tune"], "flavour": count["flavour"].lower(), "trigger": trigger,
             "os_associate": os_associate, "ss_associate": ss_associate, "quantity": "balancing_yield",
             "activity_id": activity_id, "percentile_low": fmt(percentile_low),
             "percentile_high": fmt(percentile_high), "nch_low": nch_low, "nch_high": nch_high,
-            "estimator": "central", "n_os": count["n_os"], "n_ss": count["n_ss"],
-            "n_trigger": count["n_trig"], "value": fmt(value), "status": "available_count_backed",
+            "estimator": "central", "n_os": n_os, "n_ss": n_ss,
+            "n_trigger": n_trigger, "value": fmt(value), "status": "available_count_backed",
         })
         emitted_central.add(identity)
     closure_groups: dict[tuple[str, str, str, str], list[dict[str, str]]] = defaultdict(list)
@@ -458,15 +495,21 @@ def build_balancing(logs_dir: Path, boundary_path: Path, path: Path) -> dict[str
                                  str(row["os_associate"]), float(row["percentile_low"]),
                                  quantity_order[str(row["quantity"])], str(row["estimator"])))
     write_csv(path, fields, output)
+    if rounded_block_trigger_rows != 90 or len(rounded_block_trigger_identities) != 9:
+        raise ValueError(
+            "rounded block-trigger topology differs from 90 rows across 9 identities: "
+            f"rows={rounded_block_trigger_rows} identities={len(rounded_block_trigger_identities)}")
     return {"reported_entries": len(matrices) + duplicate_count, "unique_identities": len(matrices),
             "exact_duplicates": duplicate_count, "conflicts": 0, "pair_count_exact_duplicates": count_duplicates,
             "output_rows": len(output), "activity_closure_identities": closure_count,
             "shared_trigger_denominator_identities": len(trigger_groups),
-            "unique_pair_count_identities": len(count_map)}
+            "unique_pair_count_identities": len(count_map),
+            "rounded_block_trigger_rows_omitted": rounded_block_trigger_rows,
+            "rounded_block_trigger_identities": len(rounded_block_trigger_identities)}
 
 
 def parse_macro(text: str, *, linewise: bool) -> dict[str, dict[str, object]]:
-    """Parse numeric TH1D state; two modes deliberately use different scans."""
+    """Parse numeric TH1D state using one parser in either of two scan modes."""
     array_pattern = re.compile(r"Double_t\s+(\w+)\[\d+\]\s*=\s*\{([^}]*)\};")
     uniform_pattern = re.compile(
         r'TH1D\s*\*(\w+)\s*=\s*new TH1D\("([^"]+)","[^"]*",(\d+),([^,;]+),([^;]+)\);')
@@ -503,13 +546,54 @@ def parse_macro(text: str, *, linewise: bool) -> dict[str, dict[str, object]]:
     return histograms
 
 
-def checked_macro(path: Path) -> dict[str, dict[str, object]]:
+def macro_completeness(text: str, histograms: dict[str, dict[str, object]],
+                       path: Path) -> dict[str, int]:
+    """Orthogonally account for constructors and supported numeric mutations."""
+    constructor_starts = list(re.finditer(r"\bnew\s+TH1D\s*\(", text))
+    constructor_statements = list(re.finditer(
+        r'TH1D\s*\*\w+\s*=\s*new\s+TH1D\("[^"]+","[^"]*",\d+,'
+        r'(?:[^,;]+,[^;]+|\s*\w+\s*)\);', text))
+    if len(constructor_starts) != len(constructor_statements):
+        raise ValueError(
+            f"unsupported or unaccounted TH1D constructor in accepted macro: {path}")
+    if len(histograms) != len(constructor_starts):
+        raise ValueError(f"TH1D constructor variables are not one-to-one in accepted macro: {path}")
+
+    mutation_starts = list(re.finditer(r"\b\w+\s*->\s*SetBin(?:Content|Error)\s*\(", text))
+    mutation_statements = list(re.finditer(
+        r"\b(\w+)\s*->\s*SetBin(Content|Error)\s*\(\s*(\d+)\s*,\s*([^\)]+)\s*\)\s*;",
+        text))
+    if len(mutation_starts) != len(mutation_statements):
+        raise ValueError(
+            f"unsupported or unaccounted SetBinContent/SetBinError mutation: {path}")
+    parser_shaped_mutations = list(re.finditer(
+        r"(\w+)->SetBin(Content|Error)\((\d+),([^\)]+)\);", text))
+    if len(parser_shaped_mutations) != len(mutation_starts):
+        raise ValueError(f"macro parser does not consume every supported bin mutation: {path}")
+    unknown_targets = sorted({match.group(1) for match in mutation_statements
+                              if match.group(1) not in histograms})
+    if unknown_targets:
+        raise ValueError(f"numeric mutations target unparsed histograms in {path}: {unknown_targets}")
+
+    # These ROOT methods can change numeric histogram state without a direct
+    # SetBinContent/SetBinError statement. The accepted migration does not
+    # interpret them, so their presence is a source-interpretation conflict.
+    unsupported = sorted({match.group(1) for match in re.finditer(
+        r"\b\w+\s*->\s*(FillN?|AddBinContent|SetContent|SetError|SetBins|Scale|"
+        r"Add|Divide|Multiply|Rebin|Reset|Sumw2)\s*\(", text)})
+    if unsupported:
+        raise ValueError(f"unsupported numeric histogram mutation forms in {path}: {unsupported}")
+    return {"macro_th1d_constructors_accounted": len(constructor_starts),
+            "macro_set_bin_mutations_accounted": len(mutation_starts)}
+
+
+def checked_macro(path: Path) -> tuple[dict[str, dict[str, object]], dict[str, int]]:
     text = path.read_text(encoding="utf-8")
     primary = parse_macro(text, linewise=False)
-    independent = parse_macro(text, linewise=True)
-    if primary != independent:
-        raise ValueError(f"independent macro parsers disagree: {path}")
-    return primary
+    linewise = parse_macro(text, linewise=True)
+    if primary != linewise:
+        raise ValueError(f"whole-text and linewise macro scan modes disagree: {path}")
+    return primary, macro_completeness(text, primary, path)
 
 
 def hist_value(histogram: dict[str, object], field: str, index: int) -> float:
@@ -558,8 +642,13 @@ def build_correlations(logs_dir: Path, artifact_root: Path, path: Path) -> dict[
                    ("BplusBminus", "LbbarBminus")),
     }
     checked_values = 0
+    constructor_count = 0
+    mutation_count = 0
     for _, (macro_path, pairs) in macro_views.items():
-        histograms = list(checked_macro(macro_path).values())
+        parsed, completeness = checked_macro(macro_path)
+        histograms = list(parsed.values())
+        constructor_count += completeness["macro_th1d_constructors_accounted"]
+        mutation_count += completeness["macro_set_bin_mutations_accounted"]
         os_hists = [hist for hist in histograms if str(hist["name"]).startswith("hDPhiOS_copy")]
         ss_hists = [hist for hist in histograms if str(hist["name"]).startswith("hDPhiSS_copy")]
         diff_hists = [hist for hist in histograms if "_sub_copy" in str(hist["name"])]
@@ -582,12 +671,16 @@ def build_correlations(logs_dir: Path, artifact_root: Path, path: Path) -> dict[
     fields = ("tune", "flavour", "trigger", "associate", "context", "activity_id",
               "bin_index", "dphi_low", "dphi_high", "value", "stat_error", "status")
     write_csv(path, fields, output)
-    return {"rows": len(output), "unique_identities": len(identities), "macro_crosscheck_values": checked_values}
+    return {"rows": len(output), "unique_identities": len(identities),
+            "macro_crosscheck_values": checked_values, "source_macros": len(macro_views),
+            "selected_histogram_constructors": 12,
+            "macro_th1d_constructors_accounted": constructor_count,
+            "macro_set_bin_mutations_accounted": mutation_count}
 
 
 def build_multiplicity(artifact_root: Path, path: Path) -> dict[str, int]:
     macro = artifact_root / "G1/MultiplicitySpectrum_Shared_shape.C"
-    histograms = checked_macro(macro)
+    histograms, completeness = checked_macro(macro)
     selected = {}
     pattern = re.compile(r"hPlot_MultiplicitySpectrum_Shared_shape_(MONASH|JUNCTIONS|CLOSEPACKING)__")
     for histogram in histograms.values():
@@ -612,18 +705,24 @@ def build_multiplicity(artifact_root: Path, path: Path) -> dict[str, int]:
     fields = ("tune", "bin_index", "nch_low", "nch_high", "count_or_content", "stat_error",
               "normalized_value", "normalized_error", "status")
     write_csv(path, fields, rows)
-    return {"rows": len(rows), "bins_per_tune": 4096}
+    return {"rows": len(rows), "bins_per_tune": 4096, "source_macros": 1,
+            "selected_histogram_constructors": len(selected), **completeness}
 
 
 def build_kinematics(artifact_root: Path, path: Path) -> dict[str, int]:
     rows = []
+    constructor_count = 0
+    mutation_count = 0
+    selected_constructor_count = 0
     expected_bins = {"pt": 110, "eta": 100, "phi": 100}
     source_obs = {"pt": "pT", "eta": "eta", "phi": "phi"}
     for observable in ("pt", "eta", "phi"):
         source_observable = source_obs[observable]
         for species in SPECIES:
             macro = artifact_root / f"G9/{source_observable}/Inclusive_{source_observable}_{species}_shape.C"
-            histograms = checked_macro(macro)
+            histograms, completeness = checked_macro(macro)
+            constructor_count += completeness["macro_th1d_constructors_accounted"]
+            mutation_count += completeness["macro_set_bin_mutations_accounted"]
             selected = {}
             prefix = f"hPlot_Inclusive_{source_observable}_{species}_shape_"
             for histogram in histograms.values():
@@ -633,6 +732,7 @@ def build_kinematics(artifact_root: Path, path: Path) -> dict[str, int]:
                         selected[tune] = histogram
             if set(selected) != set(TUNES):
                 raise ValueError(f"accepted kinematic macro lacks tune histogram: {macro}")
+            selected_constructor_count += len(selected)
             for tune in TUNES:
                 histogram = selected[tune]
                 edges = histogram["edges"]
@@ -651,7 +751,10 @@ def build_kinematics(artifact_root: Path, path: Path) -> dict[str, int]:
     fields = ("tune", "species", "pdg", "observable", "bin_index", "bin_low", "bin_high",
               "count_or_content", "stat_error", "normalized_value", "normalized_error", "status")
     write_csv(path, fields, rows)
-    return {"rows": len(rows), "source_macros": 30}
+    return {"rows": len(rows), "source_macros": 30,
+            "selected_histogram_constructors": selected_constructor_count,
+            "macro_th1d_constructors_accounted": constructor_count,
+            "macro_set_bin_mutations_accounted": mutation_count}
 
 
 def build_sample_counts(artifact_root: Path, csv_path: Path, tex_path: Path) -> dict[str, int]:
@@ -979,6 +1082,21 @@ def main() -> None:
         "sample_counts": build_sample_counts(args.artifact_root, measurement / "sample_counts.csv",
                                                output / "results/tables/sample_counts.tex"),
     }
+    macro_diagnostics = (diagnostics["correlations"], diagnostics["multiplicity"],
+                         diagnostics["kinematics"])
+    diagnostics["macro_completeness"] = {
+        "source_macros": sum(item["source_macros"] for item in macro_diagnostics),
+        "selected_histogram_constructors": sum(
+            item["selected_histogram_constructors"] for item in macro_diagnostics),
+        "th1d_constructors_accounted": sum(
+            item["macro_th1d_constructors_accounted"] for item in macro_diagnostics),
+        "set_bin_content_or_error_mutations_accounted": sum(
+            item["macro_set_bin_mutations_accounted"] for item in macro_diagnostics),
+        "unsupported_numeric_mutation_forms": 0,
+        "verification_method": "one_regex_parser_two_scan_modes_plus_orthogonal_lexical_accounting",
+    }
+    if diagnostics["macro_completeness"]["source_macros"] != 33:
+        raise ValueError("accepted G1/G2/G3/G9 macro inventory does not contain 33 sources")
     source_artifacts, plot_mappings = collect_and_copy_accepted_artifacts(
         args.artifact_root, output / "results/plots")
     source_artifacts.extend((
@@ -1033,7 +1151,8 @@ def main() -> None:
             "diagnostics": diagnostics,
         },
         "migration_limitations": [
-            "balancing block rows expose yields and trigger denominators but not block OS/SS component counts",
+            "balancing block rows expose accepted yields and exact trigger denominators where preserved, but not block OS/SS component counts",
+            "90 D-plus integrated block rows omit n_trigger because the accepted log preserved 30 unique tune/block denominators only as rounded scientific text; their accepted block yields, ratios, and statistical SEMs are retained, and ANALYZE-1 will recover exact block sufficient statistics directly",
             "accepted logs expose one trigger denominator only after the renderer's OS/SS-denominator equality guard",
             "correlation bins expose central values and ten-block SEM, not the ten block-bin values",
             "multiplicity and kinematic canvas macros expose normalized content/error, not underlying raw counts",

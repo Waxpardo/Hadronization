@@ -7,11 +7,11 @@
   },
   "artifacts": [
     {
-      "bytes": 802336,
+      "bytes": 799786,
       "consumer": "canonical measurement parity and analysis consumers",
       "path": "results/measurement/balancing.csv",
       "producer": "pipeline/analyze/import_accepted.py",
-      "sha256": "fb8ff54af46905daf913b09af86b3536e6c854d58532945d2ad2e2f4ce2e0a3e"
+      "sha256": "bdd6725d78518cf005062b60842179b123985c9ff1a61be28af9976bcd227884"
     },
     {
       "bytes": 194628,
@@ -377,7 +377,8 @@
     "strategy": "git_commit_containing_this_manifest"
   },
   "migration_limitations": [
-    "balancing block rows expose yields and trigger denominators but not block OS/SS component counts",
+    "balancing block rows expose accepted yields and exact trigger denominators where preserved, but not block OS/SS component counts",
+    "90 D-plus integrated block rows omit n_trigger because the accepted log preserved 30 unique tune/block denominators only as rounded scientific text; their accepted block yields, ratios, and statistical SEMs are retained, and ANALYZE-1 will recover exact block sufficient statistics directly",
     "accepted logs expose one trigger denominator only after the renderer's OS/SS-denominator equality guard",
     "correlation bins expose central values and ten-block SEM, not the ten block-bin values",
     "multiplicity and kinematic canvas macros expose normalized content/error, not underlying raw counts",
@@ -1151,22 +1152,43 @@
         "output_rows": 5016,
         "pair_count_exact_duplicates": 954,
         "reported_entries": 422,
+        "rounded_block_trigger_identities": 9,
+        "rounded_block_trigger_rows_omitted": 90,
         "shared_trigger_denominator_identities": 144,
         "unique_identities": 240,
         "unique_pair_count_identities": 576
       },
       "correlations": {
         "macro_crosscheck_values": 120,
+        "macro_set_bin_mutations_accounted": 2386,
+        "macro_th1d_constructors_accounted": 12,
         "rows": 1200,
+        "selected_histogram_constructors": 12,
+        "source_macros": 2,
         "unique_identities": 1200
       },
       "kinematics": {
+        "macro_set_bin_mutations_accounted": 17986,
+        "macro_th1d_constructors_accounted": 90,
         "rows": 9300,
+        "selected_histogram_constructors": 90,
         "source_macros": 30
+      },
+      "macro_completeness": {
+        "selected_histogram_constructors": 105,
+        "set_bin_content_or_error_mutations_accounted": 23406,
+        "source_macros": 33,
+        "th1d_constructors_accounted": 113,
+        "unsupported_numeric_mutation_forms": 0,
+        "verification_method": "one_regex_parser_two_scan_modes_plus_orthogonal_lexical_accounting"
       },
       "multiplicity": {
         "bins_per_tune": 4096,
-        "rows": 12288
+        "macro_set_bin_mutations_accounted": 3034,
+        "macro_th1d_constructors_accounted": 11,
+        "rows": 12288,
+        "selected_histogram_constructors": 3,
+        "source_macros": 1
       },
       "sample_counts": {
         "quantities_per_tune": 12,

@@ -6,6 +6,7 @@ from __future__ import annotations
 import csv
 import math
 import os
+import re
 import statistics
 from collections import defaultdict
 from pathlib import Path
@@ -40,16 +41,56 @@ expected_balancing = ("tune", "flavour", "trigger", "os_associate", "ss_associat
 assert tuple(balancing[0]) == expected_balancing
 finite_cells(balancing, {"percentile_low", "percentile_high", "nch_low", "nch_high", "n_os", "n_ss",
                          "n_trigger", "value"})
+for row in balancing:
+    for field in ("n_os", "n_ss", "n_trigger"):
+        if row[field] and not re.fullmatch(r"[0-9]+", row[field]):
+            raise AssertionError(f"populated count is not decimal digits only: {field}={row[field]!r}")
+
+rounded_status = "available_derived_no_component_counts_trigger_count_rounded_in_source"
+associate_pairs = {
+    ("dminus", "dplus"),
+    ("dzerobar", "dzero"),
+    ("lambdacplusbar", "lambdacplus"),
+}
+expected_rounded_ids = {
+    (tune, os_associate, ss_associate, f"block_{index:02d}")
+    for tune in ("MONASH", "JUNCTIONS", "CLOSEPACKING")
+    for os_associate, ss_associate in associate_pairs
+    for index in range(1, 11)
+}
+rounded_rows = [row for row in balancing
+                if row["quantity"] == "balancing_yield"
+                and row["flavour"] == "charm" and row["trigger"] == "dplus"
+                and row["activity_id"] == "integrated_0_100"
+                and row["estimator"].startswith("block_")]
+rounded_ids = {(row["tune"], row["os_associate"], row["ss_associate"], row["estimator"])
+               for row in rounded_rows}
+if rounded_ids != expected_rounded_ids or len(rounded_rows) != 90:
+    raise AssertionError("rounded-source D-plus block identity set is not exactly the required 90 rows")
+for row in rounded_rows:
+    if row["n_trigger"] or row["status"] != rounded_status:
+        raise AssertionError(f"rounded-source trigger count is not explicitly omitted: {row}")
+for row in balancing:
+    if row["status"] == rounded_status and row not in rounded_rows:
+        raise AssertionError(f"rounded-source status appears outside its 90 identities: {row}")
+    if (row["quantity"] == "balancing_yield" and row["estimator"].startswith("block_")
+            and row not in rounded_rows
+            and (not row["n_trigger"] or row["status"] != "available_derived_no_component_counts")):
+        raise AssertionError(f"available exact block trigger is blank or mislabeled: {row}")
+
 balance_ids = [(r["tune"], r["flavour"], r["trigger"], r["os_associate"], r["ss_associate"],
                 r["quantity"], r["activity_id"], r["estimator"]) for r in balancing]
 if len(balance_ids) != len(set(balance_ids)):
     raise AssertionError("balancing scientific identity is not unique")
 
-base_fields = ("tune", "flavour", "trigger", "os_associate", "activity_id")
+base_fields = ("tune", "flavour", "trigger", "os_associate", "ss_associate", "activity_id")
 grouped: dict[tuple[str, ...], dict[tuple[str, str], dict[str, str]]] = defaultdict(dict)
 for row in balancing:
     base = tuple(row[field] for field in base_fields)
-    grouped[base][(row["quantity"], row["estimator"])] = row
+    estimator_key = (row["quantity"], row["estimator"])
+    if estimator_key in grouped[base]:
+        raise AssertionError(f"balancing estimator collision within complete OS/SS identity: {base}")
+    grouped[base][estimator_key] = row
 
 for base, group in grouped.items():
     central = group[("balancing_yield", "central")]
@@ -58,11 +99,15 @@ for base, group in grouped.items():
         if not close(float(central["value"]), expected):
             raise AssertionError(f"central balancing arithmetic failed: {base}")
     if ("balancing_yield_sem", "central") in group:
-        blocks = [float(group[("balancing_yield", f"block_{index:02d}")]["value"])
-                  for index in range(1, 11)]
+        block_rows = [group[("balancing_yield", f"block_{index:02d}")]
+                      for index in range(1, 11)]
+        blocks = [float(row["value"]) for row in block_rows]
         expected_sem = statistics.stdev(blocks) / math.sqrt(10.0)
         if not close(float(group[("balancing_yield_sem", "central")]["value"]), expected_sem):
             raise AssertionError(f"ten-block yield SEM failed: {base}")
+        if all(row["n_trigger"] for row in block_rows):
+            if sum(int(row["n_trigger"]) for row in block_rows) != int(central["n_trigger"]):
+                raise AssertionError(f"exact ten-block trigger sum does not equal central: {base}")
     elif set(group) != {("balancing_yield", "central")}:
         raise AssertionError(f"count-only identity carries incomplete estimator rows: {base}")
     if ("balancing_ratio_to_reference", "central") in group:
@@ -71,14 +116,19 @@ for base, group in grouped.items():
         expected_ratio_sem = statistics.stdev(ratios) / math.sqrt(10.0)
         if not close(float(group[("balancing_ratio_sem", "central")]["value"]), expected_ratio_sem):
             raise AssertionError(f"ten-block ratio SEM failed: {base}")
-        prefix = (base[0], base[1], base[2], base[4])
+        prefix = (base[0], base[1], base[2], base[5])
         references = [candidate for candidate, candidate_group in grouped.items()
-                      if (candidate[0], candidate[1], candidate[2], candidate[4]) == prefix
+                      if (candidate[0], candidate[1], candidate[2], candidate[5]) == prefix
                       and ("balancing_yield_sem", "central") in candidate_group
                       and ("balancing_ratio_to_reference", "central") not in candidate_group]
         if len(references) != 1:
             raise AssertionError(f"ratio reference is not unique: {base}")
         reference_group = grouped[references[0]]
+        central_ratio = float(group[("balancing_ratio_to_reference", "central")]["value"])
+        expected_central_ratio = (float(group[("balancing_yield", "central")]["value"])
+                                  / float(reference_group[("balancing_yield", "central")]["value"]))
+        if not close(central_ratio, expected_central_ratio):
+            raise AssertionError(f"central ratio-to-reference arithmetic failed: {base}")
         for index, ratio in enumerate(ratios, 1):
             numerator = float(group[("balancing_yield", f"block_{index:02d}")]["value"])
             denominator = float(reference_group[("balancing_yield", f"block_{index:02d}")]["value"])
@@ -89,7 +139,8 @@ closure_groups: dict[tuple[str, ...], list[dict[str, str]]] = defaultdict(list)
 for group in grouped.values():
     central = group[("balancing_yield", "central")]
     if central["status"] == "available_count_backed":
-        closure_groups[(central["tune"], central["flavour"], central["trigger"], central["os_associate"])].append(central)
+        closure_groups[(central["tune"], central["flavour"], central["trigger"],
+                        central["os_associate"], central["ss_associate"])].append(central)
 for identity, group in closure_groups.items():
     integrated = [row for row in group if row["activity_id"] == "integrated_0_100"]
     classes = [row for row in group if row["activity_id"] != "integrated_0_100"]

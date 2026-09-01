@@ -7,7 +7,7 @@ import csv
 import json
 import os
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path, PurePosixPath
 
 
@@ -41,6 +41,10 @@ assert campaign["held_attempt_policy"] == "record_and_disclose_no_correction"
 
 if len(raw) != 3000:
     fail(f"raw-manifest row count: {len(raw)} != 3000")
+expected_raw_order = [(tune, logical_id) for tune in TUNES for logical_id in range(1000)]
+actual_raw_order = [(row["tune"], row["logical_id"]) for row in raw]
+if actual_raw_order != expected_raw_order:
+    fail("raw-manifest rows are not in declared tune/logical-ID order")
 raw_identity = {(row["tune"], row["logical_id"]) for row in raw}
 if len(raw_identity) != 3000:
     fail("raw-manifest tune/logical_id identity is not unique")
@@ -64,11 +68,18 @@ for row, serialized in zip(raw, raw_lines):
         assert SHA256.fullmatch(row[key]), (tune, logical_id, key)
     key = PurePosixPath(row["raw_storage_key"])
     assert not key.is_absolute() and ".." not in key.parts and key.parts[0] == tune
+    canonical = json.dumps(row, sort_keys=True, separators=(",", ":"))
+    if serialized != canonical:
+        fail(f"raw-manifest line is not deterministic canonical JSON: {tune}/{logical_id}")
     if any(fragment in serialized for fragment in ("/data/alice", "/Users/", "deploys/", "6729b3f0b7b9/")):
         fail(f"nonportable source path leaked into raw manifest: {tune}/{logical_id}")
 
 if len(attempts) != 3127:
     fail(f"attempt row count: {len(attempts)} != 3127")
+attempt_order = [(row["tune"], int(row["logical_id"]), int(row["attempt"])) for row in attempts]
+if attempt_order != sorted(
+        attempt_order, key=lambda item: (TUNE_INDEX.get(item[0], len(TUNES)), item[1], item[2])):
+    fail("attempt rows are not in declared tune/logical-ID/attempt order")
 attempt_identity = {(row["tune"], int(row["logical_id"]), int(row["attempt"])) for row in attempts}
 if len(attempt_identity) != 3127:
     fail("attempt identity is not unique")
@@ -88,8 +99,13 @@ if discard_distribution != Counter({"JUNCTIONS": 63, "CLOSEPACKING": 64}):
     fail(f"discard distribution differs from 0/63/64: {discard_distribution}")
 
 raw_join = {(row["tune"], row["logical_id"]): row for row in raw}
+attempt_groups: dict[tuple[str, int], list[dict[str, str]]] = defaultdict(list)
 for row in attempts:
     tune, logical_id, attempt = row["tune"], int(row["logical_id"]), int(row["attempt"])
+    identity = (tune, logical_id)
+    if identity not in raw_join:
+        fail(f"attempt identity exists outside the raw manifest: {tune}/{logical_id}/{attempt}")
+    attempt_groups[identity].append(row)
     expected_seed = 100_000_001 + 3 * 10_000_000 + TUNE_INDEX[tune] * 1_000_000 + attempt * 100_000 + logical_id
     if int(row["seed"]) != expected_seed:
         fail(f"attempt seed mismatch: {tune}/{logical_id}/{attempt}")
@@ -101,5 +117,21 @@ for row in attempts:
         assert row["raw_storage_key"] == source["raw_storage_key"]
     elif row["raw_storage_key"]:
         fail(f"discarded attempt has a raw storage key: {tune}/{logical_id}/{attempt}")
+
+if set(attempt_groups) != raw_identity:
+    fail("attempt identities do not cover exactly the 3,000 raw identities")
+for identity, source in raw_join.items():
+    group = attempt_groups[identity]
+    accepted_attempt = source["accepted_attempt"]
+    ordinals = [int(row["attempt"]) for row in group]
+    if ordinals != list(range(accepted_attempt + 1)):
+        fail(f"attempt sequence is not exactly 0..accepted_attempt: {identity}")
+    accepted_rows = [row for row in group if row["outcome"] == "accepted"]
+    if len(accepted_rows) != 1 or accepted_rows[0] is not group[-1]:
+        fail(f"accepted attempt is not the unique final row: {identity}")
+    final = accepted_rows[0]
+    if (int(final["attempt"]), int(final["seed"]), final["raw_storage_key"]) != (
+            source["accepted_attempt"], source["accepted_seed"], source["raw_storage_key"]):
+        fail(f"accepted attempt does not match raw manifest attempt/seed/storage key: {identity}")
 
 print("PASS test_campaign_record.py")
