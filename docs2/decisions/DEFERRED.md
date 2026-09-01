@@ -120,6 +120,14 @@ for the pause is [../systematics/STATUS.md](../systematics/STATUS.md).
   ruling R38 retired the manuscript gate. WRAP re-measured the twelve
   gate-cost corrections the audit rows `DA1-043` and `DA1-052` name, and
   those are now closed; bringing the document to 97 rows is post-paper.
+- **The architecture map's Appendix A is 53 entries behind the tree.** The map
+  (`PIPELINE_MAP_20260827.md`, held outside this repository) carries one entry
+  per tracked file as measured at `3cccb75`: 560 entries. The tree is now 613
+  files. The 53 without an entry are session HANDOFF's 48-file deliverables
+  package and `tests/test_handoff_package.py`, and session WRAP's four `docs2/`
+  pages. The map's sections 1–9 are current; only the appendix lags, and the
+  map's own r14 header says so. Forty-eight of the 53 are figure binaries, for
+  which the appendix's per-file format has little to record.
 - **The fifteen anchors WRAP found beyond ARCH-1's enumeration** are repaired,
   but the sweep that found them covered citations into the compiled plotting
   sources only. The same bare-anchor idiom exists elsewhere in the tree and has
