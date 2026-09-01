@@ -1,0 +1,31 @@
+{
+  "schema": "hadronization_generated_sample_count_v1",
+  "tune": "CLOSEPACKING",
+  "input": "/data/alice/ipardoza/hf/project/RUNN_EVIDENCE_fe3262c_20260830/count/filelist_CLOSEPACKING.txt",
+  "input_file_count": 1000,
+  "events": 100000000,
+  "final_heavy_hadrons": 228403184,
+  "content_sums": {
+    "charm": 201607172,
+    "beauty": 27711410
+  },
+  "species_yields": {
+    "Bplus": 1325027,
+    "Bminus": 1315871,
+    "Lambdab": 561765,
+    "Lambdabbar": 565638,
+    "Dplus": 19922694,
+    "Dminus": 20038470,
+    "Lambdacplus": 2702197,
+    "Lambdacplusbar": 2695266
+  },
+  "definitions": {
+    "species_yield": "exact signed-PDG match over heavyPdg, filtered on heavyIsFinal",
+    "content_sum_charm": "sum(heavyNc + heavyNcbar) over heavyIsFinal; heavy quarks bound in final heavy hadrons; a hidden-charm state contributes 2",
+    "content_sum_beauty": "sum(heavyNb + heavyNbbar) over heavyIsFinal",
+    "not_used": "final_heavy_qc_sum and final_heavy_qb_sum are net-valence conservation checksums, zero in a good event (heavyflavourcorrelations_status.cpp:1369-1370)",
+    "acceptance": "none; the producer stores every isHadron && hasHeavyConstituent particle with no kinematic cut at storage (:1071) and this count applies heavyIsFinal only",
+    "decay_policy": "StabilizeHeavyHadrons (:360-421) disables decay for every heavy-flavour hadron in the PYTHIA table and throws if one remains enabled, so content is counted at hadronization, before weak decays",
+    "record": "docs2/physics/SAMPLE_COUNTING.md"
+  }
+}

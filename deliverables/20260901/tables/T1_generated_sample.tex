@@ -1,0 +1,72 @@
+% T1 -- generated sample, three tunes.  Ruling R37, owner decision O2.
+%
+% WHAT THIS FILE IS.  The three certified single-column bodies
+% t1_MONASH.json.tex, t1_JUNCTIONS.json.tex and t1_CLOSEPACKING.json.tex,
+% regrouped into three columns.  No number here was computed: each value is
+% the value in that tune's own t1_<TUNE>.json, and each row label is copied
+% from that tune's own certified .tex body.  The numbers were produced by
+% RUN-N at deployment HEAD fe3262c729ec and are unchanged since.
+%
+% THE DEFINITION RECORD (R37 requires the table to state what it counts).
+%
+%   Species yields    exact signed-PDG match over the heavyPdg branch,
+%                     filtered on heavyIsFinal.  Eight rows: B+, B-,
+%                     Lambda_b, Lambda_b-bar, D+, D-, Lambda_c+, Lambda_c--bar
+%                     (+-521, +-5122, +-411, +-4122).
+%
+%   Content sums      N_{b+bbar} is sum(heavyNb + heavyNbbar) and N_{c+cbar}
+%                     is sum(heavyNc + heavyNcbar), over the same heavyIsFinal
+%                     filter.  These count heavy QUARKS bound inside final
+%                     heavy hadrons, not hadrons.  A hidden-heavy state
+%                     contributes 2 -- a J/psi carries one c and one c-bar --
+%                     and appears in the content sum but in none of the eight
+%                     species rows.
+%
+%   N_ev              both TParameter<Long64_t> counters of the merged
+%                     analysis file, asserted equal by the tool that reads
+%                     them; it refuses a number when they disagree.
+%
+%   NO ACCEPTANCE IS APPLIED.  The producer stores every particle satisfying
+%                     isHadron && hasHeavyConstituent, with no kinematic cut
+%                     at storage, and this count applies heavyIsFinal and
+%                     nothing else.  The old Overleaf table's "acc"
+%                     population was pT >= 0.15 and |eta| <= 4.  That is a
+%                     DIFFERENT QUANTITY, so the superscript does not survive
+%                     (owner decision O2).
+%
+%   DECAYS DISABLED, AND WHY.  StabilizeHeavyHadrons walks the whole PYTHIA
+%                     particle table and calls mayDecay(id, false) for every
+%                     hadron carrying a charm or beauty quark, then re-reads
+%                     each id and throws if one is still enabled.  The policy
+%                     is programmatic and fail-closed; no card lists the ids.
+%                     Two consequences, both structural rather than cuts:
+%                     no B -> D feed-down exists in the sample, so prompt
+%                     charm is structural; and the count takes the quantum
+%                     numbers at hadronisation, before weak decays move them.
+%                     The balancing observable uses that same quantity.
+%
+%   NOT COUNTED       final_heavy_qc_sum and final_heavy_qb_sum are
+%                     net-valence conservation checksums, zero in a good
+%                     event.  A table built on them reports zero and looks
+%                     like a sample with no heavy flavour in it.
+%
+%   The JSONs beside this file also carry final_heavy_hadrons per tune.  It is
+%   not a row here, because no certified per-tune .tex body carries it.
+%
+%   Record: docs2/physics/SAMPLE_COUNTING.md
+%
+% COLUMN ORDER: MONASH, JUNCTIONS, CLOSEPACKING.
+% Supply the surrounding tabular, \toprule and \bottomrule in Overleaf.
+%
+$N_{\mathrm{ev}}$ & 100\,000\,000 & 100\,000\,000 & 100\,000\,000 \\
+$N_{b+\bar b}$ & 27\,691\,828 & 27\,742\,702 & 27\,711\,410 \\
+$N_{c+\bar c}$ & 199\,648\,398 & 202\,657\,198 & 201\,607\,172 \\
+\midrule
+$B^{+}$ & 1\,857\,083 & 1\,354\,421 & 1\,325\,027 \\
+$B^{-}$ & 1\,843\,831 & 1\,341\,686 & 1\,315\,871 \\
+$\Lambda_{b}^{0}$ & 314\,865 & 613\,275 & 561\,765 \\
+$\overline{\Lambda}_{b}^{0}$ & 310\,189 & 613\,880 & 565\,638 \\
+$D^{+}$ & 22\,716\,269 & 20\,150\,781 & 19\,922\,694 \\
+$D^{-}$ & 22\,793\,762 & 20\,284\,640 & 20\,038\,470 \\
+$\Lambda_{c}^{+}$ & 2\,278\,887 & 3\,160\,250 & 2\,702\,197 \\
+$\overline{\Lambda}_{c}^{-}$ & 2\,239\,173 & 3\,143\,875 & 2\,695\,266 \\
