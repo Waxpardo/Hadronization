@@ -1,0 +1,1564 @@
+{
+  "activity": {
+    "canonical_realized_nch_bounds": {
+      "CLOSEPACKING": {
+        "integrated_0_100": {
+          "nch_high": 1572,
+          "nch_low": 0
+        },
+        "percentile_0_1": {
+          "nch_high": 1572,
+          "nch_low": 46
+        },
+        "percentile_10_20": {
+          "nch_high": 25,
+          "nch_low": 19
+        },
+        "percentile_1_10": {
+          "nch_high": 45,
+          "nch_low": 26
+        },
+        "percentile_20_30": {
+          "nch_high": 18,
+          "nch_low": 15
+        },
+        "percentile_30_40": {
+          "nch_high": 14,
+          "nch_low": 12
+        },
+        "percentile_40_50": {
+          "nch_high": 11,
+          "nch_low": 10
+        },
+        "percentile_50_60": {
+          "nch_high": 9,
+          "nch_low": 8
+        },
+        "percentile_60_70": {
+          "nch_high": 7,
+          "nch_low": 6
+        },
+        "percentile_70_80": {
+          "nch_high": 5,
+          "nch_low": 5
+        },
+        "percentile_80_90": {
+          "nch_high": 4,
+          "nch_low": 3
+        },
+        "percentile_90_100": {
+          "nch_high": 2,
+          "nch_low": 0
+        }
+      },
+      "JUNCTIONS": {
+        "integrated_0_100": {
+          "nch_high": 781,
+          "nch_low": 0
+        },
+        "percentile_0_1": {
+          "nch_high": 781,
+          "nch_low": 48
+        },
+        "percentile_10_20": {
+          "nch_high": 27,
+          "nch_low": 20
+        },
+        "percentile_1_10": {
+          "nch_high": 47,
+          "nch_low": 28
+        },
+        "percentile_20_30": {
+          "nch_high": 19,
+          "nch_low": 16
+        },
+        "percentile_30_40": {
+          "nch_high": 15,
+          "nch_low": 13
+        },
+        "percentile_40_50": {
+          "nch_high": 12,
+          "nch_low": 10
+        },
+        "percentile_50_60": {
+          "nch_high": 9,
+          "nch_low": 8
+        },
+        "percentile_60_70": {
+          "nch_high": 7,
+          "nch_low": 6
+        },
+        "percentile_70_80": {
+          "nch_high": 5,
+          "nch_low": 5
+        },
+        "percentile_80_90": {
+          "nch_high": 4,
+          "nch_low": 3
+        },
+        "percentile_90_100": {
+          "nch_high": 2,
+          "nch_low": 0
+        }
+      },
+      "MONASH": {
+        "integrated_0_100": {
+          "nch_high": 269,
+          "nch_low": 0
+        },
+        "percentile_0_1": {
+          "nch_high": 269,
+          "nch_low": 46
+        },
+        "percentile_10_20": {
+          "nch_high": 25,
+          "nch_low": 18
+        },
+        "percentile_1_10": {
+          "nch_high": 45,
+          "nch_low": 26
+        },
+        "percentile_20_30": {
+          "nch_high": 17,
+          "nch_low": 14
+        },
+        "percentile_30_40": {
+          "nch_high": 13,
+          "nch_low": 11
+        },
+        "percentile_40_50": {
+          "nch_high": 10,
+          "nch_low": 9
+        },
+        "percentile_50_60": {
+          "nch_high": 8,
+          "nch_low": 7
+        },
+        "percentile_60_70": {
+          "nch_high": 6,
+          "nch_low": 6
+        },
+        "percentile_70_80": {
+          "nch_high": 5,
+          "nch_low": 5
+        },
+        "percentile_80_90": {
+          "nch_high": 4,
+          "nch_low": 3
+        },
+        "percentile_90_100": {
+          "nch_high": 2,
+          "nch_low": 0
+        }
+      }
+    },
+    "class_scope": "resolved_independently_for_each_tune",
+    "classes": [
+      {
+        "id": "percentile_0_1",
+        "kind": "tune_local_percentile",
+        "percentile_high": "1.0",
+        "percentile_low": "0.0"
+      },
+      {
+        "id": "integrated_0_100",
+        "kind": "integrated",
+        "percentile_high": "100.0",
+        "percentile_low": "0.0"
+      },
+      {
+        "id": "percentile_1_10",
+        "kind": "tune_local_percentile",
+        "percentile_high": "10.0",
+        "percentile_low": "1.0"
+      },
+      {
+        "id": "percentile_10_20",
+        "kind": "tune_local_percentile",
+        "percentile_high": "20.0",
+        "percentile_low": "10.0"
+      },
+      {
+        "id": "percentile_20_30",
+        "kind": "tune_local_percentile",
+        "percentile_high": "30.0",
+        "percentile_low": "20.0"
+      },
+      {
+        "id": "percentile_30_40",
+        "kind": "tune_local_percentile",
+        "percentile_high": "40.0",
+        "percentile_low": "30.0"
+      },
+      {
+        "id": "percentile_40_50",
+        "kind": "tune_local_percentile",
+        "percentile_high": "50.0",
+        "percentile_low": "40.0"
+      },
+      {
+        "id": "percentile_50_60",
+        "kind": "tune_local_percentile",
+        "percentile_high": "60.0",
+        "percentile_low": "50.0"
+      },
+      {
+        "id": "percentile_60_70",
+        "kind": "tune_local_percentile",
+        "percentile_high": "70.0",
+        "percentile_low": "60.0"
+      },
+      {
+        "id": "percentile_70_80",
+        "kind": "tune_local_percentile",
+        "percentile_high": "80.0",
+        "percentile_low": "70.0"
+      },
+      {
+        "id": "percentile_80_90",
+        "kind": "tune_local_percentile",
+        "percentile_high": "90.0",
+        "percentile_low": "80.0"
+      },
+      {
+        "id": "percentile_90_100",
+        "kind": "tune_local_percentile",
+        "percentile_high": "100.0",
+        "percentile_low": "90.0"
+      }
+    ],
+    "id": "final_charged_nonheavy_eta1_pt015",
+    "predicate": {
+      "abs_eta_max": "1.0",
+      "abs_eta_relation": "inclusive",
+      "charged": true,
+      "final": true,
+      "heavy_constituent": "none",
+      "pt_min_gev": "0.15",
+      "pt_min_relation": "exclusive"
+    },
+    "tie_rule": "threshold_integer_belongs_to_lower_activity_class;higher_activity_starts_at_threshold_plus_one"
+  },
+  "observables": {
+    "balancing": {
+      "estimators": [
+        "central",
+        "block_01",
+        "block_02",
+        "block_03",
+        "block_04",
+        "block_05",
+        "block_06",
+        "block_07",
+        "block_08",
+        "block_09",
+        "block_10"
+      ],
+      "ids": [
+        "balancing_yield",
+        "balancing_yield_sem",
+        "balancing_ratio_to_reference",
+        "balancing_ratio_sem"
+      ]
+    },
+    "correlations": {
+      "delta_phi": {
+        "bins": 100,
+        "high": "4.712389",
+        "kind": "uniform",
+        "low": "-1.570796"
+      },
+      "pairs": [
+        {
+          "activity_id": "integrated_0_100",
+          "associate": "bminus",
+          "contexts": [
+            "os",
+            "os_minus_ss",
+            "ss"
+          ],
+          "flavour": "beauty",
+          "id": "bplus__bminus",
+          "trigger": "bplus"
+        },
+        {
+          "activity_id": "integrated_0_100",
+          "associate": "bminus",
+          "contexts": [
+            "os",
+            "os_minus_ss",
+            "ss"
+          ],
+          "flavour": "beauty",
+          "id": "lambdabbar__bminus",
+          "trigger": "lambdabbar"
+        },
+        {
+          "activity_id": "integrated_0_100",
+          "associate": "dminus",
+          "contexts": [
+            "os",
+            "os_minus_ss",
+            "ss"
+          ],
+          "flavour": "charm",
+          "id": "dplus__dminus",
+          "trigger": "dplus"
+        },
+        {
+          "activity_id": "integrated_0_100",
+          "associate": "dminus",
+          "contexts": [
+            "os",
+            "os_minus_ss",
+            "ss"
+          ],
+          "flavour": "charm",
+          "id": "lambdacplus__dminus",
+          "trigger": "lambdacplus"
+        }
+      ],
+      "tunes": [
+        "MONASH"
+      ]
+    },
+    "inclusive_kinematics": {
+      "axes": {
+        "eta": {
+          "bins": 100,
+          "high": "4.0",
+          "kind": "uniform",
+          "low": "-4.0"
+        },
+        "phi": {
+          "bins": 100,
+          "high": "3.141593",
+          "kind": "uniform",
+          "low": "-3.141593"
+        },
+        "pt": {
+          "edges": [
+            "0.0",
+            "0.5",
+            "1.0",
+            "1.5",
+            "2.0",
+            "2.5",
+            "3.0",
+            "3.5",
+            "4.0",
+            "4.5",
+            "5.0",
+            "5.5",
+            "6.0",
+            "6.5",
+            "7.0",
+            "7.5",
+            "8.0",
+            "8.5",
+            "9.0",
+            "9.5",
+            "10.0",
+            "10.5",
+            "11.0",
+            "11.5",
+            "12.0",
+            "12.5",
+            "13.0",
+            "13.5",
+            "14.0",
+            "14.5",
+            "15.0",
+            "15.5",
+            "16.0",
+            "16.5",
+            "17.0",
+            "17.5",
+            "18.0",
+            "18.5",
+            "19.0",
+            "19.5",
+            "20.0",
+            "20.5",
+            "21.0",
+            "21.5",
+            "22.0",
+            "22.5",
+            "23.0",
+            "23.5",
+            "24.0",
+            "24.5",
+            "25.0",
+            "25.5",
+            "26.0",
+            "26.5",
+            "27.0",
+            "27.5",
+            "28.0",
+            "28.5",
+            "29.0",
+            "29.5",
+            "30.0",
+            "30.5",
+            "31.0",
+            "31.5",
+            "32.0",
+            "32.5",
+            "33.0",
+            "33.5",
+            "34.0",
+            "34.5",
+            "35.0",
+            "35.5",
+            "36.0",
+            "36.5",
+            "37.0",
+            "37.5",
+            "38.0",
+            "38.5",
+            "39.0",
+            "39.5",
+            "40.0",
+            "40.5",
+            "41.0",
+            "41.5",
+            "42.0",
+            "42.5",
+            "43.0",
+            "43.5",
+            "44.0",
+            "44.5",
+            "45.0",
+            "45.5",
+            "46.0",
+            "46.5",
+            "47.0",
+            "47.5",
+            "48.0",
+            "48.5",
+            "49.0",
+            "49.5",
+            "50.0",
+            "60.0",
+            "75.0",
+            "100.0",
+            "150.0",
+            "250.0",
+            "500.0",
+            "1000.0",
+            "2000.0",
+            "4000.0",
+            "7000.0"
+          ],
+          "kind": "variable"
+        }
+      },
+      "species": [
+        {
+          "id": "sigmabzerobar",
+          "pdg": -5212
+        },
+        {
+          "id": "lambdabbar",
+          "pdg": -5122
+        },
+        {
+          "id": "lambdacplusbar",
+          "pdg": -4122
+        },
+        {
+          "id": "bminus",
+          "pdg": -521
+        },
+        {
+          "id": "dminus",
+          "pdg": -411
+        },
+        {
+          "id": "dplus",
+          "pdg": 411
+        },
+        {
+          "id": "bplus",
+          "pdg": 521
+        },
+        {
+          "id": "lambdacplus",
+          "pdg": 4122
+        },
+        {
+          "id": "lambdab",
+          "pdg": 5122
+        },
+        {
+          "id": "sigmabzero",
+          "pdg": 5212
+        }
+      ]
+    },
+    "multiplicity": {
+      "activity_id": "final_charged_nonheavy_eta1_pt015",
+      "binning": {
+        "bins": 4096,
+        "high": "4095.5",
+        "kind": "uniform",
+        "low": "-0.5"
+      }
+    },
+    "sample_counts": {
+      "quantities": [
+        "events",
+        "final_heavy_hadrons",
+        "charm_constituent_sum",
+        "beauty_constituent_sum"
+      ],
+      "signed_species": [
+        {
+          "id": "lambdabbar_hadrons",
+          "label": "anti-Lambda_b hadrons",
+          "pdg": -5122
+        },
+        {
+          "id": "lambdacplusbar_hadrons",
+          "label": "anti-Lambda_c hadrons",
+          "pdg": -4122
+        },
+        {
+          "id": "bminus_hadrons",
+          "label": "B- hadrons",
+          "pdg": -521
+        },
+        {
+          "id": "dminus_hadrons",
+          "label": "D- hadrons",
+          "pdg": -411
+        },
+        {
+          "id": "dplus_hadrons",
+          "label": "D+ hadrons",
+          "pdg": 411
+        },
+        {
+          "id": "bplus_hadrons",
+          "label": "B+ hadrons",
+          "pdg": 521
+        },
+        {
+          "id": "lambdacplus_hadrons",
+          "label": "Lambda_c+ hadrons",
+          "pdg": 4122
+        },
+        {
+          "id": "lambdab_hadrons",
+          "label": "Lambda_b hadrons",
+          "pdg": 5122
+        }
+      ]
+    }
+  },
+  "pair_observable": {
+    "balancing_pairs": [
+      {
+        "flavour": "beauty",
+        "id": "bplus__bcminus__bcplus",
+        "os_associate": "bcminus",
+        "os_associate_pdg": -541,
+        "ss_associate": "bcplus",
+        "ss_associate_pdg": 541,
+        "trigger": "bplus",
+        "trigger_pdg": 521
+      },
+      {
+        "flavour": "beauty",
+        "id": "bplus__bminus__bplus",
+        "os_associate": "bminus",
+        "os_associate_pdg": -521,
+        "ss_associate": "bplus",
+        "ss_associate_pdg": 521,
+        "trigger": "bplus",
+        "trigger_pdg": 521
+      },
+      {
+        "flavour": "beauty",
+        "id": "bplus__bszerobar__bszero",
+        "os_associate": "bszerobar",
+        "os_associate_pdg": -531,
+        "ss_associate": "bszero",
+        "ss_associate_pdg": 531,
+        "trigger": "bplus",
+        "trigger_pdg": 521
+      },
+      {
+        "flavour": "beauty",
+        "id": "bplus__bzerobar__bzero",
+        "os_associate": "bzerobar",
+        "os_associate_pdg": -511,
+        "ss_associate": "bzero",
+        "ss_associate_pdg": 511,
+        "trigger": "bplus",
+        "trigger_pdg": 521
+      },
+      {
+        "flavour": "beauty",
+        "id": "bplus__lambdab__lambdabbar",
+        "os_associate": "lambdab",
+        "os_associate_pdg": 5122,
+        "ss_associate": "lambdabbar",
+        "ss_associate_pdg": -5122,
+        "trigger": "bplus",
+        "trigger_pdg": 521
+      },
+      {
+        "flavour": "beauty",
+        "id": "lambdabbar__bcminus__bcplus",
+        "os_associate": "bcminus",
+        "os_associate_pdg": -541,
+        "ss_associate": "bcplus",
+        "ss_associate_pdg": 541,
+        "trigger": "lambdabbar",
+        "trigger_pdg": -5122
+      },
+      {
+        "flavour": "beauty",
+        "id": "lambdabbar__bminus__bplus",
+        "os_associate": "bminus",
+        "os_associate_pdg": -521,
+        "ss_associate": "bplus",
+        "ss_associate_pdg": 521,
+        "trigger": "lambdabbar",
+        "trigger_pdg": -5122
+      },
+      {
+        "flavour": "beauty",
+        "id": "lambdabbar__bszerobar__bszero",
+        "os_associate": "bszerobar",
+        "os_associate_pdg": -531,
+        "ss_associate": "bszero",
+        "ss_associate_pdg": 531,
+        "trigger": "lambdabbar",
+        "trigger_pdg": -5122
+      },
+      {
+        "flavour": "beauty",
+        "id": "lambdabbar__bzerobar__bzero",
+        "os_associate": "bzerobar",
+        "os_associate_pdg": -511,
+        "ss_associate": "bzero",
+        "ss_associate_pdg": 511,
+        "trigger": "lambdabbar",
+        "trigger_pdg": -5122
+      },
+      {
+        "flavour": "beauty",
+        "id": "lambdabbar__lambdab__lambdabbar",
+        "os_associate": "lambdab",
+        "os_associate_pdg": 5122,
+        "ss_associate": "lambdabbar",
+        "ss_associate_pdg": -5122,
+        "trigger": "lambdabbar",
+        "trigger_pdg": -5122
+      },
+      {
+        "flavour": "charm",
+        "id": "dplus__dminus__dplus",
+        "os_associate": "dminus",
+        "os_associate_pdg": -411,
+        "ss_associate": "dplus",
+        "ss_associate_pdg": 411,
+        "trigger": "dplus",
+        "trigger_pdg": 411
+      },
+      {
+        "flavour": "charm",
+        "id": "dplus__dzerobar__dzero",
+        "os_associate": "dzerobar",
+        "os_associate_pdg": -421,
+        "ss_associate": "dzero",
+        "ss_associate_pdg": 421,
+        "trigger": "dplus",
+        "trigger_pdg": 411
+      },
+      {
+        "flavour": "charm",
+        "id": "dplus__lambdacplusbar__lambdacplus",
+        "os_associate": "lambdacplusbar",
+        "os_associate_pdg": -4122,
+        "ss_associate": "lambdacplus",
+        "ss_associate_pdg": 4122,
+        "trigger": "dplus",
+        "trigger_pdg": 411
+      },
+      {
+        "flavour": "charm",
+        "id": "lambdacplus__dminus__dplus",
+        "os_associate": "dminus",
+        "os_associate_pdg": -411,
+        "ss_associate": "dplus",
+        "ss_associate_pdg": 411,
+        "trigger": "lambdacplus",
+        "trigger_pdg": 4122
+      },
+      {
+        "flavour": "charm",
+        "id": "lambdacplus__dzerobar__dzero",
+        "os_associate": "dzerobar",
+        "os_associate_pdg": -421,
+        "ss_associate": "dzero",
+        "ss_associate_pdg": 421,
+        "trigger": "lambdacplus",
+        "trigger_pdg": 4122
+      },
+      {
+        "flavour": "charm",
+        "id": "lambdacplus__lambdacplusbar__lambdacplus",
+        "os_associate": "lambdacplusbar",
+        "os_associate_pdg": -4122,
+        "ss_associate": "lambdacplus",
+        "ss_associate_pdg": 4122,
+        "trigger": "lambdacplus",
+        "trigger_pdg": 4122
+      }
+    ],
+    "formula": "N_OS/N_trigger-N_SS/N_trigger",
+    "integration": "full_delta_phi",
+    "missing_quantities": "explicit_status_never_numeric_zero",
+    "ordered_conditional_pairs": true,
+    "os_ss_trigger_denominators": "must_match",
+    "same_sign_factor": "1.0",
+    "sign_definition": "heavy_flavour_sign"
+  },
+  "schema": "hadronization_study_v1",
+  "scope": {
+    "held_attempts": "record_and_disclose_no_correction",
+    "research_question": "How nominal PYTHIA tune bundles alter heavy-flavour balancing and selected inclusive observables in pp collisions at 13.6 TeV.",
+    "systematic_uncertainty": "disabled_and_absent",
+    "uncertainty": "statistical_only",
+    "variation_selection": false
+  },
+  "selected_states": [
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "d0",
+      "kind": "meson",
+      "name": "D0",
+      "pdg": 421,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "c ubar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "d0bar",
+      "kind": "meson",
+      "name": "D0bar",
+      "pdg": -421,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "cbar u"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "dplus",
+      "kind": "meson",
+      "name": "Dplus",
+      "pdg": 411,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "c dbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "dminus",
+      "kind": "meson",
+      "name": "Dminus",
+      "pdg": -411,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "cbar d"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "dsplus",
+      "kind": "meson",
+      "name": "Dsplus",
+      "pdg": 431,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "c sbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "dsminus",
+      "kind": "meson",
+      "name": "Dsminus",
+      "pdg": -431,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "cbar s"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "lambdacplus",
+      "kind": "baryon",
+      "name": "Lambdacplus",
+      "pdg": 4122,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "c u d"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "lambdacplusbar",
+      "kind": "baryon",
+      "name": "Lambdacplusbar",
+      "pdg": -4122,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "cbar ubar dbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "sigmaczero",
+      "kind": "baryon",
+      "name": "Sigmaczero",
+      "pdg": 4112,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "c d d"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "sigmaczerobar",
+      "kind": "baryon",
+      "name": "Sigmaczerobar",
+      "pdg": -4112,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "cbar dbar dbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "sigmacplus",
+      "kind": "baryon",
+      "name": "Sigmacplus",
+      "pdg": 4212,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "c u d"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "sigmacplusbar",
+      "kind": "baryon",
+      "name": "Sigmacplusbar",
+      "pdg": -4212,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "cbar ubar dbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 6,
+      "id": "sigmacplusplus",
+      "kind": "baryon",
+      "name": "Sigmacplusplus",
+      "pdg": 4222,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "c u u"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -6,
+      "id": "sigmacplusplusbar",
+      "kind": "baryon",
+      "name": "Sigmacplusplusbar",
+      "pdg": -4222,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "cbar ubar ubar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "xiczero",
+      "kind": "baryon",
+      "name": "Xiczero",
+      "pdg": 4132,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "c s d"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "xiczerobar",
+      "kind": "baryon",
+      "name": "Xiczerobar",
+      "pdg": -4132,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "cbar sbar dbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "xicplus",
+      "kind": "baryon",
+      "name": "Xicplus",
+      "pdg": 4232,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "c s u"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "xicplusbar",
+      "kind": "baryon",
+      "name": "Xicplusbar",
+      "pdg": -4232,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "cbar sbar ubar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "xicprimezero",
+      "kind": "baryon",
+      "name": "Xicprimezero",
+      "pdg": 4312,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "c s d (symmetric light diquark)"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "xicprimezerobar",
+      "kind": "baryon",
+      "name": "Xicprimezerobar",
+      "pdg": -4312,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "cbar sbar dbar (symmetric light antidiquark)"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "xicprimeplus",
+      "kind": "baryon",
+      "name": "Xicprimeplus",
+      "pdg": 4322,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "c s u (symmetric light diquark)"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "xicprimeplusbar",
+      "kind": "baryon",
+      "name": "Xicprimeplusbar",
+      "pdg": -4322,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "cbar sbar ubar (symmetric light antidiquark)"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "omegaczero",
+      "kind": "baryon",
+      "name": "Omegaczero",
+      "pdg": 4332,
+      "qb": 0,
+      "qc": 1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "c s s"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "omegaczerobar",
+      "kind": "baryon",
+      "name": "Omegaczerobar",
+      "pdg": -4332,
+      "qb": 0,
+      "qc": -1,
+      "sector": "charm",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "cbar sbar sbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "bzero",
+      "kind": "meson",
+      "name": "Bzero",
+      "pdg": 511,
+      "qb": -1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "d bbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "bzerobar",
+      "kind": "meson",
+      "name": "Bzerobar",
+      "pdg": -511,
+      "qb": 1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "dbar b"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "bplus",
+      "kind": "meson",
+      "name": "Bplus",
+      "pdg": 521,
+      "qb": -1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "u bbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "bminus",
+      "kind": "meson",
+      "name": "Bminus",
+      "pdg": -521,
+      "qb": 1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "ubar b"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "bszero",
+      "kind": "meson",
+      "name": "Bszero",
+      "pdg": 531,
+      "qb": -1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "s bbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "bszerobar",
+      "kind": "meson",
+      "name": "Bszerobar",
+      "pdg": -531,
+      "qb": 1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "sbar b"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "bcplus",
+      "kind": "meson",
+      "name": "Bcplus",
+      "pdg": 541,
+      "qb": -1,
+      "qc": 1,
+      "sector": "beauty",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "c bbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "bcminus",
+      "kind": "meson",
+      "name": "Bcminus",
+      "pdg": -541,
+      "qb": 1,
+      "qc": -1,
+      "sector": "beauty",
+      "spin2j1": 1,
+      "status": "central",
+      "valence": "cbar b"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "lambdabzero",
+      "kind": "baryon",
+      "name": "Lambdabzero",
+      "pdg": 5122,
+      "qb": 1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "b u d"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "lambdabzerobar",
+      "kind": "baryon",
+      "name": "Lambdabzerobar",
+      "pdg": -5122,
+      "qb": -1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "bbar ubar dbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "sigmabminus",
+      "kind": "baryon",
+      "name": "Sigmabminus",
+      "pdg": 5112,
+      "qb": 1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "b d d"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "sigmabminusbar",
+      "kind": "baryon",
+      "name": "Sigmabminusbar",
+      "pdg": -5112,
+      "qb": -1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "bbar dbar dbar"
+    },
+    {
+      "central_eligible": false,
+      "charge3": 0,
+      "id": "sigmabzero",
+      "kind": "baryon",
+      "name": "Sigmabzero",
+      "pdg": 5212,
+      "qb": 1,
+      "qc": 0,
+      "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from central results pending physics review",
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "excluded_from_central",
+      "valence": "b u d"
+    },
+    {
+      "central_eligible": false,
+      "charge3": 0,
+      "id": "sigmabzerobar",
+      "kind": "baryon",
+      "name": "Sigmabzerobar",
+      "pdg": -5212,
+      "qb": -1,
+      "qc": 0,
+      "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from central results pending physics review",
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "excluded_from_central",
+      "valence": "bbar ubar dbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "sigmabplus",
+      "kind": "baryon",
+      "name": "Sigmabplus",
+      "pdg": 5222,
+      "qb": 1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "b u u"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "sigmabplusbar",
+      "kind": "baryon",
+      "name": "Sigmabplusbar",
+      "pdg": -5222,
+      "qb": -1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "bbar ubar ubar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "xibminus",
+      "kind": "baryon",
+      "name": "Xibminus",
+      "pdg": 5132,
+      "qb": 1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "b s d"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "xibminusbar",
+      "kind": "baryon",
+      "name": "Xibminusbar",
+      "pdg": -5132,
+      "qb": -1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "bbar sbar dbar"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "xibzero",
+      "kind": "baryon",
+      "name": "Xibzero",
+      "pdg": 5232,
+      "qb": 1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "b s u"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 0,
+      "id": "xibzerobar",
+      "kind": "baryon",
+      "name": "Xibzerobar",
+      "pdg": -5232,
+      "qb": -1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "bbar sbar ubar"
+    },
+    {
+      "central_eligible": false,
+      "charge3": -3,
+      "id": "xibprimeminus",
+      "kind": "baryon",
+      "name": "Xibprimeminus",
+      "pdg": 5312,
+      "qb": 1,
+      "qc": 0,
+      "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from central results pending physics review",
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "excluded_from_central",
+      "valence": "b s d (symmetric light diquark)"
+    },
+    {
+      "central_eligible": false,
+      "charge3": 3,
+      "id": "xibprimeminusbar",
+      "kind": "baryon",
+      "name": "Xibprimeminusbar",
+      "pdg": -5312,
+      "qb": -1,
+      "qc": 0,
+      "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from central results pending physics review",
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "excluded_from_central",
+      "valence": "bbar sbar dbar (symmetric light antidiquark)"
+    },
+    {
+      "central_eligible": false,
+      "charge3": 0,
+      "id": "xibprimezero",
+      "kind": "baryon",
+      "name": "Xibprimezero",
+      "pdg": 5322,
+      "qb": 1,
+      "qc": 0,
+      "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from central results pending physics review",
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "excluded_from_central",
+      "valence": "b s u (symmetric light diquark)"
+    },
+    {
+      "central_eligible": false,
+      "charge3": 0,
+      "id": "xibprimezerobar",
+      "kind": "baryon",
+      "name": "Xibprimezerobar",
+      "pdg": -5322,
+      "qb": -1,
+      "qc": 0,
+      "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from central results pending physics review",
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "excluded_from_central",
+      "valence": "bbar sbar ubar (symmetric light antidiquark)"
+    },
+    {
+      "central_eligible": true,
+      "charge3": -3,
+      "id": "omegabminus",
+      "kind": "baryon",
+      "name": "Omegabminus",
+      "pdg": 5332,
+      "qb": 1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "b s s"
+    },
+    {
+      "central_eligible": true,
+      "charge3": 3,
+      "id": "omegabminusbar",
+      "kind": "baryon",
+      "name": "Omegabminusbar",
+      "pdg": -5332,
+      "qb": -1,
+      "qc": 0,
+      "sector": "beauty",
+      "spin2j1": 2,
+      "status": "central",
+      "valence": "bbar sbar sbar"
+    }
+  ],
+  "selection": {
+    "associate": {
+      "abs_eta_max": "4.0",
+      "abs_eta_relation": "inclusive",
+      "final": true,
+      "origin": "unrestricted",
+      "pt_min_gev": "0.15",
+      "pt_min_relation": "exclusive",
+      "pythia_status_abs_max": 89,
+      "pythia_status_abs_min": 81,
+      "selected_state": true
+    },
+    "inclusive_kinematics": {
+      "abs_eta_max": "4.0",
+      "abs_eta_relation": "inclusive",
+      "direct_hadronization_selected_state": true,
+      "final": true,
+      "pt_min_gev": "0.15",
+      "pt_min_relation": "exclusive",
+      "selected_hard_origin_required": false,
+      "signed_pdg_exact": true
+    },
+    "t1": {
+      "final_stored_heavy_hadron": true,
+      "hidden_heavy_content_counts_twice": true,
+      "kinematic_acceptance": "none",
+      "signed_pdg_exact": true
+    },
+    "trigger": {
+      "abs_eta_max": "4.0",
+      "abs_eta_relation": "inclusive",
+      "final": true,
+      "origin": "selected_hard_process",
+      "pt_min_gev": "1.0",
+      "pt_min_relation": "exclusive",
+      "pythia_status_abs_max": 89,
+      "pythia_status_abs_min": 81,
+      "selected_state": true
+    }
+  },
+  "statistics": {
+    "block_assignment": "block=(logical_id%10)+1",
+    "blocks": 10,
+    "central": "pooled_complete_sample",
+    "equal_exposure": true,
+    "independent_tune_difference": "combine_tune_SEMs_in_quadrature",
+    "nonlinear_ratios": "formed_within_each_block",
+    "systematic_uncertainty": "absent",
+    "uncertainty": "sample_stdev(block_estimators)/sqrt(10)"
+  },
+  "tune_card_contract": {
+    "allowed_tune_differences": [
+      "StringZ:useOldAExtra",
+      "StringPT:sigma",
+      "StringZ:aLund",
+      "StringZ:bLund",
+      "StringFlav:probQQtoQ",
+      "StringFlav:probStoUD",
+      "StringFlav:probQQ1toQQ0join",
+      "MultipartonInteractions:pT0Ref",
+      "BeamRemnants:remnantMode",
+      "BeamRemnants:saturation",
+      "ColourReconnection:mode",
+      "ColourReconnection:allowDoubleJunRem",
+      "ColourReconnection:mPseudo",
+      "ColourReconnection:m0",
+      "ColourReconnection:allowJunctions",
+      "ColourReconnection:junctionCorrection",
+      "ColourReconnection:timeDilationMode",
+      "ColourReconnection:timeDilationPar",
+      "ClosePacking:doClosePacking",
+      "ClosePacking:enhanceStrange",
+      "ClosePacking:enhancePT",
+      "ClosePacking:PT0",
+      "ClosePacking:doEnhanceDiquark",
+      "ClosePacking:baryonSup",
+      "ClosePacking:parallelBaryonSup",
+      "StringFragmentation:doStrangeJunctions",
+      "StringFragmentation:enhanceStrangeJunction",
+      "Ropewalk:RopeHadronization"
+    ],
+    "common_required_values": {
+      "Beams:eCM": "13600",
+      "Beams:idA": "2212",
+      "Beams:idB": "2212",
+      "HardQCD:hardbbbar": "on",
+      "HardQCD:hardccbar": "on",
+      "Init:showChangedParticleData": "off",
+      "Init:showMultipartonInteractions": "off",
+      "Next:numberCount": "0",
+      "Next:numberShowEvent": "0",
+      "Next:numberShowInfo": "0",
+      "Next:numberShowProcess": "0",
+      "ParticleDecays:limitTau0": "on",
+      "ParticleDecays:tau0Max": "0.01",
+      "PhaseSpace:pTHatMin": "2.",
+      "Tune:pp": "14"
+    },
+    "interpretation": "Each tune is a complete configuration bundle."
+  },
+  "tunes": [
+    {
+      "card": "config/tunes/monash.cmnd",
+      "id": "monash",
+      "name": "MONASH"
+    },
+    {
+      "card": "config/tunes/junctions.cmnd",
+      "id": "junctions",
+      "name": "JUNCTIONS"
+    },
+    {
+      "card": "config/tunes/close_packing.cmnd",
+      "id": "close_packing",
+      "name": "CLOSEPACKING"
+    }
+  ],
+  "version": 1
+}

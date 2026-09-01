@@ -1,103 +1,25 @@
-
-# Scientific and generated binary outputs
-/RootFiles/**/*.root
-.DS_Store
-.vscode/
-__pycache__/
-/logs/*
-
-# External analysis data never belongs in the source checkout.
-/AnalyzedData/**/*.root
-/AnalyzedData/**/*.zip
-
-# Ignore generated production analysis outputs
-/Production/
-/campaigns/
-# Do not add an `/Analysis/` rule: it masks tracked `analysis/` on
-# case-insensitive filesystems.
-/AnalysisOutput/
-/AnalysisResults/
-/AnalyzedData/complete_root_*/
-/AnalyzedData/SUBSAMPLES_*/
-/.root_hist
-/submit_status_analysis_*.sub
-/submitCondor_hf_*_50job_separate.sub
-
-# Ignore job outputs and logs
-logs/
-/Logs/
-Jobs/
-compile_hf.log
-Jobs/HF/**/hf_*.root
-
-# Local production scratch and backup directories
-/AnalyzedData/_merge_benchmark/
-/AnalyzedData/interrupted_*/
-/AnalyzedData/pre_pr9_v4_backup_*/
-
-# Ignore ROOT ACLiC/build artifacts
-*_C.so
-*_C.d
-*_ACLiC_dict_rdict.pcm
-*.pcm
-
-# Ignore generated plot outputs
-plotting/Plots/
-plotting/Plots
-plotting/**/Plots/
-Balancing_and_Sampling/**/Plots/
-
-# Machine-generated validation reports may contain host-local provenance.
-/plotting/validation/*.json
-/plotting/validation/*.log
-
-# Ignore built executables
-SimulationScripts/heavyflavourcorrelations_status
-SimulationScripts/bbbarcorrelations_status
-SimulationScripts/bbbarcorrelations_status_JUNCTIONS
-SimulationScripts/ccbarcorrelations_status
-SimulationScripts/ccbarcorrelations_status_JUNCTIONS
-
-# Ignored historical paper archive; the selected package is `paper/*.tex`.
-Paper/Heavy_flavour_hadronisation_model_paper/
-
-# Local working material, never tracked.
-.codex-tmp/
-/LEARNING_ROADMAP.md
-/LEARNING_ROADMAP.md.bak-*
-/PUBLICATION_READY_*
-/PlottingScripts/
-/ROOT::Append
-/global_balancing_plots.ps
-/graphify-out/
-/output/
-/tmp/
-
-# Machine-specific base path (each machine keeps its own copy)
-base_path.txt
-
-# Machine-specific dependency overrides (see config/dependencies.local.conf.example)
-config/dependencies.local.conf
-config/site.local.conf
-/.local-data/
+# Portable data and site-local configuration
 /data/raw/
 /data/work/
+/config/site.conf
 
-# Rendered batch submit files.
-submit_*_smoke.sub
-submit_*_prelim.sub
-submit_*_full.sub
-submit_*_retry*.sub
-submit_analysis_*.sub
+# One documented local virtual environment
+/.venv/
 
-# Burned-seed ledger is machine/campaign state, not code
-config/burned_seeds.txt
+# OS and editor residue
+.DS_Store
+*.swp
+*~
 
-# Third-party document, never tracked.
-/docs/writing_standard/ASD-STE100_ISSUE9.pdf
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
 
-# Third-party literature. Never committed.
-Sources/
-
-# Built producer.
-generation/producer/heavyflavourcorrelations_status
+# C++ and ROOT build caches
+*.o
+*.so
+*.d
+*.pcm
+*.dylib

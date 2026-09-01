@@ -1,1 +1,0 @@
-PAIR_BLOCK_CLOSURE errors=0 analysis_schema=paul_pair_objects_primary_ground_v3 central_pair_files=300 block_pair_files=3000 object_content_sumw2_closure_checks=2100 additive_metadata_closure_checks=3600 invariant_metadata_checks=1500 source_filter_contract_checks=300 expected_central_events=100000000 relative_tolerance=2e-10

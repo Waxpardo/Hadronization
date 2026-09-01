@@ -359,9 +359,9 @@
         "bytes": 355659,
         "sha256": "c550fffb652d0ff71945ee128cfc8fe475d9b1d64433454e9073fd2076c5d8d9"
       },
-      "data/campaign.json": {
-        "bytes": 4182,
-        "sha256": "9240320c05a895324ac7107e036f2e849470a4a0cb85e43be7a7c5b7914aa3c2"
+    "data/campaign.json": {
+      "bytes": 4423,
+      "sha256": "09255ae6555d7b9f2e116618b41d5ae11379b682514f78f0acf2f7330d7e18f1"
       },
       "data/raw_manifest.jsonl": {
         "bytes": 1379970,
@@ -369,6 +369,11 @@
       }
     },
     "id": "HF_RUN3_V1"
+  },
+  "current_study_definition": {
+    "bytes": 37664,
+    "path": "config/study.json",
+    "sha256": "694bc8c32d7be18e57abd8629ed76de2d09ccfdf25d87c3c9df4a4472c34354d"
   },
   "discarded_attempts": "recorded_no_correction",
   "import_commit": {

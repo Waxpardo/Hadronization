@@ -1,7 +1,0 @@
-category,category_name,from_species,from_closure,difference,relative
-0,kCentralGround,67969216.0,67969216.0,0.0,0.0
-1,kHiddenHeavy,0.0,0.0,0.0,0.0
-2,kMultiplyHeavy,48.0,48.0,0.0,0.0
-3,kOtherNoncentral,0.0,0.0,0.0,0.0
-4,kExcludedVector,60600180.0,60600180.0,0.0,0.0
-5,kExcludedExcited,1314400.0,1314400.0,0.0,0.0

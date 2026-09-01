@@ -43,38 +43,48 @@
     "files": [
       {
         "bytes": 2229,
-        "path": "generation/cards/pythiasettings_Hard_Low_ccbb_MONASH.cmnd",
+        "path": "config/tunes/monash.cmnd",
         "sha256": "defd7f5dff774e790ffa773b3186341e89bd1fe7a5101f8fb491e3b10b156b23"
       },
       {
         "bytes": 2806,
-        "path": "generation/cards/pythiasettings_Hard_Low_ccbb_JUNCTIONS.cmnd",
+        "path": "config/tunes/junctions.cmnd",
         "sha256": "bbadecf78528637b1d80edd5594d0f3ea4d3ab73d0d44bc1e7e07c7bc25a41d8"
       },
       {
         "bytes": 3226,
-        "path": "generation/cards/pythiasettings_Hard_Low_ccbb_CLOSEPACKING.cmnd",
+        "path": "config/tunes/close_packing.cmnd",
         "sha256": "dd0755ae85c340f7e3a438931bed14afa433220f164f84fcb0e18d4ae6f2f4de"
       },
       {
-        "bytes": 9152,
-        "path": "config/campaign_ordinals_v1.json",
-        "sha256": "b3c6f6123f4536b246d056cd0defb5318f9b6248742ea566b12a70a7fc5af70d"
+        "bytes": 37664,
+        "path": "config/study.json",
+        "sha256": "694bc8c32d7be18e57abd8629ed76de2d09ccfdf25d87c3c9df4a4472c34354d"
       },
       {
-        "bytes": 3694,
-        "path": "config/dependencies.conf",
-        "sha256": "ed8332c0f59fccecafb64687d87c9cdaeaca1563b0609c98ae8cfbe3eb19dc46"
+        "bytes": 72902,
+        "path": "pipeline/generate/producer.cpp",
+        "sha256": "fb9102171f113f39228ee52be00c83328b60091108bd6d90c8c501929e6da5c7"
       },
       {
-        "bytes": 17928,
-        "path": "tools/campaign.py",
-        "sha256": "8ddf150e2b9dbbf366b37fb77b9fcf0cefab879436a62654919880aab1fff3d2"
+        "bytes": 24692,
+        "path": "pipeline/generate/physics.hpp",
+        "sha256": "de6fa6526256861119561ba708671db651dcdb6d0c4d2b648512615eae67f6d7"
       },
       {
-        "bytes": 72842,
-        "path": "generation/producer/heavyflavourcorrelations_status.cpp",
-        "sha256": "c06ded5723a7939fdce1e2f6cdd91a698322d5767c5e4a5cba481b6c95c4e25d"
+        "bytes": 4583,
+        "path": "pipeline/generate/selected_states.hpp",
+        "sha256": "10fac8df16a348256f02f8a6457d7060f75a4423651a2fc7d9bd1e8d9ebb8c57"
+      },
+      {
+        "bytes": 3949,
+        "path": "pipeline/generate/tune_settings.hpp",
+        "sha256": "c15055b5a8c49f72378e9b884ed6f419cd1515d85d646ce0d45aa99f3d3e31fb"
+      },
+      {
+        "bytes": 6894,
+        "path": "pipeline/generate/sha256.hpp",
+        "sha256": "ad56d979cab26c9212e6e351ad2fe024aed9f378fda7483dce8752d4e2d7bc3b"
       }
     ],
     "role": "interpretation_only_not_claimed_as_accepted_producer"

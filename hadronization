@@ -1,483 +1,212 @@
-#!/bin/bash
-# One command surface for local development and Nikhef execution.
-set -euo pipefail
+#!/usr/bin/env python3
+"""The single public command for the staged nominal pipeline."""
 
-project_base="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export HADRONIZATION_BASE="${project_base}"
-export SETUPENV_QUIET=1
-# shellcheck source=/dev/null
-source "${project_base}/setupEnv.sh"
-cd "${project_base}"
+import argparse
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
 
-selector="${HADRONIZATION_DATASET_SELECTOR:-${project_base}/config/dataset_selector.json}"
 
-usage() {
-  cat <<'USAGE'
-Usage: ./hadronization COMMAND [arguments]
-
-  site
-      Show the selected site and external storage roots.
-
-  check [--portable]
-      Run the repository contract suite. --portable allows an off-pin local
-      ROOT/PYTHIA environment and is never a production certification.
-
-  build
-      Build the pinned heavy-flavour producer in the current site profile.
-
-  dataset DATASET_KEY
-      Resolve and display one named dataset route.
-
-  render-production CAMPAIGN ORDINAL JOBS EVENTS [ATTEMPT]
-      Build a deterministic three-tune Condor submit file and reserve seeds.
-
-  freeze DATASET_KEY
-      Build the canonical manifest from promoted raw files.
-
-  render-analysis DATASET_KEY [OUTPUT.sub]
-      Render the canonical reduction submit file.
-
-  merge DATASET_KEY [PAIR_SCHEMA]
-      Validate and merge the central sample plus ten blocks under the blocking
-      supervisor. PAIR_SCHEMA defaults to v3.
-
-  plot-slot DATASET_KEY
-      Point plotting/Plots at the named dataset's output target for this
-      commit. The pointer it replaces is moved aside under
-      plotting/Plots.<CAMPAIGN>-<COMMIT>.superseded-<DATE> and is never
-      deleted. Only this command repoints the link.
-
-  plot DATASET_KEY [TARGET ...]
-      Run the plot workflow for a named dataset. TARGET defaults to all; see
-      plotting/run_paper_plots.sh help.
-
-  plot DATASET_KEY --systematics ENVELOPE [TARGET ...]
-      Draw the systematic overlay from one COMPLETE envelope. The path is
-      explicit: there is no default, no discovery, and no environment
-      fallback. Output goes to the plotting-syst plane, never to plotting.
-
-  systematics DATASET_KEY
-      Build the systematic-uncertainty envelope for a nominal dataset and
-      write it under RESULTS_ROOT/CAMPAIGN/COMMIT/systematics/.
-USAGE
+ROOT = Path(__file__).resolve().parent
+UNAVAILABLE = {
+    "analyze": "ANALYZE-1",
+    "merge": "ANALYZE-1",
+    "reduce": "ANALYZE-1",
+    "plot": "PLOT-1",
 }
 
-# An unknown dataset key must stop here, named, before anything is arranged.
-#
-# THE DEFECT THIS CLOSES. The resolution used to be one `eval "$(...)"`. A
-# command substitution's status is discarded, so the selector's refusal
-# reached this function as an EMPTY environment and `eval ""` succeeded. The
-# run then continued into prepare_plot_output_plane and died on
-# `HADRONIZATION_CAMPAIGN: unbound variable` -- a message that names neither
-# the key the user typed nor the file that rejected it.
-resolve_dataset() {
-  local dataset_key="$1" resolved
-  if ! resolved="$(python3 "${project_base}/tools/dataset_selector.py" shell \
-      --selector "${selector}" --checkout "${project_base}" \
-      --dataset "${dataset_key}")"; then
-    echo "ERROR: dataset key rejected: ${dataset_key}" >&2
-    echo "       rejected by selector: ${selector}" >&2
-    echo "       The accepted keys are listed above and in that file." >&2
-    exit 2
-  fi
-  if [[ -z "${resolved}" ]]; then
-    echo "ERROR: dataset key rejected: ${dataset_key}" >&2
-    echo "       rejected by selector: ${selector}" >&2
-    echo "       The selector resolved no environment for this key." >&2
-    exit 2
-  fi
-  eval "${resolved}"
-  export HADRONIZATION_DATASET="${dataset_key}"
-}
 
-prepare_plot_output_plane() {
-  local commit output_link output_target existing_target
-  commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
-  output_link="${project_base}/plotting/Plots"
-  output_target="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/plotting"
-  mkdir -p "${output_target}"
-  if [[ -L "${output_link}" ]]; then
-    existing_target="$(readlink "${output_link}")"
-    if [[ "${existing_target}" != "${output_target}" ]]; then
-      echo "ERROR: ${output_link} points to ${existing_target}, expected ${output_target}" >&2
-      echo "       This deploy's plot slot holds another run. Nothing was changed." >&2
-      echo "       Run: ./hadronization plot-slot ${HADRONIZATION_DATASET}" >&2
-      echo "       That moves the old pointer aside under a recorded name. It" >&2
-      echo "       never deletes the pointer and never touches its target." >&2
-      exit 1
-    fi
-  elif [[ -e "${output_link}" ]]; then
-    echo "ERROR: ${output_link} is checkout-local output state." >&2
-    echo "       Move it under ${HADRONIZATION_RESULTS_ROOT} before plotting." >&2
-    exit 1
-  else
-    ln -s "${output_target}" "${output_link}"
-  fi
-  printf 'HADRONIZATION_PLOT_OUTPUT=%s\n' "${output_target}"
-}
+def load_site():
+    path = ROOT / "config/site.conf"
+    values = {}
+    if not path.is_file():
+        return values
+    for number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        match = re.fullmatch(r"([A-Z][A-Z0-9_]*)=(.*)", line)
+        if not match:
+            raise ValueError("{}:{} is not KEY=VALUE".format(path, number))
+        value = match.group(2).strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        values[match.group(1)] = value
+    return values
 
-# The explicit slot migration.
-#
-# The plot run-slot is one checkout-local symlink, plotting/Plots, while the
-# target it points at is scoped per campaign and commit. One deploy therefore
-# holds the slot for one run at a time, and prepare_plot_output_plane refuses
-# when the resolved target differs. That refusal is correct and stays: an
-# IMPLICIT change would move a render into another campaign's tree. This is the
-# explicit path, and it is the only thing that repoints the link.
-#
-# It moves the old pointer aside under the run it held, prints both targets,
-# and never deletes anything. The target directories are untouched: only the
-# symlink moves, so a sealed run's files cannot be reached by a migration.
-migrate_plot_slot() {
-  local commit output_link output_target existing_target aside
-  local old_campaign old_commit
-  commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
-  output_link="${project_base}/plotting/Plots"
-  output_target="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/plotting"
-  mkdir -p "${output_target}"
-  if [[ -L "${output_link}" ]]; then
-    existing_target="$(readlink "${output_link}")"
-    if [[ "${existing_target}" == "${output_target}" ]]; then
-      printf 'PLOT_SLOT_UNCHANGED=%s\n' "${output_target}"
-      return 0
-    fi
-    # Name the aside for the run it held. The campaign and the commit are read
-    # back out of the target path, so the name says which run the pointer
-    # belonged to rather than only when it was superseded.
-    old_commit="$(basename "$(dirname "${existing_target}")")"
-    old_campaign="$(basename "$(dirname "$(dirname "${existing_target}")")")"
-    aside="${output_link}.${old_campaign}-${old_commit}.superseded-$(date +%Y%m%d)"
-    if [[ -e "${aside}" || -L "${aside}" ]]; then
-      echo "ERROR: a superseded pointer of that name already exists: ${aside}" >&2
-      echo "       Nothing was moved. Rename or remove that one deliberately." >&2
-      exit 1
-    fi
-    mv "${output_link}" "${aside}"
-    printf 'PLOT_SLOT_OLD_TARGET=%s\n' "${existing_target}"
-    printf 'PLOT_SLOT_SUPERSEDED=%s\n' "${aside}"
-  elif [[ -e "${output_link}" ]]; then
-    echo "ERROR: ${output_link} is checkout-local output state." >&2
-    echo "       Move it under ${HADRONIZATION_RESULTS_ROOT} before plotting." >&2
-    exit 1
-  fi
-  ln -s "${output_target}" "${output_link}"
-  printf 'PLOT_SLOT_NEW_TARGET=%s\n' "${output_target}"
-}
 
-prepare_systematics_output_plane() {
-  local commit
-  commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
-  export HADRONIZATION_SYSTEMATICS_OUTPUT="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/systematics"
-  export HADRONIZATION_NOMINAL_PLOT_PLANE="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/plotting"
-  case "${HADRONIZATION_SYSTEMATICS_OUTPUT}" in
-    */plotting/*|*/plotting)
-      echo "ERROR: refusing to write an envelope under a plotting output plane: ${HADRONIZATION_SYSTEMATICS_OUTPUT}" >&2
-      exit 1
-      ;;
-  esac
-  printf 'HADRONIZATION_SYSTEMATICS_OUTPUT=%s\n' "${HADRONIZATION_SYSTEMATICS_OUTPUT}"
-}
+def version(command, arguments):
+    if not command:
+        return "unavailable"
+    try:
+        result = subprocess.run([command] + arguments, text=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                timeout=10)
+    except (OSError, subprocess.TimeoutExpired):
+        return "unavailable"
+    first = result.stdout.strip().splitlines()
+    return first[0] if result.returncode == 0 and first else "unavailable"
 
-# The overlay writes to its own plane. The nominal plotting/Plots symlink is
-# never touched here: an overlay that could land in the nominal tree would
-# make a statistical-only figure indistinguishable from one carrying a band.
-prepare_systematics_plot_output_plane() {
-  local commit
-  commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
-  export HADRONIZATION_PLOT_SYST_OUTPUT="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/plotting-syst"
-  export HADRONIZATION_NOMINAL_PLOT_PLANE="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/plotting"
-  printf 'HADRONIZATION_PLOT_SYST_OUTPUT=%s\n' "${HADRONIZATION_PLOT_SYST_OUTPUT}"
-}
 
-prepare_measurement_output_plane() {
-  local commit
-  commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
-  export HADRONIZATION_MEASUREMENT_ROOT="${HADRONIZATION_RESULTS_ROOT}/${HADRONIZATION_CAMPAIGN}/${commit}/measurements/${HADRONIZATION_DATASET}"
-  printf 'HADRONIZATION_MEASUREMENT_OUTPUT=%s\n' \
-    "${HADRONIZATION_MEASUREMENT_ROOT}"
-}
+def doctor():
+    try:
+        site = load_site()
+        study = json.loads((ROOT / "config/study.json").read_text(encoding="utf-8"))
+        campaign = json.loads((ROOT / "data/campaign.json").read_text(encoding="utf-8"))
+        manifest = json.loads((ROOT / "results/manifest.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        print("REQUIRED configuration: FAIL ({})".format(error))
+        return 1
+    git = shutil.which("git")
+    head = version(git, ["-C", str(ROOT), "rev-parse", "--short=12", "HEAD"])
+    python_ok = sys.version_info >= (3, 9)
+    print("REQUIRED repository: {} ({})".format("OK" if (ROOT / ".git").is_dir() else "FAIL", head))
+    print("REQUIRED configuration: {} / {} / {}".format(
+        study.get("schema"), campaign.get("schema"), manifest.get("schema")))
+    print("REQUIRED Python: {} ({})".format("OK" if python_ok else "FAIL", sys.version.split()[0]))
+    root_config = site.get("ROOT_CONFIG") or shutil.which("root-config")
+    pythia_config = site.get("PYTHIA8_CONFIG") or shutil.which("pythia8-config")
+    pythia_prefix = site.get("PYTHIA8_PREFIX")
+    cxx = site.get("CXX") or shutil.which("c++") or shutil.which("g++")
+    print("OPTIONAL ROOT: {}".format(version(root_config, ["--version"])))
+    if pythia_config:
+        pythia = version(pythia_config, ["--version"])
+    elif pythia_prefix and Path(pythia_prefix).is_dir():
+        pythia = "configured prefix {}".format(pythia_prefix)
+    else:
+        pythia = "unavailable"
+    print("OPTIONAL PYTHIA: {}".format(pythia))
+    print("OPTIONAL compiler: {}".format(version(cxx, ["--version"])))
+    print("OPTIONAL site: {}".format(
+        ROOT / "config/site.conf" if (ROOT / "config/site.conf").is_file() else "portable defaults"))
+    return 0 if python_ok and (ROOT / ".git").is_dir() else 1
 
-command_name="${1:-help}"
-if [[ "$#" -gt 0 ]]; then shift; fi
 
-case "${command_name}" in
-  help|-h|--help)
-    usage
-    ;;
-  site)
-    printf 'HADRONIZATION_SITE=%s\n' "${HADRONIZATION_SITE}"
-    printf 'HADRONIZATION_SITE_ACCOUNT=%s\n' \
-      "${HADRONIZATION_SITE_ACCOUNT:-(none; this profile builds no account segment)}"
-    printf 'HADRONIZATION_BASE=%s\n' "${HADRONIZATION_BASE}"
-    printf 'HADRONIZATION_DATA_ROOT=%s\n' "${HADRONIZATION_DATA_ROOT}"
-    printf 'HF_PRODUCTION_ROOT=%s\n' "${HF_PRODUCTION_ROOT}"
-    printf 'HADRONIZATION_ANALYSIS_ROOT=%s\n' "${HADRONIZATION_ANALYSIS_ROOT}"
-    printf 'HADRONIZATION_MERGED_ROOT=%s\n' "${HADRONIZATION_MERGED_ROOT}"
-    printf 'HADRONIZATION_RESULTS_ROOT=%s\n' "${HADRONIZATION_RESULTS_ROOT}"
-    ;;
-  check)
-    if [[ "${1:-}" == "--portable" ]]; then
-      shift
-      HF_ALLOW_UNPINNED_ENV=1 make -C "${project_base}" check
-    else
-      make -C "${project_base}" check
-    fi
-    [[ "$#" -eq 0 ]] || { echo "ERROR: unexpected check arguments" >&2; exit 2; }
-    ;;
-  build)
-    [[ "$#" -eq 0 ]] || { usage >&2; exit 2; }
-    make -C "${project_base}" build
-    ;;
-  dataset)
-    [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }
-    python3 "${project_base}/tools/dataset_selector.py" show \
-      --selector "${selector}" --checkout "${project_base}" --dataset "$1"
-    ;;
-  render-production)
-    [[ "$#" -ge 4 && "$#" -le 5 ]] || { usage >&2; exit 2; }
-    campaign="$1"; ordinal="$2"; jobs="$3"; events="$4"; attempt="${5:-0}"
-    make -C "${project_base}" submit-full \
-      CAMPAIGN="${campaign}" ORDINAL="${ordinal}" JOBS="${jobs}" \
-      EVENTS="${events}" SUBMIT_ATTEMPT="${attempt}"
-    ;;
-  freeze)
-    [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }
-    resolve_dataset "$1"
-    freeze_dir="$(dirname "${HADRONIZATION_CANONICAL_MANIFEST}")"
-    # build_canonical_manifest.py takes the BASE production root and joins the
-    # campaign itself (tools/build_canonical_manifest.py:87). Its own default,
-    # HF_PRODUCTION_ROOT, is that base root, and `make manifest` relies on it.
-    # The selector exports HADRONIZATION_PRODUCTION_ROOT campaign-scoped
-    # (tools/dataset_selector.py:300), so passing it doubled the campaign
-    # segment and `./hadronization freeze` refused with
-    # `no raw directory: .../HF_SMOKE3/HF_SMOKE3/raw`. Every run before
-    # HF_SMOKE3 reused pre-rebuild manifests, so no run reached this surface.
-    #
-    # Derive the base from the row rather than from HF_PRODUCTION_ROOT: the
-    # selector row is what says where this dataset's production tree is, and a
-    # row that disagrees with the site profile must not be silently overridden.
-    freeze_production_base="$(dirname "${HADRONIZATION_PRODUCTION_ROOT}")"
-    if [[ -z "${HADRONIZATION_CAMPAIGN}" || -z "${HADRONIZATION_PRODUCTION_ROOT}" \
-          || "$(basename "${HADRONIZATION_PRODUCTION_ROOT}")" != "${HADRONIZATION_CAMPAIGN}" ]]; then
-      echo "ERROR: cannot derive the base production root for this dataset" >&2
-      echo "       campaign:        '${HADRONIZATION_CAMPAIGN}'" >&2
-      echo "       production root: '${HADRONIZATION_PRODUCTION_ROOT}'" >&2
-      echo "       build_canonical_manifest.py joins the campaign onto the root" >&2
-      echo "       it is given, so the row's production_root must end with the" >&2
-      echo "       campaign. Correct the row in the dataset selector." >&2
-      exit 1
-    fi
-    python3 "${project_base}/tools/build_canonical_manifest.py" \
-      "${HADRONIZATION_CAMPAIGN}" "${freeze_dir}" \
-      --production-root "${freeze_production_base}"
-    ;;
-  render-analysis)
-    [[ "$#" -ge 1 && "$#" -le 2 ]] || { usage >&2; exit 2; }
-    dataset_key="$1"; output="${2:-}"
-    resolve_dataset "${dataset_key}"
-    if [[ -z "${output}" ]]; then
-      output="${project_base}/submit_analysis_${HADRONIZATION_CAMPAIGN}.sub"
-    fi
-    python3 "${project_base}/tools/render_analysis_submit.py" \
-      "${HADRONIZATION_CANONICAL_MANIFEST}" "${project_base}" \
-      "${HADRONIZATION_PRODUCTION_ROOT}" "${HADRONIZATION_ANALYSIS_ROOT}" \
-      "${output}"
-    ;;
-  merge)
-    [[ "$#" -ge 1 && "$#" -le 2 ]] || { usage >&2; exit 2; }
-    dataset_key="$1"; pair_schema="${2:-v3}"
-    resolve_dataset "${dataset_key}"
-    freeze_dir="$(dirname "${HADRONIZATION_CANONICAL_MANIFEST}")"
-    launch_head="$(git -C "${project_base}" rev-parse HEAD)"
-    manifest_sha="$(python3 - "${HADRONIZATION_CANONICAL_MANIFEST}" <<'PY'
-import hashlib, pathlib, sys
-digest = hashlib.sha256()
-with pathlib.Path(sys.argv[1]).open("rb") as stream:
-    for chunk in iter(lambda: stream.read(16 * 1024 * 1024), b""):
-        digest.update(chunk)
-print(digest.hexdigest())
-PY
-)"
-    python3 "${project_base}/tools/launch_with_reset_signals.py" \
-      "${project_base}/tools/merge_supervisor.sh" \
-      "${freeze_dir}" "${HADRONIZATION_PRODUCTION_ROOT}" \
-      "${HADRONIZATION_ANALYSIS_ROOT}" \
-      "${HADRONIZATION_ANALYZED_DATA_BASE}" \
-      "${HADRONIZATION_CAMPAIGN}" "${pair_schema}" \
-      "${launch_head}" "${manifest_sha}"
-    ;;
-  systematics)
-    [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }
-    dataset_key="$1"
-    resolve_dataset "${dataset_key}"
-    prepare_systematics_output_plane
-    commit="$(git -C "${project_base}" rev-parse --short=12 HEAD)"
-    plan_file="${HADRONIZATION_SYSTEMATICS_OUTPUT}/request_plan.json"
-    # Answer the request before any extraction runs. A multi-hour chain that
-    # discovers a missing selector row at its end has checked too late.
-    #
-    # A REFUSAL MUST REACH THE CALLER AS A NONZERO STATUS. Each step below
-    # captures its own status and exits with it. Nothing here leans on
-    # `set -e`: this file sources setupEnv.sh, which sources the site login
-    # script, and a refusal that arrives as status 0 reads as a pass to every
-    # caller, runbook and log reader (PRACTICE 3.5).
-    request_status=0
-    if [[ "${HADRONIZATION_REQUEST_PREFLIGHT_ONLY:-0}" == "1" ]]; then
-      python3 "${project_base}/tools/systematics_request.py" \
-        --selector "${selector}" --checkout "${project_base}" \
-        --dataset "${dataset_key}" \
-        --results-root "${HADRONIZATION_RESULTS_ROOT}" \
-        --commit "${commit}" --preflight-only || request_status=$?
-      if [[ "${request_status}" -ne 0 ]]; then
-        echo "SYSTEMATICS_REFUSED the request was refused; status ${request_status}" >&2
-        exit "${request_status}"
-      fi
-      exit 0
-    fi
-    mkdir -p "${HADRONIZATION_SYSTEMATICS_OUTPUT}"
-    python3 "${project_base}/tools/systematics_request.py" \
-      --selector "${selector}" --checkout "${project_base}" \
-      --dataset "${dataset_key}" \
-      --results-root "${HADRONIZATION_RESULTS_ROOT}" \
-      --commit "${commit}" --out "${plan_file}" || request_status=$?
-    if [[ "${request_status}" -ne 0 ]]; then
-      echo "SYSTEMATICS_REFUSED the request was refused; status ${request_status}" >&2
-      exit "${request_status}"
-    fi
-    chain_status=0
-    "${project_base}/extraction/pipeline/systematics_chain.sh" \
-      "${plan_file}" "${HADRONIZATION_SYSTEMATICS_OUTPUT}" || chain_status=$?
-    if [[ "${chain_status}" -ne 0 ]]; then
-      echo "SYSTEMATICS_REFUSED the systematics chain refused; status ${chain_status}" >&2
-      exit "${chain_status}"
-    fi
-    exit 0
-    ;;
-  plot-slot)
-    [[ "$#" -eq 1 ]] || { usage >&2; exit 2; }
-    resolve_dataset "$1"
-    migrate_plot_slot
-    ;;
-  plot)
-    [[ "$#" -ge 1 ]] || { usage >&2; exit 2; }
-    dataset_key="$1"; shift
-    # The systematics flag is an explicit opt-in carrying an explicit path.
-    # No default, no discovery, no environment fallback: an envelope that a
-    # resolver found is an envelope nobody chose.
-    systematics_envelope=""
-    plot_arguments=()
-    while [[ "$#" -gt 0 ]]; do
-      case "$1" in
-        --systematics)
-          [[ "$#" -ge 2 ]] || {
-            echo "ERROR: --systematics requires an envelope path" >&2
-            exit 2
-          }
-          systematics_envelope="$2"
-          shift 2
-          ;;
-        --systematics=*)
-          systematics_envelope="${1#--systematics=}"
-          [[ -n "${systematics_envelope}" ]] || {
-            echo "ERROR: --systematics requires an envelope path" >&2
-            exit 2
-          }
-          shift
-          ;;
-        *)
-          plot_arguments+=("$1")
-          shift
-          ;;
-      esac
-    done
-    if [[ "${#plot_arguments[@]}" -gt 0 ]]; then
-      set -- "${plot_arguments[@]}"
-    else
-      set --
-    fi
-    resolve_dataset "${dataset_key}"
-    if [[ -n "${systematics_envelope}" ]]; then
-      prepare_systematics_plot_output_plane
-      python3 "${project_base}/tools/assert_systematics_envelope.py" \
-        --envelope "${systematics_envelope}" \
-        --nominal-plot-plane "${HADRONIZATION_NOMINAL_PLOT_PLANE}"
-      HADRONIZATION_SYSTEMATICS_ENVELOPE="$(cd "$(dirname "${systematics_envelope}")" && pwd)/$(basename "${systematics_envelope}")"
-      HADRONIZATION_SYSTEMATICS_ENVELOPE_SHA256="$(shasum -a 256 "${systematics_envelope}" | awk '{print $1}')"
-      export HADRONIZATION_SYSTEMATICS_ENVELOPE
-      export HADRONIZATION_SYSTEMATICS_ENVELOPE_SHA256
-      printf 'HADRONIZATION_SYSTEMATICS_ENVELOPE=%s\n' "${HADRONIZATION_SYSTEMATICS_ENVELOPE}"
-      printf 'HADRONIZATION_SYSTEMATICS_ENVELOPE_SHA256=%s\n' "${HADRONIZATION_SYSTEMATICS_ENVELOPE_SHA256}"
-      if [[ "${HADRONIZATION_REQUEST_PREFLIGHT_ONLY:-0}" == "1" ]]; then
-        echo "SYSTEMATICS_OVERLAY_PREFLIGHT_ONLY status=PASS root_execution=false outputs_written=false"
-        exit 0
-      fi
-      overlay="${project_base}/plotting/render_systematics_overlay.py"
-      if [[ ! -f "${overlay}" ]]; then
-        echo "ERROR: the systematic overlay renderer is absent: ${overlay}" >&2
-        exit 1
-      fi
-      # The nominal render log has no default. The overlay draws the
-      # statistical error from the same render the envelope is bound to, and
-      # a discovered log could be a different render entirely.
-      nominal_log="${HADRONIZATION_SYSTEMATICS_NOMINAL_LOG:?set HADRONIZATION_SYSTEMATICS_NOMINAL_LOG to the nominal render log this envelope applies to}"
-      overlay_status=0
-      python3 "${overlay}" \
-        --envelope "${HADRONIZATION_SYSTEMATICS_ENVELOPE}" \
-        --output-plane "${HADRONIZATION_PLOT_SYST_OUTPUT}" \
-        --campaign "${HADRONIZATION_CAMPAIGN}" \
-        --commit "$(git -C "${project_base}" rev-parse HEAD)" \
-        --nominal-log "${nominal_log}" \
-        ${1+"$@"} || overlay_status=$?
-      if [[ "${overlay_status}" -ne 0 ]]; then
-        echo "SYSTEMATICS_OVERLAY_REFUSED status ${overlay_status}" >&2
-      fi
-      exit "${overlay_status}"
-    fi
-    if [[ "$#" -eq 0 ]]; then set -- all; fi
-    if [[ "$#" -eq 1 && "$1" == "measure-balancing" ]]; then
-      prepare_measurement_output_plane
-      # The measurement configuration is derived from the campaign, never
-      # defaulted.
-      #
-      # THE DEFECT THIS CLOSES. The default here was the reduced JUNCTIONS
-      # configuration, which draws two canvases. A control render of the
-      # HF_RUN3_V1 nominal took it silently -- the dataset row carries no
-      # measurement_config, so HADRONIZATION_MEASUREMENT_CONFIG arrived empty
-      # -- and produced a FAIL 12/132 receipt against a 132-row envelope. A
-      # configuration mismatch read as a physics disagreement, which is the
-      # most expensive shape a silent default can take in this project.
-      #
-      # A caller who wants the reduced configuration names it.
-      measurement_config="${THNSPARSE_COMPLETE_ROOT_CONFIG:-${HADRONIZATION_MEASUREMENT_CONFIG:-}}"
-      if [[ -z "${measurement_config}" ]]; then
-        measurement_config="plotting/configuration_multiplicity_${HADRONIZATION_CAMPAIGN}_THREETUNE_THnSparse_complete_root.json"
-        if [[ ! -f "${project_base}/${measurement_config}" ]]; then
-          echo "ERROR: no measurement configuration for campaign '${HADRONIZATION_CAMPAIGN}'" >&2
-          echo "       derived: ${measurement_config}" >&2
-          echo "       That file does not exist and no default stands behind it." >&2
-          echo "       Set THNSPARSE_COMPLETE_ROOT_CONFIG to the configuration this" >&2
-          echo "       measurement needs, or add the derived file." >&2
-          exit 1
-        fi
-      fi
-      measurement_log="${HADRONIZATION_MEASUREMENT_ROOT}/render.log"
-      # Systematic shifts need not fit the nominal publication frame. Widen
-      # only the staged, non-publication copy; the uncertainty rows are
-      # calculated and logged before any canvas axis is applied.
-      MEASUREMENT_WIDEN_AXES="${MEASUREMENT_WIDEN_AXES:-1}" \
-      HADRONIZATION_MEASUREMENT_ROOT_EXACT=1 \
-        "${project_base}/tools/render_measurement.sh" \
-        "${HADRONIZATION_CAMPAIGN}" "${measurement_config}" "${selector}" \
-        "${HADRONIZATION_MEASUREMENT_ROOT}" "${measurement_log}"
-    else
-      prepare_plot_output_plane
-      DATASET_SELECTOR="${selector}" \
-        "${project_base}/plotting/run_paper_plots.sh" "$@"
-    fi
-    ;;
-  *)
-    echo "ERROR: unknown command ${command_name}" >&2
-    usage >&2
-    exit 2
-    ;;
-esac
+def is_within(path, parent):
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
+
+def clean_candidates():
+    candidates = []
+    protected_raw = ROOT / "data/raw"
+    for current, directories, files in os.walk(str(ROOT), topdown=True, followlinks=False):
+        here = Path(current)
+        directories[:] = sorted(d for d in directories if d != ".git")
+        if here == ROOT:
+            if ".local-data" in directories:
+                candidates.append(ROOT / ".local-data")
+                directories.remove(".local-data")
+        if here == ROOT / "data" and "raw" in directories:
+            directories.remove("raw")
+        for directory in list(directories):
+            path = here / directory
+            if directory == "__pycache__":
+                candidates.append(path)
+                directories.remove(directory)
+            elif path == ROOT / "plotting/Plots":
+                candidates.append(path)
+                directories.remove(directory)
+        for name in sorted(files):
+            path = here / name
+            if name == ".DS_Store" or path.suffix in {".pyc", ".so", ".d", ".pcm"}:
+                if not is_within(path.absolute(), protected_raw.absolute()):
+                    candidates.append(path)
+    unique = {path.absolute() for path in candidates}
+    return sorted(unique, key=lambda path: path.relative_to(ROOT).as_posix())
+
+
+def clean(apply_changes):
+    root_resolved = ROOT.resolve()
+    raw_absolute = (ROOT / "data/raw").absolute()
+    candidates = clean_candidates()
+    failures = []
+    for path in candidates:
+        if not is_within(path, ROOT.absolute()) or is_within(path, raw_absolute):
+            failures.append("protected or non-repository path: {}".format(path))
+            continue
+        resolved = path.resolve(strict=False)
+        if not is_within(resolved, root_resolved):
+            failures.append("target resolves outside repository: {} -> {}".format(path, resolved))
+    if failures:
+        for failure in failures:
+            print("REFUSE {}".format(failure), file=sys.stderr)
+        return 2
+    for path in candidates:
+        print("REMOVE {}".format(path.relative_to(ROOT).as_posix()))
+    if not candidates:
+        print("CLEAN no targets")
+    if not apply_changes:
+        print("DRY-RUN no files removed")
+        return 0
+    for path in sorted(candidates, key=lambda item: len(item.parts), reverse=True):
+        if path.is_symlink() or path.is_file():
+            path.unlink()
+        elif path.is_dir():
+            shutil.rmtree(str(path))
+    print("APPLIED removed {} target(s)".format(len(candidates)))
+    return 0
+
+
+def verify():
+    python = os.environ.get("PYTHON") or sys.executable
+    environment = os.environ.copy()
+    environment.pop("HADRONIZATION_DATASET", None)
+    command = [python, "-m", "unittest", "discover", "-v", "-s",
+               str(ROOT / "tests"), "-p", "test_*.py"]
+    return subprocess.run(command, cwd=str(ROOT), env=environment).returncode
+
+
+def generate(submit):
+    command = [sys.executable, str(ROOT / "pipeline/generate/submit.py"), "plan"]
+    if submit:
+        command.append("--submit")
+    return subprocess.run(command, cwd=str(ROOT)).returncode
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        prog="hadronization",
+        description=("Nominal statistical-only pipeline. The accepted migration baseline "
+                     "is present; analysis and plotting successors are staged separately."))
+    sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("doctor", help="report required and optional capabilities")
+    generate_parser = sub.add_parser("generate", help="build/describe nominal generation work")
+    generate_parser.add_argument("--submit", action="store_true",
+                                 help="contact the configured scheduler explicitly")
+    for name in ("analyze", "merge", "reduce", "plot"):
+        sub.add_parser(name, help="intentionally unavailable in CLEAN-1")
+    sub.add_parser("verify", help="run the focused active-contract suite")
+    clean_parser = sub.add_parser("clean", help="remove reproducible checkout residue")
+    clean_mode = clean_parser.add_mutually_exclusive_group()
+    clean_mode.add_argument("--dry-run", action="store_true")
+    clean_mode.add_argument("--apply", action="store_true")
+    return parser
+
+
+def main():
+    args = build_parser().parse_args()
+    if args.command == "doctor":
+        return doctor()
+    if args.command == "generate":
+        return generate(args.submit)
+    if args.command in UNAVAILABLE:
+        print("ERROR: {} not implemented until {}".format(
+            args.command, UNAVAILABLE[args.command]), file=sys.stderr)
+        return 3
+    if args.command == "verify":
+        return verify()
+    if args.command == "clean":
+        return clean(args.apply)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

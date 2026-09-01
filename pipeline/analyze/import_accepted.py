@@ -945,14 +945,15 @@ def make_campaign(source_rows: list[dict[str, object]], freeze_path: Path, sched
                     for tune in TUNES}
     if any(len(values) != 1 for values in card_digests.values()):
         raise ValueError("effective card digest varies within a tune")
-    ordinal_record = json.loads((definition_root / "config/campaign_ordinals_v1.json").read_text(encoding="utf-8"))
-    ordinal_rows = [item for item in ordinal_record["ordinals"] if item["ordinal"] == CAMPAIGN_ORDINAL]
-    if len(ordinal_rows) != 1 or ordinal_rows[0]["campaigns"] != ["HF_RUN3_V1"]:
-        raise ValueError("current ordinal registry does not uniquely bind HF_RUN3_V1 to 3")
+    study = json.loads((definition_root / "config/study.json").read_text(encoding="utf-8"))
+    if study.get("schema") != "hadronization_study_v1" or study.get("scope", {}).get("variation_selection") is not False:
+        raise ValueError("current nominal study definition is incomplete")
     cards = {}
     definition_entries = []
+    card_names = {"MONASH": "monash.cmnd", "JUNCTIONS": "junctions.cmnd",
+                  "CLOSEPACKING": "close_packing.cmnd"}
     for tune in TUNES:
-        rel = f"generation/cards/pythiasettings_Hard_Low_ccbb_{tune}.cmnd"
+        rel = f"config/tunes/{card_names[tune]}"
         card_path = definition_root / rel
         settings = parse_card(card_path)
         required = {"Beams:eCM": "13600", "HardQCD:hardccbar": "on", "HardQCD:hardbbbar": "on",
@@ -962,18 +963,16 @@ def make_campaign(source_rows: list[dict[str, object]], freeze_path: Path, sched
         cards[tune] = {"accepted_effective_sha256": next(iter(card_digests[tune])),
                        "current_definition_sha256": sha256(card_path)}
         definition_entries.append((rel, card_path))
-    dependencies = definition_root / "config/dependencies.conf"
-    dependency_text = dependencies.read_text(encoding="utf-8")
-    version_match = re.search(r"HF_PYTHIA8_VERSION:=([0-9.]+)", dependency_text)
-    producer = definition_root / "generation/producer/heavyflavourcorrelations_status.cpp"
+    producer = definition_root / "pipeline/generate/producer.cpp"
     producer_text = producer.read_text(encoding="utf-8")
-    if not version_match or "StabilizeHeavyHadrons" not in producer_text or "mayDecay(id, false)" not in producer_text:
+    if "StabilizeHeavyHadrons" not in producer_text or "mayDecay(id, false)" not in producer_text:
         raise ValueError("current runtime/decay definition is incomplete")
     definition_entries.extend((
-        ("config/campaign_ordinals_v1.json", definition_root / "config/campaign_ordinals_v1.json"),
-        ("config/dependencies.conf", dependencies),
-        ("tools/campaign.py", definition_root / "tools/campaign.py"),
-        ("generation/producer/heavyflavourcorrelations_status.cpp", producer),
+        ("config/study.json", definition_root / "config/study.json"),
+        ("pipeline/generate/producer.cpp", producer),
+        ("pipeline/generate/physics.hpp", definition_root / "pipeline/generate/physics.hpp"),
+        ("pipeline/generate/selected_states.hpp", definition_root / "pipeline/generate/selected_states.hpp"),
+        ("pipeline/generate/tune_settings.hpp", definition_root / "pipeline/generate/tune_settings.hpp"),
     ))
     return {
         "schema": "hadronization_campaign_record_v1", "version": 1, "campaign": "HF_RUN3_V1",
@@ -986,7 +985,7 @@ def make_campaign(source_rows: list[dict[str, object]], freeze_path: Path, sched
                  "attempt_domain": [0, 9]},
         "physics": {"beam": "pp", "sqrt_s_gev": 13600, "hard_processes": ["ccbar", "bbbar"],
                     "pthat_min_gev": 2.0, "heavy_hadron_decays": "disabled"},
-        "runtime": {"pythia_version": version_match.group(1)},
+        "runtime": {"pythia_version": "8.317"},
         "accepted_source": {"raw_manifest_sha256": sha256(freeze_path),
                             "raw_manifest_schema": common["schema"], "raw_schema": common["raw_schema"],
                             "producer_repository_commit": common["repository_commit"],
@@ -1005,15 +1004,10 @@ def make_campaign(source_rows: list[dict[str, object]], freeze_path: Path, sched
     }
 
 
-DATA_README = """# Canonical campaign data contract
+DATA_README = """# Data plane
 
-`campaign.json`, `raw_manifest.jsonl`, and `attempts.csv` are the portable,
-tracked HF_RUN3_V1 campaign record. Paths in the manifest are storage keys
-relative to `data/raw/`; they are not checkout-local source paths.
-
-`data/raw/` and `data/work/` are intentionally absent and ignored. DATA-1 will
-provision those physical work planes on Nikhef. No placeholder file belongs in
-either scientific-data directory.
+`campaign.json`, `raw_manifest.jsonl`, `attempts.csv`, and portable raw objects
+under ignored `raw/` are the canonical data objects. `work/` is ignored scratch.
 """
 
 

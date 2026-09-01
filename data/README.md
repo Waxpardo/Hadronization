@@ -1,9 +1,14 @@
-# Canonical campaign data contract
+# Data plane
 
-`campaign.json`, `raw_manifest.jsonl`, and `attempts.csv` are the portable,
-tracked HF_RUN3_V1 campaign record. Paths in the manifest are storage keys
-relative to `data/raw/`; they are not checkout-local source paths.
+The data plane has four objects:
 
-`data/raw/` and `data/work/` are intentionally absent and ignored. DATA-1 will
-provision those physical work planes on Nikhef. No placeholder file belongs in
-either scientific-data directory.
+1. `campaign.json` owns campaign-wide identities, seed/block rules, runtime
+   facts, accepted-source provenance, and current-definition bindings.
+2. `raw_manifest.jsonl` lists the 3,000 accepted raw files in tune/logical-job
+   order. Each `raw_storage_key` is portable and relative to `data/raw/`.
+3. `attempts.csv` records every accepted or discarded submitted attempt and
+   its deterministic seed.
+4. `raw/` holds large untracked ROOT objects addressed by those portable keys.
+
+`work/` is ignored transient scratch space. Neither `raw/` nor `work/` is
+created by repository verification.
