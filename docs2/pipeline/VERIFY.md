@@ -125,3 +125,33 @@ and not scheduled.
 RUN-N tested two receipts, not five: three renders refused before
 `WriteMultiplicityBoundaryReceipt`, which the macro calls only after every
 global canvas is drawn. Five-way equality is still untested.
+
+## What interpreter the suite has actually run under
+
+The deployment pins **Python 3.9.16**. That is the interpreter a production
+certification runs on, and the suite result that certifies a campaign is the
+one measured there.
+
+Measured on the bench by session WRAP at HEAD `6c53dc7`, with a ROOT-equipped
+shell in both cases:
+
+| interpreter | invocation | result |
+|---|---|---|
+| 3.14.7 (`/opt/homebrew/bin/python3`) | `tools/run_tests.sh .` | **97/97**, exit 0 |
+| 3.9.6 (`/usr/bin/python3`) | `PYTHON=/usr/bin/python3 tools/run_tests.sh .` | **97/97**, exit 0 |
+
+**The gap that remains, stated exactly.** Session HANDOFF added
+`tests/test_handoff_package.py` and established its Python 3.9 compatibility
+**statically** — a grammar parse, and PEP 563 deferral of its two annotations —
+because it read the bench as having no 3.9. The bench does have 3.9.6, and WRAP
+ran the whole suite on it, so the 3.9 *grammar* claim is now confirmed by
+execution rather than by reasoning.
+
+What is still not done is the run on the **deployment's 3.9.16**, on the
+deployment, under the pinned runtime. 3.9.6 and 3.9.16 are the same language
+version and different patch releases on a different machine, so the bench run
+narrows the gap and does not close it. Whoever next has deployment access runs
+`make test` there and records the result here.
+
+Use `PYTHON=` to select an interpreter; the driver passes it through to every
+test (`tools/run_tests.sh:60`).

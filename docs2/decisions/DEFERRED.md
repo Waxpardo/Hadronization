@@ -5,7 +5,10 @@ before the paper. It is published because a repository that shows its deferred
 work is easier to trust than one that does not.
 
 **The load-bearing measurement.** The audit carries 391 rows. **138** are
-deferred. Of those, **87 are LATENT** and **51 are COSMETIC**, and **none is
+deferred by judgement. (A further 38 are dormant behind ruling R31 and are
+merged into the same `DEFER` state in disposition v5, giving 176 there; they
+are described separately below, because "we decided not to" and "the module is
+switched off" are different facts.) Of those, **87 are LATENT** and **51 are COSMETIC**, and **none is
 `BLOCKS_PAPER`**. Every row the audit marked as blocking the paper was routed
 to a session and closed; nothing on the paper path is hiding here. WRAP
 re-measured this against `DA1_DISPOSITION_20260830_v4.csv` rather than

@@ -22,14 +22,17 @@ row). That row also records the campaign as sealed, `publication_eligible`
 true, and the first dataset whose merged product declares
 `paul_pair_objects_primary_ground_v3`.
 
-**The README's example command names an ordinal it cannot claim** (ledger
-DA1-022). `README.md:49` reads
+**The README once carried an example command naming an ordinal it cannot
+claim** (ledger DA1-022, closed by session WRAP). It read
 `./hadronization render-production HF_RUN3_V2 4 1000 100000`. Ordinal 4 is held
 by `HF_SYS_MUR_UP` (`config/campaign_ordinals_v1.json`, the ordinal-4 row), so
-`tools/render_production_submit.py` refuses it before it writes a submit file,
-and `HF_RUN3_V2` appears nowhere else in the tracked tree. A replacement needs
-an owner-approved campaign and a recorded ordinal claim; nobody may invent one
-in a README. Use the ordinal-3 command above.
+`tools/render_production_submit.py` refuses that pair before it writes a submit
+file, and `HF_RUN3_V2` appears nowhere else in the tracked tree. A session had
+added prose explaining that the line was illustrative; WRAP removed the line
+instead, because a command a reader can copy is not made safe by a paragraph
+telling them not to. `README.md` now states the rule — an owner-approved
+campaign and a recorded ordinal claim, with no default — and prints no
+unclaimable example. Use the ordinal-3 command above.
 
 ## Every submitted job starts held
 

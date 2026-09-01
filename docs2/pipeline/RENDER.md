@@ -84,9 +84,13 @@ neither G1 nor any balancing configuration. That is the invocation rule, not a
 defect to route around. Widening the expansion would be tidiness; it would not
 make `all` runnable on its own.
 
-`README.md:57` still writes `./hadronization plot hf_run3_v1_candidate all` in
-its example chain. Read that line as illustrative of the command shape, never
-as the paper-render recipe.
+This page once recorded that the README still wrote
+`./hadronization plot hf_run3_v1_candidate all` in its example chain. That
+stopped being true at commit `66456ce` (session DOC-1), which changed the
+example to an explicit target, and the note outlived the thing it described.
+`README.md` now states the rule directly: rendering is by explicit target, and
+`all` is not runnable for this campaign. Checked at WRAP: no tracked file
+outside this page writes that command.
 
 ## The two raw-reading targets
 

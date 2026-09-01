@@ -58,9 +58,9 @@ than as an absence of any 3.9.
 
 **#20, measured.** `BRIEF_WRAP_v2` §3.5 routes a `pin:` key-case defect as "a
 small real defect in a tracked script", and records that the architect's own
-grep could not find it. The grep was right. The defect is at
-`RUNN4_EVIDENCE_6729b3f_20260901/gate/runn4b_maketest.sh:15`, a **session-local
-gate script in an evidence store**, and RUN-N4b's report calls it "Cosmetic".
+grep could not find it. The grep was right. The defect is in a **session-local gate script in an
+evidence store held outside this repository** — `runn4b_maketest.sh`, line 15,
+in RUN-N4b's evidence directory — and RUN-N4b's report calls it "Cosmetic".
 No tracked file greps `config/dependencies.conf` for lowercase keys. The item
 was routed on a paraphrase of RUN-N4b's finding rather than on the finding,
 which names the script and its status in the same sentence.
