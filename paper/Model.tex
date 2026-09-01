@@ -1,105 +1,133 @@
-\section{Generator samples and event activity}
-\label{sec:model}
+\FloatBarrier
+\section{Data samples}
+\label{Sec:Model}
+%PYTHIA
+%- Overview of PYTHIA
+%- How is hadronisation described in PYTHIA
+%- Tunes
+%    - MONASH
+%    - JUNCTIONS
+%    (we could also look at:
+%    - Close-packing
+%    - Ropes)
+%Table with number of events, number of generated b and c quarks, yield of B+, B-, $\Lambda_b$ (and bar), D+, D-, $\Lambda_c$ (and bar).
+%Multiplicity spectra
+%Some kinematic spectra (pT, $\eta$, $\phi$, etc.) for the particles we care about. We can move this to some appendix but it will be nice to have here as an overview.
 
-\subsection{Campaign definition}
 
-The canonical \pathcode{HF_RUN3_V1} campaign was generated with PYTHIA~8.317
-for proton--proton collisions at $\sqrt{s}=13.6$~TeV. Both
-\pathcode{HardQCD:hardccbar} and \pathcode{HardQCD:hardbbbar} are enabled, with
-\pathcode{PhaseSpace:pTHatMin = 2.0}. The producer requires exactly one signed
-selected-hard heavy-quark pair in every successful event. The sample is
-therefore forced hard-heavy and is not a minimum-bias sample.\claim{M1}
+This section describes the simulated pp samples used in the analysis, the common particle-level selections, and the three PYTHIA~8 hadronisation configurations compared throughout the paper: MONASH, JUNCTIONS, and CLOSEPACKING.
 
-Each tune has 1,000 canonical files with 100,000 successful events per file,
-or 100 million events per tune. Ten disjoint statistical blocks contain 100
-files per tune.\claim{M2} The three nominal cards contain the complete MONASH,
-JUNCTIONS, and CLOSEPACKING bundles; no parameter family is interpreted in
-isolation.
+\subsection{PYTHIA~8 setup}
+\label{sec:pythia-setup}
 
-\begin{table}[H]
+Events are generated with PYTHIA~8 using the Lund string model for hadronisation.  Proton--proton collisions are generated at $\sqrt{s} = 14~\mathrm{TeV}$. The samples are hard-heavy-flavour enriched samples rather than minimum-bias samples.  
+The common generator settings are summarized in Table~\ref{tab:generator-settings}.
+
+\begin{table}[tbp]
 \centering
-\caption{Canonical campaign and analysis settings. Each entry is controlled by
-the selector, nominal cards, or generated registry and is mapped to evidence in
-the claim checklist.}
-\label{tab:campaign}
+\label{tab:generator-settings}
 \begin{tabular}{ll}
 \toprule
-Item & Contract value \\
+Setting & Value \\
 \midrule
-Collision system and energy & pp, $\sqrt{s}=13.6$~TeV \\
-Generator & PYTHIA~8.317 \\
-Pinned plotting runtime & ROOT~6.30.01 \\
-Hard processes & $c\bar c$ and $b\bar b$ enabled \\
-Hard threshold & $\pthat>2.0$~GeV \\
-Exposure per tune & $1000\times100000=10^8$ events \\
-Statistical blocks & 10 blocks of 100 files \\
-Tune bundles & MONASH, JUNCTIONS, CLOSEPACKING \\
+Collision system & pp \\
+Centre-of-mass energy & $\sqrt{s}=14~\mathrm{TeV}$ \\
+Beam IDs & \texttt{Beams:idA = 2212}, \texttt{Beams:idB = 2212} \\
+Baseline tune & \texttt{Tune:pp = 14} \\
+Hard charm production & \texttt{HardQCD:hardccbar = on} \\
+Hard beauty production & \texttt{HardQCD:hardbbbar = on} \\
+Hard-process cut & \texttt{PhaseSpace:pTHatMin = 1.} \\
+Events per job & $10^{6}$ \\
+Jobs per tune & $100$ \\
+Events per tune & $10^{8}$ \\
 \bottomrule
 \end{tabular}
+\caption{Common PYTHIA~8 generator settings used for all three hadronisation configurations.}
 \end{table}
 
-\subsection{Multiplicity counter and common classes}
+\subsection{Particle selection}
+\label{sec:particle-selection}
 
-Event activity is the operational ``final charged non-heavy'' counter. It
-increments exactly when PYTHIA reports a particle as final and charged, the
-particle has no heavy constituent, $p_{\mathrm{T}}>0.15$~GeV/$c$, and
-$|\eta|\leq1$.\claim{M3} The cards use
-\pathcode{ParticleDecays:tau0Max = 0.01}~mm; the installed PYTHIA particle
-table contains no tested light-hadron state between that cutoff and the
-conventional 10~mm primary threshold. Heavy-hadron decays are disabled, and
-heavy hadrons are excluded because their artificial stability would create an
-activity--observable autocorrelation. The counter should therefore not be
-called an experimentally identical primary-particle definition without this
-qualification.
+Particles are selected at generator level after hadronisation.  The analysis uses final-state particles satisfying $p_{\mathrm{T}} \geq 0.15~\mathrm{GeV}/c$ and $|\eta| \leq 4$. The weakly decaying heavy-flavour hadrons used in the analysis are kept stable at generator level by disabling their decays.
 
-A paired PYTHIA~8.317 MONASH minimum-bias calibration measured the production
-counter at 6.986 and the intended experimental-decay convention at 7.040, a
-0.7670\% undercount. Propagating that measured shift up and down through the
-current half-integer boundaries moves no boundary across an integer, so the S5
-class-membership change is exactly zero for c1--c11 in the calibration. This
-does not establish the bias in the forced hard-heavy sample and does not
-correct the percentile labels.
+The charged-particle multiplicity, $N_{\mathrm{ch}}$, is defined using prompt charged particles in the same kinematic acceptance with PYTHIA status codes in the prompt range used by the analysis.
 
-The analysis uses eleven non-overlapping absolute classes common to all three
-tunes. Their half-integer boundaries assign every integer \nch to exactly one
-class. MONASH minimum-bias top-percentile ranges are labels for this shared
-axis; they are not per-tune quantiles and their direction is opposite to the
-class numbering.\claim{M4}
+\subsection{Hadronisation models}
+\label{sec:hadronisation-models}
 
-\begin{table}[H]
+The same hard-process setup and particle-level selections are used for all three configurations.  The configurations differ only in the modelling of hadronisation, colour reconnection, and dense-string effects.
+
+\subsubsection{MONASH}
+\label{sec:monash}
+
+The MONASH configuration is used as the baseline PYTHIA~8 reference tune.  It corresponds to the Monash 2013 tune, which provides a global tuning of fragmentation, multiparton interactions, colour reconnection, and underlying-event parameters.
+
+This configuration is used as the reference because it is the standard PYTHIA~8 pp tune and provides the baseline expectation for heavy-flavour hadronisation without the additional junction or close-packing mechanisms studied here.
+
+\subsubsection{JUNCTIONS}
+\label{sec:junctions}
+
+The JUNCTIONS configuration uses the QCD-based colour-reconnection model with junction topologies enabled.  In this model, colour reconnections are guided by QCD colour rules and by minimization of the string-length measure. 
+
+\subsubsection{CLOSEPACKING}
+\label{sec:closepacking}
+
+The CLOSEPACKING configuration includes the string close-packing model.  The model accounts for the effect of overlapping strings in high-density pp events.  Close strings modify the effective string tension, which can affect strangeness production, transverse-momentum spectra, and baryon production.
+
+\subsection{Generated samples}
+\label{sec:generated-samples}
+
+For each configuration, $100$ independent jobs are generated, each containing $10^{6}$ events.  The total generated sample therefore contains $10^{8}$ events per configuration and $3\times10^{8}$ events overall.  The generated sample sizes and selected heavy-flavour hadron yields are shown in Table~\ref{tab:generated-heavy-flavour-summary}.
+
+\begin{table}[tbp]
 \centering
-\caption{Common absolute event-activity classes. Class c1 is the lowest and c11
-the highest activity. Percentages are labels derived from the independent
-MONASH minimum-bias calibration sample.}
-\label{tab:classes}
-\begin{tabular}{ccc}
+\label{tab:generated-heavy-flavour-summary}
+\begin{tabular}{lrrrr}
 \toprule
-Class & Integer \nch & MONASH top-percentile label \\
+Observable & MONASH & JUNCTIONS & CLOSEPACKING & Overall \\
 \midrule
-c1  & 0--2       & 88.197--100.000\% \\
-c2  & 3          & 80.597--88.197\% \\
-c3  & 4--5       & 65.937--80.597\% \\
-c4  & 6          & 59.850--65.937\% \\
-c5  & 7--8       & 50.308--59.850\% \\
-c6  & 9--10      & 43.030--50.308\% \\
-c7  & 11--13     & 34.614--43.030\% \\
-c8  & 14--17     & 26.154--34.614\% \\
-c9  & 18--23     & 17.124--26.154\% \\
-c10 & 24--32     & 8.422--17.124\% \\
-c11 & 33 and above & 0.000--8.422\% \\
+$N_{\mathrm{ev}}$ & $100\,000\,000$ & $100\,000\,000$ & $100\,000\,000$ & $300\,000\,000$ \\
+$N_{b+\bar b}^{\mathrm{acc}}$ & $13\,321\,922$ & $13\,258\,188$ & $13\,263\,640$ & $39\,843\,750$ \\
+$N_{c+\bar c}^{\mathrm{acc}}$ & $125\,387\,414$ & $124\,842\,736$ & $125\,437\,031$ & $375\,667\,181$ \\
+\midrule
+$B^{+}$ & $2\,853\,111$ & $2\,044\,989$ & $2\,004\,038$ & $6\,902\,138$ \\
+$B^{-}$ & $2\,841\,524$ & $2\,036\,333$ & $2\,004\,631$ & $6\,882\,488$ \\
+$\Lambda_{b}^{0}$ & $219\,087$ & $472\,196$ & $973\,428$ & $1\,664\,711$ \\
+$\overline{\Lambda}_{b}^{0}$ & $208\,457$ & $474\,179$ & $982\,931$ & $1\,665\,567$ \\
+$D^{+}$ & $18\,422\,929$ & $16\,436\,770$ & $16\,405\,528$ & $51\,265\,227$ \\
+$D^{-}$ & $18\,474\,130$ & $16\,514\,161$ & $16\,493\,255$ & $51\,481\,546$ \\
+$\Lambda_{c}^{+}$ & $2\,282\,077$ & $8\,039\,633$ & $7\,296\,136$ & $17\,617\,846$ \\
+$\overline{\Lambda}_{c}^{-}$ & $2\,238\,580$ & $7\,887\,369$ & $7\,195\,995$ & $17\,321\,944$ \\
 \bottomrule
 \end{tabular}
+\caption{Generated-event sample sizes and selected heavy-flavour hadron yields for the three PYTHIA~8 configurations.}
 \end{table}
 
-\subsection{Systematic scope}
+\subsection{Multiplicity classes}
+\label{sec:multiplicity-classes}
 
-The registered sources vary renormalisation and factorisation scales (S1a and
-S1b), the parton distribution (S2), the hard-process threshold (S3), the
-activity-counter window (S4), decay-daughter class migration (S5), and
-ambiguous hard-carrier assignment (S6).\claim{M5} S4 has no class-resolved
-delta. S6 uses a different five-bin axis and is not added to the c1--c11
-budget. Detector response, efficiency, resolution, and unfolding are outside
-this generator-level study. The 2026-08-21 correction applies the documented
-nominal-plus-variation SEM rule to derived deltas. Uncertainty-bearing final
-figures and release-level inferences remain blocked by the missing S4 source
-and the unbounded tune-dependent generator-hang selection risk.
+Event activity classes are defined using percentiles of the charged-particle multiplicity distribution, $N_{\mathrm{ch}}$.  The classes used throughout the analysis are
+\begin{equation}
+0\text{--}1\%,\ 
+1\text{--}10\%,\ 
+10\text{--}20\%,\ 
+20\text{--}30\%,\ 
+30\text{--}40\%,\ 
+40\text{--}50\%,\ 
+50\text{--}60\%,\ 
+60\text{--}70\%,\ 
+70\text{--}80\%,\ 
+80\text{--}90\%,\ 
+90\text{--}100\%.
+\end{equation}
+
+The $0$--$1\%$ class corresponds to the highest-multiplicity events, while the $90$--$100\%$ class corresponds to the lowest-multiplicity events.
+
+\begin{figure}[tbp]
+    \centering
+    \includegraphics[width=0.85\linewidth]{figures/Kinematic Plots/MultiplicitySpectrum_Shared_shape.png}
+    \caption{Charged-particle multiplicity distribution for the generated hard-heavy-flavour event samples. The charged-particle multiplicity $N_{\mathrm{ch}}$ is defined using prompt charged particles with $p_{\mathrm{T}}\geq0.15~\mathrm{GeV}/c$ and $|\eta|\leq4$ in pp collisions at $\sqrt{s}=14~\mathrm{TeV}$.}
+    \label{fig:mult_distribution}
+\end{figure}
+
+\FloatBarrier

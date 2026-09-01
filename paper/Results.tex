@@ -1,124 +1,185 @@
-\section{Results and publication status}
-\label{sec:results}
+\section{Results}
+\label{Sec:Results}
 
-\subsection{Multiplicity-integrated balancing yields}
 
-Table~\ref{tab:integrated} records pooled full-axis balancing yields and their
-ten-block standard errors. The values are retained in a committed plotting-log
-fixture. The fixture contains twelve finite-yield rows with ten finite blocks,
-but it omits the pair-count rows required to reproduce the registered
-integer-exact integrated closure. The numbers are therefore reportable as a
-labelled validation result, not as a closed final-figure source.\claim{R1}
+\subsection{Proposed figures}
 
-\begin{table}[H]
-\centering
-\caption{Multiplicity-integrated signed balancing yields per trigger. The
-source is the retained nominal validation fixture; the original pair-count log
-needed for integer-exact closure is unavailable.}
-\label{tab:integrated}
-\begin{tabular}{llcc}
-\toprule
-Sector & Tune bundle & Reference meson & Baryon \\
-\midrule
-Beauty & MONASH       & $B^-: 0.11625\pm0.00027$ & $\Lambda_b: 0.01942\pm0.00010$ \\
-Beauty & JUNCTIONS    & $B^-: 0.08730\pm0.00035$ & $\Lambda_b: 0.03653\pm0.00031$ \\
-Beauty & CLOSEPACKING & $B^-: 0.08550\pm0.00023$ & $\Lambda_b: 0.03330\pm0.00022$ \\
-Charm  & MONASH       & $D^-: 0.19345\pm0.00012$ & $\bar\Lambda_c^-: 0.01893\pm0.00005$ \\
-Charm  & JUNCTIONS    & $D^-: 0.17397\pm0.00013$ & $\bar\Lambda_c^-: 0.02402\pm0.00003$ \\
-Charm  & CLOSEPACKING & $D^-: 0.17348\pm0.00010$ & $\bar\Lambda_c^-: 0.02076\pm0.00004$ \\
-\bottomrule
-\end{tabular}
-\end{table}
+\begin{enumerate}
 
-Relative to MONASH, both non-baseline bundles have a lower integrated
-reference-meson balancing yield and a higher integrated baryon balancing yield
-in the beauty sector. The charm baryon shift is also positive in both bundles,
-while the reference-meson yield is lower. These are comparisons between full
-configuration bundles and do not identify their microscopic cause. They are
-also conditioned on job completion. The recorded attempt rates are tune
-dependent: 0/1,000 for MONASH, 63/1,063 for JUNCTIONS, and 64/1,064 for
-CLOSEPACKING. Because the recorded hang is in
-\pathcode{JunctionSplitting} and event-content independence is unmeasured,
-these comparisons are not accepted publication inferences.
+\item \textbf{Event classification and multiplicity selection - to be placed in the previous section}
 
-\subsection{Beauty baryon/reference-meson trend}
+\begin{itemize}
+\item Charged-particle multiplicity distribution.
+\item Definition of the event activity classes used throughout the analysis (e.g. 0--10\%, 30--60\%, 60--100\%).
+\item Vertical lines indicating the multiplicity boundaries.
+\end{itemize}
 
-The committed class-resolved table provides the $\Lambda_b/B^-$ signed
-balancing-yield ratio for all eleven common classes. Table~\ref{tab:endpoints}
-shows its lowest- and highest-activity endpoints and the primary endpoint
-contrast. The central contrast is formed as $R(\mathrm{c11})-R(\mathrm{c1})$;
-its quoted uncertainty here is statistical only.\claim{R2}
+Physics message:
+Establishes the event classes and provides the connection to the multiplicity-dependent hadronisation effects observed experimentally and what we discuss in our results.
 
-\begin{table}[H]
-\centering
-\caption{Endpoint contrast of the beauty $\Lambda_b/B^-$ balancing-yield
-ratio. Uncertainties in this table are ten-block statistical SEMs.}
-\label{tab:endpoints}
-\begin{tabular}{lccc}
-\toprule
-Tune bundle & $R(\mathrm{c1})$ & $R(\mathrm{c11})$ & $R(\mathrm{c11})-R(\mathrm{c1})$ \\
-\midrule
-MONASH       & $0.18645\pm0.00692$ & $0.16192\pm0.00258$ & $-0.02453\pm0.00739$ \\
-JUNCTIONS    & $0.21408\pm0.00873$ & $0.54317\pm0.00590$ & $+0.32909\pm0.01053$ \\
-CLOSEPACKING & $0.21624\pm0.00765$ & $0.50344\pm0.01129$ & $+0.28719\pm0.01364$ \\
-\bottomrule
-\end{tabular}
-\end{table}
 
-The non-baseline bundle contrasts exceed the MONASH contrast in the committed
-central table. The stored systematic verdict gives contrast differences of
-$0.35362\pm0.16134$ for JUNCTIONS minus MONASH and
-$0.31172\pm0.15666$ for CLOSEPACKING minus MONASH, where the uncertainty is the
-stored combined total.\claim{R3} Those totals exclude S4 and descend from the
-2026-08-21 two-SEM correction. They are
-included to synchronize the draft with the measured repository state, not to
-license a final significance statement. No trial correction across the 72
-stored comparisons or cross-class covariance estimate is available.
 
-The paper-facing charm baryon/reference-meson quantity uses the signed
-$\bar\Lambda_c^-/D^-$ registry definition. A complete machine-readable charm
-matrix and an accepted P8 canvas are absent, so this draft quotes no charm
-ratio trend and makes no charm-versus-beauty ratio comparison.\claim{R4}
 
-\subsection{Blocked scientific figure programme}
 
-The machine-readable figure manifest records eight candidate roles and zero
-accepted outputs. Accordingly, this build contains no scientific figure
-environment and no image copied from the historical paper tree. It also does
-not use the three internal explanatory SVGs.\claim{F0}
 
-Table~\ref{tab:figure-programme} preserves the intended paper order without
-turning a planned role into a figure claim. In particular, roles P2 and P3
-remain the charm and beauty correlation figures. The later balancing roles use
-the current combined-canvas layout rather than the obsolete pair of separate
-charm and beauty files.
 
-\begin{table}[H]
-\small
-\centering
-\caption{Planned publication figure roles. ``Candidate'' is the manifest
-status, not acceptance. No row contributes image bytes to this manuscript
-build.}
-\label{tab:figure-programme}
-\begin{tabularx}{\textwidth}{c l X l}
-\toprule
-Order & Role & Required current presentation & Status \\
-\midrule
-P1 & Event classification & Shared 13.6~TeV spectrum and common c1--c11 boundaries & Candidate \\
-P2 & Charm correlations & Per-trigger MONASH charm OS, SS, and OS--SS angular correlations & Candidate \\
-P3 & Beauty correlations & Per-trigger MONASH beauty OS, SS, and OS--SS angular correlations & Candidate \\
-P4/P6 & Integrated yields & One V-INTEGRATED canvas may carry charm and beauty after an explicit packaging ruling & Candidate \\
-P5/P7 & Activity-dependent yields & Combined charm and beauty canvas; V-FULL versus V-EXTREMES remains open & Candidate \\
-P8 & Signed ratios & Registry-resolved $\bar\Lambda_c^-/D^-$ and $\Lambda_b/B^-$ ratios & Candidate \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\vspace{0.5cm}
 
-Acceptance requires the exact ROOT-derived output bytes at the canonical
-role-specific result path, configuration and source digests, selector
-authorization, central and ten-block input identities, machine-readable
-points, a v1 acceptance receipt, pinned runtime, and clean visual and
-scientific review. The inaccessible external products, absent final bytes,
-incomplete S4 result, integrated-log gap, unbounded hang-selection risk,
-unrevalidated external pair sidecars, and absent corrected rerenders remain
-release blockers.\claim{F9}
+\item \textbf{Charm meson correlation functions}
+
+2$\times$1 panel:
+
+\begin{itemize}
+\item Left: $D^0$--$\overline{D}^0$ and $D^0$--$D^0$ per-trigger yield as a function of $\Delta\varphi$.
+\item Right: charge-selected correlations:
+\begin{itemize}
+\item unlike-sign ($+-$)
+\item like-sign ($++$ and/or $--$)
+\end{itemize}
+\end{itemize}
+
+Shown for Monash only.
+
+Physics message:
+Illustrates how heavy-flavour conservation and charge conservation appear at the correlation level before constructing balance observables.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/AngularCorrelations/CharmCorrelations_MONASH_PDF.pdf}
+    \caption{COMMENTS: Charm angular correlations for charm, multiplicity-integrated. Left: D+ trigger. Right: Lambda trigger. Top: OS and SS in the same pad. Bottom: Subtracted OS - SS spectrum.}
+    \label{fig:placeholder}
+\end{figure}
+
+\vspace{0.5cm}
+
+\item \textbf{Beauty meson correlation functions}
+
+2$\times$1 panel:
+
+\begin{itemize}
+\item Left: $B^+$--$B^-$ and $B^+$--$B^+$ correlations.
+\item Right: charge-selected correlations ($+-$ versus like-sign).
+\end{itemize}
+
+Shown for Monash.
+
+Physics message:
+Same as Figure 2 but for beauty, allowing direct comparison of charm and beauty hadronisation in Monash.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/AngularCorrelations/BeautyCorrelations_MONASH_PDF.pdf}
+    \caption{COMMENTS: Beauty angular correlations for charm, multiplicity-integrated. Left: D+ trigger. Right: Lambda trigger. Top: OS and SS in the same pad. Bottom: Subtracted OS - SS spectrum.}
+    \label{fig:placeholder}
+\end{figure}
+
+\vspace{0.5cm}
+
+\item \textbf{Charm balance function (yield) - meson vs baryon}
+
+Balance observable constructed from the charm correlations, e.g.
+
+Trigger: $D^0$ vs $\Lambda_c^+$
+
+
+Single panel with all hadronisation models.
+
+Physics message:
+Directly visualises the balancing partner of the charm quantum number in mesons vs baryons.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/YieldsBalancing/global_balancing_plots_integrated_charm_PDF.pdf}
+    \caption{COMMENTS: integrated yield for charm particles. Associate names are legible if you zoom in a lot. Left shows results for D+ trigger and right for Lambdac trigger. The top window is CLOSEPACKING (purple), then JUNCTIONS (red) and then MONASH (black), while the bottom most panel shows the ratios of tunes/MONASH (i.e. JUNCTIONS/MONASH and CLOSEPACKING/MONASH).}
+    \label{fig:placeholder}
+\end{figure}
+
+\vspace{0.5cm}
+
+\item \textbf{Charm balance function (yield) - meson vs baryon - multiplicity dependence}
+
+Same figure as above, but showing the two most extreme multiplicity cases
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/YieldsBalancing/global_balancing_plots_multiplicity_charm_PDF.pdf}
+    \caption{COMMENTS: integrated yield for charm particles. Associate names are legible if you zoom in a lot. Left shows results for D+ trigger and right for Lambdac trigger. The top window is CLOSEPACKING (purple), then JUNCTIONS (red) and then MONASH (black), while the bottom most panel shows the ratios of tunes/MONASH (i.e. JUNCTIONS/MONASH and CLOSEPACKING/MONASH). The results are split into the two most extreme multiplicity bins 0-1\% and 90-100\%.}
+    \label{fig:placeholder}
+\end{figure}
+
+\vspace{0.5cm}
+
+\item \textbf{Beauty balance function (yield) - meson vs baryon}
+
+Balance observable constructed from the beauty correlations, e.g.
+
+Trigger: $B^+$ vs $\Lambda_b^0$
+
+
+Single panel with all hadronisation models.
+
+Physics message:
+Directly visualises the balancing partner of the beauty quantum number in mesons vs baryons.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/YieldsBalancing/global_balancing_plots_integrated_beauty_PDF.pdf}
+    \caption{COMMENTS: integrated yield for beauty particles. Associate names are legible if you zoom in a lot. Left shows results for B+ trigger and right for Lambdab trigger. The top window is CLOSEPACKING (purple), then JUNCTIONS (red) and then MONASH (black), while the bottom most panel shows the ratios of tunes/MONASH (i.e. JUNCTIONS/MONASH and CLOSEPACKING/MONASH).}
+    \label{fig:placeholder}
+\end{figure}
+
+\vspace{0.5cm}
+
+\item \textbf{Beauty balance function (yield) - meson vs baryon - multiplicity dependence}
+
+Same figure as above, but showing the two most extreme multiplicity cases.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/YieldsBalancing/global_balancing_plots_multiplicity_beauty_PDF.pdf}
+    \caption{COMMENTS: integrated yield for beauty particles. Associate names are legible if you zoom in a lot. Left shows results for B+ trigger and right for Lambdab trigger. The top window is CLOSEPACKING (purple), then JUNCTIONS (red) and then MONASH (black), while the bottom most panel shows the ratios of tunes/MONASH (i.e. JUNCTIONS/MONASH and CLOSEPACKING/MONASH). The results are split into the two most extreme multiplicity bins 0-1\% and 90-100\%.}
+    \label{fig:placeholder}
+\end{figure}
+
+\vspace{0.5cm}
+
+\item \textbf{Charm versus beauty baryon-to-meson balancing ratio vs multiplicity}
+
+$\Lambda_c^+$/$D^0$ vs $\Lambda_b^0$/$B^+$ 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{figures/BaryonMesonRelativeYieldsBalancing/global_balancing_baryon_over_meson_ratio_multiplicity_PDF.pdf}
+    \caption{Baryon-to-meson ratio vs multiplicity. COMMENTS: BLACK = MONASH, RED = JUNCTIONS, PURPLE = CLOSEPACKING. The x-axis goes from low-multiplicity events to high-multiplicity events. Left shoes beauty and right shows charm, while bottom shows the ratio of TUNE/MONASH. Improvements to plot layout and colour are ongoing.}
+    \label{fig:placeholder}
+\end{figure}
+
+\end{enumerate}
+
+\textbf{UNDER CONSTRUCTION -- placeholder text from thesis} \\
+\subsection{Balancing of beauty and charm hadrons}
+\label{sec:results:balancing}
+The integrated yield plots are shown in Fig.~\ref{fig:secResults:GlobalYieldsBBCC} for B$^{+}$ and prompt D$^{+}$ meson trigger and appropriate associate particles as function of multiplicity. Focusing first on the beauty case, a distinct increase is seen in baryon balancing partners when switching on the Junctions tune compared with the Monash baseline. This increase from Monash to Junctions seems to be only weakly dependent on multiplicity, though the yield itself increases for larger multiplicity due to the increased number of MPIs, allowing the Junction mechanism to perform better as there will be a larger chance that different MPI states overlap in the same phase space. It should be noted that the increase in baryon yield for Junctions is especially strong for $\Sigma_{b}$ baryon associates: an order of magnitude larger than the increase in the almost identical $\Lambda^{0}_{b}$ baryons. This is explained by the fact that the $uu$ and $dd$ di-quarks are necessary to create the $\Sigma_{b}^{+/-}$ baryons and can only exist in a isospin-1 state, while the $\Sigma_{b}^{0}$ baryon contains a $ud$ di-quark that can reside in the much more energetically favoured isospin-0 state. This suppression is lifted when CR mechanisms are at play as they allow hadronisation without spin dependence. The $\Sigma_{b}$ baryons are therefore created with equal probabilities and this is reflected in Fig.~\ref{fig:secResults:GlobalYieldsBBCC}. Both the Monash and Junctions tunes apply CR mechanisms, but the beyond leading colour treatment in the latter enhances this production in $\Sigma_{b}$ baryons even more. \\
+% Besides the CR and isospin effects, there also seems to be a strong dependence on the particle mass for the baryon balancing partners, as the mass difference in $\Sigma_{b}$ and $\Lambda_{b}$ is only about 7\% [check]. 
+\indent Turning to the charm sector, the trends seen in the beauty balancing results are mostly reproduced for charm. One of the differences is the substantial multiplicity dependence of the Junctions enhancement ratio for the $\overline{\Sigma_{c}}$ baryons, while the $\Sigma_{b}$ baryons ratios were almost constant as a function of multiplicity. This seems to be related to how PYTHIA treats differences in $\Sigma_{b}$ and $\overline{\Sigma_{c}}$ baryons as the effect is not seen for the $\Lambda^{0}_{b}$ and $\overline{\Lambda^{+}_{c}}$ baryons. \\
+% There have not been many measurements of $\Sigma_{b}$ baryons, which hints that the tuning of PYTHIA can also be related to the difference seen in multiplicity dependence. \\
+\indent Another difference can be seen in the enhanced production of $\overline{\Lambda^{+}_{c}}$ baryons in Junctions, which is less pronounced than the equivalent beauty case. This again hints at differences in beauty and charm within PYTHIA and does not seem to be related only to mass effects. An explicit example of how this difference manifests is found in the \texttt{StringFlav:ProbQQ1toQQ0join} parameter (\href{https://pythia.org/latest-manual/FlavourSelection.html}{PYTHIA:FlavourSelection}). This parameter controls the suppression of spin-1 di-quarks production relative to spin-0 when two quarks are combined to a di-quark in the Junctions framework. The default value (for Monash) when the heaviest quark is charm is $0.9$ and $1.0$ for beauty, giving an example of differences in beauty and charm implementation that can be argued to be causing the observed differences. The parameter has identical values in the Junctions tune, which is why this only explains differences in Monash. Some caution is required in the discussion: there seems to be some disagreement with data when the default setting is used and this is being tuned \cite{StringFlavPaper}, however, and as there is no data available for the equivalent beauty case. Specifically, equalising the beauty and charm values for the \texttt{StringFlav:ProbQQ1toQQ0join} setting is not recommended and therefore not pursued.
+%
+\begin{figure}[t]
+    \centering
+    \includegraphics[scale=0.7]{figures/YieldsBalancing/globalCanvasYieldsPDF_215.pdf}
+    \caption{Integrated 2-particle angular spectra over the full $2\pi$ azimuthal range for (a), (c) B$^{+}$ and (b), (d) prompt $D^{+}$ mesons with respective beauty and prompt charm associates as a function of charged-particle event multiplicity. Both the PYTHIA Monash (lower) and Junctions (upper) tunes are used for the simulation of events. A clear increase in integrated yield is observed as a function of increasing multiplicity and an enhancement of baryon balancing partners is seen when enabling the Junctions tune in the simulation process due to the beyond leading colour CR mechanism.}
+    \label{fig:secResults:GlobalYieldsBBCC}
+\end{figure} %
+\subsection{Baryon/meson balancing ratio of beauty and charm hadrons}
+\label{sec:results:b/mBalancing}
+The baryon/meson balancing ratios are given in Fig.~\ref{fig:secResults:GlobalRelYieldsBBCC} for B$^{+}$ and prompt $D^{-}$ trigger particles for different associate baryons as a function of multiplicity. The relative $\Lambda_{b}^{0}$ and $\overline{\Lambda_{c}^{+}}$ ratios are treated separately from the combined case including the $\Sigma_{b}^{0}$ and $\overline{\Sigma^{+}_{c}}$ baryons as the difference in yields differ up to an order of magnitude from each other. \\
+\indent A distinct increasing trend is observed in the baryon/meson ratio with increasing multiplicity in the Junctions tune for roughly all considered balancing partners. This is to be expected as the events with higher multiplicity are created through an enhanced number of MPIs, suspected to create more junction topologies in the hadronisation process, increasing the number of baryon partners. This trend is broken however in the higher multiplicity bins, where the ratio actually decreases. For beauty this occurs only in the highest multiplicity interval, but for charm this behaviour sets in already at mid-multiplicities in the 20-40 multiplicity bin due to the difference in mass. \\
+\indent Beside the differences in multiplicity dependence, there are clear differences between beauty and (prompt) charm, while naively it is expected that the prompt nature of the charm particles will cancel any differences with the beauty counterparts. The ratio seems to be particularly different among the considered particles for the Monash tune which hints at differences in the treatment of beauty and charm in PYTHIA instead of differences caused by the beyond leading colour mechanisms or originating from a physical origin. This belief is enhanced by the fact that the \texttt{StringFlav:ProbQQ1toQQ0join} parameter has different values for beauty and charm in Monash, but not in Junctions.
+%
+\begin{figure}[t]
+    \centering
+    \includegraphics[scale=0.7]{figures/BaryonMesonRelativeYieldsBalancing/globalCanvasRelativeYieldsPDF_215.pdf}
+    \caption{Baryon/meson ratios obtained from the integrated 2-particle yields in Fig.~\ref{fig:secResults:GlobalYieldsBBCC} with charged-particle event multiplicity dependence on the x-axis. The $B^{+}\Lambda_{b}^{0}/B^{+}B^{-}$ and $D^{+}\overline{\Lambda_{c}^{+}}/D^{+}D^{-}$ pair ratios are shown in the upper plots (a), (b), while $B^{+}\Sigma_{b}^{0}/B^{+}B^{-}$ and $D^{+}\overline{\Sigma_{c}^{+}}/D^{+}D^{-}$ are also included in the lower plots (c), (d) with a log-scale to visualise the increased yield in the latter. Both the PYTHIA Monash (black) and Junctions (red or blue) tunes are used and the charm particles are only produced promptly to provide a fair comparison with their beauty counterparts. Some similarities are seen in beauty and charm and the increase in baryon/meson ratio as a function of multiplicity is promising. The distinct saturation and decrease in baryon/meson ratio is, however, not expected intuitively and there seem to be differences in the treatment of beauty and charm that are not only caused by the mass difference in these sectors, in particular in the Monash tune.}
+    \label{fig:secResults:GlobalRelYieldsBBCC}
+\end{figure} %

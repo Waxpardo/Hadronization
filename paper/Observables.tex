@@ -1,76 +1,22 @@
-\section{Heavy-flavour balancing observables}
-\label{sec:observables}
+\section{Two-particle correlations and quantum-number balancing}
+\label{Sec:Observables}
 
-\subsection{Signed species and ordered pairs}
+Traditionally, hadronisation models are constrained through measurements of identified-particle yields and yield ratios. Examples include baryon-to-meson ratios such as $\Lambda/K^0_S$, $\Lambda_c/D^0$, or $\Lambda_b/B^+$, and measurements of strangeness enhancement as a function of event multiplicity. Such observables have proven highly valuable for identifying deficiencies in hadronisation models and motivating the development of new mechanisms such as colour reconnection, junction formation, and rope or close-packing effects. However, yield measurements provide only integrated information on the final state and are therefore often not suitable to identify the microscopic origin of the observed particles. Different hadronisation mechanisms may lead to similar integrated yields while producing very different correlation patterns among the particles generated in the same event.
 
-Heavy-flavour sign follows quark content rather than electric charge,
+Two-particle correlation techniques provide a more differential probe of hadronisation dynamics. Rather than measuring only the probability of producing a given hadron species, one studies the conditional probability of producing a second particle in the presence of a selected trigger particle. The distribution of associated particles can be investigated as a function of kinematic variables such as relative azimuthal angle $\Delta\varphi$ or pseudorapidity $\Delta\eta$. Since conservation laws operate on an event-by-event basis, the balancing partners of a given particle contain direct information about the mechanisms responsible for its production.
+
+A particularly powerful application of this technique is the study of conserved quantum numbers. Electric charge, baryon number, strangeness, charm and beauty must be conserved globally in every collision event. Consequently, the production of a particle carrying a non-zero quantum number requires the existence of one or more balancing particles elsewhere in the event. The simplest example is electric charge conservation. If a positively charged trigger particle is selected, one may construct correlation functions with positively and negatively charged associated particles. The unlike-sign correlation function contains contributions from both charge-conserving processes and background sources unrelated to charge conservation. To isolate the balancing contribution, it is common to construct a charge-balance observable of the form
+
 \begin{equation}
- q_c=n_c-n_{\bar c}, \qquad q_b=n_b-n_{\bar b}.
+B_{\rm charge}(\Delta\eta,\Delta\varphi) = 
+C_{+-}(\Delta\eta,\Delta\varphi)-
+C_{++}(\Delta\eta,\Delta\varphi),
 \end{equation}
-Thus a $B^+$ meson has $q_b=-1$, whereas a $\Lambda_b^0$ baryon has
-$q_b=+1$. The signed species and pair registries enumerate particles and
-antiparticles separately and define 300 ordered trigger--associate
-combinations.\claim{O1}
 
-Triggers are final, direct-primary, central-ground heavy hadrons with
-$p_{\mathrm{T}}>1.0$~GeV/$c$ and $|\eta|\leq4$. Their heavy quark must resolve
-to the selected hard process. Associates obey the same final-state,
-direct-primary, central-ground, and pseudorapidity requirements, with
-$p_{\mathrm{T}}>0.15$~GeV/$c$, but no selected-hard origin requirement is
-imposed.\claim{O2} The reduction excludes self-pairs and pairs whose two
-hadrons claim the same selected hard parton. This trigger--associate asymmetry
-is necessary: demanding selected-hard ancestry for both particles would remove
-the same-sign term by construction.
+\noindent where $C_{+-}$ and $C_{++}$ denote the unlike-sign and like-sign correlation functions, respectively. Equivalent definitions can be constructed using negatively charged trigger particles or by averaging positive and negative trigger samples. This subtraction removes a large fraction of the combinatorial background and highlights the particles responsible for balancing the trigger charge. The amplitude, width and shape of the resulting distribution provide information on the dynamics of local charge conservation during hadronisation. The same concept can be extended to other conserved quantum numbers. For strangeness, one may investigate correlations between strange hadrons and anti-strange hadrons. For baryon number, correlations between baryons and anti-baryons reveal how baryon-number conservation is implemented during fragmentation. Such measurements have already been proposed as sensitive probes of junction topologies, since baryons produced through junction formation are expected to exhibit balancing patterns that differ substantially from those generated through the traditional diquark mechanism.
 
-\subsection{Correlation and balancing yield}
+Heavy flavour, on the other hand, offers an advantageous feature for these studies since charm and beauty quarks are produced predominantly in hard partonic scatterings as $c\bar{c}$ and $b\bar{b}$ pairs. The production process therefore establishes a well-defined heavy-flavour quantum number at the partonic level before hadronisation takes place. During fragmentation, these heavy quarks are confined into charm- and beauty-hadron species whose quantum numbers must ultimately be balanced elsewhere in the event. For example, the production of a $D^0$ meson containing a charm quark requires the corresponding anti-charm quantum number to be carried by another hadron. Similarly, the formation of a $\Lambda_c^+$ baryon involves not only charm conservation but also the redistribution of baryon number among the remaining hadrons produced during fragmentation.
 
-For a fixed ordered species pair and multiplicity class, the per-trigger
-angular observable is
-\begin{equation}
- B(\dphi)=\frac{1}{N_{\mathrm{trig}}}
- \left(\frac{\mathrm{d}N_{\mathrm{OS}}}{\mathrm{d}\dphi}
-       -\frac{\mathrm{d}N_{\mathrm{SS}}}{\mathrm{d}\dphi}\right).
- \label{eq:balance}
-\end{equation}
-OS and SS refer to opposite and equal heavy-flavour sign. The same-sign factor
-is exactly one. Both terms use the same $N_{\mathrm{trig}}$, obtained from the
-dedicated \pathcode{hTrKinematics} object. A trigger-momentum projection of the
-pair object counts trigger--associate pairs and is not an admissible trigger
-denominator.\claim{O3}
+The nature of these balancing partners is expected to depend strongly on the hadronisation model. In conventional string fragmentation, quantum-number compensation tends to occur locally along the fragmenting string. Junction topologies may redistribute baryon number over larger regions of phase space and alter the flavour composition of balancing particles. Likewise, close-packing mechanisms may modify the probabilities for producing heavy quarks and diquarks, potentially changing both the species and kinematic distributions of the balancing hadrons. Consequently, two-particle correlation measurements provide information that is largely inaccessible through inclusive yield measurements alone.
 
-The stored angular axis is $-\pi/2\leq\dphi<3\pi/2$. The integrated balancing
-yield currently supported by implementation and evidence is the full-axis
-integral,
-\begin{equation}
- Y_{\mathrm{bal}}=
- \frac{N_{\mathrm{OS}}-N_{\mathrm{SS}}}{N_{\mathrm{trig}}}.
- \label{eq:integrated}
-\end{equation}
-No reviewed contract defines near-side or away-side integration boundaries,
-so this manuscript makes no regional-integral claim. A dated 21 August 2026
-scope ruling confirms the full $\dphi$ axis as the only currently supported
-integrated observable. Regional observables require a later signed decision
-and a new contract; the ruling does not rewrite any earlier
-preregistration.\claim{O4}
-
-A baryon/reference-meson ratio divides two signed balancing yields. For the
-paper-facing beauty quantity this is the $\Lambda_b/B^-$ balancing-yield ratio
-for a $B^+$ trigger. The charm analogue uses the registry-resolved
-$\bar\Lambda_c^-/D^-$ definition for a $D^+$ trigger. These are not inclusive
-baryon-to-meson production ratios.\claim{O5}
-
-\subsection{Central values and statistical uncertainty}
-
-The central value is calculated from the complete pooled union of selected
-files. It is not the mean of block values. Statistical uncertainties are the
-standard errors of the complete estimator evaluated in ten disjoint,
-equal-exposure file blocks. For block estimates $x_k$,
-\begin{equation}
- \operatorname{SEM}(x)=
- \frac{1}{\sqrt{10}}
- \sqrt{\frac{1}{9}\sum_{k=1}^{10}(x_k-\bar{x})^2}.
-\end{equation}
-OS--SS subtraction and every nonlinear yield ratio are formed inside each
-block before the standard error is calculated, retaining the within-block
-covariance of shared counts. Final points require ten finite block
-estimators.\claim{O6}
+In the present work, we extend the concept of quantum-number balancing to the heavy-flavour sector. By selecting identified charm and beauty mesons and baryons as trigger particles and studying their correlations with associated heavy-flavour particles, we investigate how charm, beauty, charge, and baryon number are compensated in different PYTHIA hadronisation models. The resulting correlation patterns provide a direct probe of the microscopic mechanisms governing heavy-flavour hadronisation.
