@@ -186,6 +186,8 @@ FIXTURE = r'''
 #include "TObjString.h"
 #include "TTree.h"
 #include <algorithm>
+#include <array>
+#include <cstdint>
 #include <iomanip>
 #include <locale>
 #include <map>
@@ -198,6 +200,8 @@ using namespace Hadronization;
 int main(int argc, char** argv) {
   if (argc != 3) return 2;
   const std::string mode = argv[2];
+  const bool counterMutation = mode.rfind("counter_", 0) == 0;
+  const bool resolutionEvents = mode == "valid_resolutions" || counterMutation;
   TFile output(argv[1], "RECREATE");
   TTree tree("tree", "fixture");
   ULong64_t eventId = 0;
@@ -255,6 +259,10 @@ int main(int argc, char** argv) {
   TH1D hMultiplicityWide("hMULTIPLICITY_ETA40", "fixture", 10, -0.5, 9.5);
   TH1I hProcess("hPROCESS_CODE", "fixture", 1000, -0.5, 999.5);
   hMultiplicity.Sumw2(); hMultiplicityWide.Sumw2();
+  std::uint64_t hardConflictsC = 0, hardConflictsB = 0;
+  std::uint64_t hardDemotionsC = 0, hardDemotionsB = 0;
+  std::uint64_t multiHeavyC = 0, multiHeavyB = 0;
+  std::uint64_t allHeavyConflicts = 0, allHeavyDemotions = 0;
   for (int row = 0; row < 3; ++row) {
     for (auto& item : integerVectors) item.second.clear();
     for (auto& item : doubleVectors) item.second.clear();
@@ -280,8 +288,33 @@ int main(int argc, char** argv) {
     integerVectors["hard_status"] = {-23, -23};
     integerVectors["hard_bottom_ids"] = {flavour, -flavour};
     integerVectors["hard_bottom_status"] = {-23, -23};
-    if (mode == "duplicate_bottom" && row == 0)
-      integerVectors["hard_bottom_indices"] = {10, 10};
+    if (mode == "duplicate_root" && row == 0)
+      integerVectors["hard_indices"] = {10, 10};
+    if (mode == "changed_bottom_valid" && row == 0) {
+      integerVectors["hard_bottom_indices"] = {20, 21};
+      integerVectors["hard_bottom_ids"] = {421, -421};
+      integerVectors["hard_bottom_status"] = {82, 82};
+    }
+    if (mode == "duplicate_bottom_valid" && row == 0) {
+      integerVectors["hard_bottom_indices"] = {30, 30};
+      integerVectors["hard_bottom_ids"] = {443, 443};
+      integerVectors["hard_bottom_status"] = {82, 82};
+    }
+    if (mode == "bottom_wrong_sign" && row == 0) {
+      integerVectors["hard_bottom_indices"] = {20, 21};
+      integerVectors["hard_bottom_ids"] = {-421, 421};
+      integerVectors["hard_bottom_status"] = {82, 82};
+    }
+    if (mode == "bottom_no_constituent" && row == 0) {
+      integerVectors["hard_bottom_indices"] = {20, 20};
+      integerVectors["hard_bottom_ids"] = {511, 511};
+      integerVectors["hard_bottom_status"] = {82, 82};
+    }
+    if (mode == "bottom_no_audit" && row == 0) {
+      integerVectors["hard_bottom_indices"].front() = 999;
+      integerVectors["hard_bottom_ids"].front() = 990001;
+      integerVectors["hard_bottom_status"].front() = 82;
+    }
     for (const std::string name : {"hard_px", "hard_py", "hard_pz"})
       doubleVectors[name] = {0.0, 0.0};
     doubleVectors["hard_e"] = {2.0, 2.0};
@@ -295,22 +328,34 @@ int main(int argc, char** argv) {
     integerVectors["ancestryMotherOffsets"] = {0, 0, 0};
     if (mode == "ancestry_offsets" && row == 0)
       integerVectors["ancestryMotherOffsets"].back() = 1;
-    const std::array<int, 2> heavyPdgs = beautyEvent
-        ? std::array<int, 2>{{511, -511}}
-        : std::array<int, 2>{{421, -421}};
+    std::vector<int> heavyPdgs = beautyEvent
+        ? std::vector<int>{511, -511}
+        : std::vector<int>{421, -421};
+    if (resolutionEvents && row == 0)
+      heavyPdgs = {421, 421, -4422};
+    if (resolutionEvents && row == 1)
+      heavyPdgs = {511, 511, -511, -511, 5522, -5522};
     integerVectors["heavyMotherOffsets"] = {0};
     integerVectors["heavyConstituentOffsets"] = {0};
     if (mode != "empty_heavy") {
       for (std::size_t slot = 0; slot < heavyPdgs.size(); ++slot) {
         const int heavyPdg = heavyPdgs[slot];
         const auto* state = FindSelectedState(heavyPdg);
-        const auto content = DecodeHeavyContent(heavyPdg, true, false);
+        const bool isMesonValue = state ? state->kind == "meson" : false;
+        const bool isBaryonValue = state ? state->kind == "baryon" : true;
+        const auto content = DecodeHeavyContent(
+            heavyPdg, isMesonValue, isBaryonValue);
         const int signedFlavour = content.qc() != 0
             ? (content.qc() > 0 ? 4 : -4)
             : (content.qb() > 0 ? 5 : -5);
         const int hardIndex = signedFlavour > 0 ? 10 : 11;
+        const int charge3Value = state ? state->charge3
+            : (std::abs(heavyPdg) == 4422 ? (heavyPdg > 0 ? 6 : -6) : 0);
+        const int spinTypeValue = state ? state->spin2j1 : 2;
         integerVectors["ID"].push_back(heavyPdg);
-        integerVectors["HFCLASS"].push_back(beautyEvent ? 5 : 4);
+        integerVectors["HFCLASS"].push_back(
+            content.hasCharm() && content.hasBeauty() ? 45
+                : (content.hasBeauty() ? 5 : 4));
         integerVectors["STATUS"].push_back(82);
         integerVectors["MOTHER"].push_back(hardIndex);
         integerVectors["MOTHERID"].push_back(signedFlavour);
@@ -318,16 +363,16 @@ int main(int argc, char** argv) {
         doubleVectors["ETA"].push_back(0.0);
         doubleVectors["Y"].push_back(0.0);
         doubleVectors["PHI"].push_back(0.0);
-        doubleVectors["CHARGE"].push_back(state->charge3 / 3.0);
+        doubleVectors["CHARGE"].push_back(charge3Value / 3.0);
         integerVectors["heavyIndex"].push_back(20 + static_cast<int>(slot));
         integerVectors["heavyPdg"].push_back(heavyPdg);
         integerVectors["heavyStatus"].push_back(82);
         integerVectors["heavyStatusAbs"].push_back(82);
         integerVectors["heavyIsFinal"].push_back(1);
-        integerVectors["heavyIsMeson"].push_back(1);
-        integerVectors["heavyIsBaryon"].push_back(0);
-        integerVectors["heavyCharge3"].push_back(state->charge3);
-        integerVectors["heavySpinType"].push_back(state->spin2j1);
+        integerVectors["heavyIsMeson"].push_back(isMesonValue ? 1 : 0);
+        integerVectors["heavyIsBaryon"].push_back(isBaryonValue ? 1 : 0);
+        integerVectors["heavyCharge3"].push_back(charge3Value);
+        integerVectors["heavySpinType"].push_back(spinTypeValue);
         integerVectors["heavyMother1"].push_back(hardIndex);
         integerVectors["heavyMother2"].push_back(0);
         integerVectors["heavyDaughter1"].push_back(0);
@@ -341,12 +386,17 @@ int main(int argc, char** argv) {
         integerVectors["heavyNbbar"].push_back(content.nbbar);
         integerVectors["heavyQc"].push_back(content.qc());
         integerVectors["heavyQb"].push_back(content.qb());
-        integerVectors["heavyBaryonNumber"].push_back(0);
+        integerVectors["heavyBaryonNumber"].push_back(
+            isBaryonValue ? (heavyPdg > 0 ? 1 : -1) : 0);
         integerVectors["heavyStrangeness"].push_back(content.strangeness());
-        integerVectors["heavyCentral"].push_back(1);
-        integerVectors["heavyOpen"].push_back(1);
-        integerVectors["heavyHidden"].push_back(0);
-        integerVectors["heavyStateCategory"].push_back(0);
+        integerVectors["heavyCentral"].push_back(state ? 1 : 0);
+        integerVectors["heavyOpen"].push_back(
+            (content.qc() != 0 || content.qb() != 0) ? 1 : 0);
+        integerVectors["heavyHidden"].push_back(
+            (content.hiddenCharm() || content.hiddenBeauty()) ? 1 : 0);
+        integerVectors["heavyStateCategory"].push_back(static_cast<int>(
+            ClassifyHeavyStateDetailed(state != nullptr, content,
+                                       isMesonValue, spinTypeValue)));
         integerVectors["heavyOriginC"].push_back(content.qc() == 0 ? 0 : 1);
         integerVectors["heavyOriginB"].push_back(content.qb() == 0 ? 0 : 1);
         integerVectors["heavyMatchResolutionC"].push_back(content.qc() == 0 ? 0 : 1);
@@ -357,14 +407,22 @@ int main(int argc, char** argv) {
         integerVectors["heavyRejectedHardB"].push_back(-1);
         integerVectors["heavyOriginDepthC"].push_back(content.qc() == 0 ? -1 : 1);
         integerVectors["heavyOriginDepthB"].push_back(content.qb() == 0 ? -1 : 1);
-        integerVectors["heavyConstituentParentSlot"].push_back(static_cast<int>(slot));
-        integerVectors["heavyConstituentPdg"].push_back(signedFlavour);
-        integerVectors["heavyConstituentOrdinal"].push_back(0);
-        integerVectors["heavyConstituentOrigin"].push_back(1);
-        integerVectors["heavyConstituentMatchResolution"].push_back(1);
-        integerVectors["heavyConstituentMatchedHard"].push_back(hardIndex);
-        integerVectors["heavyConstituentRejectedHard"].push_back(-1);
-        integerVectors["heavyConstituentOriginDepth"].push_back(1);
+        const std::array<std::pair<int, int>, 4> constituents{{
+            {4, content.nc}, {-4, content.ncbar},
+            {5, content.nb}, {-5, content.nbbar}}};
+        for (const auto& constituent : constituents) {
+          for (int ordinal = 0; ordinal < constituent.second; ++ordinal) {
+            integerVectors["heavyConstituentParentSlot"].push_back(
+                static_cast<int>(slot));
+            integerVectors["heavyConstituentPdg"].push_back(constituent.first);
+            integerVectors["heavyConstituentOrdinal"].push_back(ordinal);
+            integerVectors["heavyConstituentOrigin"].push_back(1);
+            integerVectors["heavyConstituentMatchResolution"].push_back(1);
+            integerVectors["heavyConstituentMatchedHard"].push_back(hardIndex);
+            integerVectors["heavyConstituentRejectedHard"].push_back(-1);
+            integerVectors["heavyConstituentOriginDepth"].push_back(1);
+          }
+        }
         integerVectors["heavyConstituentOffsets"].push_back(
             static_cast<int>(integerVectors["heavyConstituentPdg"].size()));
         for (const std::string name : {"heavyPx", "heavyPy", "heavyPz",
@@ -375,6 +433,50 @@ int main(int argc, char** argv) {
         doubleVectors["heavyMass"].push_back(1.0);
       }
     }
+    const std::vector<int> originalMatchedC = integerVectors["heavyMatchedHardC"];
+    const std::vector<int> originalMatchedB = integerVectors["heavyMatchedHardB"];
+    const CarrierUniquenessResult charmUniqueness = EnforceUniqueFinalHardCarrier(
+        integerVectors["heavyIsFinal"], integerVectors["heavyQc"],
+        integerVectors["heavyOriginC"], integerVectors["heavyMatchResolutionC"],
+        integerVectors["heavyMatchedHardC"]);
+    const CarrierUniquenessResult beautyUniqueness = EnforceUniqueFinalHardCarrier(
+        integerVectors["heavyIsFinal"], integerVectors["heavyQb"],
+        integerVectors["heavyOriginB"], integerVectors["heavyMatchResolutionB"],
+        integerVectors["heavyMatchedHardB"]);
+    hardConflictsC += charmUniqueness.conflictGroups;
+    hardConflictsB += beautyUniqueness.conflictGroups;
+    hardDemotionsC += charmUniqueness.demotedMatches;
+    hardDemotionsB += beautyUniqueness.demotedMatches;
+    for (std::size_t slot = 0; slot < integerVectors["heavyPdg"].size(); ++slot) {
+      if (integerVectors["heavyMatchResolutionC"][slot] ==
+          static_cast<int>(MatchResolution::kDuplicateHardCarrier))
+        integerVectors["heavyRejectedHardC"][slot] = originalMatchedC[slot];
+      if (integerVectors["heavyMatchResolutionB"][slot] ==
+          static_cast<int>(MatchResolution::kDuplicateHardCarrier))
+        integerVectors["heavyRejectedHardB"][slot] = originalMatchedB[slot];
+    }
+    multiHeavyC += RejectFinalMultiHeavyCarrier(
+        integerVectors["heavyIsFinal"], integerVectors["heavyQc"],
+        integerVectors["heavyOriginC"], integerVectors["heavyMatchResolutionC"],
+        integerVectors["heavyMatchedHardC"], integerVectors["heavyRejectedHardC"]);
+    multiHeavyB += RejectFinalMultiHeavyCarrier(
+        integerVectors["heavyIsFinal"], integerVectors["heavyQb"],
+        integerVectors["heavyOriginB"], integerVectors["heavyMatchResolutionB"],
+        integerVectors["heavyMatchedHardB"], integerVectors["heavyRejectedHardB"]);
+    std::vector<int> constituentParentFinal;
+    for (const int parent : integerVectors["heavyConstituentParentSlot"])
+      constituentParentFinal.push_back(integerVectors["heavyIsFinal"][
+          static_cast<std::size_t>(parent)]);
+    const CarrierUniquenessResult constituentUniqueness =
+        EnforceUniqueFinalConstituentHardCarrier(
+            integerVectors["heavyConstituentParentSlot"], constituentParentFinal,
+            integerVectors["heavyConstituentPdg"],
+            integerVectors["heavyConstituentOrigin"],
+            integerVectors["heavyConstituentMatchResolution"],
+            integerVectors["heavyConstituentMatchedHard"],
+            integerVectors["heavyConstituentRejectedHard"]);
+    allHeavyConflicts += constituentUniqueness.conflictGroups;
+    allHeavyDemotions += constituentUniqueness.demotedMatches;
     if (mode == "status_finality" && row == 0)
       std::fill(integerVectors["heavyIsFinal"].begin(),
                 integerVectors["heavyIsFinal"].end(), 0);
@@ -384,9 +486,26 @@ int main(int argc, char** argv) {
       doubleVectors["heavyPt"].pop_back();
     if (mode == "constituent_offsets" && row == 0)
       integerVectors["heavyConstituentOffsets"].back() += 1;
-    nCharm = beautyEvent ? 0 : 2;
-    nBeauty = beautyEvent ? 2 : 0;
-    nBc = 0; qcSum = 0; qbSum = 0;
+    if (mode == "mass_inside_tolerance" && row == 0)
+      doubleVectors["heavyE"].front() = 1.0 + 5e-9;
+    if (mode == "mass_outside_tolerance" && row == 0)
+      doubleVectors["heavyE"].front() = 1.0 + 2e-8;
+    if (mode == "component_outside_tolerance" && row == 0)
+      doubleVectors["heavyPx"].front() = 1e-5;
+    nCharm = 0; nBeauty = 0; nBc = 0; qcSum = 0; qbSum = 0;
+    for (std::size_t slot = 0; slot < integerVectors["heavyPdg"].size(); ++slot) {
+      const bool hasCharm = integerVectors["heavyNc"][slot] +
+          integerVectors["heavyNcbar"][slot] > 0;
+      const bool hasBeauty = integerVectors["heavyNb"][slot] +
+          integerVectors["heavyNbbar"][slot] > 0;
+      if (hasCharm && hasBeauty) ++nBc;
+      else if (hasCharm) ++nCharm;
+      else if (hasBeauty) ++nBeauty;
+      if (integerVectors["heavyIsFinal"][slot] != 0) {
+        qcSum += integerVectors["heavyQc"][slot];
+        qbSum += integerVectors["heavyQb"][slot];
+      }
+    }
     if (mode == "false_flag" && row == 1) conservation = 0;
     tree.Fill(); hMultiplicity.Fill(mult10, weight);
     hMultiplicityWide.Fill(mult40, weight); hProcess.Fill(processCode);
@@ -427,18 +546,29 @@ int main(int argc, char** argv) {
                 << std::scientific << std::setprecision(17);
   std::map<int, const SelectedState*> selectedStates;
   for (const auto& state : kSelectedStates) selectedStates.emplace(state.pdg, &state);
+  for (const int extra : {-5522, -4422, 443, 4422, 5522})
+    selectedStates.emplace(extra, nullptr);
   for (const auto& item : selectedStates) {
     if (mode == "missing_selected_stability" && item.first == 5322) continue;
-    const auto& state = *item.second;
-    pdg = state.pdg; particleName = std::string(state.name);
-    isMeson = state.kind == "meson" ? 1 : 0;
-    isBaryon = state.kind == "baryon" ? 1 : 0;
-    spinType = state.spin2j1; charge3 = state.charge3;
-    hasAnti = mode == "antiparticle_flag" ? 0 : 1;
-    if (mode == "registry_parity" && std::abs(pdg) == 5322) {
-      particleName = pdg > 0 ? "Invented5322" : "Invented5322bar";
+    const SelectedState* state = item.second;
+    pdg = item.first;
+    isMeson = state ? (state->kind == "meson" ? 1 : 0) : (pdg == 443 ? 1 : 0);
+    isBaryon = isMeson == 0 ? 1 : 0;
+    spinType = state ? state->spin2j1 : (pdg == 443 ? 3 : 2);
+    charge3 = state ? state->charge3
+        : (std::abs(pdg) == 4422 ? (pdg > 0 ? 6 : -6) : 0);
+    if (pdg == 411) particleName = "D+";
+    else if (pdg == -411) particleName = "D-";
+    else if (state) particleName = std::string(state->name);
+    else if (pdg == 443) particleName = "J/psi";
+    else if (pdg == 4422) particleName = "Xi_cc++";
+    else if (pdg == -4422) particleName = "Xi_ccbar--";
+    else if (pdg == 5522) particleName = "Xi_bb0";
+    else particleName = "Xi_bbbar0";
+    if (mode == "empty_audit_name" && pdg == 411) particleName.clear();
+    hasAnti = pdg == 443 ? 0 : (mode == "antiparticle_flag" ? 0 : 1);
+    if (mode == "selected_quantum_mismatch" && std::abs(pdg) == 5322) {
       spinType = 999;
-      charge3 = pdg > 0 ? 999 : -999;
     }
     const auto content = DecodeHeavyContent(pdg, isMeson != 0, isBaryon != 0);
     nc = content.nc; ncbar = content.ncbar; nb = content.nb; nbbar = content.nbbar;
@@ -447,7 +577,7 @@ int main(int argc, char** argv) {
     strangeness = content.strangeness();
     openHeavy = (qc != 0 || qb != 0) ? 1 : 0;
     hiddenHeavy = (content.hiddenCharm() || content.hiddenBeauty()) ? 1 : 0;
-    central = 1;
+    central = state ? 1 : 0;
     stability.Fill();
     stabilityText << pdg << '\t' << std::quoted(particleName) << '\t'
                   << isHadron << '\t' << isMeson << '\t' << isBaryon << '\t'
@@ -548,6 +678,38 @@ int main(int argc, char** argv) {
   mu["successful_events"] = mode == "accounting" ? 2 : 3;
   mu["failed_attempts"] = 0; mu["tree_entries"] = 3;
   mu["effective_settings_entries"] = settingValues.size(); mu["peak_rss_kib"] = 1;
+  mu["duplicate_hard_carrier_conflict_groups_charm"] = hardConflictsC;
+  mu["duplicate_hard_carrier_conflict_groups_beauty"] = hardConflictsB;
+  mu["duplicate_hard_carrier_demotions_charm"] = hardDemotionsC;
+  mu["duplicate_hard_carrier_demotions_beauty"] = hardDemotionsB;
+  mu["multi_heavy_constituent_rejections_charm"] = multiHeavyC;
+  mu["multi_heavy_constituent_rejections_beauty"] = multiHeavyB;
+  mu["primary_all_heavy_conflict_groups"] = allHeavyConflicts;
+  mu["primary_all_heavy_demotions"] = allHeavyDemotions;
+  const std::map<std::string, std::string> wrongCounterSource{
+      {"duplicate_hard_carrier_conflict_groups_charm",
+       "duplicate_hard_carrier_conflict_groups_beauty"},
+      {"duplicate_hard_carrier_conflict_groups_beauty",
+       "duplicate_hard_carrier_conflict_groups_charm"},
+      {"duplicate_hard_carrier_demotions_charm",
+       "duplicate_hard_carrier_demotions_beauty"},
+      {"duplicate_hard_carrier_demotions_beauty",
+       "duplicate_hard_carrier_demotions_charm"},
+      {"multi_heavy_constituent_rejections_charm",
+       "multi_heavy_constituent_rejections_beauty"},
+      {"multi_heavy_constituent_rejections_beauty",
+       "multi_heavy_constituent_rejections_charm"},
+      {"primary_all_heavy_conflict_groups", "primary_all_heavy_demotions"},
+      {"primary_all_heavy_demotions", "primary_all_heavy_conflict_groups"}};
+  for (const auto& counter : wrongCounterSource) {
+    const std::string& name = counter.first;
+    if (mode == "counter_increment_" + name) ++mu[name];
+    if (mode == "counter_decrement_" + name) --mu[name];
+    if (mode == "counter_zero_" + name) mu[name] = 0;
+    if (mode == "counter_wrong_" + name) mu[name] = mu[counter.second];
+  }
+  if (mode == "true_failure_counter")
+    mu["primary_all_heavy_match_failures"] = 1;
   ml["start_unix_seconds"] = 1; ml["end_unix_seconds"] = 2; ml["elapsed_seconds"] = 1;
   md["sum_weights"] = 3.0; md["sum_weights2"] = 3.0; md["phase_space_pthat_min"] = 2.0;
   md["pythia_sigma_gen_mb"] = 1.0; md["pythia_sigma_err_mb"] = 0.0;
@@ -646,6 +808,9 @@ class SubmissionContract(unittest.TestCase):
         result = self.make_and_validate("valid")
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertIn("RAW_VALIDATION_PASS", result.stdout)
+        self.assertIn('if (pdg == 411) particleName = "D+";',
+                      self.fixture_source)
+        self.assertIn('{411, "dplus", "Dplus"', self.generated_header)
 
     def test_validator_rejects_schema_counterfeits_and_branch_mutations(self):
         diagnostics = {
@@ -699,8 +864,6 @@ class SubmissionContract(unittest.TestCase):
             "missing_selected_stability": "omits selected signed PDG",
             "status_finality": "heavy finality/daughter invariant failed",
             "bad_daughter": "heavy finality/daughter invariant failed",
-            "duplicate_bottom": "hard root/bottom copy identity is not unique",
-            "registry_parity": "heavy-stability selected-registry parity failed",
             "antiparticle_flag": "heavy-stability selected antiparticle invariant failed",
         }
         for mode, diagnostic in diagnostics.items():
@@ -708,6 +871,103 @@ class SubmissionContract(unittest.TestCase):
                 result = self.make_and_validate(mode)
                 self.assertNotEqual(result.returncode, 0, result.stdout)
                 self.assertIn(diagnostic, result.stdout)
+
+    def test_validator_rejects_empty_audit_name_with_consistent_digest(self):
+        result = self.make_and_validate("empty_audit_name")
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("empty heavy-stability PYTHIA name", result.stdout)
+        self.assertNotIn("tree/canonical digest mismatch", result.stdout)
+
+    def test_validator_rejects_selected_quantum_mismatch_independent_of_name(self):
+        result = self.make_and_validate("selected_quantum_mismatch")
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("heavy-stability selected-registry parity failed", result.stdout)
+        self.assertNotIn("empty heavy-stability PYTHIA name", result.stdout)
+
+    def test_validator_accepts_changed_and_shared_bottom_copy_endpoints(self):
+        for mode in ("changed_bottom_valid", "duplicate_bottom_valid"):
+            with self.subTest(mode=mode):
+                result = self.make_and_validate(mode)
+                self.assertEqual(result.returncode, 0, result.stdout)
+                self.assertIn("RAW_VALIDATION_PASS", result.stdout)
+
+    def test_validator_rejects_invalid_changed_bottom_copy_endpoints(self):
+        diagnostics = {
+            "bottom_wrong_sign": "lacks the required signed heavy constituent",
+            "bottom_no_constituent": "lacks the required signed heavy constituent",
+            "bottom_no_audit": "is absent from the heavy-stability audit",
+        }
+        for mode, diagnostic in diagnostics.items():
+            with self.subTest(mode=mode):
+                result = self.make_and_validate(mode)
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn(diagnostic, result.stdout)
+
+    def test_validator_rejects_duplicate_hard_root_identity(self):
+        result = self.make_and_validate("duplicate_root")
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("hard root identity is not unique", result.stdout)
+
+    def test_validator_accepts_mass_roundoff_inside_dedicated_tolerance(self):
+        result = self.make_and_validate("mass_inside_tolerance")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("RAW_VALIDATION_PASS", result.stdout)
+
+    def test_validator_rejects_mass_and_component_inconsistency(self):
+        diagnostics = {
+            "mass_outside_tolerance": "heavy mSave/mCalc inconsistency",
+            "component_outside_tolerance": "heavy pT component inconsistency",
+        }
+        for mode, diagnostic in diagnostics.items():
+            with self.subTest(mode=mode):
+                result = self.make_and_validate(mode)
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn(diagnostic, result.stdout)
+
+    def test_validator_accepts_exact_nonzero_resolution_counters(self):
+        result = self.make_and_validate("valid_resolutions")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("RAW_VALIDATION_PASS", result.stdout)
+
+    @staticmethod
+    def resolution_counter_names():
+        return (
+            "duplicate_hard_carrier_conflict_groups_charm",
+            "duplicate_hard_carrier_conflict_groups_beauty",
+            "duplicate_hard_carrier_demotions_charm",
+            "duplicate_hard_carrier_demotions_beauty",
+            "multi_heavy_constituent_rejections_charm",
+            "multi_heavy_constituent_rejections_beauty",
+            "primary_all_heavy_conflict_groups",
+            "primary_all_heavy_demotions",
+        )
+
+    def assert_resolution_counter_mutations_rejected(self, operation):
+        for name in self.resolution_counter_names():
+            with self.subTest(operation=operation, counter=name):
+                result = self.make_and_validate(
+                    "counter_{}_{}".format(operation, name))
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn("resolution counter mismatch {}".format(name),
+                              result.stdout)
+
+    def test_validator_rejects_each_incremented_resolution_counter(self):
+        self.assert_resolution_counter_mutations_rejected("increment")
+
+    def test_validator_rejects_each_decremented_resolution_counter(self):
+        self.assert_resolution_counter_mutations_rejected("decrement")
+
+    def test_validator_rejects_each_zeroed_resolution_counter(self):
+        self.assert_resolution_counter_mutations_rejected("zero")
+
+    def test_validator_rejects_each_wrong_family_resolution_counter(self):
+        self.assert_resolution_counter_mutations_rejected("wrong")
+
+    def test_validator_still_rejects_nonzero_true_failure_counter(self):
+        result = self.make_and_validate("true_failure_counter")
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("nonzero validity counter primary_all_heavy_match_failures",
+                      result.stdout)
 
     def test_complete_accepted_campaign_is_inventory_not_3000_new_attempts(self):
         campaign, study, tunes = self.submit.campaign_inputs()

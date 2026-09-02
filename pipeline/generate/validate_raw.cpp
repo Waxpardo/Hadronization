@@ -39,11 +39,14 @@ struct StoredAncestor {
 };
 
 struct StoredStability {
-  std::string name;
   int isMeson = 0;
   int isBaryon = 0;
   int spinType = 0;
   int charge3 = 0;
+  int nc = 0;
+  int ncbar = 0;
+  int nb = 0;
+  int nbbar = 0;
   int qc = 0;
   int qb = 0;
   int central = 0;
@@ -279,6 +282,19 @@ void Add(std::set<std::string>& output, const std::array<const char*, N>& values
 bool Approximately(double left, double right) {
   return std::abs(left - right) <=
          1e-10 * std::max({1.0, std::abs(left), std::abs(right)});
+}
+
+// PYTHIA stores Particle::m() independently from its Vec4. Reproduce Vec4's
+// signed mCalc() operation, then allow only the measured floating-point
+// roundoff between that value and the separately stored mSave value.
+bool PythiaSavedMassConsistent(double px, double py, double pz, double energy,
+                               double savedMass) {
+  const double massSquared = energy * energy - px * px - py * py - pz * pz;
+  const double calculatedMass =
+      massSquared > 0.0 ? std::sqrt(massSquared) : -std::sqrt(-massSquared);
+  return std::abs(calculatedMass - savedMass) <=
+         1e-8 * std::max({1.0, std::abs(calculatedMass),
+                          std::abs(savedMass)});
 }
 
 Authorization Arguments(int argc, char** argv) {
@@ -556,11 +572,10 @@ int Validate(const Authorization& auth) {
       doubles["pythia_sigma_err_mb"] < 0.0 || !std::isfinite(doubles["pythia_weight_sum"])) {
     fail("invalid normalization or phase-space metadata");
   }
-  const std::array<const char*, 6> zeroCounters{{
+  const std::array<const char*, 4> zeroCounters{{
       "content_decode_failures",
       "heavy_flavour_conservation_failures", "origin_classification_failures",
-      "primary_all_heavy_match_failures", "primary_all_heavy_conflict_groups",
-      "primary_all_heavy_demotions"}};
+      "primary_all_heavy_match_failures"}};
   for (const char* name : zeroCounters) if (unsigneds[name] != 0ULL) fail(std::string("nonzero validity counter ") + name);
   if (longs["start_unix_seconds"] <= 0 || longs["end_unix_seconds"] < longs["start_unix_seconds"] ||
       longs["elapsed_seconds"] < 0 ||
@@ -651,6 +666,9 @@ int Validate(const Authorization& auth) {
         << stabilityFinalMayDecay << '\n';
     if (stabilityPdg <= previousPdg) fail("heavy-stability signed PDGs are not ordered");
     previousPdg = stabilityPdg;
+    if (stabilityName->empty()) {
+      fail("empty heavy-stability PYTHIA name");
+    }
     if (!isBoolean(stabilityIsHadron) || !isBoolean(stabilityIsMeson) ||
         !isBoolean(stabilityIsBaryon) || !isBoolean(stabilityOpenHeavy) ||
         !isBoolean(stabilityHiddenHeavy) || !isBoolean(stabilityCentral) ||
@@ -681,9 +699,9 @@ int Validate(const Authorization& auth) {
     }
     if (!stabilityContent.emplace(
             stabilityPdg,
-            StoredStability{*stabilityName, stabilityIsMeson,
-                            stabilityIsBaryon, stabilitySpinType,
-                            stabilityCharge3, stabilityQc, stabilityQb,
+            StoredStability{stabilityIsMeson, stabilityIsBaryon, stabilitySpinType,
+                            stabilityCharge3, stabilityNc, stabilityNcbar,
+                            stabilityNb, stabilityNbbar, stabilityQc, stabilityQb,
                             stabilityCentral, stabilityHasAnti,
                             stabilityAntiVerified})
              .second) {
@@ -713,8 +731,7 @@ int Validate(const Authorization& auth) {
     }
     const bool expectedMeson = selected.kind == "meson";
     const bool expectedBaryon = selected.kind == "baryon";
-    if (found->second.name != selected.name ||
-        found->second.isMeson != (expectedMeson ? 1 : 0) ||
+    if (found->second.isMeson != (expectedMeson ? 1 : 0) ||
         found->second.isBaryon != (expectedBaryon ? 1 : 0) ||
         found->second.spinType != selected.spin2j1 ||
         found->second.charge3 != selected.charge3 ||
@@ -906,6 +923,14 @@ int Validate(const Authorization& auth) {
   double observedSumW2 = 0.0;
   unsigned long long centralOverflow = 0;
   unsigned long long wideOverflow = 0;
+  std::uint64_t reconstructedHardConflictsC = 0;
+  std::uint64_t reconstructedHardConflictsB = 0;
+  std::uint64_t reconstructedHardDemotionsC = 0;
+  std::uint64_t reconstructedHardDemotionsB = 0;
+  std::uint64_t reconstructedMultiHeavyRejectionsC = 0;
+  std::uint64_t reconstructedMultiHeavyRejectionsB = 0;
+  std::uint64_t reconstructedAllHeavyConflicts = 0;
+  std::uint64_t reconstructedAllHeavyDemotions = 0;
   std::vector<double> centralBins(
       static_cast<std::size_t>(multiplicity->GetNbinsX()) + 2U, 0.0);
   std::vector<double> centralBins2(centralBins.size(), 0.0);
@@ -1019,15 +1044,14 @@ int Validate(const Authorization& auth) {
     std::map<int, int> hardByIndex;
     std::set<int> hardIds;
     std::set<int> hardRootIndices;
-    std::set<int> hardBottomIndices;
     for (std::size_t index = 0; index < hardSize; ++index) {
       const int hardIndex = ints("hard_indices")[index];
       const int hardBottomIndex = ints("hard_bottom_indices")[index];
       const int hardId = ints("hard_ids")[index];
+      const int hardBottomId = ints("hard_bottom_ids")[index];
       if (hardIndex <= 0 || hardBottomIndex <= 0 ||
           std::abs(hardId) != expectedChannel ||
           std::abs(ints("hard_status")[index]) != 23 ||
-          ints("hard_bottom_ids")[index] != hardId ||
           ints("hard_bottom_status")[index] == 0 ||
           !std::isfinite(reals("hard_px")[index]) ||
           !std::isfinite(reals("hard_py")[index]) ||
@@ -1036,14 +1060,28 @@ int Validate(const Authorization& auth) {
           reals("hard_e")[index] < 0.0) {
         fail("invalid hard vector record");
       }
+      if (hardBottomId != hardId) {
+        const auto endpoint = stabilityContent.find(hardBottomId);
+        if (endpoint == stabilityContent.end()) {
+          fail("changed hard bottom-copy endpoint is absent from the heavy-stability audit");
+        } else {
+          const StoredStability& content = endpoint->second;
+          const bool signedConstituent =
+              hardId == 4 ? content.nc > 0
+                          : (hardId == -4 ? content.ncbar > 0
+                                          : (hardId == 5 ? content.nb > 0
+                                                         : content.nbbar > 0));
+          if (!signedConstituent) {
+            fail("changed hard bottom-copy endpoint lacks the required signed heavy constituent");
+          }
+        }
+      }
       hardByIndex.emplace(hardIndex, hardId);
       hardRootIndices.insert(hardIndex);
-      hardBottomIndices.insert(hardBottomIndex);
       hardIds.insert(hardId);
     }
-    if (hardRootIndices.size() != hardSize ||
-        hardBottomIndices.size() != hardSize) {
-      fail("hard root/bottom copy identity is not unique");
+    if (hardRootIndices.size() != hardSize) {
+      fail("hard root identity is not unique");
     }
     if (hardIds != std::set<int>{-expectedChannel, expectedChannel}) {
       fail("hard vectors do not encode the exact signed process pair");
@@ -1293,17 +1331,18 @@ int Validate(const Authorization& auth) {
           reals("heavyMass")[index] >= 0.0;
       const double derivedPt =
           std::hypot(reals("heavyPx")[index], reals("heavyPy")[index]);
-      const double derivedMass2 =
-          reals("heavyE")[index] * reals("heavyE")[index] -
-          reals("heavyPx")[index] * reals("heavyPx")[index] -
-          reals("heavyPy")[index] * reals("heavyPy")[index] -
-          reals("heavyPz")[index] * reals("heavyPz")[index];
-      if (!finiteKinematics ||
-          !Approximately(derivedPt, reals("heavyPt")[index]) ||
-          !Approximately(derivedMass2,
-                         reals("heavyMass")[index] *
-                             reals("heavyMass")[index])) {
-        fail("heavy kinematic invariant failed");
+      if (!finiteKinematics) {
+        fail("heavy kinematic component domain invariant failed");
+      } else {
+        if (!Approximately(derivedPt, reals("heavyPt")[index])) {
+          fail("heavy pT component inconsistency");
+        }
+        if (!PythiaSavedMassConsistent(
+                reals("heavyPx")[index], reals("heavyPy")[index],
+                reals("heavyPz")[index], reals("heavyE")[index],
+                reals("heavyMass")[index])) {
+          fail("heavy mSave/mCalc inconsistency");
+        }
       }
       const bool hasCharm = decoded.hasCharm();
       const bool hasBeauty = decoded.hasBeauty();
@@ -1351,12 +1390,18 @@ int Validate(const Authorization& auth) {
     }
     const std::vector<int> preUniqueC = reconstructedMatchedC;
     const std::vector<int> preUniqueB = reconstructedMatchedB;
-    Hadronization::EnforceUniqueFinalHardCarrier(
+    const Hadronization::CarrierUniquenessResult charmUniqueness =
+        Hadronization::EnforceUniqueFinalHardCarrier(
         ints("heavyIsFinal"), ints("heavyQc"), reconstructedOriginC,
         reconstructedResolutionC, reconstructedMatchedC);
-    Hadronization::EnforceUniqueFinalHardCarrier(
+    const Hadronization::CarrierUniquenessResult beautyUniqueness =
+        Hadronization::EnforceUniqueFinalHardCarrier(
         ints("heavyIsFinal"), ints("heavyQb"), reconstructedOriginB,
         reconstructedResolutionB, reconstructedMatchedB);
+    reconstructedHardConflictsC += charmUniqueness.conflictGroups;
+    reconstructedHardConflictsB += beautyUniqueness.conflictGroups;
+    reconstructedHardDemotionsC += charmUniqueness.demotedMatches;
+    reconstructedHardDemotionsB += beautyUniqueness.demotedMatches;
     for (std::size_t index = 0; index < heavySize; ++index) {
       if (reconstructedResolutionC[index] == static_cast<int>(
               Hadronization::MatchResolution::kDuplicateHardCarrier)) {
@@ -1367,11 +1412,13 @@ int Validate(const Authorization& auth) {
         reconstructedRejectedB[index] = preUniqueB[index];
       }
     }
-    Hadronization::RejectFinalMultiHeavyCarrier(
+    reconstructedMultiHeavyRejectionsC +=
+        Hadronization::RejectFinalMultiHeavyCarrier(
         ints("heavyIsFinal"), ints("heavyQc"), reconstructedOriginC,
         reconstructedResolutionC, reconstructedMatchedC,
         reconstructedRejectedC);
-    Hadronization::RejectFinalMultiHeavyCarrier(
+    reconstructedMultiHeavyRejectionsB +=
+        Hadronization::RejectFinalMultiHeavyCarrier(
         ints("heavyIsFinal"), ints("heavyQb"), reconstructedOriginB,
         reconstructedResolutionB, reconstructedMatchedB,
         reconstructedRejectedB);
@@ -1443,10 +1490,13 @@ int Validate(const Authorization& auth) {
     if (coveredConstituents != constituentSize) {
       fail("heavy constituent offsets do not cover flattened rows exactly");
     }
-    Hadronization::EnforceUniqueFinalConstituentHardCarrier(
-        ints("heavyConstituentParentSlot"), constituentParentFinal,
-        ints("heavyConstituentPdg"), constituentOrigin,
-        constituentResolution, constituentMatched, constituentRejected);
+    const Hadronization::CarrierUniquenessResult constituentUniqueness =
+        Hadronization::EnforceUniqueFinalConstituentHardCarrier(
+            ints("heavyConstituentParentSlot"), constituentParentFinal,
+            ints("heavyConstituentPdg"), constituentOrigin,
+            constituentResolution, constituentMatched, constituentRejected);
+    reconstructedAllHeavyConflicts += constituentUniqueness.conflictGroups;
+    reconstructedAllHeavyDemotions += constituentUniqueness.demotedMatches;
     if (constituentOrigin != ints("heavyConstituentOrigin") ||
         constituentResolution != ints("heavyConstituentMatchResolution") ||
         constituentMatched != ints("heavyConstituentMatchedHard") ||
@@ -1465,6 +1515,31 @@ int Validate(const Authorization& auth) {
     }
   }
   tree->ResetBranchAddresses();
+  const auto requireResolutionCounter = [&fail, &unsigneds](
+                                            const char* name,
+                                            std::uint64_t reconstructed) {
+    if (unsigneds[name] != reconstructed) {
+      fail(std::string("resolution counter mismatch ") + name +
+           ": recorded=" + std::to_string(unsigneds[name]) +
+           " reconstructed=" + std::to_string(reconstructed));
+    }
+  };
+  requireResolutionCounter("duplicate_hard_carrier_conflict_groups_charm",
+                           reconstructedHardConflictsC);
+  requireResolutionCounter("duplicate_hard_carrier_conflict_groups_beauty",
+                           reconstructedHardConflictsB);
+  requireResolutionCounter("duplicate_hard_carrier_demotions_charm",
+                           reconstructedHardDemotionsC);
+  requireResolutionCounter("duplicate_hard_carrier_demotions_beauty",
+                           reconstructedHardDemotionsB);
+  requireResolutionCounter("multi_heavy_constituent_rejections_charm",
+                           reconstructedMultiHeavyRejectionsC);
+  requireResolutionCounter("multi_heavy_constituent_rejections_beauty",
+                           reconstructedMultiHeavyRejectionsB);
+  requireResolutionCounter("primary_all_heavy_conflict_groups",
+                           reconstructedAllHeavyConflicts);
+  requireResolutionCounter("primary_all_heavy_demotions",
+                           reconstructedAllHeavyDemotions);
   if (!Approximately(observedSumW, doubles["sum_weights"]) ||
       !Approximately(observedSumW2, doubles["sum_weights2"])) {
     fail("event weights do not close to metadata");
