@@ -51,6 +51,101 @@ def command_output(command, arguments):
     return result.stdout.strip().splitlines()[0] if result.returncode == 0 and result.stdout.strip() else None
 
 
+def required_command_output(command, argument, environment, label):
+    try:
+        result = subprocess.run(
+            [command, argument], text=True, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, env=environment, timeout=15)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise ValueError("{} cannot execute {}: {}".format(
+            label, argument, error)) from error
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    if result.returncode != 0:
+        detail = stderr or stdout or "no diagnostic"
+        raise ValueError("{} {} failed with status {}: {}".format(
+            label, argument, result.returncode, detail))
+    if stderr:
+        raise ValueError("{} {} wrote a diagnostic to stderr: {}".format(
+            label, argument, stderr))
+    if not stdout:
+        raise ValueError("{} {} returned empty output".format(label, argument))
+    if "\0" in stdout:
+        raise ValueError("{} {} returned malformed output".format(label, argument))
+    return stdout
+
+
+def config_flag_tokens(output, label):
+    if "\n" in output or "\r" in output:
+        raise ValueError("{} returned multiline flag output".format(label))
+    try:
+        tokens = shlex.split(output)
+    except ValueError as error:
+        raise ValueError("{} returned malformed flags: {}".format(label, error)) from error
+    if not tokens:
+        raise ValueError("{} returned empty flags".format(label))
+    operand_options = {"-I", "-L", "-isystem", "-iquote", "-idirafter",
+                       "-F", "-framework", "-Xlinker"}
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if any(ord(character) < 32 or ord(character) == 127 for character in token):
+            raise ValueError("{} returned a malformed flag token".format(label))
+        if token in operand_options:
+            if index + 1 == len(tokens):
+                raise ValueError("{} returned {} without an operand".format(label, token))
+            operand = tokens[index + 1]
+            if token != "-Xlinker" and operand.startswith("-"):
+                raise ValueError("{} returned {} without a usable operand".format(
+                    label, token))
+            index += 2
+            continue
+        if not token.startswith("-") or token in {"-", "--"}:
+            raise ValueError("{} returned a non-flag token: {}".format(label, token))
+        index += 1
+    return tokens
+
+
+def flag_directories(tokens, options):
+    directories = []
+    for index, token in enumerate(tokens):
+        for option in options:
+            if token == option and index + 1 < len(tokens):
+                directories.append(tokens[index + 1])
+            elif token.startswith(option) and token != option:
+                directories.append(token[len(option):])
+    return directories
+
+
+def require_flag_directory(tokens, options, expected, label):
+    expected = expected.resolve()
+    matches = []
+    for value in flag_directories(tokens, options):
+        path = Path(value)
+        if path.is_absolute() and path.resolve() == expected:
+            matches.append(value)
+    if not matches:
+        raise ValueError("{} does not name the declared directory {}".format(
+            label, expected))
+
+
+def pythia_header_version(header, expected):
+    try:
+        text = header.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as error:
+        raise ValueError("PYTHIA header is unreadable: {}: {}".format(
+            header, error)) from error
+    dotted = re.findall(
+        r"(?m)^\s*#\s*define\s+PYTHIA_VERSION\s+([0-9]+\.[0-9]+)\s*$", text)
+    integer = re.findall(
+        r"(?m)^\s*#\s*define\s+PYTHIA_VERSION_INTEGER\s+([0-9]+)\s*$", text)
+    expected_integer = expected.replace(".", "")
+    if dotted != [expected] or integer != [expected_integer]:
+        raise ValueError(
+            "PYTHIA header version mismatch: expected {} and {}, found {} and {}".format(
+                expected, expected_integer, dotted, integer))
+
+
 def existing_executable(value, fallback=None):
     candidate = value or fallback
     if not candidate:
@@ -112,21 +207,63 @@ def resolve(values=None, base_environment=None, require_root=False,
     pythia_config = existing_executable(
         values.get("PYTHIA8_CONFIG"),
         str(pythia_prefix / "bin/pythia8-config") if pythia_prefix else shutil.which("pythia8-config"))
+    pythia_cxxflags = []
+    pythia_libs = []
     if pythia_config:
-        if pythia_prefix is None:
-            prefix = command_output(pythia_config, ["--prefix"])
-            pythia_prefix = Path(prefix).resolve() if prefix else Path(pythia_config).parents[1]
-        reported = command_output(pythia_config, ["--version"])
         expected = values.get("PYTHIA8_VERSION", "8.317")
+        if not re.fullmatch(r"[0-9]+\.[0-9]+", expected):
+            raise ValueError("PYTHIA expected version is malformed: {}".format(expected))
+        label = "PYTHIA runtime configuration"
+        reported = required_command_output(
+            pythia_config, "--version", base, label)
+        reported_prefix_text = required_command_output(
+            pythia_config, "--prefix", base, label)
+        if "\n" in reported or "\r" in reported or not re.fullmatch(
+                r"[0-9]+\.[0-9]+", reported):
+            raise ValueError("{} --version returned malformed output: {}".format(
+                label, reported))
+        reported_prefix = Path(reported_prefix_text)
+        if ("\n" in reported_prefix_text or "\r" in reported_prefix_text or
+                not reported_prefix.is_absolute()):
+            raise ValueError("{} --prefix returned a non-absolute path: {}".format(
+                label, reported_prefix_text))
+        reported_prefix = reported_prefix.resolve()
+        if pythia_prefix is None:
+            pythia_prefix = reported_prefix
+        elif reported_prefix != pythia_prefix:
+            raise ValueError("{} prefix mismatch: declared {}, reported {}".format(
+                label, pythia_prefix, reported_prefix))
         if verify and reported != expected:
-            raise ValueError("PYTHIA version mismatch: expected {}, reported {}".format(expected, reported))
+            raise ValueError("PYTHIA version mismatch: expected {}, reported {}".format(
+                expected, reported))
+        cxxflags_output = required_command_output(
+            pythia_config, "--cxxflags", base, label)
+        libs_output = required_command_output(
+            pythia_config, "--libs", base, label)
+        pythia_cxxflags = config_flag_tokens(
+            cxxflags_output, "PYTHIA runtime configuration --cxxflags")
+        pythia_libs = config_flag_tokens(
+            libs_output, "PYTHIA runtime configuration --libs")
         data = Path(values.get("PYTHIA8DATA", str(pythia_prefix / "share/Pythia8/xmldoc"))).resolve()
+        header = pythia_prefix / "include/Pythia8/Pythia.h"
         libraries = [pythia_prefix / "lib/libpythia8.so",
                      pythia_prefix / "lib/libpythia8.dylib"]
+        if verify and not header.is_file():
+            raise ValueError("PYTHIA header is absent: {}".format(header))
+        if verify:
+            pythia_header_version(header, expected)
         if verify and not (data / "Index.xml").is_file():
             raise ValueError("PYTHIA8DATA has no Index.xml: {}".format(data))
-        if verify and not any(path.exists() for path in libraries):
+        if verify and not any(path.is_file() for path in libraries):
             raise ValueError("PYTHIA shared library is absent under {}".format(pythia_prefix / "lib"))
+        if verify:
+            require_flag_directory(
+                pythia_cxxflags, ("-isystem", "-I"),
+                pythia_prefix / "include", "PYTHIA --cxxflags")
+            require_flag_directory(
+                pythia_libs, ("-L",), pythia_prefix / "lib", "PYTHIA --libs")
+            if "-lpythia8" not in pythia_libs:
+                raise ValueError("PYTHIA --libs does not contain -lpythia8")
         environment.update({
             "PYTHIA8": str(pythia_prefix), "PYTHIA8_PREFIX": str(pythia_prefix),
             "PYTHIA8_CONFIG": pythia_config, "PYTHIA8DATA": str(data),
@@ -184,7 +321,8 @@ def resolve(values=None, base_environment=None, require_root=False,
         environment["ROOT_DYN_PATH"] = prepend(base.get("ROOT_DYN_PATH", ""), [root_lib])
     diagnostics.append("CXX={}".format(command_output(cxx, ["--version"]) or cxx))
     return {"environment": environment, "diagnostics": diagnostics,
-            "site_configured": bool(values)}
+            "site_configured": bool(values),
+            "pythia_cxxflags": pythia_cxxflags, "pythia_libs": pythia_libs}
 
 
 def main():

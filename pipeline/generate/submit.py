@@ -455,12 +455,11 @@ def compile_producer(runtime, output):
     environment.update(runtime["environment"])
     cxx = environment["CXX"]
     root_config = environment["ROOT_CONFIG"]
-    pythia_config = environment["PYTHIA8_CONFIG"]
     root_flags = command_flags(root_config, ["--cflags"], environment)
     root_libdir = command_flags(root_config, ["--libdir"], environment)
     root_aux = command_flags(root_config, ["--auxlibs"], environment)
-    pythia_flags = command_flags(pythia_config, ["--cxxflags"], environment)
-    pythia_libs = command_flags(pythia_config, ["--libs"], environment)
+    pythia_flags = list(runtime["pythia_cxxflags"])
+    pythia_libs = list(runtime["pythia_libs"])
     output.parent.mkdir(parents=True, exist_ok=True)
     command = ([cxx, "-O2", "-std=c++17", "-Wall", "-Wextra", "-Wpedantic",
                 str(ROOT / "pipeline/generate/producer.cpp"),
