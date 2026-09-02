@@ -42,6 +42,9 @@ int main() {
       state->status != "pair_analysis" || FindSelectedState(999999)) return 7;
   if (IsPairAnalysisEligible(5212) || !IsPairAnalysisEligible(521)) return 8;
   if (TuneOrdinal("MONASH") != 0 || TuneOrdinal("CLOSEPACKING") != 2 ||
+      TuneOrdinal("close_packing") != 2 ||
+      FindTuneDefinition("junctions")->name != "JUNCTIONS" ||
+      TuneCardBasename(kTuneDefinitions[2]) != "close_packing.cmnd" ||
       kTuneDefinitions[2].card != "config/tunes/close_packing.cmnd") return 9;
   std::map<int, int> pdg{{1, 4}, {2, 4}, {3, 421}};
   std::map<int, int> status{{1, -23}, {2, -51}, {3, 83}};

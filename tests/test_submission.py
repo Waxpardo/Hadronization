@@ -531,6 +531,74 @@ class SubmissionContract(unittest.TestCase):
             self.assertEqual(rows, [])
             self.assertEqual(set(measured["statuses"].values()), {"accepted_missing_local"})
 
+    def test_campaign_tune_ordinals_are_bijective_with_generated_order(self):
+        campaign, study, tunes = self.submit.campaign_inputs()
+        mutated = json.loads(json.dumps(campaign))
+        mutated["seed"]["tune_ordinals"]["MONASH"] = 2
+        with self.assertRaisesRegex(ValueError, "ordinal map.*bijective"):
+            self.submit.validate_campaign_tunes(mutated, tunes)
+        source = (ROOT / "pipeline/generate/submit.py").read_text(encoding="utf-8")
+        producer = (ROOT / "pipeline/generate/producer.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("TUNE_MODES", source)
+        self.assertIn('tune_map[args.tune]["id"]', source)
+        self.assertNotIn('if (tune == "MONASH")', producer)
+
+    def test_accepted_inventory_distinguishes_size_observation_from_sha_verification(self):
+        campaign, study, tunes = self.submit.campaign_inputs()
+        campaign = dict(campaign)
+        campaign["logical_jobs_per_tune"] = 1
+        tunes = tunes[:1]
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            raw = base / "raw"
+            stable = raw / "MONASH/hf_MONASH_job000.root"
+            manifest = base / "manifest.jsonl"
+            accepted = {
+                "tune": "MONASH", "logical_id": 0,
+                "raw_storage_key": "MONASH/hf_MONASH_job000.root",
+                "bytes": 4,
+                "raw_sha256": self.submit.digest_bytes(b"GOOD"),
+            }
+            manifest.write_text(
+                json.dumps(accepted, sort_keys=True, separators=(",", ":")) + "\n",
+                encoding="utf-8")
+            attempts = base / "attempts.csv"
+            attempts.write_text(
+                "tune,logical_id,attempt,seed,outcome,raw_storage_key,evidence_status\n",
+                encoding="utf-8")
+
+            missing = self.submit.inventory(
+                campaign, tunes, manifest, attempts, raw, base / "work")
+            self.assertEqual(missing["statuses"][("MONASH", 0)],
+                             "accepted_missing_local")
+            stable.parent.mkdir(parents=True)
+            stable.write_bytes(b"GOOD")
+            observed = self.submit.inventory(
+                campaign, tunes, manifest, attempts, raw, base / "work")
+            self.assertEqual(observed["statuses"][("MONASH", 0)],
+                             "accepted_size_observed_sha256_unverified")
+            verified = self.submit.inventory(
+                campaign, tunes, manifest, attempts, raw, base / "work", True)
+            self.assertEqual(verified["statuses"][("MONASH", 0)],
+                             "accepted_sha256_verified")
+            stable.write_bytes(b"BAD!")
+            wrong_hash = self.submit.inventory(
+                campaign, tunes, manifest, attempts, raw, base / "work", True)
+            self.assertEqual(wrong_hash["statuses"][("MONASH", 0)],
+                             "accepted_sha256_mismatch")
+            self.assertRegex(wrong_hash["errors"][0], "SHA-256 mismatch")
+            stable.write_bytes(b"BAD")
+            wrong_size = self.submit.inventory(
+                campaign, tunes, manifest, attempts, raw, base / "work", True)
+            self.assertEqual(wrong_size["statuses"][("MONASH", 0)],
+                             "accepted_size_or_type_mismatch")
+            stable.unlink()
+            stable.mkdir()
+            wrong_type = self.submit.inventory(
+                campaign, tunes, manifest, attempts, raw, base / "work", True)
+            self.assertEqual(wrong_type["statuses"][("MONASH", 0)],
+                             "accepted_size_or_type_mismatch")
+
     def test_occupied_unregistered_path_refuses_and_reservation_never_reuses(self):
         campaign, study, tunes = self.submit.campaign_inputs()
         campaign = dict(campaign)
@@ -550,6 +618,12 @@ class SubmissionContract(unittest.TestCase):
                                              base / "raw", base / "work")
             with self.assertRaisesRegex(ValueError, "refusing overwrite"):
                 self.submit.plan_rows(campaign, tunes, measured, "continuation")
+            stable.unlink()
+            stable.symlink_to(base / "missing-target.root")
+            dangling = self.submit.inventory(campaign, tunes, manifest, attempts,
+                                             base / "raw", base / "work")
+            with self.assertRaisesRegex(ValueError, "refusing overwrite"):
+                self.submit.plan_rows(campaign, tunes, dangling, "continuation")
             stable.unlink()
             measured = self.submit.inventory(campaign, tunes, manifest, attempts,
                                              base / "raw", base / "work")
@@ -584,7 +658,8 @@ class SubmissionContract(unittest.TestCase):
             args = type("Args", (), {"tune": "MONASH", "logical_id": 0,
                                      "attempt": 0, "state": "held",
                                      "reason": "periodic CPU hold"})()
-            outcome = self.submit.record_preworker_outcome(args, base / "work")
+            outcome = self.submit.record_preworker_outcome(
+                args, base / "work", campaign, tunes)
             recorded = json.loads(outcome.read_text(encoding="utf-8"))
             self.assertEqual((recorded["state"], recorded["seed"], recorded["stage"]),
                              ("held", 130000001, "scheduler_before_worker"))
@@ -593,13 +668,105 @@ class SubmissionContract(unittest.TestCase):
             next_row = self.submit.plan_rows(campaign, tunes, measured, "continuation")[0]
             self.assertEqual((next_row["attempt"], next_row["seed"]), (1, 130100001))
 
+    def test_evidence_path_payload_transition_and_domain_contracts(self):
+        campaign, study, tunes = self.submit.campaign_inputs()
+        campaign = dict(campaign)
+        campaign["logical_jobs_per_tune"] = 1
+        tunes = tunes[:1]
+
+        def reserved(base):
+            row = {"tune": "MONASH", "logical_id": 0, "attempt": 0,
+                   "seed": 130000001,
+                   "storage_key": "MONASH/hf_MONASH_job000.root"}
+            path, payload = self.submit.reserve_rows(
+                campaign, [row], base / "work", "d" * 64)[0]
+            return path, payload
+
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            path, payload = reserved(base)
+            changed = dict(payload, tune="JUNCTIONS")
+            self.submit.atomic_json(path, changed)
+            with self.assertRaisesRegex(ValueError, "payload identity.*evidence path"):
+                self.submit.evidence_records(base / "work", campaign, tunes)
+
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            path, payload = reserved(base)
+            duplicate = (base / "work/evidence/ZZZ/job000/attempt00/reservation.json")
+            self.submit.atomic_json(duplicate, payload, exclusive=True)
+            with self.assertRaisesRegex(ValueError, "duplicate attempt evidence identity"):
+                self.submit.evidence_records(base / "work", campaign, tunes)
+
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            path, payload = reserved(base)
+            outcome = {
+                "schema": self.submit.OUTCOME_SCHEMA, "state": "failed",
+                "campaign": "HF_RUN3_V1", "tune": "MONASH", "logical_id": 0,
+                "attempt": 0, "seed": 130000002,
+                "storage_key": payload["storage_key"], "stage": "producer",
+                "exit_code": 1, "finished_unix_seconds": 2,
+            }
+            self.submit.atomic_json(path.with_name("outcome.json"), outcome,
+                                    exclusive=True)
+            with self.assertRaisesRegex(ValueError, "outcome identity/seed"):
+                self.submit.evidence_records(base / "work", campaign, tunes)
+
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            path = self.submit.evidence_directory(base / "work", "MONASH", 0, 10)
+            payload = {
+                "schema": self.submit.RESERVATION_SCHEMA, "state": "reserved",
+                "campaign": "HF_RUN3_V1", "purpose": "continuation",
+                "tune": "MONASH", "logical_id": 0, "attempt": 10,
+                "seed": 131000001,
+                "storage_key": "MONASH/hf_MONASH_job000.root",
+                "plan_sha256": "d" * 64, "reserved_unix_seconds": 1,
+            }
+            self.submit.atomic_json(path / "reservation.json", payload,
+                                    exclusive=True)
+            with self.assertRaisesRegex(ValueError, "outside campaign domain"):
+                self.submit.evidence_records(base / "work", campaign, tunes)
+
+    def test_reservation_batch_preflight_prevents_late_partial_collision(self):
+        campaign, study, tunes = self.submit.campaign_inputs()
+        campaign = dict(campaign)
+        campaign["logical_jobs_per_tune"] = 2
+        rows = [
+            {"tune": "MONASH", "logical_id": logical_id, "attempt": 0,
+             "seed": 130000001 + logical_id,
+             "storage_key": "MONASH/hf_MONASH_job{:03d}.root".format(logical_id)}
+            for logical_id in range(2)]
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory) / "work"
+            collision = self.submit.evidence_directory(work, "MONASH", 1, 0)
+            collision.mkdir(parents=True)
+            (collision / "reservation.json").write_text("occupied", encoding="utf-8")
+            with self.assertRaisesRegex(FileExistsError, "destination collision"):
+                self.submit.reserve_rows(campaign, rows, work, "d" * 64)
+            first = self.submit.evidence_directory(work, "MONASH", 0, 0)
+            self.assertFalse((first / "reservation.json").exists())
+
     def test_promotion_is_no_overwrite_and_receipt_failure_is_fail_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             partial = base / "partial.root"
             partial.write_bytes(b"validated fixture")
             stable = base / "raw/MONASH/hf_MONASH_job000.root"
-            receipt = {"output_sha256": self.submit.digest_file(partial), "state": "PASS"}
+            receipt = {
+                "schema": self.submit.RECEIPT_SCHEMA, "state": "PASS",
+                "campaign": "HF_RUN3_V1", "tune": "MONASH",
+                "logical_id": 0, "attempt": 0, "seed": 130000001,
+                "successful_events": 3, "card_sha256": "a" * 64,
+                "effective_card_sha256": "b" * 64,
+                "study_definition_sha256": "c" * 64,
+                "producer_sha256": "d" * 64, "validator_sha256": "e" * 64,
+                "repository_commit": "f" * 40,
+                "output_bytes": partial.stat().st_size,
+                "output_sha256": self.submit.digest_file(partial),
+                "target": "MONASH/hf_MONASH_job000.root",
+            }
             receipt_path = base / "evidence/validation_receipt.json"
             outcome_path = base / "evidence/outcome.json"
             with mock.patch.object(self.submit, "atomic_json", side_effect=OSError("disk full")):
@@ -614,6 +781,28 @@ class SubmissionContract(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "refusing overwrite"):
                 self.submit.promote_no_overwrite(partial, stable, receipt["output_sha256"])
             self.assertEqual(stable.read_bytes(), b"accepted namespace")
+            dangling = base / "raw/MONASH/hf_MONASH_job001.root"
+            dangling.symlink_to(base / "missing.root")
+            with self.assertRaisesRegex(RuntimeError, "refusing overwrite"):
+                self.submit.promote_no_overwrite(
+                    partial, dangling, receipt["output_sha256"])
+
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            partial = base / "partial.root"
+            partial.write_bytes(b"validated fixture")
+            stable = base / "raw/MONASH/hf_MONASH_job000.root"
+            original_unlink = Path.unlink
+            def fail_staging_unlink(path, *args, **kwargs):
+                if path.name.endswith(".staging"):
+                    raise OSError("staging cleanup injection")
+                return original_unlink(path, *args, **kwargs)
+            with mock.patch.object(Path, "unlink", fail_staging_unlink):
+                self.submit.promote_no_overwrite(
+                    partial, stable, self.submit.digest_file(partial))
+            self.assertEqual(stable.read_bytes(), partial.read_bytes())
+            staging = list(stable.parent.glob(".*.staging"))
+            self.assertEqual(len(staging), 1)
 
     def test_scheduler_contract_and_each_liveness_clause_is_active(self):
         campaign, study, tunes = self.submit.campaign_inputs()
@@ -624,12 +813,31 @@ class SubmissionContract(unittest.TestCase):
                 campaign, study, [], runtime, base / "producer", base / "validator",
                 base / "raw", base / "work", "continuation")
         self.assertTrue(self.submit.validate_submit_contract(rendered))
+        self.assertTrue(self.submit.validate_submit_executable_contract(
+            rendered, base / "producer", base / "validator"))
+        disagreement = rendered.decode("utf-8").replace(
+            "--producer-path {}".format(base / "producer"),
+            "--producer-path {}/wrong".format(base), 1)
+        with self.assertRaisesRegex(ValueError, "executable-path contract"):
+            self.submit.validate_submit_executable_contract(
+                disagreement, base / "producer", base / "validator")
         for clause in ("RemoteUserCpu > 3600", "CurrentTime - EnteredCurrentStatus) > 14400",
                        "on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)",
                        "max_retries = 0"):
             mutated = rendered.decode("utf-8").replace(clause, "REMOVED", 1)
             with self.assertRaisesRegex(ValueError, "Condor safety contract"):
                 self.submit.validate_submit_contract(mutated)
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory) / "work"
+            producer = Path(directory) / "producer"
+            validator = Path(directory) / "validator"
+            producer.write_text("fixture", encoding="utf-8")
+            validator.write_text("fixture", encoding="utf-8")
+            producer.chmod(0o700); validator.chmod(0o700)
+            condor = self.submit.submission_filesystem_preflight(
+                work, producer, validator)
+            self.assertEqual(condor, work / "condor")
+            self.assertTrue(condor.is_dir())
 
     def test_default_generate_contacts_nothing_and_submit_no_work_contacts_nothing(self):
         ordinary = subprocess.run([str(ROOT / "hadronization"), "generate"],

@@ -4,11 +4,12 @@
 #define HADRONIZATION_GENERATED_STUDY_CONTRACT_HPP
 
 #include <array>
+#include <cstddef>
 #include <string_view>
 
 namespace Hadronization {
 inline constexpr std::string_view kStudyDefinitionSchema = "hadronization_study_v1";
-inline constexpr std::string_view kStudyDefinitionSha256 = "24aa1f16d715008e034ed1960921cb03221438e34b1dc52c9825fa7405e342f8";
+inline constexpr std::string_view kStudyDefinitionSha256 = "d3eac08d732dd5d9642b650ac69cb3512bf3245ae450387e57ace7690a8ef4f5";
 inline constexpr std::string_view kRawSchema = "hf_primary_ground_raw_v7";
 inline constexpr std::string_view kRawMultiplicityEta10Branch = "multiplicity_primary_charged_eta10_v1";
 inline constexpr std::string_view kRawMultiplicityEta40Branch = "multiplicity_primary_charged_eta40_v1";
@@ -74,18 +75,18 @@ inline constexpr std::array<SelectedState, 50> kSelectedStates{{
   {-5122, "lambdabbar", "Lambdabzerobar", "beauty", "baryon", 2, 0, 0, -1, "bbar ubar dbar", true, "pair_analysis", ""},
   {5112, "sigmabminus", "Sigmabminus", "beauty", "baryon", 2, -3, 0, 1, "b d d", true, "pair_analysis", ""},
   {-5112, "sigmabminusbar", "Sigmabminusbar", "beauty", "baryon", 2, 3, 0, -1, "bbar dbar dbar", true, "pair_analysis", ""},
-  {5212, "sigmabzero", "Sigmabzero", "beauty", "baryon", 2, 0, 0, 1, "b u d", false, "inclusive_only", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
-  {-5212, "sigmabzerobar", "Sigmabzerobar", "beauty", "baryon", 2, 0, 0, -1, "bbar ubar dbar", false, "inclusive_only", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
+  {5212, "sigmabzero", "Sigmabzero", "beauty", "baryon", 2, 0, 0, 1, "b u d", false, "excluded_from_pair_analysis", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
+  {-5212, "sigmabzerobar", "Sigmabzerobar", "beauty", "baryon", 2, 0, 0, -1, "bbar ubar dbar", false, "excluded_from_pair_analysis", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
   {5222, "sigmabplus", "Sigmabplus", "beauty", "baryon", 2, 3, 0, 1, "b u u", true, "pair_analysis", ""},
   {-5222, "sigmabplusbar", "Sigmabplusbar", "beauty", "baryon", 2, -3, 0, -1, "bbar ubar ubar", true, "pair_analysis", ""},
   {5132, "xibminus", "Xibminus", "beauty", "baryon", 2, -3, 0, 1, "b s d", true, "pair_analysis", ""},
   {-5132, "xibminusbar", "Xibminusbar", "beauty", "baryon", 2, 3, 0, -1, "bbar sbar dbar", true, "pair_analysis", ""},
   {5232, "xibzero", "Xibzero", "beauty", "baryon", 2, 0, 0, 1, "b s u", true, "pair_analysis", ""},
   {-5232, "xibzerobar", "Xibzerobar", "beauty", "baryon", 2, 0, 0, -1, "bbar sbar ubar", true, "pair_analysis", ""},
-  {5312, "xibprimeminus", "Xibprimeminus", "beauty", "baryon", 2, -3, 0, 1, "b s d (symmetric light diquark)", false, "inclusive_only", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
-  {-5312, "xibprimeminusbar", "Xibprimeminusbar", "beauty", "baryon", 2, 3, 0, -1, "bbar sbar dbar (symmetric light antidiquark)", false, "inclusive_only", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
-  {5322, "xibprimezero", "Xibprimezero", "beauty", "baryon", 2, 0, 0, 1, "b s u (symmetric light diquark)", false, "inclusive_only", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
-  {-5322, "xibprimezerobar", "Xibprimezerobar", "beauty", "baryon", 2, 0, 0, -1, "bbar sbar ubar (symmetric light antidiquark)", false, "inclusive_only", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
+  {5312, "xibprimeminus", "Xibprimeminus", "beauty", "baryon", 2, -3, 0, 1, "b s d (symmetric light diquark)", false, "excluded_from_pair_analysis", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
+  {-5312, "xibprimeminusbar", "Xibprimeminusbar", "beauty", "baryon", 2, 3, 0, -1, "bbar sbar dbar (symmetric light antidiquark)", false, "excluded_from_pair_analysis", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
+  {5322, "xibprimezero", "Xibprimezero", "beauty", "baryon", 2, 0, 0, 1, "b s u (symmetric light diquark)", false, "excluded_from_pair_analysis", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
+  {-5322, "xibprimezerobar", "Xibprimezerobar", "beauty", "baryon", 2, 0, 0, -1, "bbar sbar ubar (symmetric light antidiquark)", false, "excluded_from_pair_analysis", "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry"},
   {5332, "omegabminus", "Omegabminus", "beauty", "baryon", 2, -3, 0, 1, "b s s", true, "pair_analysis", ""},
   {-5332, "omegabminusbar", "Omegabminusbar", "beauty", "baryon", 2, 3, 0, -1, "bbar sbar sbar", true, "pair_analysis", ""},
 }};
@@ -100,10 +101,25 @@ inline bool IsPairAnalysisEligible(int pdg) {
 
 struct TuneDefinition { std::string_view name, id, card, sha256; };
 inline constexpr std::array<TuneDefinition, 3> kTuneDefinitions{{
-  TuneDefinition{"MONASH", "monash", "config/tunes/monash.cmnd", "defd7f5dff774e790ffa773b3186341e89bd1fe7a5101f8fb491e3b10b156b23"},
-  TuneDefinition{"JUNCTIONS", "junctions", "config/tunes/junctions.cmnd", "bbadecf78528637b1d80edd5594d0f3ea4d3ab73d0d44bc1e7e07c7bc25a41d8"},
-  TuneDefinition{"CLOSEPACKING", "close_packing", "config/tunes/close_packing.cmnd", "dd0755ae85c340f7e3a438931bed14afa433220f164f84fcb0e18d4ae6f2f4de"},
+  TuneDefinition{"MONASH", "monash", "config/tunes/monash.cmnd", "1945c5d1e2392915a5d35fe090649857150cfc34a13403cfdafdfa85a8f893d7"},
+  TuneDefinition{"JUNCTIONS", "junctions", "config/tunes/junctions.cmnd", "dfadfd8ffd2c9a386f159e239d3b582bdb038848b9bf55eb3ade571edce79128"},
+  TuneDefinition{"CLOSEPACKING", "close_packing", "config/tunes/close_packing.cmnd", "99a7ff824cdae94b44d5d3a547770f5b7cb02e7cd8dd2842a95bdb1ebafdfe2d"},
 }};
+inline int FindTuneDefinitionIndex(std::string_view token) {
+  for (std::size_t index = 0; index < kTuneDefinitions.size(); ++index) {
+    const auto& tune = kTuneDefinitions[index];
+    if (token == tune.name || token == tune.id) return static_cast<int>(index);
+  }
+  return -1;
+}
+inline const TuneDefinition* FindTuneDefinition(std::string_view token) {
+  const int index = FindTuneDefinitionIndex(token);
+  return index < 0 ? nullptr : &kTuneDefinitions[static_cast<std::size_t>(index)];
+}
+inline std::string_view TuneCardBasename(const TuneDefinition& tune) {
+  const std::size_t slash = tune.card.find_last_of('/');
+  return slash == std::string_view::npos ? tune.card : tune.card.substr(slash + 1);
+}
 inline constexpr std::array<std::string_view, 46> kAuditedPythiaSettingKeys{{
   "BeamRemnants:remnantMode",
   "BeamRemnants:saturation",

@@ -24,13 +24,16 @@ def validate_balancing(rows):
     associate_pairs = {("dminus", "dplus"), ("dzerobar", "dzero"),
                        ("lambdacplusbar", "lambdacplus")}
     expected_rounded = {
-        (tune, os_associate, ss_associate, "block_{:02d}".format(index))
+        (tune, "charm", "dplus", os_associate, ss_associate,
+         "balancing_yield", "integrated_0_100", "block_{:02d}".format(index))
         for tune in ("MONASH", "JUNCTIONS", "CLOSEPACKING")
         for os_associate, ss_associate in associate_pairs
         for index in range(1, 11)}
     rounded_rows = [row for row in rows if row["status"] == rounded_status]
-    measured_rounded = {(row["tune"], row["os_associate"], row["ss_associate"],
-                         row["estimator"]) for row in rounded_rows}
+    measured_rounded = {
+        (row["tune"], row["flavour"], row["trigger"], row["os_associate"],
+         row["ss_associate"], row["quantity"], row["activity_id"],
+         row["estimator"]) for row in rounded_rows}
     if len(rounded_rows) != 90 or measured_rounded != expected_rounded:
         raise AssertionError("rounded-source identity/status set is not exactly the required 90")
     for row in rows:
@@ -125,7 +128,8 @@ def validate_balancing(rows):
         raise AssertionError("balancing semantic coverage changed")
 
 
-def validate_axis(table, group_fields, index, low, high, expected_groups):
+def validate_axis(table, group_fields, index, low, high, expected_groups,
+                  expected_edges):
     groups = defaultdict(list)
     for row in table:
         groups[tuple(row[field] for field in group_fields)].append(row)
@@ -133,8 +137,15 @@ def validate_axis(table, group_fields, index, low, high, expected_groups):
         raise AssertionError("axis group count mismatch")
     for identity, rows in groups.items():
         rows.sort(key=lambda row: int(row[index]))
-        if [int(row[index]) for row in rows] != list(range(1, len(rows) + 1)):
+        edges = expected_edges(identity) if callable(expected_edges) else expected_edges
+        if len(rows) != len(edges) - 1:
+            raise AssertionError("axis group has wrong exact bin count")
+        if [int(row[index]) for row in rows] != list(range(1, len(edges))):
             raise AssertionError("non-contiguous/duplicate result bin")
+        for position, row in enumerate(rows):
+            if (not close(float(row[low]), float(edges[position])) or
+                    not close(float(row[high]), float(edges[position + 1]))):
+                raise AssertionError("axis group edge sequence differs from study contract")
         for left, right in zip(rows, rows[1:]):
             if not close(float(left[high]), float(right[low])):
                 raise AssertionError("result bins overlap or leave a gap")
@@ -197,15 +208,30 @@ class ResultContract(unittest.TestCase):
         validate_balancing(csv_rows("results/measurement/balancing.csv"))
 
     def test_all_measurement_identities_bins_counts_and_table_parity(self):
+        study = load_json("config/study.json")
+        def uniform(specification):
+            low = float(specification["low"])
+            high = float(specification["high"])
+            bins = int(specification["bins"])
+            return [low + (high - low) * index / bins for index in range(bins + 1)]
         correlation = csv_rows("results/measurement/correlations.csv")
         validate_axis(correlation, ("tune", "flavour", "trigger", "associate",
                                      "context", "activity_id"),
-                      "bin_index", "dphi_low", "dphi_high", 12)
+                      "bin_index", "dphi_low", "dphi_high", 12,
+                      uniform(study["observables"]["correlations"]["delta_phi"]))
         multiplicity = csv_rows("results/measurement/multiplicity.csv")
-        validate_axis(multiplicity, ("tune",), "bin_index", "nch_low", "nch_high", 3)
+        validate_axis(multiplicity, ("tune",), "bin_index", "nch_low", "nch_high", 3,
+                      uniform(study["observables"]["multiplicity"]["binning"]))
         kinematics = csv_rows("results/measurement/kinematics.csv")
+        axes = study["observables"]["inclusive_kinematics"]["axes"]
+        kinematic_edges = {
+            name: ([float(value) for value in axis["edges"]]
+                   if axis["kind"] == "variable" else uniform(axis))
+            for name, axis in axes.items()
+        }
         validate_axis(kinematics, ("tune", "species", "pdg", "observable"),
-                      "bin_index", "bin_low", "bin_high", 90)
+                      "bin_index", "bin_low", "bin_high", 90,
+                      lambda identity: kinematic_edges[identity[-1]])
         for table in (multiplicity, kinematics):
             for row in table:
                 if row["count_or_content"] and not row["count_or_content"].isdigit():
@@ -237,6 +263,13 @@ class ResultContract(unittest.TestCase):
         row["status"] = "available_derived_no_component_counts_trigger_count_rounded_in_source"
         with self.assertRaisesRegex(AssertionError, "rounded-source"):
             validate_balancing(rounded)
+        wrong_rounded_identity = copy.deepcopy(balancing)
+        row = next(row for row in wrong_rounded_identity
+                   if row["status"] ==
+                   "available_derived_no_component_counts_trigger_count_rounded_in_source")
+        row["activity_id"] = "wrong_activity"
+        with self.assertRaisesRegex(AssertionError, "rounded-source identity"):
+            validate_balancing(wrong_rounded_identity)
 
         correlations = csv_rows("results/measurement/correlations.csv")
         duplicated = copy.deepcopy(correlations)
@@ -244,7 +277,36 @@ class ResultContract(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "non-contiguous/duplicate"):
             validate_axis(duplicated, ("tune", "flavour", "trigger", "associate",
                                        "context", "activity_id"),
-                          "bin_index", "dphi_low", "dphi_high", 12)
+                          "bin_index", "dphi_low", "dphi_high", 12,
+                          [float(row["dphi_low"]) for row in correlations[:1]] +
+                          [float(row["dphi_high"]) for row in correlations[:100]])
+        study = load_json("config/study.json")
+        corr_axis = study["observables"]["correlations"]["delta_phi"]
+        expected_edges = [
+            float(corr_axis["low"]) +
+            (float(corr_axis["high"]) - float(corr_axis["low"])) * index /
+            int(corr_axis["bins"])
+            for index in range(int(corr_axis["bins"]) + 1)]
+        missing_bin = copy.deepcopy(correlations)
+        first_identity = tuple(missing_bin[0][field] for field in
+                               ("tune", "flavour", "trigger", "associate",
+                                "context", "activity_id"))
+        del missing_bin[next(index for index, row in enumerate(missing_bin)
+                             if tuple(row[field] for field in
+                                      ("tune", "flavour", "trigger", "associate",
+                                       "context", "activity_id")) == first_identity)]
+        with self.assertRaisesRegex(AssertionError, "wrong exact bin count"):
+            validate_axis(missing_bin, ("tune", "flavour", "trigger", "associate",
+                                        "context", "activity_id"),
+                          "bin_index", "dphi_low", "dphi_high", 12,
+                          expected_edges)
+        wrong_edge = copy.deepcopy(correlations)
+        wrong_edge[0]["dphi_high"] = str(float(wrong_edge[0]["dphi_high"]) + 0.001)
+        with self.assertRaisesRegex(AssertionError, "edge sequence"):
+            validate_axis(wrong_edge, ("tune", "flavour", "trigger", "associate",
+                                       "context", "activity_id"),
+                          "bin_index", "dphi_low", "dphi_high", 12,
+                          expected_edges)
         sample = csv_rows("results/measurement/sample_counts.csv")
         tex = (ROOT / "results/tables/sample_counts.tex").read_text(encoding="utf-8")
         with self.assertRaisesRegex(AssertionError, "transcription"):

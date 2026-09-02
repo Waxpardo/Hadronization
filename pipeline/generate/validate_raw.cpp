@@ -532,6 +532,9 @@ int Validate(const Authorization& auth) {
       unsigneds["tree_entries"] != auth.events ||
       static_cast<unsigned long long>(tree->GetEntries()) != auth.events ||
       integers["complete"] != 1) fail("exact-success/tree-entry contract mismatch");
+  if (unsigneds["multiplicity_audit_events"] > auth.events) {
+    fail("multiplicity-audit event count exceeds successful events");
+  }
   if (unsigneds["attempts"] != unsigneds["successful_events"] +
       unsigneds["failed_attempts"]) fail("attempt accounting identity failed");
   if (!Approximately(doubles["phase_space_pthat_min"], auth.pthatMin) ||
@@ -1052,6 +1055,44 @@ int Validate(const Authorization& auth) {
             unsigneds["multiplicity_audit_events"] &&
         auditSize != 0U) {
       fail("multiplicity audit vectors exist beyond declared pilot range");
+    } else if (static_cast<unsigned long long>(row) <
+               unsigneds["multiplicity_audit_events"]) {
+      int auditCentral = 0;
+      int auditWide = 0;
+      std::array<int, Hadronization::kMultiplicitySpeciesBuckets>
+          auditSpecies{{0, 0, 0, 0, 0, 0}};
+      int previousParticleIndex = -1;
+      for (std::size_t audit = 0; audit < auditSize; ++audit) {
+        const int particleIndex = ints("multAuditParticleIndex")[audit];
+        const int isHeavy = ints("multAuditIsHeavy")[audit];
+        if (particleIndex <= previousParticleIndex ||
+            (isHeavy != 0 && isHeavy != 1) ||
+            !std::isfinite(reals("multAuditPt")[audit]) ||
+            !std::isfinite(reals("multAuditEta")[audit])) {
+          fail("invalid multiplicity audit row ordering/content");
+          continue;
+        }
+        previousParticleIndex = particleIndex;
+        if (Hadronization::CountsNchPrimaryChargedV1(
+                true, true, isHeavy != 0, reals("multAuditPt")[audit],
+                reals("multAuditEta")[audit],
+                Hadronization::kMultiplicityEtaCentral)) {
+          ++auditCentral;
+          ++auditSpecies[static_cast<std::size_t>(
+              Hadronization::MultiplicitySpeciesIndex(
+                  std::abs(ints("multAuditPdg")[audit])))];
+        }
+        if (Hadronization::CountsNchPrimaryChargedV1(
+                true, true, isHeavy != 0, reals("multAuditPt")[audit],
+                reals("multAuditEta")[audit],
+                Hadronization::kMultiplicityEtaWide)) {
+          ++auditWide;
+        }
+      }
+      if (auditCentral != mult || auditWide != multWide ||
+          !std::equal(auditSpecies.begin(), auditSpecies.end(), multSpecies)) {
+        fail("multiplicity audit vectors do not reproduce stored counters");
+      }
     }
 
     std::map<int, StoredAncestor> ancestry;

@@ -4,8 +4,8 @@
 //   heavyflavourcorrelations_status MODE OUTPUT SEED CAMPAIGN
 //       CAMPAIGN_ORDINAL LOGICAL_ID ROLE ATTEMPT
 //
-// MODE is monash, junctions, or closepacking. SEED is passed to PYTHIA
-// unchanged and must be allocated by the immutable campaign seed ledger.
+// MODE is a generated study tune ID. SEED is passed to PYTHIA unchanged and
+// must be allocated by the immutable campaign seed ledger.
 
 #include "physics.hpp"
 #include "sha256.hpp"
@@ -116,33 +116,39 @@ ULong64_t PeakRssKiB() {
 // each tune as a complete configuration bundle and does not isolate a single
 // mechanism with an additional matched configuration.
 //
-// Adding a configuration means one entry here and one card. There is
-// deliberately no fixed-width tune ordinal anywhere in the pipeline.
-const std::vector<std::string>& KnownTunes() {
-  static const std::vector<std::string> tunes = {
-      "MONASH", "JUNCTIONS", "CLOSEPACKING"};
-  return tunes;
+// Adding a configuration means one study entry and one card. Name, worker ID,
+// order, and card resolution all come from the generated study contract.
+std::string NormalizeTuneToken(std::string_view token) {
+  std::string normalized;
+  normalized.reserve(token.size());
+  for (const char character : token) {
+    if (std::isalnum(static_cast<unsigned char>(character)) != 0) {
+      normalized.push_back(static_cast<char>(
+          std::tolower(static_cast<unsigned char>(character))));
+    }
+  }
+  return normalized;
+}
+
+const TuneDefinition* ResolveTune(const std::string& mode) {
+  const std::string normalized = NormalizeTuneToken(mode);
+  for (const auto& tune : kTuneDefinitions) {
+    if (normalized == NormalizeTuneToken(tune.name) ||
+        normalized == NormalizeTuneToken(tune.id)) {
+      return &tune;
+    }
+  }
+  return nullptr;
 }
 
 std::string CanonicalTune(const std::string& mode) {
-  std::string upper;
-  upper.reserve(mode.size());
-  for (const char character : mode) {
-    upper.push_back(static_cast<char>(
-        std::toupper(static_cast<unsigned char>(character))));
-  }
-  for (const std::string& tune : KnownTunes()) {
-    if (tune == upper) return tune;
-  }
-  return "";
+  const auto* tune = ResolveTune(mode);
+  return tune ? std::string(tune->name) : "";
 }
 
 std::string ResolveSettingsFile(const std::string& mode) {
-  const std::string tune = CanonicalTune(mode);
-  if (tune.empty()) return "";
-  if (tune == "MONASH") return "monash.cmnd";
-  if (tune == "JUNCTIONS") return "junctions.cmnd";
-  return "close_packing.cmnd";
+  const auto* tune = ResolveTune(mode);
+  return tune ? std::string(TuneCardBasename(*tune)) : "";
 }
 
 std::vector<int> ExplicitMotherIndices(const Event& event, int particleIndex) {

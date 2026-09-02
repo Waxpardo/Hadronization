@@ -10,15 +10,15 @@
     "tune_cards": {
       "CLOSEPACKING": {
         "accepted_effective_sha256": "0a3bca5525e8a06dd9e5d9b34fed2e0d460e9b9945f3bd4df51f927dd89a6378",
-        "current_definition_sha256": "dd0755ae85c340f7e3a438931bed14afa433220f164f84fcb0e18d4ae6f2f4de"
+        "current_definition_sha256": "99a7ff824cdae94b44d5d3a547770f5b7cb02e7cd8dd2842a95bdb1ebafdfe2d"
       },
       "JUNCTIONS": {
         "accepted_effective_sha256": "db1c64736ae984f4e6496bbedeba9816f65ed8f3c668d67adfcfc87a58a70878",
-        "current_definition_sha256": "bbadecf78528637b1d80edd5594d0f3ea4d3ab73d0d44bc1e7e07c7bc25a41d8"
+        "current_definition_sha256": "dfadfd8ffd2c9a386f159e239d3b582bdb038848b9bf55eb3ade571edce79128"
       },
       "MONASH": {
         "accepted_effective_sha256": "8dfa3ea896e8358cece4e3270133efe310b114724bd8cf06fa477fe7cd46b1f9",
-        "current_definition_sha256": "defd7f5dff774e790ffa773b3186341e89bd1fe7a5101f8fb491e3b10b156b23"
+        "current_definition_sha256": "1945c5d1e2392915a5d35fe090649857150cfc34a13403cfdafdfa85a8f893d7"
       }
     },
     "tune_difference_allowlist": {
@@ -42,39 +42,39 @@
   "current_interpretation_definitions": {
     "files": [
       {
-        "bytes": 2229,
+        "bytes": 2222,
         "path": "config/tunes/monash.cmnd",
-        "sha256": "defd7f5dff774e790ffa773b3186341e89bd1fe7a5101f8fb491e3b10b156b23"
+        "sha256": "1945c5d1e2392915a5d35fe090649857150cfc34a13403cfdafdfa85a8f893d7"
       },
       {
-        "bytes": 2806,
+        "bytes": 2802,
         "path": "config/tunes/junctions.cmnd",
-        "sha256": "bbadecf78528637b1d80edd5594d0f3ea4d3ab73d0d44bc1e7e07c7bc25a41d8"
+        "sha256": "dfadfd8ffd2c9a386f159e239d3b582bdb038848b9bf55eb3ade571edce79128"
       },
       {
-        "bytes": 3226,
+        "bytes": 3225,
         "path": "config/tunes/close_packing.cmnd",
-        "sha256": "dd0755ae85c340f7e3a438931bed14afa433220f164f84fcb0e18d4ae6f2f4de"
+        "sha256": "99a7ff824cdae94b44d5d3a547770f5b7cb02e7cd8dd2842a95bdb1ebafdfe2d"
       },
       {
-        "bytes": 39311,
+        "bytes": 39389,
         "path": "config/study.json",
-        "sha256": "24aa1f16d715008e034ed1960921cb03221438e34b1dc52c9825fa7405e342f8"
+        "sha256": "d3eac08d732dd5d9642b650ac69cb3512bf3245ae450387e57ace7690a8ef4f5"
       },
       {
-        "bytes": 73028,
+        "bytes": 73246,
         "path": "pipeline/generate/producer.cpp",
-        "sha256": "5fa2589f3e6d8cb4c57372a74479be595f96fda9c0cc57a3373725cae151760f"
+        "sha256": "47299dade2413da2f110b39af7a67da7d693ea9a07b0cb04ae401a52b29c269e"
       },
       {
-        "bytes": 24298,
+        "bytes": 24237,
         "path": "pipeline/generate/physics.hpp",
-        "sha256": "7db4540db8a1445ef354c4c0a3810ae6551ee77ecaaf4e741571ad9b48f92846"
+        "sha256": "b1c240affb5e0c71fc96437349bc90cff0f0e8f93ca243046fd295280cb235e4"
       },
       {
-        "bytes": 13326,
+        "bytes": 14130,
         "path": "pipeline/generate/study_contract.hpp",
-        "sha256": "e35e5dabe6b8aa44fa223273067af081a21888eed8908c278274bdeed66003d9"
+        "sha256": "c66b627e270809ba0e1332fd17844bfc59d46660eef3e0da3f9f097dcfccf384"
       },
       {
         "bytes": 6894,

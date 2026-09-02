@@ -1,4 +1,4 @@
-! Called from file: heavyflavourcorrelations_status.cpp
+! Nominal CLOSEPACKING study card.
 ! Single PYTHIA run saving both charm and beauty hadrons for balancing studies
 ! Close Packing T1 tune
 ! Lines starting with (!) are comments
@@ -80,7 +80,7 @@ HardQCD:hardbbbar = on
 ! beauty 0.126 -> 0.212 (+68%) on moving 1.0 -> 2.0. The generated cross
 ! section is smaller, but this is a generator study with a chosen event count,
 ! so that does not enter.
-! See ValidationReports/PTHAT_MULTIPLICITY_SCAN_8317.md.
+! The active raw validator audits the phase-space and multiplicity contract.
 PhaseSpace:pTHatMin = 2.
 
 ! Light-particle decay policy. The producer programmatically disables every

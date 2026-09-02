@@ -1272,7 +1272,7 @@
       "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry",
       "sector": "beauty",
       "spin2j1": 2,
-      "status": "inclusive_only",
+      "status": "excluded_from_pair_analysis",
       "valence": "b u d"
     },
     {
@@ -1287,7 +1287,7 @@
       "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry",
       "sector": "beauty",
       "spin2j1": 2,
-      "status": "inclusive_only",
+      "status": "excluded_from_pair_analysis",
       "valence": "bbar ubar dbar"
     },
     {
@@ -1386,7 +1386,7 @@
       "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry",
       "sector": "beauty",
       "spin2j1": 2,
-      "status": "inclusive_only",
+      "status": "excluded_from_pair_analysis",
       "valence": "b s d (symmetric light diquark)"
     },
     {
@@ -1401,7 +1401,7 @@
       "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry",
       "sector": "beauty",
       "spin2j1": 2,
-      "status": "inclusive_only",
+      "status": "excluded_from_pair_analysis",
       "valence": "bbar sbar dbar (symmetric light antidiquark)"
     },
     {
@@ -1416,7 +1416,7 @@
       "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry",
       "sector": "beauty",
       "spin2j1": 2,
-      "status": "inclusive_only",
+      "status": "excluded_from_pair_analysis",
       "valence": "b s u (symmetric light diquark)"
     },
     {
@@ -1431,7 +1431,7 @@
       "reason": "PDG 2025 assigns no official MCID to 5312/5322 and treats Sigma_b0 as an unmeasured model prediction; retained as operational PYTHIA states but excluded from the balancing-pair registry",
       "sector": "beauty",
       "spin2j1": 2,
-      "status": "inclusive_only",
+      "status": "excluded_from_pair_analysis",
       "valence": "bbar sbar ubar (symmetric light antidiquark)"
     },
     {

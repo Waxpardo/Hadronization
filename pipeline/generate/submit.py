@@ -20,14 +20,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import runtime as runtime_contract  # noqa: E402
 
 
-TUNE_MODES = {"MONASH": "monash", "JUNCTIONS": "junctions",
-              "CLOSEPACKING": "closepacking"}
 MAX_CPU_SECONDS = 3600
 MAX_WALL_SECONDS = 14400
 REQUEST_MEMORY = "4GB"
 REQUEST_DISK = "4GB"
 HANG_GUARD_MARKER = "HF_HANG_GUARD"
 EVIDENCE_STATES = {"reserved", "submitted", "validated", "held", "failed", "accepted"}
+RESERVATION_SCHEMA = "hf_attempt_reservation_v1"
+OUTCOME_SCHEMA = "hf_attempt_outcome_v1"
+RECEIPT_SCHEMA = "hf_raw_validation_receipt_v5"
 
 
 def digest_bytes(value):
@@ -50,27 +51,39 @@ def load_json(path):
 def atomic_json(path, payload, exclusive=False):
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     data = (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    temporary = None
     if exclusive:
         descriptor = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        try:
-            os.write(descriptor, data)
-            os.fsync(descriptor)
-        finally:
-            os.close(descriptor)
     else:
         temporary = path.with_name(".{}.{}.tmp".format(path.name, os.getpid()))
         descriptor = os.open(str(temporary), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        try:
-            os.write(descriptor, data)
-            os.fsync(descriptor)
-        finally:
-            os.close(descriptor)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+    except Exception:
+        if temporary is not None and os.path.lexists(str(temporary)):
+            temporary.unlink()
+        raise
+    if temporary is not None:
         os.replace(str(temporary), str(path))
     directory = os.open(str(path.parent), os.O_RDONLY)
     try:
         os.fsync(directory)
     finally:
         os.close(directory)
+
+
+def validate_campaign_tunes(campaign, tune_rows):
+    tune_order = [row.get("name") for row in tune_rows]
+    if tune_order != campaign.get("tune_order"):
+        raise ValueError("study and campaign tune order differ")
+    expected_ordinals = {name: index for index, name in enumerate(tune_order)}
+    if campaign.get("seed", {}).get("tune_ordinals") != expected_ordinals:
+        raise ValueError("campaign tune ordinal map is not bijective with study tune order")
+    if len({row.get("id") for row in tune_rows}) != len(tune_rows):
+        raise ValueError("study tune worker IDs are not unique")
 
 
 def campaign_inputs():
@@ -86,8 +99,7 @@ def campaign_inputs():
     if campaign.get("systematic_uncertainties") != "disabled":
         raise ValueError("campaign does not declare systematic uncertainty disabled")
     tune_rows = study.get("tunes", [])
-    if [row.get("name") for row in tune_rows] != campaign.get("tune_order"):
-        raise ValueError("study and campaign tune order differ")
+    validate_campaign_tunes(campaign, tune_rows)
     return campaign, study, tune_rows
 
 
@@ -141,19 +153,119 @@ def evidence_directory(work_root, tune, logical_id, attempt):
             "attempt{:02d}".format(attempt))
 
 
-def evidence_records(work_root):
+def require_exact_keys(payload, required, optional, label):
+    keys = set(payload)
+    missing = set(required) - keys
+    extra = keys - set(required) - set(optional)
+    if missing or extra:
+        raise ValueError("{} schema keys differ: missing={} extra={}".format(
+            label, sorted(missing), sorted(extra)))
+
+
+def attempt_identity(payload):
+    return (payload["tune"], int(payload["logical_id"]), int(payload["attempt"]))
+
+
+def validate_receipt(path, reservation, campaign):
+    receipt = load_json(path)
+    required = {
+        "schema", "state", "campaign", "tune", "logical_id", "attempt", "seed",
+        "successful_events", "card_sha256", "effective_card_sha256",
+        "study_definition_sha256", "producer_sha256", "validator_sha256",
+        "repository_commit", "output_bytes", "output_sha256", "target",
+    }
+    require_exact_keys(receipt, required, set(), "validation receipt")
+    if receipt["schema"] != RECEIPT_SCHEMA or receipt["state"] != "PASS":
+        raise ValueError("validation receipt schema/state mismatch")
+    identity_fields = ("campaign", "tune", "logical_id", "attempt", "seed")
+    if any(receipt[field] != reservation[field] for field in identity_fields):
+        raise ValueError("validation receipt identity/seed differs from reservation")
+    if receipt["target"] != reservation["storage_key"]:
+        raise ValueError("validation receipt storage key differs from reservation")
+    if int(receipt["successful_events"]) != int(
+            campaign["successful_events_per_logical_job"]):
+        raise ValueError("validation receipt successful-event count differs from campaign")
+    if int(receipt["output_bytes"]) <= 0 or not re.fullmatch(
+            r"[0-9a-f]{64}", str(receipt["output_sha256"])):
+        raise ValueError("validation receipt output identity is malformed")
+    return receipt
+
+
+def evidence_records(work_root, campaign, tune_rows):
     records = {}
     base = work_root / "evidence"
     if not base.is_dir():
         return records
+    tune_names = {row["name"] for row in tune_rows}
+    logical_high = int(campaign["logical_jobs_per_tune"]) - 1
+    attempt_low, attempt_high = [int(value) for value in campaign["seed"]["attempt_domain"]]
+    reservation_required = {
+        "schema", "state", "campaign", "purpose", "tune", "logical_id",
+        "attempt", "seed", "storage_key", "plan_sha256", "reserved_unix_seconds",
+    }
+    reservation_optional = {"state_unix_seconds", "detail"}
+    outcome_common = {
+        "schema", "state", "campaign", "tune", "logical_id", "attempt", "seed",
+        "storage_key", "finished_unix_seconds",
+    }
     for path in sorted(base.glob("*/job*/attempt*/reservation.json")):
         try:
-            row = load_json(path)
-            key = (row["tune"], int(row["logical_id"]), int(row["attempt"]))
-            state = row["state"]
+            reservation = load_json(path)
+            require_exact_keys(reservation, reservation_required,
+                               reservation_optional, "attempt reservation")
+            key = attempt_identity(reservation)
+            if key in records:
+                raise ValueError("duplicate attempt evidence identity {}".format(key))
+            expected_path = evidence_directory(work_root, *key) / "reservation.json"
+            if path != expected_path:
+                raise ValueError("reservation payload identity does not match evidence path")
+            tune, logical_id, attempt = key
+            if (reservation["schema"] != RESERVATION_SCHEMA or
+                    reservation["campaign"] != campaign["campaign"] or
+                    reservation["purpose"] != "continuation" or
+                    reservation["state"] not in {"reserved", "submitted", "failed"}):
+                raise ValueError("reservation schema/campaign/state contract mismatch")
+            if (tune not in tune_names or not 0 <= logical_id <= logical_high or
+                    not attempt_low <= attempt <= attempt_high):
+                raise ValueError("attempt evidence identity is outside campaign domain")
+            if (reservation["storage_key"] != storage_key(tune, logical_id) or
+                    int(reservation["seed"]) != seed_for(
+                        campaign, tune, logical_id, attempt)):
+                raise ValueError("reservation storage key/seed differs from campaign identity")
+            if not re.fullmatch(r"[0-9a-f]{64}", str(reservation["plan_sha256"])):
+                raise ValueError("reservation plan digest is malformed")
+            state = reservation["state"]
             outcome = path.with_name("outcome.json")
             if outcome.is_file():
-                state = load_json(outcome)["state"]
+                outcome_row = load_json(outcome)
+                outcome_state = outcome_row.get("state")
+                if outcome_state in {"held", "failed"} and outcome_row.get(
+                        "stage") == "scheduler_before_worker":
+                    required = outcome_common | {"stage", "reason"}
+                elif outcome_state == "failed":
+                    required = outcome_common | {"stage", "exit_code"}
+                elif outcome_state in {"validated", "accepted"}:
+                    required = outcome_common | {"receipt_sha256", "cleanup_after_days"}
+                else:
+                    raise ValueError("unsupported attempt evidence state {}".format(
+                        outcome_state))
+                require_exact_keys(outcome_row, required, set(), "attempt outcome")
+                if outcome_row["schema"] != OUTCOME_SCHEMA:
+                    raise ValueError("attempt outcome schema mismatch")
+                for field in ("campaign", "tune", "logical_id", "attempt", "seed",
+                              "storage_key"):
+                    if outcome_row[field] != reservation[field]:
+                        raise ValueError("outcome identity/seed differs from reservation")
+                if state not in {"reserved", "submitted"}:
+                    raise ValueError("outcome transition does not start from an active reservation")
+                if outcome_state in {"validated", "accepted"}:
+                    receipt_path = path.with_name("validation_receipt.json")
+                    if not receipt_path.is_file():
+                        raise ValueError("validated/accepted outcome lacks validation receipt")
+                    validate_receipt(receipt_path, reservation, campaign)
+                    if digest_file(receipt_path) != outcome_row["receipt_sha256"]:
+                        raise ValueError("outcome receipt digest differs from durable receipt")
+                state = outcome_state
             if state not in EVIDENCE_STATES:
                 raise ValueError("unsupported attempt evidence state {}".format(state))
             records[key] = state
@@ -162,7 +274,8 @@ def evidence_records(work_root):
     return records
 
 
-def inventory(campaign, tune_rows, manifest_path, attempts_path, raw_root, work_root):
+def inventory(campaign, tune_rows, manifest_path, attempts_path, raw_root, work_root,
+              verify_accepted_sha256=False):
     expected = [(row["name"], logical_id) for row in tune_rows
                 for logical_id in range(int(campaign["logical_jobs_per_tune"]))]
     manifest = accepted_manifest(manifest_path)
@@ -173,6 +286,9 @@ def inventory(campaign, tune_rows, manifest_path, attempts_path, raw_root, work_
             raise ValueError("duplicate/out-of-domain accepted identity {}".format(key))
         if row["raw_storage_key"] != storage_key(*key):
             raise ValueError("accepted storage key does not match logical identity {}".format(key))
+        if (int(row["bytes"]) <= 0 or
+                not re.fullmatch(r"[0-9a-f]{64}", str(row["raw_sha256"]))):
+            raise ValueError("accepted byte/hash identity is malformed {}".format(key))
         accepted[key] = row
     history = {}
     for row in attempt_rows(attempts_path):
@@ -180,7 +296,7 @@ def inventory(campaign, tune_rows, manifest_path, attempts_path, raw_root, work_
         if key in history:
             raise ValueError("duplicate historical attempt {}".format(key))
         history[key] = row["outcome"]
-    evidence = evidence_records(work_root)
+    evidence = evidence_records(work_root, campaign, tune_rows)
     for key in evidence:
         if key in history:
             raise ValueError("work evidence reuses immutable historical attempt {}".format(key))
@@ -191,16 +307,26 @@ def inventory(campaign, tune_rows, manifest_path, attempts_path, raw_root, work_
         stable = raw_root / storage_key(tune, logical_id)
         if key in accepted:
             row = accepted[key]
-            if stable.exists():
-                if not stable.is_file() or stable.stat().st_size != int(row["bytes"]):
-                    statuses[key] = "accepted_mismatch"
+            if os.path.lexists(str(stable)):
+                if (stable.is_symlink() or not stable.is_file() or
+                        stable.stat().st_size != int(row["bytes"])):
+                    statuses[key] = "accepted_size_or_type_mismatch"
                     errors.append("accepted path size/type mismatch: {}".format(stable))
+                elif verify_accepted_sha256:
+                    actual_sha256 = digest_file(stable)
+                    if actual_sha256 != row["raw_sha256"]:
+                        statuses[key] = "accepted_sha256_mismatch"
+                        errors.append(
+                            "accepted path SHA-256 mismatch: {} expected={} actual={}".format(
+                                stable, row["raw_sha256"], actual_sha256))
+                    else:
+                        statuses[key] = "accepted_sha256_verified"
                 else:
-                    statuses[key] = "accepted_present"
+                    statuses[key] = "accepted_size_observed_sha256_unverified"
             else:
                 statuses[key] = "accepted_missing_local"
             continue
-        if stable.exists():
+        if os.path.lexists(str(stable)):
             statuses[key] = "occupied_mismatch"
             errors.append("occupied unregistered raw path; refusing overwrite: {}".format(stable))
             continue
@@ -343,8 +469,10 @@ def render_submit(campaign, study, rows, runtime, producer, validator,
         "{} worker --tune $(tune) --logical-id $(logical_id) --attempt $(attempt) "
         "--seed $(seed) --card-sha256 $(card_sha256) "
         "--effective-card-sha256 $(effective_card_sha256) --producer-sha256 {} "
-        "--validator-sha256 {} --repository-commit {} --raw-root {} --work-root {}"
-    ).format(worker, producer_sha, validator_sha, commit, raw_root, work_root)
+        "--validator-sha256 {} --repository-commit {} --raw-root {} --work-root {} "
+        "--producer-path {} --validator-path {}"
+    ).format(worker, producer_sha, validator_sha, commit, raw_root, work_root,
+             producer, validator)
     lines = [
         "# deterministic nominal generation plan",
         "# campaign={} purpose={} study_sha256={}".format(
@@ -374,6 +502,7 @@ def render_submit(campaign, study, rows, runtime, producer, validator,
     lines.extend([")", ""])
     rendered = "\n".join(lines).encode("utf-8")
     validate_submit_contract(rendered)
+    validate_submit_executable_contract(rendered, producer, validator)
     return rendered
 
 
@@ -398,22 +527,75 @@ def validate_submit_contract(rendered):
     return True
 
 
+def validate_submit_executable_contract(rendered, producer, validator):
+    text = rendered.decode("utf-8") if isinstance(rendered, bytes) else rendered
+    expected = ("--producer-path {}".format(producer),
+                "--validator-path {}".format(validator))
+    if any(token not in text for token in expected):
+        raise ValueError("Condor plan/worker executable-path contract disagrees")
+    return True
+
+
+def submission_filesystem_preflight(work_root, producer, validator):
+    for path, label in ((producer, "producer"), (validator, "validator")):
+        if path.is_symlink() or not path.is_file() or not os.access(str(path), os.X_OK):
+            raise RuntimeError("submission {} executable path is not a regular executable: {}".format(
+                label, path))
+    condor = work_root / "condor"
+    condor.mkdir(parents=True, mode=0o700, exist_ok=True)
+    if condor.is_symlink() or not condor.is_dir() or not os.access(str(condor), os.W_OK):
+        raise RuntimeError("Condor output directory is not a writable regular directory: {}".format(
+            condor))
+    return condor
+
+
 def reserve_rows(campaign, rows, work_root, plan_sha):
+    if not re.fullmatch(r"[0-9a-f]{64}", str(plan_sha)):
+        raise ValueError("reservation plan SHA-256 is malformed")
     reservations = []
     now = int(time.time())
+    destinations = []
+    identities = set()
     for row in rows:
+        key = (row["tune"], int(row["logical_id"]), int(row["attempt"]))
+        if key in identities:
+            raise ValueError("duplicate reservation batch identity {}".format(key))
+        identities.add(key)
+        if (row["storage_key"] != storage_key(row["tune"], row["logical_id"]) or
+                int(row["seed"]) != seed_for(
+                    campaign, row["tune"], int(row["logical_id"]),
+                    int(row["attempt"]))):
+            raise ValueError("reservation batch identity/seed/storage mismatch {}".format(key))
         directory = evidence_directory(work_root, row["tune"], row["logical_id"], row["attempt"])
         reservation = directory / "reservation.json"
+        if os.path.lexists(str(reservation)):
+            raise FileExistsError("reservation destination collision: {}".format(reservation))
+        if os.path.lexists(str(directory)) and (directory.is_symlink() or not directory.is_dir()):
+            raise FileExistsError("reservation directory is occupied: {}".format(directory))
         payload = {
-            "schema": "hf_attempt_reservation_v1", "state": "reserved",
+            "schema": RESERVATION_SCHEMA, "state": "reserved",
             "campaign": campaign["campaign"], "purpose": "continuation",
             "tune": row["tune"], "logical_id": row["logical_id"],
             "attempt": row["attempt"], "seed": row["seed"],
             "storage_key": row["storage_key"], "plan_sha256": plan_sha,
             "reserved_unix_seconds": now,
         }
-        atomic_json(reservation, payload, exclusive=True)
-        reservations.append((reservation, payload))
+        destinations.append((reservation, payload))
+    try:
+        for reservation, payload in destinations:
+            atomic_json(reservation, payload, exclusive=True)
+            reservations.append((reservation, payload))
+    except Exception:
+        cleanup_failures = []
+        for reservation, unused in reversed(reservations):
+            try:
+                reservation.unlink()
+            except OSError as error:
+                cleanup_failures.append("{}: {}".format(reservation, error))
+        if cleanup_failures:
+            raise RuntimeError("reservation batch rollback failed: {}".format(
+                "; ".join(cleanup_failures)))
+        raise
     return reservations
 
 
@@ -427,12 +609,13 @@ def mark_reservations(reservations, state, detail=None):
         atomic_json(path, updated)
 
 
-def record_preworker_outcome(args, work_root):
+def record_preworker_outcome(args, work_root, campaign, tune_rows):
     """Persist an operator-observed scheduler outcome for a worker that never ran."""
     directory = evidence_directory(work_root, args.tune, args.logical_id, args.attempt)
     reservation_path = directory / "reservation.json"
     if not reservation_path.is_file():
         raise RuntimeError("cannot record outcome without a durable reservation")
+    evidence_records(work_root, campaign, tune_rows)
     reservation = load_json(reservation_path)
     identity = (reservation.get("tune"), reservation.get("logical_id"),
                 reservation.get("attempt"))
@@ -441,10 +624,12 @@ def record_preworker_outcome(args, work_root):
     if reservation.get("state") not in {"reserved", "submitted"}:
         raise RuntimeError("reservation is not awaiting a pre-worker outcome")
     atomic_json(directory / "outcome.json", {
-        "schema": "hf_attempt_outcome_v1", "state": args.state,
+        "schema": OUTCOME_SCHEMA, "state": args.state,
         "stage": "scheduler_before_worker", "reason": args.reason,
+        "campaign": reservation["campaign"],
         "tune": args.tune, "logical_id": args.logical_id,
         "attempt": args.attempt, "seed": reservation.get("seed"),
+        "storage_key": reservation["storage_key"],
         "finished_unix_seconds": int(time.time()),
     }, exclusive=True)
     return directory / "outcome.json"
@@ -465,7 +650,7 @@ def validator_command(validator, partial, campaign, args):
 
 def promote_no_overwrite(partial, stable, expected_sha):
     stable.parent.mkdir(parents=True, exist_ok=True)
-    if stable.exists():
+    if os.path.lexists(str(stable)):
         raise RuntimeError("stable output already exists; refusing overwrite: {}".format(stable))
     staging = stable.parent / ".{}.{}.staging".format(stable.name, os.getpid())
     descriptor = os.open(str(staging), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
@@ -487,11 +672,16 @@ def promote_no_overwrite(partial, stable, expected_sha):
             raise
         finally:
             os.close(directory)
-        staging.unlink()
+        try:
+            staging.unlink()
+        except OSError as error:
+            print("WARNING canonical exposure committed; staging cleanup failed: {}".format(error),
+                  file=sys.stderr)
+            return
     except Exception:
         if descriptor >= 0:
             os.close(descriptor)
-        if staging.exists():
+        if os.path.lexists(str(staging)):
             staging.unlink()
         raise
 
@@ -500,16 +690,22 @@ def commit_validated_output(partial, stable, receipt_path, outcome_path, receipt
     """Durably record PASS before exposing a no-overwrite canonical path."""
     atomic_json(receipt_path, receipt, exclusive=True)
     receipt_sha = digest_file(receipt_path)
-    atomic_json(outcome_path, {
-        "schema": "hf_attempt_outcome_v1", "state": "validated",
+    outcome_identity = {
+        "campaign": receipt["campaign"], "tune": receipt["tune"],
+        "logical_id": receipt["logical_id"], "attempt": receipt["attempt"],
+        "seed": receipt["seed"], "storage_key": receipt["target"],
+    }
+    atomic_json(outcome_path, dict(outcome_identity, **{
+        "schema": OUTCOME_SCHEMA, "state": "validated",
         "receipt_sha256": receipt_sha,
-        "finished_unix_seconds": int(time.time()), "cleanup_after_days": 7})
+        "finished_unix_seconds": int(time.time()), "cleanup_after_days": 7}),
+        exclusive=True)
     promote_no_overwrite(partial, stable, receipt["output_sha256"])
     try:
-        atomic_json(outcome_path, {
-            "schema": "hf_attempt_outcome_v1", "state": "accepted",
+        atomic_json(outcome_path, dict(outcome_identity, **{
+            "schema": OUTCOME_SCHEMA, "state": "accepted",
             "receipt_sha256": receipt_sha,
-            "finished_unix_seconds": int(time.time()), "cleanup_after_days": 7})
+            "finished_unix_seconds": int(time.time()), "cleanup_after_days": 7}))
     except OSError as error:
         print("WARNING promoted output has a durable validated receipt but outcome update failed: {}".format(error),
               file=sys.stderr)
@@ -536,8 +732,8 @@ def worker(args):
     environment.update(resolved["environment"])
     work_root = Path(args.work_root).resolve()
     raw_root = Path(args.raw_root).resolve()
-    producer = work_root / "bin/producer"
-    validator = work_root / "bin/validate_raw"
+    producer = Path(args.producer_path).resolve()
+    validator = Path(args.validator_path).resolve()
     if not producer.is_file() or digest_file(producer) != args.producer_sha256:
         raise RuntimeError("producer executable digest mismatch")
     if not validator.is_file() or digest_file(validator) != args.validator_sha256:
@@ -552,6 +748,10 @@ def worker(args):
     reservation = directory / "reservation.json"
     if not reservation.is_file():
         raise RuntimeError("worker lacks durable attempt reservation")
+    current_evidence = evidence_records(work_root, campaign, tune_rows)
+    if current_evidence.get((args.tune, args.logical_id, args.attempt)) not in {
+            "reserved", "submitted"}:
+        raise RuntimeError("attempt evidence already has a terminal outcome")
     reserved = load_json(reservation)
     if (reserved.get("state") not in {"reserved", "submitted"} or
             (reserved.get("seed"), reserved.get("storage_key")) !=
@@ -567,15 +767,18 @@ def worker(args):
         "HADRONIZATION_REPOSITORY_COMMIT": args.repository_commit,
         "HADRONIZATION_REPOSITORY_DIRTY": "false",
     })
-    command = [str(producer), TUNE_MODES[args.tune], str(partial), str(args.seed),
+    command = [str(producer), tune_map[args.tune]["id"], str(partial), str(args.seed),
                campaign["campaign"], str(campaign["seed"]["campaign_ordinal"]),
                str(args.logical_id), "primary", str(args.attempt)]
     result = subprocess.run(command, cwd=str(scratch), env=environment)
     if result.returncode:
         atomic_json(directory / "outcome.json", {
-            "schema": "hf_attempt_outcome_v1", "state": "failed",
+            "schema": OUTCOME_SCHEMA, "state": "failed",
+            "campaign": campaign["campaign"], "tune": args.tune,
+            "logical_id": args.logical_id, "attempt": args.attempt,
+            "seed": args.seed, "storage_key": storage_key(args.tune, args.logical_id),
             "stage": "producer", "exit_code": result.returncode,
-            "finished_unix_seconds": int(time.time())})
+            "finished_unix_seconds": int(time.time())}, exclusive=True)
         raise RuntimeError("producer exited {}; partial retained".format(result.returncode))
     validation = subprocess.run(
         validator_command(validator, partial, campaign, args),
@@ -584,14 +787,17 @@ def worker(args):
     if validation.returncode:
         (directory / "validator.log").write_text(validation.stdout, encoding="utf-8")
         atomic_json(directory / "outcome.json", {
-            "schema": "hf_attempt_outcome_v1", "state": "failed",
+            "schema": OUTCOME_SCHEMA, "state": "failed",
+            "campaign": campaign["campaign"], "tune": args.tune,
+            "logical_id": args.logical_id, "attempt": args.attempt,
+            "seed": args.seed, "storage_key": storage_key(args.tune, args.logical_id),
             "stage": "validation", "exit_code": validation.returncode,
-            "finished_unix_seconds": int(time.time())})
+            "finished_unix_seconds": int(time.time())}, exclusive=True)
         raise RuntimeError("raw validator rejected partial; evidence retained")
     output_sha = digest_file(partial)
     stable = raw_root / storage_key(args.tune, args.logical_id)
     receipt = {
-        "schema": "hf_raw_validation_receipt_v5", "state": "PASS",
+        "schema": RECEIPT_SCHEMA, "state": "PASS",
         "campaign": campaign["campaign"], "tune": args.tune,
         "logical_id": args.logical_id, "attempt": args.attempt, "seed": args.seed,
         "successful_events": int(campaign["successful_events_per_logical_job"]),
@@ -624,6 +830,8 @@ def parser():
     plan.add_argument("--work-root", type=Path)
     plan.add_argument("--raw-manifest", type=Path)
     plan.add_argument("--attempts", type=Path)
+    plan.add_argument("--verify-accepted-sha256", action="store_true",
+                      help="hash locally present accepted raw bytes against the manifest")
     build_parser = sub.add_parser("build")
     build_parser.add_argument("--component", choices=("validator", "producer", "all"),
                               default="all")
@@ -641,10 +849,12 @@ def parser():
     run.add_argument("--repository-commit", required=True)
     run.add_argument("--raw-root", required=True)
     run.add_argument("--work-root", required=True)
+    run.add_argument("--producer-path", required=True)
+    run.add_argument("--validator-path", required=True)
     outcome = sub.add_parser(
         "record-outcome",
         help="record a held/failed scheduler outcome when the worker never ran")
-    outcome.add_argument("--tune", choices=tuple(TUNE_MODES), required=True)
+    outcome.add_argument("--tune", required=True)
     outcome.add_argument("--logical-id", type=int, required=True)
     outcome.add_argument("--attempt", type=int, required=True)
     outcome.add_argument("--state", choices=("held", "failed"), required=True)
@@ -665,7 +875,8 @@ def main():
             worker(args)
             return 0
         if args.command == "record-outcome":
-            path = record_preworker_outcome(args, work_root)
+            campaign, unused_study, tune_rows = campaign_inputs()
+            path = record_preworker_outcome(args, work_root, campaign, tune_rows)
             print("RECORDED_OUTCOME={}".format(path))
             return 0
         if args.command == "build":
@@ -680,7 +891,7 @@ def main():
         manifest_path = (args.raw_manifest or ROOT / "data/raw_manifest.jsonl").resolve()
         attempts_path = (args.attempts or ROOT / "data/attempts.csv").resolve()
         measured = inventory(campaign, tune_rows, manifest_path, attempts_path,
-                             raw_root, work_root)
+                             raw_root, work_root, args.verify_accepted_sha256)
         rows = plan_rows(campaign, tune_rows, measured, args.purpose)
         counts = {}
         for status in measured["statuses"].values():
@@ -715,6 +926,7 @@ def main():
                 raise RuntimeError("--submit requires SCHEDULER_SUBMIT in config/site.conf")
             if not producer.is_file() or not validator.is_file():
                 raise RuntimeError("--submit requires built producer and validator")
+            submission_filesystem_preflight(work_root, producer, validator)
             reservations = reserve_rows(campaign, rows, work_root, plan_sha)
             result = subprocess.run(shlex.split(submit_command) + [str(destination)])
             if result.returncode:

@@ -90,7 +90,7 @@ class StudyContract(unittest.TestCase):
         self.assertEqual(len(excluded), 6)
         self.assertEqual({state["pdg"] for state in excluded},
                          {5212, -5212, 5312, -5312, 5322, -5322})
-        self.assertTrue(all(state["status"] == "inclusive_only"
+        self.assertTrue(all(state["status"] == "excluded_from_pair_analysis"
                             and state["reason"] for state in excluded))
         self.assertTrue(all(state["status"] == "pair_analysis"
                             for state in states if state["pair_analysis_eligible"]))
@@ -136,6 +136,13 @@ class StudyContract(unittest.TestCase):
                  "check", "--output", str(target)], text=True,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.assertNotEqual(result.returncode, 0)
+            target.write_bytes(header.replace(b"  return -1;", b"  return 0;", 1))
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "pipeline/generate/study_contract.py"),
+                 "check", "--output", str(target)], text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("stale", result.stderr)
 
     def test_reference_gate_rejects_dangling_and_mis_pdg_states(self):
         dangling = copy.deepcopy(self.study)

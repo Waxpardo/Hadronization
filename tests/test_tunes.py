@@ -1,20 +1,35 @@
 import itertools
+import subprocess
 import unittest
 
 from helpers import ROOT, load_json, parse_card, sha256
 
 
 class TuneCardContract(unittest.TestCase):
-    def test_card_hashes_are_preserved(self):
+    def test_card_comment_cleanup_preserves_parsed_settings(self):
         expected = {
-            "monash.cmnd": "defd7f5dff774e790ffa773b3186341e89bd1fe7a5101f8fb491e3b10b156b23",
-            "junctions.cmnd": "bbadecf78528637b1d80edd5594d0f3ea4d3ab73d0d44bc1e7e07c7bc25a41d8",
-            "close_packing.cmnd": "dd0755ae85c340f7e3a438931bed14afa433220f164f84fcb0e18d4ae6f2f4de",
+            "monash.cmnd": "1945c5d1e2392915a5d35fe090649857150cfc34a13403cfdafdfa85a8f893d7",
+            "junctions.cmnd": "dfadfd8ffd2c9a386f159e239d3b582bdb038848b9bf55eb3ade571edce79128",
+            "close_packing.cmnd": "99a7ff824cdae94b44d5d3a547770f5b7cb02e7cd8dd2842a95bdb1ebafdfe2d",
         }
         self.assertEqual({path.name for path in (ROOT / "config/tunes").iterdir()},
                          set(expected))
         for name, digest in expected.items():
-            self.assertEqual(sha256(ROOT / "config/tunes" / name), digest)
+            path = ROOT / "config/tunes" / name
+            self.assertEqual(sha256(path), digest)
+            entry = subprocess.check_output(
+                ["git", "-C", str(ROOT), "show",
+                 "e0f56b8015797a3530c8ae50666686d81bf7b9ef:config/tunes/{}".format(name)],
+                text=True)
+            with self.subTest(name=name):
+                current = parse_card(path)
+                prior = {}
+                for raw in entry.splitlines():
+                    line = raw.split("#", 1)[0].split("!", 1)[0].strip()
+                    if "=" in line:
+                        key, value = line.split("=", 1)
+                        prior[key.strip()] = value.strip()
+                self.assertEqual(current, prior)
 
     def test_common_values_and_tune_differences(self):
         study = load_json("config/study.json")
@@ -34,6 +49,14 @@ class TuneCardContract(unittest.TestCase):
         self.assertTrue(differing <= allowed, sorted(differing - allowed))
         self.assertNotIn("SigmaProcess:renormMultFac", all_keys)
         self.assertNotIn("SigmaProcess:factorMultFac", all_keys)
+        campaign = load_json("data/campaign.json")
+        accepted = campaign["accepted_source"]["tune_cards"]
+        self.assertEqual(accepted["MONASH"]["accepted_effective_sha256"],
+                         "8dfa3ea896e8358cece4e3270133efe310b114724bd8cf06fa477fe7cd46b1f9")
+        self.assertEqual(accepted["JUNCTIONS"]["accepted_effective_sha256"],
+                         "db1c64736ae984f4e6496bbedeba9816f65ed8f3c668d67adfcfc87a58a70878")
+        self.assertEqual(accepted["CLOSEPACKING"]["accepted_effective_sha256"],
+                         "0a3bca5525e8a06dd9e5d9b34fed2e0d460e9b9945f3bd4df51f927dd89a6378")
 
 
 if __name__ == "__main__":

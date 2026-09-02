@@ -371,9 +371,9 @@
     "id": "HF_RUN3_V1"
   },
   "current_study_definition": {
-    "bytes": 39311,
+    "bytes": 39389,
     "path": "config/study.json",
-    "sha256": "24aa1f16d715008e034ed1960921cb03221438e34b1dc52c9825fa7405e342f8"
+    "sha256": "d3eac08d732dd5d9642b650ac69cb3512bf3245ae450387e57ace7690a8ef4f5"
   },
   "discarded_attempts": "recorded_no_correction",
   "import_commit": {

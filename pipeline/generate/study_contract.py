@@ -75,11 +75,12 @@ def validate(study):
         eligible = state["pair_analysis_eligible"]
         if not isinstance(eligible, bool):
             raise ValueError("pair_analysis_eligible must be boolean")
-        expected_status = "pair_analysis" if eligible else "inclusive_only"
+        expected_status = ("pair_analysis" if eligible else
+                           "excluded_from_pair_analysis")
         if state["status"] != expected_status:
             raise ValueError("selected-state eligibility/status mismatch: {}".format(state["id"]))
         if not eligible and not state.get("reason"):
-            raise ValueError("inclusive-only state lacks a reason: {}".format(state["id"]))
+            raise ValueError("pair-excluded state lacks a reason: {}".format(state["id"]))
 
     references = []
     for pair in study["pair_observable"]["balancing_pairs"]:
@@ -159,6 +160,7 @@ def render():
         "#define HADRONIZATION_GENERATED_STUDY_CONTRACT_HPP",
         "",
         "#include <array>",
+        "#include <cstddef>",
         "#include <string_view>",
         "",
         "namespace Hadronization {",
@@ -232,7 +234,24 @@ def render():
     for row, digest in tunes:
         lines.append("  TuneDefinition{{{}, {}, {}, {}}},".format(
             cpp(row["name"]), cpp(row["id"]), cpp(row["card"]), cpp(digest)))
-    lines.append("}};")
+    lines.extend([
+        "}};",
+        "inline int FindTuneDefinitionIndex(std::string_view token) {",
+        "  for (std::size_t index = 0; index < kTuneDefinitions.size(); ++index) {",
+        "    const auto& tune = kTuneDefinitions[index];",
+        "    if (token == tune.name || token == tune.id) return static_cast<int>(index);",
+        "  }",
+        "  return -1;",
+        "}",
+        "inline const TuneDefinition* FindTuneDefinition(std::string_view token) {",
+        "  const int index = FindTuneDefinitionIndex(token);",
+        "  return index < 0 ? nullptr : &kTuneDefinitions[static_cast<std::size_t>(index)];",
+        "}",
+        "inline std::string_view TuneCardBasename(const TuneDefinition& tune) {",
+        "  const std::size_t slash = tune.card.find_last_of('/');",
+        "  return slash == std::string_view::npos ? tune.card : tune.card.substr(slash + 1);",
+        "}",
+    ])
 
     def string_array(name, values):
         lines.append("inline constexpr std::array<std::string_view, {}> {}{{{{".format(

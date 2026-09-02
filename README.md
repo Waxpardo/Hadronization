@@ -26,6 +26,13 @@ durably reserves each attempt first; a scheduler hold before worker startup is
 recorded with `pipeline/generate/submit.py record-outcome` after inspecting the
 Condor event log.
 
+The default accepted-raw inventory observes only local file type and byte count,
+and labels those bytes SHA-unverified. Run `pipeline/generate/submit.py plan
+--verify-accepted-sha256` before ANALYZE-1 to compare every locally present
+accepted file with the manifest. The producer records the complete PYTHIA
+settings map; the independent raw validator proves canonical integrity and the
+generated audited subset, along with the event/vector/accounting contracts.
+
 Generation only describes deterministic nominal work unless `--submit` is
 given and an untracked `config/site.conf` configures a scheduler. `analyze`,
 `merge`, `reduce`, and `plot` intentionally refuse until ANALYZE-1 or PLOT-1.

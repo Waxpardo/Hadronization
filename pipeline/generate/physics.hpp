@@ -1,6 +1,8 @@
 #ifndef HADRONIZATION_HEAVY_FLAVOUR_UTILS_H
 #define HADRONIZATION_HEAVY_FLAVOUR_UTILS_H
 
+#include "study_contract.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -237,8 +239,8 @@ inline CarrierUniquenessResult EnforceUniqueFinalHardCarrier(
 // The validation-only all-primary-heavy closure records one row for every
 // c, cbar, b, or bbar constituent. Enforce carrier uniqueness between distinct
 // final parent hadrons, not between indistinguishable constituent rows within
-// one multiply-heavy parent. This does not alter Paul's central trigger
-// definition. demotedMatches remains a constituent-row count.
+// one multiply-heavy parent. This does not alter the scientific trigger
+// contract. demotedMatches remains a constituent-row count.
 inline CarrierUniquenessResult EnforceUniqueFinalConstituentHardCarrier(
     const std::vector<int>& parentSlot,
     const std::vector<int>& parentIsFinal,
@@ -387,9 +389,8 @@ inline int ParseBoundedInt(const char* text, const char* name, int minimum,
 }
 
 inline int TuneOrdinal(const std::string& tune) {
-  if (tune == "MONASH" || tune == "monash") return 0;
-  if (tune == "JUNCTIONS" || tune == "junctions") return 1;
-  if (tune == "CLOSEPACKING" || tune == "closepacking") return 2;
+  const int ordinal = FindTuneDefinitionIndex(tune);
+  if (ordinal >= 0) return ordinal;
   throw std::invalid_argument("unknown tune: " + tune);
 }
 
@@ -466,7 +467,7 @@ inline bool DecodePythiaBaryonNumber(int signedPdg, bool isMeson,
 // caption may now derive from these names and be unable to disagree with the
 // cut, which is the whole point of the standing rule.
 //
-// Values are unchanged; tests/test_heavy_flavour_utils.cpp pins the boundaries.
+// Values are unchanged; the active physics contract fixture pins the boundaries.
 inline constexpr double kCentralPtMinAssociate = 0.15;
 inline constexpr double kCentralPtMinTrigger = 1.0;
 inline constexpr double kCentralEtaAbsMax = 4.0;
