@@ -238,6 +238,14 @@ class StudyContract(unittest.TestCase):
             elif isinstance(value, list):
                 stack.extend(value)
         self.assertTrue(forbidden_keys.isdisjoint(seen))
+        path = ROOT / "pipeline/generate/study_contract.py"
+        spec = importlib.util.spec_from_file_location("nominal_structure_gate", str(path))
+        generator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(generator)
+        mutated = copy.deepcopy(self.study)
+        mutated["variations"] = [{"id": "forbidden_reintroduction"}]
+        with self.assertRaisesRegex(ValueError, "selectable variation"):
+            generator.validate(mutated)
 
 
 if __name__ == "__main__":

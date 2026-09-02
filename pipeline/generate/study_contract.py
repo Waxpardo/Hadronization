@@ -47,6 +47,18 @@ def validate(study):
     if (scope.get("variation_selection") is not False or
             scope.get("systematic_uncertainty") != "disabled_and_absent"):
         raise ValueError("study must remain nominal and statistical-only")
+    forbidden_keys = {"variations", "variation_modes", "systematics_selector"}
+    stack = [study]
+    while stack:
+        value = stack.pop()
+        if isinstance(value, dict):
+            selected = forbidden_keys.intersection(value)
+            if selected:
+                raise ValueError("study exposes selectable variation structure: {}".format(
+                    sorted(selected)[0]))
+            stack.extend(value.values())
+        elif isinstance(value, list):
+            stack.extend(value)
     states = study.get("selected_states", [])
     if len(states) != 50:
         raise ValueError("selected-state registry must contain 50 states")
