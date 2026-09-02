@@ -967,6 +967,17 @@ class SubmissionContract(unittest.TestCase):
                 self.submit.atomic_json(path, {"state": "reserved"}, exclusive=True)
             self.assertEqual(path.read_bytes(), original)
 
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            temporary = path.with_name(".{}.{}.tmp".format(
+                path.name, self.submit.os.getpid()))
+            foreign = b"foreign nonexclusive temporary bytes\n"
+            temporary.write_bytes(foreign)
+            with self.assertRaises(FileExistsError):
+                self.submit.atomic_json(path, {"state": "updated"})
+            self.assertFalse(path.exists())
+            self.assertEqual(temporary.read_bytes(), foreign)
+
     def test_promotion_is_no_overwrite_and_receipt_failure_is_fail_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)

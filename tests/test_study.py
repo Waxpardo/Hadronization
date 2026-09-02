@@ -108,6 +108,13 @@ class StudyContract(unittest.TestCase):
         spec.loader.exec_module(generator)
         header = ROOT / "pipeline/generate/study_contract.hpp"
         self.assertEqual(header.read_bytes(), generator.render())
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "study_contract.hpp"
+            result = subprocess.run(
+                [sys.executable, str(path), "generate", "--output", str(target)],
+                text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(target.read_bytes(), header.read_bytes())
         digest = hashlib.sha256((ROOT / "config/study.json").read_bytes()).hexdigest()
         self.assertIn('kStudyDefinitionSha256 = "{}"'.format(digest),
                       header.read_text(encoding="utf-8"))

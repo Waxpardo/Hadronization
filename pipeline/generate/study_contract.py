@@ -282,8 +282,12 @@ def main():
         expected = render()
         if args.command == "generate":
             args.output.write_bytes(expected)
+            try:
+                output_label = args.output.relative_to(ROOT)
+            except ValueError:
+                output_label = args.output
             print("GENERATED {} sha256={}".format(
-                args.output.relative_to(ROOT), sha256_bytes(expected)))
+                output_label, sha256_bytes(expected)))
             return 0
         actual = args.output.read_bytes()
         if actual != expected:

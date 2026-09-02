@@ -72,6 +72,7 @@ def atomic_json(path, payload, exclusive=False):
     data = (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
     temporary = None
     created_exclusive = False
+    created_temporary = False
     replaced = False
     try:
         if exclusive:
@@ -82,6 +83,7 @@ def atomic_json(path, payload, exclusive=False):
             temporary = path.with_name(".{}.{}.tmp".format(path.name, os.getpid()))
             descriptor = os.open(
                 str(temporary), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            created_temporary = True
         with os.fdopen(descriptor, "wb") as handle:
             handle.write(data)
             handle.flush()
@@ -94,7 +96,7 @@ def atomic_json(path, payload, exclusive=False):
         cleanup_target = None
         if exclusive and created_exclusive:
             cleanup_target = path
-        elif temporary is not None and not replaced:
+        elif temporary is not None and created_temporary and not replaced:
             cleanup_target = temporary
         cleanup_failures = []
         removed = False
