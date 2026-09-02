@@ -13,12 +13,7 @@ import time
 
 
 ROOT = Path(__file__).resolve().parent
-UNAVAILABLE = {
-    "analyze": "ANALYZE-1",
-    "merge": "ANALYZE-1",
-    "reduce": "ANALYZE-1",
-    "plot": "PLOT-1",
-}
+UNAVAILABLE = {"analyze", "merge", "reduce", "plot"}
 
 
 def doctor():
@@ -160,7 +155,7 @@ def build_parser():
         "--purpose", choices=("inventory", "continuation", "recovery", "new"),
         default=None, help="declare inventory or continuation semantics")
     for name in ("analyze", "merge", "reduce", "plot"):
-        sub.add_parser(name, help="intentionally unavailable in CLEAN-1")
+        sub.add_parser(name, help="direct stage is not yet implemented")
     sub.add_parser("verify", help="run the focused active-contract suite")
     clean_parser = sub.add_parser("clean", help="remove reproducible checkout residue")
     clean_mode = clean_parser.add_mutually_exclusive_group()
@@ -177,8 +172,8 @@ def main():
         purpose = args.purpose or ("continuation" if args.submit else "inventory")
         return generate(args.submit, purpose)
     if args.command in UNAVAILABLE:
-        print("ERROR: {} not implemented until {}".format(
-            args.command, UNAVAILABLE[args.command]), file=sys.stderr)
+        print("ERROR: {} direct stage is not yet implemented".format(
+            args.command), file=sys.stderr)
         return 3
     if args.command == "verify":
         return verify()

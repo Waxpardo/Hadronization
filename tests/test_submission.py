@@ -27,6 +27,155 @@ def declared_array(source, name):
     return re.findall(r'"([^"]+)"', match.group(1))
 
 
+LEAF_TYPES = {
+    "I": "Int_t", "D": "Double_t", "S": "Short_t",
+    "l": "ULong64_t", "L": "Long64_t",
+}
+
+
+def leaf_branches(source, owner):
+    pattern = (r"{}\.Branch\(\s*\"([^\"]+)\"\s*,"
+               r"(?:(?!{}\.Branch).)*?\"[^\"]*/([IDSlL])\"")
+    return {
+        name: LEAF_TYPES[code]
+        for name, code in re.findall(pattern.format(owner, owner), source,
+                                     re.DOTALL)
+    }
+
+
+def string_constant(source, name):
+    match = re.search(
+        r"{}\s*=\s*\"([^\"]+)\"".format(re.escape(name)), source)
+    if not match:
+        raise AssertionError("generated string constant not found: {}".format(name))
+    return match.group(1)
+
+
+def validator_raw_v7_contract(source):
+    scalar_block = re.search(r"scalarTypes\{\{(.*?)\}\};", source, re.DOTALL)
+    if not scalar_block:
+        raise AssertionError("validator scalar type contract not found")
+    event = {
+        name: type_name
+        for name, type_name in re.findall(
+            r'\{"([^"]+)",\s*"([^"]+)"\s*,', scalar_block.group(1))
+    }
+    scalar_names = set(declared_array(source, "scalarBranches"))
+    if set(event) != scalar_names:
+        raise AssertionError("validator raw-v7 scalar name/type parity mismatch")
+    for name in declared_array(source, "integerVectors"):
+        event[name] = "vector<int>"
+    for array_name in ("doubleVectors", "finalDoubleVector", "hardDoubleVectors"):
+        for name in declared_array(source, array_name):
+            event[name] = "vector<double>"
+
+    metadata = {}
+    for array_name, type_name in (
+            ("metadataStrings", "string"), ("metadataInts", "Int_t"),
+            ("metadataUnsigned", "ULong64_t"),
+            ("metadataLong", "Long64_t"),
+            ("metadataDouble", "Double_t")):
+        for name in declared_array(source, array_name):
+            metadata[name] = type_name
+    return event, metadata
+
+
+def producer_raw_v7_contract(source, generated_header):
+    event_match = re.search(
+        r'TTree tree\("tree".*?#undef BRANCH_VECTOR', source, re.DOTALL)
+    if not event_match:
+        raise AssertionError("producer raw-v7 event declaration not found")
+    block = event_match.group(0)
+    vector_types = {}
+    for type_name, declarations in re.findall(
+            r"std::vector<(int|double)>\s+([^;]+);", block, re.DOTALL):
+        for declaration in declarations.split(","):
+            name = declaration.strip()
+            if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+                raise AssertionError(
+                    "producer vector declaration parser rejected {!r}".format(name))
+            vector_types[name] = "vector<{}>".format(type_name)
+
+    event = leaf_branches(block, "tree")
+    for branch_name, variable in re.findall(
+            r'tree\.Branch\(\s*"([^"]+)"\s*,\s*&([A-Za-z_][A-Za-z0-9_]*)\s*\);',
+            block):
+        if variable not in vector_types:
+            raise AssertionError(
+                "producer raw-v7 vector type is unknown: {}".format(variable))
+        event[branch_name] = vector_types[variable]
+    for variable in re.findall(r"BRANCH_VECTOR\(([A-Za-z_][A-Za-z0-9_]*)\);", block):
+        if variable not in vector_types:
+            raise AssertionError(
+                "producer raw-v7 macro vector type is unknown: {}".format(variable))
+        event[variable] = vector_types[variable]
+    event[string_constant(generated_header, "kRawMultiplicityEta10Branch")] = "Int_t"
+    event[string_constant(generated_header, "kRawMultiplicityEta40Branch")] = "Int_t"
+
+    metadata_match = re.search(
+        r'TTree metadata\("job_metadata".*?metadata\.Fill\(\);',
+        source, re.DOTALL)
+    if not metadata_match:
+        raise AssertionError("producer raw-v7 metadata declaration not found")
+    metadata_block = metadata_match.group(0)
+    metadata = leaf_branches(metadata_block, "metadata")
+    for branch_name in re.findall(
+            r'metadata\.Branch\(\s*"([^"]+)"\s*,\s*&[A-Za-z_][A-Za-z0-9_]*\s*\);',
+            metadata_block):
+        metadata[branch_name] = "string"
+    metadata[string_constant(
+        generated_header, "kRawTuneAllowlistSchemaBranch")] = "string"
+    metadata[string_constant(
+        generated_header, "kRawTuneAllowlistSha256Branch")] = "string"
+    return event, metadata
+
+
+def rendered_string_vector(source, name):
+    match = re.search(
+        r"const std::vector<std::string>\s+{}\s*=\s*\{{(.*?)\}};".format(
+            re.escape(name)), source, re.DOTALL)
+    if not match:
+        raise AssertionError("rendered fixture vector not found: {}".format(name))
+    return re.findall(r'"([^"]+)"', match.group(1))
+
+
+def fixture_raw_v7_contract(source):
+    event_block = source[:source.index('TH1D hMultiplicity')]
+    event = leaf_branches(event_block, "tree")
+    for variable in ("centralName", "wideName"):
+        match = re.search(
+            r"const std::string\s+{}\s*=.*?;".format(variable),
+            event_block, re.DOTALL)
+        if not match:
+            raise AssertionError("fixture dynamic branch not found: {}".format(variable))
+        choices = re.findall(r'"([^"]+)"', match.group(0))
+        event[choices[-1]] = "Int_t"
+    for name in rendered_string_vector(source, "integerNames"):
+        event[name] = "vector<int>"
+    for name in rendered_string_vector(source, "doubleNames"):
+        event[name] = "vector<double>"
+
+    metadata = {}
+    for vector_name, type_name in (
+            ("stringNames", "string"), ("intNames", "Int_t"),
+            ("unsignedNames", "ULong64_t"), ("longNames", "Long64_t"),
+            ("realNames", "Double_t")):
+        for name in rendered_string_vector(source, vector_name):
+            metadata[name] = type_name
+    return event, metadata
+
+
+def assert_raw_v7_schema_parity(producer_source, validator_source,
+                                fixture_source, generated_header):
+    producer = producer_raw_v7_contract(producer_source, generated_header)
+    validator = validator_raw_v7_contract(validator_source)
+    fixture = fixture_raw_v7_contract(fixture_source)
+    if producer != validator or producer != fixture:
+        raise AssertionError("producer/validator/fixture raw-v7 schema parity mismatch")
+    if len(producer[0]) != 110 or len(producer[1]) != 65:
+        raise AssertionError("raw-v7 schema cardinality mismatch")
+
+
 FIXTURE = r'''
 #include "physics.hpp"
 #include "sha256.hpp"
@@ -131,6 +280,8 @@ int main(int argc, char** argv) {
     integerVectors["hard_status"] = {-23, -23};
     integerVectors["hard_bottom_ids"] = {flavour, -flavour};
     integerVectors["hard_bottom_status"] = {-23, -23};
+    if (mode == "duplicate_bottom" && row == 0)
+      integerVectors["hard_bottom_indices"] = {10, 10};
     for (const std::string name : {"hard_px", "hard_py", "hard_pz"})
       doubleVectors[name] = {0.0, 0.0};
     doubleVectors["hard_e"] = {2.0, 2.0};
@@ -224,6 +375,11 @@ int main(int argc, char** argv) {
         doubleVectors["heavyMass"].push_back(1.0);
       }
     }
+    if (mode == "status_finality" && row == 0)
+      std::fill(integerVectors["heavyIsFinal"].begin(),
+                integerVectors["heavyIsFinal"].end(), 0);
+    if (mode == "bad_daughter" && row == 0)
+      integerVectors["heavyDaughter1"].front() = 999999;
     if (mode == "vector_lengths" && row == 0)
       doubleVectors["heavyPt"].pop_back();
     if (mode == "constituent_offsets" && row == 0)
@@ -278,6 +434,12 @@ int main(int argc, char** argv) {
     isMeson = state.kind == "meson" ? 1 : 0;
     isBaryon = state.kind == "baryon" ? 1 : 0;
     spinType = state.spin2j1; charge3 = state.charge3;
+    hasAnti = mode == "antiparticle_flag" ? 0 : 1;
+    if (mode == "registry_parity" && std::abs(pdg) == 5322) {
+      particleName = pdg > 0 ? "Invented5322" : "Invented5322bar";
+      spinType = 999;
+      charge3 = pdg > 0 ? 999 : -999;
+    }
     const auto content = DecodeHeavyContent(pdg, isMeson != 0, isBaryon != 0);
     nc = content.nc; ncbar = content.ncbar; nb = content.nb; nbbar = content.nbbar;
     qc = content.qc(); qb = content.qb();
@@ -419,6 +581,9 @@ class SubmissionContract(unittest.TestCase):
         cls.validator = cls.base / "validate_raw"
         cls.submit.compile_validator(runtime, cls.validator)
         validator_source = (ROOT / "pipeline/generate/validate_raw.cpp").read_text(encoding="utf-8")
+        producer_source = (ROOT / "pipeline/generate/producer.cpp").read_text(encoding="utf-8")
+        generated_header = (ROOT / "pipeline/generate/study_contract.hpp").read_text(
+            encoding="utf-8")
         replacements = {
             "@INT_VECTORS@": declared_array(validator_source, "integerVectors"),
             "@DOUBLE_VECTORS@": (declared_array(validator_source, "doubleVectors") +
@@ -433,16 +598,29 @@ class SubmissionContract(unittest.TestCase):
         source = FIXTURE
         for token, values in replacements.items():
             source = source.replace(token, ", ".join(json.dumps(value) for value in values))
+        assert_raw_v7_schema_parity(
+            producer_source, validator_source, source, generated_header)
+        cls.producer_source = producer_source
+        cls.validator_source = validator_source
+        cls.fixture_source = source
+        cls.generated_header = generated_header
         source_path = cls.base / "fixture.cpp"
         source_path.write_text(source, encoding="utf-8")
         cls.fixture = cls.base / "fixture"
         environment = dict(__import__("os").environ)
         environment.update(runtime["environment"])
-        flags = shlex.split(subprocess.check_output(
+        root_flags = shlex.split(subprocess.check_output(
             [environment["ROOT_CONFIG"], "--cflags", "--libs"],
             text=True, env=environment))
+        flags = []
+        for flag in root_flags:
+            if flag.startswith("-I"):
+                flags.extend(["-isystem", flag[2:]])
+            else:
+                flags.append(flag)
         command = [environment["CXX"], "-std=c++17", "-Wall", "-Wextra",
-                   "-Wpedantic", str(source_path),
+                   "-Wpedantic", "-Wconversion", "-Wshadow", "-Werror",
+                   str(source_path),
                    "-I" + str(ROOT / "pipeline/generate")] + flags + ["-o", str(cls.fixture)]
         subprocess.run(command, check=True, env=environment,
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -480,6 +658,12 @@ class SubmissionContract(unittest.TestCase):
             result = self.make_and_validate(mode)
             self.assertNotEqual(result.returncode, 0, mode)
             self.assertIn(diagnostic, result.stdout, (mode, result.stdout))
+        mutated = self.producer_source.replace('"seed/I"', '"seed/D"', 1)
+        with self.assertRaisesRegex(
+                AssertionError, "producer/validator/fixture raw-v7 schema parity"):
+            assert_raw_v7_schema_parity(
+                mutated, self.validator_source, self.fixture_source,
+                self.generated_header)
 
     def test_validator_rejects_identity_accounting_event_and_audit_mutations(self):
         diagnostics = {
@@ -513,6 +697,11 @@ class SubmissionContract(unittest.TestCase):
             "ancestry_offsets": "vector lengths or offsets are inconsistent",
             "one_channel": "lacks a hard charm or beauty channel",
             "missing_selected_stability": "omits selected signed PDG",
+            "status_finality": "heavy finality/daughter invariant failed",
+            "bad_daughter": "heavy finality/daughter invariant failed",
+            "duplicate_bottom": "hard root/bottom copy identity is not unique",
+            "registry_parity": "heavy-stability selected-registry parity failed",
+            "antiparticle_flag": "heavy-stability selected antiparticle invariant failed",
         }
         for mode, diagnostic in diagnostics.items():
             with self.subTest(mode=mode):
@@ -747,6 +936,36 @@ class SubmissionContract(unittest.TestCase):
                 self.submit.reserve_rows(campaign, rows, work, "d" * 64)
             first = self.submit.evidence_directory(work, "MONASH", 0, 0)
             self.assertFalse((first / "reservation.json").exists())
+
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory) / "work"
+            row = rows[0]
+            reservation = self.submit.evidence_directory(
+                work, "MONASH", 0, 0) / "reservation.json"
+            original_fsync = self.submit.os.fsync
+            failed = [False]
+
+            def fail_first_fsync(descriptor):
+                if not failed[0]:
+                    failed[0] = True
+                    raise OSError("injected file fsync failure")
+                return original_fsync(descriptor)
+
+            with mock.patch.object(
+                    self.submit.os, "fsync", side_effect=fail_first_fsync):
+                with self.assertRaisesRegex(OSError, "injected file fsync failure"):
+                    self.submit.reserve_rows(
+                        campaign, [row], work, "d" * 64)
+            self.assertFalse(reservation.exists())
+            self.assertFalse(reservation.is_symlink())
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "reservation.json"
+            original = b"pre-existing collision bytes\n"
+            path.write_bytes(original)
+            with self.assertRaises(FileExistsError):
+                self.submit.atomic_json(path, {"state": "reserved"}, exclusive=True)
+            self.assertEqual(path.read_bytes(), original)
 
     def test_promotion_is_no_overwrite_and_receipt_failure_is_fail_closed(self):
         with tempfile.TemporaryDirectory() as directory:

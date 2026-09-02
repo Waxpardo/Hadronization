@@ -29,14 +29,12 @@ class CliContract(unittest.TestCase):
             self.assertIn(command, help_result.stdout)
 
     def test_unavailable_stages_refuse_without_fallthrough(self):
-        expected = {"analyze": "ANALYZE-1", "merge": "ANALYZE-1",
-                    "reduce": "ANALYZE-1", "plot": "PLOT-1"}
-        for command, successor in expected.items():
+        for command in ("analyze", "merge", "reduce", "plot"):
             result = self.run_cli(command)
             self.assertEqual(result.returncode, 3)
             self.assertEqual(
                 result.stderr.strip(),
-                "ERROR: {} not implemented until {}".format(command, successor))
+                "ERROR: {} direct stage is not yet implemented".format(command))
         unknown = self.run_cli("retired-command")
         self.assertEqual(unknown.returncode, 2)
 

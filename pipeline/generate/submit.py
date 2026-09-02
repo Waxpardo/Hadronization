@@ -48,31 +48,74 @@ def load_json(path):
         return json.load(handle)
 
 
+def fsync_directory(path):
+    descriptor = os.open(str(path), os.O_RDONLY)
+    failure = None
+    try:
+        os.fsync(descriptor)
+    except BaseException as error:
+        failure = error
+    try:
+        os.close(descriptor)
+    except BaseException as error:
+        if failure is not None:
+            raise RuntimeError(
+                "directory fsync and close both failed: {}; {}".format(
+                    failure, error)) from failure
+        raise
+    if failure is not None:
+        raise failure
+
+
 def atomic_json(path, payload, exclusive=False):
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     data = (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
     temporary = None
-    if exclusive:
-        descriptor = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    else:
-        temporary = path.with_name(".{}.{}.tmp".format(path.name, os.getpid()))
-        descriptor = os.open(str(temporary), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    created_exclusive = False
+    replaced = False
     try:
+        if exclusive:
+            descriptor = os.open(
+                str(path), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            created_exclusive = True
+        else:
+            temporary = path.with_name(".{}.{}.tmp".format(path.name, os.getpid()))
+            descriptor = os.open(
+                str(temporary), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(descriptor, "wb") as handle:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
-    except Exception:
-        if temporary is not None and os.path.lexists(str(temporary)):
-            temporary.unlink()
+        if temporary is not None:
+            os.replace(str(temporary), str(path))
+            replaced = True
+        fsync_directory(path.parent)
+    except BaseException as operation_error:
+        cleanup_target = None
+        if exclusive and created_exclusive:
+            cleanup_target = path
+        elif temporary is not None and not replaced:
+            cleanup_target = temporary
+        cleanup_failures = []
+        removed = False
+        if cleanup_target is not None and os.path.lexists(str(cleanup_target)):
+            try:
+                cleanup_target.unlink()
+                removed = True
+            except BaseException as cleanup_error:
+                cleanup_failures.append("unlink {}: {}".format(
+                    cleanup_target, cleanup_error))
+        if removed:
+            try:
+                fsync_directory(path.parent)
+            except BaseException as cleanup_error:
+                cleanup_failures.append("parent durability: {}".format(
+                    cleanup_error))
+        if cleanup_failures:
+            raise RuntimeError(
+                "atomic JSON cleanup failed after {}: {}".format(
+                    operation_error, "; ".join(cleanup_failures))) from operation_error
         raise
-    if temporary is not None:
-        os.replace(str(temporary), str(path))
-    directory = os.open(str(path.parent), os.O_RDONLY)
-    try:
-        os.fsync(directory)
-    finally:
-        os.close(directory)
 
 
 def validate_campaign_tunes(campaign, tune_rows):

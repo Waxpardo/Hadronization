@@ -38,6 +38,19 @@ struct StoredAncestor {
   std::vector<int> mothers;
 };
 
+struct StoredStability {
+  std::string name;
+  int isMeson = 0;
+  int isBaryon = 0;
+  int spinType = 0;
+  int charge3 = 0;
+  int qc = 0;
+  int qb = 0;
+  int central = 0;
+  int hasAntiparticle = 0;
+  int antiparticleVerified = 0;
+};
+
 struct ReconstructedOrigin {
   int origin = static_cast<int>(Hadronization::Origin::kUnresolved);
   int resolution =
@@ -617,7 +630,8 @@ int Validate(const Authorization& auth) {
   reconstructedStability.imbue(std::locale::classic());
   reconstructedStability << "schema=" << Hadronization::kHeavyStabilityAuditSchema << "\n"
                          << std::scientific << std::setprecision(17);
-  std::map<int, std::array<int, 5>> stabilityContent;
+  std::map<int, StoredStability> stabilityContent;
+  const auto isBoolean = [](int value) { return value == 0 || value == 1; };
   int previousPdg = std::numeric_limits<int>::min();
   for (Long64_t row = 0; row < stability->GetEntries(); ++row) {
     stability->GetEntry(row);
@@ -637,9 +651,20 @@ int Validate(const Authorization& auth) {
         << stabilityFinalMayDecay << '\n';
     if (stabilityPdg <= previousPdg) fail("heavy-stability signed PDGs are not ordered");
     previousPdg = stabilityPdg;
+    if (!isBoolean(stabilityIsHadron) || !isBoolean(stabilityIsMeson) ||
+        !isBoolean(stabilityIsBaryon) || !isBoolean(stabilityOpenHeavy) ||
+        !isBoolean(stabilityHiddenHeavy) || !isBoolean(stabilityCentral) ||
+        !isBoolean(stabilityHasAnti) || !isBoolean(stabilityAntiVerified) ||
+        !isBoolean(stabilityCanDecay) ||
+        !isBoolean(stabilityOriginalMayDecay) ||
+        !isBoolean(stabilityFinalMayDecay)) {
+      fail("heavy-stability boolean domain invariant failed");
+    }
     const auto decoded = Hadronization::DecodeHeavyContent(
         stabilityPdg, stabilityIsMeson != 0, stabilityIsBaryon != 0);
-    if (stabilityIsHadron != 1 || (stabilityNCharm <= 0 && stabilityNBeauty <= 0) ||
+    if (stabilityIsHadron != 1 ||
+        (stabilityIsMeson + stabilityIsBaryon) != 1 ||
+        (stabilityNCharm <= 0 && stabilityNBeauty <= 0) ||
         stabilityNc != decoded.nc || stabilityNcbar != decoded.ncbar ||
         stabilityNb != decoded.nb || stabilityNbbar != decoded.nbbar ||
         stabilityQc != decoded.qc() || stabilityQb != decoded.qb() ||
@@ -654,18 +679,28 @@ int Validate(const Authorization& auth) {
         !std::isfinite(stabilityTau0) || stabilityTau0 < 0.0) {
       fail("heavy-stability content/stability invariant failed");
     }
-    if (!stabilityContent.emplace(stabilityPdg, std::array<int, 5>{{
-            stabilityQc, stabilityQb, stabilityCharge3, stabilityHasAnti,
-            stabilitySpinType}}).second) {
+    if (!stabilityContent.emplace(
+            stabilityPdg,
+            StoredStability{*stabilityName, stabilityIsMeson,
+                            stabilityIsBaryon, stabilitySpinType,
+                            stabilityCharge3, stabilityQc, stabilityQb,
+                            stabilityCentral, stabilityHasAnti,
+                            stabilityAntiVerified})
+             .second) {
       fail("duplicate heavy-stability signed PDG");
     }
   }
   stability->ResetBranchAddresses();
   for (const auto& row : stabilityContent) {
-    if (row.second[3] == 0) continue;
+    if (row.second.hasAntiparticle == 0) continue;
     const auto anti = stabilityContent.find(-row.first);
-    if (anti == stabilityContent.end() || anti->second[0] != -row.second[0] ||
-        anti->second[1] != -row.second[1] || anti->second[2] != -row.second[2]) {
+    if (anti == stabilityContent.end() ||
+        anti->second.qc != -row.second.qc ||
+        anti->second.qb != -row.second.qb ||
+        anti->second.charge3 != -row.second.charge3 ||
+        anti->second.isMeson != row.second.isMeson ||
+        anti->second.isBaryon != row.second.isBaryon ||
+        anti->second.spinType != row.second.spinType) {
       fail("heavy-stability antiparticle pair mismatch");
     }
   }
@@ -674,6 +709,30 @@ int Validate(const Authorization& auth) {
     if (found == stabilityContent.end()) {
       fail("heavy-stability audit omits selected signed PDG " +
            std::to_string(selected.pdg));
+      continue;
+    }
+    const bool expectedMeson = selected.kind == "meson";
+    const bool expectedBaryon = selected.kind == "baryon";
+    if (found->second.name != selected.name ||
+        found->second.isMeson != (expectedMeson ? 1 : 0) ||
+        found->second.isBaryon != (expectedBaryon ? 1 : 0) ||
+        found->second.spinType != selected.spin2j1 ||
+        found->second.charge3 != selected.charge3 ||
+        found->second.qc != selected.qc || found->second.qb != selected.qb ||
+        found->second.central != 1) {
+      fail("heavy-stability selected-registry parity failed");
+    }
+    const auto partner = stabilityContent.find(-selected.pdg);
+    if (found->second.hasAntiparticle != 1 ||
+        found->second.antiparticleVerified != 1 ||
+        partner == stabilityContent.end() ||
+        partner->second.qc != -found->second.qc ||
+        partner->second.qb != -found->second.qb ||
+        partner->second.charge3 != -found->second.charge3 ||
+        partner->second.isMeson != found->second.isMeson ||
+        partner->second.isBaryon != found->second.isBaryon ||
+        partner->second.spinType != found->second.spinType) {
+      fail("heavy-stability selected antiparticle invariant failed");
     }
   }
   if (strings["heavy_stability_audit_sha256"] != stabilityDigest->GetString().Data() ||
@@ -959,10 +1018,13 @@ int Validate(const Authorization& auth) {
     }
     std::map<int, int> hardByIndex;
     std::set<int> hardIds;
+    std::set<int> hardRootIndices;
+    std::set<int> hardBottomIndices;
     for (std::size_t index = 0; index < hardSize; ++index) {
       const int hardIndex = ints("hard_indices")[index];
+      const int hardBottomIndex = ints("hard_bottom_indices")[index];
       const int hardId = ints("hard_ids")[index];
-      if (hardIndex <= 0 || ints("hard_bottom_indices")[index] <= 0 ||
+      if (hardIndex <= 0 || hardBottomIndex <= 0 ||
           std::abs(hardId) != expectedChannel ||
           std::abs(ints("hard_status")[index]) != 23 ||
           ints("hard_bottom_ids")[index] != hardId ||
@@ -971,11 +1033,17 @@ int Validate(const Authorization& auth) {
           !std::isfinite(reals("hard_py")[index]) ||
           !std::isfinite(reals("hard_pz")[index]) ||
           !std::isfinite(reals("hard_e")[index]) ||
-          reals("hard_e")[index] < 0.0 ||
-          !hardByIndex.emplace(hardIndex, hardId).second) {
+          reals("hard_e")[index] < 0.0) {
         fail("invalid hard vector record");
       }
+      hardByIndex.emplace(hardIndex, hardId);
+      hardRootIndices.insert(hardIndex);
+      hardBottomIndices.insert(hardBottomIndex);
       hardIds.insert(hardId);
+    }
+    if (hardRootIndices.size() != hardSize ||
+        hardBottomIndices.size() != hardSize) {
+      fail("hard root/bottom copy identity is not unique");
     }
     if (hardIds != std::set<int>{-expectedChannel, expectedChannel}) {
       fail("hard vectors do not encode the exact signed process pair");
@@ -1163,10 +1231,20 @@ int Validate(const Authorization& auth) {
           Hadronization::DecodeHeavyContent(pdg, isMeson, isBaryon);
       const auto stable = stabilityContent.find(pdg);
       const int expectedBaryon = isBaryon ? (pdg > 0 ? 1 : -1) : 0;
+      const int isFinal = ints("heavyIsFinal")[index];
+      const int daughter1 = ints("heavyDaughter1")[index];
+      const int daughter2 = ints("heavyDaughter2")[index];
+      if ((isFinal != 0 && isFinal != 1) ||
+          isFinal != (ints("heavyStatus")[index] > 0 ? 1 : 0) ||
+          ints("STATUS")[index] != ints("heavyStatus")[index] ||
+          daughter1 < 0 || daughter2 < 0 ||
+          (isFinal == 1 && (daughter1 != 0 || daughter2 != 0)) ||
+          (isFinal == 0 && ((daughter1 == 0) != (daughter2 == 0) ||
+                            (daughter1 > 0 && daughter1 > daughter2)))) {
+        fail("heavy finality/daughter invariant failed");
+      }
       if (ints("heavyIndex")[index] < 0 ||
           !heavyIndices.insert(ints("heavyIndex")[index]).second ||
-          (ints("heavyIsFinal")[index] != 0 &&
-           ints("heavyIsFinal")[index] != 1) ||
           (ints("heavyIsMeson")[index] != 0 &&
            ints("heavyIsMeson")[index] != 1) ||
           (ints("heavyIsBaryon")[index] != 0 &&
@@ -1194,10 +1272,10 @@ int Validate(const Authorization& auth) {
                   Hadronization::FindSelectedState(pdg) != nullptr, decoded,
                   isMeson, ints("heavySpinType")[index]))) {
         fail("heavy identity/content/category invariant failed");
-      } else if (stable->second[0] != decoded.qc() ||
-                 stable->second[1] != decoded.qb() ||
-                 stable->second[2] != ints("heavyCharge3")[index] ||
-                 stable->second[4] != ints("heavySpinType")[index]) {
+      } else if (stable->second.qc != decoded.qc() ||
+                 stable->second.qb != decoded.qb() ||
+                 stable->second.charge3 != ints("heavyCharge3")[index] ||
+                 stable->second.spinType != ints("heavySpinType")[index]) {
         fail("event heavy row disagrees with stability audit");
       }
       const bool finiteKinematics =
@@ -1233,7 +1311,6 @@ int Validate(const Authorization& auth) {
           hasCharm && hasBeauty ? 45 : (hasBeauty ? 5 : 4);
       if (ints("ID")[index] != pdg ||
           ints("HFCLASS")[index] != expectedClass ||
-          ints("STATUS")[index] != ints("heavyStatus")[index] ||
           ints("MOTHER")[index] != ints("heavyMother1")[index] ||
           !Approximately(reals("PT")[index], reals("heavyPt")[index]) ||
           !Approximately(reals("ETA")[index], reals("heavyEta")[index]) ||
