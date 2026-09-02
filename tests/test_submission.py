@@ -36,6 +36,7 @@ FIXTURE = r'''
 #include "TH1I.h"
 #include "TObjString.h"
 #include "TTree.h"
+#include <algorithm>
 #include <iomanip>
 #include <locale>
 #include <map>
@@ -55,7 +56,7 @@ int main(int argc, char** argv) {
   Double_t wrongProcessCode = 121.0, weight = 1.0, pthat = 2.0, hardScale = 2.0;
   Int_t mult10 = 0, mult40 = 0, species[6] = {0,0,0,0,0,0};
   Short_t chargeGrid[kLightGridCells] = {0}, baryonGrid[kLightGridCells] = {0};
-  Int_t legacyMultiplicity = 0, legacyProcess = 121, nCharm = 1, nBeauty = 0;
+  Int_t legacyMultiplicity = 0, legacyProcess = 121, nCharm = 2, nBeauty = 0;
   Int_t nBc = 0, qcSum = 0, qbSum = 0, conservation = 1, origin = 1, match = 1;
   std::map<std::string, std::vector<int>> integerVectors;
   std::map<std::string, std::vector<double>> doubleVectors;
@@ -106,14 +107,135 @@ int main(int argc, char** argv) {
   TH1I hProcess("hPROCESS_CODE", "fixture", 1000, -0.5, 999.5);
   hMultiplicity.Sumw2(); hMultiplicityWide.Sumw2();
   for (int row = 0; row < 3; ++row) {
+    for (auto& item : integerVectors) item.second.clear();
+    for (auto& item : doubleVectors) item.second.clear();
     eventId = mode == "duplicate_event" ? EventId(3, 0, 0, 0, 0) :
               EventId(3, 0, 0, 0, static_cast<std::uint64_t>(row));
+    const bool beautyEvent = mode != "one_channel" && row == 1;
+    processCode = beautyEvent ? 123 : 121;
+    hardChannel = beautyEvent ? 5 : 4;
+    legacyProcess = processCode;
+    pthat = mode == "low_pthat" && row == 0 ? 0.5 : 2.0;
+    hardScale = mode == "negative_scale" && row == 0 ? -1.0 : 2.0;
+    nMpi = mode == "negative_mpi" && row == 0 ? -1 : 1;
     mult10 = row; mult40 = row;
+    if (mode == "central_wide" && row == 1) { mult10 = 2; mult40 = 1; }
+    std::fill(std::begin(species), std::end(species), 0);
+    species[2] = mult10;
     legacyMultiplicity = row;
+    if (mode == "central_wide" && row == 1) legacyMultiplicity = mult10;
+    const int flavour = hardChannel;
+    integerVectors["hard_indices"] = {10, 11};
+    integerVectors["hard_bottom_indices"] = {10, 11};
+    integerVectors["hard_ids"] = {flavour, -flavour};
+    integerVectors["hard_status"] = {-23, -23};
+    integerVectors["hard_bottom_ids"] = {flavour, -flavour};
+    integerVectors["hard_bottom_status"] = {-23, -23};
+    for (const std::string name : {"hard_px", "hard_py", "hard_pz"})
+      doubleVectors[name] = {0.0, 0.0};
+    doubleVectors["hard_e"] = {2.0, 2.0};
+    if (mode == "hard_lengths" && row == 0)
+      integerVectors["hard_status"].pop_back();
+    integerVectors["ancestryIndex"] = {10, 11};
+    integerVectors["ancestryPdg"] = {flavour, -flavour};
+    integerVectors["ancestryStatus"] = {-23, -23};
+    integerVectors["ancestryMother1"] = {0, 0};
+    integerVectors["ancestryMother2"] = {0, 0};
+    integerVectors["ancestryMotherOffsets"] = {0, 0, 0};
+    if (mode == "ancestry_offsets" && row == 0)
+      integerVectors["ancestryMotherOffsets"].back() = 1;
+    const std::array<int, 2> heavyPdgs = beautyEvent
+        ? std::array<int, 2>{{511, -511}}
+        : std::array<int, 2>{{421, -421}};
+    integerVectors["heavyMotherOffsets"] = {0};
+    integerVectors["heavyConstituentOffsets"] = {0};
+    if (mode != "empty_heavy") {
+      for (std::size_t slot = 0; slot < heavyPdgs.size(); ++slot) {
+        const int heavyPdg = heavyPdgs[slot];
+        const auto* state = FindSelectedState(heavyPdg);
+        const auto content = DecodeHeavyContent(heavyPdg, true, false);
+        const int signedFlavour = content.qc() != 0
+            ? (content.qc() > 0 ? 4 : -4)
+            : (content.qb() > 0 ? 5 : -5);
+        const int hardIndex = signedFlavour > 0 ? 10 : 11;
+        integerVectors["ID"].push_back(heavyPdg);
+        integerVectors["HFCLASS"].push_back(beautyEvent ? 5 : 4);
+        integerVectors["STATUS"].push_back(82);
+        integerVectors["MOTHER"].push_back(hardIndex);
+        integerVectors["MOTHERID"].push_back(signedFlavour);
+        doubleVectors["PT"].push_back(0.0);
+        doubleVectors["ETA"].push_back(0.0);
+        doubleVectors["Y"].push_back(0.0);
+        doubleVectors["PHI"].push_back(0.0);
+        doubleVectors["CHARGE"].push_back(state->charge3 / 3.0);
+        integerVectors["heavyIndex"].push_back(20 + static_cast<int>(slot));
+        integerVectors["heavyPdg"].push_back(heavyPdg);
+        integerVectors["heavyStatus"].push_back(82);
+        integerVectors["heavyStatusAbs"].push_back(82);
+        integerVectors["heavyIsFinal"].push_back(1);
+        integerVectors["heavyIsMeson"].push_back(1);
+        integerVectors["heavyIsBaryon"].push_back(0);
+        integerVectors["heavyCharge3"].push_back(state->charge3);
+        integerVectors["heavySpinType"].push_back(state->spin2j1);
+        integerVectors["heavyMother1"].push_back(hardIndex);
+        integerVectors["heavyMother2"].push_back(0);
+        integerVectors["heavyDaughter1"].push_back(0);
+        integerVectors["heavyDaughter2"].push_back(0);
+        integerVectors["heavyMothers"].push_back(hardIndex);
+        integerVectors["heavyMotherOffsets"].push_back(
+            static_cast<int>(integerVectors["heavyMothers"].size()));
+        integerVectors["heavyNc"].push_back(content.nc);
+        integerVectors["heavyNcbar"].push_back(content.ncbar);
+        integerVectors["heavyNb"].push_back(content.nb);
+        integerVectors["heavyNbbar"].push_back(content.nbbar);
+        integerVectors["heavyQc"].push_back(content.qc());
+        integerVectors["heavyQb"].push_back(content.qb());
+        integerVectors["heavyBaryonNumber"].push_back(0);
+        integerVectors["heavyStrangeness"].push_back(content.strangeness());
+        integerVectors["heavyCentral"].push_back(1);
+        integerVectors["heavyOpen"].push_back(1);
+        integerVectors["heavyHidden"].push_back(0);
+        integerVectors["heavyStateCategory"].push_back(0);
+        integerVectors["heavyOriginC"].push_back(content.qc() == 0 ? 0 : 1);
+        integerVectors["heavyOriginB"].push_back(content.qb() == 0 ? 0 : 1);
+        integerVectors["heavyMatchResolutionC"].push_back(content.qc() == 0 ? 0 : 1);
+        integerVectors["heavyMatchResolutionB"].push_back(content.qb() == 0 ? 0 : 1);
+        integerVectors["heavyMatchedHardC"].push_back(content.qc() == 0 ? -1 : hardIndex);
+        integerVectors["heavyMatchedHardB"].push_back(content.qb() == 0 ? -1 : hardIndex);
+        integerVectors["heavyRejectedHardC"].push_back(-1);
+        integerVectors["heavyRejectedHardB"].push_back(-1);
+        integerVectors["heavyOriginDepthC"].push_back(content.qc() == 0 ? -1 : 1);
+        integerVectors["heavyOriginDepthB"].push_back(content.qb() == 0 ? -1 : 1);
+        integerVectors["heavyConstituentParentSlot"].push_back(static_cast<int>(slot));
+        integerVectors["heavyConstituentPdg"].push_back(signedFlavour);
+        integerVectors["heavyConstituentOrdinal"].push_back(0);
+        integerVectors["heavyConstituentOrigin"].push_back(1);
+        integerVectors["heavyConstituentMatchResolution"].push_back(1);
+        integerVectors["heavyConstituentMatchedHard"].push_back(hardIndex);
+        integerVectors["heavyConstituentRejectedHard"].push_back(-1);
+        integerVectors["heavyConstituentOriginDepth"].push_back(1);
+        integerVectors["heavyConstituentOffsets"].push_back(
+            static_cast<int>(integerVectors["heavyConstituentPdg"].size()));
+        for (const std::string name : {"heavyPx", "heavyPy", "heavyPz",
+                                       "heavyPt", "heavyEta", "heavyY",
+                                       "heavyPhi"})
+          doubleVectors[name].push_back(0.0);
+        doubleVectors["heavyE"].push_back(1.0);
+        doubleVectors["heavyMass"].push_back(1.0);
+      }
+    }
+    if (mode == "vector_lengths" && row == 0)
+      doubleVectors["heavyPt"].pop_back();
+    if (mode == "constituent_offsets" && row == 0)
+      integerVectors["heavyConstituentOffsets"].back() += 1;
+    nCharm = beautyEvent ? 0 : 2;
+    nBeauty = beautyEvent ? 2 : 0;
+    nBc = 0; qcSum = 0; qbSum = 0;
     if (mode == "false_flag" && row == 1) conservation = 0;
     tree.Fill(); hMultiplicity.Fill(mult10, weight);
     hMultiplicityWide.Fill(mult40, weight); hProcess.Fill(processCode);
   }
+  if (mode == "corrupt_sumw2") hMultiplicity.GetSumw2()->SetAt(99.0, 1);
   tree.Write(); hMultiplicity.Write(); hMultiplicityWide.Write(); hProcess.Write();
 
   TTree stability("heavy_stability_audit", "fixture");
@@ -147,9 +269,23 @@ int main(int argc, char** argv) {
   std::ostringstream stabilityText; stabilityText.imbue(std::locale::classic());
   stabilityText << "schema=" << kHeavyStabilityAuditSchema << "\n"
                 << std::scientific << std::setprecision(17);
-  for (int sign : {-1, 1}) {
-    pdg = sign * 421; particleName = sign < 0 ? "D0bar" : "D0";
-    nc = sign > 0 ? 1 : 0; ncbar = sign < 0 ? 1 : 0; qc = sign;
+  std::map<int, const SelectedState*> selectedStates;
+  for (const auto& state : kSelectedStates) selectedStates.emplace(state.pdg, &state);
+  for (const auto& item : selectedStates) {
+    if (mode == "missing_selected_stability" && item.first == 5322) continue;
+    const auto& state = *item.second;
+    pdg = state.pdg; particleName = std::string(state.name);
+    isMeson = state.kind == "meson" ? 1 : 0;
+    isBaryon = state.kind == "baryon" ? 1 : 0;
+    spinType = state.spin2j1; charge3 = state.charge3;
+    const auto content = DecodeHeavyContent(pdg, isMeson != 0, isBaryon != 0);
+    nc = content.nc; ncbar = content.ncbar; nb = content.nb; nbbar = content.nbbar;
+    qc = content.qc(); qb = content.qb();
+    nHeavyCharm = nc + ncbar; nHeavyBeauty = nb + nbbar;
+    strangeness = content.strangeness();
+    openHeavy = (qc != 0 || qb != 0) ? 1 : 0;
+    hiddenHeavy = (content.hiddenCharm() || content.hiddenBeauty()) ? 1 : 0;
+    central = 1;
     stability.Fill();
     stabilityText << pdg << '\t' << std::quoted(particleName) << '\t'
                   << isHadron << '\t' << isMeson << '\t' << isBaryon << '\t'
@@ -170,14 +306,28 @@ int main(int argc, char** argv) {
   stabilityShaObject.Write("heavy_stability_audit_sha256");
 
   TTree processes("process_counts", "fixture"); Int_t summaryCode = 121;
-  ULong64_t summaryCount = mode == "closure" ? 2 : 3;
+  ULong64_t summaryCount = mode == "closure" ? 1 :
+      (mode == "one_channel" ? 3 : 2);
   processes.Branch("code", &summaryCode, "code/I");
-  processes.Branch("count", &summaryCount, "count/l"); processes.Fill(); processes.Write();
+  processes.Branch("count", &summaryCount, "count/l"); processes.Fill();
+  if (mode != "one_channel") {
+    summaryCode = 123; summaryCount = 1; processes.Fill();
+  }
+  processes.Write();
 
-  std::map<std::string, std::string> settingValues = {
-      {"HardQCD:hardbbbar", "true"}, {"HardQCD:hardccbar", "true"},
-      {"Main:numberOfEvents", "3"}, {"PhaseSpace:pTHatMin", "2"},
-      {"Random:seed", "130000001"}, {"Random:setSeed", "true"}};
+  std::map<std::string, std::string> settingValues;
+  if (mode != "minimal_settings") {
+    for (const auto name : kAuditedPythiaSettingKeys)
+      settingValues[std::string(name)] = "0";
+  }
+  settingValues["HardQCD:hardbbbar"] = "true";
+  settingValues["HardQCD:hardccbar"] = "true";
+  settingValues["Main:numberOfEvents"] = "3";
+  settingValues["PhaseSpace:pTHatMin"] = "2";
+  settingValues["Random:seed"] = "130000001";
+  settingValues["Random:setSeed"] = "true";
+  if (mode == "missing_audited_setting")
+    settingValues.erase(std::string(kAuditedPythiaSettingKeys.front()));
   TTree settings("effective_settings", "fixture"); std::string settingName, settingValue;
   settings.Branch("name", &settingName); settings.Branch("value", &settingValue);
   std::ostringstream settingsText; settingsText.imbue(std::locale::classic());
@@ -186,8 +336,11 @@ int main(int argc, char** argv) {
     settingName = row.first; settingValue = row.second; settings.Fill();
     settingsText << std::quoted(settingName) << '\t' << std::quoted(settingValue) << '\n';
   }
-  settings.Write(); const std::string settingsSha = Sha256Hex(settingsText.str());
-  TObjString settingsCanonical(settingsText.str().c_str());
+  settings.Write(); std::string settingsSha = Sha256Hex(settingsText.str());
+  if (mode == "settings_digest") settingsSha.assign(64, '0');
+  const std::string settingsCanonicalText = mode == "settings_canonical"
+      ? settingsText.str() + "drift\n" : settingsText.str();
+  TObjString settingsCanonical(settingsCanonicalText.c_str());
   settingsCanonical.Write("effective_settings_canonical");
   TObjString settingsShaObject(settingsSha.c_str());
   settingsShaObject.Write("effective_settings_sha256");
@@ -341,6 +494,31 @@ class SubmissionContract(unittest.TestCase):
             result = self.make_and_validate(mode)
             self.assertNotEqual(result.returncode, 0, mode)
             self.assertIn(diagnostic, result.stdout, (mode, result.stdout))
+
+    def test_validator_rejects_scientific_false_green_mutations(self):
+        diagnostics = {
+            "minimal_settings": "omits a generated audited setting",
+            "missing_audited_setting": "omits a generated audited setting",
+            "settings_canonical": "effective-settings digest/cardinality mismatch",
+            "settings_digest": "effective-settings digest/cardinality mismatch",
+            "corrupt_sumw2": "bin content/Sumw2 differs",
+            "low_pthat": "invalid event pTHat/hard-scale/MPI physics",
+            "negative_scale": "invalid event pTHat/hard-scale/MPI physics",
+            "negative_mpi": "invalid event pTHat/hard-scale/MPI physics",
+            "central_wide": "invalid central/wide multiplicity physics",
+            "empty_heavy": "vector lengths or offsets are inconsistent",
+            "hard_lengths": "hard vector lengths/exact-pair cardinality",
+            "vector_lengths": "vector lengths or offsets are inconsistent",
+            "constituent_offsets": "vector lengths or offsets are inconsistent",
+            "ancestry_offsets": "vector lengths or offsets are inconsistent",
+            "one_channel": "lacks a hard charm or beauty channel",
+            "missing_selected_stability": "omits selected signed PDG",
+        }
+        for mode, diagnostic in diagnostics.items():
+            with self.subTest(mode=mode):
+                result = self.make_and_validate(mode)
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn(diagnostic, result.stdout)
 
     def test_complete_accepted_campaign_is_inventory_not_3000_new_attempts(self):
         campaign, study, tunes = self.submit.campaign_inputs()
