@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 
 
 ROOT = Path(__file__).resolve().parent
@@ -20,69 +21,29 @@ UNAVAILABLE = {
 }
 
 
-def load_site():
-    path = ROOT / "config/site.conf"
-    values = {}
-    if not path.is_file():
-        return values
-    for number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        match = re.fullmatch(r"([A-Z][A-Z0-9_]*)=(.*)", line)
-        if not match:
-            raise ValueError("{}:{} is not KEY=VALUE".format(path, number))
-        value = match.group(2).strip()
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
-            value = value[1:-1]
-        values[match.group(1)] = value
-    return values
-
-
-def version(command, arguments):
-    if not command:
-        return "unavailable"
-    try:
-        result = subprocess.run([command] + arguments, text=True,
-                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                timeout=10)
-    except (OSError, subprocess.TimeoutExpired):
-        return "unavailable"
-    first = result.stdout.strip().splitlines()
-    return first[0] if result.returncode == 0 and first else "unavailable"
-
-
 def doctor():
     try:
-        site = load_site()
         study = json.loads((ROOT / "config/study.json").read_text(encoding="utf-8"))
         campaign = json.loads((ROOT / "data/campaign.json").read_text(encoding="utf-8"))
         manifest = json.loads((ROOT / "results/manifest.json").read_text(encoding="utf-8"))
+        sys.path.insert(0, str(ROOT / "pipeline/generate"))
+        import runtime as runtime_contract
+        runtime = runtime_contract.resolve()
     except (OSError, ValueError, json.JSONDecodeError) as error:
         print("REQUIRED configuration: FAIL ({})".format(error))
         return 1
-    git = shutil.which("git")
-    head = version(git, ["-C", str(ROOT), "rev-parse", "--short=12", "HEAD"])
+    head = subprocess.check_output(
+        ["git", "-C", str(ROOT), "rev-parse", "--short=12", "HEAD"],
+        text=True).strip()
     python_ok = sys.version_info >= (3, 9)
     print("REQUIRED repository: {} ({})".format("OK" if (ROOT / ".git").is_dir() else "FAIL", head))
     print("REQUIRED configuration: {} / {} / {}".format(
         study.get("schema"), campaign.get("schema"), manifest.get("schema")))
     print("REQUIRED Python: {} ({})".format("OK" if python_ok else "FAIL", sys.version.split()[0]))
-    root_config = site.get("ROOT_CONFIG") or shutil.which("root-config")
-    pythia_config = site.get("PYTHIA8_CONFIG") or shutil.which("pythia8-config")
-    pythia_prefix = site.get("PYTHIA8_PREFIX")
-    cxx = site.get("CXX") or shutil.which("c++") or shutil.which("g++")
-    print("OPTIONAL ROOT: {}".format(version(root_config, ["--version"])))
-    if pythia_config:
-        pythia = version(pythia_config, ["--version"])
-    elif pythia_prefix and Path(pythia_prefix).is_dir():
-        pythia = "configured prefix {}".format(pythia_prefix)
-    else:
-        pythia = "unavailable"
-    print("OPTIONAL PYTHIA: {}".format(pythia))
-    print("OPTIONAL compiler: {}".format(version(cxx, ["--version"])))
-    print("OPTIONAL site: {}".format(
-        ROOT / "config/site.conf" if (ROOT / "config/site.conf").is_file() else "portable defaults"))
+    for diagnostic in runtime["diagnostics"]:
+        print("RUNTIME {}".format(diagnostic))
+    print("RUNTIME site: {}".format(
+        ROOT / "config/site.conf" if runtime["site_configured"] else "portable defaults"))
     return 0 if python_ok and (ROOT / ".git").is_dir() else 1
 
 
@@ -100,25 +61,38 @@ def clean_candidates():
     for current, directories, files in os.walk(str(ROOT), topdown=True, followlinks=False):
         here = Path(current)
         directories[:] = sorted(d for d in directories if d != ".git")
-        if here == ROOT:
-            if ".local-data" in directories:
-                candidates.append(ROOT / ".local-data")
-                directories.remove(".local-data")
-        if here == ROOT / "data" and "raw" in directories:
-            directories.remove("raw")
+        if here == ROOT / "data":
+            directories[:] = [name for name in directories
+                               if name not in {"raw", "work"}]
         for directory in list(directories):
             path = here / directory
             if directory == "__pycache__":
                 candidates.append(path)
                 directories.remove(directory)
-            elif path == ROOT / "plotting/Plots":
-                candidates.append(path)
-                directories.remove(directory)
         for name in sorted(files):
             path = here / name
-            if name == ".DS_Store" or path.suffix in {".pyc", ".so", ".d", ".pcm"}:
+            if name == ".DS_Store" or path.suffix in {
+                    ".pyc", ".pyo", ".pyd", ".o", ".so", ".d", ".pcm", ".dylib"}:
                 if not is_within(path.absolute(), protected_raw.absolute()):
                     candidates.append(path)
+    work = ROOT / "data/work"
+    if work.is_dir() and not work.is_symlink():
+        now = int(time.time())
+        for current, directories, files in os.walk(str(work), topdown=True,
+                                                   followlinks=False):
+            here = Path(current)
+            directories[:] = sorted(directories)
+            if "outcome.json" not in files or "scratch" not in directories:
+                continue
+            try:
+                outcome = json.loads((here / "outcome.json").read_text(encoding="utf-8"))
+                days = int(outcome.get("cleanup_after_days", 7))
+                finished = int(outcome["finished_unix_seconds"])
+            except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError):
+                continue
+            if outcome.get("state") == "accepted" and days >= 1 and now - finished >= days * 86400:
+                candidates.append(here / "scratch")
+            directories.remove("scratch")
     unique = {path.absolute() for path in candidates}
     return sorted(unique, key=lambda path: path.relative_to(ROOT).as_posix())
 
@@ -164,8 +138,9 @@ def verify():
     return subprocess.run(command, cwd=str(ROOT), env=environment).returncode
 
 
-def generate(submit):
-    command = [sys.executable, str(ROOT / "pipeline/generate/submit.py"), "plan"]
+def generate(submit, purpose):
+    command = [sys.executable, str(ROOT / "pipeline/generate/submit.py"), "plan",
+               "--purpose", purpose]
     if submit:
         command.append("--submit")
     return subprocess.run(command, cwd=str(ROOT)).returncode
@@ -181,6 +156,9 @@ def build_parser():
     generate_parser = sub.add_parser("generate", help="build/describe nominal generation work")
     generate_parser.add_argument("--submit", action="store_true",
                                  help="contact the configured scheduler explicitly")
+    generate_parser.add_argument(
+        "--purpose", choices=("inventory", "continuation", "recovery", "new"),
+        default=None, help="declare inventory or continuation semantics")
     for name in ("analyze", "merge", "reduce", "plot"):
         sub.add_parser(name, help="intentionally unavailable in CLEAN-1")
     sub.add_parser("verify", help="run the focused active-contract suite")
@@ -196,7 +174,8 @@ def main():
     if args.command == "doctor":
         return doctor()
     if args.command == "generate":
-        return generate(args.submit)
+        purpose = args.purpose or ("continuation" if args.submit else "inventory")
+        return generate(args.submit, purpose)
     if args.command in UNAVAILABLE:
         print("ERROR: {} not implemented until {}".format(
             args.command, UNAVAILABLE[args.command]), file=sys.stderr)

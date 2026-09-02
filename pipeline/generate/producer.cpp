@@ -8,9 +8,8 @@
 // unchanged and must be allocated by the immutable campaign seed ledger.
 
 #include "physics.hpp"
-#include "selected_states.hpp"
 #include "sha256.hpp"
-#include "tune_settings.hpp"
+#include "study_contract.hpp"
 
 #include "Pythia8/Pythia.h"
 
@@ -113,9 +112,9 @@ ULong64_t PeakRssKiB() {
 // The three published tunes. The published JUNCTIONS tune retunes StringZ,
 // StringFlav and pT0Ref away from Monash, and those settings govern baryon
 // production, so a MONASH-vs-JUNCTIONS difference in a baryon observable cannot
-// be attributed to junction formation on its own. Ruling R32 of 2026-08-30
-// states that limit in the paper rather than isolating it with a fourth,
-// matched configuration.
+// be attributed to junction formation on its own. This study therefore treats
+// each tune as a complete configuration bundle and does not isolate a single
+// mechanism with an additional matched configuration.
 //
 // Adding a configuration means one entry here and one card. There is
 // deliberately no fixed-width tune ordinal anywhere in the pipeline.
@@ -712,12 +711,14 @@ int main(int argc, char** argv) {
   tree.Branch("pthat", &pTHat, "pthat/D");
   tree.Branch("hard_scale", &hardScale, "hard_scale/D");
   tree.Branch("n_mpi", &nMPI, "n_mpi/I");
-  tree.Branch("multiplicity_final_charged_nonheavy_eta10_v1",
-              &multiplicityCentral,
-              "multiplicity_final_charged_nonheavy_eta10_v1/I");
-  tree.Branch("multiplicity_final_charged_nonheavy_eta40_v1",
-              &multiplicityWide,
-              "multiplicity_final_charged_nonheavy_eta40_v1/I");
+  const std::string multiplicityEta10Leaf =
+      std::string(kRawMultiplicityEta10Branch) + "/I";
+  const std::string multiplicityEta40Leaf =
+      std::string(kRawMultiplicityEta40Branch) + "/I";
+  tree.Branch(kRawMultiplicityEta10Branch.data(), &multiplicityCentral,
+              multiplicityEta10Leaf.c_str());
+  tree.Branch(kRawMultiplicityEta40Branch.data(), &multiplicityWide,
+              multiplicityEta40Leaf.c_str());
   tree.Branch("multiplicity_central_by_species",
               multiplicityCentralBySpecies,
               "multiplicity_central_by_species[6]/I");
@@ -836,14 +837,12 @@ int main(int argc, char** argv) {
 
   TH1D hMultiplicity(
       "hMULTIPLICITY",
-      "NCH_FINAL_CHARGED_NONHEAVY_ETA10_V1;N_{ch};successful events", 4096,
-      -0.5,
+      "NCH_PRIMARY_CHARGED_ETA10_V1;N_{ch};successful events", 4096, -0.5,
       4095.5);
   hMultiplicity.Sumw2();
   TH1D hMultiplicityWide(
       "hMULTIPLICITY_ETA40",
-      "NCH_FINAL_CHARGED_NONHEAVY_ETA40_V1;N_{ch};successful events", 4096,
-      -0.5,
+      "NCH_PRIMARY_CHARGED_ETA40_V1;N_{ch};successful events", 4096, -0.5,
       4095.5);
   hMultiplicityWide.Sumw2();
   TH1I hProcessCode("hPROCESS_CODE", "hard process code;code;events", 1000, -0.5,
@@ -1061,13 +1060,13 @@ int main(int argc, char** argv) {
           multAuditPt.push_back(particle.pT());
           multAuditEta.push_back(particle.eta());
         }
-        if (CountsNchFinalChargedNonHeavyV1(
+        if (CountsNchPrimaryChargedV1(
                 particle.isFinal(), particle.isCharged(), hasHeavyConstituent,
                 particle.pT(), particle.eta(), kMultiplicityEtaCentral)) {
           ++multiplicityCentral;
           ++multiplicityCentralBySpecies[MultiplicitySpeciesIndex(absId)];
         }
-        if (CountsNchFinalChargedNonHeavyV1(
+        if (CountsNchPrimaryChargedV1(
                 particle.isFinal(), particle.isCharged(), hasHeavyConstituent,
                 particle.pT(), particle.eta(), kMultiplicityEtaWide)) {
           ++multiplicityWide;
@@ -1525,15 +1524,15 @@ int main(int argc, char** argv) {
   Int_t rootCompressionAlgorithm = output.GetCompressionAlgorithm();
   Int_t rootCompressionLevel = output.GetCompressionLevel();
   TTree metadata("job_metadata", "immutable logical-attempt metadata");
-  std::string rawSchema = kRawSchema;
+  std::string rawSchema(kRawSchema);
   std::string selector = kSelectorVersion;
   std::string originAlgorithm = kOriginAlgorithmVersion;
   std::string speciesSchema(kSpeciesRegistrySchema);
   std::string speciesSha(kSpeciesRegistrySha256);
   std::string multiplicityDefinition(kMultiplicityDefinitionVersion);
   std::string lightGridSchema(kLightCompensationGridSchema);
-  std::string studyDefinitionSchema(kStudyDefinitionSchema);
-  std::string studyDefinitionSha(kStudyDefinitionSha256);
+  std::string tuneAllowlistSchema(kTuneDifferenceAllowlistSchema);
+  std::string tuneAllowlistSha(kTuneDifferenceAllowlistSha256);
   std::string stabilityAuditSchema(kHeavyStabilityAuditSchema);
   std::string stabilityAuditSha = stabilityAuditSha256;
   std::string effectiveSettingsSchema = kEffectiveSettingsSchema;
@@ -1597,8 +1596,8 @@ int main(int argc, char** argv) {
   metadata.Branch("species_registry_sha256", &speciesSha);
   metadata.Branch("multiplicity_definition", &multiplicityDefinition);
   metadata.Branch("light_compensation_grid_schema", &lightGridSchema);
-  metadata.Branch("study_definition_schema", &studyDefinitionSchema);
-  metadata.Branch("study_definition_sha256", &studyDefinitionSha);
+  metadata.Branch(kRawTuneAllowlistSchemaBranch.data(), &tuneAllowlistSchema);
+  metadata.Branch(kRawTuneAllowlistSha256Branch.data(), &tuneAllowlistSha);
   metadata.Branch("heavy_stability_audit_schema", &stabilityAuditSchema);
   metadata.Branch("heavy_stability_audit_sha256", &stabilityAuditSha);
   metadata.Branch("effective_settings_schema", &effectiveSettingsSchema);
@@ -1704,11 +1703,11 @@ int main(int argc, char** argv) {
   stabilityCanonicalObject.Write("heavy_stability_audit_canonical");
   TObjString stabilityShaObject(stabilityAuditSha256.c_str());
   stabilityShaObject.Write("heavy_stability_audit_sha256");
-  TObjString multiplicityCentralName(kMultiplicityCentral);
+  TObjString multiplicityCentralName(kMultiplicityCentral.data());
   multiplicityCentralName.Write("multiplicity_central_version");
-  TObjString multiplicityCrossCheckName(kMultiplicityCrossCheck);
+  TObjString multiplicityCrossCheckName(kMultiplicityCrossCheck.data());
   multiplicityCrossCheckName.Write("multiplicity_crosscheck_version");
-  TObjString multiplicityDefinitionContract(kMultiplicityDefinitionVersion);
+  TObjString multiplicityDefinitionContract(kMultiplicityDefinitionVersion.data());
   multiplicityDefinitionContract.Write("multiplicity_definition");
   TObjString primaryAllHeavyMatchContract(kPrimaryAllHeavyMatchSchema);
   primaryAllHeavyMatchContract.Write("primary_all_heavy_match_version");

@@ -57,29 +57,24 @@
         "sha256": "dd0755ae85c340f7e3a438931bed14afa433220f164f84fcb0e18d4ae6f2f4de"
       },
       {
-        "bytes": 37664,
+        "bytes": 39311,
         "path": "config/study.json",
-        "sha256": "694bc8c32d7be18e57abd8629ed76de2d09ccfdf25d87c3c9df4a4472c34354d"
+        "sha256": "24aa1f16d715008e034ed1960921cb03221438e34b1dc52c9825fa7405e342f8"
       },
       {
-        "bytes": 72902,
+        "bytes": 73028,
         "path": "pipeline/generate/producer.cpp",
-        "sha256": "fb9102171f113f39228ee52be00c83328b60091108bd6d90c8c501929e6da5c7"
+        "sha256": "5fa2589f3e6d8cb4c57372a74479be595f96fda9c0cc57a3373725cae151760f"
       },
       {
-        "bytes": 24692,
+        "bytes": 24298,
         "path": "pipeline/generate/physics.hpp",
-        "sha256": "de6fa6526256861119561ba708671db651dcdb6d0c4d2b648512615eae67f6d7"
+        "sha256": "7db4540db8a1445ef354c4c0a3810ae6551ee77ecaaf4e741571ad9b48f92846"
       },
       {
-        "bytes": 4583,
-        "path": "pipeline/generate/selected_states.hpp",
-        "sha256": "10fac8df16a348256f02f8a6457d7060f75a4423651a2fc7d9bd1e8d9ebb8c57"
-      },
-      {
-        "bytes": 3949,
-        "path": "pipeline/generate/tune_settings.hpp",
-        "sha256": "c15055b5a8c49f72378e9b884ed6f419cd1515d85d646ce0d45aa99f3d3e31fb"
+        "bytes": 13326,
+        "path": "pipeline/generate/study_contract.hpp",
+        "sha256": "e35e5dabe6b8aa44fa223273067af081a21888eed8908c278274bdeed66003d9"
       },
       {
         "bytes": 6894,

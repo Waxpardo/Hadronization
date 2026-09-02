@@ -1,9 +1,39 @@
 import json
+import copy
+import hashlib
+import importlib.util
 import math
+from pathlib import Path
 import re
+import subprocess
+import sys
+import tempfile
 import unittest
 
 from helpers import ROOT, csv_rows, load_json
+
+
+def validate_references(study):
+    states = study["selected_states"]
+    by_id = {state["id"]: state for state in states}
+    if len(by_id) != len(states):
+        raise AssertionError("selected-state ID is not unique")
+    for pair in study["pair_observable"]["balancing_pairs"]:
+        for field in ("trigger", "os_associate", "ss_associate"):
+            identifier = pair[field]
+            state = by_id.get(identifier)
+            if state is None:
+                raise AssertionError("dangling study state reference")
+            if state["pdg"] != pair[field + "_pdg"]:
+                raise AssertionError("mis-PDG study state reference")
+            if state["sector"] != pair["flavour"]:
+                raise AssertionError("mis-flavour study state reference")
+            if not state["pair_analysis_eligible"]:
+                raise AssertionError("ineligible balancing-pair state reference")
+    for species in study["observables"]["inclusive_kinematics"]["species"]:
+        state = by_id.get(species["id"])
+        if state is None or state["pdg"] != species["pdg"]:
+            raise AssertionError("dangling or mis-PDG inclusive state reference")
 
 
 def edges(rows, observable, low, high):
@@ -55,22 +85,67 @@ class StudyContract(unittest.TestCase):
         states = self.study["selected_states"]
         self.assertEqual(len(states), 50)
         self.assertEqual(len({state["pdg"] for state in states}), 50)
-        excluded = [state for state in states if not state["central_eligible"]]
+        self.assertEqual(len({state["id"] for state in states}), 50)
+        excluded = [state for state in states if not state["pair_analysis_eligible"]]
         self.assertEqual(len(excluded), 6)
         self.assertEqual({state["pdg"] for state in excluded},
                          {5212, -5212, 5312, -5312, 5322, -5322})
-        self.assertTrue(all(state["status"] == "excluded_from_central"
+        self.assertTrue(all(state["status"] == "inclusive_only"
                             and state["reason"] for state in excluded))
-        header = (ROOT / "pipeline/generate/selected_states.hpp").read_text(
-            encoding="utf-8")
-        matches = re.findall(
-            r'^\s*\{(-?[0-9]+),\s*"([^"]+)".*\s(true|false)\},$',
-            header, re.MULTILINE)
-        implementation = {(int(pdg), name, eligible == "true")
-                          for pdg, name, eligible in matches}
-        configured = {(state["pdg"], state["name"], state["central_eligible"])
-                      for state in states}
-        self.assertEqual(implementation, configured)
+        self.assertTrue(all(state["status"] == "pair_analysis"
+                            for state in states if state["pair_analysis_eligible"]))
+        by_pdg = {state["pdg"]: state["id"] for state in states}
+        self.assertEqual(by_pdg[421], "dzero")
+        self.assertEqual(by_pdg[-421], "dzerobar")
+        self.assertEqual(by_pdg[5122], "lambdab")
+        self.assertEqual(by_pdg[-5122], "lambdabbar")
+        validate_references(self.study)
+
+    def test_generated_contract_is_exact_full_field_and_tune_parity(self):
+        path = ROOT / "pipeline/generate/study_contract.py"
+        spec = importlib.util.spec_from_file_location("study_contract_generator", str(path))
+        generator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(generator)
+        header = ROOT / "pipeline/generate/study_contract.hpp"
+        self.assertEqual(header.read_bytes(), generator.render())
+        digest = hashlib.sha256((ROOT / "config/study.json").read_bytes()).hexdigest()
+        self.assertIn('kStudyDefinitionSha256 = "{}"'.format(digest),
+                      header.read_text(encoding="utf-8"))
+        for state in self.study["selected_states"]:
+            for field in ("id", "name", "sector", "kind", "valence", "status"):
+                self.assertIn(json.dumps(str(state[field])), header.read_text(encoding="utf-8"))
+        for tune in self.study["tunes"]:
+            self.assertIn(json.dumps(tune["name"]), header.read_text(encoding="utf-8"))
+            self.assertIn(json.dumps(tune["card"]), header.read_text(encoding="utf-8"))
+
+    def test_generated_contract_check_rejects_any_field_or_digest_drift(self):
+        header = (ROOT / "pipeline/generate/study_contract.hpp").read_bytes()
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "study_contract.hpp"
+            target.write_bytes(header.replace(b'"dzero"', b'"dzero_DRIFT"', 1))
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "pipeline/generate/study_contract.py"),
+                 "check", "--output", str(target)], text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("stale", result.stderr)
+            target.write_bytes(header.replace(b"kStudyDefinitionSha256 = \"",
+                                              b"kStudyDefinitionSha256 = \"0", 1))
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "pipeline/generate/study_contract.py"),
+                 "check", "--output", str(target)], text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.assertNotEqual(result.returncode, 0)
+
+    def test_reference_gate_rejects_dangling_and_mis_pdg_states(self):
+        dangling = copy.deepcopy(self.study)
+        dangling["pair_observable"]["balancing_pairs"][0]["trigger"] = "missing"
+        with self.assertRaisesRegex(AssertionError, "dangling"):
+            validate_references(dangling)
+        wrong = copy.deepcopy(self.study)
+        wrong["pair_observable"]["balancing_pairs"][0]["trigger_pdg"] = 999
+        with self.assertRaisesRegex(AssertionError, "mis-PDG"):
+            validate_references(wrong)
 
     def test_activity_and_balancing_identity_bijections(self):
         balancing = csv_rows("results/measurement/balancing.csv")

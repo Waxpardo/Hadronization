@@ -10,5 +10,7 @@ The data plane has four objects:
    its deterministic seed.
 4. `raw/` holds large untracked ROOT objects addressed by those portable keys.
 
-`work/` is ignored transient scratch space. Neither `raw/` nor `work/` is
-created by repository verification.
+`work/` is ignored transient scratch and durable attempt-evidence space. The
+public cleanup command only removes old scratch for attempts explicitly marked
+accepted; it never traverses `raw/` or removes reservation/outcome evidence.
+Neither `raw/` nor `work/` is created by repository verification.

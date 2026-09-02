@@ -15,17 +15,10 @@
 
 namespace Hadronization {
 
-inline constexpr const char* kRawSchema = "hf_primary_ground_raw_v7";
 inline constexpr const char* kSelectorVersion =
     "hard_trigger_primary_ground__primary_ground_associate_v1";
 inline constexpr const char* kOriginAlgorithmVersion =
     "signed_heavy_constituent_complete_mothers_unique_v4";
-inline constexpr const char* kMultiplicityCentral =
-    "NCH_FINAL_CHARGED_NONHEAVY_ETA10_V1";
-inline constexpr const char* kMultiplicityCrossCheck =
-    "NCH_FINAL_CHARGED_NONHEAVY_ETA40_V1";
-inline constexpr const char* kMultiplicityDefinitionVersion =
-    "final_charged_nonheavy_hadron_level_v1";
 inline constexpr const char* kHeavyStabilityAuditSchema =
     "heavy_stability_audit_v2";
 inline constexpr const char* kEffectiveSettingsSchema =
@@ -493,7 +486,7 @@ inline bool IsDirectPrimaryStatus(int status) {
 }
 
 // ---------------------------------------------------------------------------
-// Charged-particle multiplicity, NCH_FINAL_CHARGED_NONHEAVY_*_V1.
+// Charged-particle multiplicity, NCH_PRIMARY_CHARGED_*_V1.
 //
 // This is a genuine charged-particle multiplicity, not a count of directly
 // produced hadronisation products. It is the hadron-level analogue of the
@@ -552,9 +545,9 @@ inline bool IsMultiplicityKinematic(double pt, double eta, double etaMax) {
 
 // `isCharged` and `hasHeavyConstituent` come from the generator's
 // ParticleData, so this stays free of any hand-rolled PDG decoding.
-inline bool CountsNchFinalChargedNonHeavyV1(bool isFinal, bool isCharged,
-                                           bool hasHeavyConstituent, double pt,
-                                           double eta, double etaMax) {
+inline bool CountsNchPrimaryChargedV1(bool isFinal, bool isCharged,
+                                      bool hasHeavyConstituent, double pt,
+                                      double eta, double etaMax) {
   return isFinal && isCharged && !hasHeavyConstituent &&
          IsMultiplicityKinematic(pt, eta, etaMax);
 }

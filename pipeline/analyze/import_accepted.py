@@ -32,6 +32,17 @@ RENDER_HEAD = "6729b3f0b7b94278b06a21943da669d6df737cc0"
 COUNT_HEAD = "fe3262c729ec5a6b942309da45a70efdb2fe7fb4"
 FREEZE_SHA256 = "fcd96eaebd4dc11f071a2c8db8849f6a4cc19b764622a796664e524b27d0fc80"
 
+CURRENT_DEFINITION_PATHS = (
+    "config/tunes/monash.cmnd",
+    "config/tunes/junctions.cmnd",
+    "config/tunes/close_packing.cmnd",
+    "config/study.json",
+    "pipeline/generate/producer.cpp",
+    "pipeline/generate/physics.hpp",
+    "pipeline/generate/study_contract.hpp",
+    "pipeline/generate/sha256.hpp",
+)
+
 BALANCING_LOGS = (
     "render_VBARYONMESON.log",
     "render_VCORRELATIONS.log",
@@ -928,6 +939,22 @@ def parse_card(path: Path) -> dict[str, str]:
     return settings
 
 
+def current_definition_entries(definition_root: Path) -> list[dict[str, object]]:
+    """Bind the complete retained interpretation surface to exact file bytes."""
+    entries = []
+    for relative in CURRENT_DEFINITION_PATHS:
+        path = definition_root / relative
+        if not path.is_file():
+            raise ValueError(f"current definition file is absent: {relative}")
+        entries.append({"path": relative, **file_identity(path)})
+    return entries
+
+
+def current_study_definition(definition_root: Path) -> dict[str, object]:
+    relative = "config/study.json"
+    return {"path": relative, **file_identity(definition_root / relative)}
+
+
 def make_campaign(source_rows: list[dict[str, object]], freeze_path: Path, scheduler: dict[str, object] | None,
                   definition_root: Path) -> dict[str, object]:
     common_fields = (
@@ -949,7 +976,6 @@ def make_campaign(source_rows: list[dict[str, object]], freeze_path: Path, sched
     if study.get("schema") != "hadronization_study_v1" or study.get("scope", {}).get("variation_selection") is not False:
         raise ValueError("current nominal study definition is incomplete")
     cards = {}
-    definition_entries = []
     card_names = {"MONASH": "monash.cmnd", "JUNCTIONS": "junctions.cmnd",
                   "CLOSEPACKING": "close_packing.cmnd"}
     for tune in TUNES:
@@ -962,18 +988,10 @@ def make_campaign(source_rows: list[dict[str, object]], freeze_path: Path, sched
             raise ValueError(f"current tune card physics identity mismatch: {card_path}")
         cards[tune] = {"accepted_effective_sha256": next(iter(card_digests[tune])),
                        "current_definition_sha256": sha256(card_path)}
-        definition_entries.append((rel, card_path))
     producer = definition_root / "pipeline/generate/producer.cpp"
     producer_text = producer.read_text(encoding="utf-8")
     if "StabilizeHeavyHadrons" not in producer_text or "mayDecay(id, false)" not in producer_text:
         raise ValueError("current runtime/decay definition is incomplete")
-    definition_entries.extend((
-        ("config/study.json", definition_root / "config/study.json"),
-        ("pipeline/generate/producer.cpp", producer),
-        ("pipeline/generate/physics.hpp", definition_root / "pipeline/generate/physics.hpp"),
-        ("pipeline/generate/selected_states.hpp", definition_root / "pipeline/generate/selected_states.hpp"),
-        ("pipeline/generate/tune_settings.hpp", definition_root / "pipeline/generate/tune_settings.hpp"),
-    ))
     return {
         "schema": "hadronization_campaign_record_v1", "version": 1, "campaign": "HF_RUN3_V1",
         "tune_order": list(TUNES), "logical_jobs_per_tune": 1000,
@@ -996,7 +1014,7 @@ def make_campaign(source_rows: list[dict[str, object]], freeze_path: Path, sched
                             "tune_cards": cards},
         "current_interpretation_definitions": {
             "role": "interpretation_only_not_claimed_as_accepted_producer",
-            "files": [{"path": rel, **file_identity(path)} for rel, path in definition_entries],
+            "files": current_definition_entries(definition_root),
         },
         "attempt_evidence_inventory": scheduler or {"file_count": 0, "status": "not_supplied"},
         "systematic_uncertainties": "disabled",
@@ -1006,8 +1024,20 @@ def make_campaign(source_rows: list[dict[str, object]], freeze_path: Path, sched
 
 DATA_README = """# Data plane
 
-`campaign.json`, `raw_manifest.jsonl`, `attempts.csv`, and portable raw objects
-under ignored `raw/` are the canonical data objects. `work/` is ignored scratch.
+The data plane has four objects:
+
+1. `campaign.json` owns campaign-wide identities, seed/block rules, runtime
+   facts, accepted-source provenance, and current-definition bindings.
+2. `raw_manifest.jsonl` lists the 3,000 accepted raw files in tune/logical-job
+   order. Each `raw_storage_key` is portable and relative to `data/raw/`.
+3. `attempts.csv` records every accepted or discarded submitted attempt and
+   its deterministic seed.
+4. `raw/` holds large untracked ROOT objects addressed by those portable keys.
+
+`work/` is ignored transient scratch and durable attempt-evidence space. The
+public cleanup command only removes old scratch for attempts explicitly marked
+accepted; it never traverses `raw/` or removes reservation/outcome evidence.
+Neither `raw/` nor `work/` is created by repository verification.
 """
 
 
@@ -1020,9 +1050,21 @@ def result_artifact(path: Path, output_root: Path, *, producer: str, consumer: s
     return result
 
 
-def validate_staging(output: Path) -> None:
-    json.loads((output / "data/campaign.json").read_text(encoding="utf-8"))
-    json.loads((output / "results/manifest.json").read_text(encoding="utf-8"))
+def validate_metadata_parity(output: Path, definition_root: Path) -> None:
+    campaign = json.loads((output / "data/campaign.json").read_text(encoding="utf-8"))
+    manifest = json.loads((output / "results/manifest.json").read_text(encoding="utf-8"))
+    expected = current_definition_entries(definition_root)
+    actual = campaign.get("current_interpretation_definitions", {}).get("files")
+    if actual != expected:
+        raise ValueError("campaign current-definition record is incomplete or stale")
+    if manifest.get("current_study_definition") != current_study_definition(definition_root):
+        raise ValueError("result manifest current-study-definition record is incomplete or stale")
+    if (output / "data/README.md").read_text(encoding="utf-8") != DATA_README:
+        raise ValueError("generated data README differs from the canonical importer-owned text")
+
+
+def validate_staging(output: Path, definition_root: Path) -> None:
+    validate_metadata_parity(output, definition_root)
     for line in (output / "data/raw_manifest.jsonl").read_text(encoding="utf-8").splitlines():
         json.loads(line)
     for path in sorted(output.rglob("*.csv")):
@@ -1123,6 +1165,7 @@ def main() -> None:
     manifest = {
         "schema": "hadronization_result_package_v1", "version": 1, "status": "migration_baseline",
         "campaign": {"id": "HF_RUN3_V1", "data_files": data_files},
+        "current_study_definition": current_study_definition(args.definition_root),
         "import_commit": {"strategy": "git_commit_containing_this_manifest",
                           "starting_head": args.import_starting_head, "manifest_self_hash": None},
         "accepted_identities": {"figure_render_head_g1_g9": RENDER_HEAD,
@@ -1155,7 +1198,7 @@ def main() -> None:
         ],
     }
     write_json(output / "results/manifest.json", manifest)
-    validate_staging(output)
+    validate_staging(output, args.definition_root)
 
 
 if __name__ == "__main__":

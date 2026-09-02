@@ -1,6 +1,10 @@
 from pathlib import Path
+import importlib.util
+import json
 import re
+import shutil
 import subprocess
+import tempfile
 import unittest
 
 from helpers import ROOT
@@ -37,19 +41,28 @@ class LeanTreeContract(unittest.TestCase):
         active = [
             ROOT / "hadronization", ROOT / "setup.sh",
             ROOT / "pipeline/generate/submit.py",
+            ROOT / "pipeline/generate/runtime.py",
+            ROOT / "pipeline/generate/study_contract.py",
+            ROOT / "pipeline/generate/study_contract.hpp",
+            ROOT / "pipeline/generate/validate_raw.cpp",
             ROOT / "pipeline/generate/producer.cpp",
             ROOT / "pipeline/generate/physics.hpp",
-            ROOT / "pipeline/generate/selected_states.hpp",
-            ROOT / "pipeline/generate/tune_settings.hpp",
             ROOT / "config/study.json",
         ]
         text = "\n".join(path.read_text(encoding="utf-8") for path in active)
-        for token in ("/Users/", "/data/alice/", "HF_SYS_", "--systematics",
-                      "card_variant", "HADRONIZATION_BASE",
+        for token in ("/Users/", "/data/alice/", "HF_SYS_",
+                      "HADRONIZATION_BASE",
                       "HADRONIZATION_RESULTS_ROOT"):
             self.assertNotIn(token, text)
         self.assertNotRegex(text, r'os\.environ\s*\[\s*["\']HADRONIZATION_DATASET')
         self.assertNotRegex(text, r'os\.environ\.get\(\s*["\']HADRONIZATION_DATASET')
+        for command in ((str(ROOT / "hadronization"), "generate", "--help"),
+                        ("python3", str(ROOT / "pipeline/generate/submit.py"),
+                         "plan", "--help")):
+            help_text = subprocess.check_output(command, text=True).lower()
+            self.assertNotIn("--systematic", help_text)
+            self.assertNotIn("--variation", help_text)
+            self.assertNotIn("--dataset", help_text)
 
     def test_local_includes_resolve(self):
         sources = list((ROOT / "pipeline").rglob("*.cpp"))
@@ -80,6 +93,39 @@ class LeanTreeContract(unittest.TestCase):
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/plot/")},
             {"pipeline/plot/reference_plotting.C"})
+
+    def test_importer_metadata_builders_match_the_retained_plane(self):
+        path = ROOT / "pipeline/analyze/import_accepted.py"
+        spec = importlib.util.spec_from_file_location("accepted_importer", str(path))
+        importer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(importer)
+        self.assertEqual(importer.DATA_README,
+                         (ROOT / "data/README.md").read_text(encoding="utf-8"))
+        campaign = json.loads((ROOT / "data/campaign.json").read_text(encoding="utf-8"))
+        self.assertEqual(
+            campaign["current_interpretation_definitions"]["files"],
+            importer.current_definition_entries(ROOT))
+        result = json.loads((ROOT / "results/manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(result["current_study_definition"],
+                         importer.current_study_definition(ROOT))
+
+    def test_importer_parity_gate_rejects_an_omitted_definition_record(self):
+        path = ROOT / "pipeline/analyze/import_accepted.py"
+        spec = importlib.util.spec_from_file_location("accepted_importer_mutation", str(path))
+        importer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(importer)
+        campaign = json.loads((ROOT / "data/campaign.json").read_text(encoding="utf-8"))
+        campaign["current_interpretation_definitions"]["files"].pop()
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            (output / "data").mkdir()
+            (output / "results").mkdir()
+            (output / "data/campaign.json").write_text(
+                json.dumps(campaign), encoding="utf-8")
+            (output / "data/README.md").write_text(importer.DATA_README, encoding="utf-8")
+            shutil.copyfile(ROOT / "results/manifest.json", output / "results/manifest.json")
+            with self.assertRaisesRegex(ValueError, "definition record"):
+                importer.validate_metadata_parity(output, ROOT)
 
 
 if __name__ == "__main__":
