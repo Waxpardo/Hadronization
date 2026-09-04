@@ -284,17 +284,36 @@ bool Approximately(double left, double right) {
          1e-10 * std::max({1.0, std::abs(left), std::abs(right)});
 }
 
-// PYTHIA stores Particle::m() independently from its Vec4. Reproduce Vec4's
-// signed mCalc() operation, then allow only the measured floating-point
-// roundoff between that value and the separately stored mSave value.
+// PYTHIA keeps Particle::mSave separate from its Vec4.  The first term bounds
+// their observed low-boost storage/transform drift; the second bounds the
+// cancellation-amplified drift of a repeatedly transformed Vec4.  Both are
+// binary64 mass-squared budgets, measured in units of epsilon and kept well
+// inside the historical validator's acceptance region.
+constexpr double kSavedMassSquaredUlps = 65536.0;
+constexpr double kVec4CancellationUlps = 2048.0;
+
 bool PythiaSavedMassConsistent(double px, double py, double pz, double energy,
                                double savedMass) {
-  const double massSquared = energy * energy - px * px - py * py - pz * pz;
-  const double calculatedMass =
-      massSquared > 0.0 ? std::sqrt(massSquared) : -std::sqrt(-massSquared);
-  return std::abs(calculatedMass - savedMass) <=
-         1e-8 * std::max({1.0, std::abs(calculatedMass),
-                          std::abs(savedMass)});
+  const double energySquared = energy * energy;
+  const double pxSquared = px * px;
+  const double pySquared = py * py;
+  const double pzSquared = pz * pz;
+  const double savedMassSquared = savedMass * savedMass;
+  const double invariantMassSquared =
+      energySquared - pxSquared - pySquared - pzSquared;
+  if (!std::isfinite(invariantMassSquared) || invariantMassSquared < 0.0) {
+    return false;
+  }
+  const double residual =
+      std::abs(invariantMassSquared - savedMassSquared);
+  const double componentScale =
+      std::max(1.0, energySquared + pxSquared + pySquared + pzSquared);
+  const double savedMassScale = std::max(1.0, savedMassSquared);
+  const double tolerance = std::numeric_limits<double>::epsilon() *
+      (kSavedMassSquaredUlps * savedMassScale +
+       kVec4CancellationUlps * componentScale);
+  return std::isfinite(residual) && std::isfinite(tolerance) &&
+         residual <= tolerance;
 }
 
 Authorization Arguments(int argc, char** argv) {

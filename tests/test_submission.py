@@ -1,5 +1,7 @@
 import importlib.util
+from decimal import Decimal, localcontext
 import json
+import math
 from pathlib import Path
 import re
 import shlex
@@ -10,6 +12,88 @@ import unittest
 from unittest import mock
 
 from helpers import ROOT
+
+
+MASS_CASES = {
+    # Accepted PYTHIA rows measured independently from the stratified sample.
+    "transition_below": (
+        -0.65647586501055222, -0.88109799673942379,
+        -1.5185865564570249, 2.7485678178030177,
+        2.0102799999999998),
+    "transition_above": (
+        -1.3076076015190745, 2.8302798907269628,
+        7.2360464351265019, 8.0968137393840962, 1.86486),
+    "boosted": (
+        1.0073255225537583, 0.09182028542174181,
+        -2119.9611695267768, 2119.9622352570532,
+        1.8696200000000001),
+}
+
+
+def independent_mass_boundary_ratio(values):
+    """High-precision oracle over the already-rounded fixture doubles."""
+    with localcontext() as context:
+        context.prec = 80
+        px, py, pz, energy, mass = map(Decimal.from_float, values)
+        invariant = energy * energy - px * px - py * py - pz * pz
+        saved = mass * mass
+        component_scale = max(
+            Decimal(1),
+            energy * energy + px * px + py * py + pz * pz)
+        saved_scale = max(Decimal(1), saved)
+        tolerance = Decimal.from_float(sys.float_info.epsilon) * (
+            Decimal(65536) * saved_scale +
+            Decimal(2048) * component_scale)
+        return float(abs(invariant - saved) / tolerance)
+
+
+def independent_mutation_for_ratio(case_name, field, target_ratio):
+    """Find a rounded-double perturbation at a requested oracle-bound multiple."""
+    field_index = {"px": 0, "energy": 3, "mass": 4}[field]
+    base = list(MASS_CASES[case_name])
+    base_ratio = independent_mass_boundary_ratio(base)
+    if target_ratio <= base_ratio:
+        raise AssertionError("target ratio must exceed the accepted base ratio")
+    scale = max(1.0, abs(base[field_index]))
+    step = math.ulp(scale) * 8.0
+    direction = None
+    for _ in range(80):
+        candidates = []
+        for sign in (-1.0, 1.0):
+            changed = list(base)
+            changed[field_index] += sign * step
+            candidates.append((independent_mass_boundary_ratio(changed), sign))
+        ratio, sign = max(candidates)
+        if ratio > base_ratio:
+            direction = sign
+            break
+        step *= 2.0
+    if direction is None:
+        raise AssertionError("could not find an increasing mutation direction")
+    lower = 0.0
+    upper = step
+    for _ in range(80):
+        changed = list(base)
+        changed[field_index] += direction * upper
+        if independent_mass_boundary_ratio(changed) >= target_ratio:
+            break
+        upper *= 2.0
+    else:
+        raise AssertionError("could not bracket requested mutation ratio")
+    for _ in range(100):
+        middle = 0.5 * (lower + upper)
+        changed = list(base)
+        changed[field_index] += direction * middle
+        if independent_mass_boundary_ratio(changed) < target_ratio:
+            lower = middle
+        else:
+            upper = middle
+    mutation = direction * upper
+    changed = list(base)
+    changed[field_index] += mutation
+    if independent_mass_boundary_ratio(changed) < 0.95 * target_ratio:
+        raise AssertionError("rounded mutation missed requested boundary ratio")
+    return mutation
 
 
 def load_submit():
@@ -187,8 +271,10 @@ FIXTURE = r'''
 #include "TTree.h"
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <iomanip>
+#include <limits>
 #include <locale>
 #include <map>
 #include <sstream>
@@ -198,8 +284,9 @@ FIXTURE = r'''
 using namespace Hadronization;
 
 int main(int argc, char** argv) {
-  if (argc != 3) return 2;
+  if (argc != 3 && argc != 4) return 2;
   const std::string mode = argv[2];
+  const double mutation = argc == 4 ? std::stod(argv[3]) : 0.0;
   const bool counterMutation = mode.rfind("counter_", 0) == 0;
   const bool resolutionEvents = mode == "valid_resolutions" || counterMutation;
   TFile output(argv[1], "RECREATE");
@@ -486,12 +573,69 @@ int main(int argc, char** argv) {
       doubleVectors["heavyPt"].pop_back();
     if (mode == "constituent_offsets" && row == 0)
       integerVectors["heavyConstituentOffsets"].back() += 1;
-    if (mode == "mass_inside_tolerance" && row == 0)
-      doubleVectors["heavyE"].front() = 1.0 + 5e-9;
-    if (mode == "mass_outside_tolerance" && row == 0)
-      doubleVectors["heavyE"].front() = 1.0 + 2e-8;
-    if (mode == "component_outside_tolerance" && row == 0)
-      doubleVectors["heavyPx"].front() = 1e-5;
+    if (mode.rfind("mass_", 0) == 0 && row == 0 &&
+        !doubleVectors["heavyMass"].empty()) {
+      const auto setKinematics = [&](double px, double py, double pz,
+                                     double energy, double savedMass) {
+        const double pt = std::hypot(px, py);
+        const double eta = pt > 0.0 ? std::asinh(pz / pt) : 0.0;
+        const double rapidity =
+            energy > std::abs(pz)
+                ? 0.5 * std::log((energy + pz) / (energy - pz))
+                : 0.0;
+        const double phi = std::atan2(py, px);
+        doubleVectors["heavyPx"].front() = px;
+        doubleVectors["heavyPy"].front() = py;
+        doubleVectors["heavyPz"].front() = pz;
+        doubleVectors["heavyE"].front() = energy;
+        doubleVectors["heavyMass"].front() = savedMass;
+        doubleVectors["heavyPt"].front() = pt;
+        doubleVectors["heavyEta"].front() = eta;
+        doubleVectors["heavyY"].front() = rapidity;
+        doubleVectors["heavyPhi"].front() = phi;
+        doubleVectors["PT"].front() = pt;
+        doubleVectors["ETA"].front() = eta;
+        doubleVectors["Y"].front() = rapidity;
+        doubleVectors["PHI"].front() = phi;
+      };
+      const bool boosted = mode == "mass_valid_boosted" ||
+          mode.find("_high_") != std::string::npos;
+      const bool transitionAbove = mode == "mass_valid_transition_above";
+      if (boosted) {
+        setKinematics(1.0073255225537583, 0.09182028542174181,
+                      -2119.9611695267768, 2119.9622352570532,
+                      1.8696200000000001);
+      } else if (transitionAbove) {
+        setKinematics(-1.3076076015190745, 2.8302798907269628,
+                      7.2360464351265019, 8.0968137393840962, 1.86486);
+      } else {
+        setKinematics(-0.65647586501055222, -0.88109799673942379,
+                      -1.5185865564570249, 2.7485678178030177,
+                      2.0102799999999998);
+      }
+      if (mode.find("mass_saved_") == 0) {
+        doubleVectors["heavyMass"].front() += mutation;
+      } else if (mode.find("mass_energy_") == 0) {
+        setKinematics(doubleVectors["heavyPx"].front(),
+                      doubleVectors["heavyPy"].front(),
+                      doubleVectors["heavyPz"].front(),
+                      doubleVectors["heavyE"].front() + mutation,
+                      doubleVectors["heavyMass"].front());
+      } else if (mode.find("mass_momentum_") == 0) {
+        setKinematics(doubleVectors["heavyPx"].front() + mutation,
+                      doubleVectors["heavyPy"].front(),
+                      doubleVectors["heavyPz"].front(),
+                      doubleVectors["heavyE"].front(),
+                      doubleVectors["heavyMass"].front());
+      } else if (mode == "mass_spacelike") {
+        setKinematics(2.0, 0.0, 0.0, 1.0, 1.0);
+      } else if (mode == "mass_nonfinite") {
+        doubleVectors["heavyE"].front() =
+            std::numeric_limits<double>::infinity();
+      } else if (mode == "mass_negative") {
+        doubleVectors["heavyMass"].front() = -1.0;
+      }
+    }
     nCharm = 0; nBeauty = 0; nBc = 0; qcSum = 0; qbSum = 0;
     for (std::size_t slot = 0; slot < integerVectors["heavyPdg"].size(); ++slot) {
       const bool hasCharm = integerVectors["heavyNc"][slot] +
@@ -792,9 +936,12 @@ class SubmissionContract(unittest.TestCase):
         if hasattr(cls, "temporary"):
             cls.temporary.cleanup()
 
-    def make_and_validate(self, mode):
+    def make_and_validate(self, mode, mutation=None):
         output = self.base / "{}.root".format(mode)
-        subprocess.run([str(self.fixture), str(output), mode], check=True)
+        fixture_command = [str(self.fixture), str(output), mode]
+        if mutation is not None:
+            fixture_command.append("{:.17g}".format(mutation))
+        subprocess.run(fixture_command, check=True)
         command = [str(self.validator), str(output), "--campaign", "HF_RUN3_V1",
                    "--tune", "MONASH", "--campaign-ordinal", "3",
                    "--logical-id", "0", "--attempt", "0", "--seed", "130000001",
@@ -908,21 +1055,76 @@ class SubmissionContract(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0, result.stdout)
         self.assertIn("hard root identity is not unique", result.stdout)
 
-    def test_validator_accepts_mass_roundoff_inside_dedicated_tolerance(self):
-        result = self.make_and_validate("mass_inside_tolerance")
+    def test_validator_accepts_measured_mass_vectors_across_conditioning_regimes(self):
+        for mode in ("mass_valid_transition_below",
+                     "mass_valid_transition_above",
+                     "mass_valid_boosted"):
+            with self.subTest(mode=mode):
+                result = self.make_and_validate(mode)
+                self.assertEqual(result.returncode, 0, result.stdout)
+                self.assertIn("RAW_VALIDATION_PASS", result.stdout)
+
+    def test_validator_accepts_mass_value_safely_inside_independent_boundary(self):
+        mutation = independent_mutation_for_ratio(
+            "transition_below", "mass", 0.5)
+        changed = list(MASS_CASES["transition_below"])
+        changed[4] += mutation
+        self.assertLess(independent_mass_boundary_ratio(changed), 0.55)
+        result = self.make_and_validate("mass_saved_low_inside", mutation)
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertIn("RAW_VALIDATION_PASS", result.stdout)
 
-    def test_validator_rejects_mass_and_component_inconsistency(self):
-        diagnostics = {
-            "mass_outside_tolerance": "heavy mSave/mCalc inconsistency",
-            "component_outside_tolerance": "heavy pT component inconsistency",
+    def test_validator_rejects_saved_mass_corruption_at_low_and_high_boost(self):
+        cases = {
+            "mass_saved_low_outside": "transition_below",
+            "mass_saved_high_outside": "boosted",
         }
-        for mode, diagnostic in diagnostics.items():
+        for mode, case_name in cases.items():
+            with self.subTest(mode=mode):
+                mutation = independent_mutation_for_ratio(
+                    case_name, "mass", 4.0)
+                result = self.make_and_validate(mode, mutation)
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn("heavy mSave/mCalc inconsistency", result.stdout)
+                self.assertNotIn("heavy pT component inconsistency", result.stdout)
+                self.assertNotIn("heavy kinematic component domain", result.stdout)
+
+    def test_validator_rejects_energy_corruption_at_low_and_high_boost(self):
+        cases = {
+            "mass_energy_low_outside": "transition_below",
+            "mass_energy_high_outside": "boosted",
+        }
+        for mode, case_name in cases.items():
+            with self.subTest(mode=mode):
+                mutation = independent_mutation_for_ratio(
+                    case_name, "energy", 4.0)
+                result = self.make_and_validate(mode, mutation)
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn("heavy mSave/mCalc inconsistency", result.stdout)
+                self.assertNotIn("heavy pT component inconsistency", result.stdout)
+                self.assertNotIn("heavy kinematic component domain", result.stdout)
+
+    def test_validator_rejects_momentum_corruption_after_aliases_are_updated(self):
+        mutation = independent_mutation_for_ratio("boosted", "px", 4.0)
+        result = self.make_and_validate("mass_momentum_high_outside", mutation)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("heavy mSave/mCalc inconsistency", result.stdout)
+        self.assertNotIn("heavy pT component inconsistency", result.stdout)
+        self.assertNotIn("legacy/full-heavy aliases disagree", result.stdout)
+
+    def test_validator_rejects_spacelike_mass_vector(self):
+        result = self.make_and_validate("mass_spacelike")
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("heavy mSave/mCalc inconsistency", result.stdout)
+
+    def test_validator_preserves_mass_component_domain_rejections(self):
+        for mode in ("mass_nonfinite", "mass_negative"):
             with self.subTest(mode=mode):
                 result = self.make_and_validate(mode)
                 self.assertNotEqual(result.returncode, 0, result.stdout)
-                self.assertIn(diagnostic, result.stdout)
+                self.assertIn("heavy kinematic component domain invariant failed",
+                              result.stdout)
+                self.assertNotIn("heavy mSave/mCalc inconsistency", result.stdout)
 
     def test_validator_accepts_exact_nonzero_resolution_counters(self):
         result = self.make_and_validate("valid_resolutions")
