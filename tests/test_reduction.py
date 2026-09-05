@@ -815,6 +815,36 @@ class ReductionContract(unittest.TestCase):
         self.assertEqual(module.validate_compact_domains(
             domains, analysis, analysis_sha),
             metadata["compact_domains_sha256"])
+        block_count = len(domains["block_ids"])
+        cell_count = sum(
+            len(projection["scope_ids"]) * block_count *
+            projection["bin_count"] * len(projection["component_ids"])
+            for projection in domains["projection_dictionary"])
+        gram = domains["event_gram_dictionary"]
+        gram_count = (len(gram["scope_ids"]) * block_count *
+                      len(gram["allowed_term_codes"]))
+        self.assertEqual(cell_count, 2483700)
+        self.assertEqual(gram_count, 1892160)
+        self.assertNotEqual((cell_count, gram_count), (1664280, 946080))
+        self.assertEqual(metadata["metrics"]["cells"], cell_count)
+        self.assertEqual(metadata["metrics"]["event_gram"], gram_count)
+        self.assertEqual(analysis["compact_storage"][
+            "maximum_complete_default_bytes"], 85 * 1024 * 1024)
+
+    def test_publication_size_policy_is_strict_without_large_fixture(self):
+        spec = importlib.util.spec_from_file_location(
+            "reduction_size_test", str(ROOT / "pipeline/reduce/run.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        analysis = json.loads((ROOT / "config/analysis.json").read_text(
+            encoding="utf-8"))
+        analysis["compact_storage"]["maximum_complete_default_bytes"] = (
+            self.compact_root.stat().st_size)
+        with self.assertRaisesRegex(ValueError, "strict <85 MiB gate"):
+            module.enforce_publication_size(
+                "PUBLICATION_ELIGIBLE", self.compact_root, analysis)
+        module.enforce_publication_size(
+            "NONPUBLICATION_PARTIAL", self.compact_root, analysis)
 
     def test_configurable_three_class_request_changes_only_downstream_projection(self):
         analysis = json.loads((ROOT / "config/analysis.json").read_text(encoding="utf-8"))
@@ -988,6 +1018,11 @@ class ReductionContract(unittest.TestCase):
                                  "--output-root", str(output), check=True)
         self.assertIn("RECOVERED", recovered.stdout)
         self.assertEqual(sha256(root), before)
+        public_verify = self._reduce(
+            "verify", "--root", str(root), "--receipt",
+            str(root.with_suffix(".json")), "--work-root",
+            str(self.reduce_work), check=True)
+        self.assertIn("VERIFIED", public_verify.stdout)
         no_overwrite = self._reduce("run", "--plan", str(self.combined_plan),
                                     "--analyzed-root", str(self.combined_root),
                                     "--work-root", str(self.reduce_work),
@@ -1014,6 +1049,35 @@ class ReductionContract(unittest.TestCase):
                               str(receipt), "--work-root", str(self.reduce_work))
         self.assertEqual(verify.returncode, 2)
         self.assertIn("nested digest differs", verify.stderr)
+
+    def test_root_only_recovery_rejects_coherently_rebound_nested_domain(self):
+        output = self.base / "coherent-domain-recovery"
+        root = output / self.compact_root.parent.name / self.compact_root.name
+        root.parent.mkdir(parents=True)
+        metadata = json.loads(json.dumps(self.oracle["metadata"]))
+        embedded = json.loads(json.dumps(self.oracle["receipt"]))
+        for payload in (metadata, embedded):
+            payload["compact_domains"]["analysis_request_sha256"] = "0" * 64
+            payload["compact_domains_sha256"] = hashlib.sha256(
+                self._canonical(payload["compact_domains"]).encode(
+                    "ascii")).hexdigest()
+        embedded["activity_receipts_sha256"] = hashlib.sha256(
+            self._canonical(embedded["activity_receipts"]).encode(
+                "ascii")).hexdigest()
+        embedded["block_accounting_sha256"] = hashlib.sha256(
+            self._canonical(embedded["block_accounting"]).encode(
+                "ascii")).hexdigest()
+        self._payload_root(self.compact_root, root, metadata, embedded)
+        before = sha256(root)
+        recovered = self._reduce(
+            "run", "--plan", str(self.combined_plan), "--analyzed-root",
+            str(self.combined_root), "--work-root", str(self.reduce_work),
+            "--output-root", str(output))
+        self.assertEqual(recovered.returncode, 2)
+        self.assertIn("root-only compact domain differs from current request",
+                      recovered.stderr)
+        self.assertEqual(sha256(root), before)
+        self.assertFalse(root.with_suffix(".json").exists())
 
     def test_compact_unknown_cycles_config_and_scientific_tampering_fail(self):
         for mode in ("unknown", "cycle", "scientific", "binding"):

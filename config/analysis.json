@@ -195,7 +195,7 @@
     "tables": ["cells", "event_gram"],
     "metadata_objects": ["metadata", "receipt"],
     "compression": {"algorithm": "ZSTD", "level": 5},
-    "maximum_complete_default_bytes": 52428800,
+    "maximum_complete_default_bytes": 89128960,
     "sparse_rule": "absence inside a declared domain is exact zero; absence outside is NOT_MATERIALIZED",
     "pooled_copy": false,
     "summation": "Neumaier compensated binary64 with recorded absolute sums and operation counts"

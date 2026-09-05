@@ -1361,8 +1361,6 @@ std::pair<std::string,std::string> ReadStressSpec(const std::string& path) {
 }
 
 void WriteStressCompact(const std::string& specPath, const std::string& output) {
-  constexpr std::uint64_t cellCount = 1664280;
-  constexpr std::uint64_t gramCount = 946080;
   auto templates = ReadStressSpec(specPath);
   const CompactDomains domains = ReadCompactDomains(templates.first,
                                                       templates.second);
@@ -1392,18 +1390,11 @@ void WriteStressCompact(const std::string& specPath, const std::string& output) 
           for (const UInt_t declaredComponent : declared.second.components) {
             component = declaredComponent;
             value=2.0*StressUnit(randomState)-1.0;sumabs=std::abs(value)+0.01*StressUnit(randomState)+1e-12;rowSumw2=value*value+0.01*StressUnit(randomState)+1e-12;fills=1ULL+StressRandom(randomState)%17ULL;cells.Fill();for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(bin),std::to_string(component),DoubleHex(value),DoubleHex(sumabs),DoubleHex(rowSumw2),std::to_string(fills)})DigestField(digest,field);
-            if (++cellRows == cellCount) break;
+            ++cellRows;
           }
-          if (cellRows == cellCount) break;
         }
-        if (cellRows == cellCount) break;
       }
-      if (cellRows == cellCount) break;
     }
-    if (cellRows == cellCount) break;
-  }
-  if (cellRows != cellCount) {
-    throw std::runtime_error("compact stress cell domain is too small");
   }
   digest.Update(std::string("event_gram\0",11));
   UInt_t left=0,right=0;Double_t cross=0;
@@ -1418,14 +1409,9 @@ void WriteStressCompact(const std::string& specPath, const std::string& output) 
         left = static_cast<UInt_t>(term / domains.gramTermMultiplier);
         right = static_cast<UInt_t>(term % domains.gramTermMultiplier);
         cross=2.0*StressUnit(randomState)-1.0;gram.Fill();for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(left),std::to_string(right),DoubleHex(cross)})DigestField(digest,field);
-        if (++gramRows == gramCount) break;
+        ++gramRows;
       }
-      if (gramRows == gramCount) break;
     }
-    if (gramRows == gramCount) break;
-  }
-  if (gramRows != gramCount) {
-    throw std::runtime_error("compact stress Gram domain is too small");
   }
   const std::string scientific=digest.FinalHex();
   std::string metadata = templates.first;
@@ -1434,7 +1420,7 @@ void WriteStressCompact(const std::string& specPath, const std::string& output) 
   ReplaceOne(receipt, "\"__SCIENTIFIC_DIGEST__\"", "\""+scientific+"\"");
   file.cd();cells.Write();gram.Write();TObjString metadataObject(metadata.c_str());metadataObject.Write("metadata");TObjString receiptObject(receipt.c_str());receiptObject.Write("receipt");file.Close();if(file.IsZombie())throw std::runtime_error("stress compact ROOT close failed");
   VerifyCompact(output);
-  std::ifstream input(output,std::ios::binary|std::ios::ate);if(!input)throw std::runtime_error("cannot stat stress compact ROOT");std::cout<<"STRESS_SUMMARY bytes="<<static_cast<std::uint64_t>(input.tellg())<<" cells="<<cellCount<<" event_gram="<<gramCount<<" lineage_sources="<<domains.lineageSources<<" lineage_shards="<<domains.lineageShards<<'\n';
+  std::ifstream input(output,std::ios::binary|std::ios::ate);if(!input)throw std::runtime_error("cannot stat stress compact ROOT");std::cout<<"STRESS_SUMMARY bytes="<<static_cast<std::uint64_t>(input.tellg())<<" cells="<<cellRows<<" event_gram="<<gramRows<<" lineage_sources="<<domains.lineageSources<<" lineage_shards="<<domains.lineageShards<<'\n';
 }
 
 int Main(int argc,char** argv){if(argc<2)throw std::runtime_error("usage: reduce <reduce|verify|stress> ...");const std::string command=argv[1];if(command=="reduce"){if(argc!=4)throw std::runtime_error("usage: reduce reduce SPEC OUTPUT");Reducer reducer(ReadSpec(argv[2]));reducer.Run(argv[3]);return 0;}if(command=="verify"){if(argc!=3)throw std::runtime_error("usage: reduce verify ROOT");VerifyCompact(argv[2]);return 0;}if(command=="stress"){if(argc!=4)throw std::runtime_error("usage: reduce stress SPEC ROOT");WriteStressCompact(argv[2],argv[3]);return 0;}throw std::runtime_error("unknown reducer command");}

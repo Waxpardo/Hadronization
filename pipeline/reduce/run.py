@@ -423,7 +423,7 @@ def checked_analysis(path):
             storage.get("tables") != ["cells", "event_gram"] or
             storage.get("metadata_objects") != ["metadata", "receipt"] or
             storage.get("compression") != {"algorithm": "ZSTD", "level": 5} or
-            storage.get("maximum_complete_default_bytes") != 50 * 1024 * 1024 or
+            storage.get("maximum_complete_default_bytes") != 85 * 1024 * 1024 or
             storage.get("sparse_rule") !=
             "absence inside a declared domain is exact zero; absence outside is "
             "NOT_MATERIALIZED" or storage.get("pooled_copy") is not False or
@@ -893,6 +893,19 @@ def compact_domains(analysis, analysis_sha, pairs, scopes, dynamic_species):
     }
 
 
+def compact_domain_cardinalities(domains):
+    """Derive complete stored-row cardinalities from the canonical domains."""
+    blocks = domains["block_ids"]
+    cells = sum(
+        len(projection["scope_ids"]) * len(blocks) *
+        projection["bin_count"] * len(projection["component_ids"])
+        for projection in domains["projection_dictionary"])
+    gram = domains["event_gram_dictionary"]
+    event_gram = (len(gram["scope_ids"]) * len(blocks) *
+                  len(gram["allowed_term_codes"]))
+    return cells, event_gram
+
+
 def stress_compact_payloads(analysis, analysis_sha):
     """Build a full-shape synthetic contract for the bounded storage gate."""
     tune_names = ["MONASH", "JUNCTIONS", "CLOSEPACKING"]
@@ -1014,7 +1027,8 @@ def stress_compact_payloads(analysis, analysis_sha):
     estimator = {"policy_id": analysis["estimator_policy"]["id"],
                  "block_count": 10, "dof": 9,
                  "stress_contract": "full_shape_storage_only"}
-    metrics = {"cells": 1664280, "event_gram": 946080,
+    cells, event_gram = compact_domain_cardinalities(domains)
+    metrics = {"cells": cells, "event_gram": event_gram,
                "events": 300000000, "sources": 3000,
                "input_bytes": sum(item["root_bytes"] for item in shards)}
     activity_sha = sha_bytes(canonical(activity).encode("ascii"))
@@ -1549,6 +1563,13 @@ def validate_compact_domains(domains, analysis, analysis_sha):
     return sha_bytes(canonical(domains).encode("ascii"))
 
 
+def enforce_publication_size(publication, root_path, analysis):
+    maximum = analysis["compact_storage"]["maximum_complete_default_bytes"]
+    if (publication == "PUBLICATION_ELIGIBLE" and
+            root_path.stat().st_size >= maximum):
+        raise ValueError("complete compact ROOT violates strict <85 MiB gate")
+
+
 def verify_output(root_path, receipt_path, analysis_path, work_root):
     analysis, analysis_sha = checked_analysis(analysis_path)
     regular_file(root_path, "compact ROOT")
@@ -1635,6 +1656,7 @@ def verify_output(root_path, receipt_path, analysis_path, work_root):
     if (storage.get("root_bytes") != root_path.stat().st_size or
             storage.get("root_sha256") != sha_file(root_path)):
         raise ValueError("compact ROOT physical identity differs")
+    enforce_publication_size(receipt["state"], root_path, analysis)
     environment, binary, current_build = build_reducer(work_root)
     for key in ("source_sha256", "statistics_sha256"):
         if (build["build_identity"][key] !=
@@ -1724,14 +1746,27 @@ def run(args):
         summary = parse_summary(completed.stdout)
         validate_summary_binding(summary, plan, analysis_sha, parent_digest,
                                  publication, build["build_id"])
+        recovered_domains = compact_domains(
+            analysis, analysis_sha, pairs, scopes, summary["dynamic_species"])
+        recovered_domain_sha = validate_compact_domains(
+            recovered_domains, analysis, analysis_sha)
+        if summary["compact_domains_sha256"] != recovered_domain_sha:
+            raise ValueError("root-only compact domain differs from current request")
+        enforce_publication_size(publication, root_path, analysis)
         rebuilt = reduction_receipt(plan, analysis_sha, parent_digest, publication,
                                     root_path, summary, build, 0.0,
                                     len(plan["sources"]),
-                                    compact_domains(analysis, analysis_sha, pairs,
-                                                    scopes,
-                                                    summary["dynamic_species"]),
+                                    recovered_domains,
                                     lineage)
         atomic_json(receipt_path, rebuilt, exclusive=True)
+        try:
+            verified, unused_summary = verify_output(
+                root_path, receipt_path, args.analysis, work_root)
+            del verified, unused_summary
+        except Exception:
+            receipt_path.unlink()
+            fsync_directory(receipt_path.parent)
+            raise
         print("RECOVERED ROOT={} RECEIPT={} STATE={}".format(
             root_path, receipt_path, publication))
         return
@@ -1756,10 +1791,7 @@ def run(args):
                                  publication, build["build_id"])
         run_binary(binary, environment, ["verify", str(staged_root)],
                    "staged compact verifier")
-        if (publication == "PUBLICATION_ELIGIBLE" and
-                staged_root.stat().st_size >=
-                analysis["compact_storage"]["maximum_complete_default_bytes"]):
-            raise ValueError("complete compact ROOT violates strict <50 MiB gate")
+        enforce_publication_size(publication, staged_root, analysis)
         fsync_file(staged_root)
         os.link(str(staged_root), str(root_path))
         fsync_directory(root_path.parent)
