@@ -1,0 +1,152 @@
+{
+  "schema": "hadronization_downstream_analysis_request_v1",
+  "version": "1.0.0",
+  "base_study": {
+    "schema": "hadronization_study_v1",
+    "sha256": "d3eac08d732dd5d9642b650ac69cb3512bf3245ae450387e57ace7690a8ef4f5"
+  },
+  "lossless_input": {
+    "schema": "hadronization_lossless_analysis_v1",
+    "schema_digest": "3a83a7550c27c3f59989b84eea0204bce45bd9c401744f321758e56f3bf422c9",
+    "structural_registries_digest": "5462be4f9fed821f6a0c09cda4b461343d1720112f8c76a3afd14ce8130895f3"
+  },
+  "axes": {
+    "activity": {
+      "bins": 4096,
+      "integer_domain": [0, 4095],
+      "endpoint_rule": "each nonnegative integer is one regular bin"
+    },
+    "dphi": {
+      "bins": 100,
+      "low": -1.5707963267948966,
+      "high": 4.71238898038469,
+      "endpoint_rule": "low inclusive, high exclusive",
+      "semantic": "wrap(trigger_phi-associate_phi) in [-pi/2,3pi/2)"
+    },
+    "eta": {
+      "bins": 100,
+      "low": -4.0,
+      "high": 4.0,
+      "endpoint_rule": "both physical endpoints inclusive; high occupies last bin"
+    },
+    "phi": {
+      "bins": 100,
+      "low": -3.141592653589793,
+      "high": 3.141592653589793,
+      "endpoint_rule": "both physical endpoints inclusive; high occupies last bin"
+    },
+    "pt": {
+      "edges": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0, 20.5, 21.0, 21.5, 22.0, 22.5, 23.0, 23.5, 24.0, 24.5, 25.0, 25.5, 26.0, 26.5, 27.0, 27.5, 28.0, 28.5, 29.0, 29.5, 30.0, 30.5, 31.0, 31.5, 32.0, 32.5, 33.0, 33.5, 34.0, 34.5, 35.0, 35.5, 36.0, 36.5, 37.0, 37.5, 38.0, 38.5, 39.0, 39.5, 40.0, 40.5, 41.0, 41.5, 42.0, 42.5, 43.0, 43.5, 44.0, 44.5, 45.0, 45.5, 46.0, 46.5, 47.0, 47.5, 48.0, 48.5, 49.0, 49.5, 50.0, 60.0, 75.0, 100.0, 150.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 7000.0],
+      "endpoint_rule": "low inclusive, high inclusive; underflow and overflow retained"
+    }
+  },
+  "profiles": [
+    {
+      "id": "inclusive",
+      "trigger_pt": null,
+      "associate_pt": null
+    },
+    {
+      "id": "historical_1p0_0p15",
+      "trigger_pt": {"operator": ">", "value": 1.0},
+      "associate_pt": {"operator": ">", "value": 0.15}
+    }
+  ],
+  "pair_acceptance": {
+    "eta": {"operator": "abs<=", "value": 4.0},
+    "roles": "ordered structural trigger and associate",
+    "dphi_sign": "trigger_phi-associate_phi"
+  },
+  "activities": [
+    {
+      "id": "charged_light_sector_activity_a15_v1_eta4",
+      "semantic_id": "charged_light_sector_activity_a15_v1",
+      "physical_field": "a15_eta4",
+      "eta_window": 4.0,
+      "role": "nominal",
+      "raw_definition_id": "primary_charged_light_hadron_level_v1",
+      "predicate": "positive/final, nonzero charge, no charm/beauty constituent, finite kinematics, pt>0.15, abs(eta)<=4"
+    },
+    {
+      "id": "charged_light_sector_activity_a15_v1_eta1",
+      "semantic_id": "charged_light_sector_activity_a15_v1",
+      "physical_field": "a15_eta1",
+      "eta_window": 1.0,
+      "role": "parity",
+      "raw_definition_id": "primary_charged_light_hadron_level_v1",
+      "predicate": "positive/final, nonzero charge, no charm/beauty constituent, finite kinematics, pt>0.15, abs(eta)<=1"
+    }
+  ],
+  "percentile_intervals": [[0, 1], [1, 10], [10, 20], [20, 30], [30, 40], [40, 50], [50, 60], [60, 70], [70, 80], [80, 90], [90, 100]],
+  "integrated_interval": [0, 100],
+  "activity_policy": {
+    "threshold": "first integer n whose ascending weighted cumulative is >= (100-p)/100 of total",
+    "tie_rule": "threshold belongs to the lower-activity class",
+    "weight_convention": "signed event weight; every aggregate bin must be nonnegative and total positive",
+    "complement_rule": "resolve every tune-local delete-one-block boundary; instability or unresolved margin withholds unconditional class uncertainty"
+  },
+  "pair_query_registry": {
+    "expansion": "ordered Cartesian product within sector in listed order",
+    "trigger_pdgs": [411, -411, 421, -421, 4122, -4122, 511, -511, 521, -521, 5122, -5122],
+    "associate_pdgs": {
+      "charm": [411, -411, 421, -421, 431, -431, 4112, -4112, 4122, -4122, 4132, -4132, 4212, -4212, 4222, -4222, 4232, -4232, 4312, -4312, 4322, -4322, 4332, -4332],
+      "beauty": [511, -511, 521, -521, 531, -531, 541, -541, 5112, -5112, 5122, -5122, 5132, -5132, 5212, -5212, 5222, -5222, 5232, -5232, 5312, -5312, 5322, -5322, 5332, -5332]
+    },
+    "reference_meson_by_trigger": {
+      "-5122": -521,
+      "-4122": 411,
+      "-521": 521,
+      "-511": 511,
+      "-421": 421,
+      "-411": 411,
+      "411": -411,
+      "421": -421,
+      "511": -511,
+      "521": -521,
+      "4122": -411,
+      "5122": 521
+    },
+    "expected_count": 300,
+    "central_eligibility_source": "lossless structural selected-state registry"
+  },
+  "correlations": {
+    "tunes": "all admitted tunes",
+    "identities": [[521, -521], [-5122, -521], [411, -411], [4122, -411]],
+    "components": ["OS", "SS"],
+    "difference_recipe": "OS-SS"
+  },
+  "projection_recipes": [
+    "G1_activity_eta1_eta4",
+    "G9_direct_primary_selected_strict_pt0p15_eta4",
+    "T1_all_final_heavy_no_acceptance",
+    "ordered_pair_scalars",
+    "configured_dphi_correlations",
+    "origin_integrated",
+    "closure_full_visible_eta4_no_associate_pt_floor",
+    "closure_species_integrated",
+    "closure_category_dphi_integrated"
+  ],
+  "g9_species_pdgs": [-5212, -5122, -4122, -521, -411, 411, 521, 4122, 5122, 5212],
+  "estimator_policy": {
+    "id": "pooled_delete_one_source_block_jackknife_v2",
+    "center": "g(sum(block_vectors))",
+    "covariance": "(K-1)/K times sum outer(delete_one-leave_mean)",
+    "bias_correction": false,
+    "denominator_resolution_alpha": 0.05,
+    "phase_a_t9_two_sided_quantile": 2.2621571628540993,
+    "quantile_algorithm": "accepted STATISTICS-1 binary64 constant for K=10; Boost students_t quantile otherwise",
+    "cancelled_parent_rule": "exact/numerical existence applies to every semantic denominator; statistical resolution and complement sign screens apply only to algebraically surviving denominators",
+    "class_boundary_statuses": ["CLASS_BOUNDARY_UNSTABLE", "CLASS_BOUNDARY_UNRESOLVED"],
+    "display_label": "finite-MC standard error (delete-one-source-block jackknife; K=10 per tune)"
+  },
+  "compact_storage": {
+    "schema": "hadronization_compact_plot_source_v1",
+    "tables": ["cells", "event_gram"],
+    "metadata_objects": ["metadata", "receipt"],
+    "compression": {"algorithm": "ZSTD", "level": 5},
+    "maximum_complete_default_bytes": 52428800,
+    "sparse_rule": "absence inside a declared domain is exact zero; absence outside is NOT_MATERIALIZED",
+    "pooled_copy": false,
+    "summation": "Neumaier compensated binary64 with recorded absolute sums and operation counts"
+  }
+}

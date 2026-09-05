@@ -13,7 +13,7 @@ import time
 
 
 ROOT = Path(__file__).resolve().parent
-UNAVAILABLE = {"merge", "reduce", "plot"}
+UNAVAILABLE = {"merge", "plot"}
 
 
 def doctor():
@@ -72,7 +72,8 @@ def clean_candidates():
                     candidates.append(path)
     work = ROOT / "data/work"
     if work.is_dir() and not work.is_symlink():
-        for relative in ("analyze/bin", "analyze/staging"):
+        for relative in ("analyze/bin", "analyze/staging",
+                         "reduce/bin", "reduce/staging"):
             path = work / relative
             if os.path.lexists(str(path)):
                 candidates.append(path)
@@ -150,6 +151,11 @@ def analyze(arguments):
     return subprocess.run(command, cwd=str(ROOT)).returncode
 
 
+def reduce(arguments):
+    command = [sys.executable, str(ROOT / "pipeline/reduce/run.py")] + arguments
+    return subprocess.run(command, cwd=str(ROOT)).returncode
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="hadronization",
@@ -167,7 +173,11 @@ def build_parser():
         "analyze", help="plan, build, verify, and explain lossless analysis shards",
         add_help=False)
     analyze_parser.add_argument("arguments", nargs=argparse.REMAINDER)
-    for name in ("merge", "reduce", "plot"):
+    reduce_parser = sub.add_parser(
+        "reduce", help="build, verify, and explain a compact statistical plot source",
+        add_help=False)
+    reduce_parser.add_argument("arguments", nargs=argparse.REMAINDER)
+    for name in ("merge", "plot"):
         sub.add_parser(name, help="direct stage is not yet implemented")
     sub.add_parser("verify", help="run the focused active-contract suite")
     clean_parser = sub.add_parser("clean", help="remove reproducible checkout residue")
@@ -180,6 +190,8 @@ def build_parser():
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == "analyze":
         return analyze(sys.argv[2:])
+    if len(sys.argv) > 1 and sys.argv[1] == "reduce":
+        return reduce(sys.argv[2:])
     args = build_parser().parse_args()
     if args.command == "doctor":
         return doctor()
@@ -188,6 +200,8 @@ def main():
         return generate(args.submit, purpose)
     if args.command == "analyze":
         return analyze(args.arguments)
+    if args.command == "reduce":
+        return reduce(args.arguments)
     if args.command in UNAVAILABLE:
         print("ERROR: {} direct stage is not yet implemented".format(
             args.command), file=sys.stderr)

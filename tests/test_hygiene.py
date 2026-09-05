@@ -80,7 +80,7 @@ class LeanTreeContract(unittest.TestCase):
 
     def test_only_target_layout_exceptions_exist(self):
         expected_config = {
-            "config/study.json", "config/site.example.conf",
+            "config/study.json", "config/analysis.json", "config/site.example.conf",
             "config/tunes/monash.cmnd", "config/tunes/junctions.cmnd",
             "config/tunes/close_packing.cmnd"}
         paths = self.tracked_and_new_paths()
@@ -92,6 +92,10 @@ class LeanTreeContract(unittest.TestCase):
              "pipeline/analyze/import_accepted.py",
              "pipeline/analyze/run.py",
              "pipeline/analyze/reference_analysis.C"})
+        self.assertEqual(
+            {path for path in paths if path.startswith("pipeline/reduce/")},
+            {"pipeline/reduce/reduce.cpp", "pipeline/reduce/run.py",
+             "pipeline/reduce/statistics.hpp"})
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/plot/")},
             {"pipeline/plot/reference_plotting.C"})

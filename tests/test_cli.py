@@ -30,7 +30,7 @@ class CliContract(unittest.TestCase):
             self.assertIn(command, help_result.stdout)
 
     def test_unavailable_stages_refuse_without_fallthrough(self):
-        for command in ("merge", "reduce", "plot"):
+        for command in ("merge", "plot"):
             result = self.run_cli(command)
             self.assertEqual(result.returncode, 3)
             self.assertEqual(
@@ -44,6 +44,16 @@ class CliContract(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         for command in ("plan", "run", "verify", "explain"):
             self.assertIn(command, result.stdout)
+
+    def test_reduce_stage_has_implemented_subcommands(self):
+        result = self.run_cli("reduce", "--help")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for command in ("run", "verify", "explain"):
+            self.assertIn(command, result.stdout)
+        plot = self.run_cli("plot")
+        self.assertEqual(plot.returncode, 3)
+        self.assertEqual(plot.stderr.strip(),
+                         "ERROR: plot direct stage is not yet implemented")
 
     def test_setup_is_idempotent_and_has_no_dataset_dependency(self):
         script = r'''
@@ -91,6 +101,12 @@ test -z "${HADRONIZATION_DATASET+x}"
             analyze_staging = checkout / "data/work/analyze/staging/interrupted"
             analyze_staging.mkdir(parents=True)
             (analyze_staging / "shard.root").write_bytes(b"partial")
+            reduce_cache = checkout / "data/work/reduce/bin"
+            reduce_cache.mkdir(parents=True)
+            (reduce_cache / "reduce-fixture").write_bytes(b"cache")
+            reduce_staging = checkout / "data/work/reduce/staging/interrupted"
+            reduce_staging.mkdir(parents=True)
+            (reduce_staging / "plot-source.root").write_bytes(b"partial")
             dry = subprocess.run([str(checkout / "hadronization"), "clean"],
                                  cwd="/tmp", text=True, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
@@ -111,6 +127,8 @@ test -z "${HADRONIZATION_DATASET+x}"
             self.assertFalse(scratch.exists())
             self.assertFalse(analyze_cache.exists())
             self.assertFalse((checkout / "data/work/analyze/staging").exists())
+            self.assertFalse(reduce_cache.exists())
+            self.assertFalse((checkout / "data/work/reduce/staging").exists())
             self.assertTrue((completed / "outcome.json").is_file())
             self.assertTrue((active / "scratch/partial.root").is_file())
 
