@@ -39,6 +39,10 @@ constexpr const char* kSchemaDigest =
     "3a83a7550c27c3f59989b84eea0204bce45bd9c401744f321758e56f3bf422c9";
 constexpr const char* kRegistriesDigest =
     "5462be4f9fed821f6a0c09cda4b461343d1720112f8c76a3afd14ce8130895f3";
+constexpr Long64_t kAggregateAutoFlushBytes = 64LL * 1024LL * 1024LL;
+constexpr Long64_t kPerTreeAutoFlushBytes = kAggregateAutoFlushBytes / 16LL;
+constexpr Int_t kBasketBytes = 32 * 1024;
+constexpr ULong64_t kEventFlushInterval = 8192;
 
 enum Family : std::size_t {
   kAncestry = 0, kAncestryMothers, kClosure, kConstituents,
@@ -62,6 +66,7 @@ struct SourceSpec {
   Int_t seed = 0;
   ULong64_t events = 0;
   ULong64_t bytes = 0;
+  UInt_t block = 0;
   std::string rawSha256, validationReceiptSha256, validationLogSha256;
   std::string tune, storageKey, path, manifestJson;
   std::string producerSha256, producerCommit, effectiveSettingsSha256;
@@ -146,17 +151,21 @@ void Read(TTree& t, TriggerRow& r) { IN(t,r,event_id); IN(t,r,heavy_index); IN(t
 #undef IN
 
 struct Trees {
-  std::array<std::unique_ptr<TTree>, kFamilyCount> tree;
+  std::array<TTree*, kFamilyCount> tree{};
   AncestryRow ancestry; AncestryMotherRow ancestryMothers; ClosureRow closure;
   ConstituentRow constituents; CompatibilityRow compatibility; EventRangeRow ranges;
   EventRow events; HardRow hard; HeavyRow heavy; HeavyMotherRow heavyMothers;
   OriginRow origins; PairRow pairs; SourceBlockRow sourceBlocks;
   SourceCountRow sourceCounts; SourceRow sources; TriggerRow triggers;
 
-  Trees() {
+  explicit Trees(TFile& output) {
+    output.cd();
     for (std::size_t i = 0; i < kFamilyCount; ++i) {
-      tree[i] = std::make_unique<TTree>(kTableNames[i], kTableNames[i]);
-      tree[i]->SetDirectory(nullptr);
+      tree[i] = new TTree(kTableNames[i], kTableNames[i]);
+      tree[i]->SetDirectory(&output);
+      tree[i]->SetAutoSave(0);
+      tree[i]->SetAutoFlush(-kPerTreeAutoFlushBytes);
+      tree[i]->SetBasketSize("*", kBasketBytes);
     }
     Branches(*tree[kAncestry], ancestry); Branches(*tree[kAncestryMothers], ancestryMothers);
     Branches(*tree[kClosure], closure); Branches(*tree[kConstituents], constituents);
@@ -171,9 +180,11 @@ struct Trees {
     (void)row;
     if (tree[family]->Fill() <= 0) throw std::runtime_error("failed to fill output tree");
   }
-  void Write() {
+  void FlushBaskets() {
     for (auto& item : tree) {
-      if (item->Write() <= 0) throw std::runtime_error("failed to write output tree");
+      if (item->FlushBaskets() < 0) {
+        throw std::runtime_error("failed to flush output tree baskets");
+      }
     }
   }
 };
@@ -257,7 +268,7 @@ std::vector<SourceSpec> LoadSpecs(const std::string& path) {
   std::vector<SourceSpec> result;
   while (std::getline(in, line)) {
     const auto p = Split(line, '\t');
-    if (p.size() != 20U) throw std::runtime_error("source spec field count differs");
+    if (p.size() != 21U) throw std::runtime_error("source spec field count differs");
     SourceSpec s;
     s.sourceId = ParseUnsigned<UInt_t>(p[0], "source id");
     s.tuneOrdinal = ParseUnsigned<UInt_t>(p[1], "tune ordinal");
@@ -267,17 +278,18 @@ std::vector<SourceSpec> LoadSpecs(const std::string& path) {
     s.seed = static_cast<Int_t>(ParseUnsigned<UInt_t>(p[5], "seed"));
     s.events = ParseUnsigned<ULong64_t>(p[6], "events");
     s.bytes = ParseUnsigned<ULong64_t>(p[7], "bytes");
-    s.rawSha256 = p[8]; s.validationReceiptSha256 = p[9]; s.validationLogSha256 = p[10];
-    s.tune = HexDecode(p[11]); s.storageKey = HexDecode(p[12]); s.path = HexDecode(p[13]);
-    s.manifestJson = HexDecode(p[14]); s.producerSha256 = p[15]; s.producerCommit = p[16];
-    s.effectiveSettingsSha256 = p[17]; s.attemptLedgerSha256 = p[18];
-    s.campaign = HexDecode(p[19]);
+    s.block = ParseUnsigned<UInt_t>(p[8], "block");
+    s.rawSha256 = p[9]; s.validationReceiptSha256 = p[10]; s.validationLogSha256 = p[11];
+    s.tune = HexDecode(p[12]); s.storageKey = HexDecode(p[13]); s.path = HexDecode(p[14]);
+    s.manifestJson = HexDecode(p[15]); s.producerSha256 = p[16]; s.producerCommit = p[17];
+    s.effectiveSettingsSha256 = p[18]; s.attemptLedgerSha256 = p[19];
+    s.campaign = HexDecode(p[20]);
     for (const auto* digest : {&s.rawSha256, &s.validationReceiptSha256,
                                &s.validationLogSha256, &s.producerSha256,
                                &s.effectiveSettingsSha256, &s.attemptLedgerSha256}) {
       if (!LowerHex(*digest, 64)) throw std::runtime_error("source spec has invalid SHA-256");
     }
-    if (!LowerHex(s.producerCommit, 40) || s.events == 0 || s.bytes == 0 ||
+    if (!LowerHex(s.producerCommit, 40) || s.events == 0 || s.bytes == 0 || s.block == 0 ||
         s.tuneOrdinal > 3 || s.campaignOrdinal > 65535 || s.logicalId > 16383 ||
         s.attempt > 4095) throw std::runtime_error("source spec identity is outside raw-v7 domain");
     result.push_back(std::move(s));
@@ -517,7 +529,8 @@ std::string OriginalMetadata(TTree* metadata) {
   std::ostringstream out; out << '{'; bool first = true;
   for (const auto& name : names) {
     TBranch* branch = metadata->GetBranch(name.c_str());
-    if (!first) out << ','; first = false;
+    if (!first) out << ',';
+    first = false;
     out << JsonEscape(name) << ":{";
     const std::string className = branch->GetClassName();
     if (className == "string" || className == "std::string") {
@@ -816,7 +829,11 @@ std::string ExtractDigest(const std::string& contract){const std::string prefix=
 struct RootView {
   TFile file; std::array<TTree*,kFamilyCount> tree{};
   explicit RootView(const std::string& path, bool requireContract=true):file(path.c_str(),"READ"){
-    if(file.IsZombie())throw std::runtime_error("analysis shard is zombie/unreadable");if(file.GetCompressionAlgorithm()!=static_cast<int>(ROOT::RCompressionSetting::EAlgorithm::kZSTD)||file.GetCompressionLevel()!=5)throw std::runtime_error("analysis compression contract differs");std::map<std::string,std::pair<std::string,int>> keys;TIter next(file.GetListOfKeys());while(auto* object=next()){auto* key=dynamic_cast<TKey*>(object);if(!key||!keys.emplace(key->GetName(),std::make_pair(key->GetClassName(),key->GetCycle())).second)throw std::runtime_error("unknown or duplicate ROOT key/cycle");}
+    if(file.IsZombie())throw std::runtime_error("analysis shard is zombie/unreadable");
+    if(file.GetCompressionAlgorithm()!=static_cast<int>(ROOT::RCompressionSetting::EAlgorithm::kZSTD)||file.GetCompressionLevel()!=5)throw std::runtime_error("analysis compression contract differs");
+    std::map<std::string,std::pair<std::string,int>> keys;
+    TIter next(file.GetListOfKeys());
+    while(auto* object=next()){auto* key=dynamic_cast<TKey*>(object);if(!key||!keys.emplace(key->GetName(),std::make_pair(key->GetClassName(),key->GetCycle())).second)throw std::runtime_error("unknown or duplicate ROOT key/cycle");}
     std::set<std::string> expected;for(const char* name:kTableNames)expected.insert(name);if(requireContract)expected.insert("contract");std::set<std::string> actual;for(const auto& item:keys)actual.insert(item.first);if(actual!=expected)throw std::runtime_error("analysis ROOT object set differs");
     for(std::size_t i=0;i<kFamilyCount;++i){if(keys.at(kTableNames[i])!=std::make_pair(std::string("TTree"),1))throw std::runtime_error("analysis tree key class/cycle differs");tree[i]=dynamic_cast<TTree*>(file.Get(kTableNames[i]));ValidateTreeSchema(tree[i],static_cast<Family>(i));}
     if(requireContract&&keys.at("contract")!=std::make_pair(std::string("TObjString"),1))throw std::runtime_error("contract key class/cycle differs");
@@ -891,7 +908,12 @@ void ValidateSemantics(RootView& view){
   std::map<UInt_t,std::array<ULong64_t,kFamilyCount>> observed;
   for(const auto&s:sources){if(s.source_id>=sources.size()||s.source_id!=&s-&sources[0]||s.events==0||s.attempted_events<s.events||!std::isfinite(s.sumw)||!std::isfinite(s.sumw2)||!std::isfinite(s.sumabsw)||s.sumw2<0||s.sumabsw<0)throw std::runtime_error("source row contract differs");observed[s.source_id][kSources]=1;observed[s.source_id][kSourceBlocks]=1;observed[s.source_id][kEventRanges]=1;observed[s.source_id][kSourceCounts]=kFamilyCount;}
   for(std::size_t i=0;i<ranges.size();++i){if(ranges[i].source_id!=i||ranges[i].count!=sources[i].events||(i&&ranges[i-1].first_id+ranges[i-1].count>ranges[i].first_id))throw std::runtime_error("event range coverage/overlap differs");}
-  for(std::size_t i=0;i<blocks.size();++i)if(blocks[i].source_id!=i||blocks[i].assignment_id!=0||blocks[i].block!=(sources[i].logical_id%10)+1)throw std::runtime_error("source block assignment differs");
+  for (std::size_t i = 0; i < blocks.size(); ++i) {
+    if (blocks[i].source_id != i || blocks[i].assignment_id != 0 ||
+        blocks[i].block == 0) {
+      throw std::runtime_error("source block assignment differs");
+    }
+  }
   auto sourceFor=[&](ULong64_t event){auto it=std::upper_bound(ranges.begin(),ranges.end(),event,[](ULong64_t value,const EventRangeRow&r){return value<r.first_id;});if(it==ranges.begin())throw std::runtime_error("event outside source ranges");--it;if(event>=it->first_id+it->count)throw std::runtime_error("event outside source ranges");return it->source_id;};
   EventCursor<AncestryRow> ancestry(view.tree[kAncestry]);EventCursor<AncestryMotherRow> ancestryMothers(view.tree[kAncestryMothers]);EventCursor<ClosureRow> closure(view.tree[kClosure]);EventCursor<ConstituentRow> constituents(view.tree[kConstituents]);EventCursor<CompatibilityRow> compatibility(view.tree[kEventCompatibility]);EventCursor<HardRow> hard(view.tree[kHard]);EventCursor<HeavyRow> heavy(view.tree[kHeavy]);EventCursor<HeavyMotherRow> heavyMothers(view.tree[kHeavyMothers]);EventCursor<OriginRow> origins(view.tree[kOrigins]);EventCursor<PairRow> pairs(view.tree[kPairs]);EventCursor<TriggerRow> triggers(view.tree[kTriggers]);
   std::vector<ULong64_t> eventCount(sources.size());std::vector<double> sw(sources.size()),sw2(sources.size()),saw(sources.size());
@@ -906,11 +928,15 @@ void ValidateSemantics(RootView& view){
     for(const auto&h:eventHeavy){if(!std::isfinite(h.px)||!std::isfinite(h.py)||!std::isfinite(h.pz)||!std::isfinite(h.energy)||!std::isfinite(h.mass)||!std::isfinite(h.pt)||!std::isfinite(h.eta)||!std::isfinite(h.rapidity)||!std::isfinite(h.phi)||h.energy<0||h.mass<0||h.pt<0||h.final>1||h.selected>1||h.pair_eligible>1||h.is_meson>1||h.is_baryon>1||h.is_meson==h.is_baryon||h.open>1||h.hidden>1)throw std::runtime_error("heavy row contract differs");const auto* state=Hadronization::FindSelectedState(h.pdg);const auto content=Hadronization::DecodeHeavyContent(h.pdg,h.is_meson!=0,h.is_baryon!=0);const int category=static_cast<int>(Hadronization::ClassifyHeavyStateDetailed(state!=nullptr,content,h.is_meson!=0,h.spin));if(h.selected!=(state?1:0)||h.pair_eligible!=(state&&state->pairAnalysisEligible?1:0)||h.category!=category||h.nc!=content.nc||h.ncbar!=content.ncbar||h.nb!=content.nb||h.nbbar!=content.nbbar||h.qc!=content.qc()||h.qb!=content.qb()||h.baryon3!=(h.is_baryon?(h.pdg>0?3:-3):0)||h.strangeness!=content.strangeness()||h.open!=((h.qc!=0||h.qb!=0)?1:0)||h.hidden!=((content.hiddenCharm()||content.hiddenBeauty())?1:0)||(state&&(h.charge3!=state->charge3||h.spin!=state->spin2j1))||!heavyMap.emplace(h.heavy_index,h).second)throw std::runtime_error("heavy registry/content cache/key differs");}observed[sid][kHeavy]+=eventHeavy.size();
     const auto eventOrigins=origins.Take(event.event_id);std::map<std::pair<Int_t,Int_t>,OriginRow> originMap;
     for(const auto&o:eventOrigins){const auto found=heavyMap.find(o.heavy_index);if(found==heavyMap.end()||(o.sector!=4&&o.sector!=5)||!originMap.emplace(std::make_pair(o.heavy_index,o.sector),o).second)throw std::runtime_error("origin foreign key/domain differs");ValidateOriginDecision(o.origin,o.resolution,o.matched_hard,o.rejected_hard,o.depth,SectorCharge(found->second,o.sector)!=0);}
-    for(const auto&item:heavyMap)for(int sector:{4,5})if(!originMap.count({item.first,sector}))throw std::runtime_error("origin sector coverage differs");if(eventOrigins.size()!=2*eventHeavy.size())throw std::runtime_error("origin sector coverage differs");observed[sid][kOrigins]+=eventOrigins.size();
+    for(const auto&item:heavyMap)for(int sector:{4,5})if(!originMap.count({item.first,sector}))throw std::runtime_error("origin sector coverage differs");
+    if(eventOrigins.size()!=2*eventHeavy.size())throw std::runtime_error("origin sector coverage differs");
+    observed[sid][kOrigins]+=eventOrigins.size();
 
     const auto eventTriggers=triggers.Take(event.event_id);std::vector<TriggerRow> expectedTriggers;std::vector<TriggerRow> accepted;
     for(const auto&item:heavyMap){const int sector=TriggerSector(item.second.pdg);if(!sector)continue;const auto&origin=originMap.at({item.first,sector});TriggerRow expected{event.event_id,item.first,sector,TriggerMask(item.second,origin,sector)};expectedTriggers.push_back(expected);if(expected.rejection_mask==0)accepted.push_back(expected);}
-    if(eventTriggers.size()!=expectedTriggers.size())throw std::runtime_error("trigger candidate coverage differs");for(std::size_t i=0;i<eventTriggers.size();++i)if(!SameRow(eventTriggers[i],expectedTriggers[i]))throw std::runtime_error("trigger rejection mask/coverage differs");observed[sid][kTriggers]+=eventTriggers.size();
+    if(eventTriggers.size()!=expectedTriggers.size())throw std::runtime_error("trigger candidate coverage differs");
+    for(std::size_t i=0;i<eventTriggers.size();++i)if(!SameRow(eventTriggers[i],expectedTriggers[i]))throw std::runtime_error("trigger rejection mask/coverage differs");
+    observed[sid][kTriggers]+=eventTriggers.size();
 
     const auto eventAncestry=ancestry.Take(event.event_id);std::set<Int_t> ancestryKeys;for(const auto&r:eventAncestry)if(!ancestryKeys.insert(r.node_index).second)throw std::runtime_error("ancestry key differs");observed[sid][kAncestry]+=eventAncestry.size();
     const auto eventAncestryMothers=ancestryMothers.Take(event.event_id);for(const auto&r:eventAncestryMothers)if(!ancestryKeys.count(r.node_index))throw std::runtime_error("ancestry mother foreign key differs");observed[sid][kAncestryMothers]+=eventAncestryMothers.size();
@@ -935,16 +961,54 @@ VerificationResult Verify(const std::string& path,bool requireContract=true){Roo
 
 void Summary(const VerificationResult& result){std::cout<<"ANALYSIS_SUMMARY scientific_digest="<<result.digest<<" source_digests=";for(std::size_t i=0;i<result.sourceDigests.size();++i){if(i)std::cout<<',';std::cout<<result.sourceDigests[i];}for(std::size_t i=0;i<kFamilyCount;++i)std::cout<<" rows_"<<kTableNames[i]<<'='<<result.rows[i];std::cout<<'\n';}
 
+std::string BindingJson(const std::string& path) {
+  RootView view(path);
+  const auto sources = LoadRows<SourceRow>(view.tree[kSources]);
+  const auto blocks = LoadRows<SourceBlockRow>(view.tree[kSourceBlocks]);
+  const auto ranges = LoadRows<EventRangeRow>(view.tree[kEventRanges]);
+  auto* object = dynamic_cast<TObjString*>(view.file.Get("contract"));
+  if (!object) throw std::runtime_error("missing contract object");
+  std::ostringstream out;
+  out << "{\"contract\":" << object->GetString().Data() << ",\"event_ranges\":[";
+  for (std::size_t i = 0; i < ranges.size(); ++i) {
+    if (i) out << ',';
+    out << "{\"count\":" << ranges[i].count << ",\"first_id\":"
+        << ranges[i].first_id << ",\"source_id\":" << ranges[i].source_id << '}';
+  }
+  out << "],\"source_blocks\":[";
+  for (std::size_t i = 0; i < blocks.size(); ++i) {
+    if (i) out << ',';
+    out << "{\"assignment_id\":" << blocks[i].assignment_id << ",\"block\":"
+        << blocks[i].block << ",\"source_id\":" << blocks[i].source_id << '}';
+  }
+  out << "],\"sources\":[";
+  for (std::size_t i = 0; i < sources.size(); ++i) {
+    if (i) out << ',';
+    out << "{\"attempt\":" << sources[i].attempt << ",\"events\":"
+        << sources[i].events << ",\"logical_id\":" << sources[i].logical_id
+        << ",\"source_id\":" << sources[i].source_id << ",\"tune\":"
+        << sources[i].tune << '}';
+  }
+  out << "]}";
+  return out.str();
+}
+
 void WriteShard(const std::string& specPath,const std::string& outputPath,const std::string& contractPath){
   const auto specs=LoadSpecs(specPath);if(std::ifstream existing(outputPath);existing.good())throw std::runtime_error("output path already exists");
   TFile output(outputPath.c_str(),"CREATE","lossless analysis shard");
-  if(output.IsZombie())throw std::runtime_error("cannot create unique analysis output");output.SetCompressionAlgorithm(ROOT::RCompressionSetting::EAlgorithm::kZSTD);output.SetCompressionLevel(5);Trees trees;SourceMetadataBuilder metadata;
-  for(const auto&s:specs){std::ifstream bytes(s.path,std::ios::binary|std::ios::ate);if(!bytes||static_cast<ULong64_t>(bytes.tellg())!=s.bytes)throw std::runtime_error("raw physical size differs");TFile raw(s.path.c_str(),"READ");if(raw.IsZombie())throw std::runtime_error("raw source is unreadable");ValidateMetadata(raw,s,trees.sources);auto* tree=dynamic_cast<TTree*>(raw.Get("tree"));RawEvent event;BindRaw(tree,event);std::array<ULong64_t,kFamilyCount> counts{};trees.sources.sumabsw=0;for(ULong64_t local=0;local<s.events;++local){if(tree->GetEntry(static_cast<Long64_t>(local))<=0)throw std::runtime_error("cannot read raw event");const ULong64_t eventId=Hadronization::EventId(static_cast<int>(s.campaignOrdinal),static_cast<int>(s.tuneOrdinal),static_cast<int>(s.logicalId),static_cast<int>(s.attempt),local);ProcessEvent(trees,counts,event,eventId);trees.sources.sumabsw+=std::abs(event.weight);}tree->ResetBranchAddresses();if(!std::isfinite(trees.sources.sumabsw))throw std::runtime_error("invalid sumabsw");trees.Fill(kSources,trees.sources);counts[kSources]=1;trees.ranges={Hadronization::EventId(static_cast<int>(s.campaignOrdinal),static_cast<int>(s.tuneOrdinal),static_cast<int>(s.logicalId),static_cast<int>(s.attempt),0),s.events,s.sourceId};trees.Fill(kEventRanges,trees.ranges);counts[kEventRanges]=1;trees.sourceBlocks={s.sourceId,0,static_cast<UInt_t>((s.logicalId%10)+1)};trees.Fill(kSourceBlocks,trees.sourceBlocks);counts[kSourceBlocks]=1;counts[kSourceCounts]=kFamilyCount;for(UInt_t family=0;family<kFamilyCount;++family){trees.sourceCounts={s.sourceId,family,counts[family]};trees.Fill(kSourceCounts,trees.sourceCounts);}metadata.Add(raw,dynamic_cast<TTree*>(raw.Get("job_metadata")),s);raw.Close();}
-  output.cd();trees.Write();output.Write();output.Close();
+  if(output.IsZombie())throw std::runtime_error("cannot create unique analysis output");
+  output.SetCompressionAlgorithm(ROOT::RCompressionSetting::EAlgorithm::kZSTD);
+  output.SetCompressionLevel(5);
+  Trees trees(output);
+  SourceMetadataBuilder metadata;
+  for(const auto&s:specs){std::ifstream bytes(s.path,std::ios::binary|std::ios::ate);if(!bytes||static_cast<ULong64_t>(bytes.tellg())!=s.bytes)throw std::runtime_error("raw physical size differs");TFile raw(s.path.c_str(),"READ");if(raw.IsZombie())throw std::runtime_error("raw source is unreadable");ValidateMetadata(raw,s,trees.sources);auto* tree=dynamic_cast<TTree*>(raw.Get("tree"));RawEvent event;BindRaw(tree,event);std::array<ULong64_t,kFamilyCount> counts{};trees.sources.sumabsw=0;for(ULong64_t local=0;local<s.events;++local){if(tree->GetEntry(static_cast<Long64_t>(local))<=0)throw std::runtime_error("cannot read raw event");const ULong64_t eventId=Hadronization::EventId(static_cast<int>(s.campaignOrdinal),static_cast<int>(s.tuneOrdinal),static_cast<int>(s.logicalId),static_cast<int>(s.attempt),local);ProcessEvent(trees,counts,event,eventId);trees.sources.sumabsw+=std::abs(event.weight);if((local+1)%kEventFlushInterval==0)trees.FlushBaskets();}tree->ResetBranchAddresses();if(!std::isfinite(trees.sources.sumabsw))throw std::runtime_error("invalid sumabsw");trees.Fill(kSources,trees.sources);counts[kSources]=1;trees.ranges={Hadronization::EventId(static_cast<int>(s.campaignOrdinal),static_cast<int>(s.tuneOrdinal),static_cast<int>(s.logicalId),static_cast<int>(s.attempt),0),s.events,s.sourceId};trees.Fill(kEventRanges,trees.ranges);counts[kEventRanges]=1;trees.sourceBlocks={s.sourceId,0,s.block};trees.Fill(kSourceBlocks,trees.sourceBlocks);counts[kSourceBlocks]=1;counts[kSourceCounts]=kFamilyCount;for(UInt_t family=0;family<kFamilyCount;++family){trees.sourceCounts={s.sourceId,family,counts[family]};trees.Fill(kSourceCounts,trees.sourceCounts);}metadata.Add(raw,dynamic_cast<TTree*>(raw.Get("job_metadata")),s);trees.FlushBaskets();raw.Close();}
+  output.cd();
+  if (output.Write() <= 0) throw std::runtime_error("failed to write output trees");
+  output.Close();
   {TFile check(outputPath.c_str(),"READ");if(check.IsZombie())throw std::runtime_error("cannot reopen staged shard");for(const char* name:kTableNames)if(!check.Get(name))throw std::runtime_error("staged shard lost a tree on close");}
   RootView incomplete(outputPath,false);const auto content=DigestAndOrder(incomplete);const auto sourceDigests=SourceDigests(incomplete);ValidateSemantics(incomplete);incomplete.file.Close();std::string contract=ReadFile(contractPath);ReplaceExactlyOne(contract,std::string(64,'X'),content.first);ReplaceExactlyOne(contract,"\"__SOURCE_DIGESTS__\"",DigestListJson(sourceDigests));ReplaceExactlyOne(contract,"\"__SOURCE_METADATA__\"",metadata.Json());TFile update(outputPath.c_str(),"UPDATE");if(update.IsZombie())throw std::runtime_error("cannot add staged contract");TObjString object(contract.c_str());if(object.Write("contract")<=0)throw std::runtime_error("cannot write contract object");update.Close();Summary(Verify(outputPath));
 }
 
 }  // namespace
 
-int main(int argc,char**argv){try{if(argc==3&&std::string(argv[1])=="inspect-raw"){std::cout<<InspectRaw(argv[2])<<'\n';return 0;}if(argc==3&&std::string(argv[1])=="verify"){Summary(Verify(argv[2]));return 0;}if(argc==5&&std::string(argv[1])=="write"){WriteShard(argv[2],argv[3],argv[4]);return 0;}throw std::runtime_error("usage: analyze {inspect-raw RAW|verify SHARD|write SPEC OUTPUT CONTRACT}");}catch(const std::exception&error){std::cerr<<"ANALYSIS_ERROR "<<error.what()<<'\n';return 2;}}
+int main(int argc,char**argv){try{if(argc==3&&std::string(argv[1])=="inspect-raw"){std::cout<<InspectRaw(argv[2])<<'\n';return 0;}if(argc==3&&std::string(argv[1])=="verify"){Summary(Verify(argv[2]));return 0;}if(argc==3&&std::string(argv[1])=="binding"){std::cout<<BindingJson(argv[2])<<'\n';return 0;}if(argc==5&&std::string(argv[1])=="write"){WriteShard(argv[2],argv[3],argv[4]);return 0;}throw std::runtime_error("usage: analyze {inspect-raw RAW|verify SHARD|binding SHARD|write SPEC OUTPUT CONTRACT}");}catch(const std::exception&error){std::cerr<<"ANALYSIS_ERROR "<<error.what()<<'\n';return 2;}}

@@ -85,6 +85,12 @@ test -z "${HADRONIZATION_DATASET+x}"
             (active / "outcome.json").write_text(json.dumps({
                 "state": "submitted", "finished_unix_seconds": 1,
                 "cleanup_after_days": 1}), encoding="utf-8")
+            analyze_cache = checkout / "data/work/analyze/bin"
+            analyze_cache.mkdir(parents=True)
+            (analyze_cache / "analyze-fixture").write_bytes(b"cache")
+            analyze_staging = checkout / "data/work/analyze/staging/interrupted"
+            analyze_staging.mkdir(parents=True)
+            (analyze_staging / "shard.root").write_bytes(b"partial")
             dry = subprocess.run([str(checkout / "hadronization"), "clean"],
                                  cwd="/tmp", text=True, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
@@ -103,6 +109,8 @@ test -z "${HADRONIZATION_DATASET+x}"
             self.assertFalse(cache.exists())
             self.assertEqual(protected.read_bytes(), b"raw")
             self.assertFalse(scratch.exists())
+            self.assertFalse(analyze_cache.exists())
+            self.assertFalse((checkout / "data/work/analyze/staging").exists())
             self.assertTrue((completed / "outcome.json").is_file())
             self.assertTrue((active / "scratch/partial.root").is_file())
 

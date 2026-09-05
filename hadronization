@@ -72,6 +72,10 @@ def clean_candidates():
                     candidates.append(path)
     work = ROOT / "data/work"
     if work.is_dir() and not work.is_symlink():
+        for relative in ("analyze/bin", "analyze/staging"):
+            path = work / relative
+            if os.path.lexists(str(path)):
+                candidates.append(path)
         now = int(time.time())
         for current, directories, files in os.walk(str(work), topdown=True,
                                                    followlinks=False):

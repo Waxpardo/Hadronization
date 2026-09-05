@@ -41,6 +41,15 @@ EXPECTED_SCHEMA = {
     "triggers": "event_id:ULong64_t,heavy_index:Int_t,sector:Int_t,rejection_mask:UInt_t",
 }
 
+CANDIDATE_FIXTURE_DIGEST = "ffc1a0aeb1a86872238f53c7cfebad2eaa70dc5fd6b8c1a1472bcbca250de334"
+CANDIDATE_FIXTURE_ROWS = {
+    "ancestry": 36, "ancestry_mothers": 0, "closure": 62,
+    "constituents": 48, "event_compatibility": 34, "event_ranges": 2,
+    "events": 6, "hard": 12, "heavy": 42, "heavy_mothers": 36,
+    "origins": 84, "pairs": 38, "source_blocks": 2, "source_counts": 32,
+    "sources": 2, "triggers": 10,
+}
+
 
 ORACLE = r'''
 #include "TBranch.h"
@@ -86,7 +95,13 @@ int main(int argc,char**argv){
     else if(mode=="broken_count"&&std::string(name)=="source_counts"){ULong64_t rows=0;source->SetBranchAddress("rows",&rows);copy=source->CloneTree(0);for(Long64_t i=0;i<source->GetEntries();++i){source->GetEntry(i);if(i==0)++rows;copy->Fill();}source->ResetBranchAddresses();}
     else copy=source->CloneTree(-1,"fast");
     copy->SetName(name);copy->Write();if(mode=="duplicate_cycle"&&std::string(name)=="triggers")copy->Write();delete copy;}
-  auto*contract=dynamic_cast<TObjString*>(input.Get("contract"));if(!contract)return 5;output.cd();contract->Write("contract");if(mode=="unknown_object"){TObjString extra("not allowed");extra.Write("extra");}output.Close();return 0;
+  auto*contract=dynamic_cast<TObjString*>(input.Get("contract"));if(!contract)return 5;std::string contractText=contract->GetString().Data();
+  auto mutateDigest=[&](const std::string&prefix){const auto at=contractText.find(prefix);if(at==std::string::npos)return false;const auto value=at+prefix.size();contractText[value]=contractText[value]=='a'?'b':'a';return true;};
+  if(mode=="contract_map"&&!mutateDigest("\"map_digest\":\""))return 8;
+  if(mode=="dictionary_reference"&&!mutateDigest("\"effective_settings_identity\":\""))return 9;
+  if(mode=="dictionary_payload"){const std::string prefix="\"canonical\":\"";const auto at=contractText.find(prefix);if(at==std::string::npos)return 10;contractText.insert(at+prefix.size(),"X");}
+  if(mode=="source_reference"){const std::string prefix="\"manifest_row\":{\"accepted_attempt\":";const auto start=contractText.find(prefix);if(start==std::string::npos)return 11;const auto at=contractText.find("\"block\":",start);if(at==std::string::npos)return 12;const auto value=at+8;contractText[value]=contractText[value]=='1'?'2':'1';}
+  output.cd();TObjString contractCopy(contractText.c_str());contractCopy.Write("contract");if(mode=="unknown_object"){TObjString extra("not allowed");extra.Write("extra");}output.Close();return 0;
 }
 '''
 
@@ -108,17 +123,29 @@ def fixture_source():
     for token, values in replacements.items():
         source = source.replace(token, ", ".join(json.dumps(value) for value in values))
     factorization = {
+        'if (argc != 3 && argc != 4) return 2;':
+            'if (argc < 3 || argc > 8) return 2;',
         'const double mutation = argc == 4 ? std::stod(argv[3]) : 0.0;':
             'const double mutation = 0.0;\n'
-            '  const int fixtureLogical = argc == 4 ? std::stoi(argv[3]) : 0;',
+            '  const int fixtureLogical = argc >= 4 ? std::stoi(argv[3]) : 0;\n'
+            '  const int fixtureAttempt = argc >= 5 ? std::stoi(argv[4]) : 0;\n'
+            '  const std::string fixtureTune = argc >= 6 ? argv[5] : "MONASH";\n'
+            '  const int fixtureTuneOrdinal = argc >= 7 ? std::stoi(argv[6]) : 0;\n'
+            '  const int fixtureCampaignOrdinal = argc >= 8 ? std::stoi(argv[7]) : 3;\n'
+            '  const int fixtureSeed = 100000001 + fixtureCampaignOrdinal * 10000000 +\n'
+            '      fixtureTuneOrdinal * 1000000 + fixtureAttempt * 100000 + fixtureLogical;',
         'EventId(3, 0, 0, 0, static_cast<std::uint64_t>(row))':
-            'EventId(3, 0, fixtureLogical, 0, static_cast<std::uint64_t>(row))',
+            'EventId(fixtureCampaignOrdinal, fixtureTuneOrdinal, fixtureLogical, '
+            'fixtureAttempt, static_cast<std::uint64_t>(row))',
         'settingValues["Random:seed"] = "130000001";':
-            'settingValues["Random:seed"] = std::to_string(130000001 + fixtureLogical);',
+            'settingValues["Random:seed"] = std::to_string(fixtureSeed);',
         'mi["campaign_ordinal"] = 3; mi["logical_id"] = 0; mi["attempt"] = 0;':
-            'mi["campaign_ordinal"] = 3; mi["logical_id"] = fixtureLogical; mi["attempt"] = 0;',
+            'mi["campaign_ordinal"] = fixtureCampaignOrdinal; '
+            'mi["logical_id"] = fixtureLogical; mi["attempt"] = fixtureAttempt;',
         'mi["seed"] = 130000001; mi["complete"] = 1;':
-            'mi["seed"] = 130000001 + fixtureLogical; mi["complete"] = 1;',
+            'mi["seed"] = fixtureSeed; mi["complete"] = 1;',
+        'ms["tune"] = mode == "identity" ? "JUNCTIONS" : "MONASH";':
+            'ms["tune"] = mode == "identity" ? "JUNCTIONS" : fixtureTune;',
     }
     for old_text, new_text in factorization.items():
         if source.count(old_text) != 1:
@@ -338,7 +365,8 @@ class AnalysisShardContract(unittest.TestCase):
                      cls.base / "analyze.cpp", cls.base / "analyzer",
                      include_generate=True)
         for logical, path in enumerate(cls.raw_paths):
-            subprocess.run([str(cls.base / "fixture"), str(path), "valid", str(logical)],
+            subprocess.run([str(cls.base / "fixture"), str(path), "valid", str(logical),
+                            "0", "MONASH", "0", "3"],
                            check=True, env=cls.environment)
         cls.raw_digests = [sha256(path) for path in cls.raw_paths]
         inspection = subprocess.run(
@@ -396,6 +424,18 @@ class AnalysisShardContract(unittest.TestCase):
         config.mkdir()
         shutil.copy2(ROOT / "config/study.json", config / "study.json")
         campaign = json.loads((ROOT / "data/campaign.json").read_text(encoding="utf-8"))
+        campaign["tune_order"] = ["MONASH"]
+        campaign["logical_jobs_per_tune"] = 2
+        campaign["successful_events_per_logical_job"] = 3
+        campaign["successful_events_per_tune"] = 6
+        campaign["blocks"] = {"count": 2, "logical_id_domain": [0, 1],
+                              "logical_id_rule": "block=(logical_id%2)+1"}
+        campaign["seed"]["attempt_domain"] = [0, 1]
+        campaign["seed"]["tune_ordinals"] = {"MONASH": 0}
+        campaign["attempt_evidence_inventory"] = {"file_count": 2,
+                                                   "sha256": "a" * 64}
+        campaign["accepted_source"]["tune_cards"] = {
+            "MONASH": campaign["accepted_source"]["tune_cards"]["MONASH"]}
         campaign["accepted_source"]["producer_executable_sha256"] = "b" * 64
         campaign["accepted_source"]["producer_repository_commit"] = "c" * 40
         campaign["accepted_source"]["tune_cards"]["MONASH"][
@@ -417,7 +457,8 @@ class AnalysisShardContract(unittest.TestCase):
             })
         cls.manifest_path = data / "raw_manifest.jsonl"
         cls.manifest_path.write_text(
-            "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows),
+            "".join(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n"
+                    for row in rows),
             encoding="utf-8")
         cls.attempts_path = data / "attempts.csv"
         cls.attempts_path.write_text(
@@ -428,9 +469,9 @@ class AnalysisShardContract(unittest.TestCase):
             "MONASH/wide-job-id-0001.root\n", encoding="utf-8")
 
     @classmethod
-    def _cli(cls, *arguments, check=False):
+    def _cli(cls, *arguments, check=False, environment=None):
         result = subprocess.run([str(ROOT / "hadronization"), "analyze"] + list(arguments),
-                                cwd=str(ROOT), env=cls.environment, text=True,
+                                cwd=str(ROOT), env=environment or cls.environment, text=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if check and result.returncode:
             raise AssertionError("analyze CLI failed: {}".format(result.stderr))
@@ -446,6 +487,12 @@ class AnalysisShardContract(unittest.TestCase):
         config.mkdir()
         shutil.copy2(ROOT / "config/study.json", config / "study.json")
         campaign = json.loads(self.campaign_path.read_text(encoding="utf-8"))
+        campaign["logical_jobs_per_tune"] = 1
+        campaign["successful_events_per_tune"] = 3
+        campaign["blocks"] = {"count": 1, "logical_id_domain": [0, 0],
+                              "logical_id_rule": "block=(logical_id%1)+1"}
+        campaign["attempt_evidence_inventory"] = {"file_count": 1,
+                                                   "sha256": "a" * 64}
         campaign_path = data / "campaign.json"
         campaign_path.write_text(json.dumps(campaign, sort_keys=True), encoding="utf-8")
         storage_key = "MONASH/{}".format(raw_path.name)
@@ -458,7 +505,8 @@ class AnalysisShardContract(unittest.TestCase):
             "validation_receipt_sha256": "e" * 64,
         }
         manifest = data / "raw_manifest.jsonl"
-        manifest.write_text(json.dumps(manifest_row, sort_keys=True) + "\n",
+        manifest.write_text(json.dumps(manifest_row, sort_keys=True,
+                                       separators=(",", ":")) + "\n",
                             encoding="utf-8")
         attempts = data / "attempts.csv"
         attempts.write_text(
@@ -500,6 +548,19 @@ class AnalysisShardContract(unittest.TestCase):
         fields = [field.split(":", 1)[0] for field in EXPECTED_SCHEMA[name].split(",")]
         return [dict(zip(fields, row)) for row in self.oracle["rows"][name]]
 
+    def receipt_for_root(self, root_path, label, mutate=None):
+        payload = json.loads(self.receipt.read_text(encoding="utf-8"))
+        payload["storage_identity"]["root_bytes"] = root_path.stat().st_size
+        payload["storage_identity"]["root_sha256"] = sha256(root_path)
+        payload["storage_identity_sha256"] = hashlib.sha256(json.dumps(
+            payload["storage_identity"], sort_keys=True,
+            separators=(",", ":")).encode("utf-8")).hexdigest()
+        if mutate is not None:
+            mutate(payload)
+        receipt_path = root_path.with_name(label + ".json")
+        receipt_path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+        return receipt_path
+
     def test_exact_schema_semantics_and_independent_digest(self):
         self.assertEqual(self.oracle["compression"], (5, 5))
         self.assertEqual(set(self.oracle["schemas"]), set(TABLES))
@@ -509,6 +570,12 @@ class AnalysisShardContract(unittest.TestCase):
                          {("contract", "TObjString", 1)})
         self.assertNotIn("cells", self.oracle["schemas"])
         self.assertNotIn("event_gram", self.oracle["schemas"])
+        self.assertEqual(self.oracle["contract"]["streaming"], {
+            "aggregate_autoflush_bytes": 64 * 1024 * 1024,
+            "basket_bytes": 32 * 1024,
+            "event_flush_interval": 8192,
+            "per_tree_autoflush_bytes": 4 * 1024 * 1024,
+        })
 
         digest = hashlib.sha256()
         for name in TABLES:
@@ -519,6 +586,9 @@ class AnalysisShardContract(unittest.TestCase):
                     digest.update(struct.pack(">Q", len(encoded)))
                     digest.update(encoded)
         receipt = json.loads(self.receipt.read_text(encoding="utf-8"))
+        self.assertEqual(digest.hexdigest(), CANDIDATE_FIXTURE_DIGEST)
+        self.assertEqual({name: len(rows) for name, rows in self.oracle["rows"].items()},
+                         CANDIDATE_FIXTURE_ROWS)
         self.assertEqual(digest.hexdigest(),
                          receipt["scientific_identity"]["scientific_content_digest"])
         self.assertEqual(digest.hexdigest(),
@@ -601,62 +671,137 @@ class AnalysisShardContract(unittest.TestCase):
         self.assertIn("collision", collision.stderr)
         verify = self._cli("verify", "--plan", str(self.plan), check=True)
         self.assertIn("VERIFIED shard=0", verify.stdout)
-        explain = self._cli("explain", "--receipt", str(self.receipt), check=True)
+        explain = self._cli("explain", "--receipt", str(self.receipt),
+                            "--raw-root", str(self.raw_root),
+                            "--work-root", str(self.work_root), check=True)
         self.assertEqual(json.loads(explain.stdout)["state"], "PASS")
         self.assertEqual([sha256(path) for path in self.raw_paths], self.raw_digests)
 
     def test_factorization_and_unequal_shard_planning_are_data_driven(self):
-        control = self.base / "factorization" / "data"
+        base = self.base / "factorization"
+        control = base / "control/data"
+        config = base / "control/config"
+        raw_root = base / "raw"
+        output_root = base / "output"
+        work_root = base / "work"
         control.mkdir(parents=True)
+        config.mkdir()
+        shutil.copy2(ROOT / "config/study.json", config / "study.json")
         campaign = json.loads(self.campaign_path.read_text(encoding="utf-8"))
-        campaign["tune_order"] = ["CLOSEPACKING", "MONASH"]
-        campaign["logical_jobs_per_tune"] = 17
-        campaign["successful_events_per_logical_job"] = 13
+        campaign["tune_order"] = ["MONASH", "JUNCTIONS"]
+        campaign["logical_jobs_per_tune"] = 1
+        campaign["successful_events_per_logical_job"] = 3
+        campaign["successful_events_per_tune"] = 3
+        campaign["blocks"] = {"count": 1, "logical_id_domain": [0, 0],
+                              "logical_id_rule": "block=(logical_id%1)+1"}
+        campaign["seed"]["tune_ordinals"] = {"MONASH": 0, "JUNCTIONS": 1}
+        campaign["seed"]["attempt_domain"] = [0, 1]
+        campaign["attempt_evidence_inventory"] = {"file_count": 3,
+                                                   "sha256": "a" * 64}
+        campaign["accepted_source"]["tune_cards"] = {
+            tune: json.loads((ROOT / "data/campaign.json").read_text(
+                encoding="utf-8"))["accepted_source"]["tune_cards"][tune]
+            for tune in campaign["tune_order"]}
         campaign_path = control / "campaign.json"
         campaign_path.write_text(json.dumps(campaign, sort_keys=True), encoding="utf-8")
-        rows = []
-        descriptors = [
-            ("CLOSEPACKING", 2, 3, 930000003, 7, 10, "opaque-2.root"),
-            ("CLOSEPACKING", 10007, 1, 930010008, 11, 11,
-             "opaque-wide-10007-retry.root"),
-            ("MONASH", 31, 4, 930100035, 13, 200, "x.root"),
-        ]
-        attempts_rows = []
-        for tune, logical, attempt, seed, events, size, filename in descriptors:
+        descriptors = [("MONASH", 0, 1, 0, "opaque-job-000000.root"),
+                       ("JUNCTIONS", 0, 0, 1, "x.root")]
+        rows, attempts_rows = [], []
+        for tune, logical, attempt, ordinal, filename in descriptors:
+            path = raw_root / tune / filename
+            path.parent.mkdir(parents=True, exist_ok=True)
+            subprocess.run([str(self.base / "fixture"), str(path), "valid",
+                            str(logical), str(attempt), tune, str(ordinal), "3"],
+                           check=True, env=self.environment)
+            seed = 130000001 + ordinal * 1000000 + attempt * 100000 + logical
             storage = "{}/{}".format(tune, filename)
             rows.append({
                 "accepted_attempt": attempt, "accepted_seed": seed,
-                "block": (logical % 10) + 1, "bytes": size,
-                "logical_id": logical, "raw_sha256": "a" * 64,
-                "raw_storage_key": storage, "successful_events": events,
+                "block": 1, "bytes": path.stat().st_size,
+                "logical_id": logical, "raw_sha256": sha256(path),
+                "raw_storage_key": storage, "successful_events": 3,
                 "tune": tune, "validation_log_sha256": "b" * 64,
                 "validation_receipt_sha256": "c" * 64,
             })
+            for prior in range(attempt):
+                attempts_rows.append(
+                    "{},{},{},{},discarded,inferred_from_accepted_attempt_ordinal,".format(
+                        tune, logical, prior,
+                        130000001 + ordinal * 1000000 + prior * 100000 + logical))
             attempts_rows.append(
                 "{},{},{},{},accepted,accepted_manifest_confirmed,{}".format(
                     tune, logical, attempt, seed, storage))
         manifest = control / "manifest.jsonl"
-        manifest.write_text("".join(json.dumps(row, sort_keys=True) + "\n"
+        manifest.write_text("".join(json.dumps(row, sort_keys=True,
+                                               separators=(",", ":")) + "\n"
                                     for row in rows), encoding="utf-8")
         attempts = control / "attempts.csv"
         attempts.write_text(
             "tune,logical_id,attempt,seed,outcome,evidence_status,raw_storage_key\n" +
             "\n".join(attempts_rows) + "\n", encoding="utf-8")
-        plan = self.work_root / "factorization-plan.json"
+        plan = work_root / "factorization-plan.json"
         result = self._cli(
             "plan", "--campaign", str(campaign_path), "--manifest", str(manifest),
-            "--attempts", str(attempts), "--raw-root", str(self.raw_root),
-            "--work-root", str(self.work_root), "--output-root",
-            str(self.base / "factorization-output"), "--plan", str(plan),
-            "--target-bytes", "25", check=True)
-        self.assertIn("SHARDS=2 SOURCES=3", result.stdout)
+            "--attempts", str(attempts), "--raw-root", str(raw_root),
+            "--work-root", str(work_root), "--output-root", str(output_root),
+            "--plan", str(plan), "--target-bytes", "1000000000", check=True)
+        self.assertIn("SHARDS=1 SOURCES=2", result.stdout)
+        self._cli("run", "--plan", str(plan), check=True)
         payload = json.loads(plan.read_text(encoding="utf-8"))
         self.assertEqual([shard["source_ids"] for shard in payload["shards"]],
-                         [[0, 1], [2]])
-        self.assertEqual([source["manifest_row"]["successful_events"]
-                          for source in payload["sources"]], [7, 11, 13])
+                         [[0, 1]])
         self.assertEqual([source["manifest_row"]["accepted_attempt"]
-                          for source in payload["sources"]], [3, 1, 4])
+                          for source in payload["sources"]], [1, 0])
+        receipt = json.loads((output_root / "HF_RUN3_V1/shard-0000.json").read_text(
+            encoding="utf-8"))
+        self.assertEqual(receipt["binding"]["tune_ordinals"],
+                         {"MONASH": 0, "JUNCTIONS": 1})
+
+    def test_incoherent_descriptor_and_manifest_fail_before_plan_creation(self):
+        base_campaign = json.loads(self.campaign_path.read_text(encoding="utf-8"))
+        base_rows = [json.loads(line) for line in self.manifest_path.read_text(
+            encoding="utf-8").splitlines()]
+        cases = {}
+        campaign = json.loads(json.dumps(base_campaign))
+        campaign["seed"]["campaign_ordinal"] = 65536
+        cases["campaign-ordinal"] = (campaign, base_rows, "campaign ordinal")
+        campaign = json.loads(json.dumps(base_campaign))
+        campaign["seed"]["tune_ordinals"]["MONASH"] = 3
+        cases["tune-ordinal"] = (campaign, base_rows, "tune ordinals")
+        campaign = json.loads(json.dumps(base_campaign))
+        campaign["successful_events_per_tune"] += 1
+        cases["exposure-total"] = (campaign, base_rows, "exposure is incoherent")
+        rows = json.loads(json.dumps(base_rows))
+        rows[0]["block"] = 2
+        cases["block"] = (base_campaign, rows, "descriptor rule")
+        rows = json.loads(json.dumps(base_rows))
+        rows[0]["accepted_seed"] += 1
+        cases["seed"] = (base_campaign, rows, "accepted seed")
+        rows = json.loads(json.dumps(base_rows))
+        rows[0]["successful_events"] = 1 << 20
+        cases["event-id"] = (base_campaign, rows, "exposure differs")
+        rows = json.loads(json.dumps(base_rows))
+        rows[1]["logical_id"] = 16384
+        cases["logical-domain"] = (base_campaign, rows, "logical ID")
+        for label, (campaign, rows, diagnostic) in cases.items():
+            control = self.base / "invalid-controls" / label
+            control.mkdir(parents=True)
+            campaign_path = control / "campaign.json"
+            manifest_path = control / "manifest.jsonl"
+            plan = self.work_root / ("invalid-" + label + ".json")
+            campaign_path.write_text(json.dumps(campaign, sort_keys=True), encoding="utf-8")
+            manifest_path.write_text("".join(json.dumps(row, sort_keys=True,
+                                                         separators=(",", ":")) + "\n"
+                                             for row in rows), encoding="utf-8")
+            result = self._cli(
+                "plan", "--campaign", str(campaign_path), "--manifest",
+                str(manifest_path), "--attempts", str(self.attempts_path),
+                "--raw-root", str(self.raw_root), "--work-root", str(self.work_root),
+                "--output-root", str(self.base / "invalid-output"), "--plan",
+                str(plan), "--target-bytes", "1000")
+            self.assertEqual(result.returncode, 2, label)
+            self.assertIn(diagnostic, result.stderr, (label, result.stderr))
+            self.assertFalse(plan.exists(), label)
 
     def test_failure_cleanup_partial_collision_symlink_and_promotion_race(self):
         partial_output = self.base / "partial-output"
@@ -667,7 +812,7 @@ class AnalysisShardContract(unittest.TestCase):
         partial.write_bytes(b"foreign")
         result = self._cli("run", "--plan", str(partial_plan))
         self.assertEqual(result.returncode, 2)
-        self.assertIn("foreign or partial final collision", result.stderr)
+        self.assertIn("root-only promotion recovery rejected", result.stderr)
         self.assertEqual(partial.read_bytes(), b"foreign")
 
         link = self.base / "analysis-shard-link.root"
@@ -696,31 +841,47 @@ class AnalysisShardContract(unittest.TestCase):
         staging = self.work_root / "staging"
         self.assertFalse(staging.exists() and any(staging.iterdir()))
 
-        crash_work = self.base / "failure-work"
-        crash_bin = crash_work / "bin"
-        crash_bin.mkdir(parents=True)
-        analyzer = next((self.work_root / "bin").glob("analyze-*"))
-        validator = next((self.work_root / "bin").glob("validate-raw-*"))
-        real_analyzer = crash_bin / "real-analyzer"
-        shutil.copy2(analyzer, real_analyzer)
-        cached_analyzer = crash_bin / analyzer.name
-        cached_analyzer.write_text(
-            "#!/usr/bin/env python3\nimport os,sys\n"
-            "if len(sys.argv)>1 and sys.argv[1]=='write':\n"
-            " print('forced pre-promotion failure',file=sys.stderr);sys.exit(2)\n"
-            "os.execv({!r},[{!r}]+sys.argv[1:])\n".format(
-                str(real_analyzer), str(real_analyzer)), encoding="utf-8")
-        cached_analyzer.chmod(0o700)
-        shutil.copy2(validator, crash_bin / validator.name)
-        failure_output = self.base / "failure-output"
-        failure_plan = self._single_source_plan(
-            "failure", self.raw_root, self.raw_paths[0], failure_output, crash_work)
-        result = self._cli("run", "--plan", str(failure_plan))
+        interruption_output = self.base / "interruption-output"
+        interruption_plan = self._single_source_plan(
+            "interruption", self.raw_root, self.raw_paths[0], interruption_output)
+        environment = dict(self.environment)
+        environment["HADRONIZATION_ANALYZE_FAIL_AFTER_ROOT_PROMOTION"] = "1"
+        result = self._cli("run", "--plan", str(interruption_plan),
+                           environment=environment)
         self.assertEqual(result.returncode, 2)
-        self.assertIn("forced pre-promotion failure", result.stderr)
-        failure_staging = crash_work / "staging"
-        self.assertFalse(failure_staging.exists() and any(failure_staging.iterdir()))
-        self.assertFalse((failure_output / "HF_RUN3_V1").exists())
+        self.assertIn("injected interruption after ROOT promotion", result.stderr)
+        partial_root = interruption_output / "HF_RUN3_V1/shard-0000.root"
+        partial_receipt = partial_root.with_suffix(".json")
+        self.assertTrue(partial_root.is_file())
+        self.assertFalse(partial_receipt.exists())
+        partial_digest = sha256(partial_root)
+        recovered = self._cli("run", "--plan", str(interruption_plan), check=True)
+        self.assertIn("RECOVERED shard=0", recovered.stdout)
+        self.assertEqual(sha256(partial_root), partial_digest)
+        self.assertTrue(partial_receipt.is_file())
+        self._cli("verify", "--plan", str(interruption_plan), check=True)
+        self.assertEqual([sha256(path) for path in self.raw_paths], self.raw_digests)
+
+        cache_work = self.base / "cache-work"
+        cache_output = self.base / "cache-output"
+        cache_plan = self._single_source_plan(
+            "cache", self.raw_root, self.raw_paths[0], cache_output, cache_work)
+        self._cli("run", "--plan", str(cache_plan), check=True)
+        cached_analyzer = next(path for path in (cache_work / "bin").glob("analyze-*")
+                               if path.suffix != ".json")
+        substituted = (
+            "#!/usr/bin/env python3\nimport os,sys\n"
+            "print('substituted cache executed',file=sys.stderr);sys.exit(97)\n")
+        cached_analyzer.write_text(substituted, encoding="utf-8")
+        cached_analyzer.chmod(0o700)
+        verify = self._cli("verify", "--plan", str(cache_plan), check=True)
+        self.assertIn("VERIFIED shard=0", verify.stdout)
+        self.assertNotEqual(cached_analyzer.read_text(encoding="latin1"), substituted)
+        build_receipt = json.loads(cached_analyzer.with_suffix(
+            ".build.json").read_text(encoding="utf-8"))
+        self.assertEqual(build_receipt["binary_sha256"], sha256(cached_analyzer))
+        self.assertFalse((cache_work / "staging").exists() and
+                         any((cache_work / "staging").iterdir()))
 
     def test_receipt_provenance_mutation_is_rejected(self):
         mutant = self.output_root / "receipt-mutant"
@@ -729,7 +890,7 @@ class AnalysisShardContract(unittest.TestCase):
         receipt_path = mutant / "shard.json"
         shutil.copy2(self.shard, root_path)
         payload = json.loads(self.receipt.read_text(encoding="utf-8"))
-        payload["producer_provenance"]["host"] = "foreign-host"
+        payload["producer_provenance"]["publication"]["host"] = "foreign-host"
         receipt_path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
         result = self._cli("verify", "--root", str(root_path),
                            "--receipt", str(receipt_path),
@@ -737,6 +898,52 @@ class AnalysisShardContract(unittest.TestCase):
                            "--work-root", str(self.work_root))
         self.assertEqual(result.returncode, 2)
         self.assertIn("producer provenance digest mismatch", result.stderr)
+
+    def test_plan_receipt_root_and_dictionary_cross_binding_is_structural(self):
+        mutant_root = self.output_root / "contract-mutants"
+        mutant_root.mkdir()
+        cases = {
+            "contract_map": "ROOT contract binding differs from receipt",
+            "dictionary_reference": "dictionary reference is unresolved",
+            "dictionary_payload": "dictionary key/payload collision",
+            "source_reference": "source metadata/receipt cross-binding differs",
+        }
+        for mode, diagnostic in cases.items():
+            root_path = mutant_root / (mode + ".root")
+            subprocess.run([str(self.base / "mutator"), str(self.shard),
+                            str(root_path), mode], check=True, env=self.environment)
+            receipt_path = self.receipt_for_root(root_path, mode)
+            result = self._cli("verify", "--root", str(root_path),
+                               "--receipt", str(receipt_path),
+                               "--raw-root", str(self.raw_root),
+                               "--work-root", str(self.work_root))
+            self.assertEqual(result.returncode, 2, mode)
+            self.assertIn(diagnostic, result.stderr, (mode, result.stderr))
+
+        top_level = mutant_root / "top-level.json"
+        payload = json.loads(self.receipt.read_text(encoding="utf-8"))
+        payload["campaign"] = "FOREIGN"
+        top_level.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+        result = self._cli("verify", "--root", str(self.shard),
+                           "--receipt", str(top_level),
+                           "--raw-root", str(self.raw_root),
+                           "--work-root", str(self.work_root))
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("duplicated binding fields", result.stderr)
+
+        nested = mutant_root / "nested.json"
+        payload = json.loads(self.receipt.read_text(encoding="utf-8"))
+        payload["storage_identity"]["map_digest"] = "0" * 64
+        payload["storage_identity_sha256"] = hashlib.sha256(json.dumps(
+            payload["storage_identity"], sort_keys=True,
+            separators=(",", ":")).encode("utf-8")).hexdigest()
+        nested.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+        result = self._cli("verify", "--root", str(self.shard),
+                           "--receipt", str(nested),
+                           "--raw-root", str(self.raw_root),
+                           "--work-root", str(self.work_root))
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("duplicated binding fields", result.stderr)
 
     def test_raw_alias_vector_and_phase_a_audit_mutants_are_rejected(self):
         diagnostics = {
@@ -771,7 +978,8 @@ class AnalysisShardContract(unittest.TestCase):
                           for source in combined["sources"]], [0, 1])
 
     def test_minimal_root_mutants_are_rejected(self):
-        analyzer = next((self.work_root / "bin").glob("analyze-*"))
+        analyzer = next(path for path in (self.work_root / "bin").glob("analyze-*")
+                        if path.suffix != ".json")
         expected = {
             "unknown_object": "object set",
             "duplicate_cycle": "duplicate ROOT key/cycle",
@@ -783,7 +991,7 @@ class AnalysisShardContract(unittest.TestCase):
             "broken_count": "source family counts",
             "shuffled_rows": "duplicate/nonmonotonic natural key",
             "wrong_cache": "pair cached authority/semantics",
-            "wrong_source_block": "source block assignment",
+            "wrong_source_block": "scientific content digest differs",
             "missing_source": "source digest routing is out of domain",
             "missing_event": "event-scoped rows remain after final event",
         }
