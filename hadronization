@@ -13,7 +13,7 @@ import time
 
 
 ROOT = Path(__file__).resolve().parent
-UNAVAILABLE = {"analyze", "merge", "reduce", "plot"}
+UNAVAILABLE = {"merge", "reduce", "plot"}
 
 
 def doctor():
@@ -141,6 +141,11 @@ def generate(submit, purpose):
     return subprocess.run(command, cwd=str(ROOT)).returncode
 
 
+def analyze(arguments):
+    command = [sys.executable, str(ROOT / "pipeline/analyze/run.py")] + arguments
+    return subprocess.run(command, cwd=str(ROOT)).returncode
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="hadronization",
@@ -154,7 +159,11 @@ def build_parser():
     generate_parser.add_argument(
         "--purpose", choices=("inventory", "continuation", "recovery", "new"),
         default=None, help="declare inventory or continuation semantics")
-    for name in ("analyze", "merge", "reduce", "plot"):
+    analyze_parser = sub.add_parser(
+        "analyze", help="plan, build, verify, and explain lossless analysis shards",
+        add_help=False)
+    analyze_parser.add_argument("arguments", nargs=argparse.REMAINDER)
+    for name in ("merge", "reduce", "plot"):
         sub.add_parser(name, help="direct stage is not yet implemented")
     sub.add_parser("verify", help="run the focused active-contract suite")
     clean_parser = sub.add_parser("clean", help="remove reproducible checkout residue")
@@ -165,12 +174,16 @@ def build_parser():
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "analyze":
+        return analyze(sys.argv[2:])
     args = build_parser().parse_args()
     if args.command == "doctor":
         return doctor()
     if args.command == "generate":
         purpose = args.purpose or ("continuation" if args.submit else "inventory")
         return generate(args.submit, purpose)
+    if args.command == "analyze":
+        return analyze(args.arguments)
     if args.command in UNAVAILABLE:
         print("ERROR: {} direct stage is not yet implemented".format(
             args.command), file=sys.stderr)

@@ -1,6 +1,7 @@
 # Portable data and site-local configuration
 /data/raw/
 /data/work/
+/data/analyzed/
 /config/site.conf
 
 # One documented local virtual environment

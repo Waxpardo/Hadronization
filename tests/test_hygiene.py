@@ -88,7 +88,9 @@ class LeanTreeContract(unittest.TestCase):
                          expected_config)
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/analyze/")},
-            {"pipeline/analyze/import_accepted.py",
+            {"pipeline/analyze/analyze.cpp",
+             "pipeline/analyze/import_accepted.py",
+             "pipeline/analyze/run.py",
              "pipeline/analyze/reference_analysis.C"})
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/plot/")},
