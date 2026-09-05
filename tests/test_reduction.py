@@ -38,8 +38,10 @@ COMPACT_ORACLE = r'''
 #include "TTree.h"
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
-int main(int argc,char**argv){if(argc!=2)return 2;TFile f(argv[1],"READ");if(f.IsZombie())return 3;auto*c=dynamic_cast<TTree*>(f.Get("cells"));auto*g=dynamic_cast<TTree*>(f.Get("event_gram"));auto*m=dynamic_cast<TObjString*>(f.Get("metadata"));auto*r=dynamic_cast<TObjString*>(f.Get("receipt"));if(!c||!g||!m||!r)return 4;UInt_t p=0,s=0,b=0,n=0,k=0;Double_t v=0,a=0,w=0;ULong64_t fills=0;c->SetBranchAddress("projection_id",&p);c->SetBranchAddress("scope_id",&s);c->SetBranchAddress("block",&b);c->SetBranchAddress("bin",&n);c->SetBranchAddress("component",&k);c->SetBranchAddress("value",&v);c->SetBranchAddress("sumabs",&a);c->SetBranchAddress("row_sumw2",&w);c->SetBranchAddress("fills",&fills);std::cout<<std::setprecision(17);for(Long64_t i=0;i<c->GetEntries();++i){c->GetEntry(i);std::cout<<"C\t"<<p<<'\t'<<s<<'\t'<<b<<'\t'<<n<<'\t'<<k<<'\t'<<v<<'\t'<<a<<'\t'<<w<<'\t'<<fills<<'\n';}UInt_t l=0,rr=0;Double_t x=0;g->SetBranchAddress("projection_id",&p);g->SetBranchAddress("scope_id",&s);g->SetBranchAddress("block",&b);g->SetBranchAddress("left",&l);g->SetBranchAddress("right",&rr);g->SetBranchAddress("cross",&x);for(Long64_t i=0;i<g->GetEntries();++i){g->GetEntry(i);std::cout<<"G\t"<<p<<'\t'<<s<<'\t'<<b<<'\t'<<l<<'\t'<<rr<<'\t'<<x<<'\n';}std::cout<<"M\t"<<m->GetString().Data()<<'\n'<<"R\t"<<r->GetString().Data()<<'\n';return 0;}
+std::string hx(double v){std::ostringstream o;o<<std::hexfloat<<v;return o.str();}
+int main(int argc,char**argv){if(argc!=2)return 2;TFile f(argv[1],"READ");if(f.IsZombie())return 3;auto*c=dynamic_cast<TTree*>(f.Get("cells"));auto*g=dynamic_cast<TTree*>(f.Get("event_gram"));auto*m=dynamic_cast<TObjString*>(f.Get("metadata"));auto*r=dynamic_cast<TObjString*>(f.Get("receipt"));if(!c||!g||!m||!r)return 4;UInt_t p=0,s=0,b=0,n=0,k=0;Double_t v=0,a=0,w=0;ULong64_t fills=0;c->SetBranchAddress("projection_id",&p);c->SetBranchAddress("scope_id",&s);c->SetBranchAddress("block",&b);c->SetBranchAddress("bin",&n);c->SetBranchAddress("component",&k);c->SetBranchAddress("value",&v);c->SetBranchAddress("sumabs",&a);c->SetBranchAddress("row_sumw2",&w);c->SetBranchAddress("fills",&fills);std::cout<<std::setprecision(17);for(Long64_t i=0;i<c->GetEntries();++i){c->GetEntry(i);std::cout<<"C\t"<<p<<'\t'<<s<<'\t'<<b<<'\t'<<n<<'\t'<<k<<'\t'<<v<<'\t'<<a<<'\t'<<w<<'\t'<<fills<<'\t'<<hx(v)<<'\t'<<hx(a)<<'\t'<<hx(w)<<'\n';}UInt_t l=0,rr=0;Double_t x=0;g->SetBranchAddress("projection_id",&p);g->SetBranchAddress("scope_id",&s);g->SetBranchAddress("block",&b);g->SetBranchAddress("left",&l);g->SetBranchAddress("right",&rr);g->SetBranchAddress("cross",&x);for(Long64_t i=0;i<g->GetEntries();++i){g->GetEntry(i);std::cout<<"G\t"<<p<<'\t'<<s<<'\t'<<b<<'\t'<<l<<'\t'<<rr<<'\t'<<x<<'\t'<<hx(x)<<'\n';}std::cout<<"M\t"<<m->GetString().Data()<<'\n'<<"R\t"<<r->GetString().Data()<<'\n';return 0;}
 '''
 
 
@@ -47,8 +49,27 @@ COMPACT_MUTATOR = r'''
 #include "TFile.h"
 #include "TObjString.h"
 #include "TTree.h"
+#include <fstream>
+#include <sstream>
 #include <string>
-int main(int argc,char**argv){if(argc!=4)return 2;const std::string mode=argv[3];TFile input(argv[1],"READ");if(input.IsZombie())return 3;TFile output(argv[2],"RECREATE","",input.GetCompressionSettings());if(output.IsZombie())return 4;auto*c=dynamic_cast<TTree*>(input.Get("cells"));auto*g=dynamic_cast<TTree*>(input.Get("event_gram"));auto*m=dynamic_cast<TObjString*>(input.Get("metadata"));auto*r=dynamic_cast<TObjString*>(input.Get("receipt"));if(!c||!g||!m||!r)return 5;output.cd();auto*cc=c->CloneTree(-1,"fast");cc->SetName("cells");cc->Write();if(mode=="cycle")cc->Write();auto*gg=g->CloneTree(-1,"fast");gg->SetName("event_gram");gg->Write();std::string mt=m->GetString().Data(),rt=r->GetString().Data();auto flip=[](std::string&text,const std::string&key){const auto at=text.find(key);if(at==std::string::npos)return false;char&value=text[at+key.size()];value=value=='0'?'1':'0';return true;};if(mode=="scientific"){if(!flip(mt,"\"scientific_content_digest\":\""))return 6;}if(mode=="binding"){if(!flip(mt,"\"analysis_request_sha256\":\"")||!flip(rt,"\"analysis_request_sha256\":\""))return 7;}TObjString mo(mt.c_str());mo.Write("metadata");TObjString ro(rt.c_str());ro.Write("receipt");if(mode=="unknown"){TObjString extra("foreign");extra.Write("extra");}output.Close();return 0;}
+std::string text(const char*path){std::ifstream f(path);std::ostringstream o;o<<f.rdbuf();return o.str();}
+int main(int argc,char**argv){if(argc<4)return 2;const std::string mode=argv[3];TFile input(argv[1],"READ");if(input.IsZombie())return 3;TFile output(argv[2],"RECREATE","",input.GetCompressionSettings());if(output.IsZombie())return 4;auto*c=dynamic_cast<TTree*>(input.Get("cells"));auto*g=dynamic_cast<TTree*>(input.Get("event_gram"));auto*m=dynamic_cast<TObjString*>(input.Get("metadata"));auto*r=dynamic_cast<TObjString*>(input.Get("receipt"));if(!c||!g||!m||!r)return 5;output.cd();TTree*cc=nullptr;if(mode=="domain_cell"){UInt_t p=0;c->SetBranchAddress("projection_id",&p);cc=c->CloneTree(0);for(Long64_t i=0;i<c->GetEntries();++i){c->GetEntry(i);if(i==0)p=0;cc->Fill();}}else cc=c->CloneTree(-1,"fast");cc->SetName("cells");cc->Write();if(mode=="cycle")cc->Write();TTree*gg=nullptr;if(mode=="domain_gram"){UInt_t p=0;g->SetBranchAddress("projection_id",&p);gg=g->CloneTree(0);for(Long64_t i=0;i<g->GetEntries();++i){g->GetEntry(i);if(i==0)p=1;gg->Fill();}}else gg=g->CloneTree(-1,"fast");gg->SetName("event_gram");gg->Write();std::string mt=m->GetString().Data(),rt=r->GetString().Data();auto flip=[](std::string&value,const std::string&key){const auto at=value.find(key);if(at==std::string::npos)return false;char&digit=value[at+key.size()];digit=digit=='0'?'1':'0';return true;};if(mode=="scientific"){if(!flip(mt,"\"scientific_content_digest\":\""))return 6;}if(mode=="binding"){if(!flip(mt,"\"analysis_request_sha256\":\"")||!flip(rt,"\"analysis_request_sha256\":\""))return 7;}if(mode=="payload"){if(argc!=6)return 8;mt=text(argv[4]);rt=text(argv[5]);}TObjString mo(mt.c_str());mo.Write("metadata");TObjString ro(rt.c_str());ro.Write("receipt");if(mode=="unknown"){TObjString extra("foreign");extra.Write("extra");}output.Close();return 0;}
+'''
+
+
+GRAM_INPUT_EXTRACTOR = r'''
+#include "TFile.h"
+#include "TTree.h"
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <utility>
+#include <vector>
+struct H{int pdg=0;double eta=0;};struct R{ULong64_t first=0,count=0;UInt_t source=0;};
+template<class T>void b(TTree*t,const char*n,T*v){if(t->SetBranchAddress(n,v)<0)throw 1;}
+int main(int argc,char**argv){if(argc!=2)return 2;TFile f(argv[1],"READ");if(f.IsZombie())return 3;auto*rt=dynamic_cast<TTree*>(f.Get("event_ranges"));auto*bt=dynamic_cast<TTree*>(f.Get("source_blocks"));auto*et=dynamic_cast<TTree*>(f.Get("events"));auto*ht=dynamic_cast<TTree*>(f.Get("heavy"));auto*tt=dynamic_cast<TTree*>(f.Get("triggers"));auto*pt=dynamic_cast<TTree*>(f.Get("pairs"));if(!rt||!bt||!et||!ht||!tt||!pt)return 4;ULong64_t first=0,count=0;UInt_t source=0;b(rt,"first_id",&first);b(rt,"count",&count);b(rt,"source_id",&source);std::vector<R> ranges;for(Long64_t i=0;i<rt->GetEntries();++i){rt->GetEntry(i);ranges.push_back({first,count,source});}UInt_t sid=0,assignment=0,block=0;b(bt,"source_id",&sid);b(bt,"assignment_id",&assignment);b(bt,"block",&block);std::vector<UInt_t> blocks(bt->GetEntries());for(Long64_t i=0;i<bt->GetEntries();++i){bt->GetEntry(i);if(sid!=static_cast<UInt_t>(i)||assignment!=0)return 5;blocks[i]=block;}auto eventBlock=[&](ULong64_t event){for(const auto&r:ranges)if(event>=r.first&&event-r.first<r.count)return blocks.at(r.source);throw 2;};ULong64_t event=0;Double_t weight=0;b(et,"event_id",&event);b(et,"weight",&weight);std::map<ULong64_t,double> weights;for(Long64_t i=0;i<et->GetEntries();++i){et->GetEntry(i);weights[event]=weight;}Int_t index=0,pdg=0;Double_t eta=0;b(ht,"event_id",&event);b(ht,"heavy_index",&index);b(ht,"pdg",&pdg);b(ht,"eta",&eta);std::map<std::pair<ULong64_t,int>,H> heavy;for(Long64_t i=0;i<ht->GetEntries();++i){ht->GetEntry(i);heavy[{event,index}]={pdg,eta};}Int_t trigger=0,associate=0;UInt_t mask=0;b(tt,"event_id",&event);b(tt,"heavy_index",&trigger);b(tt,"rejection_mask",&mask);std::cout<<std::setprecision(17);for(Long64_t i=0;i<tt->GetEntries();++i){tt->GetEntry(i);const auto&h=heavy.at({event,trigger});if(mask==0&&std::abs(h.eta)<=4.0)std::cout<<"T\t"<<event<<'\t'<<eventBlock(event)<<'\t'<<h.pdg<<'\t'<<weights.at(event)<<'\n';}Double_t pairWeight=0;b(pt,"event_id",&event);b(pt,"trigger_heavy_index",&trigger);b(pt,"associate_heavy_index",&associate);b(pt,"weight",&pairWeight);for(Long64_t i=0;i<pt->GetEntries();++i){pt->GetEntry(i);const auto&t=heavy.at({event,trigger});const auto&a=heavy.at({event,associate});if(std::abs(t.eta)<=4.0&&std::abs(a.eta)<=4.0)std::cout<<"P\t"<<event<<'\t'<<eventBlock(event)<<'\t'<<t.pdg<<'\t'<<a.pdg<<'\t'<<pairWeight<<'\n';}return 0;}
 '''
 
 
@@ -107,6 +128,8 @@ class ReductionContract(unittest.TestCase):
                      cls.base / "shard_mutator")
         cls._compile(COMPACT_MUTATOR, cls.base / "compact_mutator.cpp",
                      cls.base / "compact_mutator")
+        cls._compile(GRAM_INPUT_EXTRACTOR, cls.base / "gram_inputs.cpp",
+                     cls.base / "gram_inputs")
         cls.raw_paths = []
         for logical in range(10):
             path = cls.raw_root / "MONASH" / "opaque-{:03d}.root".format(logical)
@@ -150,6 +173,55 @@ class ReductionContract(unittest.TestCase):
         cls.compact_receipt = cls.compact_root.with_suffix(".json")
         cls.split_compact_root = next(cls.split_reduced.rglob("*.root"))
         cls.oracle = cls._compact_rows(cls.compact_root)
+
+        repeated_source = fixture.replace(
+            "std::vector<int>{421, -421, 411, -431",
+            "std::vector<int>{421, -421, 421, -431", 1)
+        if repeated_source == fixture:
+            raise AssertionError("repeated-Gram fixture insertion point changed")
+        cls._compile(repeated_source, cls.base / "repeated_fixture.cpp",
+                     cls.base / "repeated_fixture", include_generate=True)
+        repeated_raw = cls.base / "repeated-raw"
+        repeated_paths = []
+        for logical in range(10):
+            path = repeated_raw / "MONASH" / "opaque-{:03d}.root".format(logical)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            subprocess.run([str(cls.base / "repeated_fixture"), str(path), "valid",
+                            str(logical), "0", "MONASH", "0", "3"],
+                           check=True, env=cls.environment)
+            repeated_paths.append(path)
+        repeated_control = cls.base / "repeated-control"
+        repeated_control.mkdir()
+        repeated_campaign = repeated_control / "campaign.json"
+        shutil.copy2(cls.campaign_path, repeated_campaign)
+        rows = [json.loads(line) for line in
+                cls.manifest_path.read_text(encoding="utf-8").splitlines()]
+        for row, path in zip(rows, repeated_paths):
+            row["bytes"] = path.stat().st_size
+            row["raw_sha256"] = sha256(path)
+        repeated_manifest = repeated_control / "raw_manifest.jsonl"
+        repeated_manifest.write_text("".join(
+            json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n"
+            for row in rows), encoding="utf-8")
+        repeated_attempts = repeated_control / "attempts.csv"
+        shutil.copy2(cls.attempts_path, repeated_attempts)
+        repeated_work = cls.base / "repeated-work"
+        repeated_analyzed = cls.base / "repeated-analyzed"
+        repeated_reduced = cls.base / "repeated-reduced"
+        repeated_plan = repeated_work / "plan.json"
+        cls._analyze("plan", "--campaign", str(repeated_campaign),
+                     "--manifest", str(repeated_manifest), "--attempts",
+                     str(repeated_attempts), "--raw-root", str(repeated_raw),
+                     "--work-root", str(repeated_work), "--output-root",
+                     str(repeated_analyzed), "--plan", str(repeated_plan),
+                     "--target-bytes", "1000000000", check=True)
+        cls._analyze("run", "--plan", str(repeated_plan), check=True)
+        cls._reduce("run", "--plan", str(repeated_plan), "--analyzed-root",
+                    str(repeated_analyzed), "--work-root", str(cls.reduce_work),
+                    "--output-root", str(repeated_reduced), check=True)
+        cls.repeated_shard = next(repeated_analyzed.rglob("shard-*.root"))
+        cls.repeated_compact = cls._compact_rows(
+            next(repeated_reduced.rglob("plot-source-*.root")))
 
     @classmethod
     def tearDownClass(cls):
@@ -245,15 +317,19 @@ class ReductionContract(unittest.TestCase):
         result = subprocess.run([str(cls.base / "compact_oracle"), str(path)],
                                 check=True, env=cls.environment, text=True,
                                 stdout=subprocess.PIPE)
-        parsed = {"cells": {}, "gram": {}, "metadata": None, "receipt": None}
+        parsed = {"cells": {}, "gram": {}, "cell_hex": {}, "gram_hex": {},
+                  "metadata": None, "receipt": None}
         for line in result.stdout.splitlines():
             kind, *values = line.split("\t")
             if kind == "C":
                 key = tuple(map(int, values[:5]))
                 parsed["cells"][key] = (float(values[5]), float(values[6]),
                                          float(values[7]), int(values[8]))
+                parsed["cell_hex"][key] = tuple(values[9:12])
             elif kind == "G":
-                parsed["gram"][tuple(map(int, values[:5]))] = float(values[5])
+                key = tuple(map(int, values[:5]))
+                parsed["gram"][key] = float(values[5])
+                parsed["gram_hex"][key] = values[6]
             elif kind == "M":
                 parsed["metadata"] = json.loads(values[0])
             elif kind == "R":
@@ -269,6 +345,94 @@ class ReductionContract(unittest.TestCase):
             json.dumps(receipt["storage_identity"], sort_keys=True,
                        separators=(",", ":")).encode("ascii")).hexdigest()
         receipt_path.write_text(json.dumps(receipt, sort_keys=True), encoding="utf-8")
+
+    @staticmethod
+    def _canonical(value):
+        return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+    @classmethod
+    def _scientific_digest(cls, compact):
+        digest = hashlib.sha256()
+
+        def field(value):
+            encoded = value.encode("ascii")
+            digest.update(len(encoded).to_bytes(8, "big"))
+            digest.update(encoded)
+
+        digest.update(b"cells\0")
+        for key in sorted(compact["cells"]):
+            values = compact["cells"][key]
+            for value in key:
+                field(str(value))
+            for value in compact["cell_hex"][key]:
+                field(value)
+            field(str(values[3]))
+        digest.update(b"event_gram\0")
+        for key in sorted(compact["gram"]):
+            for value in key:
+                field(str(value))
+            field(compact["gram_hex"][key])
+        return digest.hexdigest()
+
+    @classmethod
+    def _payload_root(cls, source_root, output_root, metadata, receipt):
+        metadata_path = output_root.with_suffix(".metadata.json")
+        receipt_path = output_root.with_suffix(".embedded.json")
+        metadata_path.write_text(cls._canonical(metadata), encoding="ascii")
+        receipt_path.write_text(cls._canonical(receipt), encoding="ascii")
+        subprocess.run([str(cls.base / "compact_mutator"), str(source_root),
+                        str(output_root), "payload", str(metadata_path),
+                        str(receipt_path)], check=True, env=cls.environment)
+        metadata_path.unlink()
+        receipt_path.unlink()
+
+    @classmethod
+    def _write_external_receipt(cls, output_root, metadata, embedded,
+                                external):
+        scientific = external["scientific_identity"]
+        scientific["metadata_sha256"] = hashlib.sha256(
+            cls._canonical(metadata).encode("ascii")).hexdigest()
+        scientific["embedded_receipt_sha256"] = hashlib.sha256(
+            cls._canonical(embedded).encode("ascii")).hexdigest()
+        external["scientific_identity_sha256"] = hashlib.sha256(
+            cls._canonical(scientific).encode("ascii")).hexdigest()
+        external_path = output_root.with_suffix(".json")
+        external_path.write_text(cls._canonical(external), encoding="ascii")
+        cls._rebind_storage(external_path, output_root)
+        return external_path
+
+    @classmethod
+    def _coherent_domain_key_mutant(cls, mode):
+        staged = cls.base / (mode + "-keys.root")
+        output = cls.base / (mode + ".root")
+        subprocess.run([str(cls.base / "compact_mutator"),
+                        str(cls.compact_root), str(staged), mode],
+                       check=True, env=cls.environment)
+        compact = cls._compact_rows(staged)
+        scientific = cls._scientific_digest(compact)
+        metadata = compact["metadata"]
+        embedded = compact["receipt"]
+        metadata["scientific_content_digest"] = scientific
+        embedded["scientific_content_digest"] = scientific
+        cls._payload_root(staged, output, metadata, embedded)
+        staged.unlink()
+        external = json.loads(cls.compact_receipt.read_text(encoding="utf-8"))
+        external["scientific_identity"]["scientific_content_digest"] = scientific
+        external_path = cls._write_external_receipt(
+            output, metadata, embedded, external)
+        return output, external_path
+
+    @classmethod
+    def _lineage_mutant(cls, name, mutate):
+        output = cls.base / ("lineage-" + name + ".root")
+        metadata = json.loads(json.dumps(cls.oracle["metadata"]))
+        embedded = json.loads(json.dumps(cls.oracle["receipt"]))
+        external = json.loads(cls.compact_receipt.read_text(encoding="utf-8"))
+        mutate(metadata, embedded, external["scientific_identity"])
+        cls._payload_root(cls.compact_root, output, metadata, embedded)
+        external_path = cls._write_external_receipt(
+            output, metadata, embedded, external)
+        return output, external_path
 
     def test_analysis_request_is_downstream_and_expands_exact_registry(self):
         spec = importlib.util.spec_from_file_location(
@@ -376,20 +540,50 @@ class ReductionContract(unittest.TestCase):
                             second["scientific_identity"]["parent_shard_set_digest"])
         self.assertEqual(first["scientific_identity"]["sources"], 10)
         self.assertEqual(first["scientific_identity"]["events"], 30)
+        self.assertEqual(first["scientific_identity"]["scientific_content_digest"],
+                         "1c67584337d73ef25eab126c7447ca433c88d3d2bbad7273c75b0d120ec28952")
+        self.assertEqual((first["scientific_identity"]["cells"],
+                          first["scientific_identity"]["event_gram"]),
+                         (1180, 600))
+        first_lineage = first["scientific_identity"]["input_lineage"]
+        second_lineage = second["scientific_identity"]["input_lineage"]
+        self.assertEqual((first_lineage["shard_count"],
+                          first_lineage["source_count"]), (1, 10))
+        self.assertEqual((second_lineage["shard_count"],
+                          second_lineage["source_count"]), (10, 10))
+        self.assertEqual(first["scientific_identity"]["input_lineage_sha256"],
+                         first["scientific_identity"]["parent_shard_set_digest"])
 
     def test_compact_schema_domains_profiles_activities_and_diagnostics(self):
         metadata = self.oracle["metadata"]
         receipt = self.oracle["receipt"]
+        domains = metadata["compact_domains"]
         self.assertEqual(metadata["schema"], "hadronization_compact_plot_source_v1")
-        self.assertEqual(len(metadata["pair_queries"]), 300)
-        self.assertEqual([item["id"] for item in metadata["profiles"]],
+        self.assertEqual(domains, receipt["compact_domains"])
+        self.assertEqual(len(domains["pair_query_dictionary"]), 300)
+        self.assertEqual([item["id"] for item in domains["profiles"]],
                          ["inclusive", "historical_1p0_0p15"])
-        self.assertEqual([item["physical_field"] for item in metadata["activities"]],
+        self.assertEqual([item["physical_field"] for item in domains["activities"]],
                          ["a15_eta4", "a15_eta1"])
-        self.assertEqual({item["name"] for item in metadata["projections"]},
+        self.assertEqual({item["name"] for item in
+                          domains["projection_dictionary"]},
                          {"activity_hist", "ordered_pair_scalar", "trigger_scalar",
                           "dphi_correlation", "origin", "closure_category_dphi",
                           "closure_species", "closure_full_visible", "G9", "T1"})
+        self.assertEqual([item["signed_pdg"] for item in
+                          domains["trigger_dictionary"]],
+                         [411, -411, 421, -421, 4122, -4122,
+                          511, -511, 521, -521, 5122, -5122])
+        self.assertEqual([item["label"] for item in
+                          domains["origin_dictionary"]],
+                         ["selected_hard_companion", "shower", "MPI",
+                          "other_resolved", "unresolved"])
+        self.assertEqual([item["label"] for item in
+                          domains["closure_category_dictionary"]],
+                         ["selected_ground", "excluded_vector",
+                          "excluded_excited", "multiply_heavy"])
+        self.assertEqual(len(domains["event_gram_dictionary"][
+            "allowed_term_codes"]), 1314)
         self.assertFalse(metadata["pooled_copy"])
         self.assertEqual(receipt["estimator_policy_id"],
                          "pooled_delete_one_source_block_jackknife_v2")
@@ -414,7 +608,8 @@ class ReductionContract(unittest.TestCase):
 
     def test_strict_profile_eta_endpoints_g9_t1_and_visible_closure_are_distinct(self):
         metadata = self.oracle["metadata"]
-        scopes = {item["id"]: item for item in metadata["scopes"]}
+        domains = metadata["compact_domains"]
+        scopes = {item["id"]: item for item in domains["scope_dictionary"]}
         inclusive = {scope_id for scope_id, item in scopes.items()
                      if item["family"] == "pair" and item["profile"] == "inclusive"}
         historical = {scope_id for scope_id, item in scopes.items()
@@ -427,26 +622,199 @@ class ReductionContract(unittest.TestCase):
         self.assertGreater(inclusive_pairs, historical_pairs)
         self.assertTrue(any(key[0] == 9 for key in self.oracle["cells"]))
         self.assertTrue(any(key[0] == 10 for key in self.oracle["cells"]))
-        dynamic = self.oracle["receipt"]["dynamic_species"]
+        dynamic = domains["dynamic_species"]
         closure_species = dynamic["closure_species_pdgs"]
         low_pt_visible = closure_species.index(-421)
         self.assertTrue(any(key[0] == 7 and
                             key[3] % len(closure_species) == low_pt_visible
                             for key in self.oracle["cells"]))
-        self.assertEqual(metadata["axes"]["dphi"]["low"], -math.pi / 2)
-        self.assertEqual(metadata["axes"]["dphi"]["high"], 3 * math.pi / 2)
+        self.assertEqual(domains["axes"]["dphi"]["low"], -math.pi / 2)
+        self.assertEqual(domains["axes"]["dphi"]["high"], 3 * math.pi / 2)
 
     def test_event_gram_is_event_aggregated_not_per_fill_squares(self):
-        # A multi-pair fixture necessarily creates an O/S cross term. Its stored
-        # event product can exceed either individual row-sumw2, which a per-fill
-        # squaring implementation cannot produce for distinct primitives.
-        cross = [value for key, value in self.oracle["gram"].items()
-                 if key[3] != key[4] and value != 0.0]
-        self.assertTrue(cross)
-        row_sumw2 = [value[2] for key, value in self.oracle["cells"].items()
-                     if key[0] in {2, 3}]
-        self.assertGreater(max(map(abs, cross)), 0.0)
-        self.assertGreater(max(row_sumw2), 0.0)
+        domains = self.repeated_compact["metadata"]["compact_domains"]
+        scope = next(item["id"] for item in domains["scope_dictionary"]
+                     if item["family"] == "pair" and
+                     item["profile"] == "inclusive" and
+                     item["activity"] ==
+                     "charged_light_sector_activity_a15_v1_eta4" and
+                     item["class_id"] == 0)
+        pair_ids = {(item["trigger_pdg"], item["associate_pdg"]): item["id"]
+                    for item in domains["pair_query_dictionary"]}
+        trigger_ids = {item["signed_pdg"]: 300 + item["id"]
+                       for item in domains["trigger_dictionary"]}
+        extracted = subprocess.check_output(
+            [str(self.base / "gram_inputs"), str(self.repeated_shard)],
+            env=self.environment, text=True)
+        event_vectors = {}
+        for line in extracted.splitlines():
+            fields = line.split("\t")
+            event_key = (int(fields[1]), int(fields[2]))
+            vector = event_vectors.setdefault(event_key, {})
+            if fields[0] == "T":
+                component = trigger_ids[int(fields[3])]
+                weight = float(fields[4])
+            else:
+                component = pair_ids[(int(fields[3]), int(fields[4]))]
+                weight = float(fields[5])
+            vector.setdefault(component, []).append(weight)
+        self.assertTrue(any(len(fills) > 1 for vector in event_vectors.values()
+                            for fills in vector.values()))
+        gram = domains["event_gram_dictionary"]
+        multiplier = gram["term_code_multiplier"]
+        terms = [(code // multiplier, code % multiplier)
+                 for code in gram["allowed_term_codes"]]
+        expected = {}
+        per_fill_mutant = {}
+        for (unused_event, block), vector in event_vectors.items():
+            del unused_event
+            for left, right in terms:
+                left_fills = vector.get(left, [])
+                right_fills = vector.get(right, [])
+                product = sum(left_fills) * sum(right_fills)
+                if product != 0.0:
+                    key = (2, scope, block, left, right)
+                    expected[key] = expected.get(key, 0.0) + product
+                    per_fill_mutant[key] = per_fill_mutant.get(key, 0.0) + sum(
+                        first * second for first, second in
+                        zip(left_fills, right_fills))
+        actual = {key: value for key, value in self.repeated_compact["gram"].items()
+                  if key[1] == scope}
+        self.assertEqual(set(actual), set(expected))
+        diagonal = [key for key in expected if key[3] == key[4]]
+        off_diagonal = [key for key in expected if key[3] != key[4]]
+        self.assertTrue(diagonal)
+        self.assertTrue(off_diagonal)
+        for key in diagonal + off_diagonal:
+            self.assertAlmostEqual(actual[key], expected[key], places=13)
+        self.assertTrue(any(not math.isclose(expected[key],
+                                             per_fill_mutant.get(key, 0.0),
+                                             rel_tol=1e-13, abs_tol=1e-13)
+                            for key in expected))
+
+    def test_release_refuses_non_k10_before_publication_or_partial_reduction(self):
+        control = self.base / "control-k5"
+        (control / "data").mkdir(parents=True)
+        campaign = json.loads(self.campaign_path.read_text(encoding="utf-8"))
+        campaign["blocks"] = {"count": 5, "logical_id_domain": [0, 9],
+                              "logical_id_rule": "block=(logical_id%5)+1"}
+        campaign_path = control / "data/campaign.json"
+        campaign_path.write_text(json.dumps(campaign, sort_keys=True),
+                                 encoding="utf-8")
+        manifest_rows = [json.loads(line) for line in
+                         self.manifest_path.read_text(encoding="utf-8").splitlines()]
+        for row in manifest_rows:
+            row["block"] = row["logical_id"] % 5 + 1
+        manifest_path = control / "data/raw_manifest.jsonl"
+        manifest_path.write_text("".join(
+            json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n"
+            for row in manifest_rows), encoding="utf-8")
+        attempts_path = control / "data/attempts.csv"
+        shutil.copy2(self.attempts_path, attempts_path)
+        (control / "work").mkdir()
+        plan = control / "work/plan.json"
+        self._analyze("plan", "--campaign", str(campaign_path),
+                      "--manifest", str(manifest_path), "--attempts",
+                      str(attempts_path), "--raw-root", str(self.raw_hidden),
+                      "--work-root", str(control / "work"), "--output-root",
+                      str(control / "analyzed"), "--plan", str(plan),
+                      "--target-bytes", "1000000000", check=True)
+        for partial in (False, True):
+            arguments = ["run", "--plan", str(plan), "--analyzed-root",
+                         str(control / "analyzed"), "--work-root",
+                         str(self.reduce_work), "--output-root",
+                         str(control / ("partial" if partial else "publication"))]
+            if partial:
+                arguments.append("--partial")
+            result = self._reduce(*arguments)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("requires K=10/dof=9 in every mode", result.stderr)
+
+    def test_coherently_rebound_out_of_domain_cell_and_gram_are_refused(self):
+        self.assertEqual(self._scientific_digest(self.oracle),
+                         self.oracle["receipt"]["scientific_content_digest"])
+        for mode, diagnostic in (("domain_cell", "cell key is outside"),
+                                 ("domain_gram", "Gram key is outside")):
+            root, receipt = self._coherent_domain_key_mutant(mode)
+            result = self._reduce("verify", "--root", str(root), "--receipt",
+                                  str(receipt), "--work-root",
+                                  str(self.reduce_work))
+            self.assertEqual(result.returncode, 2)
+            self.assertIn(diagnostic, result.stderr)
+
+    def test_lineage_member_order_digest_and_cross_binding_mutants_fail(self):
+        def rebind(payload):
+            digest = hashlib.sha256(self._canonical(
+                payload["input_lineage"]).encode("ascii")).hexdigest()
+            payload["input_lineage_sha256"] = digest
+            payload["parent_shard_set_digest"] = digest
+
+        def member(metadata, embedded, external):
+            for payload in (metadata, embedded, external):
+                payload["input_lineage"]["sources"][0]["manifest_row"][
+                    "raw_sha256"] = "0" * 64
+                rebind(payload)
+
+        def order(metadata, embedded, external):
+            for payload in (metadata, embedded, external):
+                lineage = payload["input_lineage"]
+                lineage["sources"][0], lineage["sources"][1] = (
+                    lineage["sources"][1], lineage["sources"][0])
+                rebind(payload)
+
+        def digest(unused_metadata, unused_embedded, external):
+            del unused_metadata, unused_embedded
+            external["input_lineage_sha256"] = "0" * 64
+
+        def cross(unused_metadata, embedded, unused_external):
+            del unused_metadata, unused_external
+            embedded["input_lineage_sha256"] = "0" * 64
+
+        cases = (("member", member, "source subset/order digest"),
+                 ("order", order, "source manifest identity differs"),
+                 ("digest", digest, "payload digest"),
+                 ("cross", cross, "digest/cross-binding"))
+        for name, mutation, diagnostic in cases:
+            root, receipt = self._lineage_mutant(name, mutation)
+            result = self._reduce("verify", "--root", str(root), "--receipt",
+                                  str(receipt), "--work-root",
+                                  str(self.reduce_work))
+            self.assertEqual(result.returncode, 2)
+            self.assertIn(diagnostic, result.stderr)
+
+    def test_storage_stress_contract_has_full_release_metadata_shape(self):
+        spec = importlib.util.spec_from_file_location(
+            "reduction_stress_test", str(ROOT / "pipeline/reduce/run.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        analysis, analysis_sha = module.checked_analysis(
+            ROOT / "config/analysis.json")
+        metadata, embedded = module.stress_compact_payloads(
+            analysis, analysis_sha)
+        self.assertEqual(metadata["compact_domains"],
+                         embedded["compact_domains"])
+        self.assertEqual(metadata["input_lineage"],
+                         embedded["input_lineage"])
+        lineage = metadata["input_lineage"]
+        self.assertEqual(lineage["source_count"], 3000)
+        self.assertEqual(lineage["shard_count"], 323)
+        self.assertEqual([source_id for shard in lineage["shards"]
+                          for source_id in shard["source_ids"]],
+                         list(range(3000)))
+        self.assertEqual(module.validate_input_lineage(
+            lineage, metadata["input_lineage_sha256"]),
+            metadata["parent_shard_set_digest"])
+        domains = metadata["compact_domains"]
+        self.assertEqual(len(domains["projection_dictionary"]), 10)
+        self.assertEqual(len(domains["event_gram_dictionary"][
+            "allowed_term_codes"]), 1314)
+        self.assertEqual(len(domains["dynamic_species"][
+            "closure_species_pdgs"]), 202)
+        self.assertEqual(len(domains["dynamic_species"][
+            "t1_all_final_pdgs"]), 202)
+        self.assertEqual(module.validate_compact_domains(
+            domains, analysis, analysis_sha),
+            metadata["compact_domains_sha256"])
 
     def test_configurable_three_class_request_changes_only_downstream_projection(self):
         analysis = json.loads((ROOT / "config/analysis.json").read_text(encoding="utf-8"))
@@ -461,7 +829,8 @@ class ReductionContract(unittest.TestCase):
                               check=True)
         root = next(output.rglob("*.root"))
         compact = self._compact_rows(root)
-        pair_scopes = [item for item in compact["metadata"]["scopes"]
+        pair_scopes = [item for item in compact["metadata"]["compact_domains"][
+            "scope_dictionary"]
                        if item["family"] == "pair"]
         self.assertEqual({item["class_id"] for item in pair_scopes}, {0, 1, 2, 3})
         self.assertNotEqual(sha256(root), sha256(self.compact_root))

@@ -161,6 +161,17 @@ std::string HexDecode(const std::string& value) {
   return result;
 }
 
+std::string HexEncode(const std::string& value) {
+  static constexpr char digits[] = "0123456789abcdef";
+  std::string result;
+  result.reserve(value.size() * 2);
+  for (const unsigned char character : value) {
+    result.push_back(digits[character >> 4U]);
+    result.push_back(digits[character & 0x0fU]);
+  }
+  return result;
+}
+
 double Double(const std::string& value) {
   std::size_t consumed = 0;
   const double result = std::stod(value, &consumed);
@@ -207,6 +218,20 @@ void ReplaceOne(std::string& value, const std::string& target,
     throw std::runtime_error("template placeholder cardinality differs: " + target);
   }
   value.replace(at, target.size(), replacement);
+}
+
+void ReplaceAll(std::string& value, const std::string& target,
+                const std::string& replacement) {
+  std::size_t at = 0;
+  std::size_t count = 0;
+  while ((at = value.find(target, at)) != std::string::npos) {
+    value.replace(at, target.size(), replacement);
+    at += replacement.size();
+    ++count;
+  }
+  if (count == 0) {
+    throw std::runtime_error("template placeholder is absent: " + target);
+  }
 }
 
 std::string DoubleHex(double value) {
@@ -380,6 +405,7 @@ Spec ReadSpec(const std::string& path) {
       "analysis_sha256", "plan_digest", "map_digest", "parent_shard_set_digest",
       "publication_state", "block_count", "activity_bins", "dphi_bins",
       "dphi_low", "dphi_high", "eta_low", "eta_high", "phi_low", "phi_high",
+      "compact_domains_template", "input_lineage", "input_lineage_sha256",
       "metadata_template", "receipt_template"};
   std::set<std::string> observed;
   for (const auto& item : spec.settings) observed.insert(item.first);
@@ -634,14 +660,13 @@ void Reducer::Initialize() {
   dphiLow_ = Double(spec_.settings.at("dphi_low")); dphiHigh_ = Double(spec_.settings.at("dphi_high"));
   etaLow_ = Double(spec_.settings.at("eta_low")); etaHigh_ = Double(spec_.settings.at("eta_high"));
   phiLow_ = Double(spec_.settings.at("phi_low")); phiHigh_ = Double(spec_.settings.at("phi_high"));
-  if (blocks_ <= 0 || activityBins_ != 4096 || dphiBins_ != 100 ||
+  if (blocks_ != 10) {
+    throw std::runtime_error("this reducer release requires K=10/dof=9 in every mode");
+  }
+  if (activityBins_ != 4096 || dphiBins_ != 100 ||
       dphiLow_ != -kPi / 2.0 || dphiHigh_ != 3.0 * kPi / 2.0 ||
       etaLow_ != -4.0 || etaHigh_ != 4.0 || phiLow_ != -kPi || phiHigh_ != kPi) {
     throw std::runtime_error("reduction numerical domain differs");
-  }
-  if (spec_.settings.at("publication_state") == "PUBLICATION_ELIGIBLE" &&
-      blocks_ != 10) {
-    throw std::runtime_error("publication estimator requires Phase-A K=10/dof=9");
   }
   for (const auto& state : spec_.states) {
     if (!stateByPdg_.emplace(state.pdg, state).second) throw std::runtime_error("duplicate state PDG");
@@ -1021,29 +1046,287 @@ std::string Reducer::ScientificDigest()const{
 std::pair<std::string,std::string> Reducer::Write(const std::string& output,const std::string& activityJson,const std::string& dynamicJson,const std::string& estimatorJson,const std::string& scientificDigest){
   std::ostringstream metrics;metrics<<"{\"cells\":"<<cells_.size()<<",\"event_gram\":"<<gram_.size()<<",\"events\":"<<totalEvents_<<",\"input_bytes\":"<<inputBytes_<<",\"sources\":"<<totalSources_<<'}';
   const std::string accountingJson=AccountingJson();
+  std::string domains=HexDecode(spec_.settings.at("compact_domains_template"));
+  ReplaceOne(domains,"\"__DOMAIN_DYNAMIC_SPECIES__\"",dynamicJson);
+  ReplaceAll(domains,"\"__CLOSURE_SPECIES_COUNT__\"",std::to_string(closurePdgs_.size()));
+  ReplaceAll(domains,"\"__T1_SPECIES_COUNT__\"",std::to_string(t1Pdgs_.size()));
+  ReplaceOne(domains,"\"__CLOSURE_BIN_COUNT__\"",std::to_string(12U*closurePdgs_.size()));
+  const std::string domainsSha=Sha(domains);
+  const std::string lineage=HexDecode(spec_.settings.at("input_lineage"));
+  const std::string lineageSha=Sha(lineage);
+  if(lineageSha!=spec_.settings.at("input_lineage_sha256")||lineageSha!=spec_.settings.at("parent_shard_set_digest"))throw std::runtime_error("compact input-lineage binding differs before write");
   std::string metadata=HexDecode(spec_.settings.at("metadata_template")),receipt=HexDecode(spec_.settings.at("receipt_template"));
-  for(auto* target:{&metadata,&receipt}){ReplaceOne(*target,"\"__ACTIVITY_RECEIPTS__\"",activityJson);ReplaceOne(*target,"\"__BLOCK_ACCOUNTING__\"",accountingJson);ReplaceOne(*target,"\"__DYNAMIC_SPECIES__\"",dynamicJson);ReplaceOne(*target,"\"__ESTIMATOR_AUDIT__\"",estimatorJson);ReplaceOne(*target,"\"__METRICS__\"",metrics.str());ReplaceOne(*target,"__SCIENTIFIC_DIGEST__",scientificDigest);}
-  ReplaceOne(receipt,"__ACTIVITY_RECEIPTS_SHA256__",Sha(activityJson));ReplaceOne(receipt,"__BLOCK_ACCOUNTING_SHA256__",Sha(accountingJson));ReplaceOne(receipt,"__DYNAMIC_SPECIES_SHA256__",Sha(dynamicJson));
+  for(auto* target:{&metadata,&receipt}){ReplaceOne(*target,"\"__ACTIVITY_RECEIPTS__\"",activityJson);ReplaceOne(*target,"\"__BLOCK_ACCOUNTING__\"",accountingJson);ReplaceOne(*target,"\"__COMPACT_DOMAINS__\"",domains);ReplaceOne(*target,"__COMPACT_DOMAINS_SHA256__",domainsSha);ReplaceOne(*target,"\"__INPUT_LINEAGE__\"",lineage);ReplaceOne(*target,"\"__ESTIMATOR_AUDIT__\"",estimatorJson);ReplaceOne(*target,"\"__METRICS__\"",metrics.str());ReplaceOne(*target,"__SCIENTIFIC_DIGEST__",scientificDigest);}
+  ReplaceOne(receipt,"__ACTIVITY_RECEIPTS_SHA256__",Sha(activityJson));ReplaceOne(receipt,"__BLOCK_ACCOUNTING_SHA256__",Sha(accountingJson));
   TFile file(output.c_str(),"CREATE","",ROOT::CompressionSettings(ROOT::RCompressionSetting::EAlgorithm::kZSTD,5));if(file.IsZombie())throw std::runtime_error("cannot create staged compact ROOT");
   UInt_t projection=0,scope=0,block=0,bin=0,component=0;Double_t value=0,sumabs=0,rowSumw2=0;ULong64_t fills=0;TTree cells("cells","compact block primitives");cells.SetDirectory(&file);cells.Branch("projection_id",&projection,"projection_id/i");cells.Branch("scope_id",&scope,"scope_id/i");cells.Branch("block",&block,"block/i");cells.Branch("bin",&bin,"bin/i");cells.Branch("component",&component,"component/i");cells.Branch("value",&value,"value/D");cells.Branch("sumabs",&sumabs,"sumabs/D");cells.Branch("row_sumw2",&rowSumw2,"row_sumw2/D");cells.Branch("fills",&fills,"fills/l");cells.SetAutoSave(0);cells.SetAutoFlush(-4*1024*1024);for(const auto& item:cells_){projection=item.first.projection;scope=item.first.scope;block=item.first.block;bin=item.first.bin;component=item.first.component;value=item.second.Value();sumabs=item.second.SumAbs();rowSumw2=item.second.SumW2();fills=item.second.fills;cells.Fill();}
   UInt_t left=0,right=0;Double_t cross=0;TTree gram("event_gram","event-aggregated scalar cross products");gram.SetDirectory(&file);gram.Branch("projection_id",&projection,"projection_id/i");gram.Branch("scope_id",&scope,"scope_id/i");gram.Branch("block",&block,"block/i");gram.Branch("left",&left,"left/i");gram.Branch("right",&right,"right/i");gram.Branch("cross",&cross,"cross/D");gram.SetAutoSave(0);gram.SetAutoFlush(-4*1024*1024);for(const auto& item:gram_){projection=item.first.projection;scope=item.first.scope;block=item.first.block;left=item.first.left;right=item.first.right;cross=item.second.Value();gram.Fill();}
   file.cd();cells.Write();gram.Write();TObjString metadataObject(metadata.c_str());metadataObject.Write("metadata");TObjString receiptObject(receipt.c_str());receiptObject.Write("receipt");file.Close();if(file.IsZombie())throw std::runtime_error("compact ROOT close failed");return{Sha(metadata),Sha(receipt)};
 }
 
-void Reducer::Run(const std::string& output){for(const auto& shard:spec_.shards)InspectShard(shard);for(const auto& shard:spec_.shards)FirstPass(shard);ResolveActivities();MaterializeActivityCells();for(const auto& shard:spec_.shards)SecondPass(shard);FinalizeDynamicCells();const std::string activity=ActivityJson(),accounting=AccountingJson(),dynamic=DynamicJson(),estimator=EstimatorAuditJson(),digest=ScientificDigest();const auto payloadDigests=Write(output,activity,dynamic,estimator,digest);const std::string metadataTemplate=HexDecode(spec_.settings.at("metadata_template"));std::cout<<"REDUCTION_SUMMARY cells="<<cells_.size()<<" event_gram="<<gram_.size()<<" events="<<totalEvents_<<" sources="<<totalSources_<<" input_bytes="<<inputBytes_<<" scientific_digest="<<digest<<" activity_receipts_sha256="<<Sha(activity)<<" block_accounting_sha256="<<Sha(accounting)<<" dynamic_species_sha256="<<Sha(dynamic)<<" analysis_sha256="<<spec_.settings.at("analysis_sha256")<<" plan_digest="<<spec_.settings.at("plan_digest")<<" map_digest="<<spec_.settings.at("map_digest")<<" parent_shard_set_digest="<<spec_.settings.at("parent_shard_set_digest")<<" publication_state="<<spec_.settings.at("publication_state")<<" metadata_sha256="<<payloadDigests.first<<" embedded_receipt_sha256="<<payloadDigests.second<<" build_id="<<JsonStringValue(metadataTemplate,"reducer_build_id")<<'\n';}
+void Reducer::Run(const std::string& output){for(const auto& shard:spec_.shards)InspectShard(shard);for(const auto& shard:spec_.shards)FirstPass(shard);ResolveActivities();MaterializeActivityCells();for(const auto& shard:spec_.shards)SecondPass(shard);FinalizeDynamicCells();const std::string activity=ActivityJson(),accounting=AccountingJson(),dynamic=DynamicJson(),estimator=EstimatorAuditJson(),digest=ScientificDigest();const auto payloadDigests=Write(output,activity,dynamic,estimator,digest);const std::string metadataTemplate=HexDecode(spec_.settings.at("metadata_template"));std::string domains=HexDecode(spec_.settings.at("compact_domains_template"));ReplaceOne(domains,"\"__DOMAIN_DYNAMIC_SPECIES__\"",dynamic);ReplaceAll(domains,"\"__CLOSURE_SPECIES_COUNT__\"",std::to_string(closurePdgs_.size()));ReplaceAll(domains,"\"__T1_SPECIES_COUNT__\"",std::to_string(t1Pdgs_.size()));ReplaceOne(domains,"\"__CLOSURE_BIN_COUNT__\"",std::to_string(12U*closurePdgs_.size()));std::cout<<"REDUCTION_SUMMARY cells="<<cells_.size()<<" event_gram="<<gram_.size()<<" events="<<totalEvents_<<" sources="<<totalSources_<<" input_bytes="<<inputBytes_<<" scientific_digest="<<digest<<" activity_receipts_sha256="<<Sha(activity)<<" block_accounting_sha256="<<Sha(accounting)<<" compact_domains_sha256="<<Sha(domains)<<" input_lineage_sha256="<<spec_.settings.at("input_lineage_sha256")<<" dynamic_species_hex="<<HexEncode(dynamic)<<" analysis_sha256="<<spec_.settings.at("analysis_sha256")<<" plan_digest="<<spec_.settings.at("plan_digest")<<" map_digest="<<spec_.settings.at("map_digest")<<" parent_shard_set_digest="<<spec_.settings.at("parent_shard_set_digest")<<" publication_state="<<spec_.settings.at("publication_state")<<" metadata_sha256="<<payloadDigests.first<<" embedded_receipt_sha256="<<payloadDigests.second<<" build_id="<<JsonStringValue(metadataTemplate,"reducer_build_id")<<'\n';}
 
-std::string ExtractJsonValue(const std::string& json,const std::string& key){const std::string needle="\""+key+"\":";const auto at=json.find(needle);if(at==std::string::npos)throw std::runtime_error("compact receipt lacks "+key);std::size_t start=at+needle.size();if(start>=json.size())throw std::runtime_error("compact receipt value is truncated");if(json[start]=='\"'){std::size_t end=start+1;bool escaped=false;for(;end<json.size();++end){if(!escaped&&json[end]=='\"')return json.substr(start,end-start+1);escaped=!escaped&&json[end]=='\\';if(json[end]!='\\')escaped=false;}throw std::runtime_error("unterminated JSON string");}if(json[start]=='['||json[start]=='{'){const char open=json[start],close=open=='['?']':'}';int depth=0;bool quoted=false,escaped=false;for(std::size_t end=start;end<json.size();++end){const char c=json[end];if(quoted){if(!escaped&&c=='\"')quoted=false;escaped=!escaped&&c=='\\';if(c!='\\')escaped=false;continue;}if(c=='\"'){quoted=true;continue;}if(c==open)++depth;else if(c==close&&--depth==0)return json.substr(start,end-start+1);}throw std::runtime_error("unterminated JSON container");}const auto end=json.find_first_of(",}",start);return json.substr(start,end-start);}
+std::string ExtractJsonValue(const std::string& json,const std::string& key) {
+  if (json.size() < 2 || json.front() != '{' || json.back() != '}') {
+    throw std::runtime_error("compact JSON object type differs");
+  }
+  int depth = 0;
+  for (std::size_t index = 0; index < json.size(); ++index) {
+    const char character = json[index];
+    if (character == '{' || character == '[') {
+      ++depth;
+      continue;
+    }
+    if (character == '}' || character == ']') {
+      --depth;
+      continue;
+    }
+    if (character != '"') continue;
+    std::size_t end = index + 1;
+    bool escaped = false;
+    for (; end < json.size(); ++end) {
+      if (!escaped && json[end] == '"') break;
+      escaped = !escaped && json[end] == '\\';
+      if (json[end] != '\\') escaped = false;
+    }
+    if (end >= json.size()) throw std::runtime_error("unterminated JSON string");
+    const bool member = depth == 1 && json.substr(index + 1, end - index - 1) == key &&
+                        end + 1 < json.size() && json[end + 1] == ':';
+    index = end;
+    if (!member) continue;
+    const std::size_t start = end + 2;
+    if (start >= json.size()) throw std::runtime_error("compact JSON value is truncated");
+    if (json[start] == '"') {
+      std::size_t valueEnd = start + 1;
+      escaped = false;
+      for (; valueEnd < json.size(); ++valueEnd) {
+        if (!escaped && json[valueEnd] == '"') {
+          return json.substr(start, valueEnd - start + 1);
+        }
+        escaped = !escaped && json[valueEnd] == '\\';
+        if (json[valueEnd] != '\\') escaped = false;
+      }
+      throw std::runtime_error("unterminated JSON string value");
+    }
+    if (json[start] == '[' || json[start] == '{') {
+      int containerDepth = 0;
+      bool quoted = false;
+      escaped = false;
+      for (std::size_t valueEnd = start; valueEnd < json.size(); ++valueEnd) {
+        const char valueCharacter = json[valueEnd];
+        if (quoted) {
+          if (!escaped && valueCharacter == '"') quoted = false;
+          escaped = !escaped && valueCharacter == '\\';
+          if (valueCharacter != '\\') escaped = false;
+          continue;
+        }
+        if (valueCharacter == '"') quoted = true;
+        else if (valueCharacter == '[' || valueCharacter == '{') ++containerDepth;
+        else if ((valueCharacter == ']' || valueCharacter == '}') &&
+                 --containerDepth == 0) {
+          return json.substr(start, valueEnd - start + 1);
+        }
+      }
+      throw std::runtime_error("unterminated JSON container value");
+    }
+    const auto valueEnd = json.find_first_of(",}", start);
+    if (valueEnd == std::string::npos) throw std::runtime_error("unterminated JSON scalar value");
+    return json.substr(start, valueEnd - start);
+  }
+  throw std::runtime_error("compact JSON object lacks " + key);
+}
 std::string JsonStringValue(const std::string& json,const std::string& key){const std::string value=ExtractJsonValue(json,key);if(value.size()<2||value.front()!='\"'||value.back()!='\"')throw std::runtime_error("compact receipt string type differs");return value.substr(1,value.size()-2);}
 std::uint64_t JsonUnsignedValue(const std::string& json,const std::string& key){const std::string value=ExtractJsonValue(json,key);const long long parsed=Integer(value);if(parsed<0)throw std::runtime_error("negative compact metric");return static_cast<std::uint64_t>(parsed);}
 
+std::vector<std::string> JsonArrayElements(const std::string& json,
+                                           const std::string& key) {
+  const std::string value = ExtractJsonValue(json, key);
+  if (value.size() < 2 || value.front() != '[' || value.back() != ']') {
+    throw std::runtime_error("compact JSON array type differs: " + key);
+  }
+  std::vector<std::string> result;
+  std::size_t start = 1;
+  int depth = 0;
+  bool quoted = false;
+  bool escaped = false;
+  for (std::size_t index = 1; index + 1 < value.size(); ++index) {
+    const char character = value[index];
+    if (quoted) {
+      if (!escaped && character == '"') quoted = false;
+      escaped = !escaped && character == '\\';
+      if (character != '\\') escaped = false;
+      continue;
+    }
+    if (character == '"') {
+      quoted = true;
+    } else if (character == '[' || character == '{') {
+      ++depth;
+    } else if (character == ']' || character == '}') {
+      --depth;
+    } else if (character == ',' && depth == 0) {
+      if (index == start) throw std::runtime_error("empty compact JSON array element");
+      result.push_back(value.substr(start, index - start));
+      start = index + 1;
+    }
+  }
+  if (start + 1 < value.size()) result.push_back(value.substr(start, value.size() - start - 1));
+  return result;
+}
+
+std::vector<std::uint64_t> JsonUnsignedArray(const std::string& json,
+                                             const std::string& key) {
+  std::vector<std::uint64_t> result;
+  for (const auto& element : JsonArrayElements(json, key)) {
+    const long long value = Integer(element);
+    if (value < 0) throw std::runtime_error("negative compact JSON array value");
+    result.push_back(static_cast<std::uint64_t>(value));
+  }
+  return result;
+}
+
+struct MaterializedDomain {
+  std::set<UInt_t> scopes;
+  std::set<UInt_t> components;
+  std::uint64_t bins = 0;
+};
+
+struct CompactDomains {
+  std::set<UInt_t> blocks;
+  std::map<UInt_t, MaterializedDomain> cells;
+  UInt_t gramProjection = 0;
+  std::set<UInt_t> gramScopes;
+  std::set<std::uint64_t> gramTermCodes;
+  std::uint64_t gramTermMultiplier = 0;
+  std::string payload;
+  std::string lineage;
+  std::string dynamicSpecies;
+  std::uint64_t lineageShards = 0;
+  std::uint64_t lineageSources = 0;
+};
+
+CompactDomains ReadCompactDomains(const std::string& metadata,
+                                  const std::string& receipt) {
+  CompactDomains result;
+  result.payload = ExtractJsonValue(metadata, "compact_domains");
+  result.lineage = ExtractJsonValue(metadata, "input_lineage");
+  if (ExtractJsonValue(receipt, "compact_domains") != result.payload ||
+      ExtractJsonValue(receipt, "input_lineage") != result.lineage) {
+    throw std::runtime_error("compact contract payload cross-binding differs");
+  }
+  const std::string domainsSha = Sha(result.payload);
+  const std::string lineageSha = Sha(result.lineage);
+  if (JsonStringValue(metadata, "compact_domains_sha256") != domainsSha ||
+      JsonStringValue(receipt, "compact_domains_sha256") != domainsSha ||
+      JsonStringValue(metadata, "input_lineage_sha256") != lineageSha ||
+      JsonStringValue(receipt, "input_lineage_sha256") != lineageSha ||
+      JsonStringValue(metadata, "parent_shard_set_digest") != lineageSha ||
+      JsonStringValue(receipt, "parent_shard_set_digest") != lineageSha) {
+    throw std::runtime_error("compact contract payload digest/cross-binding differs");
+  }
+  if (JsonStringValue(result.payload, "domain_schema") !=
+      "hadronization_compact_domain_contract_v1" ||
+      JsonStringValue(result.lineage, "lineage_schema") !=
+      "hadronization_compact_input_lineage_v1") {
+    throw std::runtime_error("compact domain/lineage schema differs");
+  }
+  const auto blockValues = JsonUnsignedArray(result.payload, "block_ids");
+  if (blockValues.size() != 10) throw std::runtime_error("compact K10 block domain differs");
+  for (std::size_t index = 0; index < blockValues.size(); ++index) {
+    if (blockValues[index] != index + 1) throw std::runtime_error("compact K10 block order differs");
+    result.blocks.insert(static_cast<UInt_t>(blockValues[index]));
+  }
+  const auto projections = JsonArrayElements(result.payload, "projection_dictionary");
+  if (projections.size() != 10) throw std::runtime_error("compact projection dictionary count differs");
+  for (std::size_t index = 0; index < projections.size(); ++index) {
+    const auto& projection = projections[index];
+    const auto identifier = JsonUnsignedValue(projection, "id");
+    if (identifier != index + 1 || identifier > std::numeric_limits<UInt_t>::max()) {
+      throw std::runtime_error("compact projection dictionary ID/order differs");
+    }
+    MaterializedDomain domain;
+    domain.bins = JsonUnsignedValue(projection, "bin_count");
+    for (const auto value : JsonUnsignedArray(projection, "scope_ids")) {
+      if (value > std::numeric_limits<UInt_t>::max()) throw std::runtime_error("compact scope ID overflows");
+      domain.scopes.insert(static_cast<UInt_t>(value));
+    }
+    for (const auto value : JsonUnsignedArray(projection, "component_ids")) {
+      if (value > std::numeric_limits<UInt_t>::max()) throw std::runtime_error("compact component ID overflows");
+      domain.components.insert(static_cast<UInt_t>(value));
+    }
+    if (domain.scopes.empty() || domain.components.empty() ||
+        !result.cells.emplace(static_cast<UInt_t>(identifier), std::move(domain)).second) {
+      throw std::runtime_error("compact projection materialized domain differs");
+    }
+  }
+  const std::string gram = ExtractJsonValue(result.payload, "event_gram_dictionary");
+  result.gramProjection = static_cast<UInt_t>(JsonUnsignedValue(gram, "projection_id"));
+  result.gramTermMultiplier = JsonUnsignedValue(gram, "term_code_multiplier");
+  for (const auto value : JsonUnsignedArray(gram, "scope_ids")) {
+    if (value > std::numeric_limits<UInt_t>::max()) throw std::runtime_error("compact Gram scope overflows");
+    result.gramScopes.insert(static_cast<UInt_t>(value));
+  }
+  const auto componentIds = JsonUnsignedArray(gram, "component_ids");
+  bool componentOrder = componentIds.size() == 312;
+  for (std::size_t index = 0; index < componentIds.size(); ++index) {
+    if (componentIds[index] != index) componentOrder = false;
+  }
+  if (!componentOrder) {
+    throw std::runtime_error("compact Gram component dictionary differs");
+  }
+  for (const auto value : JsonUnsignedArray(gram, "allowed_term_codes")) {
+    result.gramTermCodes.insert(value);
+  }
+  if (result.gramProjection != 2 || result.gramScopes.empty() ||
+      result.gramTermMultiplier != 512 || result.gramTermCodes.size() != 1314) {
+    throw std::runtime_error("compact Gram materialized domain differs");
+  }
+  result.dynamicSpecies = ExtractJsonValue(result.payload, "dynamic_species");
+  const auto shards = JsonArrayElements(result.lineage, "shards");
+  const auto sources = JsonArrayElements(result.lineage, "sources");
+  if (JsonUnsignedValue(result.lineage, "shard_count") != shards.size() ||
+      JsonUnsignedValue(result.lineage, "source_count") != sources.size() ||
+      shards.empty() || sources.empty()) {
+    throw std::runtime_error("compact lineage count differs");
+  }
+  std::vector<std::uint64_t> orderedSources;
+  for (std::size_t index = 0; index < shards.size(); ++index) {
+    std::ostringstream expectedName;
+    expectedName << "shard-" << std::setw(4) << std::setfill('0') << index
+                 << ".root";
+    std::ostringstream expectedReceipt;
+    expectedReceipt << "shard-" << std::setw(4) << std::setfill('0') << index
+                    << ".json";
+    if (JsonUnsignedValue(shards[index], "ordinal") != index ||
+        JsonStringValue(shards[index], "root_name") != expectedName.str() ||
+        JsonStringValue(shards[index], "receipt_name") != expectedReceipt.str()) {
+      throw std::runtime_error("compact lineage shard order/name differs");
+    }
+    const auto members = JsonUnsignedArray(shards[index], "source_ids");
+    orderedSources.insert(orderedSources.end(), members.begin(), members.end());
+  }
+  if (orderedSources.size() != sources.size()) {
+    throw std::runtime_error("compact lineage source membership count differs");
+  }
+  for (std::size_t index = 0; index < sources.size(); ++index) {
+    if (orderedSources[index] != index ||
+        JsonUnsignedValue(sources[index], "source_id") != index) {
+      throw std::runtime_error("compact lineage source membership/order differs");
+    }
+  }
+  result.lineageShards = shards.size();
+  result.lineageSources = sources.size();
+  return result;
+}
+
 void VerifyCompact(const std::string& path){
   TFile file(path.c_str(),"READ");if(file.IsZombie())throw std::runtime_error("compact ROOT is zombie/unreadable");if(file.GetCompressionAlgorithm()!=static_cast<int>(ROOT::RCompressionSetting::EAlgorithm::kZSTD)||file.GetCompressionLevel()!=5)throw std::runtime_error("compact ROOT compression differs");std::map<std::string,std::pair<std::string,int>> keys;TIter iterator(file.GetListOfKeys());while(auto* object=iterator()){auto* key=dynamic_cast<TKey*>(object);if(key==nullptr||!keys.emplace(key->GetName(),std::make_pair(key->GetClassName(),key->GetCycle())).second)throw std::runtime_error("compact duplicate ROOT key/cycle");}const std::map<std::string,std::pair<std::string,int>> expected{{"cells",{"TTree",1}},{"event_gram",{"TTree",1}},{"metadata",{"TObjString",1}},{"receipt",{"TObjString",1}}};if(keys!=expected)throw std::runtime_error("compact exact object set/cycle differs");auto* cells=dynamic_cast<TTree*>(file.Get("cells"));auto* gram=dynamic_cast<TTree*>(file.Get("event_gram"));const std::string cellsSchema="projection_id:UInt_t,scope_id:UInt_t,block:UInt_t,bin:UInt_t,component:UInt_t,value:Double_t,sumabs:Double_t,row_sumw2:Double_t,fills:ULong64_t";const std::string gramSchema="projection_id:UInt_t,scope_id:UInt_t,block:UInt_t,left:UInt_t,right:UInt_t,cross:Double_t";if(TreeSchema(cells)!=cellsSchema||TreeSchema(gram)!=gramSchema)throw std::runtime_error("compact table branch order/set differs");
-  UInt_t projection=0,scope=0,block=0,bin=0,component=0;Double_t value=0,sumabs=0,rowSumw2=0;ULong64_t fills=0;Branch(cells,"projection_id",&projection);Branch(cells,"scope_id",&scope);Branch(cells,"block",&block);Branch(cells,"bin",&bin);Branch(cells,"component",&component);Branch(cells,"value",&value);Branch(cells,"sumabs",&sumabs);Branch(cells,"row_sumw2",&rowSumw2);Branch(cells,"fills",&fills);Sha256 digest;digest.Update(std::string("cells\0",6));std::tuple<UInt_t,UInt_t,UInt_t,UInt_t,UInt_t> previousCell{};bool first=true;for(Long64_t row=0;row<cells->GetEntries();++row){if(cells->GetEntry(row)<=0)throw std::runtime_error("cannot read compact cell");const auto key=std::make_tuple(projection,scope,block,bin,component);if((!first&&key<=previousCell)||block==0||!std::isfinite(value)||!std::isfinite(sumabs)||!std::isfinite(rowSumw2)||sumabs<0||rowSumw2<0||fills==0||sumabs+64*std::numeric_limits<double>::epsilon()*std::max(1.0,sumabs)<std::abs(value))throw std::runtime_error("compact cell natural key/numerical domain differs");first=false;previousCell=key;for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(bin),std::to_string(component),DoubleHex(value),DoubleHex(sumabs),DoubleHex(rowSumw2),std::to_string(fills)})DigestField(digest,field);}
-  UInt_t left=0,right=0;Double_t cross=0;Branch(gram,"projection_id",&projection);Branch(gram,"scope_id",&scope);Branch(gram,"block",&block);Branch(gram,"left",&left);Branch(gram,"right",&right);Branch(gram,"cross",&cross);digest.Update(std::string("event_gram\0",11));std::tuple<UInt_t,UInt_t,UInt_t,UInt_t,UInt_t> previousGram{};first=true;for(Long64_t row=0;row<gram->GetEntries();++row){if(gram->GetEntry(row)<=0)throw std::runtime_error("cannot read compact Gram row");const auto key=std::make_tuple(projection,scope,block,left,right);if((!first&&key<=previousGram)||block==0||left>right||!std::isfinite(cross))throw std::runtime_error("compact Gram natural key/numerical domain differs");first=false;previousGram=key;for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(left),std::to_string(right),DoubleHex(cross)})DigestField(digest,field);}
-  const std::string scientific=digest.FinalHex();auto* metadata=dynamic_cast<TObjString*>(file.Get("metadata"));auto* receiptObject=dynamic_cast<TObjString*>(file.Get("receipt"));if(metadata==nullptr||receiptObject==nullptr)throw std::runtime_error("compact metadata objects are absent");const std::string metadataText=metadata->GetString().Data(),receipt=receiptObject->GetString().Data();if(metadataText.find("\"schema\":\""+std::string(kCompactSchema)+"\"")==std::string::npos||JsonStringValue(metadataText,"scientific_content_digest")!=scientific||JsonStringValue(receipt,"scientific_content_digest")!=scientific)throw std::runtime_error("compact scientific digest differs");
+  auto* metadata=dynamic_cast<TObjString*>(file.Get("metadata"));auto* receiptObject=dynamic_cast<TObjString*>(file.Get("receipt"));if(metadata==nullptr||receiptObject==nullptr)throw std::runtime_error("compact metadata objects are absent");const std::string metadataText=metadata->GetString().Data(),receipt=receiptObject->GetString().Data();const CompactDomains domains=ReadCompactDomains(metadataText,receipt);
+  UInt_t projection=0,scope=0,block=0,bin=0,component=0;Double_t value=0,sumabs=0,rowSumw2=0;ULong64_t fills=0;Branch(cells,"projection_id",&projection);Branch(cells,"scope_id",&scope);Branch(cells,"block",&block);Branch(cells,"bin",&bin);Branch(cells,"component",&component);Branch(cells,"value",&value);Branch(cells,"sumabs",&sumabs);Branch(cells,"row_sumw2",&rowSumw2);Branch(cells,"fills",&fills);Sha256 digest;digest.Update(std::string("cells\0",6));std::tuple<UInt_t,UInt_t,UInt_t,UInt_t,UInt_t> previousCell{};bool first=true;for(Long64_t row=0;row<cells->GetEntries();++row){if(cells->GetEntry(row)<=0)throw std::runtime_error("cannot read compact cell");const auto key=std::make_tuple(projection,scope,block,bin,component);const auto declared=domains.cells.find(projection);const bool outside=declared==domains.cells.end()||declared->second.scopes.count(scope)==0||domains.blocks.count(block)==0||bin>=declared->second.bins||declared->second.components.count(component)==0;if((!first&&key<=previousCell)||outside||!std::isfinite(value)||!std::isfinite(sumabs)||!std::isfinite(rowSumw2)||sumabs<0||rowSumw2<0||fills==0||sumabs+64*std::numeric_limits<double>::epsilon()*std::max(1.0,sumabs)<std::abs(value))throw std::runtime_error(outside?"compact cell key is outside the exact declared domain":"compact cell natural key/numerical domain differs");first=false;previousCell=key;for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(bin),std::to_string(component),DoubleHex(value),DoubleHex(sumabs),DoubleHex(rowSumw2),std::to_string(fills)})DigestField(digest,field);}
+  UInt_t left=0,right=0;Double_t cross=0;Branch(gram,"projection_id",&projection);Branch(gram,"scope_id",&scope);Branch(gram,"block",&block);Branch(gram,"left",&left);Branch(gram,"right",&right);Branch(gram,"cross",&cross);digest.Update(std::string("event_gram\0",11));std::tuple<UInt_t,UInt_t,UInt_t,UInt_t,UInt_t> previousGram{};first=true;for(Long64_t row=0;row<gram->GetEntries();++row){if(gram->GetEntry(row)<=0)throw std::runtime_error("cannot read compact Gram row");const auto key=std::make_tuple(projection,scope,block,left,right);const std::uint64_t term=static_cast<std::uint64_t>(left)*domains.gramTermMultiplier+right;const bool outside=projection!=domains.gramProjection||domains.gramScopes.count(scope)==0||domains.blocks.count(block)==0||left>right||domains.gramTermCodes.count(term)==0;if((!first&&key<=previousGram)||outside||!std::isfinite(cross))throw std::runtime_error(outside?"compact Gram key is outside the exact declared domain":"compact Gram natural key/numerical domain differs");first=false;previousGram=key;for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(left),std::to_string(right),DoubleHex(cross)})DigestField(digest,field);}
+  const std::string scientific=digest.FinalHex();if(metadataText.find("\"schema\":\""+std::string(kCompactSchema)+"\"")==std::string::npos||JsonStringValue(metadataText,"scientific_content_digest")!=scientific||JsonStringValue(receipt,"scientific_content_digest")!=scientific)throw std::runtime_error("compact scientific digest differs");
   const std::string analysisSha=JsonStringValue(metadataText,"analysis_request_sha256"),planDigest=JsonStringValue(metadataText,"parent_plan_digest"),mapDigest=JsonStringValue(metadataText,"parent_map_digest"),parentDigest=JsonStringValue(metadataText,"parent_shard_set_digest"),publicationState=JsonStringValue(metadataText,"publication_state"),buildId=JsonStringValue(metadataText,"reducer_build_id");
   if(JsonStringValue(receipt,"analysis_request_sha256")!=analysisSha||JsonStringValue(receipt,"parent_plan_digest")!=planDigest||JsonStringValue(receipt,"parent_map_digest")!=mapDigest||JsonStringValue(receipt,"parent_shard_set_digest")!=parentDigest||JsonStringValue(receipt,"state")!=publicationState||JsonStringValue(receipt,"reducer_build_id")!=buildId||JsonStringValue(receipt,"estimator_policy_id")!=HR::kEstimatorPolicy)throw std::runtime_error("compact embedded identity binding differs");
-  const std::string activity=ExtractJsonValue(receipt,"activity_receipts"),accounting=ExtractJsonValue(receipt,"block_accounting"),dynamic=ExtractJsonValue(receipt,"dynamic_species");if(JsonStringValue(receipt,"activity_receipts_sha256")!=Sha(activity)||JsonStringValue(receipt,"block_accounting_sha256")!=Sha(accounting)||JsonStringValue(receipt,"dynamic_species_sha256")!=Sha(dynamic)||ExtractJsonValue(metadataText,"activity_receipts")!=activity||ExtractJsonValue(metadataText,"block_accounting")!=accounting||ExtractJsonValue(metadataText,"dynamic_species")!=dynamic)throw std::runtime_error("compact metadata payload digest differs");const std::string metrics=ExtractJsonValue(receipt,"metrics");const auto eventCount=JsonUnsignedValue(metrics,"events"),sourceCount=JsonUnsignedValue(metrics,"sources"),inputBytes=JsonUnsignedValue(metrics,"input_bytes");if(JsonUnsignedValue(metrics,"cells")!=static_cast<std::uint64_t>(cells->GetEntries())||JsonUnsignedValue(metrics,"event_gram")!=static_cast<std::uint64_t>(gram->GetEntries()))throw std::runtime_error("compact metric row counts differ");std::cout<<"REDUCTION_SUMMARY cells="<<cells->GetEntries()<<" event_gram="<<gram->GetEntries()<<" events="<<eventCount<<" sources="<<sourceCount<<" input_bytes="<<inputBytes<<" scientific_digest="<<scientific<<" activity_receipts_sha256="<<Sha(activity)<<" block_accounting_sha256="<<Sha(accounting)<<" dynamic_species_sha256="<<Sha(dynamic)<<" analysis_sha256="<<analysisSha<<" plan_digest="<<planDigest<<" map_digest="<<mapDigest<<" parent_shard_set_digest="<<parentDigest<<" publication_state="<<publicationState<<" metadata_sha256="<<Sha(metadataText)<<" embedded_receipt_sha256="<<Sha(receipt)<<" build_id="<<buildId<<'\n';
+  const std::string activity=ExtractJsonValue(receipt,"activity_receipts"),accounting=ExtractJsonValue(receipt,"block_accounting");if(JsonStringValue(receipt,"activity_receipts_sha256")!=Sha(activity)||JsonStringValue(receipt,"block_accounting_sha256")!=Sha(accounting)||ExtractJsonValue(metadataText,"activity_receipts")!=activity||ExtractJsonValue(metadataText,"block_accounting")!=accounting)throw std::runtime_error("compact metadata payload digest differs");const std::string metrics=ExtractJsonValue(receipt,"metrics");const auto eventCount=JsonUnsignedValue(metrics,"events"),sourceCount=JsonUnsignedValue(metrics,"sources"),inputBytes=JsonUnsignedValue(metrics,"input_bytes");if(JsonUnsignedValue(metrics,"cells")!=static_cast<std::uint64_t>(cells->GetEntries())||JsonUnsignedValue(metrics,"event_gram")!=static_cast<std::uint64_t>(gram->GetEntries())||sourceCount!=domains.lineageSources)throw std::runtime_error("compact metric row/lineage counts differ");std::cout<<"REDUCTION_SUMMARY cells="<<cells->GetEntries()<<" event_gram="<<gram->GetEntries()<<" events="<<eventCount<<" sources="<<sourceCount<<" input_bytes="<<inputBytes<<" scientific_digest="<<scientific<<" activity_receipts_sha256="<<Sha(activity)<<" block_accounting_sha256="<<Sha(accounting)<<" compact_domains_sha256="<<Sha(domains.payload)<<" input_lineage_sha256="<<Sha(domains.lineage)<<" dynamic_species_hex="<<HexEncode(domains.dynamicSpecies)<<" analysis_sha256="<<analysisSha<<" plan_digest="<<planDigest<<" map_digest="<<mapDigest<<" parent_shard_set_digest="<<parentDigest<<" publication_state="<<publicationState<<" metadata_sha256="<<Sha(metadataText)<<" embedded_receipt_sha256="<<Sha(receipt)<<" build_id="<<buildId<<'\n';
 }
 
 std::uint64_t StressRandom(std::uint64_t& state) {
@@ -1058,40 +1341,103 @@ double StressUnit(std::uint64_t& state) {
   return static_cast<double>(StressRandom(state) >> 11U) * 0x1.0p-53;
 }
 
-void WriteStressCompact(const std::string& output) {
+std::pair<std::string,std::string> ReadStressSpec(const std::string& path) {
+  std::ifstream input(path);
+  if (!input) throw std::runtime_error("cannot open compact stress spec");
+  std::vector<std::string> lines;
+  for (std::string line; std::getline(input, line);) lines.push_back(line);
+  if (lines.size() != 4 ||
+      lines[0] != "hadronization_compact_stress_spec_v1" ||
+      lines[3] != "END") {
+    throw std::runtime_error("compact stress spec framing differs");
+  }
+  const auto metadata = Split(lines[1]);
+  const auto receipt = Split(lines[2]);
+  if (metadata.size() != 2 || metadata[0] != "METADATA" ||
+      receipt.size() != 2 || receipt[0] != "RECEIPT") {
+    throw std::runtime_error("compact stress spec payload differs");
+  }
+  return {HexDecode(metadata[1]), HexDecode(receipt[1])};
+}
+
+void WriteStressCompact(const std::string& specPath, const std::string& output) {
   constexpr std::uint64_t cellCount = 1664280;
   constexpr std::uint64_t gramCount = 946080;
+  auto templates = ReadStressSpec(specPath);
+  const CompactDomains domains = ReadCompactDomains(templates.first,
+                                                      templates.second);
   TFile file(output.c_str(), "CREATE", "",
              ROOT::CompressionSettings(
                  ROOT::RCompressionSetting::EAlgorithm::kZSTD, 5));
   if (file.IsZombie()) throw std::runtime_error("cannot create stress compact ROOT");
   Sha256 digest;
   digest.Update(std::string("cells\0", 6));
-  UInt_t projection=2,scope=0,block=0,bin=0,component=0;
+  UInt_t projection=0,scope=0,block=0,bin=0,component=0;
   Double_t value=0,sumabs=0,rowSumw2=0;
   ULong64_t fills=0;
   TTree cells("cells", "compact block primitives");
   cells.SetDirectory(&file);
   cells.Branch("projection_id",&projection,"projection_id/i");cells.Branch("scope_id",&scope,"scope_id/i");cells.Branch("block",&block,"block/i");cells.Branch("bin",&bin,"bin/i");cells.Branch("component",&component,"component/i");cells.Branch("value",&value,"value/D");cells.Branch("sumabs",&sumabs,"sumabs/D");cells.Branch("row_sumw2",&rowSumw2,"row_sumw2/D");cells.Branch("fills",&fills,"fills/l");cells.SetAutoSave(0);cells.SetAutoFlush(-4*1024*1024);
   std::uint64_t randomState=0x5245445543453155ULL;
-  for(std::uint64_t row=0;row<cellCount;++row){scope=static_cast<UInt_t>(row/1000000ULL);const std::uint64_t withinScope=row%1000000ULL;block=static_cast<UInt_t>(withinScope/100000ULL+1ULL);const std::uint64_t withinBlock=withinScope%100000ULL;bin=static_cast<UInt_t>(withinBlock/2ULL);component=static_cast<UInt_t>(withinBlock%2ULL);value=2.0*StressUnit(randomState)-1.0;sumabs=std::abs(value)+0.01*StressUnit(randomState)+1e-12;rowSumw2=value*value+0.01*StressUnit(randomState)+1e-12;fills=1ULL+StressRandom(randomState)%17ULL;cells.Fill();for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(bin),std::to_string(component),DoubleHex(value),DoubleHex(sumabs),DoubleHex(rowSumw2),std::to_string(fills)})DigestField(digest,field);}
-  std::vector<std::pair<UInt_t,UInt_t>> terms;terms.reserve(1314);for(UInt_t left=0;left<51&&terms.size()<1314;++left)for(UInt_t right=left;right<51&&terms.size()<1314;++right)terms.push_back({left,right});
+  std::uint64_t cellRows = 0;
+  for (const auto& declared : domains.cells) {
+    projection = declared.first;
+    for (const UInt_t declaredScope : declared.second.scopes) {
+      scope = declaredScope;
+      for (const UInt_t declaredBlock : domains.blocks) {
+        block = declaredBlock;
+        for (std::uint64_t declaredBin = 0;
+             declaredBin < declared.second.bins; ++declaredBin) {
+          bin = static_cast<UInt_t>(declaredBin);
+          for (const UInt_t declaredComponent : declared.second.components) {
+            component = declaredComponent;
+            value=2.0*StressUnit(randomState)-1.0;sumabs=std::abs(value)+0.01*StressUnit(randomState)+1e-12;rowSumw2=value*value+0.01*StressUnit(randomState)+1e-12;fills=1ULL+StressRandom(randomState)%17ULL;cells.Fill();for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(bin),std::to_string(component),DoubleHex(value),DoubleHex(sumabs),DoubleHex(rowSumw2),std::to_string(fills)})DigestField(digest,field);
+            if (++cellRows == cellCount) break;
+          }
+          if (cellRows == cellCount) break;
+        }
+        if (cellRows == cellCount) break;
+      }
+      if (cellRows == cellCount) break;
+    }
+    if (cellRows == cellCount) break;
+  }
+  if (cellRows != cellCount) {
+    throw std::runtime_error("compact stress cell domain is too small");
+  }
   digest.Update(std::string("event_gram\0",11));
   UInt_t left=0,right=0;Double_t cross=0;
   TTree gram("event_gram","event-aggregated scalar cross products");gram.SetDirectory(&file);gram.Branch("projection_id",&projection,"projection_id/i");gram.Branch("scope_id",&scope,"scope_id/i");gram.Branch("block",&block,"block/i");gram.Branch("left",&left,"left/i");gram.Branch("right",&right,"right/i");gram.Branch("cross",&cross,"cross/D");gram.SetAutoSave(0);gram.SetAutoFlush(-4*1024*1024);
-  for(std::uint64_t row=0;row<gramCount;++row){scope=static_cast<UInt_t>(row/13140ULL);const std::uint64_t withinScope=row%13140ULL;block=static_cast<UInt_t>(withinScope/1314ULL+1ULL);const auto& term=terms.at(static_cast<std::size_t>(withinScope%1314ULL));left=term.first;right=term.second;cross=2.0*StressUnit(randomState)-1.0;gram.Fill();for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(left),std::to_string(right),DoubleHex(cross)})DigestField(digest,field);}
+  projection = domains.gramProjection;
+  std::uint64_t gramRows = 0;
+  for (const UInt_t declaredScope : domains.gramScopes) {
+    scope = declaredScope;
+    for (const UInt_t declaredBlock : domains.blocks) {
+      block = declaredBlock;
+      for (const std::uint64_t term : domains.gramTermCodes) {
+        left = static_cast<UInt_t>(term / domains.gramTermMultiplier);
+        right = static_cast<UInt_t>(term % domains.gramTermMultiplier);
+        cross=2.0*StressUnit(randomState)-1.0;gram.Fill();for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(left),std::to_string(right),DoubleHex(cross)})DigestField(digest,field);
+        if (++gramRows == gramCount) break;
+      }
+      if (gramRows == gramCount) break;
+    }
+    if (gramRows == gramCount) break;
+  }
+  if (gramRows != gramCount) {
+    throw std::runtime_error("compact stress Gram domain is too small");
+  }
   const std::string scientific=digest.FinalHex();
-  const std::string activity="[]",accounting="{\"blocks\":[],\"summation\":\"deterministic high-occupancy stress\"}",dynamic="{}";
-  const std::string metrics="{\"cells\":1664280,\"event_gram\":946080,\"events\":0,\"input_bytes\":0,\"sources\":0}";
-  const std::string stressIdentity=Sha("deterministic_high_occupancy_stress_v1");
-  const std::string metadata="{\"activity_receipts\":"+activity+",\"analysis_request_sha256\":\""+stressIdentity+"\",\"block_accounting\":"+accounting+",\"dynamic_species\":"+dynamic+",\"metrics\":"+metrics+",\"parent_map_digest\":\""+stressIdentity+"\",\"parent_plan_digest\":\""+stressIdentity+"\",\"parent_shard_set_digest\":\""+stressIdentity+"\",\"publication_state\":\"NONPUBLICATION_PARTIAL\",\"reducer_build_id\":\""+stressIdentity+"\",\"schema\":\""+kCompactSchema+"\",\"scientific_content_digest\":\""+scientific+"\"}";
-  const std::string receipt="{\"activity_receipts\":"+activity+",\"activity_receipts_sha256\":\""+Sha(activity)+"\",\"analysis_request_sha256\":\""+stressIdentity+"\",\"block_accounting\":"+accounting+",\"block_accounting_sha256\":\""+Sha(accounting)+"\",\"dynamic_species\":"+dynamic+",\"dynamic_species_sha256\":\""+Sha(dynamic)+"\",\"estimator_policy_id\":\""+HR::kEstimatorPolicy+"\",\"metrics\":"+metrics+",\"parent_map_digest\":\""+stressIdentity+"\",\"parent_plan_digest\":\""+stressIdentity+"\",\"parent_shard_set_digest\":\""+stressIdentity+"\",\"reducer_build_id\":\""+stressIdentity+"\",\"scientific_content_digest\":\""+scientific+"\",\"state\":\"NONPUBLICATION_PARTIAL\"}";
+  std::string metadata = templates.first;
+  std::string receipt = templates.second;
+  ReplaceOne(metadata, "\"__SCIENTIFIC_DIGEST__\"", "\""+scientific+"\"");
+  ReplaceOne(receipt, "\"__SCIENTIFIC_DIGEST__\"", "\""+scientific+"\"");
   file.cd();cells.Write();gram.Write();TObjString metadataObject(metadata.c_str());metadataObject.Write("metadata");TObjString receiptObject(receipt.c_str());receiptObject.Write("receipt");file.Close();if(file.IsZombie())throw std::runtime_error("stress compact ROOT close failed");
   VerifyCompact(output);
-  std::ifstream input(output,std::ios::binary|std::ios::ate);if(!input)throw std::runtime_error("cannot stat stress compact ROOT");std::cout<<"STRESS_SUMMARY bytes="<<static_cast<std::uint64_t>(input.tellg())<<" cells="<<cellCount<<" event_gram="<<gramCount<<'\n';
+  std::ifstream input(output,std::ios::binary|std::ios::ate);if(!input)throw std::runtime_error("cannot stat stress compact ROOT");std::cout<<"STRESS_SUMMARY bytes="<<static_cast<std::uint64_t>(input.tellg())<<" cells="<<cellCount<<" event_gram="<<gramCount<<" lineage_sources="<<domains.lineageSources<<" lineage_shards="<<domains.lineageShards<<'\n';
 }
 
-int Main(int argc,char** argv){if(argc<2)throw std::runtime_error("usage: reduce <reduce|verify|stress> ...");const std::string command=argv[1];if(command=="reduce"){if(argc!=4)throw std::runtime_error("usage: reduce reduce SPEC OUTPUT");Reducer reducer(ReadSpec(argv[2]));reducer.Run(argv[3]);return 0;}if(command=="verify"){if(argc!=3)throw std::runtime_error("usage: reduce verify ROOT");VerifyCompact(argv[2]);return 0;}if(command=="stress"){if(argc!=3)throw std::runtime_error("usage: reduce stress ROOT");WriteStressCompact(argv[2]);return 0;}throw std::runtime_error("unknown reducer command");}
+int Main(int argc,char** argv){if(argc<2)throw std::runtime_error("usage: reduce <reduce|verify|stress> ...");const std::string command=argv[1];if(command=="reduce"){if(argc!=4)throw std::runtime_error("usage: reduce reduce SPEC OUTPUT");Reducer reducer(ReadSpec(argv[2]));reducer.Run(argv[3]);return 0;}if(command=="verify"){if(argc!=3)throw std::runtime_error("usage: reduce verify ROOT");VerifyCompact(argv[2]);return 0;}if(command=="stress"){if(argc!=4)throw std::runtime_error("usage: reduce stress SPEC ROOT");WriteStressCompact(argv[2],argv[3]);return 0;}throw std::runtime_error("unknown reducer command");}
 
 }  // namespace
 

@@ -129,15 +129,66 @@
   "g9_species_pdgs": [-5212, -5122, -4122, -521, -411, 411, 521, 4122, 5122, 5212],
   "estimator_policy": {
     "id": "pooled_delete_one_source_block_jackknife_v2",
+    "release_block_count": 10,
+    "variance_dof": 9,
     "center": "g(sum(block_vectors))",
     "covariance": "(K-1)/K times sum outer(delete_one-leave_mean)",
     "bias_correction": false,
     "denominator_resolution_alpha": 0.05,
     "phase_a_t9_two_sided_quantile": 2.2621571628540993,
-    "quantile_algorithm": "accepted STATISTICS-1 binary64 constant for K=10; Boost students_t quantile otherwise",
+    "quantile_algorithm": "accepted STATISTICS-1 binary64 t9 constant; this release supports K=10 only",
     "cancelled_parent_rule": "exact/numerical existence applies to every semantic denominator; statistical resolution and complement sign screens apply only to algebraically surviving denominators",
     "class_boundary_statuses": ["CLASS_BOUNDARY_UNSTABLE", "CLASS_BOUNDARY_UNRESOLVED"],
     "display_label": "finite-MC standard error (delete-one-source-block jackknife; K=10 per tune)"
+  },
+  "compact_domain_registries": {
+    "projection_ids": [
+      {"id": 1, "name": "activity_hist", "scope_family": "activity"},
+      {"id": 2, "name": "ordered_pair_scalar", "scope_family": "pair"},
+      {"id": 3, "name": "trigger_scalar", "scope_family": "pair"},
+      {"id": 4, "name": "dphi_correlation", "scope_family": "pair"},
+      {"id": 5, "name": "origin", "scope_family": "integrated_profile"},
+      {"id": 6, "name": "closure_category_dphi", "scope_family": "integrated_profile"},
+      {"id": 7, "name": "closure_species", "scope_family": "integrated_profile"},
+      {"id": 8, "name": "closure_full_visible", "scope_family": "integrated_profile"},
+      {"id": 9, "name": "G9", "scope_family": "tune"},
+      {"id": 10, "name": "T1", "scope_family": "tune"}
+    ],
+    "origin_ids": [
+      {"id": 0, "label": "selected_hard_companion"},
+      {"id": 1, "label": "shower"},
+      {"id": 2, "label": "MPI"},
+      {"id": 3, "label": "other_resolved"},
+      {"id": 4, "label": "unresolved"}
+    ],
+    "closure_category_ids": [
+      {"id": 0, "label": "selected_ground"},
+      {"id": 1, "label": "excluded_vector"},
+      {"id": 2, "label": "excluded_excited"},
+      {"id": 3, "label": "multiply_heavy"}
+    ],
+    "correlation_component_ids": [
+      {"id": 0, "label": "OS"},
+      {"id": 1, "label": "SS"}
+    ],
+    "closure_full_visible_component_ids": [
+      {"id": 0, "label": "full"},
+      {"id": 1, "label": "visible"}
+    ],
+    "g9_axis_ids": [
+      {"id": 0, "label": "pt", "flow": "explicit underflow and overflow slots"},
+      {"id": 1, "label": "eta", "flow": "no materialized flow slots"},
+      {"id": 2, "label": "phi", "flow": "no materialized flow slots"}
+    ],
+    "t1_component_ids": [
+      {"id": 0, "label": "hadron_count"},
+      {"id": 1, "label": "charm_plus_anticharm_constituent_count"},
+      {"id": 2, "label": "beauty_plus_antibeauty_constituent_count"}
+    ],
+    "gram_component_kinds": [
+      {"id": 0, "label": "ordered_pair_count", "source": "pair_query_ids"},
+      {"id": 1, "label": "trigger_denominator", "source": "trigger_ids"}
+    ]
   },
   "compact_storage": {
     "schema": "hadronization_compact_plot_source_v1",

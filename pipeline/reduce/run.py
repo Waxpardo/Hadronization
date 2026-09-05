@@ -150,7 +150,7 @@ def checked_analysis(path):
         "profiles", "pair_acceptance", "activities", "percentile_intervals",
         "integrated_interval", "activity_policy", "pair_query_registry",
         "correlations", "projection_recipes", "g9_species_pdgs",
-        "estimator_policy", "compact_storage",
+        "estimator_policy", "compact_domain_registries", "compact_storage",
     }
     exact_keys(payload, expected, "analysis request")
     if payload["schema"] != "hadronization_downstream_analysis_request_v1":
@@ -323,12 +323,15 @@ def checked_analysis(path):
             -5212, -5122, -4122, -521, -411, 411, 521, 4122, 5122, 5212]:
         raise ValueError("analysis G9 registry differs")
     policy = payload["estimator_policy"]
-    exact_keys(policy, {"id", "center", "covariance", "bias_correction",
+    exact_keys(policy, {"id", "release_block_count", "variance_dof",
+                        "center", "covariance", "bias_correction",
                         "denominator_resolution_alpha",
                         "phase_a_t9_two_sided_quantile", "quantile_algorithm",
                         "cancelled_parent_rule", "class_boundary_statuses",
                         "display_label"}, "analysis estimator policy")
     if (policy.get("id") != "pooled_delete_one_source_block_jackknife_v2" or
+            policy.get("release_block_count") != 10 or
+            policy.get("variance_dof") != 9 or
             policy.get("denominator_resolution_alpha") != 0.05 or
             policy.get("phase_a_t9_two_sided_quantile") !=
             2.2621571628540993 or policy.get("bias_correction") is not False or
@@ -336,8 +339,8 @@ def checked_analysis(path):
             policy.get("covariance") !=
             "(K-1)/K times sum outer(delete_one-leave_mean)" or
             policy.get("quantile_algorithm") !=
-            "accepted STATISTICS-1 binary64 constant for K=10; Boost "
-            "students_t quantile otherwise" or
+            "accepted STATISTICS-1 binary64 t9 constant; this release supports "
+            "K=10 only" or
             policy.get("cancelled_parent_rule") !=
             "exact/numerical existence applies to every semantic denominator; "
             "statistical resolution and complement sign screens apply only to "
@@ -347,6 +350,70 @@ def checked_analysis(path):
             not isinstance(policy.get("display_label"), str) or
             not policy["display_label"]):
         raise ValueError("analysis estimator policy differs")
+    registries = payload["compact_domain_registries"]
+    exact_keys(registries, {"projection_ids", "origin_ids",
+                            "closure_category_ids",
+                            "correlation_component_ids",
+                            "closure_full_visible_component_ids",
+                            "g9_axis_ids", "t1_component_ids",
+                            "gram_component_kinds"},
+               "analysis compact-domain registries")
+    expected_registries = {
+        "projection_ids": [
+            {"id": 1, "name": "activity_hist", "scope_family": "activity"},
+            {"id": 2, "name": "ordered_pair_scalar", "scope_family": "pair"},
+            {"id": 3, "name": "trigger_scalar", "scope_family": "pair"},
+            {"id": 4, "name": "dphi_correlation", "scope_family": "pair"},
+            {"id": 5, "name": "origin", "scope_family": "integrated_profile"},
+            {"id": 6, "name": "closure_category_dphi",
+             "scope_family": "integrated_profile"},
+            {"id": 7, "name": "closure_species",
+             "scope_family": "integrated_profile"},
+            {"id": 8, "name": "closure_full_visible",
+             "scope_family": "integrated_profile"},
+            {"id": 9, "name": "G9", "scope_family": "tune"},
+            {"id": 10, "name": "T1", "scope_family": "tune"},
+        ],
+        "origin_ids": [
+            {"id": 0, "label": "selected_hard_companion"},
+            {"id": 1, "label": "shower"},
+            {"id": 2, "label": "MPI"},
+            {"id": 3, "label": "other_resolved"},
+            {"id": 4, "label": "unresolved"},
+        ],
+        "closure_category_ids": [
+            {"id": 0, "label": "selected_ground"},
+            {"id": 1, "label": "excluded_vector"},
+            {"id": 2, "label": "excluded_excited"},
+            {"id": 3, "label": "multiply_heavy"},
+        ],
+        "correlation_component_ids": [
+            {"id": 0, "label": "OS"}, {"id": 1, "label": "SS"}],
+        "closure_full_visible_component_ids": [
+            {"id": 0, "label": "full"},
+            {"id": 1, "label": "visible"}],
+        "g9_axis_ids": [
+            {"id": 0, "label": "pt",
+             "flow": "explicit underflow and overflow slots"},
+            {"id": 1, "label": "eta",
+             "flow": "no materialized flow slots"},
+            {"id": 2, "label": "phi",
+             "flow": "no materialized flow slots"},
+        ],
+        "t1_component_ids": [
+            {"id": 0, "label": "hadron_count"},
+            {"id": 1, "label": "charm_plus_anticharm_constituent_count"},
+            {"id": 2, "label": "beauty_plus_antibeauty_constituent_count"},
+        ],
+        "gram_component_kinds": [
+            {"id": 0, "label": "ordered_pair_count",
+             "source": "pair_query_ids"},
+            {"id": 1, "label": "trigger_denominator",
+             "source": "trigger_ids"},
+        ],
+    }
+    if registries != expected_registries:
+        raise ValueError("analysis compact-domain registries differ")
     storage = payload["compact_storage"]
     exact_keys(storage, {"schema", "tables", "metadata_objects",
                          "compression", "maximum_complete_default_bytes",
@@ -564,8 +631,447 @@ def scopes_for(tune_names, analysis):
     return scopes
 
 
+def input_lineage(plan, admitted, receipts):
+    shards = []
+    for (shard, root_path, receipt_path), receipt in zip(admitted, receipts):
+        shards.append({
+            "ordinal": shard["ordinal"],
+            "root_name": root_path.name,
+            "receipt_name": receipt_path.name,
+            "root_sha256": receipt["storage_identity"]["root_sha256"],
+            "root_bytes": receipt["storage_identity"]["root_bytes"],
+            "receipt_scientific_identity_sha256":
+                receipt["scientific_identity_sha256"],
+            "source_ids": shard["source_ids"],
+        })
+    sources = []
+    for source_id, source in enumerate(plan["sources"]):
+        if source.get("source_id") != source_id:
+            raise ValueError("analysis-plan source IDs are not canonical")
+        sources.append({"source_id": source_id,
+                        "manifest_row": source["manifest_row"]})
+    return {
+        "lineage_schema": "hadronization_compact_input_lineage_v1",
+        "campaign": {
+            "id": plan["campaign"],
+            "descriptor_name": Path(plan["campaign_descriptor"]).name,
+            "descriptor_sha256": plan["campaign_descriptor_sha256"],
+            "lossless_identity_sha256":
+                plan["campaign_lossless_identity_sha256"],
+        },
+        "accepted_manifest": {
+            "name": Path(plan["manifest"]).name,
+            "sha256": plan["manifest_sha256"],
+            "source_subset_sha256": plan["source_subset_digest"],
+            "raw_mapping_sha256": plan["raw_mapping_digest"],
+        },
+        "attempt_ledger": {
+            "name": Path(plan["attempts"]).name,
+            "sha256": plan["attempt_ledger_sha256"],
+        },
+        "analysis_plan": {"schema": plan["schema"],
+                          "sha256": plan["plan_digest"]},
+        "shard_map": {"sha256": plan["map_digest"],
+                      "target_bytes": plan["target_bytes"]},
+        "lossless_contract": {
+            "schema_sha256": plan["schema_digest"],
+            "registries_sha256": plan["registries_digest"],
+            "dependency_identity_sha256":
+                plan["lossless_dependency_identity_sha256"],
+        },
+        "block_assignment": plan["block_assignment"],
+        "tune_ordinals": plan["tune_ordinals"],
+        "shard_count": len(shards),
+        "source_count": len(sources),
+        "shards": shards,
+        "sources": sources,
+    }
+
+
+def _domain_dynamic(dynamic_species):
+    if dynamic_species == "__DOMAIN_DYNAMIC_SPECIES__":
+        return (dynamic_species, "__CLOSURE_SPECIES_COUNT__",
+                "__T1_SPECIES_COUNT__")
+    exact_keys(dynamic_species, {"closure_species_pdgs", "t1_all_final_pdgs"},
+               "compact dynamic-PDG dictionaries")
+    for key in ("closure_species_pdgs", "t1_all_final_pdgs"):
+        values = dynamic_species[key]
+        if (not isinstance(values, list) or
+                any(type(value) is not int for value in values) or
+                values != sorted(set(values))):
+            raise ValueError("compact dynamic-PDG dictionary differs: {}".format(key))
+    return (dynamic_species, len(dynamic_species["closure_species_pdgs"]),
+            len(dynamic_species["t1_all_final_pdgs"]))
+
+
+def compact_domains(analysis, analysis_sha, pairs, scopes, dynamic_species):
+    dynamic, closure_species_count, t1_species_count = _domain_dynamic(
+        dynamic_species)
+    registries = analysis["compact_domain_registries"]
+    trigger_dictionary = [
+        {"id": identifier, "signed_pdg": pdg}
+        for identifier, pdg in enumerate(
+            analysis["pair_query_registry"]["trigger_pdgs"])]
+    correlation_dictionary = [
+        {"id": identifier, "trigger_pdg": values[0],
+         "associate_pdg": values[1]}
+        for identifier, values in enumerate(
+            analysis["correlations"]["identities"])]
+    class_dictionary = [{"id": 0, "integrated": True,
+                         "percentile_interval": analysis["integrated_interval"]}]
+    class_dictionary.extend(
+        {"id": identifier, "integrated": False,
+         "percentile_interval": interval}
+        for identifier, interval in enumerate(
+            analysis["percentile_intervals"], 1))
+    scope_dictionary = list(scopes)
+    tune_dictionary = []
+    for scope in scope_dictionary:
+        if (scope["family"] == "tune" and
+                scope["tune"] not in tune_dictionary):
+            tune_dictionary.append(scope["tune"])
+    scope_ids = {
+        family: [item["id"] for item in scope_dictionary
+                 if item["family"] == family]
+        for family in {item["scope_family"]
+                       for item in registries["projection_ids"]}
+    }
+    scalar = [{"id": 0, "label": "additive_statistic"}]
+    activity_bins = analysis["axes"]["activity"]["bins"]
+    dphi_bins = analysis["axes"]["dphi"]["bins"]
+    pt_storage_bins = len(analysis["axes"]["pt"]["edges"]) + 1
+    g9_per_species = pt_storage_bins + 200
+    projections = []
+
+    def add(identifier, bin_count, dimensions, components):
+        declared = registries["projection_ids"][identifier - 1]
+        if declared["id"] != identifier:
+            raise ValueError("projection registry IDs are not canonical")
+        projections.append({
+            "id": identifier,
+            "name": declared["name"],
+            "allowed_scope_families": [declared["scope_family"]],
+            "scope_ids": scope_ids[declared["scope_family"]],
+            "bin_count": bin_count,
+            "bin_layout": {"packing": "row_major", "dimensions": dimensions},
+            "component_dictionary": components,
+            "component_ids": [item["id"] for item in components],
+        })
+
+    add(1, activity_bins,
+        [{"id": "activity_bin", "size": activity_bins, "stride": 1}], scalar)
+    add(2, len(pairs),
+        [{"id": "pair_query_id", "size": len(pairs), "stride": 1}], scalar)
+    add(3, len(trigger_dictionary),
+        [{"id": "trigger_id", "size": len(trigger_dictionary), "stride": 1}],
+        scalar)
+    add(4, len(correlation_dictionary) * dphi_bins,
+        [{"id": "correlation_id", "size": len(correlation_dictionary),
+          "stride": dphi_bins},
+         {"id": "dphi_bin", "size": dphi_bins, "stride": 1}],
+        registries["correlation_component_ids"])
+    add(5, len(pairs) * len(registries["origin_ids"]),
+        [{"id": "pair_query_id", "size": len(pairs),
+          "stride": len(registries["origin_ids"])},
+         {"id": "origin_id", "size": len(registries["origin_ids"]),
+          "stride": 1}], scalar)
+    add(6, len(trigger_dictionary) * len(
+        registries["closure_category_ids"]) * dphi_bins,
+        [{"id": "trigger_id", "size": len(trigger_dictionary),
+          "stride": len(registries["closure_category_ids"]) * dphi_bins},
+         {"id": "closure_category_id",
+          "size": len(registries["closure_category_ids"]),
+          "stride": dphi_bins},
+         {"id": "dphi_bin", "size": dphi_bins, "stride": 1}], scalar)
+    add(7, (len(trigger_dictionary) * closure_species_count
+            if type(closure_species_count) is int
+            else "__CLOSURE_BIN_COUNT__"),
+        [{"id": "trigger_id", "size": len(trigger_dictionary),
+          "stride": closure_species_count},
+         {"id": "closure_species_pdg_id", "size": closure_species_count,
+          "stride": 1}], scalar)
+    add(8, len(trigger_dictionary),
+        [{"id": "trigger_id", "size": len(trigger_dictionary), "stride": 1}],
+        registries["closure_full_visible_component_ids"])
+    add(9, len(analysis["g9_species_pdgs"]) * g9_per_species,
+        [{"id": "g9_species_id", "size": len(analysis["g9_species_pdgs"]),
+          "stride": g9_per_species},
+         {"id": "g9_axis_storage_bin", "size": g9_per_species,
+          "stride": 1}], scalar)
+    add(10, t1_species_count,
+        [{"id": "t1_signed_pdg_id", "size": t1_species_count, "stride": 1}],
+        registries["t1_component_ids"])
+
+    pair_lookup = {(item["trigger_pdg"], item["associate_pdg"]): item
+                   for item in pairs}
+    terms = set()
+    for opposite in pairs:
+        if opposite["sign"] != -1:
+            continue
+        same = pair_lookup[(opposite["trigger_pdg"],
+                            -opposite["associate_pdg"])]
+        reference_opposite = pair_lookup[(opposite["trigger_pdg"],
+                                          opposite["reference_meson_pdg"])]
+        reference_same = pair_lookup[(opposite["trigger_pdg"],
+                                      -opposite["reference_meson_pdg"])]
+        trigger_id = 300 + next(
+            item["id"] for item in trigger_dictionary
+            if item["signed_pdg"] == opposite["trigger_pdg"])
+        o, s = opposite["id"], same["id"]
+        ro, rs = reference_opposite["id"], reference_same["id"]
+        candidates = ([(o, o), (o, s), (o, trigger_id), (s, s),
+                       (s, trigger_id), (trigger_id, trigger_id)]
+                      if o == ro else
+                      [(o, o), (o, s), (s, s), (o, trigger_id),
+                       (s, trigger_id), (o, ro), (o, rs), (s, ro), (s, rs)])
+        terms.update(tuple(sorted(term)) for term in candidates)
+    gram_components = [
+        {"id": item["id"], "kind_id": 0,
+         "pair_query_id": item["id"],
+         "trigger_pdg": item["trigger_pdg"],
+         "associate_pdg": item["associate_pdg"]}
+        for item in pairs]
+    gram_components.extend(
+        {"id": 300 + item["id"], "kind_id": 1,
+         "trigger_id": item["id"], "trigger_pdg": item["signed_pdg"]}
+        for item in trigger_dictionary)
+    term_multiplier = 512
+    return {
+        "domain_schema": "hadronization_compact_domain_contract_v1",
+        "analysis_request_sha256": analysis_sha,
+        "sparse_rule": analysis["compact_storage"]["sparse_rule"],
+        "block_ids": list(range(1, analysis["estimator_policy"][
+            "release_block_count"] + 1)),
+        "tune_dictionary": tune_dictionary,
+        "scope_dictionary": scope_dictionary,
+        "class_dictionary": class_dictionary,
+        "axes": analysis["axes"],
+        "profiles": analysis["profiles"],
+        "activities": analysis["activities"],
+        "trigger_dictionary": trigger_dictionary,
+        "pair_query_dictionary": pairs,
+        "origin_dictionary": registries["origin_ids"],
+        "closure_category_dictionary": registries["closure_category_ids"],
+        "correlation_dictionary": correlation_dictionary,
+        "correlation_component_dictionary":
+            registries["correlation_component_ids"],
+        "closure_full_visible_component_dictionary":
+            registries["closure_full_visible_component_ids"],
+        "g9_species_dictionary": [
+            {"id": identifier, "signed_pdg": pdg}
+            for identifier, pdg in enumerate(analysis["g9_species_pdgs"])],
+        "g9_axis_dictionary": [
+            {**registries["g9_axis_ids"][0], "offset": 0,
+             "storage_bins": pt_storage_bins,
+             "underflow_id": 0,
+             "regular_bin_ids": [1, pt_storage_bins - 2],
+             "overflow_id": pt_storage_bins - 1,
+             "endpoint_rule": analysis["axes"]["pt"]["endpoint_rule"]},
+            {**registries["g9_axis_ids"][1], "offset": pt_storage_bins,
+             "storage_bins": 100,
+             "endpoint_rule": analysis["axes"]["eta"]["endpoint_rule"]},
+            {**registries["g9_axis_ids"][2], "offset": pt_storage_bins + 100,
+             "storage_bins": 100,
+             "endpoint_rule": analysis["axes"]["phi"]["endpoint_rule"]},
+        ],
+        "t1_component_dictionary": registries["t1_component_ids"],
+        "dynamic_species": dynamic,
+        "projection_dictionary": projections,
+        "event_gram_dictionary": {
+            "projection_id": 2,
+            "allowed_scope_families": ["pair"],
+            "scope_ids": scope_ids["pair"],
+            "component_kinds": registries["gram_component_kinds"],
+            "component_dictionary": gram_components,
+            "component_ids": [item["id"] for item in gram_components],
+            "term_order": "left<=right",
+            "term_code": "left*512+right",
+            "term_code_multiplier": term_multiplier,
+            "allowed_term_codes": [left * term_multiplier + right
+                                   for left, right in sorted(terms)],
+        },
+    }
+
+
+def stress_compact_payloads(analysis, analysis_sha):
+    """Build a full-shape synthetic contract for the bounded storage gate."""
+    tune_names = ["MONASH", "JUNCTIONS", "CLOSEPACKING"]
+    scopes = scopes_for(tune_names, analysis)
+    states, pairs = state_registry(analysis)
+    species = {item["pdg"] for item in states}
+    candidate = 100000
+    while len(species) < 202:
+        species.add(candidate)
+        if len(species) < 202:
+            species.add(-candidate)
+        candidate += 1
+    dynamic = {"closure_species_pdgs": sorted(species),
+               "t1_all_final_pdgs": sorted(species)}
+    domains = compact_domains(analysis, analysis_sha, pairs, scopes, dynamic)
+    validate_compact_domains(domains, analysis, analysis_sha)
+
+    def identity(label):
+        return sha_bytes(("hadronization-reduce-stress-v1:" + label).encode("ascii"))
+
+    tune_ordinals = {name: ordinal for ordinal, name in enumerate(tune_names)}
+    sources = []
+    for source_id in range(3000):
+        tune_ordinal, logical_id = divmod(source_id, 1000)
+        tune = tune_names[tune_ordinal]
+        sources.append({
+            "source_id": source_id,
+            "manifest_row": {
+                "accepted_attempt": source_id % 3,
+                "accepted_seed": 130000001 + tune_ordinal * 1000000 + logical_id,
+                "block": logical_id % 10 + 1,
+                "bytes": 900000000 + source_id * 7919 % 100000000,
+                "logical_id": logical_id,
+                "raw_sha256": identity("raw:{}".format(source_id)),
+                "raw_storage_key": "{}/job{:04d}.root".format(tune, logical_id),
+                "successful_events": 100000,
+                "tune": tune,
+                "validation_log_sha256": identity(
+                    "validation-log:{}".format(source_id)),
+                "validation_receipt_sha256": identity(
+                    "validation-receipt:{}".format(source_id)),
+            },
+        })
+    shard_sizes = [10] * 93 + [9] * 230
+    shards = []
+    first = 0
+    for ordinal, count in enumerate(shard_sizes):
+        members = list(range(first, first + count))
+        shards.append({
+            "ordinal": ordinal,
+            "root_name": "shard-{:04d}.root".format(ordinal),
+            "receipt_name": "shard-{:04d}.json".format(ordinal),
+            "root_sha256": identity("shard-root:{}".format(ordinal)),
+            "root_bytes": sum(sources[item]["manifest_row"]["bytes"]
+                              for item in members) // 2,
+            "receipt_scientific_identity_sha256": identity(
+                "shard-scientific:{}".format(ordinal)),
+            "source_ids": members,
+        })
+        first += count
+    if first != len(sources):
+        raise ValueError("stress lineage source partition differs")
+    lineage = {
+        "lineage_schema": "hadronization_compact_input_lineage_v1",
+        "campaign": {
+            "id": "HF_RUN3_V1",
+            "descriptor_name": "campaign.json",
+            "descriptor_sha256": identity("campaign-descriptor"),
+            "lossless_identity_sha256": identity("campaign-lossless"),
+        },
+        "accepted_manifest": {
+            "name": "raw_manifest.jsonl",
+            "sha256": identity("accepted-manifest"),
+            "source_subset_sha256": sha_bytes(canonical(
+                [item["manifest_row"] for item in sources]).encode("ascii")),
+            "raw_mapping_sha256": identity("raw-mapping"),
+        },
+        "attempt_ledger": {"name": "attempts.csv",
+                           "sha256": identity("attempt-ledger")},
+        "analysis_plan": {
+            "schema": "hadronization_analysis_shard_plan_v1",
+            "sha256": identity("analysis-plan"),
+        },
+        "shard_map": {"sha256": identity("shard-map"),
+                      "target_bytes": 512 * 1024 * 1024},
+        "lossless_contract": {
+            "schema_sha256": identity("lossless-schema"),
+            "registries_sha256": identity("lossless-registries"),
+            "dependency_identity_sha256": identity("lossless-dependency"),
+        },
+        "block_assignment": {"count": 10,
+                             "logical_id_domain": [0, 999],
+                             "logical_id_rule": "block=(logical_id%10)+1"},
+        "tune_ordinals": tune_ordinals,
+        "shard_count": len(shards), "source_count": len(sources),
+        "shards": shards, "sources": sources,
+    }
+    lineage_sha = validate_input_lineage(lineage)
+    domain_sha = sha_bytes(canonical(domains).encode("ascii"))
+    activity = []
+    for tune in tune_names:
+        for definition in analysis["activities"]:
+            activity.append({
+                "semantic_id": definition["id"], "tune": tune,
+                "class_ids": list(range(1 + len(analysis[
+                    "percentile_intervals"]))),
+                "thresholds": [1000 + tune_ordinals[tune] * 100 + value
+                               for value in range(len(analysis[
+                                   "percentile_intervals"]) - 1)],
+                "source_count": 1000, "successful_events": 100000000,
+            })
+    accounting = {
+        "summation": analysis["compact_storage"]["summation"],
+        "blocks": [
+            {"tune": tune, "block": block, "sources": 100,
+             "successful_events": 10000000}
+            for tune in tune_names for block in range(1, 11)],
+    }
+    estimator = {"policy_id": analysis["estimator_policy"]["id"],
+                 "block_count": 10, "dof": 9,
+                 "stress_contract": "full_shape_storage_only"}
+    metrics = {"cells": 1664280, "event_gram": 946080,
+               "events": 300000000, "sources": 3000,
+               "input_bytes": sum(item["root_bytes"] for item in shards)}
+    activity_sha = sha_bytes(canonical(activity).encode("ascii"))
+    accounting_sha = sha_bytes(canonical(accounting).encode("ascii"))
+    plan_sha = lineage["analysis_plan"]["sha256"]
+    map_sha = lineage["shard_map"]["sha256"]
+    build_id = identity("stress-build")
+    common = {
+        "analysis_request_sha256": analysis_sha,
+        "parent_plan_digest": plan_sha,
+        "parent_map_digest": map_sha,
+        "parent_shard_set_digest": lineage_sha,
+        "reducer_build_id": build_id,
+        "scientific_content_digest": "__SCIENTIFIC_DIGEST__",
+        "compact_domains": domains,
+        "compact_domains_sha256": domain_sha,
+        "input_lineage": lineage,
+        "input_lineage_sha256": lineage_sha,
+        "activity_receipts": activity,
+        "block_accounting": accounting,
+        "estimator_audit": estimator,
+        "metrics": metrics,
+    }
+    metadata = {
+        **common,
+        "schema": REDUCTION_SCHEMA,
+        "publication_state": "PUBLICATION_ELIGIBLE",
+        "base_study": analysis["base_study"],
+        "lossless_input": analysis["lossless_input"],
+        "estimator_policy": analysis["estimator_policy"],
+        "sparse_rule": analysis["compact_storage"]["sparse_rule"],
+        "pooled_copy": False,
+    }
+    embedded = {
+        **common,
+        "schema": RECEIPT_SCHEMA,
+        "state": "PUBLICATION_ELIGIBLE",
+        "activity_receipts_sha256": activity_sha,
+        "block_accounting_sha256": accounting_sha,
+        "estimator_policy_id": analysis["estimator_policy"]["id"],
+    }
+    return metadata, embedded
+
+
+def write_stress_spec(path, analysis_path=ANALYSIS):
+    analysis, analysis_sha = checked_analysis(analysis_path)
+    metadata, embedded = stress_compact_payloads(analysis, analysis_sha)
+    path.write_text("\n".join((
+        "hadronization_compact_stress_spec_v1",
+        "METADATA\t" + hexadecimal(canonical(metadata)),
+        "RECEIPT\t" + hexadecimal(canonical(embedded)),
+        "END", "")), encoding="ascii")
+
+
 def build_metadata(analysis, analysis_sha, plan, publication, states, pairs,
-                   scopes, parent_digest, build_id):
+                   scopes, parent_digest, build_id, domain_template,
+                   lineage, lineage_sha):
     return {
         "schema": REDUCTION_SCHEMA,
         "analysis_request_sha256": analysis_sha,
@@ -576,43 +1082,15 @@ def build_metadata(analysis, analysis_sha, plan, publication, states, pairs,
         "parent_shard_set_digest": parent_digest,
         "reducer_build_id": build_id,
         "publication_state": publication,
-        "axes": analysis["axes"],
-        "profiles": analysis["profiles"],
-        "activities": analysis["activities"],
-        "percentile_intervals": analysis["percentile_intervals"],
-        "integrated_interval": analysis["integrated_interval"],
-        "activity_policy": analysis["activity_policy"],
         "estimator_policy": analysis["estimator_policy"],
-        "pair_queries": pairs,
-        "correlations": analysis["correlations"],
-        "g9_species_pdgs": analysis["g9_species_pdgs"],
-        "states": [{key: item[key] for key in
-                    ("pdg", "id", "sector", "pair_analysis_eligible")}
-                   for item in states],
-        "scopes": scopes,
-        "projections": [
-            {"id": 1, "name": "activity_hist", "domain": "activity integer"},
-            {"id": 2, "name": "ordered_pair_scalar", "domain": "300 query ids"},
-            {"id": 3, "name": "trigger_scalar", "domain": "12 trigger ids"},
-            {"id": 4, "name": "dphi_correlation", "domain": "4 identities x 100 bins x OS/SS"},
-            {"id": 5, "name": "origin", "domain": "300 query ids x five dense origins"},
-            {"id": 6, "name": "closure_category_dphi", "domain": "12 triggers x four categories x 100 bins"},
-            {"id": 7, "name": "closure_species", "domain": "12 triggers x dynamic exact signed PDG dictionary"},
-            {"id": 8, "name": "closure_full_visible", "domain": "12 triggers x full/visible"},
-            {"id": 9, "name": "G9", "domain": "10 species x pt/eta/phi including flows"},
-            {"id": 10, "name": "T1", "domain": "dynamic all-final exact signed PDG dictionary"},
-        ],
-        "components": {
-            "cells": ["value", "sumabs", "row_sumw2", "fills"],
-            "correlation": {"0": "OS", "1": "SS"},
-            "closure_full_visible": {"0": "full", "1": "visible"},
-            "event_gram_basis": ["O", "S", "T", "reference_O", "reference_S"],
-        },
+        "compact_domains": "__COMPACT_DOMAINS__",
+        "compact_domains_sha256": "__COMPACT_DOMAINS_SHA256__",
+        "input_lineage": "__INPUT_LINEAGE__",
+        "input_lineage_sha256": lineage_sha,
         "sparse_rule": analysis["compact_storage"]["sparse_rule"],
         "pooled_copy": False,
         "activity_receipts": "__ACTIVITY_RECEIPTS__",
         "block_accounting": "__BLOCK_ACCOUNTING__",
-        "dynamic_species": "__DYNAMIC_SPECIES__",
         "estimator_audit": "__ESTIMATOR_AUDIT__",
         "metrics": "__METRICS__",
         "scientific_content_digest": "__SCIENTIFIC_DIGEST__",
@@ -628,9 +1106,11 @@ def float_text(value):
 
 
 def write_spec(path, plan, admitted, receipts, analysis, analysis_sha,
-               publication, states, pairs, scopes, parent_digest, build_id):
+               publication, states, pairs, scopes, parent_digest, build_id,
+               domain_template, lineage, lineage_sha):
     metadata = build_metadata(analysis, analysis_sha, plan, publication, states,
-                              pairs, scopes, parent_digest, build_id)
+                              pairs, scopes, parent_digest, build_id,
+                              domain_template, lineage, lineage_sha)
     embedded = {
         "schema": RECEIPT_SCHEMA,
         "state": publication,
@@ -640,14 +1120,16 @@ def write_spec(path, plan, admitted, receipts, analysis, analysis_sha,
         "parent_shard_set_digest": parent_digest,
         "reducer_build_id": build_id,
         "scientific_content_digest": "__SCIENTIFIC_DIGEST__",
+        "compact_domains": "__COMPACT_DOMAINS__",
+        "compact_domains_sha256": "__COMPACT_DOMAINS_SHA256__",
+        "input_lineage": "__INPUT_LINEAGE__",
+        "input_lineage_sha256": lineage_sha,
         "activity_receipts": "__ACTIVITY_RECEIPTS__",
         "block_accounting": "__BLOCK_ACCOUNTING__",
-        "dynamic_species": "__DYNAMIC_SPECIES__",
         "estimator_audit": "__ESTIMATOR_AUDIT__",
         "metrics": "__METRICS__",
         "activity_receipts_sha256": "__ACTIVITY_RECEIPTS_SHA256__",
         "block_accounting_sha256": "__BLOCK_ACCOUNTING_SHA256__",
-        "dynamic_species_sha256": "__DYNAMIC_SPECIES_SHA256__",
         "estimator_policy_id": analysis["estimator_policy"]["id"],
     }
     lines = [SPEC_SCHEMA,
@@ -665,6 +1147,11 @@ def write_spec(path, plan, admitted, receipts, analysis, analysis_sha,
              "SETTING\teta_high\t{}".format(float_text(analysis["axes"]["eta"]["high"])),
              "SETTING\tphi_low\t{}".format(float_text(analysis["axes"]["phi"]["low"])),
              "SETTING\tphi_high\t{}".format(float_text(analysis["axes"]["phi"]["high"])),
+             "SETTING\tcompact_domains_template\t{}".format(
+                 hexadecimal(canonical(domain_template))),
+             "SETTING\tinput_lineage\t{}".format(
+                 hexadecimal(canonical(lineage))),
+             "SETTING\tinput_lineage_sha256\t{}".format(lineage_sha),
              "SETTING\tmetadata_template\t{}".format(hexadecimal(canonical(metadata))),
              "SETTING\treceipt_template\t{}".format(hexadecimal(canonical(embedded)))]
     for edge in analysis["axes"]["pt"]["edges"]:
@@ -784,17 +1271,8 @@ def build_reducer(work_root):
     return environment, binary, build_receipt
 
 
-def parent_shard_set_digest(plan, receipts):
-    rows = []
-    for shard, receipt in zip(plan["shards"], receipts):
-        rows.append({
-            "ordinal": shard["ordinal"], "source_ids": shard["source_ids"],
-            "root_sha256": receipt["storage_identity"]["root_sha256"],
-            "root_bytes": receipt["storage_identity"]["root_bytes"],
-            "receipt_scientific_identity_sha256":
-                receipt["scientific_identity_sha256"],
-        })
-    return sha_bytes(canonical(rows).encode("ascii"))
+def parent_shard_set_digest(lineage):
+    return sha_bytes(canonical(lineage).encode("ascii"))
 
 
 def parse_summary(stdout):
@@ -808,23 +1286,36 @@ def parse_summary(stdout):
         values[key] = value
     expected = {"cells", "event_gram", "events", "sources", "input_bytes",
                 "scientific_digest", "activity_receipts_sha256",
-                "block_accounting_sha256", "dynamic_species_sha256",
+                "block_accounting_sha256", "compact_domains_sha256",
+                "input_lineage_sha256", "dynamic_species_hex",
                 "analysis_sha256", "plan_digest", "map_digest",
                 "parent_shard_set_digest", "publication_state",
                 "metadata_sha256", "embedded_receipt_sha256", "build_id"}
     if set(values) != expected:
         raise ValueError("reducer summary field set differs")
     digest_fields = {"scientific_digest", "activity_receipts_sha256",
-                     "block_accounting_sha256", "dynamic_species_sha256",
+                     "block_accounting_sha256", "compact_domains_sha256",
+                     "input_lineage_sha256",
                      "analysis_sha256", "plan_digest", "map_digest",
                      "parent_shard_set_digest", "metadata_sha256",
                      "embedded_receipt_sha256", "build_id"}
     for key in digest_fields:
         lower_sha(values[key], "reducer {}".format(key))
+    dynamic_hex = values["dynamic_species_hex"]
+    if (not dynamic_hex or len(dynamic_hex) % 2 or
+            any(character not in "0123456789abcdef" for character in dynamic_hex)):
+        raise ValueError("reducer dynamic-species payload is not lowercase hex")
+    try:
+        values["dynamic_species"] = json.loads(bytes.fromhex(
+            dynamic_hex).decode("ascii"))
+    except (UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError("reducer dynamic-species payload is invalid") from error
+    del values["dynamic_species_hex"]
     if values["publication_state"] not in {"PUBLICATION_ELIGIBLE",
                                             "NONPUBLICATION_PARTIAL"}:
         raise ValueError("reducer publication state differs")
-    for key in expected - digest_fields - {"publication_state"}:
+    for key in expected - digest_fields - {"publication_state",
+                                            "dynamic_species_hex"}:
         values[key] = int(values[key])
     return values
 
@@ -835,6 +1326,7 @@ def validate_summary_binding(summary, plan, analysis_sha, parent_digest,
                 "plan_digest": plan["plan_digest"],
                 "map_digest": plan["map_digest"],
                 "parent_shard_set_digest": parent_digest,
+                "input_lineage_sha256": parent_digest,
                 "publication_state": publication,
                 "build_id": build_id}
     for key, value in expected.items():
@@ -861,7 +1353,8 @@ def output_paths(plan, analysis_sha, parent_digest, output_root):
 
 
 def reduction_receipt(plan, analysis_sha, parent_digest, publication,
-                      root_path, summary, build, elapsed, source_count):
+                      root_path, summary, build, elapsed, source_count,
+                      domains, lineage):
     scientific = {
         "analysis_request_sha256": analysis_sha,
         "parent_plan_digest": plan["plan_digest"],
@@ -870,7 +1363,10 @@ def reduction_receipt(plan, analysis_sha, parent_digest, publication,
         "scientific_content_digest": summary["scientific_digest"],
         "activity_receipts_sha256": summary["activity_receipts_sha256"],
         "block_accounting_sha256": summary["block_accounting_sha256"],
-        "dynamic_species_sha256": summary["dynamic_species_sha256"],
+        "compact_domains": domains,
+        "compact_domains_sha256": summary["compact_domains_sha256"],
+        "input_lineage": lineage,
+        "input_lineage_sha256": summary["input_lineage_sha256"],
         "metadata_sha256": summary["metadata_sha256"],
         "embedded_receipt_sha256": summary["embedded_receipt_sha256"],
         "reducer_build_id": summary["build_id"],
@@ -896,9 +1392,165 @@ def reduction_receipt(plan, analysis_sha, parent_digest, publication,
     }
 
 
+def validate_input_lineage(lineage, expected_sha=None):
+    exact_keys(lineage, {"lineage_schema", "campaign", "accepted_manifest",
+                         "attempt_ledger", "analysis_plan", "shard_map",
+                         "lossless_contract", "block_assignment",
+                         "tune_ordinals", "shard_count", "source_count",
+                         "shards", "sources"}, "compact input lineage")
+    if lineage["lineage_schema"] != "hadronization_compact_input_lineage_v1":
+        raise ValueError("compact input-lineage schema differs")
+    exact_keys(lineage["campaign"], {"id", "descriptor_name",
+                                     "descriptor_sha256",
+                                     "lossless_identity_sha256"},
+               "compact lineage campaign")
+    exact_keys(lineage["accepted_manifest"], {"name", "sha256",
+                                               "source_subset_sha256",
+                                               "raw_mapping_sha256"},
+               "compact lineage accepted manifest")
+    exact_keys(lineage["attempt_ledger"], {"name", "sha256"},
+               "compact lineage attempt ledger")
+    exact_keys(lineage["analysis_plan"], {"schema", "sha256"},
+               "compact lineage analysis plan")
+    exact_keys(lineage["shard_map"], {"sha256", "target_bytes"},
+               "compact lineage shard map")
+    exact_keys(lineage["lossless_contract"], {"schema_sha256",
+                                               "registries_sha256",
+                                               "dependency_identity_sha256"},
+               "compact lineage lossless contract")
+    for container, keys in (
+            (lineage["campaign"], ("descriptor_sha256",
+                                   "lossless_identity_sha256")),
+            (lineage["accepted_manifest"], ("sha256",
+                                             "source_subset_sha256",
+                                             "raw_mapping_sha256")),
+            (lineage["attempt_ledger"], ("sha256",)),
+            (lineage["analysis_plan"], ("sha256",)),
+            (lineage["shard_map"], ("sha256",)),
+            (lineage["lossless_contract"], ("schema_sha256",
+                                             "registries_sha256",
+                                             "dependency_identity_sha256"))):
+        for key in keys:
+            lower_sha(container[key], "compact lineage {}".format(key))
+    for container, key in ((lineage["campaign"], "descriptor_name"),
+                           (lineage["accepted_manifest"], "name"),
+                           (lineage["attempt_ledger"], "name")):
+        name = container[key]
+        if (not isinstance(name, str) or not name or Path(name).name != name or
+                name in {".", ".."}):
+            raise ValueError("compact lineage portable name differs")
+    assignment = lineage["block_assignment"]
+    exact_keys(assignment, {"count", "logical_id_domain", "logical_id_rule"},
+               "compact lineage block assignment")
+    if (assignment["count"] != 10 or
+            assignment["logical_id_rule"] !=
+            "block=(logical_id%10)+1" or
+            not isinstance(assignment["logical_id_domain"], list) or
+            len(assignment["logical_id_domain"]) != 2):
+        raise ValueError("compact lineage is not the release K10 assignment")
+    tune_ordinals = lineage["tune_ordinals"]
+    if (not isinstance(tune_ordinals, dict) or not tune_ordinals or
+            any(not isinstance(name, str) or not name or type(value) is not int
+                for name, value in tune_ordinals.items()) or
+            sorted(tune_ordinals.values()) != list(range(len(tune_ordinals)))):
+        raise ValueError("compact lineage tune ordinals differ")
+    shards = lineage["shards"]
+    sources = lineage["sources"]
+    if (type(lineage["shard_count"]) is not int or
+            lineage["shard_count"] != len(shards) or not shards or
+            type(lineage["source_count"]) is not int or
+            lineage["source_count"] != len(sources) or not sources):
+        raise ValueError("compact lineage counts differ")
+    concatenated = []
+    for ordinal, shard in enumerate(shards):
+        exact_keys(shard, {"ordinal", "root_name", "receipt_name",
+                           "root_sha256", "root_bytes",
+                           "receipt_scientific_identity_sha256", "source_ids"},
+                   "compact lineage shard")
+        if (shard["ordinal"] != ordinal or
+                shard["root_name"] != "shard-{:04d}.root".format(ordinal) or
+                shard["receipt_name"] != "shard-{:04d}.json".format(ordinal) or
+                type(shard["root_bytes"]) is not int or
+                shard["root_bytes"] < 1 or
+                not isinstance(shard["source_ids"], list) or
+                not shard["source_ids"] or
+                any(type(value) is not int for value in shard["source_ids"])):
+            raise ValueError("compact lineage shard member/order differs")
+        lower_sha(shard["root_sha256"], "compact lineage shard ROOT")
+        lower_sha(shard["receipt_scientific_identity_sha256"],
+                  "compact lineage shard receipt")
+        concatenated.extend(shard["source_ids"])
+    if concatenated != list(range(len(sources))):
+        raise ValueError("compact lineage source membership/order differs")
+    manifest_keys = {"accepted_attempt", "accepted_seed", "block", "bytes",
+                     "logical_id", "raw_sha256", "raw_storage_key",
+                     "successful_events", "tune", "validation_log_sha256",
+                     "validation_receipt_sha256"}
+    logical_domain = assignment["logical_id_domain"]
+    manifest_rows = []
+    source_order = []
+    for source_id, source in enumerate(sources):
+        exact_keys(source, {"source_id", "manifest_row"},
+                   "compact lineage source")
+        row = source["manifest_row"]
+        exact_keys(row, manifest_keys, "compact lineage manifest row")
+        raw_key = row["raw_storage_key"]
+        if (source["source_id"] != source_id or
+                row["tune"] not in tune_ordinals or
+                type(row["logical_id"]) is not int or
+                not logical_domain[0] <= row["logical_id"] <= logical_domain[1] or
+                type(row["block"]) is not int or
+                row["block"] != row["logical_id"] % 10 + 1 or
+                type(row["accepted_attempt"]) is not int or
+                row["accepted_attempt"] < 0 or
+                type(row["accepted_seed"]) is not int or
+                row["accepted_seed"] < 1 or
+                type(row["successful_events"]) is not int or
+                row["successful_events"] < 1 or
+                type(row["bytes"]) is not int or row["bytes"] < 1 or
+                not isinstance(raw_key, str) or not raw_key or
+                raw_key.startswith("/") or "\\" in raw_key or
+                ".." in Path(raw_key).parts):
+            raise ValueError("compact lineage source manifest identity differs")
+        for key in ("raw_sha256", "validation_log_sha256",
+                    "validation_receipt_sha256"):
+            lower_sha(row[key], "compact lineage source {}".format(key))
+        manifest_rows.append(row)
+        source_order.append((tune_ordinals[row["tune"]], row["logical_id"]))
+    if (source_order != sorted(set(source_order)) or
+            lineage["accepted_manifest"]["source_subset_sha256"] !=
+            sha_bytes(canonical(manifest_rows).encode("ascii"))):
+        raise ValueError("compact lineage source subset/order digest differs")
+    digest = sha_bytes(canonical(lineage).encode("ascii"))
+    if expected_sha is not None and digest != expected_sha:
+        raise ValueError("compact input-lineage payload digest differs")
+    return digest
+
+
+def validate_compact_domains(domains, analysis, analysis_sha):
+    if not isinstance(domains, dict):
+        raise ValueError("compact domain payload is not an object")
+    tunes = domains.get("tune_dictionary")
+    if (not isinstance(tunes, list) or not tunes or
+            any(not isinstance(value, str) or not value for value in tunes) or
+            len(set(tunes)) != len(tunes)):
+        raise ValueError("compact domain tune dictionary differs")
+    expected_scopes = scopes_for(tunes, analysis)
+    if domains.get("scope_dictionary") != expected_scopes:
+        raise ValueError("compact domain scope dictionary differs")
+    dynamic = domains.get("dynamic_species")
+    _domain_dynamic(dynamic)
+    unused_states, pairs = state_registry(analysis)
+    del unused_states
+    expected = compact_domains(analysis, analysis_sha, pairs, expected_scopes,
+                               dynamic)
+    if domains != expected:
+        raise ValueError("compact machine-readable domain contract differs")
+    return sha_bytes(canonical(domains).encode("ascii"))
+
+
 def verify_output(root_path, receipt_path, analysis_path, work_root):
     analysis, analysis_sha = checked_analysis(analysis_path)
-    del analysis
     regular_file(root_path, "compact ROOT")
     receipt = json_file(receipt_path)
     exact_keys(receipt, {"schema", "state", "scientific_identity",
@@ -917,7 +1569,9 @@ def verify_output(root_path, receipt_path, analysis_path, work_root):
                             "scientific_content_digest",
                             "activity_receipts_sha256",
                             "block_accounting_sha256",
-                            "dynamic_species_sha256", "metadata_sha256",
+                            "compact_domains", "compact_domains_sha256",
+                            "input_lineage", "input_lineage_sha256",
+                            "metadata_sha256",
                             "embedded_receipt_sha256", "reducer_build_id",
                             "cells", "event_gram",
                             "events", "sources"},
@@ -964,6 +1618,14 @@ def verify_output(root_path, receipt_path, analysis_path, work_root):
             receipt["producer_provenance_sha256"] !=
             sha_bytes(canonical(provenance).encode("ascii"))):
         raise ValueError("reduction receipt nested digest differs")
+    domain_sha = validate_compact_domains(scientific["compact_domains"],
+                                          analysis, analysis_sha)
+    lineage_sha = validate_input_lineage(scientific["input_lineage"],
+                                         scientific["input_lineage_sha256"])
+    if (scientific["compact_domains_sha256"] != domain_sha or
+            scientific["input_lineage_sha256"] != lineage_sha or
+            scientific["parent_shard_set_digest"] != lineage_sha):
+        raise ValueError("reduction receipt compact contract binding differs")
     if scientific.get("analysis_request_sha256") != analysis_sha:
         raise ValueError("analysis request changed since reduction")
     if (storage.get("compression") != {"algorithm": "ZSTD", "level": 5} or
@@ -986,7 +1648,8 @@ def verify_output(root_path, receipt_path, analysis_path, work_root):
         "sources": "sources", "scientific_content_digest": "scientific_digest",
         "activity_receipts_sha256": "activity_receipts_sha256",
         "block_accounting_sha256": "block_accounting_sha256",
-        "dynamic_species_sha256": "dynamic_species_sha256",
+        "compact_domains_sha256": "compact_domains_sha256",
+        "input_lineage_sha256": "input_lineage_sha256",
         "metadata_sha256": "metadata_sha256",
         "embedded_receipt_sha256": "embedded_receipt_sha256",
         "analysis_request_sha256": "analysis_sha256",
@@ -1004,6 +1667,9 @@ def verify_output(root_path, receipt_path, analysis_path, work_root):
     if (provenance["source_count"] != summary["sources"] or
             provenance["input_bytes"] != summary["input_bytes"]):
         raise ValueError("compact ROOT producer metrics differ")
+    if (summary["dynamic_species"] !=
+            scientific["compact_domains"]["dynamic_species"]):
+        raise ValueError("compact ROOT dynamic-PDG dictionaries differ")
     return receipt, summary
 
 
@@ -1012,6 +1678,9 @@ def run(args):
     plan_path = args.plan.resolve()
     plan = analyze.checked_plan(plan_path)
     analysis, analysis_sha = checked_analysis(args.analysis)
+    if (plan["block_assignment"]["count"] !=
+            analysis["estimator_policy"]["release_block_count"]):
+        raise ValueError("this reducer release requires K=10/dof=9 in every mode")
     analyzed_root = Path(args.analyzed_root or plan["output_root"]).resolve()
     work_root = Path(args.work_root or ROOT / "data/work/reduce").resolve(strict=False)
     output_root = Path(args.output_root or ROOT / "data/work/reduced").resolve(strict=False)
@@ -1025,11 +1694,15 @@ def run(args):
     if source_ids != list(range(len(plan["sources"]))):
         raise ValueError("source membership is not exact once-only closure")
     publication = publication_state(plan, analyze, args.partial)
-    parent_digest = parent_shard_set_digest(plan, receipts)
+    lineage = input_lineage(plan, admitted, receipts)
+    validate_input_lineage(lineage)
+    parent_digest = parent_shard_set_digest(lineage)
     states, pairs = state_registry(analysis)
     tune_names = [name for name, unused in sorted(
         plan["tune_ordinals"].items(), key=lambda item: item[1])]
     scopes = scopes_for(tune_names, analysis)
+    domain_template = compact_domains(
+        analysis, analysis_sha, pairs, scopes, "__DOMAIN_DYNAMIC_SPECIES__")
     environment, binary, build = build_reducer(work_root)
     root_path, receipt_path = output_paths(plan, analysis_sha, parent_digest,
                                            output_root)
@@ -1053,7 +1726,11 @@ def run(args):
                                  publication, build["build_id"])
         rebuilt = reduction_receipt(plan, analysis_sha, parent_digest, publication,
                                     root_path, summary, build, 0.0,
-                                    len(plan["sources"]))
+                                    len(plan["sources"]),
+                                    compact_domains(analysis, analysis_sha, pairs,
+                                                    scopes,
+                                                    summary["dynamic_species"]),
+                                    lineage)
         atomic_json(receipt_path, rebuilt, exclusive=True)
         print("RECOVERED ROOT={} RECEIPT={} STATE={}".format(
             root_path, receipt_path, publication))
@@ -1068,7 +1745,7 @@ def run(args):
         staged_root = stage / "plot-source.root"
         write_spec(spec_path, plan, admitted, receipts, analysis, analysis_sha,
                    publication, states, pairs, scopes, parent_digest,
-                   build["build_id"])
+                   build["build_id"], domain_template, lineage, parent_digest)
         started = time.monotonic()
         completed = run_binary(binary, environment,
                                ["reduce", str(spec_path), str(staged_root)],
@@ -1090,7 +1767,11 @@ def run(args):
             raise ValueError("injected interruption after compact ROOT promotion")
         receipt = reduction_receipt(plan, analysis_sha, parent_digest, publication,
                                     root_path, summary, build, elapsed,
-                                    len(plan["sources"]))
+                                    len(plan["sources"]),
+                                    compact_domains(analysis, analysis_sha, pairs,
+                                                    scopes,
+                                                    summary["dynamic_species"]),
+                                    lineage)
         atomic_json(receipt_path, receipt, exclusive=True)
         verified, unused_summary = verify_output(root_path, receipt_path,
                                                   args.analysis, work_root)
