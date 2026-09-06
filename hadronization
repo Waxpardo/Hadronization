@@ -13,7 +13,7 @@ import time
 
 
 ROOT = Path(__file__).resolve().parent
-UNAVAILABLE = {"merge", "plot"}
+UNAVAILABLE = {"merge"}
 
 
 def doctor():
@@ -156,6 +156,11 @@ def reduce(arguments):
     return subprocess.run(command, cwd=str(ROOT)).returncode
 
 
+def plot(arguments):
+    command = [sys.executable, str(ROOT / "pipeline/plot/run.py")] + arguments
+    return subprocess.run(command, cwd=str(ROOT)).returncode
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="hadronization",
@@ -177,8 +182,11 @@ def build_parser():
         "reduce", help="build, verify, and explain a compact statistical plot source",
         add_help=False)
     reduce_parser.add_argument("arguments", nargs=argparse.REMAINDER)
-    for name in ("merge", "plot"):
-        sub.add_parser(name, help="direct stage is not yet implemented")
+    plot_parser = sub.add_parser(
+        "plot", help="query and export verified numerical plot projections",
+        add_help=False)
+    plot_parser.add_argument("arguments", nargs=argparse.REMAINDER)
+    sub.add_parser("merge", help="direct stage is not yet implemented")
     sub.add_parser("verify", help="run the focused active-contract suite")
     clean_parser = sub.add_parser("clean", help="remove reproducible checkout residue")
     clean_mode = clean_parser.add_mutually_exclusive_group()
@@ -192,6 +200,8 @@ def main():
         return analyze(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == "reduce":
         return reduce(sys.argv[2:])
+    if len(sys.argv) > 1 and sys.argv[1] == "plot":
+        return plot(sys.argv[2:])
     args = build_parser().parse_args()
     if args.command == "doctor":
         return doctor()
@@ -202,6 +212,8 @@ def main():
         return analyze(args.arguments)
     if args.command == "reduce":
         return reduce(args.arguments)
+    if args.command == "plot":
+        return plot(args.arguments)
     if args.command in UNAVAILABLE:
         print("ERROR: {} direct stage is not yet implemented".format(
             args.command), file=sys.stderr)

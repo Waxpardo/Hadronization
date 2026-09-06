@@ -47,7 +47,11 @@ class LeanTreeContract(unittest.TestCase):
             ROOT / "pipeline/generate/validate_raw.cpp",
             ROOT / "pipeline/generate/producer.cpp",
             ROOT / "pipeline/generate/physics.hpp",
+            ROOT / "pipeline/plot/plot.cpp",
+            ROOT / "pipeline/plot/projection.hpp",
+            ROOT / "pipeline/plot/run.py",
             ROOT / "config/study.json",
+            ROOT / "config/plot.json",
         ]
         text = "\n".join(path.read_text(encoding="utf-8") for path in active)
         for token in ("/Users/", "/data/alice/", "HF_SYS_",
@@ -80,7 +84,8 @@ class LeanTreeContract(unittest.TestCase):
 
     def test_only_target_layout_exceptions_exist(self):
         expected_config = {
-            "config/study.json", "config/analysis.json", "config/site.example.conf",
+            "config/study.json", "config/analysis.json", "config/plot.json",
+            "config/site.example.conf",
             "config/tunes/monash.cmnd", "config/tunes/junctions.cmnd",
             "config/tunes/close_packing.cmnd"}
         paths = self.tracked_and_new_paths()
@@ -98,7 +103,8 @@ class LeanTreeContract(unittest.TestCase):
              "pipeline/reduce/statistics.hpp"})
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/plot/")},
-            {"pipeline/plot/reference_plotting.C"})
+            {"pipeline/plot/plot.cpp", "pipeline/plot/projection.hpp",
+             "pipeline/plot/run.py"})
 
     def test_importer_metadata_builders_match_the_retained_plane(self):
         path = ROOT / "pipeline/analyze/import_accepted.py"

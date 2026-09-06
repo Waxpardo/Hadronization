@@ -30,7 +30,7 @@ class CliContract(unittest.TestCase):
             self.assertIn(command, help_result.stdout)
 
     def test_unavailable_stages_refuse_without_fallthrough(self):
-        for command in ("merge", "plot"):
+        for command in ("merge",):
             result = self.run_cli(command)
             self.assertEqual(result.returncode, 3)
             self.assertEqual(
@@ -50,10 +50,10 @@ class CliContract(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         for command in ("run", "verify", "explain"):
             self.assertIn(command, result.stdout)
-        plot = self.run_cli("plot")
-        self.assertEqual(plot.returncode, 3)
-        self.assertEqual(plot.stderr.strip(),
-                         "ERROR: plot direct stage is not yet implemented")
+        plot = self.run_cli("plot", "--help")
+        self.assertEqual(plot.returncode, 0, plot.stderr)
+        for command in ("query", "export", "verify"):
+            self.assertIn(command, plot.stdout)
 
     def test_setup_is_idempotent_and_has_no_dataset_dependency(self):
         script = r'''

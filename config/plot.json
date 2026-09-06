@@ -1,0 +1,40 @@
+{
+  "schema": "hadronization_plot_presentation_v1",
+  "version": "1.0.0",
+  "families": {
+    "D": [421, -421, 411, -411],
+    "LambdaC": [4122, -4122],
+    "B": [511, -511, 521, -521],
+    "LambdaB": [5122, -5122],
+    "Ds": [431, -431],
+    "Bs": [531, -531],
+    "Bc": [541, -541],
+    "Sigma": [4112, -4112, 4212, -4212, 4222, -4222, 5112, -5112, 5212, -5212, 5222, -5222],
+    "Xi": [4132, -4132, 4232, -4232, 5132, -5132, 5232, -5232],
+    "XiPrime": [4312, -4312, 4322, -4322, 5312, -5312, 5322, -5322],
+    "Omega": [4332, -4332, 5332, -5332]
+  },
+  "presets": {
+    "all_central": {"selector": "all_central"},
+    "all_registered": {"selector": "all_registered"},
+    "paper_default": {"families": ["D", "LambdaC", "B", "LambdaB"]}
+  },
+  "layout": {
+    "axis_padding_fraction": 0.08,
+    "facet_dimension": "associate_family",
+    "grid_columns_maximum": 3,
+    "maximum_panels_per_page": 6,
+    "shared_legend_reservation": "page_top",
+    "text_pixel_size": 18
+  },
+  "style_identities": {
+    "class_line_style_rule": "root_line_style=1+class_id",
+    "species_encoding": "facet_only",
+    "tunes": [
+      {"id": "MONASH", "color": "#000000", "marker": "filled_circle", "line": "solid"},
+      {"id": "JUNCTIONS", "color": "#0072B2", "marker": "filled_square", "line": "solid"},
+      {"id": "CLOSEPACKING", "color": "#D55E00", "marker": "filled_up_triangle", "line": "solid"}
+    ],
+    "unity_reference": {"color": "neutral_gray", "line": "dashed", "role": "reference_only"}
+  }
+}
