@@ -948,7 +948,54 @@ class PlottingContract(unittest.TestCase):
         build = json.loads(receipts[0].read_text(encoding="ascii"))
         binary = Path(str(receipts[0])[:-len(".build.json")])
         self.assertEqual(build["binary_sha256"], sha256(binary))
+        reducer_receipts = list((work / "reduce/bin").glob("*.build.json"))
+        self.assertEqual(len(reducer_receipts), 1)
+        reducer_receipts[0].write_text("{}\n", encoding="ascii")
+        pair()
+        reducer_build = json.loads(reducer_receipts[0].read_text(encoding="ascii"))
+        reducer_binary = Path(str(reducer_receipts[0])[:-len(".build.json")])
+        self.assertEqual(reducer_build["binary_sha256"], sha256(reducer_binary))
         self.assertFalse(any((work / "bin").glob("*.tmp")))
+        self.assertFalse(any((work / "reduce/bin").glob("*.tmp")))
+
+        bad_receipt = self.base / "atomic-invalid-receipt.json"
+        bad_receipt.write_text("{}\n", encoding="ascii")
+        valid = invoke(*commands[0])
+        invalid = invoke(self.root, bad_receipt, ROOT / "config/analysis.json",
+                         "balancing")
+        valid_out, valid_err = valid.communicate()
+        unused_out, invalid_err = invalid.communicate()
+        self.assertEqual(valid.returncode, 0, valid_err)
+        self.assertEqual(invalid.returncode, 2)
+        self.assertTrue(invalid_err)
+        self.assertFalse(any(work.glob("plot-embedded-*")))
+        self.assertFalse(any(work.glob("plot-engine-*")))
+
+    def test_concurrent_exports_share_work_and_match_sequential_bytes(self):
+        work = self.base / "atomic-export-work"
+        concurrent = [self.base / "atomic-export-a", self.base / "atomic-export-b"]
+        command = [str(ROOT / "hadronization"), "plot", "export", "--root",
+                   str(self.root), "--receipt", str(self.receipt), "--work-dir",
+                   str(work), "--output"]
+        processes = [subprocess.Popen(command + [str(path)], cwd=str(ROOT),
+                                      env=self.environment, text=True,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                     for path in concurrent]
+        for process in processes:
+            stdout, stderr = process.communicate()
+            self.assertEqual(process.returncode, 0, stderr)
+            self.assertIn("EXPORTED", stdout)
+        sequential = self.base / "atomic-export-sequential"
+        result = subprocess.run(command + [str(sequential)], cwd=str(ROOT),
+                                env=self.environment, text=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        baseline = {path.name: path.read_bytes() for path in sequential.iterdir()}
+        for output in concurrent:
+            self.assertEqual({path.name: path.read_bytes() for path in output.iterdir()},
+                             baseline)
+            verified = self._verify_export_cli(output)
+            self.assertEqual(verified.returncode, 0, verified.stderr)
 
     def test_plot_default_work_and_clean_own_only_plot_cache(self):
         parsed = self.plot.parser().parse_args([
