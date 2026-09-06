@@ -915,6 +915,7 @@ class SubmissionContract(unittest.TestCase):
         cls.fixture = cls.base / "fixture"
         environment = dict(__import__("os").environ)
         environment.update(runtime["environment"])
+        cls.environment = environment
         root_flags = shlex.split(subprocess.check_output(
             [environment["ROOT_CONFIG"], "--cflags", "--libs"],
             text=True, env=environment))
@@ -941,7 +942,7 @@ class SubmissionContract(unittest.TestCase):
         fixture_command = [str(self.fixture), str(output), mode]
         if mutation is not None:
             fixture_command.append("{:.17g}".format(mutation))
-        subprocess.run(fixture_command, check=True)
+        subprocess.run(fixture_command, check=True, env=self.environment)
         command = [str(self.validator), str(output), "--campaign", "HF_RUN3_V1",
                    "--tune", "MONASH", "--campaign-ordinal", "3",
                    "--logical-id", "0", "--attempt", "0", "--seed", "130000001",
@@ -949,7 +950,7 @@ class SubmissionContract(unittest.TestCase):
                    "--executable-sha256", "b" * 64, "--repository-commit", "c" * 40,
                    "--pythia-version", "8.317"]
         return subprocess.run(command, text=True, stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT)
+                              stderr=subprocess.STDOUT, env=self.environment)
 
     def test_validator_accepts_complete_compact_raw_v7_fixture(self):
         result = self.make_and_validate("valid")

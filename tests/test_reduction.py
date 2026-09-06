@@ -100,12 +100,11 @@ class ReductionContract(unittest.TestCase):
             raise AssertionError("fixture heavy-species insertion point changed")
         fixture = fixture.replace(original_species,
                                   "std::vector<int>{421, -421, 411")
+        if fixture.count("const bool reductionBoundary = false;") != 1:
+            raise AssertionError("fixture canonical-boundary insertion point changed")
         fixture = fixture.replace(
-            "const double ptValue = slot == 0 ? 1.0 : 0.15;",
-            "const double ptValue = slot == 0 ? 1.0 : (slot == 2 ? 0.2 : 0.15);")
-        fixture = fixture.replace(
-            "const double etaValue = slot == 0 ? 4.0 : 4.1;",
-            "const double etaValue = slot <= 2 ? 4.0 : 4.1;")
+            "const bool reductionBoundary = false;",
+            "const bool reductionBoundary = true;")
         activity_assignment = "mult10 = row; mult40 = row;"
         if fixture.count(activity_assignment) != 1:
             raise AssertionError("fixture activity insertion point changed")
@@ -242,9 +241,13 @@ class ReductionContract(unittest.TestCase):
             command += shlex.split(subprocess.check_output(
                 [cls.environment["ROOT_CONFIG"], "--cflags", "--libs"],
                 text=True, env=cls.environment))
-        subprocess.run(command + ["-o", str(output)], check=True,
-                       env=cls.environment, stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE)
+        result = subprocess.run(command + ["-o", str(output)],
+                                env=cls.environment, text=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode:
+            raise AssertionError(
+                "C++ fixture compile failed (status {}):\nstdout:\n{}\nstderr:\n{}".format(
+                    result.returncode, result.stdout.strip(), result.stderr.strip()))
 
     @classmethod
     def _write_controls(cls):
@@ -451,7 +454,8 @@ class ReductionContract(unittest.TestCase):
 
     def test_single_numerical_core_matches_independent_hand_calculation(self):
         output = subprocess.check_output([str(self.base / "statistics"), "scalar"],
-                                         text=True).split()
+                                         text=True,
+                                         env=self.environment).split()
         center, leave_mean, covariance, old_sem = map(float, output[:4])
         numerators = [0, 1, 1, 2, 3, 5, 7, 11, 19, 29]
         denominators = [1, 2, 3, 4, 5, 7, 11, 13, 17, 31]
@@ -501,31 +505,36 @@ class ReductionContract(unittest.TestCase):
 
     def test_full_vector_covariance_and_status_edges(self):
         vector = subprocess.check_output(
-            [str(self.base / "statistics"), "vector"], text=True).split()
+            [str(self.base / "statistics"), "vector"], text=True,
+            env=self.environment).split()
         self.assertAlmostEqual(float(vector[0]), 1.0, places=15)
         self.assertNotEqual(float(vector[1]), 0.0)
         self.assertLess(float(vector[2]), 1e-14)
         self.assertGreater(float(vector[3]), 0.0)
         status = subprocess.check_output(
-            [str(self.base / "statistics"), "statuses"], text=True).split()
+            [str(self.base / "statistics"), "statuses"], text=True,
+            env=self.environment).split()
         self.assertEqual(status[:2], ["AVAILABLE", "AVAILABLE_ZERO_DISPERSION"])
         self.assertEqual(float(status[2]), -1.0)
         self.assertNotEqual(max(0.0, float(status[2])), float(status[2]))
         self.assertEqual(status[3], "1")
         self.assertEqual(float(status[4]), 0.0)
         missing = subprocess.check_output(
-            [str(self.base / "statistics"), "missing"], text=True).split()
+            [str(self.base / "statistics"), "missing"], text=True,
+            env=self.environment).split()
         self.assertEqual(missing,
                          ["UNSTABLE_DENOMINATOR", "LEAVE_DENOMINATOR_ZERO",
                           "1", "0"])
         unstable = subprocess.check_output(
-            [str(self.base / "statistics"), "unstable"], text=True).split()
+            [str(self.base / "statistics"), "unstable"], text=True,
+            env=self.environment).split()
         self.assertEqual(unstable,
                          ["UNSTABLE_DENOMINATOR",
                           "DENOMINATOR_STATISTICALLY_UNRESOLVED",
                           "10", "10", "0"])
         event = subprocess.check_output(
-            [str(self.base / "statistics"), "event"], text=True).strip()
+            [str(self.base / "statistics"), "event"], text=True,
+            env=self.environment).strip()
         self.assertEqual(float(event), 3.0)
 
     def test_complete_admission_is_regrouping_invariant_and_raw_independent(self):

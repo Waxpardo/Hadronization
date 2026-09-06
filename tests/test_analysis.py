@@ -82,7 +82,9 @@ MUTATOR = r'''
 #include <string>
 
 int main(int argc,char**argv){
-  if(argc!=4)return 2;const std::string mode=argv[3];TFile input(argv[1],"READ");if(input.IsZombie())return 3;TFile output(argv[2],"RECREATE");output.SetCompressionAlgorithm(input.GetCompressionAlgorithm());output.SetCompressionLevel(input.GetCompressionLevel());
+  if(argc!=4)return 2;
+  const std::string mode=argv[3];
+  TFile input(argv[1],"READ");if(input.IsZombie())return 3;TFile output(argv[2],"RECREATE");output.SetCompressionAlgorithm(input.GetCompressionAlgorithm());output.SetCompressionLevel(input.GetCompressionLevel());
   const char* names[]={"ancestry","ancestry_mothers","closure","constituents","event_compatibility","event_ranges","events","hard","heavy","heavy_mothers","origins","pairs","source_blocks","source_counts","sources","triggers"};
   for(const char*name:names){auto*source=dynamic_cast<TTree*>(input.Get(name));if(!source)return 4;output.cd();TTree*copy=nullptr;
     if(mode=="missing_field"&&std::string(name)=="events"){source->SetBranchStatus("n_mpi",0);copy=source->CloneTree(-1,"fast");source->SetBranchStatus("*",1);}
@@ -285,16 +287,35 @@ def fixture_source():
     source = source.replace(hard_marker, hard_marker + lineage)
     marker = '    const std::vector<int> originalMatchedC = integerVectors["heavyMatchedHardC"];'
     boundary = r'''    if (row == 0) {
+      // Exact synthetic-digest inputs use canonical local binary64 values.
+      // Python independently checks these against the intended analytic kinematics.
+      const bool reductionBoundary = false;
       for (std::size_t slot = 0; slot < heavyPdgs.size(); ++slot) {
-        const double ptValue = slot == 0 ? 1.0 : 0.15;
-        const double etaValue = slot == 0 ? 4.0 : 4.1;
+        const double ptValue = slot == 0 ? 1.0 :
+            (reductionBoundary && slot == 2 ? 0.2 : 0.15);
+        const double etaValue = slot == 0 ? 4.0 :
+            (reductionBoundary && slot <= 2 ? 4.0 : 4.1);
         const double phiValue = slot == 0 ? -1.4 : 2.5;
-        const double pzValue = ptValue * std::sinh(etaValue);
-        const double energyValue = std::sqrt(1.0 + ptValue * ptValue + pzValue * pzValue);
-        const double rapidityValue = 0.5 * std::log(
-            (energyValue + pzValue) / (energyValue - pzValue));
-        doubleVectors["heavyPx"][slot] = ptValue * std::cos(phiValue);
-        doubleVectors["heavyPy"][slot] = ptValue * std::sin(phiValue);
+        const double pxValue = slot == 0 ? 0x1.5c17bbc13570bp-3 :
+            (reductionBoundary && slot == 2 ? -0x1.4825ff2d13c64p-3 :
+                                             -0x1.ec38fec39da96p-4);
+        const double pyValue = slot == 0 ? -0x1.f88cddf44e102p-1 :
+            (reductionBoundary && slot == 2 ? 0x1.ea44b494c7780p-4 :
+                                              0x1.6fb3876f959ap-4);
+        const double pzValue = slot == 0 ? 0x1.b4a3803703631p+4 :
+            (reductionBoundary && slot == 1 ? 0x1.05fbb354353b7p+2 :
+             reductionBoundary && slot == 2 ? 0x1.5d4f99c59c4f4p+2 :
+                                               0x1.218dc7e8ce9f3p+2);
+        const double energyValue = slot == 0 ? 0x1.b5397e056f1d4p+4 :
+            (reductionBoundary && slot == 1 ? 0x1.0ddba8442df74p+2 :
+             reductionBoundary && slot == 2 ? 0x1.635b2ac2a8e58p+2 :
+                                               0x1.28b2a2ad3a891p+2);
+        const double rapidityValue = slot == 0 ? 0x1.d3ae75b70f271p+1 :
+            (reductionBoundary && slot == 1 ? 0x1.0d9c70606ab9ap+1 :
+             reductionBoundary && slot == 2 ? 0x1.308aac9253b2cp+1 :
+                                               0x1.1a142cead81c3p+1);
+        doubleVectors["heavyPx"][slot] = pxValue;
+        doubleVectors["heavyPy"][slot] = pyValue;
         doubleVectors["heavyPz"][slot] = pzValue;
         doubleVectors["heavyE"][slot] = energyValue;
         doubleVectors["heavyPt"][slot] = ptValue;
@@ -608,6 +629,64 @@ class AnalysisShardContract(unittest.TestCase):
                          {"1", "2", "3", "4", "5"})
         heavy = self.named_rows("heavy")
         heavy_by_key = {(row["event_id"], row["heavy_index"]): row for row in heavy}
+        first_event = heavy[0]["event_id"]
+        canonical_cases = (
+            ("20", 1.0, 4.0, -1.4, {
+                "px": float.fromhex("0x1.5c17bbc13570bp-3"),
+                "py": float.fromhex("-0x1.f88cddf44e102p-1"),
+                "pz": float.fromhex("0x1.b4a3803703631p+4"),
+                "energy": float.fromhex("0x1.b5397e056f1d4p+4"),
+                "rapidity": float.fromhex("0x1.d3ae75b70f271p+1"),
+            }),
+            ("21", 0.15, 4.1, 2.5, {
+                "px": float.fromhex("-0x1.ec38fec39da96p-4"),
+                "py": float.fromhex("0x1.6fb3876f959ap-4"),
+                "pz": float.fromhex("0x1.218dc7e8ce9f3p+2"),
+                "energy": float.fromhex("0x1.28b2a2ad3a891p+2"),
+                "rapidity": float.fromhex("0x1.1a142cead81c3p+1"),
+            }),
+            (None, 0.15, 4.0, 2.5, {
+                "px": float.fromhex("-0x1.ec38fec39da96p-4"),
+                "py": float.fromhex("0x1.6fb3876f959ap-4"),
+                "pz": float.fromhex("0x1.05fbb354353b7p+2"),
+                "energy": float.fromhex("0x1.0ddba8442df74p+2"),
+                "rapidity": float.fromhex("0x1.0d9c70606ab9ap+1"),
+            }),
+            (None, 0.2, 4.0, 2.5, {
+                "px": float.fromhex("-0x1.4825ff2d13c64p-3"),
+                "py": float.fromhex("0x1.ea44b494c7780p-4"),
+                "pz": float.fromhex("0x1.5d4f99c59c4f4p+2"),
+                "energy": float.fromhex("0x1.635b2ac2a8e58p+2"),
+                "rapidity": float.fromhex("0x1.308aac9253b2cp+1"),
+            }),
+        )
+        for heavy_index, pt, eta, phi, canonical in canonical_cases:
+            expected = {
+                "px": pt * math.cos(phi),
+                "py": pt * math.sin(phi),
+                "pz": pt * math.sinh(eta),
+            }
+            expected["energy"] = math.sqrt(
+                1.0 + expected["px"] ** 2 + expected["py"] ** 2 +
+                expected["pz"] ** 2)
+            expected["rapidity"] = 0.5 * math.log(
+                (expected["energy"] + expected["pz"]) /
+                (expected["energy"] - expected["pz"]))
+            for field, value in expected.items():
+                stored = canonical[field]
+                tolerance = 256 * max(math.ulp(stored), math.ulp(value))
+                self.assertLessEqual(abs(stored - value), tolerance,
+                                     (pt, eta, phi, field, stored, value))
+            if heavy_index is not None:
+                row = heavy_by_key[(first_event, heavy_index)]
+                self.assertEqual((float.fromhex(row["pt"]),
+                                  float.fromhex(row["eta"]),
+                                  float.fromhex(row["phi"]),
+                                  float.fromhex(row["mass"])),
+                                 (pt, eta, phi, 1.0))
+                for field, value in canonical.items():
+                    self.assertEqual(float.fromhex(row[field]), value,
+                                     (heavy_index, field))
         for row in pairs:
             trigger = heavy_by_key[(row["event_id"], row["trigger_heavy_index"])]
             associate = heavy_by_key[(row["event_id"], row["associate_heavy_index"])]
