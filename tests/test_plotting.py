@@ -1,6 +1,7 @@
 import csv
 import copy
 import hashlib
+from fractions import Fraction
 import importlib.util
 import json
 import math
@@ -168,6 +169,115 @@ int main(){
 '''
 
 
+NESTED_RATIO = r'''
+#define main plot_engine_main
+#include "plot.cpp"
+#undef main
+int main(int argc, char** argv) {
+  if (argc != 2) return 2;
+  const std::string mode = argv[1];
+  HP::Domains d;
+  for (int k = 1; k <= 10; ++k) d.blockIds.push_back(k);
+  d.tunes = {"MONASH", "JUNCTIONS", "CLOSEPACKING"};
+  d.activities = {"charged_light_sector_activity_a15_v1_eta4"};
+  d.triggers = {421};
+  d.pairs = {{0,421,-4122,-1,-421,true,"charm"},
+             {1,421,4122,1,-421,true,"charm"},
+             {2,421,-421,-1,-421,true,"charm"},
+             {3,421,421,1,-421,true,"charm"},
+             {4,421,-4132,-1,-421,true,"charm"},
+             {5,421,4132,1,-421,true,"charm"}};
+  d.classes = {{0,true,0,100},{1,false,0,10}};
+  const bool boundary = mode.find("boundary") != std::string::npos;
+  for (int tune = 0; tune < 3; ++tune) {
+    d.scopes.push_back({tune,"pair",d.tunes[tune],"inclusive",d.activities[0],
+                        boundary ? 1 : 0});
+    d.boundaries.push_back({tune,0,1,0,5,
+        !(mode == "reference_boundary_unstable" && tune == 0),
+        !(mode == "source_boundary_unresolved" && tune == 1),false});
+  }
+  HP::Source source(d);
+  try {
+    for (unsigned tune = 0; tune < 3; ++tune) {
+      for (unsigned block = 1; block <= 10; ++block) {
+        const double i = block - 1;
+        double b = tune == 0 ? 10 : 20;
+        double m = tune == 0 ? (block == 1 ? 20 : -1) : 10;
+        double t = 100;
+        if (mode == "regular") {
+          b = tune == 0 ? 3*i+4 : i+2;
+          m = tune == 0 ? i+7 : i+5;
+        }
+        if (mode == "ma_unstable" && tune == 1) m = block == 1 ? 20 : -1;
+        if (mode == "bm_unstable" && tune == 0) b = block == 1 ? 20 : -1;
+        if (mode == "mm_zero" && tune == 0) m = 0;
+        if (mode == "mm_leave_zero" && tune == 0) m = block == 1 ? 20 : 0;
+        if (mode == "mm_nonfinite" && tune == 0 && block == 1)
+          m = std::numeric_limits<double>::quiet_NaN();
+        if ((mode == "source_trigger_zero" && tune == 1) ||
+            (mode == "reference_trigger_zero" && tune == 0)) t = 0;
+        if (mode == "trigger_low" || mode == "trigger_leave_zero")
+          t = block == 1 ? 20 : (mode == "trigger_low" ? -1 : 0);
+        const auto add = [&](unsigned projection, unsigned bin, double value) {
+          source.AddCell({projection,tune,block,bin,0},
+                         {value,std::abs(value),value*value,1});
+        };
+        const bool missingTrigger =
+            (mode == "source_trigger_missing" && tune == 1) ||
+            (mode == "reference_trigger_missing" && tune == 0);
+        if (!missingTrigger) add(3,0,t);
+        add(2,0,b+7); add(2,1,7);
+        if (!(mode == "mm_missing" && tune == 0)) {
+          // OS/SS remain nonnegative in every finite net fixture.
+          add(2,2,m < 0 ? 7 : m+7); add(2,3,m < 0 ? 7-m : 7);
+        }
+        add(2,4,(tune == 0 ? 10 : 20)+7); add(2,5,7);
+      }
+    }
+    EmitBalancing(std::cout, source);
+  } catch (const std::exception& error) {
+    std::cout << "REJECTED " << error.what() << '\n';
+  }
+}
+'''
+
+
+def nested_rational_oracle(regular=False):
+    """Exact arithmetic on independently specified additive net counts."""
+    ba = [i + 2 for i in range(10)] if regular else [20] * 10
+    ma = [i + 5 for i in range(10)] if regular else [10] * 10
+    bm = [3 * i + 4 for i in range(10)] if regular else [10] * 10
+    mm = [i + 7 for i in range(10)] if regular else [20] + [-1] * 9
+    a, c, b, d = map(sum, (ba, ma, bm, mm))
+    center = Fraction(a * d, c * b)
+    source = [Fraction((a - x) * d, (c - y) * b)
+              for x, y in zip(ba, ma)]
+    reference = [Fraction(a * (d - y), c * (b - x))
+                 for x, y in zip(bm, mm)]
+    means = [sum(family) / 10 for family in (source, reference)]
+    contributions = [Fraction(9, 10) * sum((v - mean) ** 2 for v in family)
+                     for family, mean in zip((source, reference), means)]
+    variance = sum(contributions)
+    paired = [Fraction((a-ba[k])*(d-mm[k]), (c-ma[k])*(b-bm[k]))
+              for k in range(10)]
+    joint = source + reference
+    joint_scatter = sum((v - sum(joint)/20) ** 2 for v in joint)
+    parent_m = [Fraction(b-x, d-y) for x, y in zip(bm, mm)]
+    parent_mean = sum(parent_m) / 10
+    parent_variance = Fraction(9, 10) * sum((v-parent_mean)**2 for v in parent_m)
+    mutants = {
+        "paired_block": Fraction(9, 10) * sum((v-sum(paired)/10)**2 for v in paired),
+        "pooled_20": Fraction(19, 20) * joint_scatter,
+        "combined_centering": Fraction(9, 10) * joint_scatter,
+        "wrong_factor": variance / Fraction(9, 10),
+        "delta_denominator": contributions[0] + Fraction(a, c)**2 *
+                             parent_variance / Fraction(b, d)**4,
+        "raw_source_mean": sum(Fraction(a-x, c-y) for x, y in zip(ba, ma))/10,
+        "bias_corrected_center": 10*center - 9*means[0],
+    }
+    return center, source, reference, means, contributions, variance, mutants
+
+
 class PlottingContract(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -237,6 +347,8 @@ class PlottingContract(unittest.TestCase):
                      cls.base / "compact-mutator")
         cls._compile(GEOMETRY_AND_RATIO, cls.base / "geometry.cpp",
                      cls.base / "geometry", include_plot=True, root=False)
+        cls._compile(NESTED_RATIO, cls.base / "nested.cpp", cls.base / "nested",
+                     include_plot=True)
         cls._write_inputs()
         cls.plan = cls.work / "plan.json"
         cls._analyze("plan", "--campaign", str(cls.campaign), "--manifest",
@@ -420,6 +532,128 @@ class PlottingContract(unittest.TestCase):
             str(self.plot_work), "--preset", preset, "--family", family, *extra)
         self.assertEqual(completed.returncode, 0, completed.stderr)
         return json.loads(completed.stdout)
+
+    def _nested_rows(self, mode):
+        output = subprocess.check_output([str(self.base / "nested"), mode],
+                                         text=True, env=self.environment)
+        if output.startswith("REJECTED"):
+            return output.strip()
+        names = {4: "quantity", 5: "tune", 15: "associate", 22: "value",
+                 23: "value_status", 24: "error", 25: "uncertainty_status",
+                 26: "variance", 27: "source_mean", 28: "reference_mean",
+                 29: "source", 30: "reference", 31: "reasons", 32: "diagnostic"}
+        return [{name: line.split("\t")[index] for index, name in names.items()}
+                for line in output.splitlines()]
+
+    def test_nested_final_functional_exact_oracles_and_mutants(self):
+        for regular in (False, True):
+            with self.subTest(regular=regular):
+                rows = self._nested_rows("regular" if regular else "counterexample")
+                row = next(r for r in rows if r["quantity"] ==
+                           "baryon_meson_ratio_to_reference_tune" and
+                           r["tune"] == "JUNCTIONS" and r["associate"] == "-4122")
+                center, source, reference, means, contributions, variance, mutants = \
+                    nested_rational_oracle(regular)
+                self.assertEqual(row["value_status"], "AVAILABLE")
+                self.assertEqual(row["uncertainty_status"], "AVAILABLE")
+                self.assertEqual(row["reasons"], "-")
+                for key, expected in (("value", center), ("variance", variance),
+                                      ("source_mean", means[0]),
+                                      ("reference_mean", means[1])):
+                    self.assertAlmostEqual(float.fromhex(row[key]), float(expected),
+                                           places=15)
+                self.assertAlmostEqual(float.fromhex(row["error"]),
+                                       math.sqrt(float(variance)), places=15)
+                for key, expected in (("source", source), ("reference", reference)):
+                    actual = list(map(float.fromhex, row[key].split(";")))
+                    self.assertEqual(len(actual), 10)
+                    for found, wanted in zip(actual, expected):
+                        self.assertAlmostEqual(found, float(wanted), places=15)
+                self.assertEqual(sum(contributions), variance)
+                if not regular:
+                    self.assertEqual(center, Fraction(11, 50))
+                    self.assertEqual(source, [Fraction(11, 50)] * 10)
+                    self.assertEqual(reference, [Fraction(-1, 5)] +
+                                     [Fraction(4, 15)] * 9)
+                    self.assertEqual(contributions, [0, Fraction(441, 2500)])
+                    self.assertEqual(variance, Fraction(441, 2500))
+                    self.assertEqual(Fraction(21, 50)**2, variance)
+                    direct = next(r for r in rows if r["quantity"] ==
+                                  "baryon_meson_reference_ratio" and
+                                  r["tune"] == "MONASH" and
+                                  r["associate"] == "-4122")
+                    self.assertEqual(direct["value_status"], "UNSTABLE_DENOMINATOR")
+                    self.assertEqual(direct["uncertainty_status"],
+                                     "DENOMINATOR_STATISTICALLY_UNRESOLVED")
+                else:
+                    # The counterexample has a constant source family and equal
+                    # family means. This asymmetric oracle distinguishes those
+                    # otherwise surviving paired/combined-centering mutants.
+                    for name, mutant in mutants.items():
+                        expected = center if name in {
+                            "raw_source_mean", "bias_corrected_center"} else variance
+                        self.assertNotEqual(mutant, expected, name)
+                        self.assertGreater(abs(float(mutant-expected)), 1e-10, name)
+
+    def test_nested_semantic_parent_roles_statuses_and_locality(self):
+        controls = {
+            "mm_zero": ("DENOMINATOR_NUMERICALLY_UNRESOLVED", "UNAVAILABLE",
+                        "DENOMINATOR_NUMERICALLY_UNRESOLVED:reference_meson_os_minus_ss"),
+            "mm_missing": ("POOLED_DENOMINATOR_ZERO", "UNAVAILABLE",
+                           "POOLED_DENOMINATOR_ZERO:reference_meson_os_minus_ss"),
+            "mm_leave_zero": ("AVAILABLE", "LEAVE_DENOMINATOR_ZERO",
+                              "LEAVE_DENOMINATOR_NUMERICALLY_UNRESOLVED:reference_meson_os_minus_ss:1"),
+            "ma_unstable": ("UNSTABLE_DENOMINATOR", "DENOMINATOR_STATISTICALLY_UNRESOLVED",
+                            "DENOMINATOR_STATISTICALLY_UNRESOLVED:source_meson_os_minus_ss"),
+            "bm_unstable": ("UNSTABLE_DENOMINATOR", "DENOMINATOR_STATISTICALLY_UNRESOLVED",
+                            "DENOMINATOR_STATISTICALLY_UNRESOLVED:reference_tune_numerator_os_minus_ss"),
+            "reference_boundary_unstable": ("AVAILABLE", "CLASS_BOUNDARY_UNSTABLE",
+                                            "CLASS_BOUNDARY_UNSTABLE"),
+            "source_boundary_unresolved": ("AVAILABLE", "CLASS_BOUNDARY_UNRESOLVED",
+                                           "CLASS_BOUNDARY_UNRESOLVED"),
+            "trigger_leave_zero": ("AVAILABLE", "LEAVE_DENOMINATOR_ZERO",
+                                   "LEAVE_DENOMINATOR_NUMERICALLY_UNRESOLVED:source_shared_trigger:1"),
+        }
+        for tune in ("source", "reference"):
+            for state, status in (("zero", "DENOMINATOR_NUMERICALLY_UNRESOLVED"),
+                                  ("missing", "POOLED_DENOMINATOR_ZERO")):
+                controls[tune + "_trigger_" + state] = (
+                    status, "UNAVAILABLE", status + ":" + tune + "_shared_trigger")
+        for mode, (value_status, uncertainty_status, reason) in controls.items():
+            with self.subTest(mode=mode):
+                rows = self._nested_rows(mode)
+                nested = [r for r in rows if r["quantity"] ==
+                          "baryon_meson_ratio_to_reference_tune"]
+                row = next(r for r in nested if r["tune"] == "JUNCTIONS" and
+                           r["associate"] == "-4122")
+                self.assertEqual(row["value_status"], value_status)
+                self.assertEqual(row["uncertainty_status"], uncertainty_status)
+                self.assertIn(reason, row["reasons"].split(","))
+                self.assertEqual(row["error"], "-")
+                self.assertEqual(row["variance"], "-")
+                if value_status in {"AVAILABLE", "UNSTABLE_DENOMINATOR"}:
+                    self.assertTrue(math.isfinite(float.fromhex(row["value"])))
+                    self.assertEqual(len(row["source"].split(";")), 10)
+                    self.assertEqual(len(row["reference"].split(";")), 10)
+                else:
+                    self.assertEqual(row["value"], "-")
+                if "boundary" in mode:
+                    self.assertIn("fixed_pooled_boundary_delete_one", row["diagnostic"])
+                if mode == "bm_unstable":
+                    adjacent = next(r for r in nested if r["tune"] == "JUNCTIONS" and
+                                    r["associate"] == "-4132")
+                    self.assertEqual(adjacent["uncertainty_status"], "AVAILABLE")
+                if mode.startswith("source_") or mode == "ma_unstable":
+                    adjacent = next(r for r in nested if r["tune"] == "CLOSEPACKING" and
+                                    r["associate"] == "-4122")
+                    self.assertEqual(adjacent["uncertainty_status"], "AVAILABLE")
+        self.assertEqual(self._nested_rows("mm_nonfinite"),
+                         "REJECTED compact cell is duplicate or numerically invalid")
+        low = next(r for r in self._nested_rows("trigger_low") if r["quantity"] ==
+                   "baryon_meson_ratio_to_reference_tune" and r["tune"] == "JUNCTIONS")
+        self.assertEqual((low["value_status"], low["uncertainty_status"]),
+                         ("AVAILABLE", "AVAILABLE"))
+        self.assertAlmostEqual(float.fromhex(low["error"]), 0.42, places=15)
 
     def test_public_admission_help_and_scale_metadata(self):
         help_result = self._plot_cli("--help")

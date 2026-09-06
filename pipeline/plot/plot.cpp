@@ -443,6 +443,114 @@ HP::ProjectionResult ReferenceRatio(const HP::Source& source,
       HP::BoundaryReasons(source.Domain(), scope));
 }
 
+HP::ProjectionResult NestedReferenceRatio(const HP::Source& source,
+                                          const HP::Scope& scope,
+                                          const HP::Scope& referenceScope,
+                                          const HP::Pair& opposite) {
+  const auto& domains = source.Domain();
+  const auto& same = Pair(domains, opposite.triggerPdg, -opposite.associatePdg);
+  const auto& mesonOs = Pair(domains, opposite.triggerPdg, opposite.referencePdg);
+  const auto& mesonSs = Pair(domains, opposite.triggerPdg, -opposite.referencePdg);
+  const int trigger = TriggerId(domains, opposite.triggerPdg);
+  const auto primitives = [&](const HP::Scope& selected) {
+    return source.BlockVectors({{2, selected.id, opposite.id, 0},
+                                {2, selected.id, same.id, 0},
+                                {2, selected.id, mesonOs.id, 0},
+                                {2, selected.id, mesonSs.id, 0},
+                                {3, selected.id, trigger, 0}});
+  };
+  const auto sourceBlocks = primitives(scope);
+  const auto referenceBlocks = primitives(referenceScope);
+  const auto pool = [](const auto& blocks) {
+    std::vector<double> totals(blocks.front().size());
+    for (std::size_t component = 0; component < totals.size(); ++component) {
+      std::vector<double> column;
+      for (const auto& block : blocks) column.push_back(block[component]);
+      totals[component] = HR::Sum(column);
+    }
+    return totals;
+  };
+  const auto sourcePool = pool(sourceBlocks);
+  const auto referencePool = pool(referenceBlocks);
+  // R = B_A*M_M/(M_A*B_M). Both triggers and M_M must still exist
+  // in the original B/M parents; only M_A and B_M survive as denominators.
+  const auto functional = [](const auto& a, const auto& m) {
+    if (!HR::FiniteVector(a) || !HR::FiniteVector(m)) {
+      return HR::FunctionValue{false, {}, "NONFINITE_INPUT"};
+    }
+    if (a[4] == 0.0 || m[4] == 0.0 || a[2] - a[3] == 0.0 ||
+        m[2] - m[3] == 0.0 || m[0] - m[1] == 0.0) {
+      return HR::FunctionValue{false, {}, "POOLED_DENOMINATOR_ZERO"};
+    }
+    return HR::FunctionValue{true,
+        {(a[0] - a[1]) * (m[2] - m[3]) /
+         ((a[2] - a[3]) * (m[0] - m[1]))}, {}};
+  };
+  auto output = HP::Estimate(sourceBlocks, [&](const auto& a) {
+    return functional(a, referencePool);
+  }, {HP::Denominator("source_shared_trigger",
+                       source.Series(3, scope.id, trigger, 0), false),
+      HP::Denominator("source_meson_os_minus_ss", PairNet(source, scope, mesonOs))},
+     HP::BoundaryReasons(domains, scope));
+  const auto reference = HP::Estimate(referenceBlocks, [&](const auto& m) {
+    return functional(sourcePool, m);
+  }, {HP::Denominator("reference_shared_trigger",
+                       source.Series(3, referenceScope.id, trigger, 0), false),
+      HP::Denominator("reference_meson_os_minus_ss",
+                       PairNet(source, referenceScope, mesonOs), false),
+      HP::Denominator("reference_tune_numerator_os_minus_ss",
+                       PairNet(source, referenceScope, opposite))},
+     HP::BoundaryReasons(domains, referenceScope));
+  auto& result = output.estimate;
+  const auto& other = reference.estimate;
+  output.referenceComplements = other.complements;
+  output.referenceLeaveMean = other.leaveMean;
+  for (const auto& reason : other.reasons) HR::AddReason(result, reason);
+  result.denominatorAudits.insert(result.denominatorAudits.end(),
+                                  other.denominatorAudits.begin(),
+                                  other.denominatorAudits.end());
+  result.cancelledParentDiagnostics.insert(result.cancelledParentDiagnostics.end(),
+      other.cancelledParentDiagnostics.begin(), other.cancelledParentDiagnostics.end());
+  output.diagnostic += ";" + reference.diagnostic +
+                       ";exact_two_independent_tune_delete_one_families";
+  if (result.center.empty() || other.center.empty()) {
+    if (result.valueStatus == "UNAVAILABLE" || !result.center.empty()) {
+      result.valueStatus = other.valueStatus;
+    }
+    result.center.clear();
+    result.covariance.clear();
+    result.standardError.clear();
+    result.uncertaintyStatus = "UNAVAILABLE";
+    return output;
+  }
+  if (other.valueStatus == "UNSTABLE_DENOMINATOR") {
+    result.valueStatus = "UNSTABLE_DENOMINATOR";
+  }
+  if (!HP::AvailableUncertainty(result.uncertaintyStatus) ||
+      !HP::AvailableUncertainty(other.uncertaintyStatus)) {
+    if (HP::AvailableUncertainty(result.uncertaintyStatus)) {
+      result.uncertaintyStatus = other.uncertaintyStatus;
+    }
+    result.covariance.clear();
+    result.standardError.clear();
+    return output;
+  }
+  // Each PooledDeleteOne call centers its own exact nonlinear family and
+  // supplies its (K-1)/K contribution. Independent samples add covariances.
+  result.covariance[0] += other.covariance[0];
+  if (!std::isfinite(result.covariance[0])) {
+    HR::AddReason(result, "COVARIANCE_ARITHMETIC_FAILURE");
+    result.uncertaintyStatus = "COVARIANCE_ARITHMETIC_FAILURE";
+    result.covariance.clear();
+    result.standardError.clear();
+    return output;
+  }
+  result.standardError[0] = std::sqrt(result.covariance[0]);
+  result.uncertaintyStatus = result.covariance[0] == 0.0
+      ? "AVAILABLE_ZERO_DISPERSION" : "AVAILABLE";
+  return output;
+}
+
 std::string BalanceRole(const HP::Scope& scope, const HP::Pair& pair,
                         bool referenceRatio) {
   if (scope.profile != "inclusive" ||
@@ -513,11 +621,8 @@ void EmitBalancing(std::ostream& output, const HP::Source& source) {
                   std::numeric_limits<double>::quiet_NaN()};
       Emit(output, domains, row, tuneRatio, 0);
       if (std::abs(pair.associatePdg) == std::abs(pair.referencePdg)) continue;
-      const auto absoluteReferenceRatio = ReferenceRatio(source, scope, pair);
-      const auto tuneReferenceRatio = HP::IndependentRatio(
-          absoluteReferenceRatio, ReferenceRatio(source, referenceScope, pair),
-          {HP::Denominator("reference_tune_numerator_os_minus_ss",
-                           PairNet(source, referenceScope, pair))});
+      const auto tuneReferenceRatio = NestedReferenceRatio(
+          source, scope, referenceScope, pair);
       row.semanticId = Identity("baryon_meson_ratio_to_MONASH", scope,
                                 pair.triggerPdg, pair.associatePdg,
                                 "reference=" + std::to_string(pair.referencePdg));
