@@ -1,8 +1,10 @@
 import csv
 import copy
+import contextlib
 import hashlib
 from fractions import Fraction
 import importlib.util
+import io
 import json
 import math
 import os
@@ -12,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
 
 from helpers import ROOT, TUNES, sha256
@@ -522,6 +525,131 @@ class PlottingContract(unittest.TestCase):
             command = [python, str(ROOT / "pipeline/plot/run.py")] + list(arguments)
         return subprocess.run(command, cwd=str(ROOT), env=environment, text=True,
                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    def _verify_export_cli(self, output, root=None, receipt=None, analysis=None,
+                           plot_config=None):
+        return self._plot_cli(
+            "verify", "--root", str(root or self.root), "--receipt",
+            str(receipt or self.receipt), "--analysis",
+            str(analysis or ROOT / "config/analysis.json"), "--plot-config",
+            str(plot_config or ROOT / "config/plot.json"), "--work-dir",
+            str(self.plot_work), "--output", str(output))
+
+    def _hardlink_export(self, source, name):
+        output = self.base / name
+        output.mkdir()
+        for path in source.iterdir():
+            os.link(str(path), str(output / path.name))
+        return output
+
+    @staticmethod
+    def _test_canonical(value):
+        return json.dumps(value, sort_keys=True, separators=(",", ":"),
+                          ensure_ascii=True)
+
+    def _write_mutant_file(self, directory, name, payload):
+        path = directory / name
+        path.unlink()
+        path.write_bytes(payload)
+        manifest_path = directory / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="ascii"))
+        item = next(value for value in manifest["files"]
+                    if value["name"] == name)
+        item["bytes"] = len(payload)
+        item["sha256"] = hashlib.sha256(payload).hexdigest()
+        manifest["numerical_exports_sha256"] = hashlib.sha256(
+            self._test_canonical(
+                [value["sha256"] for value in manifest["files"]]).encode(
+                    "ascii")).hexdigest()
+        manifest_path.unlink()
+        manifest_path.write_text(self._test_canonical(manifest) + "\n",
+                                 encoding="ascii")
+
+    def _mutate_csv(self, directory, name, mutation):
+        path = directory / name
+        with path.open(encoding="ascii", newline="") as handle:
+            reader = csv.DictReader(handle)
+            fields = list(reader.fieldnames)
+            rows = list(reader)
+        rows = mutation(rows)
+        output = io.StringIO(newline="")
+        writer = csv.DictWriter(output, fieldnames=fields, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+        self._write_mutant_file(directory, name,
+                                output.getvalue().encode("ascii"))
+
+    def _rewrite_manifest(self, directory, mutation, rewrite_row_bindings=False):
+        manifest_path = directory / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="ascii"))
+        mutation(manifest)
+        if rewrite_row_bindings:
+            selection = manifest["resolved_selection"]
+            request_identity = {
+                "schema": "hadronization_plot_request_v1",
+                "analysis_request_sha256": manifest["analysis_request_sha256"],
+                "compact_scientific_content_digest": manifest["compact_input"][
+                    "scientific_content_digest"],
+                "plot_config_sha256": manifest["plot_config_sha256"],
+                "resolved_selection": selection,
+                "families": ["balancing", "correlations", "kinematics",
+                             "multiplicity", "sample_counts"],
+            }
+            manifest["request_id"] = hashlib.sha256(self._test_canonical(
+                request_identity).encode("ascii")).hexdigest()
+            manifest_path.unlink()
+            manifest_path.write_text(self._test_canonical(manifest) + "\n",
+                                     encoding="ascii")
+            for family in ("balancing", "correlations", "kinematics",
+                           "multiplicity", "sample_counts"):
+                name = family + ".csv"
+                def rebind(rows, manifest=manifest):
+                    for row in rows:
+                        row["request_id"] = manifest["request_id"]
+                        row["compact_scientific_content_digest"] = manifest[
+                            "compact_input"]["scientific_content_digest"]
+                    return rows
+                self._mutate_csv(directory, name, rebind)
+            manifest = json.loads(manifest_path.read_text(encoding="ascii"))
+        manifest_path.unlink()
+        manifest_path.write_text(self._test_canonical(manifest) + "\n",
+                                 encoding="ascii")
+
+    def _assert_verify_and_reuse_reject(self, directory, cached_engine,
+                                        reason, include=None):
+        original_engine_rows = self.plot.engine_rows
+        calls = []
+        def cached_engine_rows(*arguments, **keywords):
+            calls.append((arguments, keywords))
+            return cached_engine
+        self.plot.engine_rows = cached_engine_rows
+        try:
+            verify_arguments = SimpleNamespace(
+                root=self.root, receipt=self.receipt,
+                analysis=ROOT / "config/analysis.json",
+                plot_config=ROOT / "config/plot.json",
+                work_dir=self.plot_work, output=directory)
+            verify_stdout = io.StringIO()
+            with contextlib.redirect_stdout(verify_stdout):
+                with self.assertRaises(ValueError) as verified:
+                    self.plot.verify(verify_arguments)
+            self.assertNotIn("VERIFIED", verify_stdout.getvalue())
+            self.assertIn(reason, str(verified.exception))
+            reuse_arguments = SimpleNamespace(
+                root=self.root, receipt=self.receipt,
+                analysis=ROOT / "config/analysis.json",
+                plot_config=ROOT / "config/plot.json", plot_request=None,
+                preset="paper_default", include=list(include or []), exclude=[],
+                work_dir=self.plot_work, output=directory, reuse=True)
+            reuse_stdout = io.StringIO()
+            with contextlib.redirect_stdout(reuse_stdout):
+                with self.assertRaises(ValueError) as reused:
+                    self.plot.export(reuse_arguments)
+            self.assertNotIn("REUSED", reuse_stdout.getvalue())
+            self.assertIn(reason, str(reused.exception))
+        finally:
+            self.plot.engine_rows = original_engine_rows
+        self.assertIn(len(calls), (1, 2))
 
     def _query(self, family, *extra, root=None, receipt=None, analysis=None,
                preset="all_registered"):
@@ -1375,14 +1503,45 @@ class PlottingContract(unittest.TestCase):
         first_bytes = {path.name: path.read_bytes() for path in first.iterdir()}
         second_bytes = {path.name: path.read_bytes() for path in second.iterdir()}
         self.assertEqual(first_bytes, second_bytes)
-        verified = self._plot_cli("verify", "--output", str(first))
+        output_only = self._plot_cli("verify", "--output", str(first))
+        self.assertEqual(output_only.returncode, 2)
+        self.assertNotIn("VERIFIED", output_only.stdout)
+        verified = self._verify_export_cli(first)
         self.assertEqual(verified.returncode, 0, verified.stderr)
         collision = self._plot_cli(*command, "--output", str(first))
         self.assertEqual(collision.returncode, 2)
         reused = self._plot_cli(*command, "--output", str(first), "--reuse")
         self.assertEqual(reused.returncode, 0, reused.stderr)
+        before_reuse = {
+            path.name: (path.read_bytes(), path.stat().st_mtime_ns)
+            for path in first.iterdir()
+        }
+        calls = []
+        original_engine_rows = self.plot.engine_rows
+        def counted_engine_rows(*arguments, **keywords):
+            calls.append((arguments, keywords))
+            return original_engine_rows(*arguments, **keywords)
+        self.plot.engine_rows = counted_engine_rows
+        try:
+            arguments = SimpleNamespace(
+                root=self.root, receipt=self.receipt,
+                analysis=ROOT / "config/analysis.json",
+                plot_config=ROOT / "config/plot.json", plot_request=None,
+                preset="paper_default", include=[], exclude=[],
+                work_dir=self.plot_work, output=first, reuse=True)
+            stdout = io.StringIO()
+            with contextlib.redirect_stdout(stdout):
+                self.plot.export(arguments)
+        finally:
+            self.plot.engine_rows = original_engine_rows
+        self.assertEqual(len(calls), 1)
+        self.assertIn("REUSED", stdout.getvalue())
+        self.assertEqual(before_reuse, {
+            path.name: (path.read_bytes(), path.stat().st_mtime_ns)
+            for path in first.iterdir()
+        })
         (first / "stale.txt").write_text("stale", encoding="ascii")
-        stale = self._plot_cli("verify", "--output", str(first))
+        stale = self._verify_export_cli(first)
         self.assertEqual(stale.returncode, 2)
         (first / "stale.txt").unlink()
         interrupted = self.base / "export-interrupted"
@@ -1418,6 +1577,190 @@ class PlottingContract(unittest.TestCase):
                             augmented_manifest["request_id"])
         self.assertNotEqual((second / "manifest.json").read_bytes(),
                             (augmented / "manifest.json").read_bytes())
+
+    def test_scientific_verify_and_reuse_reject_resigned_mutants(self):
+        valid = self.base / "scientifically-valid-export"
+        arguments = SimpleNamespace(
+            root=self.root, receipt=self.receipt,
+            analysis=ROOT / "config/analysis.json",
+            plot_config=ROOT / "config/plot.json", plot_request=None,
+            preset="paper_default", include=[], exclude=[],
+            work_dir=self.plot_work, output=valid, reuse=False)
+        captured = []
+        original_engine_rows = self.plot.engine_rows
+        def capture_engine_rows(*engine_arguments, **engine_keywords):
+            result = original_engine_rows(*engine_arguments, **engine_keywords)
+            captured.append(result)
+            return result
+        self.plot.engine_rows = capture_engine_rows
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.plot.export(arguments)
+        finally:
+            self.plot.engine_rows = original_engine_rows
+        self.assertEqual(len(captured), 1)
+        cached_engine = captured[0]
+        baseline = {
+            path.name: (path.stat().st_size, sha256(path))
+            for path in valid.iterdir()
+        }
+
+        original_engine_rows = self.plot.engine_rows
+        self.plot.engine_rows = lambda *unused_args, **unused_kwargs: cached_engine
+        try:
+            verified_stdout = io.StringIO()
+            with contextlib.redirect_stdout(verified_stdout):
+                self.plot.verify(SimpleNamespace(
+                    root=self.root, receipt=self.receipt,
+                    analysis=ROOT / "config/analysis.json",
+                    plot_config=ROOT / "config/plot.json",
+                    work_dir=self.plot_work, output=valid))
+            self.assertIn("VERIFIED", verified_stdout.getvalue())
+            arguments.reuse = True
+            reused_stdout = io.StringIO()
+            with contextlib.redirect_stdout(reused_stdout):
+                self.plot.export(arguments)
+            self.assertIn("REUSED", reused_stdout.getvalue())
+        finally:
+            self.plot.engine_rows = original_engine_rows
+
+        def exercise(name, mutation, reason, include=None):
+            mutant = self._hardlink_export(valid, name)
+            try:
+                mutation(mutant)
+                self._assert_verify_and_reuse_reject(
+                    mutant, cached_engine, reason, include=include)
+            finally:
+                shutil.rmtree(str(mutant))
+            self.assertEqual(baseline, {
+                path.name: (path.stat().st_size, sha256(path))
+                for path in valid.iterdir()
+            })
+
+        with (valid / "correlations.csv").open(
+                encoding="ascii", newline="") as handle:
+            correlation_count = sum(1 for unused_row in csv.DictReader(handle))
+        self.assertEqual(correlation_count, 172800)
+        exercise("mutant-correlation-omission", lambda directory:
+                 self._mutate_csv(directory, "correlations.csv",
+                                  lambda unused_rows: []), "scientific payload")
+
+        def remove_one(directory):
+            self._mutate_csv(directory, "balancing.csv", lambda rows: rows[:-1])
+        exercise("mutant-row-omission", remove_one, "scientific payload")
+
+        def add_one(directory):
+            def mutation(rows):
+                extra = dict(rows[-1])
+                extra["semantic_id"] += ".extra"
+                extra["bin_index"] = "999999"
+                return sorted(rows + [extra], key=lambda row: row["semantic_id"])
+            self._mutate_csv(directory, "balancing.csv", mutation)
+        exercise("mutant-row-addition", add_one, "scientific payload")
+
+        def duplicate_one(directory):
+            self._mutate_csv(
+                directory, "balancing.csv",
+                lambda rows: sorted(rows + [dict(rows[-1])],
+                                    key=lambda row: row["semantic_id"]))
+        exercise("mutant-semantic-duplicate", duplicate_one,
+                 "row identity differs")
+
+        def reorder_rows(directory):
+            def mutation(rows):
+                rows[0], rows[1] = rows[1], rows[0]
+                return rows
+            self._mutate_csv(directory, "balancing.csv", mutation)
+        exercise("mutant-row-order", reorder_rows, "deterministic row order")
+
+        def change_field(field, replacement):
+            def package_mutation(directory):
+                def row_mutation(rows):
+                    row = next(item for item in rows if item[field])
+                    row[field] = replacement(row[field])
+                    return rows
+                self._mutate_csv(directory, "balancing.csv", row_mutation)
+            return package_mutation
+        exercise("mutant-value", change_field(
+            "value", lambda unused_value: "0x1.0000000000000p+20"),
+            "scientific payload")
+        exercise("mutant-status", change_field(
+            "value_status", lambda value: value + "_MUTANT"),
+            "scientific payload")
+        exercise("mutant-reason", change_field(
+            "reasons", lambda value: value + ",MUTANT"),
+            "scientific payload")
+        exercise("mutant-covariance", change_field(
+            "variance", lambda unused_value: "0x0.0p+0"),
+            "scientific payload")
+        exercise("mutant-complement", change_field(
+            "source_tune_complements", lambda value: value + ";0x0.0p+0"),
+            "scientific payload")
+
+        augmented_selection = self.plot.resolve_selection(
+            self.config, self.domains, "paper_default", ["Ds"], [])
+        augmented_rows = self.plot.filter_rows(cached_engine[1],
+                                               augmented_selection)
+        augmented_layout = self.plot.layout_primitives(
+            self.config, augmented_selection, augmented_rows)
+        def change_selection(directory):
+            def mutation(manifest):
+                manifest["resolved_selection"] = augmented_selection
+                manifest["roles"] = cached_engine[0]
+                manifest["layout_primitives"] = augmented_layout
+            self._rewrite_manifest(directory, mutation,
+                                   rewrite_row_bindings=True)
+        exercise("mutant-selection", change_selection, "scientific payload",
+                 include=["Ds"])
+
+        def stale_compact_digest(manifest):
+            manifest["compact_input"]["scientific_content_digest"] = "0" * 64
+        def stale_analysis_request(manifest):
+            manifest["analysis_request_sha256"] = "0" * 64
+        def stale_plot_config(manifest):
+            manifest["plot_config_sha256"] = "0" * 64
+        for name, mutation in (
+                ("compact-digest", stale_compact_digest),
+                ("analysis-request", stale_analysis_request),
+                ("plot-config", stale_plot_config)):
+            def stale_binding(directory, mutation=mutation):
+                self._rewrite_manifest(directory, mutation,
+                                       rewrite_row_bindings=True)
+            exercise("mutant-stale-" + name, stale_binding,
+                     "request identity")
+
+        def replace_role(directory):
+            manifest = json.loads((directory / "manifest.json").read_text(
+                encoding="ascii"))
+            old_id = manifest["roles"][0]["id"]
+            family = manifest["roles"][0]["family"]
+            new_id = old_id + ".mutant"
+            def mutation(value):
+                value["roles"][0]["id"] = new_id
+            self._rewrite_manifest(directory, mutation)
+            def replace_references(rows):
+                for row in rows:
+                    if row["role_id"] == old_id:
+                        row["role_id"] = new_id
+                return rows
+            self._mutate_csv(directory, family + ".csv", replace_references)
+        exercise("mutant-role", replace_role, "scientific payload")
+
+        def add_page(directory):
+            def mutation(manifest):
+                page = copy.deepcopy(manifest["layout_primitives"]["pages"][-1])
+                page["page_id"] += ".extra"
+                page["output_role"] += ".extra"
+                page["page_number"] += 1
+                manifest["layout_primitives"]["pages"].append(page)
+            self._rewrite_manifest(directory, mutation)
+        exercise("mutant-page", add_page, "scientific manifest")
+
+        def replace_payload(directory):
+            payload = (directory / "sample_counts.tex").read_bytes()
+            self._write_mutant_file(directory, "sample_counts.tex",
+                                    payload + b"% mutant\n")
+        exercise("mutant-payload", replace_payload, "scientific payload")
 
     def test_migration_and_lossless_paths_are_not_runtime_inputs(self):
         before = self._query(

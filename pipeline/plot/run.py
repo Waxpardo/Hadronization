@@ -5,6 +5,7 @@ import argparse
 import csv
 import hashlib
 import importlib.util
+import io
 import json
 import math
 import os
@@ -845,17 +846,16 @@ def layout_primitives(config, selection, rows):
             "facet_dimension": layout["facet_dimension"], "pages": pages}
 
 
-def write_csv(path, rows):
-    with path.open("w", encoding="ascii", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=CSV_FIELDS,
-                                lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(rows)
-        handle.flush()
-        os.fsync(handle.fileno())
+def csv_payload(rows):
+    handle = io.StringIO(newline="")
+    writer = csv.DictWriter(handle, fieldnames=CSV_FIELDS,
+                            lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(rows)
+    return handle.getvalue().encode("ascii")
 
 
-def write_tex(path, rows):
+def tex_payload(rows):
     selected = [row for row in rows if row["family"] == "sample_counts"]
     selected.sort(key=lambda row: (row["semantic_id"], row["tune"]))
     lines = [r"\begin{tabular}{lll}",
@@ -868,13 +868,82 @@ def write_tex(path, rows):
         value = str(int(numeric))
         lines.append("{} & {} & {} \\\\".format(label, row["tune"], value))
     lines.append(r"\end{tabular}")
-    with path.open("w", encoding="ascii", newline="") as handle:
-        handle.write("\n".join(lines) + "\n")
+    return ("\n".join(lines) + "\n").encode("ascii")
+
+
+def write_payload(path, payload):
+    with path.open("wb") as handle:
+        handle.write(payload)
         handle.flush()
         os.fsync(handle.fileno())
 
 
-def verify_export(directory, expected_request_id=None):
+def expected_export_model(root_path, receipt, config, config_sha, selection,
+                          roles, rows, build):
+    scientific = receipt["scientific_identity"]["scientific_content_digest"]
+    request_identity = {
+        "schema": REQUEST_SCHEMA,
+        "analysis_request_sha256": receipt["scientific_identity"][
+            "analysis_request_sha256"],
+        "compact_scientific_content_digest": scientific,
+        "plot_config_sha256": config_sha,
+        "resolved_selection": selection,
+        "families": list(DEFAULT_FAMILIES),
+    }
+    request_id = sha_bytes(canonical(request_identity).encode("ascii"))
+    selected = filter_rows(rows, selection)
+    root_sha = receipt["storage_identity"]["root_sha256"]
+    eligibility = selection["eligibility_status"]
+    public = [public_row(row, request_id, root_sha, scientific, eligibility)
+              for row in selected]
+    public.sort(key=lambda row: row["semantic_id"])
+    payloads = {
+        family + ".csv": csv_payload(
+            [row for row in public if row["family"] == family])
+        for family in DEFAULT_FAMILIES
+    }
+    payloads["sample_counts.tex"] = tex_payload(selected)
+    files = []
+    for family in DEFAULT_FAMILIES:
+        name = family + ".csv"
+        payload = payloads[name]
+        files.append({"name": name, "family": family, "bytes": len(payload),
+                      "sha256": sha_bytes(payload)})
+    tex = payloads["sample_counts.tex"]
+    files.append({"name": "sample_counts.tex", "family": "sample_counts",
+                  "bytes": len(tex), "sha256": sha_bytes(tex)})
+    manifest = {
+        "schema": EXPORT_SCHEMA,
+        "version": "1.0.0",
+        "state": "COMPLETE",
+        "compact_input": {
+            "root_sha256": root_sha,
+            "root_bytes": receipt["storage_identity"]["root_bytes"],
+            "scientific_content_digest": scientific,
+            "scientific_identity_sha256": receipt[
+                "scientific_identity_sha256"],
+            "publication_state": receipt["state"],
+            "scale": compact_scale(receipt),
+        },
+        "analysis_request_sha256": receipt["scientific_identity"][
+            "analysis_request_sha256"],
+        "plot_config_sha256": config_sha,
+        "resolved_selection": selection,
+        "request_id": request_id,
+        "roles": roles,
+        "layout_primitives": layout_primitives(config, selection, selected),
+        "files": files,
+        "filesystem_set": sorted([item["name"] for item in files] +
+                                 ["manifest.json"]),
+        "numerical_exports_sha256": sha_bytes(canonical(
+            [item["sha256"] for item in files]).encode("ascii")),
+        "build": build,
+    }
+    return {"manifest": manifest, "payloads": payloads}
+
+
+def verify_export_transport(directory, expected_request_id=None):
+    """Verify only the self-consistency and transport integrity of an export."""
     reject_symlink_components(directory, "plot export directory")
     if directory.is_symlink() or not directory.is_dir():
         raise ValueError("plot export is not a regular directory")
@@ -903,6 +972,31 @@ def verify_export(directory, expected_request_id=None):
     if manifest["request_id"] != sha_bytes(canonical(request_identity).encode(
             "ascii")):
         raise ValueError("plot export request digest differs")
+    exact_keys(manifest["resolved_selection"], {
+        "schema", "preset", "include", "exclude", "eligibility",
+        "eligibility_status", "family_tokens", "signed_pdgs", "pair_ids",
+        "noncentral_signed_pdgs", "selection_id"},
+        "plot resolved selection")
+    selection = dict(manifest["resolved_selection"])
+    selection_id = selection.pop("selection_id")
+    if selection_id != sha_bytes(canonical(selection).encode("ascii")):
+        raise ValueError("plot resolved-selection digest differs")
+    compact_input = manifest["compact_input"]
+    exact_keys(compact_input, {"root_sha256", "root_bytes",
+                               "scientific_content_digest",
+                               "scientific_identity_sha256",
+                               "publication_state", "scale"},
+               "plot compact input")
+    for key in ("root_sha256", "scientific_content_digest",
+                "scientific_identity_sha256"):
+        value = compact_input[key]
+        if (not isinstance(value, str) or len(value) != 64 or
+                any(character not in "0123456789abcdef" for character in value)):
+            raise ValueError("plot compact input digest differs: {}".format(key))
+    if (type(compact_input["root_bytes"]) is not int or
+            compact_input["root_bytes"] < 1 or
+            compact_input["publication_state"] != "PUBLICATION_ELIGIBLE"):
+        raise ValueError("plot compact input state/size differs")
     expected = set(manifest["filesystem_set"])
     observed = {path.name for path in directory.iterdir()
                 if path.is_file() and not path.is_symlink()}
@@ -917,6 +1011,11 @@ def verify_export(directory, expected_request_id=None):
     if {item.get("name") for item in manifest["files"]} != expected_payload_names:
         raise ValueError("plot export payload set differs")
     semantic_ids = set()
+    natural_keys = set()
+    natural_fields = (
+        "family", "quantity", "tune", "reference_tune", "profile",
+        "activity_id", "class_id", "trigger_pdg", "associate_pdg",
+        "reference_pdg", "component", "axis", "bin_index")
     for item in manifest["files"]:
         exact_keys(item, {"name", "family", "bytes", "sha256"},
                    "plot export file")
@@ -929,6 +1028,7 @@ def verify_export(directory, expected_request_id=None):
                 reader = csv.DictReader(handle)
                 if reader.fieldnames != list(CSV_FIELDS):
                     raise ValueError("plot CSV schema differs: {}".format(item["name"]))
+                file_semantic_ids = []
                 for row in reader:
                     if (row["request_id"] != manifest["request_id"] or
                             row["compact_root_sha256"] !=
@@ -941,11 +1041,23 @@ def verify_export(directory, expected_request_id=None):
                         raise ValueError("plot CSV row identity differs: {}".format(
                             item["name"]))
                     semantic_ids.add(row["semantic_id"])
+                    file_semantic_ids.append(row["semantic_id"])
+                    natural = tuple(row[name] for name in natural_fields)
+                    if natural in natural_keys:
+                        raise ValueError("plot CSV natural key collides: {}".format(
+                            item["name"]))
+                    natural_keys.add(natural)
+                if file_semantic_ids != sorted(file_semantic_ids):
+                    raise ValueError("plot CSV deterministic row order differs: {}".format(
+                        item["name"]))
     if manifest["numerical_exports_sha256"] != sha_bytes(
             canonical(payload_hashes).encode("ascii")):
         raise ValueError("plot numerical export digest differs")
     roles = manifest["roles"]
-    if len({role["id"] for role in roles}) != len(roles):
+    if (not isinstance(roles, list) or
+            any(not isinstance(role, dict) or
+                set(role) != {"id", "family", "selector"} for role in roles) or
+            len({role["id"] for role in roles}) != len(roles)):
         raise ValueError("plot manifest role collision")
     page_roles = [page["output_role"] for page in
                   manifest["layout_primitives"]["pages"]]
@@ -959,6 +1071,44 @@ def verify_export(directory, expected_request_id=None):
             any([item["block"] for item in tune["blocks"]] != scale["block_ids"]
                 for tune in scale["tunes"])):
         raise ValueError("plot compact scale accounting differs")
+    build = manifest["build"]
+    exact_keys(build, {"schema", "build_id", "build_identity",
+                       "binary_sha256"}, "plot export build receipt")
+    exact_keys(build["build_identity"], {
+        "schema", "source_sha256", "projection_sha256", "statistics_sha256",
+        "compiler", "root", "flags"}, "plot export build identity")
+    if (build["schema"] != "hadronization_plot_engine_build_receipt_v1" or
+            build["build_identity"]["schema"] !=
+            "hadronization_plot_engine_build_v1" or
+            build["build_id"] != sha_bytes(canonical(
+                build["build_identity"]).encode("ascii"))):
+        raise ValueError("plot export build provenance differs")
+    for key in ("source_sha256", "projection_sha256", "statistics_sha256"):
+        value = build["build_identity"][key]
+        if (not isinstance(value, str) or len(value) != 64 or
+                any(character not in "0123456789abcdef" for character in value)):
+            raise ValueError("plot export build source digest differs")
+    binary_sha = build["binary_sha256"]
+    if (not isinstance(binary_sha, str) or len(binary_sha) != 64 or
+            any(character not in "0123456789abcdef" for character in binary_sha)):
+        raise ValueError("plot export build binary digest differs")
+    return manifest
+
+
+def verify_export_scientific(directory, expected_model):
+    """Verify exact equality with a model freshly derived from compact inputs."""
+    expected = expected_model["manifest"]
+    manifest = verify_export_transport(directory, expected["request_id"])
+    if manifest["resolved_selection"] != expected["resolved_selection"]:
+        raise ValueError("plot export resolved selection differs from current inputs")
+    for name, payload in expected_model["payloads"].items():
+        if (directory / name).read_bytes() != payload:
+            raise ValueError("plot export scientific payload differs: {}".format(name))
+    if manifest != expected:
+        differing = sorted(key for key in expected
+                           if manifest.get(key) != expected[key])
+        raise ValueError("plot export scientific manifest differs: {}".format(
+            differing))
     return manifest
 
 
@@ -979,7 +1129,7 @@ def resolved_arguments(args, config, domains):
     return resolve_selection(config, domains, preset, includes, excludes)
 
 
-def prepare(args, families):
+def prepare(args, families, manifest_selection=None):
     for path, label in ((args.root, "compact ROOT"),
                         (args.receipt, "compact receipt"),
                         (args.analysis, "analysis request")):
@@ -992,7 +1142,12 @@ def prepare(args, families):
     receipt, summary = admit(root_path, receipt_path, analysis_path, work_root)
     config, config_sha = checked_plot_config(args.plot_config)
     domains = receipt["scientific_identity"]["compact_domains"]
-    selection = resolved_arguments(args, config, domains)
+    if manifest_selection is None:
+        selection = resolved_arguments(args, config, domains)
+    else:
+        selection = resolve_selection(
+            config, domains, manifest_selection["preset"],
+            manifest_selection["include"], manifest_selection["exclude"])
     request_identity = {
         "schema": REQUEST_SCHEMA,
         "analysis_request_sha256": receipt["scientific_identity"][
@@ -1018,7 +1173,11 @@ def export(args):
     output = args.output.resolve(strict=False)
     if output.exists():
         if args.reuse:
-            manifest = verify_export(output, request_id)
+            transport = verify_export_transport(output, request_id)
+            expected = expected_export_model(
+                root_path, receipt, config, config_sha, selection, roles, rows,
+                transport["build"])
+            manifest = verify_export_scientific(output, expected)
             print("RESOLVED_SELECTION {}".format(canonical(selection)))
             print("REUSED OUTPUT={} REQUEST_ID={}".format(output,
                                                            manifest["request_id"]))
@@ -1029,53 +1188,16 @@ def export(args):
                                  dir=str(output.parent)))
     created_output = False
     try:
-        selected = filter_rows(rows, selection)
-        root_sha = receipt["storage_identity"]["root_sha256"]
-        scientific = receipt["scientific_identity"]["scientific_content_digest"]
-        eligibility = selection["eligibility_status"]
-        public = [public_row(row, request_id, root_sha, scientific, eligibility)
-                  for row in selected]
-        public.sort(key=lambda row: row["semantic_id"])
-        files = []
-        for family in DEFAULT_FAMILIES:
-            path = stage / (family + ".csv")
-            write_csv(path, [row for row in public if row["family"] == family])
-            files.append({"name": path.name, "family": family,
-                          "bytes": path.stat().st_size, "sha256": sha_file(path)})
-        tex = stage / "sample_counts.tex"
-        write_tex(tex, selected)
-        files.append({"name": tex.name, "family": "sample_counts",
-                      "bytes": tex.stat().st_size, "sha256": sha_file(tex)})
-        layout = layout_primitives(config, selection, selected)
-        manifest = {
-            "schema": EXPORT_SCHEMA,
-            "version": "1.0.0",
-            "state": "COMPLETE",
-            "compact_input": {
-                "root_sha256": root_sha,
-                "root_bytes": receipt["storage_identity"]["root_bytes"],
-                "scientific_content_digest": scientific,
-                "scientific_identity_sha256": receipt[
-                    "scientific_identity_sha256"],
-                "publication_state": receipt["state"],
-                "scale": compact_scale(receipt),
-            },
-            "analysis_request_sha256": receipt["scientific_identity"][
-                "analysis_request_sha256"],
-            "plot_config_sha256": config_sha,
-            "resolved_selection": selection,
-            "request_id": request_id,
-            "roles": roles,
-            "layout_primitives": layout,
-            "files": files,
-            "filesystem_set": sorted([item["name"] for item in files] +
-                                     ["manifest.json"]),
-            "numerical_exports_sha256": sha_bytes(canonical(
-                [item["sha256"] for item in files]).encode("ascii")),
-            "build": build,
-        }
+        expected = expected_export_model(
+            root_path, receipt, config, config_sha, selection, roles, rows, build)
+        manifest = expected["manifest"]
+        if manifest["request_id"] != request_id:
+            raise ValueError("fresh export request identity differs")
+        files = manifest["files"]
+        for name, payload in expected["payloads"].items():
+            write_payload(stage / name, payload)
         atomic_json(stage / "manifest.json", manifest)
-        verify_export(stage, request_id)
+        verify_export_scientific(stage, expected)
         output.mkdir(mode=0o700)
         created_output = True
         for item in files:
@@ -1086,7 +1208,7 @@ def export(args):
         os.link(str(stage / "manifest.json"), str(output / "manifest.json"))
         fsync_directory(output)
         fsync_directory(output.parent)
-        verify_export(output, request_id)
+        verify_export_scientific(output, expected)
         created_output = False
         print("RESOLVED_SELECTION {}".format(canonical(selection)))
         print("EXPORTED OUTPUT={} REQUEST_ID={} FILES={}".format(
@@ -1174,26 +1296,42 @@ def query(args):
 
 def verify(args):
     reject_symlink_components(args.output, "plot export output")
-    manifest = verify_export(args.output.resolve())
+    output = args.output.resolve()
+    transport = verify_export_transport(output)
+    prepared = prepare(args, DEFAULT_FAMILIES,
+                       transport["resolved_selection"])
+    (root_path, receipt, unused_summary, config, config_sha, selection,
+     unused_request_id, roles, rows, unused_build) = prepared
+    del unused_summary, unused_request_id, unused_build
+    if selection != transport["resolved_selection"]:
+        raise ValueError("plot export resolved selection is not derivable")
+    expected = expected_export_model(
+        root_path, receipt, config, config_sha, selection, roles, rows,
+        transport["build"])
+    manifest = verify_export_scientific(output, expected)
     print("VERIFIED OUTPUT={} REQUEST_ID={} FILES={}".format(
-        args.output.resolve(), manifest["request_id"],
+        output, manifest["request_id"],
         len(manifest["filesystem_set"])))
 
 
-def common(parser):
+def authoritative_inputs(parser):
     parser.add_argument("--root", type=Path, required=True,
                         help="verified compact plot-source ROOT")
     parser.add_argument("--receipt", type=Path, required=True,
                         help="matching compact reduction receipt")
     parser.add_argument("--analysis", type=Path, default=ANALYSIS)
     parser.add_argument("--plot-config", type=Path, default=PLOT_CONFIG)
+    parser.add_argument("--work-dir", type=Path, default=Path(
+        tempfile.gettempdir()) / "hadronization-plot-v1")
+
+
+def common(parser):
+    authoritative_inputs(parser)
     parser.add_argument("--plot-request", type=Path)
     parser.add_argument("--preset", choices=("paper_default", "all_central",
                                               "all_registered"))
     parser.add_argument("--include", action="append", default=[])
     parser.add_argument("--exclude", action="append", default=[])
-    parser.add_argument("--work-dir", type=Path, default=Path(
-        tempfile.gettempdir()) / "hadronization-plot-v1")
 
 
 def parser():
@@ -1213,7 +1351,9 @@ def parser():
     common(export_parser)
     export_parser.add_argument("--output", type=Path, required=True)
     export_parser.add_argument("--reuse", action="store_true")
-    verify_parser = sub.add_parser("verify", help="verify an exact completed export set")
+    verify_parser = sub.add_parser(
+        "verify", help="scientifically verify an exact completed export set")
+    authoritative_inputs(verify_parser)
     verify_parser.add_argument("--output", type=Path, required=True)
     return top
 
