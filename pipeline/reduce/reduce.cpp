@@ -289,13 +289,7 @@ struct Accumulator {
   double Value() const { return sum + correction; }
   double SumAbs() const { return sumabs + sumabsCorrection; }
   double SumW2() const { return sumw2 + sumw2Correction; }
-  double ErrorBound() const {
-    if (fills < 2) return 0.0;
-    constexpr double unit = 0x1p-53;
-    const double operations = static_cast<double>(2 * fills + 2);
-    if (operations * unit >= 1.0) return std::numeric_limits<double>::infinity();
-    return operations * unit / (1.0 - operations * unit) * SumAbs();
-  }
+  double ErrorBound() const { return HR::AccumulationErrorBound(SumAbs(), fills); }
 };
 
 struct CellKey {

@@ -98,6 +98,16 @@ inline double Sum(const std::vector<double>& values) {
   return total + correction;
 }
 
+inline double AccumulationErrorBound(double sumabs, std::uint64_t fills) {
+  if (fills < 2) return 0.0;
+  constexpr double unit = 0x1p-53;
+  const double operations = 2.0 * static_cast<double>(fills) + 2.0;
+  if (!std::isfinite(operations) || operations * unit >= 1.0) {
+    return std::numeric_limits<double>::infinity();
+  }
+  return operations * unit / (1.0 - operations * unit) * sumabs;
+}
+
 inline bool IntervalContainsZero(double value, double error) {
   return !std::isfinite(value) || !std::isfinite(error) || error < 0.0 ||
          std::abs(value) <= error;

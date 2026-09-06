@@ -523,9 +523,158 @@ def engine_rows(root_path, receipt, families, work_root):
         rows.append(row)
     if len({role["id"] for role in roles}) != len(roles):
         raise ValueError("plot role IDs collide")
-    if len({row["semantic_id"] for row in rows}) != len(rows):
-        raise ValueError("plot semantic IDs collide")
+    validate_engine_relations(roles, rows, receipt, families)
     return roles, rows, build
+
+
+def _replicas(token, label):
+    if token == "-":
+        return []
+    replicas = token.split(";")
+    if len(replicas) != 10:
+        raise ValueError("{} cardinality differs from K=10".format(label))
+    for value in replicas:
+        if value != "-":
+            numeric = float.fromhex(value)
+            if not math.isfinite(numeric):
+                raise ValueError("{} contains a nonfinite value".format(label))
+    return replicas
+
+
+def _role_matches(row, pairs):
+    matches = []
+    role_id = row["role_id"]
+    canonical_pair = (row["profile"] == "inclusive" and
+                      row["activity_id"] ==
+                      "charged_light_sector_activity_a15_v1_eta4")
+    pair = pairs.get((int(row["trigger_pdg"]), int(row["associate_pdg"])))
+    if row["family"] == "balancing" and canonical_pair and pair is not None:
+        class_id = int(row["class_id"])
+        if class_id == 0:
+            matches.append("balancing.integrated." + pair["sector"])
+        elif class_id > 0:
+            if row["quantity"] in {
+                    "baryon_meson_reference_ratio",
+                    "baryon_meson_ratio_to_reference_tune"}:
+                matches.append("balancing.baryon_meson.activity")
+            elif row["quantity"] in {
+                    "os_minus_ss_per_trigger", "ratio_to_reference_tune"}:
+                matches.append("balancing.activity." + pair["sector"])
+    if row["family"] == "correlations" and canonical_pair and pair is not None:
+        matches.append("correlations.{}.{}".format(row["tune"], pair["sector"]))
+    if row["family"] == "kinematics":
+        matches.append("kinematics.{}.{}".format(row["associate_pdg"],
+                                                  row["axis"]))
+    if (row["family"] == "multiplicity" and row["activity_id"] ==
+            "charged_light_sector_activity_a15_v1_eta4"):
+        matches.append("multiplicity.composite")
+    return [value for value in matches if value == role_id]
+
+
+def validate_engine_relations(roles, rows, receipt, families):
+    """Validate emitted rows relationally; role selector prose is non-authoritative."""
+    domains = receipt["scientific_identity"]["compact_domains"]
+    role_map = {role["id"]: role["family"] for role in roles}
+    if len(roles) != 42 or len(role_map) != 42:
+        raise ValueError("plot role registry is not the frozen 42-ID set")
+    expected_roles = {
+        "balancing.integrated.charm": "balancing",
+        "balancing.integrated.beauty": "balancing",
+        "balancing.activity.charm": "balancing",
+        "balancing.activity.beauty": "balancing",
+        "balancing.baryon_meson.activity": "balancing",
+        "multiplicity.composite": "multiplicity",
+    }
+    for tune in domains["tune_dictionary"]:
+        for sector in ("charm", "beauty"):
+            expected_roles["correlations.{}.{}".format(tune, sector)] = \
+                "correlations"
+    for species in domains["g9_species_dictionary"]:
+        for axis in ("pt", "eta", "phi"):
+            expected_roles["kinematics.{}.{}".format(
+                species["signed_pdg"], axis)] = "kinematics"
+    if role_map != expected_roles:
+        raise ValueError("plot role registry differs from the frozen IDs/families")
+    semantic_ids = [row["semantic_id"] for row in rows]
+    if len(semantic_ids) != len(set(semantic_ids)):
+        raise ValueError("plot semantic IDs collide")
+    natural_fields = (
+        "family", "quantity", "tune", "reference_tune", "profile",
+        "activity_id", "class_id", "trigger_pdg", "associate_pdg",
+        "reference_pdg", "component", "axis", "bin_index")
+    natural_keys = [tuple(row[name] for name in natural_fields) for row in rows]
+    if len(natural_keys) != len(set(natural_keys)):
+        raise ValueError("plot emitted-row natural keys collide")
+
+    reached = set()
+    pairs = {(item["trigger_pdg"], item["associate_pdg"]): item
+             for item in domains["pair_query_dictionary"]}
+    available_uncertainty = {"AVAILABLE", "AVAILABLE_ZERO_DISPERSION"}
+    tune_ratio_quantities = {"ratio_to_reference_tune",
+                             "baryon_meson_ratio_to_reference_tune"}
+    for row in rows:
+        role_id = row["role_id"]
+        if role_id != "-":
+            if role_id not in role_map or role_map[role_id] != row["family"]:
+                raise ValueError("plot row role/family agreement differs")
+            if len(_role_matches(row, pairs)) != 1:
+                raise ValueError("plot row role/context predicate differs")
+            reached.add(role_id)
+        if row["reference_tune"] != "-" and row["tune"] == row["reference_tune"]:
+            raise ValueError("plot emitted a fake reference-tune ratio row")
+        has_value = row["value"] != "-"
+        if has_value != (row["value_status"] in {"AVAILABLE",
+                                                  "UNSTABLE_DENOMINATOR"}):
+            raise ValueError("plot value/status relation differs")
+        has_uncertainty = row["uncertainty_status"] in available_uncertainty
+        if has_uncertainty != (row["finite_mc_error"] != "-" and
+                               row["variance"] != "-"):
+            raise ValueError("plot uncertainty/status relation differs")
+        if has_uncertainty and not has_value:
+            raise ValueError("plot uncertainty is available without a value")
+        source = _replicas(row["source_tune_complements"],
+                           "source-tune complements")
+        reference = _replicas(row["reference_tune_complements"],
+                              "reference-tune complements")
+        if has_uncertainty and (len(source) != 10 or "-" in source or
+                                row["source_tune_leave_mean"] == "-"):
+            raise ValueError("available uncertainty lacks K source complements")
+        is_tune_ratio = row["quantity"] in tune_ratio_quantities
+        if is_tune_ratio != (row["reference_tune"] != "-"):
+            raise ValueError("tune-ratio/reference-tune relation differs")
+        if is_tune_ratio:
+            if has_value and len(reference) != 10:
+                raise ValueError("tune ratio lacks aligned K reference complements")
+            if has_uncertainty and ("-" in reference or
+                                    row["reference_tune_leave_mean"] == "-"):
+                raise ValueError("available tune-ratio uncertainty lacks references")
+        elif reference or row["reference_tune_leave_mean"] != "-":
+            raise ValueError("non-tune ratio carries reference complements")
+
+    requested = set(families)
+    role_families = {"balancing", "correlations", "kinematics", "multiplicity"}
+    if role_families.issubset(requested) and reached != set(role_map):
+        raise ValueError("not every frozen plot role is reachable")
+
+    if "correlations" in requested:
+        components = ("OS", "SS", "OS_MINUS_SS")
+        expected = {
+            (scope["tune"], scope["profile"], scope["activity"],
+             str(scope["class_id"]), str(correlation["trigger_pdg"]),
+             str(correlation["associate_pdg"]), component, str(bin_index))
+            for scope in domains["scope_dictionary"] if scope["family"] == "pair"
+            for correlation in domains["correlation_dictionary"]
+            for component in components
+            for bin_index in range(domains["axes"]["dphi"]["bins"])
+        }
+        observed = {
+            (row["tune"], row["profile"], row["activity_id"], row["class_id"],
+             row["trigger_pdg"], row["associate_pdg"], row["component"],
+             row["bin_index"])
+            for row in rows if row["family"] == "correlations"
+        }
+        if observed != expected:
+            raise ValueError("correlation rows differ from compact Cartesian domain")
 
 
 def float_text(token):

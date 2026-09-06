@@ -20,25 +20,151 @@ from test_reduction import COMPACT_MUTATOR, COMPACT_ORACLE
 
 GEOMETRY_AND_RATIO = r'''
 #include "projection.hpp"
+#include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <limits>
+#include <numeric>
+#include <string>
 #include <vector>
 namespace HP=Hadronization::Plot;namespace HR=Hadronization::Reduction;
-int main(){std::cout<<std::setprecision(17);
+void family(const std::vector<std::vector<double>>& values,std::size_t component){
+ for(std::size_t block=0;block<values.size();++block){if(block)std::cout<<';';
+   const double value=values[block][component];
+   if(std::isfinite(value))std::cout<<value;else std::cout<<'-';}
+ std::cout<<'\n';
+}
+int main(){
+ std::cout<<std::setprecision(17);
  std::cout<<HP::DeltaPhi(-HP::kPi/2,0)<<' '<<HP::DeltaPhi(3*HP::kPi/2,0)<<' '
-          <<HP::DeltaPhi(.25,-.75)<<' '<<HP::DeltaPhi(.25,HP::AssociatePhi(.25,1.0))<<'\n';
+          <<HP::DeltaPhi(.25,-.75)<<' '
+          <<HP::DeltaPhi(.25,HP::AssociatePhi(.25,1.0))<<'\n';
  std::vector<std::vector<double>> a,b;
- for(int i=0;i<10;++i){a.push_back({double(i+2),double(i+5)});b.push_back({double(3*i+4),double(i+7)});}
- auto make=[](const auto&z){return HP::Estimate(z,[](const auto&v){return HR::Ratio(0,1,v);});};
- auto x=make(a),y=make(b);auto r=HP::IndependentRatio(x,y);
- std::cout<<r.estimate.center[0]<<' '<<r.estimate.covariance[0]<<' '<<r.estimate.standardError[0]<<'\n';
- std::vector<double> reference,zero(10,0.0);
- for(int i=0;i<10;++i)reference.push_back(a[i][1]);
- auto cancelled=HP::EstimateAfterExactCancellation(a,[](const auto&v){return HR::Ratio(0,1,v);},{HP::ExactDenominator("reference",reference)},{"trigger"});
- auto veto=HP::Estimate(a,[](const auto&v){return HR::Ratio(0,1,v);},{HP::ExactDenominator("trigger",zero,false),HP::ExactDenominator("reference",reference)});
- std::cout<<cancelled.estimate.center[0]<<' '<<cancelled.estimate.valueStatus<<' '<<veto.estimate.valueStatus<<'\n';
- auto boundary=HP::Estimate(a,[](const auto&v){return HR::Ratio(0,1,v);},{},{"CLASS_BOUNDARY_UNSTABLE"});
- std::cout<<boundary.estimate.center[0]<<' '<<boundary.estimate.valueStatus<<' '<<boundary.estimate.uncertaintyStatus<<' '<<boundary.estimate.covariance.size()<<' '<<boundary.diagnostic<<'\n';}
+ HP::BlockSeries referencePrimitive;
+ referencePrimitive.exact=true;
+ for(int i=0;i<10;++i){
+   a.push_back({double(i+2),double(i+5)});
+   b.push_back({double(3*i+4),double(i+7)});
+   referencePrimitive.values.push_back(double(3*i+4));
+   referencePrimitive.absoluteErrorBounds.push_back(0.0);
+ }
+ auto make=[](const auto& values){return HP::Estimate(
+   values,[](const auto& pooled){return HR::Ratio(0,1,pooled);});};
+ const auto x=make(a),y=make(b);
+ const auto ratio=HP::IndependentRatio(
+   x,y,{HP::Denominator("reference_tune_numerator",referencePrimitive)});
+ std::cout<<ratio.estimate.center[0]<<' '<<ratio.estimate.covariance[0]<<' '
+          <<ratio.estimate.standardError[0]<<' '<<ratio.estimate.leaveMean[0]<<' '
+          <<ratio.referenceLeaveMean[0]<<'\n';
+ family(ratio.estimate.complements,0);
+ family(ratio.referenceComplements,0);
+
+ HP::Domains domains;for(int block=1;block<=10;++block)domains.blockIds.push_back(block);
+ HP::Source source(domains);
+ for(int block=1;block<=10;++block){
+   source.AddCell({2,0,unsigned(block),0,0},{1.0,1.0e16,1.0,2});
+   source.AddCell({2,0,unsigned(block),1,0},
+                  {0.9999999999999999,1.0e16,1.0,2});
+ }
+ const auto net=HP::Difference(source.Series(2,0,0,0),source.Series(2,0,1,0));
+ std::vector<std::vector<double>> identityBlocks(10,std::vector<double>{1.0});
+ auto identity=[](const auto& pooled){return HR::FunctionValue{true,{pooled[0]}, {}};};
+ const auto typed=HP::Estimate(identityBlocks,identity,
+                              {HP::Denominator("typed_net",net,false)});
+ auto dropped=net;dropped.absoluteErrorBounds.clear();
+ const auto metadataDrop=HP::Estimate(identityBlocks,identity,
+                                      {HP::Denominator("typed_net",dropped,false)});
+ auto forced=net;forced.exact=true;
+ const auto forcedExact=HP::Estimate(identityBlocks,identity,
+                                     {HP::Denominator("typed_net",forced,false)});
+ std::cout<<typed.estimate.valueStatus<<' '<<metadataDrop.estimate.valueStatus<<' '
+          <<forcedExact.estimate.valueStatus<<' '<<net.values[0]<<' '
+          <<net.absoluteErrorBounds[0]<<'\n';
+
+ HR::DenominatorSeries exactZero{"cancelled_zero",std::vector<double>(10,0.0),
+                                  {},false,true};
+ const auto pooledZero=HP::Estimate(identityBlocks,identity,{exactZero});
+ std::vector<double> complementBlocks={9,1,1,1,1,1,1,1,1,-8};
+ HR::DenominatorSeries exactComplement{"cancelled_complement",complementBlocks,
+                                       {},false,true};
+ const auto complementZero=HP::Estimate(identityBlocks,identity,{exactComplement});
+ HR::DenominatorSeries numericComplement=exactComplement;
+ numericComplement.id="cancelled_numeric_complement";
+ numericComplement.exact=false;
+ numericComplement.absoluteErrorBounds=std::vector<double>(10,0.0);
+ numericComplement.absoluteErrorBounds.back()=0.5;
+ const auto complementUnresolved=HP::Estimate(identityBlocks,identity,
+                                               {numericComplement});
+ std::cout<<pooledZero.estimate.valueStatus<<' '
+          <<complementZero.estimate.valueStatus<<' '
+          <<complementZero.estimate.uncertaintyStatus<<' '
+          <<complementUnresolved.estimate.valueStatus<<' '
+          <<complementUnresolved.estimate.uncertaintyStatus<<'\n';
+
+ HR::DenominatorSeries low{"low_information",{20,-1,-1,-1,-1,-1,-1,-1,-1,-1},
+                            {},false,true};
+ const auto cancelledLow=HP::Estimate(identityBlocks,identity,{low});
+ low.algebraicallySurvives=true;
+ const auto survivingLow=HP::Estimate(identityBlocks,identity,{low});
+ std::cout<<cancelledLow.estimate.valueStatus<<' '
+          <<cancelledLow.estimate.uncertaintyStatus<<' '
+          <<cancelledLow.estimate.reasons.size()<<' '
+          <<survivingLow.estimate.valueStatus<<' '
+          <<survivingLow.estimate.uncertaintyStatus<<'\n';
+
+ auto boundary=HP::Estimate(a,[](const auto& pooled){return HR::Ratio(0,1,pooled);},
+                            {},{"CLASS_BOUNDARY_UNSTABLE"});
+ std::cout<<boundary.estimate.center[0]<<' '<<boundary.estimate.valueStatus<<' '
+          <<boundary.estimate.uncertaintyStatus<<' '
+          <<boundary.estimate.covariance.size()<<' '<<boundary.diagnostic<<'\n';
+
+ std::vector<std::vector<double>> sourceBlocks,referenceBlocks;
+ std::vector<HP::BlockSeries> referenceBins(3);
+ for(auto& series:referenceBins)series.exact=true;
+ for(int i=0;i<10;++i){
+   sourceBlocks.push_back({double(i+2),double(2*i+3),double(i+1)});
+   referenceBlocks.push_back({double(2*i+5),0.0,double(i+4)});
+   for(std::size_t component=0;component<3;++component){
+     referenceBins[component].values.push_back(referenceBlocks.back()[component]);
+     referenceBins[component].absoluteErrorBounds.push_back(0.0);
+   }
+ }
+ auto normalized=[](const auto& blocks){
+   HP::BlockSeries total;total.exact=true;
+   for(const auto& block:blocks){
+     total.values.push_back(std::accumulate(block.begin(),block.end(),0.0));
+     total.absoluteErrorBounds.push_back(0.0);
+   }
+   return HP::Estimate(blocks,[](const auto& pooled){return HR::Normalized(0,3,pooled);},
+                       {HP::Denominator("total",total)});
+ };
+ const auto vectorRatio=HP::IndependentRatio(
+   normalized(sourceBlocks),normalized(referenceBlocks),
+   {HP::Denominator("reference_bin_0",referenceBins[0]),
+    HP::Denominator("reference_bin_1",referenceBins[1]),
+    HP::Denominator("reference_bin_2",referenceBins[2])});
+ std::cout<<HP::ValueStatus(vectorRatio,0)<<' '<<HP::ValueStatus(vectorRatio,1)<<' '
+          <<HP::ValueStatus(vectorRatio,2)<<' '
+          <<HP::UncertaintyStatus(vectorRatio,0)<<' '
+          <<HP::UncertaintyStatus(vectorRatio,1)<<' '
+          <<HP::UncertaintyStatus(vectorRatio,2)<<' '
+          <<vectorRatio.estimate.covariance[2]<<'\n';
+ family(vectorRatio.estimate.complements,0);
+ family(vectorRatio.estimate.complements,2);
+ family(vectorRatio.referenceComplements,0);
+ family(vectorRatio.referenceComplements,2);
+ int finiteInvalid=0;for(std::size_t block=0;block<10;++block){
+   finiteInvalid+=std::isfinite(vectorRatio.estimate.complements[block][1]);
+   finiteInvalid+=std::isfinite(vectorRatio.referenceComplements[block][1]);}
+ std::cout<<finiteInvalid<<'\n';
+ auto referenceSurviving=exactComplement;
+ referenceSurviving.algebraicallySurvives=true;
+ const auto referenceComplementFailure=HP::IndependentRatio(
+   x,y,{referenceSurviving});
+ std::cout<<referenceComplementFailure.estimate.center[0]<<' '
+          <<HP::ValueStatus(referenceComplementFailure,0)<<' '
+          <<HP::UncertaintyStatus(referenceComplementFailure,0)<<'\n';
+}
 '''
 
 
@@ -503,6 +629,8 @@ class PlottingContract(unittest.TestCase):
             "--class-id", "0", "--pair", "521:-521")
         self.assertTrue(any(item["value_status"] == "POOLED_DENOMINATOR_ZERO"
                             for item in missing["rows"]))
+        self.assertFalse(any(item["reference_tune"] == "MONASH"
+                             for item in missing["rows"]))
         baryon = self._query(
             "balancing", "--tune", "MONASH", "--profile", "inclusive",
             "--activity", "charged_light_sector_activity_a15_v1_eta4",
@@ -520,7 +648,8 @@ class PlottingContract(unittest.TestCase):
         self.assertEqual(geometry[1], -math.pi / 2)
         self.assertEqual(geometry[2:], [1.0, 1.0])
         self.assertNotEqual(round(math.pi, 6), math.pi)
-        ratio, covariance, error = map(float, output[1].split())
+        ratio, covariance, error, source_mean, reference_mean = map(
+            float, output[1].split())
         first_n = [float(index + 2) for index in range(10)]
         first_d = [float(index + 5) for index in range(10)]
         second_n = [float(3 * index + 4) for index in range(10)]
@@ -536,26 +665,115 @@ class PlottingContract(unittest.TestCase):
         first = estimate(first_n, first_d)
         second = estimate(second_n, second_d)
         expected = first[0] / second[0]
-        expected_covariance = (first[2] / second[0] ** 2 +
-                               first[0] ** 2 * second[2] / second[0] ** 4)
+        source_family = [value / second[0] for value in first[1]]
+        reference_family = [first[0] / value for value in second[1]]
+        expected_source_mean = sum(source_family) / 10.0
+        expected_reference_mean = sum(reference_family) / 10.0
+        source_bias_corrected_center = 10.0 * expected - 9.0 * expected_source_mean
+        expected_covariance = 0.9 * (
+            sum((value - expected_source_mean) ** 2
+                for value in source_family) +
+            sum((value - expected_reference_mean) ** 2
+                for value in reference_family))
+        linearized = (first[2] / second[0] ** 2 +
+                      first[0] ** 2 * second[2] / second[0] ** 4)
         paired = [first[1][index] / second[1][index] for index in range(10)]
         paired_mean = sum(paired) / 10.0
         paired_covariance = 0.9 * sum((value - paired_mean) ** 2 for value in paired)
+        combined_mean = sum(source_family + reference_family) / 20.0
+        combined_centering = 0.9 * sum(
+            (value - combined_mean) ** 2
+            for value in source_family + reference_family)
+        wrong_factor = expected_covariance / 0.9
+        pooled_family = source_family + reference_family
+        pooled_mean = sum(pooled_family) / len(pooled_family)
+        pooled_tune_deletion = 19.0 / 20.0 * sum(
+            (value - pooled_mean) ** 2 for value in pooled_family)
+        third_n = [float(2 * index + 5) for index in range(10)]
+        third_d = [float(index + 9) for index in range(10)]
+        third = estimate(third_n, third_d)
+        third_family = [value / second[0] for value in third[1]]
+        pooled_thirty = source_family + reference_family + third_family
+        pooled_thirty_mean = sum(pooled_thirty) / 30.0
+        pooled_thirty_covariance = 29.0 / 30.0 * sum(
+            (value - pooled_thirty_mean) ** 2 for value in pooled_thirty)
         self.assertAlmostEqual(ratio, expected, places=15)
+        self.assertNotAlmostEqual(ratio, source_bias_corrected_center, places=12)
         self.assertAlmostEqual(covariance, expected_covariance, places=15)
         self.assertAlmostEqual(error, math.sqrt(expected_covariance), places=15)
-        self.assertNotAlmostEqual(paired_covariance, expected_covariance, places=10)
-        cancelled_value, cancelled_status, veto_status = output[2].split()
-        self.assertAlmostEqual(float(cancelled_value), first[0], places=15)
-        self.assertEqual(cancelled_status, "AVAILABLE")
-        self.assertEqual(veto_status, "POOLED_DENOMINATOR_ZERO")
+        self.assertAlmostEqual(source_mean, expected_source_mean, places=15)
+        self.assertAlmostEqual(reference_mean, expected_reference_mean, places=15)
+        self.assertAlmostEqual(expected_covariance, 0.0017791710298199297,
+                               places=16)
+        self.assertAlmostEqual(linearized, 0.0017662834141002417, places=16)
+        for mutant in (linearized, paired_covariance, combined_centering,
+                       wrong_factor, pooled_tune_deletion,
+                       pooled_thirty_covariance):
+            self.assertNotAlmostEqual(mutant, expected_covariance, places=10)
+        exported_source = list(map(float, output[2].split(";")))
+        exported_reference = list(map(float, output[3].split(";")))
+        self.assertEqual(exported_source, source_family)
+        self.assertEqual(exported_reference, reference_family)
+        self.assertNotEqual(exported_source, first[1])
+        self.assertNotEqual(exported_reference, second[1])
+
+        typed, dropped, forced, net_value, net_bound = output[4].split()
+        self.assertEqual(typed, "DENOMINATOR_NUMERICALLY_UNRESOLVED")
+        self.assertEqual((dropped, forced), ("AVAILABLE", "AVAILABLE"))
+        self.assertNotEqual(float(net_value), 0.0)
+        self.assertGreater(float(net_bound), abs(float(net_value)))
+        pooled, cancelled_value, cancelled_uncertainty, numerical_value, \
+            numerical_uncertainty = output[5].split()
+        self.assertEqual(pooled, "POOLED_DENOMINATOR_ZERO")
+        self.assertEqual(cancelled_value, "AVAILABLE")
+        self.assertEqual(cancelled_uncertainty, "LEAVE_DENOMINATOR_ZERO")
+        self.assertEqual(numerical_value, "AVAILABLE")
+        self.assertEqual(numerical_uncertainty,
+                         "LEAVE_DENOMINATOR_NUMERICALLY_UNRESOLVED")
+        cancelled_value, cancelled_uncertainty, cancelled_reasons, \
+            surviving_value, surviving_uncertainty = output[6].split()
+        self.assertEqual((cancelled_value, cancelled_uncertainty,
+                          cancelled_reasons),
+                         ("AVAILABLE", "AVAILABLE_ZERO_DISPERSION", "0"))
+        self.assertEqual(surviving_value, "UNSTABLE_DENOMINATOR")
+        self.assertEqual(surviving_uncertainty,
+                         "DENOMINATOR_STATISTICALLY_UNRESOLVED")
         boundary_value, value_status, uncertainty_status, covariance_size, diagnostic = \
-            output[3].split()
+            output[7].split()
         self.assertAlmostEqual(float(boundary_value), first[0], places=15)
         self.assertEqual(value_status, "AVAILABLE")
         self.assertEqual(uncertainty_status, "CLASS_BOUNDARY_UNSTABLE")
         self.assertEqual(covariance_size, "0")
         self.assertEqual(diagnostic, "fixed_pooled_boundary_delete_one")
+
+        vector_status = output[8].split()
+        self.assertEqual(vector_status[:3],
+                         ["AVAILABLE", "POOLED_DENOMINATOR_ZERO", "AVAILABLE"])
+        self.assertEqual(vector_status[3:6],
+                         ["AVAILABLE", "UNAVAILABLE", "AVAILABLE"])
+        vector_covariance = float(vector_status[6])
+        source_zero = list(map(float, output[9].split(";")))
+        source_two = list(map(float, output[10].split(";")))
+        reference_zero = list(map(float, output[11].split(";")))
+        reference_two = list(map(float, output[12].split(";")))
+        mean_source_zero = sum(source_zero) / 10.0
+        mean_source_two = sum(source_two) / 10.0
+        mean_reference_zero = sum(reference_zero) / 10.0
+        mean_reference_two = sum(reference_two) / 10.0
+        reconstructed = 0.9 * sum(
+            (source_zero[index] - mean_source_zero) *
+            (source_two[index] - mean_source_two) +
+            (reference_zero[index] - mean_reference_zero) *
+            (reference_two[index] - mean_reference_two)
+            for index in range(10))
+        self.assertAlmostEqual(vector_covariance, reconstructed, places=15)
+        self.assertNotEqual(vector_covariance, 0.0)
+        self.assertEqual(output[13], "0")
+        retained_center, retained_value_status, retained_uncertainty_status = \
+            output[14].split()
+        self.assertAlmostEqual(float(retained_center), expected, places=15)
+        self.assertEqual(retained_value_status, "UNSTABLE_DENOMINATOR")
+        self.assertEqual(retained_uncertainty_status, "LEAVE_DENOMINATOR_ZERO")
 
     def test_complete_pair_correlation_profile_activity_and_role_sets(self):
         roles, rows, unused = self.plot.engine_rows(
@@ -563,11 +781,27 @@ class PlottingContract(unittest.TestCase):
         del unused
         self.assertEqual(len(roles), 42)
         self.assertEqual(len({item["id"] for item in roles}), 42)
+        expected_roles = {
+            "balancing.integrated.charm", "balancing.integrated.beauty",
+            "balancing.activity.charm", "balancing.activity.beauty",
+            "balancing.baryon_meson.activity", "multiplicity.composite",
+        }
+        expected_roles.update(
+            "correlations.{}.{}".format(tune, sector)
+            for tune in TUNES for sector in ("charm", "beauty"))
+        expected_roles.update(
+            "kinematics.{}.{}".format(item["signed_pdg"], axis)
+            for item in self.domains["g9_species_dictionary"]
+            for axis in ("pt", "eta", "phi"))
+        self.assertEqual({item["id"] for item in roles}, expected_roles)
         correlation_roles = {item["id"] for item in roles
                              if item["family"] == "correlations"}
         self.assertEqual(correlation_roles, {
             "correlations.{}.{}".format(tune, sector)
             for tune in TUNES for sector in ("charm", "beauty")})
+        self.assertFalse(any(row["tune"] == "MONASH" and
+                             row["reference_tune"] == "MONASH"
+                             for row in rows))
         selected = [row for row in rows if row["family"] == "balancing" and
                     row["quantity"] == "ordered_pair_yield" and
                     row["tune"] == "MONASH" and row["profile"] == "inclusive" and
@@ -583,6 +817,95 @@ class PlottingContract(unittest.TestCase):
         self.assertEqual({row["activity_id"] for row in rows
                           if row["family"] == "correlations"},
                          {item["id"] for item in self.domains["activities"]})
+        expected = {
+            (scope["tune"], scope["profile"], scope["activity"],
+             str(scope["class_id"]), str(identity["trigger_pdg"]),
+             str(identity["associate_pdg"]), component, str(bin_index))
+            for scope in self.domains["scope_dictionary"]
+            if scope["family"] == "pair"
+            for identity in self.domains["correlation_dictionary"]
+            for component in ("OS", "SS", "OS_MINUS_SS")
+            for bin_index in range(self.domains["axes"]["dphi"]["bins"])
+        }
+        correlations = [row for row in rows if row["family"] == "correlations"]
+        observed = {
+            (row["tune"], row["profile"], row["activity_id"], row["class_id"],
+             row["trigger_pdg"], row["associate_pdg"], row["component"],
+             row["bin_index"]) for row in correlations
+        }
+        self.assertEqual(observed, expected)
+        materialized_classes = {str(item["id"])
+                                for item in self.domains["class_dictionary"]}
+        self.assertEqual({row["class_id"] for row in correlations},
+                         materialized_classes)
+        role_rows = [row for row in correlations if row["role_id"] != "-"]
+        self.assertEqual({row["profile"] for row in role_rows}, {"inclusive"})
+        self.assertEqual({row["activity_id"] for row in role_rows},
+                         {"charged_light_sector_activity_a15_v1_eta4"})
+        self.assertEqual({row["class_id"] for row in role_rows},
+                         materialized_classes)
+        self.assertTrue(all(row["role_id"] == "-" for row in correlations
+                            if row["profile"] == "historical_1p0_0p15" or
+                            row["activity_id"] ==
+                            "charged_light_sector_activity_a15_v1_eta1"))
+
+        fake_reference = dict(next(
+            row for row in rows if row["quantity"] == "ratio_to_reference_tune"))
+        fake_reference["role_id"] = "-"
+        fake_reference["tune"] = fake_reference["reference_tune"]
+        with self.assertRaisesRegex(ValueError, "fake reference-tune"):
+            self.plot.validate_engine_relations(
+                roles, [fake_reference], self.admitted, ("balancing",))
+        wrong_role = dict(next(row for row in correlations
+                               if row["role_id"] != "-"))
+        wrong_role["profile"] = "historical_1p0_0p15"
+        with self.assertRaisesRegex(ValueError, "role/context"):
+            self.plot.validate_engine_relations(
+                roles, [wrong_role], self.admitted, ("balancing",))
+        available_value = dict(next(row for row in rows
+                                    if row["value"] != "-"))
+        available_value["role_id"] = "-"
+        missing_value = dict(available_value)
+        missing_value["value"] = "-"
+        with self.assertRaisesRegex(ValueError, "value/status"):
+            self.plot.validate_engine_relations(
+                roles, [missing_value], self.admitted, ("balancing",))
+        short_replicas = dict(correlations[0])
+        short_replicas["role_id"] = "-"
+        short_replicas["source_tune_complements"] = ";".join(["0x0p+0"] * 9)
+        with self.assertRaisesRegex(ValueError, "cardinality"):
+            self.plot.validate_engine_relations(
+                roles, [short_replicas], self.admitted, ("balancing",))
+        natural = dict(next(row for row in rows
+                            if row["quantity"] == "ordered_pair_yield" and
+                            row["role_id"] == "-"))
+        duplicate = dict(natural)
+        duplicate["semantic_id"] += "/mutant"
+        with self.assertRaisesRegex(ValueError, "natural keys"):
+            self.plot.validate_engine_relations(
+                roles, [natural, duplicate], self.admitted, ("balancing",))
+
+        admitted, unused_summary = self.plot.admit(
+            self.alt_root, self.alt_receipt, self.alt_analysis, self.plot_work)
+        del unused_summary
+        unused_roles, alternate, unused_build = self.plot.engine_rows(
+            self.alt_root, admitted, ("correlations",), self.plot_work)
+        del unused_roles, unused_build
+        alt_domains = admitted["scientific_identity"]["compact_domains"]
+        alt_expected = {
+            (scope["tune"], scope["profile"], scope["activity"],
+             str(scope["class_id"]), str(identity["trigger_pdg"]),
+             str(identity["associate_pdg"]), component, str(bin_index))
+            for scope in alt_domains["scope_dictionary"]
+            if scope["family"] == "pair"
+            for identity in alt_domains["correlation_dictionary"]
+            for component in ("OS", "SS", "OS_MINUS_SS")
+            for bin_index in range(alt_domains["axes"]["dphi"]["bins"])
+        }
+        self.assertEqual({
+            (row["tune"], row["profile"], row["activity_id"], row["class_id"],
+             row["trigger_pdg"], row["associate_pdg"], row["component"],
+             row["bin_index"]) for row in alternate}, alt_expected)
 
     def test_g9_t1_origin_and_closure_domains_remain_distinct(self):
         expectations = {
@@ -613,6 +936,22 @@ class PlottingContract(unittest.TestCase):
         unused_roles, rows, unused_build = self.plot.engine_rows(
             self.root, self.admitted, ("multiplicity",), self.plot_work)
         del unused_roles, unused_build
+        tune_ratios = [row for row in rows
+                       if row["quantity"] == "ratio_to_reference_tune"]
+        self.assertTrue(tune_ratios)
+        self.assertFalse(any(row["tune"] == "MONASH" for row in tune_ratios))
+        self.assertFalse(any(row["tune"] == row["reference_tune"]
+                             for row in rows if row["reference_tune"] != "-"))
+        multiplicity_roles = [row for row in rows if row["role_id"] != "-"]
+        self.assertTrue(multiplicity_roles)
+        self.assertTrue(all(
+            row["role_id"] == "multiplicity.composite" and
+            row["activity_id"] ==
+            "charged_light_sector_activity_a15_v1_eta4"
+            for row in multiplicity_roles))
+        self.assertTrue(all(row["role_id"] == "-" for row in rows
+                            if row["activity_id"] ==
+                            "charged_light_sector_activity_a15_v1_eta1"))
         selected = [row for row in rows if row["tune"] == "MONASH" and
                     row["axis"] == "nch" and row["quantity"] ==
                     "normalized_distribution" and row["activity_id"] ==
@@ -642,6 +981,49 @@ class PlottingContract(unittest.TestCase):
             for position, left in enumerate(varying)
             for right in varying[position + 1:]]
         self.assertTrue(any(abs(value) > 0 for value in off_diagonal))
+
+        ratio_rows = [row for row in tune_ratios
+                      if row["tune"] == "JUNCTIONS" and row["activity_id"] ==
+                      "charged_light_sector_activity_a15_v1_eta4"]
+        valid = [row for row in ratio_rows
+                 if row["uncertainty_status"] in
+                 {"AVAILABLE", "AVAILABLE_ZERO_DISPERSION"}]
+        invalid = [row for row in ratio_rows if row["value"] == "-"]
+        self.assertGreaterEqual(len(valid), 2)
+        self.assertTrue(invalid)
+        self.assertTrue(all(row["value"] != "1" for row in invalid))
+        self.assertTrue(all(len(row["source_tune_complements"].split(";")) == 10
+                            and len(row["reference_tune_complements"].split(";")) == 10
+                            for row in ratio_rows))
+        families = []
+        for row in valid:
+            source_family = list(map(float.fromhex,
+                                     row["source_tune_complements"].split(";")))
+            reference_family = list(map(float.fromhex,
+                                        row["reference_tune_complements"].split(";")))
+            source_mean = sum(source_family) / 10.0
+            reference_mean = sum(reference_family) / 10.0
+            variance = 0.9 * (
+                sum((value - source_mean) ** 2 for value in source_family) +
+                sum((value - reference_mean) ** 2
+                    for value in reference_family))
+            self.assertAlmostEqual(variance, float.fromhex(row["variance"]),
+                                   places=15)
+            self.assertAlmostEqual(math.sqrt(variance),
+                                   float.fromhex(row["finite_mc_error"]), places=15)
+            families.append((source_family, reference_family,
+                             source_mean, reference_mean))
+        cross_covariances = []
+        for index, left in enumerate(families):
+            for right in families[index + 1:]:
+                cross_covariances.append(0.9 * sum(
+                    (left[0][block] - left[2]) *
+                    (right[0][block] - right[2]) +
+                    (left[1][block] - left[3]) *
+                    (right[1][block] - right[3])
+                    for block in range(10)))
+        self.assertTrue(cross_covariances)
+        self.assertTrue(all(math.isfinite(value) for value in cross_covariances))
 
     def test_dynamic_default_and_three_class_compacts(self):
         default = self._query(
@@ -786,6 +1168,15 @@ class PlottingContract(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         original_manifest = json.loads((second / "manifest.json").read_text())
         augmented_manifest = json.loads((augmented / "manifest.json").read_text())
+        reached_roles = set()
+        for family in self.plot.DEFAULT_FAMILIES:
+            with (second / (family + ".csv")).open(
+                    encoding="ascii", newline="") as handle:
+                reached_roles.update(row["role_id"] for row in
+                                     csv.DictReader(handle) if row["role_id"])
+        self.assertEqual(len(original_manifest["roles"]), 42)
+        self.assertEqual(reached_roles,
+                         {role["id"] for role in original_manifest["roles"]})
         self.assertEqual(original_manifest["compact_input"][
             "scientific_content_digest"], augmented_manifest["compact_input"][
                 "scientific_content_digest"])

@@ -309,6 +309,8 @@ void Emit(std::ostream& output, const HP::Domains& domains, const HP::Row& row,
   const std::string referenceLeave = index < projected.referenceLeaveMean.size()
                                          ? Float(projected.referenceLeaveMean[index])
                                          : "-";
+  const std::string valueStatus = HP::ValueStatus(projected, index);
+  const std::string uncertaintyStatus = HP::UncertaintyStatus(projected, index);
   output << "D\t" << row.family << '\t' << row.semanticId << '\t'
          << (row.roleId.empty() ? "-" : row.roleId) << '\t' << row.quantity << '\t'
          << row.tune << '\t' << (row.referenceTune.empty() ? "-" : row.referenceTune)
@@ -322,11 +324,11 @@ void Emit(std::ostream& output, const HP::Domains& domains, const HP::Row& row,
          << (row.component.empty() ? "-" : row.component) << '\t'
          << (row.axis.empty() ? "-" : row.axis) << '\t' << row.binIndex << '\t'
          << Float(row.binLow) << '\t' << Float(row.binHigh) << '\t' << value << '\t'
-         << result.valueStatus << '\t' << error << '\t' << result.uncertaintyStatus
+         << valueStatus << '\t' << error << '\t' << uncertaintyStatus
          << '\t' << variance << '\t' << leave << '\t' << referenceLeave << '\t'
          << Complements(result.complements, index) << '\t'
          << Complements(projected.referenceComplements, index) << '\t'
-         << Join(result.reasons) << '\t'
+         << Join(HP::Reasons(projected, index)) << '\t'
          << (projected.diagnostic.empty() ? "-" : projected.diagnostic) << '\t'
          << result.policy << '\n';
 }
@@ -374,15 +376,22 @@ std::string Identity(const std::string& quantity, const HP::Scope& scope,
 
 HP::ProjectionResult PairYield(const HP::Source& source, const HP::Scope& scope,
                                const HP::Pair& pair) {
-  const auto numerator = source.Blocks(2, scope.id, pair.id, 0);
-  const auto denominator = source.Blocks(3, scope.id,
-                                         TriggerId(source.Domain(), pair.triggerPdg), 0);
+  const auto denominator = source.Series(
+      3, scope.id, TriggerId(source.Domain(), pair.triggerPdg), 0);
   return HP::Estimate(source.BlockVectors({{2, scope.id, pair.id, 0},
                                            {3, scope.id,
                                             TriggerId(source.Domain(), pair.triggerPdg), 0}}),
                       [](const auto& value) { return HR::Ratio(0, 1, value); },
-                      {HP::ExactDenominator("trigger", denominator)},
+                      {HP::Denominator("trigger", denominator)},
                       HP::BoundaryReasons(source.Domain(), scope));
+}
+
+HP::BlockSeries PairNet(const HP::Source& source, const HP::Scope& scope,
+                        const HP::Pair& opposite) {
+  const auto& same = Pair(source.Domain(), opposite.triggerPdg,
+                          -opposite.associatePdg);
+  return HP::Difference(source.Series(2, scope.id, opposite.id, 0),
+                        source.Series(2, scope.id, same.id, 0));
 }
 
 HP::ProjectionResult Balance(const HP::Source& source, const HP::Scope& scope,
@@ -390,7 +399,7 @@ HP::ProjectionResult Balance(const HP::Source& source, const HP::Scope& scope,
   const auto& same = Pair(source.Domain(), opposite.triggerPdg,
                           -opposite.associatePdg);
   const int triggerId = TriggerId(source.Domain(), opposite.triggerPdg);
-  const auto denominator = source.Blocks(3, scope.id, triggerId, 0);
+  const auto denominator = source.Series(3, scope.id, triggerId, 0);
   return HP::Estimate(source.BlockVectors({{2, scope.id, opposite.id, 0},
                                            {2, scope.id, same.id, 0},
                                            {3, scope.id, triggerId, 0}}),
@@ -400,7 +409,7 @@ HP::ProjectionResult Balance(const HP::Source& source, const HP::Scope& scope,
                         }
                         return HR::FunctionValue{true,
                                                   {(value[0] - value[1]) / value[2]}, {}};
-                      }, {HP::ExactDenominator("trigger", denominator)},
+                      }, {HP::Denominator("trigger", denominator)},
                       HP::BoundaryReasons(source.Domain(), scope));
 }
 
@@ -413,13 +422,12 @@ HP::ProjectionResult ReferenceRatio(const HP::Source& source,
                                  opposite.referencePdg);
   const auto& referenceSs = Pair(source.Domain(), opposite.triggerPdg,
                                  -opposite.referencePdg);
-  std::vector<double> reference;
-  const auto os = source.Blocks(2, scope.id, referenceOs.id, 0);
-  const auto ss = source.Blocks(2, scope.id, referenceSs.id, 0);
-  for (std::size_t block = 0; block < os.size(); ++block) {
-    reference.push_back(os[block] - ss[block]);
-  }
-  return HP::EstimateAfterExactCancellation(
+  const auto reference = HP::Difference(
+      source.Series(2, scope.id, referenceOs.id, 0),
+      source.Series(2, scope.id, referenceSs.id, 0));
+  const auto trigger = source.Series(
+      3, scope.id, TriggerId(source.Domain(), opposite.triggerPdg), 0);
+  return HP::Estimate(
       source.BlockVectors({{2, scope.id, opposite.id, 0},
                            {2, scope.id, same.id, 0},
                            {2, scope.id, referenceOs.id, 0},
@@ -430,8 +438,8 @@ HP::ProjectionResult ReferenceRatio(const HP::Source& source,
         }
         return HR::FunctionValue{true,
                                   {(value[0] - value[1]) / (value[2] - value[3])}, {}};
-      }, {HP::ExactDenominator("reference_os_minus_ss", reference)},
-      {"shared_trigger"},
+      }, {HP::Denominator("shared_trigger", trigger, false),
+          HP::Denominator("reference_os_minus_ss", reference)},
       HP::BoundaryReasons(source.Domain(), scope));
 }
 
@@ -444,8 +452,6 @@ std::string BalanceRole(const HP::Scope& scope, const HP::Pair& pair,
   if (!referenceRatio) return "balancing.activity." + pair.sector;
   return {};
 }
-
-HP::ProjectionResult Unity(std::size_t dimension);
 
 void EmitBalancing(std::ostream& output, const HP::Source& source) {
   const auto& domains = source.Domain();
@@ -484,19 +490,18 @@ void EmitBalancing(std::ostream& output, const HP::Source& source) {
     throw std::runtime_error("MONASH reference tune is absent");
   }
   for (const auto& scope : domains.scopes) {
-    if (scope.family != "pair") continue;
+    if (scope.family != "pair" || scope.tune == referenceTune) continue;
     const auto& referenceScope = FindScope(domains, "pair", referenceTune,
                                            scope.profile, scope.activity,
                                            scope.classId);
     for (const auto& pair : domains.pairs) {
       if (pair.sign != -1) continue;
       const auto absolute = Balance(source, scope, pair);
-      const auto reference = scope.tune == referenceTune
-                                 ? absolute
-                                 : Balance(source, referenceScope, pair);
-      const auto tuneRatio = scope.tune == referenceTune
-                                 ? Unity(1)
-                                 : HP::IndependentRatio(absolute, reference);
+      const auto reference = Balance(source, referenceScope, pair);
+      const auto tuneRatio = HP::IndependentRatio(
+          absolute, reference,
+          {HP::Denominator("reference_tune_os_minus_ss",
+                           PairNet(source, referenceScope, pair))});
       HP::Row row{"balancing",
                   Identity("os_minus_ss_ratio_to_MONASH", scope,
                            pair.triggerPdg, pair.associatePdg),
@@ -509,10 +514,10 @@ void EmitBalancing(std::ostream& output, const HP::Source& source) {
       Emit(output, domains, row, tuneRatio, 0);
       if (std::abs(pair.associatePdg) == std::abs(pair.referencePdg)) continue;
       const auto absoluteReferenceRatio = ReferenceRatio(source, scope, pair);
-      const auto tuneReferenceRatio = scope.tune == referenceTune
-          ? Unity(1)
-          : HP::IndependentRatio(absoluteReferenceRatio,
-                                 ReferenceRatio(source, referenceScope, pair));
+      const auto tuneReferenceRatio = HP::IndependentRatio(
+          absoluteReferenceRatio, ReferenceRatio(source, referenceScope, pair),
+          {HP::Denominator("reference_tune_numerator_os_minus_ss",
+                           PairNet(source, referenceScope, pair))});
       row.semanticId = Identity("baryon_meson_ratio_to_MONASH", scope,
                                 pair.triggerPdg, pair.associatePdg,
                                 "reference=" + std::to_string(pair.referencePdg));
@@ -537,7 +542,7 @@ HP::ProjectionResult Correlation(const HP::Source& source, const HP::Scope& scop
     }
   }
   coordinates.emplace_back(3, scope.id, triggerId, 0);
-  const auto denominator = source.Blocks(3, scope.id, triggerId, 0);
+  const auto denominator = source.Series(3, scope.id, triggerId, 0);
   return HP::Estimate(source.BlockVectors(coordinates), [bins](const auto& value) {
     if (value.back() == 0.0) {
       return HR::FunctionValue{false, {}, "POOLED_DENOMINATOR_ZERO"};
@@ -552,13 +557,14 @@ HP::ProjectionResult Correlation(const HP::Source& source, const HP::Scope& scop
       projected.push_back((value[bin] - value[bins + bin]) / value.back());
     }
     return HR::FunctionValue{true, projected, {}};
-  }, {HP::ExactDenominator("trigger", denominator)});
+  }, {HP::Denominator("trigger", denominator)},
+     HP::BoundaryReasons(source.Domain(), scope));
 }
 
 void EmitCorrelations(std::ostream& output, const HP::Source& source) {
   const auto& domains = source.Domain();
   for (const auto& scope : domains.scopes) {
-    if (scope.family != "pair" || scope.classId != 0) continue;
+    if (scope.family != "pair") continue;
     for (std::size_t correlation = 0; correlation < domains.correlations.size();
          ++correlation) {
       const auto result = Correlation(source, scope, static_cast<int>(correlation));
@@ -573,7 +579,10 @@ void EmitCorrelations(std::ostream& output, const HP::Source& source) {
           HP::Row row{"correlations",
                       Identity("dphi_" + label, scope, identity.first,
                                identity.second, "bin=" + std::to_string(bin)),
-                      "correlations." + scope.tune + "." + pair.sector,
+                      scope.profile == "inclusive" && scope.activity ==
+                              "charged_light_sector_activity_a15_v1_eta4"
+                          ? "correlations." + scope.tune + "." + pair.sector
+                          : "",
                       "dphi_per_trigger", scope.tune, {}, scope.profile,
                       scope.activity, scope.classId, -1, -1, -1, -1,
                       identity.first, identity.second, 0, label, "dphi", bin,
@@ -593,16 +602,17 @@ HP::ProjectionResult Normalized(const HP::Source& source, std::uint32_t projecti
                                 int scope, int firstBin, int count) {
   std::vector<std::tuple<std::uint32_t, std::uint32_t,
                          std::uint32_t, std::uint32_t>> coordinates;
-  std::vector<double> total(source.Domain().blockIds.size(), 0.0);
+  std::vector<HP::BlockSeries> components;
+  components.reserve(static_cast<std::size_t>(count));
   for (int bin = 0; bin < count; ++bin) {
     coordinates.emplace_back(projection, scope, firstBin + bin, 0);
-    const auto values = source.Blocks(projection, scope, firstBin + bin, 0);
-    for (std::size_t block = 0; block < values.size(); ++block) total[block] += values[block];
+    components.push_back(source.Series(projection, scope, firstBin + bin, 0));
   }
+  const auto total = HP::Total(components);
   return HP::Estimate(source.BlockVectors(coordinates),
                       [count](const auto& value) {
                         return HR::Normalized(0, static_cast<std::size_t>(count), value);
-                      }, {HP::ExactDenominator("normalization_total", total)});
+                      }, {HP::Denominator("normalization_total", total)});
 }
 
 void EmitKinematics(std::ostream& output, const HP::Source& source) {
@@ -654,19 +664,6 @@ void EmitKinematics(std::ostream& output, const HP::Source& source) {
   }
 }
 
-HP::ProjectionResult Unity(std::size_t dimension) {
-  HP::ProjectionResult result;
-  result.estimate.policy = HR::kEstimatorPolicy;
-  result.estimate.valueStatus = "AVAILABLE";
-  result.estimate.uncertaintyStatus = "UNITY_REFERENCE_NO_UNCERTAINTY";
-  result.estimate.center.assign(dimension, 1.0);
-  result.estimate.dimension = dimension;
-  result.estimate.blocks = 0;
-  result.estimate.dof = 0;
-  result.diagnostic = "neutral_unity_reference";
-  return result;
-}
-
 void EmitMultiplicity(std::ostream& output, const HP::Source& source) {
   const auto& domains = source.Domain();
   const std::string referenceTune = "MONASH";
@@ -681,24 +678,36 @@ void EmitMultiplicity(std::ostream& output, const HP::Source& source) {
     for (const auto& tune : domains.tunes) {
       const auto& scope = FindScope(domains, "activity", tune, {}, activity);
       const auto result = tune == referenceTune
-                              ? reference
-                              : Normalized(source, 1, scope.id, 0,
-                                           domains.activityBins);
-      const auto ratio = tune == referenceTune
-                             ? Unity(static_cast<std::size_t>(domains.activityBins))
-                             : HP::IndependentRatio(result, reference);
+          ? reference : Normalized(source, 1, scope.id, 0, domains.activityBins);
       for (int bin = 0; bin < domains.activityBins; ++bin) {
         HP::Row row{"multiplicity",
                     Identity("g1_normalized", scope, 0, 0,
                              "bin=" + std::to_string(bin)),
-                    "multiplicity.composite", "normalized_distribution", tune, {}, {},
+                    activity == "charged_light_sector_activity_a15_v1_eta4"
+                        ? "multiplicity.composite" : "",
+                    "normalized_distribution", tune, {}, {},
                     activity, -1, -1, -1, -1, -1, 0, 0, 0, {}, "nch", bin,
                     static_cast<double>(bin), static_cast<double>(bin + 1)};
         Emit(output, domains, row, result, static_cast<std::size_t>(bin));
-        row.semanticId = Identity("g1_ratio_to_MONASH", scope, 0, 0,
-                                  "bin=" + std::to_string(bin));
-        row.quantity = "ratio_to_reference_tune";
-        row.referenceTune = referenceTune;
+      }
+      if (tune == referenceTune) continue;
+      std::vector<HR::DenominatorSeries> referenceBins;
+      referenceBins.reserve(static_cast<std::size_t>(domains.activityBins));
+      for (int bin = 0; bin < domains.activityBins; ++bin) {
+        referenceBins.push_back(HP::Denominator(
+            "reference_tune_bin_" + std::to_string(bin),
+            source.Series(1, referenceScope.id, bin, 0)));
+      }
+      const auto ratio = HP::IndependentRatio(result, reference, referenceBins);
+      for (int bin = 0; bin < domains.activityBins; ++bin) {
+        HP::Row row{"multiplicity",
+                    Identity("g1_ratio_to_MONASH", scope, 0, 0,
+                             "bin=" + std::to_string(bin)),
+                    activity == "charged_light_sector_activity_a15_v1_eta4"
+                        ? "multiplicity.composite" : "",
+                    "ratio_to_reference_tune", tune, referenceTune, {}, activity,
+                    -1, -1, -1, -1, -1, 0, 0, 0, {}, "nch", bin,
+                    static_cast<double>(bin), static_cast<double>(bin + 1)};
         Emit(output, domains, row, ratio, static_cast<std::size_t>(bin));
       }
     }
@@ -743,13 +752,13 @@ HP::ProjectionResult ScalarPerTrigger(const HP::Source& source, int projection,
   const auto& denominatorScope = FindScope(
       source.Domain(), "pair", scope.tune, scope.profile,
       "charged_light_sector_activity_a15_v1_eta4", 0);
-  const auto denominator = source.Blocks(3, denominatorScope.id, triggerId, 0);
+  const auto denominator = source.Series(3, denominatorScope.id, triggerId, 0);
   return HP::Estimate(source.BlockVectors(
                           {{static_cast<std::uint32_t>(projection), scope.id, bin,
                             static_cast<std::uint32_t>(component)},
                            {3, denominatorScope.id, triggerId, 0}}),
                       [](const auto& value) { return HR::Ratio(0, 1, value); },
-                      {HP::ExactDenominator("trigger", denominator)});
+                      {HP::Denominator("trigger", denominator)});
 }
 
 void EmitDiagnostics(std::ostream& output, const HP::Source& source,

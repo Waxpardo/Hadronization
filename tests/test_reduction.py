@@ -28,7 +28,8 @@ int main(int argc,char**argv){if(argc!=2)return 2;std::cout<<std::setprecision(1
  if(mode=="statuses"){std::vector<std::vector<double>> z(10,std::vector<double>{-2,1,5,2,0});HR::DenominatorSeries cancelled{"T",{100,1,1,1,1,1,1,1,1,1},{},false,true};HR::DenominatorSeries surviving{"R",std::vector<double>(10,2),{},true,true};auto r=HR::PooledDeleteOne(z,[](const auto&v){return HR::Ratio(0,3,v);},{cancelled,surviving});std::cout<<r.valueStatus<<' '<<r.uncertaintyStatus<<' '<<r.center[0]<<' '<<r.cancelledParentDiagnostics.size()<<' '<<r.standardError[0]<<'\n';return 0;}
  if(mode=="missing"){std::vector<std::vector<double>> z(10,std::vector<double>{1,0});z[0][1]=10;HR::DenominatorSeries d{"D",{10,0,0,0,0,0,0,0,0,0},{},true,true};auto r=HR::PooledDeleteOne(z,[](const auto&v){return HR::Ratio(0,1,v);},{d});std::cout<<r.valueStatus<<' '<<r.uncertaintyStatus<<' '<<r.center[0]<<' '<<r.covariance.size()<<'\n';return 0;}
  if(mode=="unstable"){const double values[]={10,-1,-1,-1,-1,-1,-1,-1,-1,-1};std::vector<std::vector<double>> z;HR::DenominatorSeries d{"D",{}, {},true,true};for(double v:values){z.push_back({1,v});d.blocks.push_back(v);}auto r=HR::PooledDeleteOne(z,[](const auto&v){return HR::Ratio(0,1,v);},{d});std::cout<<r.valueStatus<<' '<<r.uncertaintyStatus<<' '<<r.center[0]<<' '<<r.complements.size()<<' '<<r.covariance.size()<<'\n';return 0;}
- if(mode=="event"){const auto c=HR::EventInfluenceCovariance({1.0},1,1,{14.0},{6.0},3);std::cout<<c[0]<<'\n';return 0;}return 3;}
+ if(mode=="event"){const auto c=HR::EventInfluenceCovariance({1.0},1,1,{14.0},{6.0},3);std::cout<<c[0]<<'\n';return 0;}
+ if(mode=="bounds"){const std::uint64_t finite=(std::uint64_t{1}<<52)-2,overflow=finite+1;std::cout<<HR::AccumulationErrorBound(7.0,0)<<' '<<HR::AccumulationErrorBound(7.0,1)<<' '<<HR::AccumulationErrorBound(7.0,2)<<' '<<HR::AccumulationErrorBound(7.0,finite)<<' '<<std::isinf(HR::AccumulationErrorBound(7.0,overflow))<<' '<<std::isinf(HR::AccumulationErrorBound(7.0,std::numeric_limits<std::uint64_t>::max()))<<'\n';return 0;}return 3;}
 '''
 
 
@@ -536,6 +537,16 @@ class ReductionContract(unittest.TestCase):
             [str(self.base / "statistics"), "event"], text=True,
             env=self.environment).strip()
         self.assertEqual(float(event), 3.0)
+        bounds = subprocess.check_output(
+            [str(self.base / "statistics"), "bounds"], text=True,
+            env=self.environment).split()
+        self.assertEqual(bounds[:2], ["0", "0"])
+        unit = 2.0 ** -53
+        operations = 6.0
+        expected = operations * unit / (1.0 - operations * unit) * 7.0
+        self.assertEqual(float(bounds[2]), expected)
+        self.assertTrue(math.isfinite(float(bounds[3])))
+        self.assertEqual(bounds[4:], ["1", "1"])
 
     def test_complete_admission_is_regrouping_invariant_and_raw_independent(self):
         first = json.loads(self.compact_receipt.read_text(encoding="utf-8"))

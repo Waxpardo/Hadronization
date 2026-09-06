@@ -63,6 +63,12 @@ struct CellValue {
   std::uint64_t fills = 0;
 };
 
+struct BlockSeries {
+  std::vector<double> values;
+  std::vector<double> absoluteErrorBounds;
+  bool exact = true;
+};
+
 struct Scope {
   int id = -1;
   std::string family;
@@ -136,6 +142,9 @@ struct ProjectionResult {
   std::string diagnostic;
   std::vector<std::vector<double>> referenceComplements;
   std::vector<double> referenceLeaveMean;
+  std::vector<std::string> componentValueStatus;
+  std::vector<std::string> componentUncertaintyStatus;
+  std::vector<std::vector<std::string>> componentReasons;
 };
 
 struct Row {
@@ -186,22 +195,32 @@ class Source {
   void AddCell(const CellKey& key, const CellValue& value) {
     if (!std::isfinite(value.value) || !std::isfinite(value.absoluteSum) ||
         !std::isfinite(value.rowSumW2) || value.absoluteSum < std::abs(value.value) ||
-        value.rowSumW2 < 0.0 || !cells_.emplace(key, value).second) {
+        value.rowSumW2 < 0.0 || value.fills == 0 ||
+        !cells_.emplace(key, value).second) {
       throw std::runtime_error("compact cell is duplicate or numerically invalid");
     }
   }
 
-  std::vector<double> Blocks(std::uint32_t projection, std::uint32_t scope,
-                             std::uint32_t bin, std::uint32_t component) const {
-    std::vector<double> values;
-    values.reserve(domains_.blockIds.size());
+  BlockSeries Series(std::uint32_t projection, std::uint32_t scope,
+                     std::uint32_t bin, std::uint32_t component) const {
+    BlockSeries series;
+    series.values.reserve(domains_.blockIds.size());
+    series.absoluteErrorBounds.reserve(domains_.blockIds.size());
     for (const int block : domains_.blockIds) {
       const auto found = cells_.find({projection, scope,
                                       static_cast<std::uint32_t>(block), bin,
                                       component});
-      values.push_back(found == cells_.end() ? 0.0 : found->second.value);
+      if (found == cells_.end()) {
+        series.values.push_back(0.0);
+        series.absoluteErrorBounds.push_back(0.0);
+      } else {
+        series.values.push_back(found->second.value);
+        series.absoluteErrorBounds.push_back(Reduction::AccumulationErrorBound(
+            found->second.absoluteSum, found->second.fills));
+        series.exact = false;
+      }
     }
-    return values;
+    return series;
   }
 
   std::vector<std::vector<double>> BlockVectors(
@@ -209,10 +228,10 @@ class Source {
                                    std::uint32_t, std::uint32_t>>& coordinates) const {
     std::vector<std::vector<double>> result(domains_.blockIds.size());
     for (const auto& coordinate : coordinates) {
-      const auto values = Blocks(std::get<0>(coordinate), std::get<1>(coordinate),
+      const auto series = Series(std::get<0>(coordinate), std::get<1>(coordinate),
                                  std::get<2>(coordinate), std::get<3>(coordinate));
-      for (std::size_t block = 0; block < values.size(); ++block) {
-        result[block].push_back(values[block]);
+      for (std::size_t block = 0; block < series.values.size(); ++block) {
+        result[block].push_back(series.values[block]);
       }
     }
     return result;
@@ -223,10 +242,48 @@ class Source {
   std::map<CellKey, CellValue> cells_;
 };
 
-inline Reduction::DenominatorSeries ExactDenominator(
-    const std::string& id, const std::vector<double>& blocks,
-    bool survives = true) {
-  return {id, blocks, {}, survives, true};
+inline BlockSeries Difference(const BlockSeries& first,
+                              const BlockSeries& second) {
+  if (first.values.size() != second.values.size() ||
+      first.absoluteErrorBounds.size() != first.values.size() ||
+      second.absoluteErrorBounds.size() != second.values.size()) {
+    throw std::invalid_argument("block-series difference dimensions differ");
+  }
+  BlockSeries result;
+  result.exact = first.exact && second.exact;
+  result.values.resize(first.values.size());
+  result.absoluteErrorBounds.resize(first.values.size());
+  for (std::size_t block = 0; block < first.values.size(); ++block) {
+    result.values[block] = first.values[block] - second.values[block];
+    result.absoluteErrorBounds[block] = first.absoluteErrorBounds[block] +
+                                        second.absoluteErrorBounds[block];
+  }
+  return result;
+}
+
+inline BlockSeries Total(const std::vector<BlockSeries>& inputs) {
+  if (inputs.empty()) throw std::invalid_argument("block-series total is empty");
+  const std::size_t blocks = inputs.front().values.size();
+  BlockSeries result;
+  result.values.assign(blocks, 0.0);
+  result.absoluteErrorBounds.assign(blocks, 0.0);
+  for (const auto& input : inputs) {
+    if (input.values.size() != blocks ||
+        input.absoluteErrorBounds.size() != blocks) {
+      throw std::invalid_argument("block-series total dimensions differ");
+    }
+    result.exact = result.exact && input.exact;
+    for (std::size_t block = 0; block < blocks; ++block) {
+      result.values[block] += input.values[block];
+      result.absoluteErrorBounds[block] += input.absoluteErrorBounds[block];
+    }
+  }
+  return result;
+}
+
+inline Reduction::DenominatorSeries Denominator(
+    const std::string& id, const BlockSeries& series, bool survives = true) {
+  return {id, series.values, series.absoluteErrorBounds, survives, series.exact};
 }
 
 inline std::vector<std::string> BoundaryReasons(const Domains& domains,
@@ -262,129 +319,231 @@ inline ProjectionResult Estimate(
   ProjectionResult result;
   result.estimate = Reduction::PooledDeleteOne(blockVectors, function, denominators,
                                                 {}, reasons);
+  if (!result.estimate.cancelledParentDiagnostics.empty()) {
+    result.diagnostic = "exact_algebraic_cancellation:";
+    for (std::size_t index = 0;
+         index < result.estimate.cancelledParentDiagnostics.size(); ++index) {
+      if (index != 0) result.diagnostic += ',';
+      result.diagnostic += result.estimate.cancelledParentDiagnostics[index];
+    }
+  }
   if (std::find(reasons.begin(), reasons.end(), "CLASS_BOUNDARY_UNSTABLE") !=
           reasons.end() ||
       std::find(reasons.begin(), reasons.end(), "CLASS_BOUNDARY_UNRESOLVED") !=
           reasons.end()) {
-    result.diagnostic = "fixed_pooled_boundary_delete_one";
+    if (!result.diagnostic.empty()) result.diagnostic += ';';
+    result.diagnostic += "fixed_pooled_boundary_delete_one";
   }
   return result;
 }
 
-inline ProjectionResult EstimateAfterExactCancellation(
-    const std::vector<std::vector<double>>& blockVectors,
-    const Reduction::EstimatorFunction& function,
-    const std::vector<Reduction::DenominatorSeries>& survivingDenominators,
-    const std::vector<std::string>& cancelledParents,
-    const std::vector<std::string>& reasons = {}) {
-  ProjectionResult result = Estimate(blockVectors, function,
-                                     survivingDenominators, reasons);
-  result.estimate.cancelledParentDiagnostics = cancelledParents;
-  if (!cancelledParents.empty()) {
-    if (!result.diagnostic.empty()) result.diagnostic += ";";
-    result.diagnostic += "exact_algebraic_cancellation:";
-    for (std::size_t index = 0; index < cancelledParents.size(); ++index) {
-      if (index != 0) result.diagnostic += ",";
-      result.diagnostic += cancelledParents[index];
-    }
-  }
-  return result;
+inline std::string ValueStatus(const ProjectionResult& result,
+                               std::size_t component) {
+  return component < result.componentValueStatus.size()
+             ? result.componentValueStatus[component]
+             : result.estimate.valueStatus;
 }
 
-inline ProjectionResult IndependentRatio(const ProjectionResult& numerator,
-                                         const ProjectionResult& denominator) {
+inline std::string UncertaintyStatus(const ProjectionResult& result,
+                                     std::size_t component) {
+  return component < result.componentUncertaintyStatus.size()
+             ? result.componentUncertaintyStatus[component]
+             : result.estimate.uncertaintyStatus;
+}
+
+inline const std::vector<std::string>& Reasons(const ProjectionResult& result,
+                                               std::size_t component) {
+  return component < result.componentReasons.size()
+             ? result.componentReasons[component]
+             : result.estimate.reasons;
+}
+
+inline bool AvailableUncertainty(const std::string& status) {
+  return status == "AVAILABLE" || status == "AVAILABLE_ZERO_DISPERSION";
+}
+
+inline ProjectionResult IndependentRatio(
+    const ProjectionResult& numerator, const ProjectionResult& denominator,
+    const std::vector<Reduction::DenominatorSeries>& referenceDenominators) {
   ProjectionResult output;
   auto& result = output.estimate;
   result.policy = Reduction::kEstimatorPolicy;
   result.blocks = numerator.estimate.blocks;
   result.dof = numerator.estimate.dof;
-  for (const auto& reason : numerator.estimate.reasons) {
-    Reduction::AddReason(result, reason);
+  if (result.blocks != denominator.estimate.blocks || result.blocks != 10 ||
+      result.dof != denominator.estimate.dof || result.dof != 9) {
+    Reduction::AddReason(result, "INDEPENDENT_RATIO_BLOCK_DOMAIN_INVALID");
+    return output;
   }
-  for (const auto& reason : denominator.estimate.reasons) {
-    Reduction::AddReason(result, reason);
-  }
-  if (numerator.estimate.center.size() != denominator.estimate.center.size() ||
-      numerator.estimate.center.empty()) {
-    result.valueStatus = numerator.estimate.center.empty()
-                             ? numerator.estimate.valueStatus
-                             : denominator.estimate.valueStatus;
+  const std::size_t dimension = std::max(numerator.estimate.center.size(),
+                                         denominator.estimate.center.size());
+  if (dimension == 0 || referenceDenominators.size() != dimension) {
     Reduction::AddReason(result, "INDEPENDENT_RATIO_INPUT_UNAVAILABLE");
     return output;
   }
-  const std::size_t dimension = numerator.estimate.center.size();
   result.dimension = dimension;
-  result.center.resize(dimension);
+  const double missing = std::numeric_limits<double>::quiet_NaN();
+  result.center.assign(dimension, missing);
+  result.standardError.assign(dimension, missing);
+  result.covariance.assign(dimension * dimension, missing);
+  result.leaveMean.assign(dimension, missing);
+  output.referenceLeaveMean.assign(dimension, missing);
+  result.complements.assign(result.blocks, std::vector<double>(dimension, missing));
+  output.referenceComplements.assign(
+      result.blocks, std::vector<double>(dimension, missing));
+  output.componentValueStatus.assign(dimension, "UNAVAILABLE");
+  output.componentUncertaintyStatus.assign(dimension, "UNAVAILABLE");
+  output.componentReasons.resize(dimension);
+  std::vector<unsigned char> uncertaintyReady(dimension, 0);
+  const auto appendReason = [&](std::size_t component,
+                                const std::string& reason) {
+    auto& reasons = output.componentReasons[component];
+    if (std::find(reasons.begin(), reasons.end(), reason) == reasons.end()) {
+      reasons.push_back(reason);
+    }
+    Reduction::AddReason(result, reason);
+  };
   for (std::size_t index = 0; index < dimension; ++index) {
+    for (const auto& reason : numerator.estimate.reasons) appendReason(index, reason);
+    for (const auto& reason : denominator.estimate.reasons) appendReason(index, reason);
+    Reduction::JackknifeResult audit;
+    audit.blocks = result.blocks;
+    audit.dof = result.dof;
+    Reduction::AuditDenominators({referenceDenominators[index]}, {}, audit);
+    result.denominatorAudits.insert(result.denominatorAudits.end(),
+                                    audit.denominatorAudits.begin(),
+                                    audit.denominatorAudits.end());
+    for (const auto& reason : audit.reasons) appendReason(index, reason);
+    const auto pooledFailure = std::find_if(
+        audit.reasons.begin(), audit.reasons.end(), [](const auto& reason) {
+          return reason.rfind("POOLED_DENOMINATOR_ZERO:", 0) == 0 ||
+                 reason.rfind("DENOMINATOR_NUMERICALLY_UNRESOLVED:", 0) == 0;
+        });
+    const bool sourceCenter = index < numerator.estimate.center.size() &&
+                              std::isfinite(numerator.estimate.center[index]);
+    const bool referenceCenter = index < denominator.estimate.center.size() &&
+                                 std::isfinite(denominator.estimate.center[index]);
+    if (!sourceCenter || !referenceCenter || pooledFailure != audit.reasons.end()) {
+      if (pooledFailure != audit.reasons.end()) {
+        output.componentValueStatus[index] = pooledFailure->substr(
+            0, pooledFailure->find(':'));
+      } else {
+        output.componentValueStatus[index] = !sourceCenter
+            ? ValueStatus(numerator, index) : ValueStatus(denominator, index);
+        appendReason(index, "INDEPENDENT_RATIO_INPUT_UNAVAILABLE");
+      }
+      continue;
+    }
     if (denominator.estimate.center[index] == 0.0) {
-      result.center.clear();
-      result.valueStatus = "POOLED_DENOMINATOR_ZERO";
-      result.uncertaintyStatus = "UNAVAILABLE";
-      result.reasons.push_back("POOLED_DENOMINATOR_ZERO:REFERENCE_TUNE");
-      return output;
+      output.componentValueStatus[index] = "POOLED_DENOMINATOR_ZERO";
+      appendReason(index, "POOLED_DENOMINATOR_ZERO:REFERENCE_TUNE");
+      continue;
     }
     result.center[index] = numerator.estimate.center[index] /
                            denominator.estimate.center[index];
-  }
-  result.valueStatus =
-      numerator.estimate.valueStatus == "UNSTABLE_DENOMINATOR" ||
-              denominator.estimate.valueStatus == "UNSTABLE_DENOMINATOR"
-          ? "UNSTABLE_DENOMINATOR"
-          : "AVAILABLE";
-  if (numerator.estimate.covariance.size() != dimension * dimension ||
-      denominator.estimate.covariance.size() != dimension * dimension) {
-    if (std::find(result.reasons.begin(), result.reasons.end(),
-                  "CLASS_BOUNDARY_UNRESOLVED") != result.reasons.end()) {
-      result.uncertaintyStatus = "CLASS_BOUNDARY_UNRESOLVED";
-    } else if (std::find(result.reasons.begin(), result.reasons.end(),
-                         "CLASS_BOUNDARY_UNSTABLE") != result.reasons.end()) {
-      result.uncertaintyStatus = "CLASS_BOUNDARY_UNSTABLE";
-    } else {
-      result.uncertaintyStatus = "SOURCE_UNCERTAINTY_UNAVAILABLE";
+    const bool statisticallyUnresolved = std::any_of(
+        audit.reasons.begin(), audit.reasons.end(), [](const auto& reason) {
+          return reason.rfind("DENOMINATOR_STATISTICALLY_UNRESOLVED:", 0) == 0;
+        });
+    output.componentValueStatus[index] =
+        ValueStatus(numerator, index) == "UNSTABLE_DENOMINATOR" ||
+                ValueStatus(denominator, index) == "UNSTABLE_DENOMINATOR" ||
+                statisticallyUnresolved
+            ? "UNSTABLE_DENOMINATOR"
+            : "AVAILABLE";
+    const auto auditUncertaintyFailure = std::find_if(
+        audit.reasons.begin(), audit.reasons.end(), [](const auto& reason) {
+          return reason.rfind("LEAVE_DENOMINATOR_", 0) == 0 ||
+                 reason.rfind("DENOMINATOR_STATISTICALLY_UNRESOLVED:", 0) == 0 ||
+                 reason.rfind("NONFINITE_INPUT", 0) == 0;
+        });
+    if (auditUncertaintyFailure != audit.reasons.end()) {
+      output.componentUncertaintyStatus[index] = auditUncertaintyFailure->substr(
+          0, auditUncertaintyFailure->find(':'));
+      continue;
     }
-    return output;
+    if (!AvailableUncertainty(UncertaintyStatus(numerator, index))) {
+      output.componentUncertaintyStatus[index] =
+          UncertaintyStatus(numerator, index);
+      continue;
+    }
+    if (!AvailableUncertainty(UncertaintyStatus(denominator, index))) {
+      output.componentUncertaintyStatus[index] =
+          UncertaintyStatus(denominator, index);
+      continue;
+    }
+    bool complementsValid = numerator.estimate.complements.size() == result.blocks &&
+                            denominator.estimate.complements.size() == result.blocks;
+    for (std::size_t block = 0; complementsValid && block < result.blocks; ++block) {
+      complementsValid = index < numerator.estimate.complements[block].size() &&
+                         index < denominator.estimate.complements[block].size() &&
+                         std::isfinite(numerator.estimate.complements[block][index]) &&
+                         std::isfinite(denominator.estimate.complements[block][index]) &&
+                         denominator.estimate.complements[block][index] != 0.0;
+    }
+    if (!complementsValid) {
+      output.componentUncertaintyStatus[index] =
+          "SOURCE_UNCERTAINTY_UNAVAILABLE";
+      appendReason(index, "INDEPENDENT_RATIO_COMPLEMENTS_UNAVAILABLE");
+      continue;
+    }
+    std::vector<double> sourceFamily;
+    std::vector<double> referenceFamily;
+    sourceFamily.reserve(result.blocks);
+    referenceFamily.reserve(result.blocks);
+    for (std::size_t block = 0; block < result.blocks; ++block) {
+      const double sourceValue = numerator.estimate.complements[block][index] /
+                                 denominator.estimate.center[index];
+      const double referenceValue = numerator.estimate.center[index] /
+                                    denominator.estimate.complements[block][index];
+      result.complements[block][index] = sourceValue;
+      output.referenceComplements[block][index] = referenceValue;
+      sourceFamily.push_back(sourceValue);
+      referenceFamily.push_back(referenceValue);
+    }
+    result.leaveMean[index] = Reduction::Sum(sourceFamily) /
+                              static_cast<double>(result.blocks);
+    output.referenceLeaveMean[index] = Reduction::Sum(referenceFamily) /
+                                       static_cast<double>(result.blocks);
+    uncertaintyReady[index] = 1;
   }
-  result.covariance.assign(dimension * dimension, 0.0);
+
+  const double factor = static_cast<double>(result.blocks - 1) /
+                        static_cast<double>(result.blocks);
   for (std::size_t row = 0; row < dimension; ++row) {
     for (std::size_t column = 0; column < dimension; ++column) {
-      const double ar = numerator.estimate.center[row];
-      const double ac = numerator.estimate.center[column];
-      const double br = denominator.estimate.center[row];
-      const double bc = denominator.estimate.center[column];
-      result.covariance[row * dimension + column] =
-          numerator.estimate.covariance[row * dimension + column] / (br * bc) +
-          ar * ac * denominator.estimate.covariance[row * dimension + column] /
-              (br * br * bc * bc);
+      if (!uncertaintyReady[row] || !uncertaintyReady[column]) continue;
+      std::vector<double> terms;
+      terms.reserve(2 * result.blocks);
+      for (std::size_t block = 0; block < result.blocks; ++block) {
+        terms.push_back(factor *
+            (result.complements[block][row] - result.leaveMean[row]) *
+            (result.complements[block][column] - result.leaveMean[column]));
+        terms.push_back(factor *
+            (output.referenceComplements[block][row] -
+             output.referenceLeaveMean[row]) *
+            (output.referenceComplements[block][column] -
+             output.referenceLeaveMean[column]));
+      }
+      result.covariance[row * dimension + column] = Reduction::Sum(terms);
     }
   }
-  result.standardError.resize(dimension);
-  bool zero = true;
   for (std::size_t index = 0; index < dimension; ++index) {
+    if (!uncertaintyReady[index]) continue;
     const double variance = result.covariance[index * dimension + index];
     if (!(variance >= 0.0) || !std::isfinite(variance)) {
-      result.covariance.clear();
-      result.standardError.clear();
-      result.uncertaintyStatus = "COVARIANCE_ARITHMETIC_FAILURE";
-      return output;
+      output.componentUncertaintyStatus[index] =
+          "COVARIANCE_ARITHMETIC_FAILURE";
+      appendReason(index, "COVARIANCE_ARITHMETIC_FAILURE");
+      continue;
     }
     result.standardError[index] = std::sqrt(variance);
-    if (variance != 0.0) zero = false;
+    output.componentUncertaintyStatus[index] =
+        variance == 0.0 ? "AVAILABLE_ZERO_DISPERSION" : "AVAILABLE";
   }
-  result.uncertaintyStatus = zero ? "AVAILABLE_ZERO_DISPERSION" : "AVAILABLE";
-  if (!numerator.estimate.complements.empty()) {
-    for (const auto& value : numerator.estimate.complements) {
-      result.complements.push_back(value);
-    }
-    result.leaveMean = numerator.estimate.leaveMean;
-  }
-  if (!denominator.estimate.complements.empty()) {
-    output.referenceComplements.reserve(denominator.estimate.complements.size());
-    for (const auto& value : denominator.estimate.complements) {
-      output.referenceComplements.push_back(value);
-    }
-    output.referenceLeaveMean = denominator.estimate.leaveMean;
-  }
-  output.diagnostic = "independent_tune_covariance_sum";
+  result.valueStatus = "COMPONENT_LOCAL";
+  result.uncertaintyStatus = "COMPONENT_LOCAL";
+  output.diagnostic = "exact_two_independent_tune_delete_one_families";
   return output;
 }
 
