@@ -551,6 +551,20 @@ struct ActivityReceipt {
   std::vector<Boundary> classes;
 };
 
+struct ActivitySlot {
+  int tune = 0, activity = 0;
+  std::uint32_t scope = 0;
+};
+
+using ActivityCellValues = std::map<CellKey, double>;
+
+std::vector<ActivityReceipt> ResolveActivityReceipts(
+    int blocks, int bins, const std::vector<Class>& classes,
+    const std::vector<ActivitySlot>& slots,
+    const ActivityCellValues& activityCells,
+    const std::map<int, bool>& tuneDesignComplete);
+std::string ActivityJson(const std::vector<ActivityReceipt>& receipts);
+
 std::string JsonStringValue(const std::string& json, const std::string& key);
 
 struct BlockAccounting {
@@ -585,7 +599,6 @@ class Reducer {
                  const std::vector<TriggerRow>& triggers,
                  const std::vector<PairRow>& pairs);
   void FinalizeDynamicCells();
-  std::string ActivityJson() const;
   std::string AccountingJson() const;
   std::string DynamicJson() const;
   std::string EstimatorAuditJson() const;
@@ -884,6 +897,7 @@ int Threshold(const std::vector<double>& histogram, int percentile) {
 }
 
 void Reducer::ResolveActivities() {
+  std::vector<ActivitySlot> slots;
   for (int tune = 0; tune <= maxTune_; ++tune) {
     bool hasTune = false; for (const auto& shard : spec_.shards) for (const auto& source : shard.sources) if (source.tune == tune) hasTune = true;
     if (!hasTune) continue;
@@ -893,25 +907,54 @@ void Reducer::ResolveActivities() {
     tuneDesignComplete_[tune]=designComplete;
     if (spec_.settings.at("publication_state") == "PUBLICATION_ELIGIBLE" && !designComplete) throw std::runtime_error("Phase-A tune blocks lack ten equal successful-event exposures");
     for (int activity = 0; activity < 2; ++activity) {
-      ActivityReceipt receipt; receipt.tune=tune; receipt.activity=activity;
-      std::vector<double> pooled(activityBins_,0.0);
-      for (int bin=0;bin<activityBins_;++bin) {
+      slots.push_back({tune, activity,
+                       static_cast<std::uint32_t>(ActivityScope(tune, activity))});
+    }
+  }
+  ActivityCellValues activityCells;
+  for (const auto& item : cells_) {
+    if (item.first.projection == 1) {
+      activityCells.emplace(item.first, item.second.Value());
+    }
+  }
+  activityReceipts_ = ResolveActivityReceipts(
+      blocks_, activityBins_, spec_.classes, slots, activityCells,
+      tuneDesignComplete_);
+}
+
+std::vector<ActivityReceipt> ResolveActivityReceipts(
+    int blocks, int bins, const std::vector<Class>& classes,
+    const std::vector<ActivitySlot>& slots,
+    const ActivityCellValues& activityCells,
+    const std::map<int, bool>& tuneDesignComplete) {
+  std::vector<ActivityReceipt> receipts;
+  const auto cellValue = [&](const ActivitySlot& slot, int block, int bin) {
+    const auto found = activityCells.find(
+        {1, slot.scope, static_cast<std::uint32_t>(block),
+         static_cast<std::uint32_t>(bin), 0});
+    return found == activityCells.end() ? 0.0 : found->second;
+  };
+  for (const auto& slot : slots) {
+      const bool designComplete = tuneDesignComplete.at(slot.tune);
+      ActivityReceipt receipt; receipt.tune=slot.tune; receipt.activity=slot.activity;
+      std::vector<double> pooled(bins,0.0);
+      for (int bin=0;bin<bins;++bin) {
         std::vector<double> blockValues;
-        blockValues.reserve(blocks_);
-        for (int block=1;block<=blocks_;++block) {
-          blockValues.push_back(activityHistogram_[ActivityOffset(tune,block,activity,bin,blocks_,2,activityBins_)].Value());
+        blockValues.reserve(blocks);
+        for (int block=1;block<=blocks;++block) {
+          blockValues.push_back(cellValue(slot, block, bin));
         }
         pooled[bin]=HR::Sum(blockValues);
       }
       std::set<int> percentiles;
-      for (const auto& klass:spec_.classes) { percentiles.insert(klass.lowPercent); percentiles.insert(klass.highPercent); }
+      for (const auto& klass:classes) { percentiles.insert(klass.lowPercent); percentiles.insert(klass.highPercent); }
       for (const int percentile:percentiles) {
         const int threshold=Threshold(pooled,percentile); receipt.pooledThreshold[percentile]=threshold;
         bool resolved=true;
-        std::vector<int> leaves; leaves.reserve(blocks_);
-        for (int removed=1;removed<=blocks_;++removed) {
-          std::vector<double> complement(activityBins_);
-          for(int bin=0;bin<activityBins_;++bin){std::vector<double> remaining;remaining.reserve(blocks_-1);for(int retained=1;retained<=blocks_;++retained)if(retained!=removed)remaining.push_back(activityHistogram_[ActivityOffset(tune,retained,activity,bin,blocks_,2,activityBins_)].Value());complement[bin]=HR::Sum(remaining);}
+        std::vector<int> leaves; leaves.reserve(blocks);
+        for (int removed=1;removed<=blocks;++removed) {
+          std::vector<double> complement(bins);
+          for(int bin=0;bin<bins;++bin){std::vector<double> remaining;remaining.reserve(blocks-1);for(int retained=1;retained<=blocks;++retained)if(retained!=removed)remaining.push_back(cellValue(slot, retained, bin));complement[bin]=HR::Sum(remaining);}
           try { leaves.push_back(Threshold(complement,percentile)); }
           catch (const std::runtime_error& error) {
             if (std::string(error.what()) != "ACTIVITY_MEASURE_UNDEFINED" || designComplete) throw;
@@ -921,18 +964,18 @@ void Reducer::ResolveActivities() {
         }
         receipt.complementThreshold[percentile]=leaves;
         if(percentile>0&&percentile<100){
-          const double q=(100.0-percentile)/100.0; std::vector<double> r(blocks_),l(blocks_);
-          for(int block=1;block<=blocks_;++block){Accumulator below,through,total;for(int bin=0;bin<activityBins_;++bin){const double value=activityHistogram_[ActivityOffset(tune,block,activity,bin,blocks_,2,activityBins_)].Value();total.Add(value);if(bin<threshold)below.Add(value);if(bin<=threshold)through.Add(value);}r[block-1]=through.Value()-q*total.Value();l[block-1]=below.Value()-q*total.Value();}
-          const double sr=HR::Sum(r),sl=HR::Sum(l),mr=sr/blocks_,ml=sl/blocks_;std::vector<double> vrTerms,vlTerms;vrTerms.reserve(blocks_);vlTerms.reserve(blocks_);for(int block=0;block<blocks_;++block){vrTerms.push_back((r[block]-mr)*(r[block]-mr));vlTerms.push_back((l[block]-ml)*(l[block]-ml));}const double vr=static_cast<double>(blocks_)/(blocks_-1)*HR::Sum(vrTerms),vl=static_cast<double>(blocks_)/(blocks_-1)*HR::Sum(vlTerms);const double critical=2.2621571628540993;resolved=resolved&&sr>critical*std::sqrt(vr)&&-sl>critical*std::sqrt(vl);
+          const double q=(100.0-percentile)/100.0; std::vector<double> r(blocks),l(blocks);
+          for(int block=1;block<=blocks;++block){Accumulator below,through,total;for(int bin=0;bin<bins;++bin){const double value=cellValue(slot, block, bin);total.Add(value);if(bin<threshold)below.Add(value);if(bin<=threshold)through.Add(value);}r[block-1]=through.Value()-q*total.Value();l[block-1]=below.Value()-q*total.Value();}
+          const double sr=HR::Sum(r),sl=HR::Sum(l),mr=sr/blocks,ml=sl/blocks;std::vector<double> vrTerms,vlTerms;vrTerms.reserve(blocks);vlTerms.reserve(blocks);for(int block=0;block<blocks;++block){vrTerms.push_back((r[block]-mr)*(r[block]-mr));vlTerms.push_back((l[block]-ml)*(l[block]-ml));}const double vr=static_cast<double>(blocks)/(blocks-1)*HR::Sum(vrTerms),vl=static_cast<double>(blocks)/(blocks-1)*HR::Sum(vlTerms);const double critical=2.2621571628540993;resolved=resolved&&sr>critical*std::sqrt(vr)&&-sl>critical*std::sqrt(vl);
           receipt.throughMargins[percentile]=r;
           receipt.belowMargins[percentile]=l;
         }
         receipt.resolved[percentile]=resolved;
       }
-      for(const auto& klass:spec_.classes){Boundary boundary;if(klass.integrated){boundary.low=0;boundary.high=activityBins_-1;}else{boundary.low=klass.highPercent==100?0:receipt.pooledThreshold.at(klass.highPercent)+1;boundary.high=klass.lowPercent==0?activityBins_-1:receipt.pooledThreshold.at(klass.lowPercent);boundary.empty=boundary.low>boundary.high;for(const int percentile:{klass.lowPercent,klass.highPercent}){if(percentile>0&&percentile<100){const auto& leaves=receipt.complementThreshold.at(percentile);if(std::any_of(leaves.begin(),leaves.end(),[&](int value){return value!=receipt.pooledThreshold.at(percentile);}))boundary.stable=false;if(!receipt.resolved.at(percentile))boundary.resolved=false;}}}receipt.classes.push_back(boundary);}
-      activityReceipts_.push_back(receipt);
-    }
+      for(const auto& klass:classes){Boundary boundary;if(klass.integrated){boundary.low=0;boundary.high=bins-1;}else{boundary.low=klass.highPercent==100?0:receipt.pooledThreshold.at(klass.highPercent)+1;boundary.high=klass.lowPercent==0?bins-1:receipt.pooledThreshold.at(klass.lowPercent);boundary.empty=boundary.low>boundary.high;for(const int percentile:{klass.lowPercent,klass.highPercent}){if(percentile>0&&percentile<100){const auto& leaves=receipt.complementThreshold.at(percentile);if(std::any_of(leaves.begin(),leaves.end(),[&](int value){return value!=receipt.pooledThreshold.at(percentile);}))boundary.stable=false;if(!receipt.resolved.at(percentile))boundary.resolved=false;}}}receipt.classes.push_back(boundary);}
+      receipts.push_back(receipt);
   }
+  return receipts;
 }
 
 bool Reducer::InClass(int tune,int activity,int classId,int value) const {
@@ -1013,8 +1056,8 @@ void Reducer::FinalizeDynamicCells(){
   for(const auto& item:t1_){const auto& [scope,block,pdg]=item.first;for(int component=0;component<3;++component)if(item.second[component].fills!=0)cells_[{10,scope,block,static_cast<std::uint32_t>(t1Index.at(pdg)),static_cast<std::uint32_t>(component)}]=item.second[component];}
 }
 
-std::string Reducer::ActivityJson()const{
-  std::ostringstream out;out<<'[';for(std::size_t i=0;i<activityReceipts_.size();++i){if(i)out<<',';const auto& receipt=activityReceipts_[i];out<<"{\"activity_id\":"<<receipt.activity<<",\"classes\":[";for(std::size_t j=0;j<receipt.classes.size();++j){if(j)out<<',';const auto& boundary=receipt.classes[j];out<<"{\"empty\":"<<(boundary.empty?"true":"false")<<",\"high\":"<<boundary.high<<",\"low\":"<<boundary.low<<",\"resolved\":"<<(boundary.resolved?"true":"false")<<",\"stable\":"<<(boundary.stable?"true":"false")<<'}';}out<<"],\"thresholds\":[";bool first=true;for(const auto& threshold:receipt.pooledThreshold){if(!first)out<<',';first=false;out<<"{\"below_margins\":[";const auto below=receipt.belowMargins.find(threshold.first);if(below!=receipt.belowMargins.end())for(std::size_t j=0;j<below->second.size();++j){if(j)out<<',';out<<JsonDouble(below->second[j]);}out<<"],\"complements\":[";const auto& leaves=receipt.complementThreshold.at(threshold.first);for(std::size_t j=0;j<leaves.size();++j){if(j)out<<',';out<<leaves[j];}out<<"],\"percentile\":"<<threshold.first<<",\"pooled\":"<<threshold.second<<",\"resolved\":"<<(receipt.resolved.at(threshold.first)?"true":"false")<<",\"through_margins\":[";const auto through=receipt.throughMargins.find(threshold.first);if(through!=receipt.throughMargins.end())for(std::size_t j=0;j<through->second.size();++j){if(j)out<<',';out<<JsonDouble(through->second[j]);}out<<"]}";}out<<"],\"tune\":"<<receipt.tune<<'}';}out<<']';return out.str();
+std::string ActivityJson(const std::vector<ActivityReceipt>& receipts){
+  std::ostringstream out;out<<'[';for(std::size_t i=0;i<receipts.size();++i){if(i)out<<',';const auto& receipt=receipts[i];out<<"{\"activity_id\":"<<receipt.activity<<",\"classes\":[";for(std::size_t j=0;j<receipt.classes.size();++j){if(j)out<<',';const auto& boundary=receipt.classes[j];out<<"{\"empty\":"<<(boundary.empty?"true":"false")<<",\"high\":"<<boundary.high<<",\"low\":"<<boundary.low<<",\"resolved\":"<<(boundary.resolved?"true":"false")<<",\"stable\":"<<(boundary.stable?"true":"false")<<'}';}out<<"],\"thresholds\":[";bool first=true;for(const auto& threshold:receipt.pooledThreshold){if(!first)out<<',';first=false;out<<"{\"below_margins\":[";const auto below=receipt.belowMargins.find(threshold.first);if(below!=receipt.belowMargins.end())for(std::size_t j=0;j<below->second.size();++j){if(j)out<<',';out<<JsonDouble(below->second[j]);}out<<"],\"complements\":[";const auto& leaves=receipt.complementThreshold.at(threshold.first);for(std::size_t j=0;j<leaves.size();++j){if(j)out<<',';out<<leaves[j];}out<<"],\"percentile\":"<<threshold.first<<",\"pooled\":"<<threshold.second<<",\"resolved\":"<<(receipt.resolved.at(threshold.first)?"true":"false")<<",\"through_margins\":[";const auto through=receipt.throughMargins.find(threshold.first);if(through!=receipt.throughMargins.end())for(std::size_t j=0;j<through->second.size();++j){if(j)out<<',';out<<JsonDouble(through->second[j]);}out<<"]}";}out<<"],\"tune\":"<<receipt.tune<<'}';}out<<']';return out.str();
 }
 
 std::string Reducer::AccountingJson()const{std::ostringstream out;out<<"{\"blocks\":[";bool first=true;for(int tune=0;tune<=maxTune_;++tune)if(tuneScope_.count(tune))for(int block=1;block<=blocks_;++block){if(!first)out<<',';first=false;const auto& value=blockAccounting_.at(static_cast<std::size_t>(tune)*blocks_+block-1);out<<"{\"attempted_events\":"<<value.attemptedEvents<<",\"block\":"<<block<<",\"sources\":"<<value.sources<<",\"successful_events\":"<<value.successfulEvents<<",\"sumabsw\":"<<JsonDouble(value.sumabsw.Value())<<",\"sumw\":"<<JsonDouble(value.sumw.Value())<<",\"sumw2\":"<<JsonDouble(value.sumw2.Value())<<",\"tune\":"<<tune<<'}';}out<<"],\"summation\":\"Neumaier compensated binary64; cells retain sumabs,row_sumw2,fills\"}";return out.str();}
@@ -1058,7 +1101,7 @@ std::pair<std::string,std::string> Reducer::Write(const std::string& output,cons
   file.cd();cells.Write();gram.Write();TObjString metadataObject(metadata.c_str());metadataObject.Write("metadata");TObjString receiptObject(receipt.c_str());receiptObject.Write("receipt");file.Close();if(file.IsZombie())throw std::runtime_error("compact ROOT close failed");return{Sha(metadata),Sha(receipt)};
 }
 
-void Reducer::Run(const std::string& output){for(const auto& shard:spec_.shards)InspectShard(shard);for(const auto& shard:spec_.shards)FirstPass(shard);ResolveActivities();MaterializeActivityCells();for(const auto& shard:spec_.shards)SecondPass(shard);FinalizeDynamicCells();const std::string activity=ActivityJson(),accounting=AccountingJson(),dynamic=DynamicJson(),estimator=EstimatorAuditJson(),digest=ScientificDigest();const auto payloadDigests=Write(output,activity,dynamic,estimator,digest);const std::string metadataTemplate=HexDecode(spec_.settings.at("metadata_template"));std::string domains=HexDecode(spec_.settings.at("compact_domains_template"));ReplaceOne(domains,"\"__DOMAIN_DYNAMIC_SPECIES__\"",dynamic);ReplaceAll(domains,"\"__CLOSURE_SPECIES_COUNT__\"",std::to_string(closurePdgs_.size()));ReplaceAll(domains,"\"__T1_SPECIES_COUNT__\"",std::to_string(t1Pdgs_.size()));ReplaceOne(domains,"\"__CLOSURE_BIN_COUNT__\"",std::to_string(12U*closurePdgs_.size()));std::cout<<"REDUCTION_SUMMARY cells="<<cells_.size()<<" event_gram="<<gram_.size()<<" events="<<totalEvents_<<" sources="<<totalSources_<<" input_bytes="<<inputBytes_<<" scientific_digest="<<digest<<" activity_receipts_sha256="<<Sha(activity)<<" block_accounting_sha256="<<Sha(accounting)<<" compact_domains_sha256="<<Sha(domains)<<" input_lineage_sha256="<<spec_.settings.at("input_lineage_sha256")<<" dynamic_species_hex="<<HexEncode(dynamic)<<" analysis_sha256="<<spec_.settings.at("analysis_sha256")<<" plan_digest="<<spec_.settings.at("plan_digest")<<" map_digest="<<spec_.settings.at("map_digest")<<" parent_shard_set_digest="<<spec_.settings.at("parent_shard_set_digest")<<" publication_state="<<spec_.settings.at("publication_state")<<" metadata_sha256="<<payloadDigests.first<<" embedded_receipt_sha256="<<payloadDigests.second<<" build_id="<<JsonStringValue(metadataTemplate,"reducer_build_id")<<'\n';}
+void Reducer::Run(const std::string& output){for(const auto& shard:spec_.shards)InspectShard(shard);for(const auto& shard:spec_.shards)FirstPass(shard);MaterializeActivityCells();ResolveActivities();for(const auto& shard:spec_.shards)SecondPass(shard);FinalizeDynamicCells();const std::string activity=ActivityJson(activityReceipts_),accounting=AccountingJson(),dynamic=DynamicJson(),estimator=EstimatorAuditJson(),digest=ScientificDigest();const auto payloadDigests=Write(output,activity,dynamic,estimator,digest);const std::string metadataTemplate=HexDecode(spec_.settings.at("metadata_template"));std::string domains=HexDecode(spec_.settings.at("compact_domains_template"));ReplaceOne(domains,"\"__DOMAIN_DYNAMIC_SPECIES__\"",dynamic);ReplaceAll(domains,"\"__CLOSURE_SPECIES_COUNT__\"",std::to_string(closurePdgs_.size()));ReplaceAll(domains,"\"__T1_SPECIES_COUNT__\"",std::to_string(t1Pdgs_.size()));ReplaceOne(domains,"\"__CLOSURE_BIN_COUNT__\"",std::to_string(12U*closurePdgs_.size()));std::cout<<"REDUCTION_SUMMARY cells="<<cells_.size()<<" event_gram="<<gram_.size()<<" events="<<totalEvents_<<" sources="<<totalSources_<<" input_bytes="<<inputBytes_<<" scientific_digest="<<digest<<" activity_receipts_sha256="<<Sha(activity)<<" block_accounting_sha256="<<Sha(accounting)<<" compact_domains_sha256="<<Sha(domains)<<" input_lineage_sha256="<<spec_.settings.at("input_lineage_sha256")<<" dynamic_species_hex="<<HexEncode(dynamic)<<" analysis_sha256="<<spec_.settings.at("analysis_sha256")<<" plan_digest="<<spec_.settings.at("plan_digest")<<" map_digest="<<spec_.settings.at("map_digest")<<" parent_shard_set_digest="<<spec_.settings.at("parent_shard_set_digest")<<" publication_state="<<spec_.settings.at("publication_state")<<" metadata_sha256="<<payloadDigests.first<<" embedded_receipt_sha256="<<payloadDigests.second<<" build_id="<<JsonStringValue(metadataTemplate,"reducer_build_id")<<'\n';}
 
 std::string ExtractJsonValue(const std::string& json,const std::string& key) {
   if (json.size() < 2 || json.front() != '{' || json.back() != '}') {
@@ -1131,6 +1174,7 @@ std::string ExtractJsonValue(const std::string& json,const std::string& key) {
 }
 std::string JsonStringValue(const std::string& json,const std::string& key){const std::string value=ExtractJsonValue(json,key);if(value.size()<2||value.front()!='\"'||value.back()!='\"')throw std::runtime_error("compact receipt string type differs");return value.substr(1,value.size()-2);}
 std::uint64_t JsonUnsignedValue(const std::string& json,const std::string& key){const std::string value=ExtractJsonValue(json,key);const long long parsed=Integer(value);if(parsed<0)throw std::runtime_error("negative compact metric");return static_cast<std::uint64_t>(parsed);}
+bool JsonBooleanValue(const std::string& json,const std::string& key){const std::string value=ExtractJsonValue(json,key);if(value=="true")return true;if(value=="false")return false;throw std::runtime_error("compact receipt boolean type differs");}
 
 std::vector<std::string> JsonArrayElements(const std::string& json,
                                            const std::string& key) {
@@ -1196,6 +1240,9 @@ struct CompactDomains {
   std::string dynamicSpecies;
   std::uint64_t lineageShards = 0;
   std::uint64_t lineageSources = 0;
+  int activityBins = 0;
+  std::vector<Class> activityClasses;
+  std::vector<ActivitySlot> activitySlots;
 };
 
 CompactDomains ReadCompactDomains(const std::string& metadata,
@@ -1229,6 +1276,81 @@ CompactDomains ReadCompactDomains(const std::string& metadata,
     if (blockValues[index] != index + 1) throw std::runtime_error("compact K10 block order differs");
     result.blocks.insert(static_cast<UInt_t>(blockValues[index]));
   }
+  std::map<std::string, int> tuneOrdinals;
+  const auto tuneValues = JsonArrayElements(result.payload, "tune_dictionary");
+  for (std::size_t index = 0; index < tuneValues.size(); ++index) {
+    const std::string& encoded = tuneValues[index];
+    if (encoded.size() < 2 || encoded.front() != '"' || encoded.back() != '"' ||
+        !tuneOrdinals.emplace(encoded.substr(1, encoded.size() - 2),
+                              static_cast<int>(index)).second) {
+      throw std::runtime_error("compact activity tune dictionary differs");
+    }
+  }
+  std::map<std::string, int> activityOrdinals;
+  const auto activityValues = JsonArrayElements(result.payload, "activities");
+  for (std::size_t index = 0; index < activityValues.size(); ++index) {
+    if (!activityOrdinals.emplace(JsonStringValue(activityValues[index], "id"),
+                                  static_cast<int>(index)).second) {
+      throw std::runtime_error("compact activity dictionary differs");
+    }
+  }
+  const std::string axes = ExtractJsonValue(result.payload, "axes");
+  const std::string activityAxis = ExtractJsonValue(axes, "activity");
+  const auto activityBinCount = JsonUnsignedValue(activityAxis, "bins");
+  if (activityBinCount == 0 ||
+      activityBinCount > static_cast<std::uint64_t>(std::numeric_limits<int>::max())) {
+    throw std::runtime_error("compact activity axis differs");
+  }
+  result.activityBins = static_cast<int>(activityBinCount);
+  const auto classValues = JsonArrayElements(result.payload, "class_dictionary");
+  for (std::size_t index = 0; index < classValues.size(); ++index) {
+    const auto interval = JsonUnsignedArray(classValues[index],
+                                            "percentile_interval");
+    if (JsonUnsignedValue(classValues[index], "id") != index ||
+        interval.size() != 2 || interval[0] > interval[1] ||
+        interval[1] > 100) {
+      throw std::runtime_error("compact activity class dictionary differs");
+    }
+    result.activityClasses.push_back({
+        static_cast<int>(index), static_cast<int>(interval[0]),
+        static_cast<int>(interval[1]),
+        JsonBooleanValue(classValues[index], "integrated")});
+  }
+  if (tuneOrdinals.empty() || activityOrdinals.empty() ||
+      result.activityClasses.empty()) {
+    throw std::runtime_error("compact activity configuration is empty");
+  }
+  for (const auto& scopeValue : JsonArrayElements(result.payload,
+                                                   "scope_dictionary")) {
+    if (JsonStringValue(scopeValue, "family") != "activity") continue;
+    const auto identifier = JsonUnsignedValue(scopeValue, "id");
+    const auto tune = tuneOrdinals.find(JsonStringValue(scopeValue, "tune"));
+    const auto activity = activityOrdinals.find(
+        JsonStringValue(scopeValue, "activity"));
+    if (identifier > std::numeric_limits<UInt_t>::max() ||
+        tune == tuneOrdinals.end() || activity == activityOrdinals.end()) {
+      throw std::runtime_error("compact activity scope dictionary differs");
+    }
+    result.activitySlots.push_back({tune->second, activity->second,
+                                    static_cast<UInt_t>(identifier)});
+  }
+  std::sort(result.activitySlots.begin(), result.activitySlots.end(),
+            [](const auto& left, const auto& right) {
+              return std::tie(left.tune, left.activity) <
+                     std::tie(right.tune, right.activity);
+            });
+  if (result.activitySlots.size() != tuneOrdinals.size() *
+          activityOrdinals.size()) {
+    throw std::runtime_error("compact activity scope coverage differs");
+  }
+  for (std::size_t index = 0; index < result.activitySlots.size(); ++index) {
+    const int expectedTune = static_cast<int>(index / activityOrdinals.size());
+    const int expectedActivity = static_cast<int>(index % activityOrdinals.size());
+    if (result.activitySlots[index].tune != expectedTune ||
+        result.activitySlots[index].activity != expectedActivity) {
+      throw std::runtime_error("compact activity scope order differs");
+    }
+  }
   const auto projections = JsonArrayElements(result.payload, "projection_dictionary");
   if (projections.size() != 10) throw std::runtime_error("compact projection dictionary count differs");
   for (std::size_t index = 0; index < projections.size(); ++index) {
@@ -1251,6 +1373,15 @@ CompactDomains ReadCompactDomains(const std::string& metadata,
         !result.cells.emplace(static_cast<UInt_t>(identifier), std::move(domain)).second) {
       throw std::runtime_error("compact projection materialized domain differs");
     }
+  }
+  const auto activityDomain = result.cells.find(1);
+  std::set<UInt_t> activityScopes;
+  for (const auto& slot : result.activitySlots) activityScopes.insert(slot.scope);
+  if (activityDomain == result.cells.end() ||
+      activityDomain->second.bins != activityBinCount ||
+      activityDomain->second.scopes != activityScopes ||
+      activityDomain->second.components != std::set<UInt_t>{0}) {
+    throw std::runtime_error("compact projection-1 activity domain differs");
   }
   const std::string gram = ExtractJsonValue(result.payload, "event_gram_dictionary");
   result.gramProjection = static_cast<UInt_t>(JsonUnsignedValue(gram, "projection_id"));
@@ -1312,15 +1443,15 @@ CompactDomains ReadCompactDomains(const std::string& metadata,
   return result;
 }
 
-void VerifyCompact(const std::string& path){
+void VerifyCompact(const std::string& path, bool deriveActivity = true){
   TFile file(path.c_str(),"READ");if(file.IsZombie())throw std::runtime_error("compact ROOT is zombie/unreadable");if(file.GetCompressionAlgorithm()!=static_cast<int>(ROOT::RCompressionSetting::EAlgorithm::kZSTD)||file.GetCompressionLevel()!=5)throw std::runtime_error("compact ROOT compression differs");std::map<std::string,std::pair<std::string,int>> keys;TIter iterator(file.GetListOfKeys());while(auto* object=iterator()){auto* key=dynamic_cast<TKey*>(object);if(key==nullptr||!keys.emplace(key->GetName(),std::make_pair(key->GetClassName(),key->GetCycle())).second)throw std::runtime_error("compact duplicate ROOT key/cycle");}const std::map<std::string,std::pair<std::string,int>> expected{{"cells",{"TTree",1}},{"event_gram",{"TTree",1}},{"metadata",{"TObjString",1}},{"receipt",{"TObjString",1}}};if(keys!=expected)throw std::runtime_error("compact exact object set/cycle differs");auto* cells=dynamic_cast<TTree*>(file.Get("cells"));auto* gram=dynamic_cast<TTree*>(file.Get("event_gram"));const std::string cellsSchema="projection_id:UInt_t,scope_id:UInt_t,block:UInt_t,bin:UInt_t,component:UInt_t,value:Double_t,sumabs:Double_t,row_sumw2:Double_t,fills:ULong64_t";const std::string gramSchema="projection_id:UInt_t,scope_id:UInt_t,block:UInt_t,left:UInt_t,right:UInt_t,cross:Double_t";if(TreeSchema(cells)!=cellsSchema||TreeSchema(gram)!=gramSchema)throw std::runtime_error("compact table branch order/set differs");
   auto* metadata=dynamic_cast<TObjString*>(file.Get("metadata"));auto* receiptObject=dynamic_cast<TObjString*>(file.Get("receipt"));if(metadata==nullptr||receiptObject==nullptr)throw std::runtime_error("compact metadata objects are absent");const std::string metadataText=metadata->GetString().Data(),receipt=receiptObject->GetString().Data();const CompactDomains domains=ReadCompactDomains(metadataText,receipt);
-  UInt_t projection=0,scope=0,block=0,bin=0,component=0;Double_t value=0,sumabs=0,rowSumw2=0;ULong64_t fills=0;Branch(cells,"projection_id",&projection);Branch(cells,"scope_id",&scope);Branch(cells,"block",&block);Branch(cells,"bin",&bin);Branch(cells,"component",&component);Branch(cells,"value",&value);Branch(cells,"sumabs",&sumabs);Branch(cells,"row_sumw2",&rowSumw2);Branch(cells,"fills",&fills);Sha256 digest;digest.Update(std::string("cells\0",6));std::tuple<UInt_t,UInt_t,UInt_t,UInt_t,UInt_t> previousCell{};bool first=true;for(Long64_t row=0;row<cells->GetEntries();++row){if(cells->GetEntry(row)<=0)throw std::runtime_error("cannot read compact cell");const auto key=std::make_tuple(projection,scope,block,bin,component);const auto declared=domains.cells.find(projection);const bool outside=declared==domains.cells.end()||declared->second.scopes.count(scope)==0||domains.blocks.count(block)==0||bin>=declared->second.bins||declared->second.components.count(component)==0;if((!first&&key<=previousCell)||outside||!std::isfinite(value)||!std::isfinite(sumabs)||!std::isfinite(rowSumw2)||sumabs<0||rowSumw2<0||fills==0||sumabs+64*std::numeric_limits<double>::epsilon()*std::max(1.0,sumabs)<std::abs(value))throw std::runtime_error(outside?"compact cell key is outside the exact declared domain":"compact cell natural key/numerical domain differs");first=false;previousCell=key;for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(bin),std::to_string(component),DoubleHex(value),DoubleHex(sumabs),DoubleHex(rowSumw2),std::to_string(fills)})DigestField(digest,field);}
+  UInt_t projection=0,scope=0,block=0,bin=0,component=0;Double_t value=0,sumabs=0,rowSumw2=0;ULong64_t fills=0;Branch(cells,"projection_id",&projection);Branch(cells,"scope_id",&scope);Branch(cells,"block",&block);Branch(cells,"bin",&bin);Branch(cells,"component",&component);Branch(cells,"value",&value);Branch(cells,"sumabs",&sumabs);Branch(cells,"row_sumw2",&rowSumw2);Branch(cells,"fills",&fills);ActivityCellValues activityCells;Sha256 digest;digest.Update(std::string("cells\0",6));std::tuple<UInt_t,UInt_t,UInt_t,UInt_t,UInt_t> previousCell{};bool first=true;for(Long64_t row=0;row<cells->GetEntries();++row){if(cells->GetEntry(row)<=0)throw std::runtime_error("cannot read compact cell");const auto key=std::make_tuple(projection,scope,block,bin,component);const auto declared=domains.cells.find(projection);const bool outside=declared==domains.cells.end()||declared->second.scopes.count(scope)==0||domains.blocks.count(block)==0||bin>=declared->second.bins||declared->second.components.count(component)==0;if((!first&&key<=previousCell)||outside||!std::isfinite(value)||!std::isfinite(sumabs)||!std::isfinite(rowSumw2)||sumabs<0||rowSumw2<0||fills==0||sumabs+64*std::numeric_limits<double>::epsilon()*std::max(1.0,sumabs)<std::abs(value))throw std::runtime_error(outside?"compact cell key is outside the exact declared domain":"compact cell natural key/numerical domain differs");first=false;previousCell=key;if(projection==1)activityCells.emplace(CellKey{projection,scope,block,bin,component},value);for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(bin),std::to_string(component),DoubleHex(value),DoubleHex(sumabs),DoubleHex(rowSumw2),std::to_string(fills)})DigestField(digest,field);}
   UInt_t left=0,right=0;Double_t cross=0;Branch(gram,"projection_id",&projection);Branch(gram,"scope_id",&scope);Branch(gram,"block",&block);Branch(gram,"left",&left);Branch(gram,"right",&right);Branch(gram,"cross",&cross);digest.Update(std::string("event_gram\0",11));std::tuple<UInt_t,UInt_t,UInt_t,UInt_t,UInt_t> previousGram{};first=true;for(Long64_t row=0;row<gram->GetEntries();++row){if(gram->GetEntry(row)<=0)throw std::runtime_error("cannot read compact Gram row");const auto key=std::make_tuple(projection,scope,block,left,right);const std::uint64_t term=static_cast<std::uint64_t>(left)*domains.gramTermMultiplier+right;const bool outside=projection!=domains.gramProjection||domains.gramScopes.count(scope)==0||domains.blocks.count(block)==0||left>right||domains.gramTermCodes.count(term)==0;if((!first&&key<=previousGram)||outside||!std::isfinite(cross))throw std::runtime_error(outside?"compact Gram key is outside the exact declared domain":"compact Gram natural key/numerical domain differs");first=false;previousGram=key;for(const auto& field:std::vector<std::string>{std::to_string(projection),std::to_string(scope),std::to_string(block),std::to_string(left),std::to_string(right),DoubleHex(cross)})DigestField(digest,field);}
   const std::string scientific=digest.FinalHex();if(metadataText.find("\"schema\":\""+std::string(kCompactSchema)+"\"")==std::string::npos||JsonStringValue(metadataText,"scientific_content_digest")!=scientific||JsonStringValue(receipt,"scientific_content_digest")!=scientific)throw std::runtime_error("compact scientific digest differs");
   const std::string analysisSha=JsonStringValue(metadataText,"analysis_request_sha256"),planDigest=JsonStringValue(metadataText,"parent_plan_digest"),mapDigest=JsonStringValue(metadataText,"parent_map_digest"),parentDigest=JsonStringValue(metadataText,"parent_shard_set_digest"),publicationState=JsonStringValue(metadataText,"publication_state"),buildId=JsonStringValue(metadataText,"reducer_build_id");
   if(JsonStringValue(receipt,"analysis_request_sha256")!=analysisSha||JsonStringValue(receipt,"parent_plan_digest")!=planDigest||JsonStringValue(receipt,"parent_map_digest")!=mapDigest||JsonStringValue(receipt,"parent_shard_set_digest")!=parentDigest||JsonStringValue(receipt,"state")!=publicationState||JsonStringValue(receipt,"reducer_build_id")!=buildId||JsonStringValue(receipt,"estimator_policy_id")!=HR::kEstimatorPolicy)throw std::runtime_error("compact embedded identity binding differs");
-  const std::string activity=ExtractJsonValue(receipt,"activity_receipts"),accounting=ExtractJsonValue(receipt,"block_accounting");if(JsonStringValue(receipt,"activity_receipts_sha256")!=Sha(activity)||JsonStringValue(receipt,"block_accounting_sha256")!=Sha(accounting)||ExtractJsonValue(metadataText,"activity_receipts")!=activity||ExtractJsonValue(metadataText,"block_accounting")!=accounting)throw std::runtime_error("compact metadata payload digest differs");const std::string metrics=ExtractJsonValue(receipt,"metrics");const auto eventCount=JsonUnsignedValue(metrics,"events"),sourceCount=JsonUnsignedValue(metrics,"sources"),inputBytes=JsonUnsignedValue(metrics,"input_bytes");if(JsonUnsignedValue(metrics,"cells")!=static_cast<std::uint64_t>(cells->GetEntries())||JsonUnsignedValue(metrics,"event_gram")!=static_cast<std::uint64_t>(gram->GetEntries())||sourceCount!=domains.lineageSources)throw std::runtime_error("compact metric row/lineage counts differ");std::cout<<"REDUCTION_SUMMARY cells="<<cells->GetEntries()<<" event_gram="<<gram->GetEntries()<<" events="<<eventCount<<" sources="<<sourceCount<<" input_bytes="<<inputBytes<<" scientific_digest="<<scientific<<" activity_receipts_sha256="<<Sha(activity)<<" block_accounting_sha256="<<Sha(accounting)<<" compact_domains_sha256="<<Sha(domains.payload)<<" input_lineage_sha256="<<Sha(domains.lineage)<<" dynamic_species_hex="<<HexEncode(domains.dynamicSpecies)<<" analysis_sha256="<<analysisSha<<" plan_digest="<<planDigest<<" map_digest="<<mapDigest<<" parent_shard_set_digest="<<parentDigest<<" publication_state="<<publicationState<<" metadata_sha256="<<Sha(metadataText)<<" embedded_receipt_sha256="<<Sha(receipt)<<" build_id="<<buildId<<'\n';
+  const std::string activity=ExtractJsonValue(receipt,"activity_receipts"),accounting=ExtractJsonValue(receipt,"block_accounting");if(JsonStringValue(receipt,"activity_receipts_sha256")!=Sha(activity)||JsonStringValue(receipt,"block_accounting_sha256")!=Sha(accounting)||ExtractJsonValue(metadataText,"activity_receipts")!=activity||ExtractJsonValue(metadataText,"block_accounting")!=accounting)throw std::runtime_error("compact metadata payload digest differs");if(deriveActivity){std::map<int,bool> tuneDesignComplete;for(const auto& slot:domains.activitySlots)tuneDesignComplete[slot.tune]=publicationState=="PUBLICATION_ELIGIBLE";const std::string derived=ActivityJson(ResolveActivityReceipts(domains.blocks.size(),domains.activityBins,domains.activityClasses,domains.activitySlots,activityCells,tuneDesignComplete));if(activity!=derived)throw std::runtime_error("compact activity receipts differ from projection-1 cells: stored="+Sha(activity)+" derived="+Sha(derived));}const std::string metrics=ExtractJsonValue(receipt,"metrics");const auto eventCount=JsonUnsignedValue(metrics,"events"),sourceCount=JsonUnsignedValue(metrics,"sources"),inputBytes=JsonUnsignedValue(metrics,"input_bytes");if(JsonUnsignedValue(metrics,"cells")!=static_cast<std::uint64_t>(cells->GetEntries())||JsonUnsignedValue(metrics,"event_gram")!=static_cast<std::uint64_t>(gram->GetEntries())||sourceCount!=domains.lineageSources)throw std::runtime_error("compact metric row/lineage counts differ");std::cout<<"REDUCTION_SUMMARY cells="<<cells->GetEntries()<<" event_gram="<<gram->GetEntries()<<" events="<<eventCount<<" sources="<<sourceCount<<" input_bytes="<<inputBytes<<" scientific_digest="<<scientific<<" activity_receipts_sha256="<<Sha(activity)<<" block_accounting_sha256="<<Sha(accounting)<<" compact_domains_sha256="<<Sha(domains.payload)<<" input_lineage_sha256="<<Sha(domains.lineage)<<" dynamic_species_hex="<<HexEncode(domains.dynamicSpecies)<<" analysis_sha256="<<analysisSha<<" plan_digest="<<planDigest<<" map_digest="<<mapDigest<<" parent_shard_set_digest="<<parentDigest<<" publication_state="<<publicationState<<" metadata_sha256="<<Sha(metadataText)<<" embedded_receipt_sha256="<<Sha(receipt)<<" build_id="<<buildId<<'\n';
 }
 
 std::uint64_t StressRandom(std::uint64_t& state) {
@@ -1413,7 +1544,7 @@ void WriteStressCompact(const std::string& specPath, const std::string& output) 
   ReplaceOne(metadata, "\"__SCIENTIFIC_DIGEST__\"", "\""+scientific+"\"");
   ReplaceOne(receipt, "\"__SCIENTIFIC_DIGEST__\"", "\""+scientific+"\"");
   file.cd();cells.Write();gram.Write();TObjString metadataObject(metadata.c_str());metadataObject.Write("metadata");TObjString receiptObject(receipt.c_str());receiptObject.Write("receipt");file.Close();if(file.IsZombie())throw std::runtime_error("stress compact ROOT close failed");
-  VerifyCompact(output);
+  VerifyCompact(output, false);
   std::ifstream input(output,std::ios::binary|std::ios::ate);if(!input)throw std::runtime_error("cannot stat stress compact ROOT");std::cout<<"STRESS_SUMMARY bytes="<<static_cast<std::uint64_t>(input.tellg())<<" cells="<<cellRows<<" event_gram="<<gramRows<<" lineage_sources="<<domains.lineageSources<<" lineage_shards="<<domains.lineageShards<<'\n';
 }
 

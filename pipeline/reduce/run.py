@@ -440,7 +440,8 @@ def lower_sha(value, label):
         raise ValueError("{} is not a lowercase SHA-256".format(label))
 
 
-def admit_receipt(plan, shard, root_path, receipt_path, analyze):
+def admit_receipt(plan, shard, root_path, receipt_path, analyze,
+                  analyzer, analyzer_environment):
     regular_file(root_path, "accepted analysis shard")
     receipt = json_file(receipt_path)
     exact_keys(receipt, {
@@ -537,7 +538,43 @@ def admit_receipt(plan, shard, root_path, receipt_path, analyze):
             not isinstance(producer["compiler"], str) or not producer["compiler"] or
             not isinstance(producer["root"], str) or not producer["root"]):
         raise ValueError("accepted shard producer publication differs")
+    try:
+        verified = analyze.verify_receipt(
+            receipt_path, root_path, plan, shard, analyzer,
+            analyzer_environment)
+    except (OSError, ValueError, RuntimeError,
+            subprocess.CalledProcessError) as error:
+        raise ValueError(
+            "analyzer semantic admission failed for shard {} ({}): {}".format(
+                shard["ordinal"], root_path.name, error)) from error
+    if verified != receipt:
+        raise ValueError(
+            "analyzer semantic admission returned a different receipt for "
+            "shard {} ({})".format(shard["ordinal"], root_path.name))
     return receipt
+
+
+def build_analyzer_admission(analyze, work_root):
+    runtime = analyze.runtime_contract.resolve(require_root=True)
+    binary_root = work_root / "bin"
+    before = {}
+    if binary_root.is_dir():
+        for path in binary_root.iterdir():
+            if path.is_file() and not path.is_symlink():
+                stat = path.stat()
+                before[path.name] = (stat.st_ino, stat.st_mtime_ns,
+                                     stat.st_size)
+    analyzer, build = analyze.build_tool(
+        runtime, binary_root, analyze.ANALYSIS_SOURCE, "analyze")
+    stat = analyzer.stat()
+    selected = (stat.st_ino, stat.st_mtime_ns, stat.st_size)
+    environment = os.environ.copy()
+    environment.update(runtime["environment"])
+    return analyzer, environment, build, {
+        "build_tool_calls": 1,
+        "compiler_processes": int(before.get(analyzer.name) != selected),
+        "analyzer_processes_per_full_pass": 2,
+    }
 
 
 def exact_shard_set(plan, output_root, analyze):
@@ -1709,8 +1746,21 @@ def run(args):
     safe_child(work_root, work_root, "reducer work root")
     safe_child(output_root, output_root, "reducer output root")
     admitted = exact_shard_set(plan, analyzed_root, analyze)
-    receipts = [admit_receipt(plan, shard, root_path, receipt_path, analyze)
-                for shard, root_path, receipt_path in admitted]
+    (admission_analyzer, admission_environment, unused_analyzer_build,
+     admission_metrics) = build_analyzer_admission(analyze, work_root)
+    del unused_analyzer_build
+    receipts = [admit_receipt(
+        plan, shard, root_path, receipt_path, analyze, admission_analyzer,
+        admission_environment)
+        for shard, root_path, receipt_path in admitted]
+    full_passes = len(admitted)
+    print(
+        "ANALYZER_ADMISSION shards={} build_tool_calls={} "
+        "compiler_processes={} analyzer_processes={} full_semantic_passes={}".format(
+            full_passes, admission_metrics["build_tool_calls"],
+            admission_metrics["compiler_processes"],
+            admission_metrics["analyzer_processes_per_full_pass"] * full_passes,
+            full_passes))
     source_ids = [source_id for shard in plan["shards"]
                   for source_id in shard["source_ids"]]
     if source_ids != list(range(len(plan["sources"]))):

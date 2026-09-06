@@ -4,6 +4,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import shlex
 import shutil
 import subprocess
@@ -55,6 +56,15 @@ COMPACT_MUTATOR = r'''
 #include <string>
 std::string text(const char*path){std::ifstream f(path);std::ostringstream o;o<<f.rdbuf();return o.str();}
 int main(int argc,char**argv){if(argc<4)return 2;const std::string mode=argv[3];TFile input(argv[1],"READ");if(input.IsZombie())return 3;TFile output(argv[2],"RECREATE","",input.GetCompressionSettings());if(output.IsZombie())return 4;auto*c=dynamic_cast<TTree*>(input.Get("cells"));auto*g=dynamic_cast<TTree*>(input.Get("event_gram"));auto*m=dynamic_cast<TObjString*>(input.Get("metadata"));auto*r=dynamic_cast<TObjString*>(input.Get("receipt"));if(!c||!g||!m||!r)return 5;output.cd();TTree*cc=nullptr;if(mode=="domain_cell"){UInt_t p=0;c->SetBranchAddress("projection_id",&p);cc=c->CloneTree(0);for(Long64_t i=0;i<c->GetEntries();++i){c->GetEntry(i);if(i==0)p=0;cc->Fill();}}else cc=c->CloneTree(-1,"fast");cc->SetName("cells");cc->Write();if(mode=="cycle")cc->Write();TTree*gg=nullptr;if(mode=="domain_gram"){UInt_t p=0;g->SetBranchAddress("projection_id",&p);gg=g->CloneTree(0);for(Long64_t i=0;i<g->GetEntries();++i){g->GetEntry(i);if(i==0)p=1;gg->Fill();}}else gg=g->CloneTree(-1,"fast");gg->SetName("event_gram");gg->Write();std::string mt=m->GetString().Data(),rt=r->GetString().Data();auto flip=[](std::string&value,const std::string&key){const auto at=value.find(key);if(at==std::string::npos)return false;char&digit=value[at+key.size()];digit=digit=='0'?'1':'0';return true;};if(mode=="scientific"){if(!flip(mt,"\"scientific_content_digest\":\""))return 6;}if(mode=="binding"){if(!flip(mt,"\"analysis_request_sha256\":\"")||!flip(rt,"\"analysis_request_sha256\":\""))return 7;}if(mode=="payload"){if(argc!=6)return 8;mt=text(argv[4]);rt=text(argv[5]);}TObjString mo(mt.c_str());mo.Write("metadata");TObjString ro(rt.c_str());ro.Write("receipt");if(mode=="unknown"){TObjString extra("foreign");extra.Write("extra");}output.Close();return 0;}
+'''
+
+
+SHARD_ACTIVITY_MUTATOR = r'''
+#include "TFile.h"
+#include "TObjString.h"
+#include "TTree.h"
+#include <string>
+int main(int argc,char**argv){if(argc!=3)return 2;TFile input(argv[1],"READ");if(input.IsZombie())return 3;TFile output(argv[2],"RECREATE","",input.GetCompressionSettings());if(output.IsZombie())return 4;const char*names[]={"ancestry","ancestry_mothers","closure","constituents","event_compatibility","event_ranges","events","hard","heavy","heavy_mothers","origins","pairs","source_blocks","source_counts","sources","triggers"};for(const char*name:names){auto*source=dynamic_cast<TTree*>(input.Get(name));if(!source)return 5;output.cd();TTree*copy=nullptr;if(std::string(name)=="events"||std::string(name)=="pairs"){Int_t eta1=0,eta4=0;source->SetBranchAddress("a15_eta1",&eta1);source->SetBranchAddress("a15_eta4",&eta4);copy=source->CloneTree(0);for(Long64_t row=0;row<source->GetEntries();++row){source->GetEntry(row);eta1+=10;eta4+=10;copy->Fill();}source->ResetBranchAddresses();}else copy=source->CloneTree(-1,"fast");copy->SetName(name);copy->Write();delete copy;}auto*contract=dynamic_cast<TObjString*>(input.Get("contract"));if(!contract)return 6;output.cd();TObjString contractCopy(contract->GetString().Data());contractCopy.Write("contract");output.Close();return 0;}
 '''
 
 
@@ -128,6 +138,9 @@ class ReductionContract(unittest.TestCase):
                      cls.base / "shard_mutator")
         cls._compile(COMPACT_MUTATOR, cls.base / "compact_mutator.cpp",
                      cls.base / "compact_mutator")
+        cls._compile(SHARD_ACTIVITY_MUTATOR,
+                     cls.base / "shard_activity_mutator.cpp",
+                     cls.base / "shard_activity_mutator")
         cls._compile(GRAM_INPUT_EXTRACTOR, cls.base / "gram_inputs.cpp",
                      cls.base / "gram_inputs")
         cls.raw_paths = []
@@ -322,7 +335,8 @@ class ReductionContract(unittest.TestCase):
                                 check=True, env=cls.environment, text=True,
                                 stdout=subprocess.PIPE)
         parsed = {"cells": {}, "gram": {}, "cell_hex": {}, "gram_hex": {},
-                  "metadata": None, "receipt": None}
+                  "metadata": None, "receipt": None,
+                  "metadata_text": None, "receipt_text": None}
         for line in result.stdout.splitlines():
             kind, *values = line.split("\t")
             if kind == "C":
@@ -335,8 +349,10 @@ class ReductionContract(unittest.TestCase):
                 parsed["gram"][key] = float(values[5])
                 parsed["gram_hex"][key] = values[6]
             elif kind == "M":
+                parsed["metadata_text"] = values[0]
                 parsed["metadata"] = json.loads(values[0])
             elif kind == "R":
+                parsed["receipt_text"] = values[0]
                 parsed["receipt"] = json.loads(values[0])
         return parsed
 
@@ -391,6 +407,18 @@ class ReductionContract(unittest.TestCase):
         receipt_path.unlink()
 
     @classmethod
+    def _payload_root_text(cls, source_root, output_root, metadata, receipt):
+        metadata_path = output_root.with_suffix(".metadata.json")
+        receipt_path = output_root.with_suffix(".embedded.json")
+        metadata_path.write_text(metadata, encoding="ascii")
+        receipt_path.write_text(receipt, encoding="ascii")
+        subprocess.run([str(cls.base / "compact_mutator"), str(source_root),
+                        str(output_root), "payload", str(metadata_path),
+                        str(receipt_path)], check=True, env=cls.environment)
+        metadata_path.unlink()
+        receipt_path.unlink()
+
+    @classmethod
     def _write_external_receipt(cls, output_root, metadata, embedded,
                                 external):
         scientific = external["scientific_identity"]
@@ -436,6 +464,43 @@ class ReductionContract(unittest.TestCase):
         cls._payload_root(cls.compact_root, output, metadata, embedded)
         external_path = cls._write_external_receipt(
             output, metadata, embedded, external)
+        return output, external_path
+
+    @classmethod
+    def _activity_payload_mutant(cls, name, mutate):
+        output = cls.base / ("activity-" + name + ".root")
+        metadata = cls.oracle["metadata_text"]
+        embedded = cls.oracle["receipt_text"]
+        external = json.loads(cls.compact_receipt.read_text(encoding="utf-8"))
+        marker = '"activity_receipts":'
+        start = embedded.index(marker) + len(marker)
+        unused, length = json.JSONDecoder().raw_decode(embedded[start:])
+        del unused
+        activity = embedded[start:start + length]
+        changed = mutate(activity)
+        if changed == activity:
+            raise AssertionError("activity mutant {} changed nothing".format(name))
+        if metadata.count(activity) != 1 or embedded.count(activity) != 1:
+            raise AssertionError("activity payload cardinality changed")
+        metadata = metadata.replace(activity, changed, 1)
+        embedded = embedded.replace(activity, changed, 1)
+        activity_sha = hashlib.sha256(changed.encode("ascii")).hexdigest()
+        embedded = re.sub(
+            r'("activity_receipts_sha256":")[0-9a-f]{64}(\")',
+            r'\g<1>{}\2'.format(activity_sha), embedded, count=1)
+        external["scientific_identity"][
+            "activity_receipts_sha256"] = activity_sha
+        cls._payload_root_text(cls.compact_root, output, metadata, embedded)
+        scientific = external["scientific_identity"]
+        scientific["metadata_sha256"] = hashlib.sha256(
+            metadata.encode("ascii")).hexdigest()
+        scientific["embedded_receipt_sha256"] = hashlib.sha256(
+            embedded.encode("ascii")).hexdigest()
+        external["scientific_identity_sha256"] = hashlib.sha256(
+            cls._canonical(scientific).encode("ascii")).hexdigest()
+        external_path = output.with_suffix(".json")
+        external_path.write_text(cls._canonical(external), encoding="ascii")
+        cls._rebind_storage(external_path, output)
         return output, external_path
 
     def test_analysis_request_is_downstream_and_expands_exact_registry(self):
@@ -883,8 +948,91 @@ class ReductionContract(unittest.TestCase):
             "scope_dictionary"]
                        if item["family"] == "pair"]
         self.assertEqual({item["class_id"] for item in pair_scopes}, {0, 1, 2, 3})
+        expected_classes = [
+            {"empty": False, "high": 4095, "low": 0,
+             "resolved": True, "stable": True},
+            {"empty": False, "high": 4095, "low": 3,
+             "resolved": False, "stable": True},
+            {"empty": False, "high": 2, "low": 2,
+             "resolved": False, "stable": True},
+            {"empty": False, "high": 1, "low": 0,
+             "resolved": True, "stable": True},
+        ]
+        for activity in compact["receipt"]["activity_receipts"]:
+            # Independent fixture oracle: each of blocks 2..10 contributes
+            # one count at 0, 1 and 2; block 1 contributes at 1, 2 and 3.
+            thresholds = {item["percentile"]: item
+                          for item in activity["thresholds"]}
+            self.assertEqual({key: item["pooled"]
+                              for key, item in thresholds.items()},
+                             {0: 3, 10: 2, 50: 1, 100: 0})
+            self.assertEqual(thresholds[0]["complements"], [2] + [3] * 9)
+            self.assertEqual(thresholds[10]["complements"], [2] * 10)
+            self.assertEqual(thresholds[50]["complements"], [1] * 10)
+            self.assertEqual(thresholds[100]["complements"], [0] * 10)
+            self.assertEqual({key: item["resolved"]
+                              for key, item in thresholds.items()},
+                             {0: True, 10: False, 50: True, 100: True})
+            for actual, expected in zip(
+                    thresholds[10]["below_margins"],
+                    [-1.7] + [-0.7] * 9):
+                self.assertAlmostEqual(actual, expected, places=12)
+            for actual, expected in zip(
+                    thresholds[10]["through_margins"],
+                    [-0.7] + [0.3] * 9):
+                self.assertAlmostEqual(actual, expected, places=12)
+            for actual, expected in zip(
+                    thresholds[50]["below_margins"],
+                    [-1.5] + [-0.5] * 9):
+                self.assertAlmostEqual(actual, expected, places=12)
+            for actual, expected in zip(
+                    thresholds[50]["through_margins"],
+                    [-0.5] + [0.5] * 9):
+                self.assertAlmostEqual(actual, expected, places=12)
+            self.assertEqual(activity["classes"], expected_classes)
         self.assertNotEqual(sha256(root), sha256(self.compact_root))
         self.assertIn("PUBLICATION_ELIGIBLE", result.stdout)
+
+    def test_activity_receipt_is_rederived_from_projection_one_cells(self):
+        def bound(payload):
+            return payload.replace('"low":0,', '"low":1,', 1)
+
+        def resolved(payload):
+            return payload.replace('"resolved":true', '"resolved":false', 1)
+
+        def stable(payload):
+            return payload.replace('"stable":true', '"stable":false', 1)
+
+        def margin(payload):
+            def change(match):
+                return match.group(1) + repr(float(match.group(2)) + 0.25)
+            return re.sub(r'("below_margins":\[)(-?[0-9.eE+]+)',
+                          change, payload, count=1)
+
+        def complement(payload):
+            def change(match):
+                return match.group(1) + str(int(match.group(2)) + 1)
+            return re.sub(r'("complements":\[)(-?[0-9]+)',
+                          change, payload, count=1)
+
+        def tie_policy(payload):
+            return payload.replace(
+                '],"tune":0}',
+                '],"tie_policy":"mutated_noncanonical_tie_policy","tune":0}',
+                1)
+
+        for name, mutation in (
+                ("bound", bound), ("resolved", resolved),
+                ("stable", stable), ("margin", margin),
+                ("complement", complement), ("tie-policy", tie_policy)):
+            root, receipt = self._activity_payload_mutant(name, mutation)
+            verify = self._reduce(
+                "verify", "--root", str(root), "--receipt", str(receipt),
+                "--work-root", str(self.reduce_work))
+            self.assertEqual(verify.returncode, 2, name)
+            self.assertIn(
+                "compact activity receipts differ from projection-1 cells",
+                verify.stderr, name)
 
     def test_bounded_profile_changes_reuse_the_same_accepted_shards(self):
         spec = importlib.util.spec_from_file_location(
@@ -984,6 +1132,75 @@ class ReductionContract(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("dependency/commit marker differs", result.stderr)
 
+    def test_reducer_uses_one_analyzer_build_and_full_pass_per_shard(self):
+        combined = self._reduce(
+            "run", "--plan", str(self.combined_plan), "--analyzed-root",
+            str(self.combined_root), "--work-root", str(self.reduce_work),
+            "--output-root", str(self.combined_reduced), check=True)
+        self.assertIn(
+            "ANALYZER_ADMISSION shards=1 build_tool_calls=1 "
+            "compiler_processes=0 analyzer_processes=2 "
+            "full_semantic_passes=1", combined.stdout)
+        split = self._reduce(
+            "run", "--plan", str(self.split_plan), "--analyzed-root",
+            str(self.split_root), "--work-root", str(self.reduce_work),
+            "--output-root", str(self.split_reduced), check=True)
+        self.assertIn(
+            "ANALYZER_ADMISSION shards=10 build_tool_calls=1 "
+            "compiler_processes=0 analyzer_processes=20 "
+            "full_semantic_passes=10", split.stdout)
+
+    def test_analyzer_semantic_admission_rejects_coherent_activity_mutant(self):
+        mutant = self.base / "semantic-activity-mutant"
+        shutil.copytree(self.combined_root, mutant)
+        root_path = next(mutant.rglob("shard-*.root"))
+        replacement = root_path.with_suffix(".mutated.root")
+        subprocess.run(
+            [str(self.base / "shard_activity_mutator"), str(root_path),
+             str(replacement)], check=True, env=self.environment)
+        os.replace(str(replacement), str(root_path))
+        receipt_path = root_path.with_suffix(".json")
+        self._rebind_storage(receipt_path, root_path)
+        analyzer = self._analyze(
+            "verify", "--root", str(root_path), "--receipt",
+            str(receipt_path), "--raw-root", str(self.raw_hidden),
+            "--work-root", str(self.base / "semantic-analyze-work"))
+        self.assertEqual(analyzer.returncode, 2)
+        self.assertIn("scientific content digest differs", analyzer.stderr)
+        reducer = self._reduce(
+            "run", "--plan", str(self.combined_plan), "--analyzed-root",
+            str(mutant), "--work-root", str(self.reduce_work),
+            "--output-root", str(self.base / "semantic-mutant-output"))
+        self.assertEqual(reducer.returncode, 2)
+        self.assertIn(
+            "analyzer semantic admission failed for shard 0 "
+            "(shard-0000.root)", reducer.stderr)
+        self.assertIn("scientific content digest differs", reducer.stderr)
+        self.assertFalse((self.base / "semantic-mutant-output").exists())
+
+    def test_reducer_admits_analyzer_root_only_recovery_after_full_verify(self):
+        recovered = self.base / "recovered-analyzed"
+        source_root = next(self.combined_root.rglob("shard-*.root"))
+        recovered_root = recovered / source_root.relative_to(self.combined_root)
+        recovered_root.parent.mkdir(parents=True)
+        shutil.copy2(source_root, recovered_root)
+        result = self._analyze(
+            "run", "--plan", str(self.combined_plan), "--raw-root",
+            str(self.raw_hidden), "--work-root", str(self.work_root),
+            "--output-root", str(recovered), check=True)
+        self.assertIn("RECOVERED", result.stdout)
+        recovered_receipt = json.loads(
+            recovered_root.with_suffix(".json").read_text(encoding="utf-8"))
+        self.assertEqual(recovered_receipt["producer_provenance"]["publication"][
+            "mode"], "root_only_recovery")
+        reduced = self._reduce(
+            "run", "--plan", str(self.combined_plan), "--analyzed-root",
+            str(recovered), "--work-root", str(self.reduce_work),
+            "--output-root", str(self.base / "recovered-analyzed-output"),
+            check=True)
+        self.assertIn("full_semantic_passes=1", reduced.stdout)
+        self.assertIn("REDUCED", reduced.stdout)
+
     def test_consumed_rows_are_validated_after_receipt_admission(self):
         accounting_mutant = self.base / "consumed-row-accounting"
         shutil.copytree(self.combined_root, accounting_mutant)
@@ -998,11 +1215,10 @@ class ReductionContract(unittest.TestCase):
             str(accounting_mutant), "--work-root", str(self.reduce_work),
             "--output-root", str(self.base / "consumed-row-accounting-output"))
         self.assertEqual(result.returncode, 2)
-        self.assertIn("receipt row accounting differs: events", result.stderr)
-        expectations = {"wrong_cache": "pair cached authority",
-                        "invalid_domain": "trigger row order/domain",
-                        "shuffled_rows": "pair structural ownership"}
-        for mode, diagnostic in expectations.items():
+        self.assertIn("analyzer semantic admission failed for shard 0",
+                      result.stderr)
+        self.assertIn("ROOT row counts differ from receipt", result.stderr)
+        for mode in ("wrong_cache", "invalid_domain", "shuffled_rows"):
             mutant = self.base / ("consumed-" + mode)
             shutil.copytree(self.combined_root, mutant)
             root_path = next(mutant.rglob("shard-*.root"))
@@ -1017,7 +1233,9 @@ class ReductionContract(unittest.TestCase):
                 str(mutant), "--work-root", str(self.reduce_work),
                 "--output-root", str(self.base / ("consumed-output-" + mode)))
             self.assertEqual(result.returncode, 2)
-            self.assertIn(diagnostic, result.stderr)
+            self.assertIn("analyzer semantic admission failed for shard 0",
+                          result.stderr)
+            self.assertIn("ANALYSIS_ERROR", result.stderr)
 
     def test_root_first_promotion_recovery_and_tamper_refusal(self):
         output = self.base / "interrupted"
@@ -1081,13 +1299,24 @@ class ReductionContract(unittest.TestCase):
             payload["compact_domains_sha256"] = hashlib.sha256(
                 self._canonical(payload["compact_domains"]).encode(
                     "ascii")).hexdigest()
+        receipt_text = self.oracle["receipt_text"]
+        marker = '"activity_receipts":'
+        start = receipt_text.index(marker) + len(marker)
+        unused, length = json.JSONDecoder().raw_decode(receipt_text[start:])
+        del unused
+        raw_activity = receipt_text[start:start + length]
         embedded["activity_receipts_sha256"] = hashlib.sha256(
-            self._canonical(embedded["activity_receipts"]).encode(
-                "ascii")).hexdigest()
+            raw_activity.encode("ascii")).hexdigest()
         embedded["block_accounting_sha256"] = hashlib.sha256(
             self._canonical(embedded["block_accounting"]).encode(
                 "ascii")).hexdigest()
-        self._payload_root(self.compact_root, root, metadata, embedded)
+        canonical_activity = self._canonical(embedded["activity_receipts"])
+        metadata_text = self._canonical(metadata).replace(
+            canonical_activity, raw_activity, 1)
+        embedded_text = self._canonical(embedded).replace(
+            canonical_activity, raw_activity, 1)
+        self._payload_root_text(
+            self.compact_root, root, metadata_text, embedded_text)
         before = sha256(root)
         recovered = self._reduce(
             "run", "--plan", str(self.combined_plan), "--analyzed-root",
