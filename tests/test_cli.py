@@ -107,6 +107,10 @@ test -z "${HADRONIZATION_DATASET+x}"
             reduce_staging = checkout / "data/work/reduce/staging/interrupted"
             reduce_staging.mkdir(parents=True)
             (reduce_staging / "plot-source.root").write_bytes(b"partial")
+            plot_cache = checkout / "data/work/plot/bin"
+            plot_cache.mkdir(parents=True)
+            (plot_cache / "plot-fixture").write_bytes(b"cache")
+            (plot_cache / "plot-fixture.build.lock").write_bytes(b"lock")
             dry = subprocess.run([str(checkout / "hadronization"), "clean"],
                                  cwd="/tmp", text=True, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
@@ -116,6 +120,7 @@ test -z "${HADRONIZATION_DATASET+x}"
             self.assertNotIn("data/raw", dry.stdout)
             self.assertIn("data/work/evidence/MONASH/job000/attempt00/scratch", dry.stdout)
             self.assertNotIn("job001/attempt00/scratch", dry.stdout)
+            self.assertIn("data/work/plot/bin", dry.stdout)
             applied = subprocess.run(
                 [str(checkout / "hadronization"), "clean", "--apply"],
                 cwd="/tmp", text=True, stdout=subprocess.PIPE,
@@ -129,6 +134,7 @@ test -z "${HADRONIZATION_DATASET+x}"
             self.assertFalse((checkout / "data/work/analyze/staging").exists())
             self.assertFalse(reduce_cache.exists())
             self.assertFalse((checkout / "data/work/reduce/staging").exists())
+            self.assertFalse(plot_cache.exists())
             self.assertTrue((completed / "outcome.json").is_file())
             self.assertTrue((active / "scratch/partial.root").is_file())
 

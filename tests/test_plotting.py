@@ -910,6 +910,52 @@ class PlottingContract(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertRegex(result.stderr, "domain|binding|request")
 
+    def test_shared_work_cache_is_atomic_and_embedded_receipts_are_private(self):
+        """Real processes must share a cold/warm cache without cross-readback."""
+        work = self.base / "atomic-shared-work"
+        commands = [
+            (self.root, self.receipt, ROOT / "config/analysis.json", "balancing"),
+            (self.alt_root, self.alt_receipt, self.alt_analysis, "correlations"),
+        ]
+
+        def invoke(root, receipt, analysis, family):
+            return subprocess.Popen(
+                [str(ROOT / "hadronization"), "plot", "query", "--root", str(root),
+                 "--receipt", str(receipt), "--analysis", str(analysis),
+                 "--work-dir", str(work), "--family", family], cwd=str(ROOT),
+                env=self.environment, text=True, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+
+        def pair():
+            processes = [invoke(*command) for command in commands]
+            results = [process.communicate() + (process.returncode,)
+                       for process in processes]
+            for stdout, stderr, code in results:
+                self.assertEqual(code, 0, stderr)
+                self.assertIn('"query_status": "AVAILABLE"', stdout)
+
+        # The first pair overlaps both compiler/readback paths; the second is
+        # a warm-cache check.  Old fixed compiler/readback names fail here.
+        pair()
+        pair()
+        self.assertFalse(any(work.glob("plot-embedded-*")))
+        self.assertFalse((work / "embedded-receipt.json").exists())
+
+        receipts = list((work / "bin").glob("*.build.json"))
+        self.assertEqual(len(receipts), 1)
+        receipts[0].write_text("{}\n", encoding="ascii")
+        pair()
+        build = json.loads(receipts[0].read_text(encoding="ascii"))
+        binary = Path(str(receipts[0])[:-len(".build.json")])
+        self.assertEqual(build["binary_sha256"], sha256(binary))
+        self.assertFalse(any((work / "bin").glob("*.tmp")))
+
+    def test_plot_default_work_and_clean_own_only_plot_cache(self):
+        parsed = self.plot.parser().parse_args([
+            "query", "--root", str(self.root), "--receipt", str(self.receipt),
+            "--family", "balancing"])
+        self.assertEqual(parsed.work_dir, ROOT / "data/work/plot")
+
     def test_admission_rejects_extra_object_and_cycle(self):
         for mode in ("unknown", "cycle"):
             root = self.base / (mode + ".root")

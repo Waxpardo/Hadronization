@@ -3,6 +3,7 @@
 
 import argparse
 import csv
+import fcntl
 import hashlib
 import importlib.util
 import io
@@ -15,6 +16,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from contextlib import contextmanager
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -115,6 +117,31 @@ def fsync_directory(path):
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
+
+
+@contextmanager
+def build_lock(path):
+    """Serialize one reproducible cache key across cooperating processes."""
+    descriptor = os.open(str(path), os.O_CREAT | os.O_RDWR, 0o600)
+    try:
+        fcntl.flock(descriptor, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(descriptor, fcntl.LOCK_UN)
+        os.close(descriptor)
+
+
+def cached_build(binary, receipt, identity):
+    if not binary.is_file() or not receipt.is_file():
+        return None
+    try:
+        current = json_file(receipt, "plot build receipt")
+    except ValueError:
+        return None
+    if (current.get("build_identity") == identity and
+            current.get("binary_sha256") == sha_file(binary)):
+        return current
+    return None
 
 
 def atomic_json(path, value):
@@ -331,46 +358,51 @@ def build_engine(work_root):
     binary_root.mkdir(parents=True, exist_ok=True)
     binary = binary_root / ("plot-" + build_id[:20])
     receipt = binary.with_suffix(".build.json")
-    if binary.is_file() and receipt.is_file():
-        current = json_file(receipt, "plot build receipt")
-        if (current.get("build_identity") == identity and
-                current.get("binary_sha256") == sha_file(binary)):
+    lock = binary.with_suffix(".build.lock")
+    with build_lock(lock):
+        current = cached_build(binary, receipt, identity)
+        if current is not None:
             return environment, binary, current
-        binary.unlink()
-        receipt.unlink()
-    flags = command_tokens(environment["ROOT_CONFIG"], "--cflags", environment)
-    libraries = command_tokens(environment["ROOT_CONFIG"], "--libs", environment)
-    temporary = binary.with_name("." + binary.name + ".tmp")
-    command = [environment["CXX"]] + identity["flags"] + [
-        "-I" + str(ROOT / "pipeline/plot"),
-        "-I" + str(ROOT / "pipeline/reduce"), str(source)] + flags + libraries + [
-        "-o", str(temporary)]
-    completed = subprocess.run(command, env=environment, text=True,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if completed.returncode or completed.stdout.strip() or completed.stderr.strip():
-        if temporary.exists():
-            temporary.unlink()
-        raise ValueError("plot-engine warning-free build failed: {}".format(
-            completed.stderr.strip() or completed.stdout.strip()))
-    os.chmod(str(temporary), 0o700)
-    os.replace(str(temporary), str(binary))
-    fsync_file(binary)
-    build_receipt = {
-        "schema": "hadronization_plot_engine_build_receipt_v1",
-        "build_id": build_id,
-        "build_identity": identity,
-        "binary_sha256": sha_file(binary),
-    }
-    payload = (canonical(build_receipt) + "\n").encode("ascii")
-    with tempfile.NamedTemporaryFile(prefix="." + receipt.name + ".",
-                                     dir=str(receipt.parent), delete=False) as handle:
-        temporary_receipt = Path(handle.name)
-        handle.write(payload)
-        handle.flush()
-        os.fsync(handle.fileno())
-    os.replace(str(temporary_receipt), str(receipt))
-    fsync_directory(receipt.parent)
-    return environment, binary, build_receipt
+        # A mismatched pair is an owned cache entry.  Only its key holder may
+        # retire it; invocation-private files are never named or removed here.
+        for path in (binary, receipt):
+            if path.exists() or path.is_symlink():
+                path.unlink()
+        flags = command_tokens(environment["ROOT_CONFIG"], "--cflags", environment)
+        libraries = command_tokens(environment["ROOT_CONFIG"], "--libs", environment)
+        descriptor, temporary_name = tempfile.mkstemp(
+            prefix="." + binary.name + ".", suffix=".tmp", dir=str(binary_root))
+        os.close(descriptor)
+        temporary = Path(temporary_name)
+        try:
+            command = [environment["CXX"]] + identity["flags"] + [
+                "-I" + str(ROOT / "pipeline/plot"),
+                "-I" + str(ROOT / "pipeline/reduce"), str(source)] + flags + libraries + [
+                "-o", str(temporary)]
+            completed = subprocess.run(command, env=environment, text=True,
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if (completed.returncode or completed.stdout.strip() or
+                    completed.stderr.strip()):
+                raise ValueError("plot-engine warning-free build failed: {}".format(
+                    completed.stderr.strip() or completed.stdout.strip()))
+            os.chmod(str(temporary), 0o700)
+            os.replace(str(temporary), str(binary))
+            fsync_file(binary)
+            fsync_directory(binary_root)
+        finally:
+            if temporary.exists():
+                temporary.unlink()
+        build_receipt = {
+            "schema": "hadronization_plot_engine_build_receipt_v1",
+            "build_id": build_id,
+            "build_identity": identity,
+            "binary_sha256": sha_file(binary),
+        }
+        atomic_json(receipt, build_receipt)
+        current = cached_build(binary, receipt, identity)
+        if current is None:
+            raise ValueError("plot build cache publication did not validate")
+        return environment, binary, current
 
 
 def number(value):
@@ -468,16 +500,15 @@ def admit(root_path, receipt_path, analysis_path, work_root):
 def _read_embedded_payload(root_path, work_root):
     environment, binary, unused_build = build_engine(work_root)
     del unused_build
-    output = work_root / "embedded-receipt.json"
-    completed = subprocess.run([str(binary), "embedded", str(root_path), str(output)],
-                               env=environment, text=True,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if completed.returncode or not output.is_file():
-        raise ValueError("compact embedded receipt readback failed: {}".format(
-            completed.stderr.strip() or completed.stdout.strip()))
-    payload = json_file(output, "embedded compact receipt")
-    output.unlink()
-    return payload
+    with tempfile.TemporaryDirectory(prefix="plot-embedded-", dir=str(work_root)) as directory:
+        output = Path(directory) / "embedded-receipt.json"
+        completed = subprocess.run(
+            [str(binary), "embedded", str(root_path), str(output)], env=environment,
+            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if completed.returncode or not output.is_file():
+            raise ValueError("compact embedded receipt readback failed: {}".format(
+                completed.stderr.strip() or completed.stdout.strip()))
+        return json_file(output, "embedded compact receipt")
 
 
 def engine_rows(root_path, receipt, families, work_root):
@@ -1321,8 +1352,7 @@ def authoritative_inputs(parser):
                         help="matching compact reduction receipt")
     parser.add_argument("--analysis", type=Path, default=ANALYSIS)
     parser.add_argument("--plot-config", type=Path, default=PLOT_CONFIG)
-    parser.add_argument("--work-dir", type=Path, default=Path(
-        tempfile.gettempdir()) / "hadronization-plot-v1")
+    parser.add_argument("--work-dir", type=Path, default=ROOT / "data/work/plot")
 
 
 def common(parser):

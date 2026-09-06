@@ -31,7 +31,10 @@ def doctor():
         ["git", "-C", str(ROOT), "rev-parse", "--short=12", "HEAD"],
         text=True).strip()
     python_ok = sys.version_info >= (3, 9)
-    print("REQUIRED repository: {} ({})".format("OK" if (ROOT / ".git").is_dir() else "FAIL", head))
+    # A linked worktree has a .git file, while a primary checkout has a
+    # directory.  Both are valid repository roots for the public commands.
+    repository_ok = (ROOT / ".git").exists()
+    print("REQUIRED repository: {} ({})".format("OK" if repository_ok else "FAIL", head))
     print("REQUIRED configuration: {} / {} / {}".format(
         study.get("schema"), campaign.get("schema"), manifest.get("schema")))
     print("REQUIRED Python: {} ({})".format("OK" if python_ok else "FAIL", sys.version.split()[0]))
@@ -39,7 +42,7 @@ def doctor():
         print("RUNTIME {}".format(diagnostic))
     print("RUNTIME site: {}".format(
         ROOT / "config/site.conf" if runtime["site_configured"] else "portable defaults"))
-    return 0 if python_ok and (ROOT / ".git").is_dir() else 1
+    return 0 if python_ok and repository_ok else 1
 
 
 def is_within(path, parent):
@@ -73,7 +76,7 @@ def clean_candidates():
     work = ROOT / "data/work"
     if work.is_dir() and not work.is_symlink():
         for relative in ("analyze/bin", "analyze/staging",
-                         "reduce/bin", "reduce/staging"):
+                         "reduce/bin", "reduce/staging", "plot/bin"):
             path = work / relative
             if os.path.lexists(str(path)):
                 candidates.append(path)

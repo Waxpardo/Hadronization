@@ -2,6 +2,7 @@
 """Admit a complete lossless shard plan and build/verify its compact plot source."""
 
 import argparse
+import fcntl
 import hashlib
 import importlib.util
 import json
@@ -16,6 +17,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from contextlib import contextmanager
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -118,6 +120,31 @@ def fsync_directory(path):
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
+
+
+@contextmanager
+def build_lock(path):
+    """Serialize one reproducible cache key across cooperating processes."""
+    descriptor = os.open(str(path), os.O_CREAT | os.O_RDWR, 0o600)
+    try:
+        fcntl.flock(descriptor, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(descriptor, fcntl.LOCK_UN)
+        os.close(descriptor)
+
+
+def cached_build(binary, receipt, identity):
+    if not binary.is_file() or not receipt.is_file():
+        return None
+    try:
+        current = json_file(receipt)
+    except ValueError:
+        return None
+    if (current.get("build_identity") == identity and
+            current.get("binary_sha256") == sha_file(binary)):
+        return current
+    return None
 
 
 def atomic_json(path, value, exclusive=True):
@@ -1287,39 +1314,52 @@ def build_reducer(work_root):
         "flags": ["-std=c++17", "-O2", "-Wall", "-Wextra", "-Wpedantic", "-Werror"],
     }
     build_id = sha_bytes(canonical(identity).encode("ascii"))
+    work_root = work_root.resolve(strict=False)
+    reject_symlink_components(work_root, "reducer work root")
     bin_root = work_root / "bin"
     bin_root.mkdir(parents=True, exist_ok=True)
     binary = bin_root / ("reduce-" + build_id[:20])
     receipt = binary.with_suffix(".build.json")
-    if binary.is_file() and receipt.is_file():
-        current = json_file(receipt)
-        if (current.get("build_identity") == identity and
-                current.get("binary_sha256") == sha_file(binary)):
+    lock = binary.with_suffix(".build.lock")
+    with build_lock(lock):
+        current = cached_build(binary, receipt, identity)
+        if current is not None:
             return environment, binary, current
-        binary.unlink()
-        receipt.unlink()
-    flags = command_tokens(environment["ROOT_CONFIG"], "--cflags", environment)
-    libraries = command_tokens(environment["ROOT_CONFIG"], "--libs", environment)
-    temporary = binary.with_name("." + binary.name + ".tmp")
-    command = [environment["CXX"]] + identity["flags"] + [
-        "-I" + str(ROOT / "pipeline/generate"),
-        "-I" + str(ROOT / "pipeline/reduce"), str(source)] + flags + libraries + [
-        "-o", str(temporary)]
-    completed = subprocess.run(command, env=environment, text=True,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if completed.returncode or completed.stdout.strip() or completed.stderr.strip():
-        if temporary.exists():
-            temporary.unlink()
-        raise ValueError("reducer warning-free build failed: {}".format(
-            completed.stderr.strip() or completed.stdout.strip()))
-    os.chmod(str(temporary), 0o700)
-    os.replace(str(temporary), str(binary))
-    fsync_file(binary)
-    build_receipt = {"schema": "hadronization_reducer_build_receipt_v1",
-                     "build_id": build_id, "build_identity": identity,
-                     "binary_sha256": sha_file(binary)}
-    atomic_json(receipt, build_receipt, exclusive=False)
-    return environment, binary, build_receipt
+        for path in (binary, receipt):
+            if path.exists() or path.is_symlink():
+                path.unlink()
+        flags = command_tokens(environment["ROOT_CONFIG"], "--cflags", environment)
+        libraries = command_tokens(environment["ROOT_CONFIG"], "--libs", environment)
+        descriptor, temporary_name = tempfile.mkstemp(
+            prefix="." + binary.name + ".", suffix=".tmp", dir=str(bin_root))
+        os.close(descriptor)
+        temporary = Path(temporary_name)
+        try:
+            command = [environment["CXX"]] + identity["flags"] + [
+                "-I" + str(ROOT / "pipeline/generate"),
+                "-I" + str(ROOT / "pipeline/reduce"), str(source)] + flags + libraries + [
+                "-o", str(temporary)]
+            completed = subprocess.run(command, env=environment, text=True,
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if (completed.returncode or completed.stdout.strip() or
+                    completed.stderr.strip()):
+                raise ValueError("reducer warning-free build failed: {}".format(
+                    completed.stderr.strip() or completed.stdout.strip()))
+            os.chmod(str(temporary), 0o700)
+            os.replace(str(temporary), str(binary))
+            fsync_file(binary)
+            fsync_directory(bin_root)
+        finally:
+            if temporary.exists():
+                temporary.unlink()
+        build_receipt = {"schema": "hadronization_reducer_build_receipt_v1",
+                         "build_id": build_id, "build_identity": identity,
+                         "binary_sha256": sha_file(binary)}
+        atomic_json(receipt, build_receipt, exclusive=False)
+        current = cached_build(binary, receipt, identity)
+        if current is None:
+            raise ValueError("reducer build cache publication did not validate")
+        return environment, binary, current
 
 
 def parent_shard_set_digest(lineage):
