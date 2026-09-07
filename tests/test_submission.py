@@ -14,6 +14,10 @@ from unittest import mock
 from helpers import ROOT
 
 
+FINAL_SAVED_MASS_SQUARED_ULPS = 1048576
+VEC4_CANCELLATION_ULPS = 4096
+
+
 MASS_CASES = {
     # Accepted PYTHIA rows measured independently from the stratified sample.
     "transition_below": (
@@ -27,10 +31,30 @@ MASS_CASES = {
         1.0073255225537583, 0.09182028542174181,
         -2119.9611695267768, 2119.9622352570532,
         1.8696200000000001),
+    # RUN-ANALYSIS-1 production stop: JUNCTIONS logical 58, tree entry
+    # 35,598, event 915042782448398, heavy slot 1, PDG 4212.
+    "production_stop": (
+        -1.1105588708129701, 0.25046818581982877,
+        2.7789801514781347, 3.87152109564187,
+        2.4433316586479696),
+    # Complete-manifest saved-mass maximum: JUNCTIONS logical 915, tree entry
+    # 60,656, event 918723569446128, heavy slot 0, PDG -4112.
+    "full_scan_saved_extreme": (
+        -1.7236023419368458, -2.5401658635144932,
+        2.2303266857620887, 4.5266509271070969,
+        2.4683929675390233),
+    # Complete-manifest component maximum: JUNCTIONS logical 757, tree entry
+    # 54,872, event 918044964607576, heavy slot 0, PDG -411.
+    "full_scan_component_extreme": (
+        1.475054593426796, -0.84845832978883062,
+        1191.5378504105215, 1191.5405322963986,
+        1.8696200000000001),
 }
 
 
-def independent_mass_boundary_ratio(values):
+def independent_mass_boundary_ratio(
+        values, saved_mass_ulps=FINAL_SAVED_MASS_SQUARED_ULPS,
+        component_ulps=VEC4_CANCELLATION_ULPS):
     """High-precision oracle over the already-rounded fixture doubles."""
     with localcontext() as context:
         context.prec = 80
@@ -42,8 +66,8 @@ def independent_mass_boundary_ratio(values):
             energy * energy + px * px + py * py + pz * pz)
         saved_scale = max(Decimal(1), saved)
         tolerance = Decimal.from_float(sys.float_info.epsilon) * (
-            Decimal(65536) * saved_scale +
-            Decimal(2048) * component_scale)
+            Decimal(saved_mass_ulps) * saved_scale +
+            Decimal(component_ulps) * component_scale)
         return float(abs(invariant - saved) / tolerance)
 
 
@@ -422,6 +446,12 @@ int main(int argc, char** argv) {
       heavyPdgs = {421, 421, -4422};
     if (resolutionEvents && row == 1)
       heavyPdgs = {511, 511, -511, -511, 5522, -5522};
+    if (mode == "mass_valid_production_stop" && row == 0)
+      heavyPdgs = {-4212, 4212};
+    if (mode == "mass_valid_full_scan_saved_extreme" && row == 0)
+      heavyPdgs = {-4112, 4112};
+    if (mode == "mass_valid_full_scan_component_extreme" && row == 0)
+      heavyPdgs = {-411, 411};
     integerVectors["heavyMotherOffsets"] = {0};
     integerVectors["heavyConstituentOffsets"] = {0};
     if (mode != "empty_heavy") {
@@ -575,6 +605,8 @@ int main(int argc, char** argv) {
       integerVectors["heavyConstituentOffsets"].back() += 1;
     if (mode.rfind("mass_", 0) == 0 && row == 0 &&
         !doubleVectors["heavyMass"].empty()) {
+      const std::size_t massSlot =
+          mode == "mass_valid_production_stop" ? 1U : 0U;
       const auto setKinematics = [&](double px, double py, double pz,
                                      double energy, double savedMass) {
         const double pt = std::hypot(px, py);
@@ -584,19 +616,19 @@ int main(int argc, char** argv) {
                 ? 0.5 * std::log((energy + pz) / (energy - pz))
                 : 0.0;
         const double phi = std::atan2(py, px);
-        doubleVectors["heavyPx"].front() = px;
-        doubleVectors["heavyPy"].front() = py;
-        doubleVectors["heavyPz"].front() = pz;
-        doubleVectors["heavyE"].front() = energy;
-        doubleVectors["heavyMass"].front() = savedMass;
-        doubleVectors["heavyPt"].front() = pt;
-        doubleVectors["heavyEta"].front() = eta;
-        doubleVectors["heavyY"].front() = rapidity;
-        doubleVectors["heavyPhi"].front() = phi;
-        doubleVectors["PT"].front() = pt;
-        doubleVectors["ETA"].front() = eta;
-        doubleVectors["Y"].front() = rapidity;
-        doubleVectors["PHI"].front() = phi;
+        doubleVectors["heavyPx"].at(massSlot) = px;
+        doubleVectors["heavyPy"].at(massSlot) = py;
+        doubleVectors["heavyPz"].at(massSlot) = pz;
+        doubleVectors["heavyE"].at(massSlot) = energy;
+        doubleVectors["heavyMass"].at(massSlot) = savedMass;
+        doubleVectors["heavyPt"].at(massSlot) = pt;
+        doubleVectors["heavyEta"].at(massSlot) = eta;
+        doubleVectors["heavyY"].at(massSlot) = rapidity;
+        doubleVectors["heavyPhi"].at(massSlot) = phi;
+        doubleVectors["PT"].at(massSlot) = pt;
+        doubleVectors["ETA"].at(massSlot) = eta;
+        doubleVectors["Y"].at(massSlot) = rapidity;
+        doubleVectors["PHI"].at(massSlot) = phi;
       };
       const bool boosted = mode == "mass_valid_boosted" ||
           mode.find("_high_") != std::string::npos;
@@ -608,25 +640,37 @@ int main(int argc, char** argv) {
       } else if (transitionAbove) {
         setKinematics(-1.3076076015190745, 2.8302798907269628,
                       7.2360464351265019, 8.0968137393840962, 1.86486);
+      } else if (mode == "mass_valid_production_stop") {
+        setKinematics(-1.1105588708129701, 0.25046818581982877,
+                      2.7789801514781347, 3.87152109564187,
+                      2.4433316586479696);
+      } else if (mode == "mass_valid_full_scan_saved_extreme") {
+        setKinematics(-1.7236023419368458, -2.5401658635144932,
+                      2.2303266857620887, 4.5266509271070969,
+                      2.4683929675390233);
+      } else if (mode == "mass_valid_full_scan_component_extreme") {
+        setKinematics(1.475054593426796, -0.84845832978883062,
+                      1191.5378504105215, 1191.5405322963986,
+                      1.8696200000000001);
       } else {
         setKinematics(-0.65647586501055222, -0.88109799673942379,
                       -1.5185865564570249, 2.7485678178030177,
                       2.0102799999999998);
       }
       if (mode.find("mass_saved_") == 0) {
-        doubleVectors["heavyMass"].front() += mutation;
+        doubleVectors["heavyMass"].at(massSlot) += mutation;
       } else if (mode.find("mass_energy_") == 0) {
-        setKinematics(doubleVectors["heavyPx"].front(),
-                      doubleVectors["heavyPy"].front(),
-                      doubleVectors["heavyPz"].front(),
-                      doubleVectors["heavyE"].front() + mutation,
-                      doubleVectors["heavyMass"].front());
+        setKinematics(doubleVectors["heavyPx"].at(massSlot),
+                      doubleVectors["heavyPy"].at(massSlot),
+                      doubleVectors["heavyPz"].at(massSlot),
+                      doubleVectors["heavyE"].at(massSlot) + mutation,
+                      doubleVectors["heavyMass"].at(massSlot));
       } else if (mode.find("mass_momentum_") == 0) {
-        setKinematics(doubleVectors["heavyPx"].front() + mutation,
-                      doubleVectors["heavyPy"].front(),
-                      doubleVectors["heavyPz"].front(),
-                      doubleVectors["heavyE"].front(),
-                      doubleVectors["heavyMass"].front());
+        setKinematics(doubleVectors["heavyPx"].at(massSlot) + mutation,
+                      doubleVectors["heavyPy"].at(massSlot),
+                      doubleVectors["heavyPz"].at(massSlot),
+                      doubleVectors["heavyE"].at(massSlot),
+                      doubleVectors["heavyMass"].at(massSlot));
       } else if (mode == "mass_spacelike") {
         setKinematics(2.0, 0.0, 0.0, 1.0, 1.0);
       } else if (mode == "mass_nonfinite") {
@@ -1061,6 +1105,39 @@ class SubmissionContract(unittest.TestCase):
                      "mass_valid_transition_above",
                      "mass_valid_boosted"):
             with self.subTest(mode=mode):
+                result = self.make_and_validate(mode)
+                self.assertEqual(result.returncode, 0, result.stdout)
+                self.assertIn("RAW_VALIDATION_PASS", result.stdout)
+
+    def test_validator_accepts_exact_run_analysis_stop_mass_row(self):
+        values = MASS_CASES["production_stop"]
+        old_ratio = independent_mass_boundary_ratio(values, 65536, 2048)
+        final_ratio = independent_mass_boundary_ratio(values)
+        self.assertGreater(old_ratio, 1.12)
+        self.assertLess(old_ratio, 1.13)
+        self.assertGreater(final_ratio, 0.07)
+        self.assertLess(final_ratio, 0.08)
+        self.assertGreater(1.0 / final_ratio, 12.8)
+        result = self.make_and_validate("mass_valid_production_stop")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("RAW_VALIDATION_PASS", result.stdout)
+
+    def test_validator_accepts_independent_full_scan_mass_extrema(self):
+        cases = {
+            "full_scan_saved_extreme": (
+                "mass_valid_full_scan_saved_extreme", 131072, 4096, 0.81),
+            "full_scan_component_extreme": (
+                "mass_valid_full_scan_component_extreme", 1048576, 2048, 0.89),
+        }
+        for case_name, (mode, saved_ulps, component_ulps, final_limit) in cases.items():
+            with self.subTest(case=case_name):
+                values = MASS_CASES[case_name]
+                partial_ratio = independent_mass_boundary_ratio(
+                    values, saved_ulps, component_ulps)
+                final_ratio = independent_mass_boundary_ratio(values)
+                self.assertGreater(partial_ratio, 1.0)
+                self.assertLess(final_ratio, final_limit)
+                self.assertGreater(1.0 / final_ratio, 1.13)
                 result = self.make_and_validate(mode)
                 self.assertEqual(result.returncode, 0, result.stdout)
                 self.assertIn("RAW_VALIDATION_PASS", result.stdout)

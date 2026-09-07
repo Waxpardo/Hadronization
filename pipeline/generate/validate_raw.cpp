@@ -289,8 +289,11 @@ bool Approximately(double left, double right) {
 // cancellation-amplified drift of a repeatedly transformed Vec4.  Both are
 // binary64 mass-squared budgets, measured in units of epsilon and kept well
 // inside the historical validator's acceptance region.
-constexpr double kSavedMassSquaredUlps = 65536.0;
-constexpr double kVec4CancellationUlps = 2048.0;
+// 1048576 and 4096 are the next powers of two above the independently measured
+// full-manifest requirements of 838704 saved-mass units and 3610 component
+// units, respectively, after fixing the other term at its final value.
+constexpr double kSavedMassSquaredUlps = 1048576.0;
+constexpr double kVec4CancellationUlps = 4096.0;
 
 bool PythiaSavedMassConsistent(double px, double py, double pz, double energy,
                                double savedMass) {
