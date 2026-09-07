@@ -17,6 +17,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -333,13 +334,15 @@ void Emit(std::ostream& output, const HP::Domains& domains, const HP::Row& row,
          << result.policy << '\n';
 }
 
-const HP::Scope& FindScope(const HP::Domains& domains, const std::string& family,
-                           const std::string& tune, const std::string& profile = {},
-                           const std::string& activity = {}, int classId = -1) {
+const HP::Scope& FindScope(const HP::Domains& domains, std::string_view family,
+                           std::string_view tune, std::string_view profile = "",
+                           std::string_view activity = "", int classId = -1) {
   const auto found = std::find_if(domains.scopes.begin(), domains.scopes.end(),
-                                  [&](const auto& scope) {
-    return scope.family == family && scope.tune == tune && scope.profile == profile &&
-           scope.activity == activity && scope.classId == classId;
+                                  [family, tune, profile, activity, classId](
+                                      const auto& scope) {
+    return std::string_view(scope.family) == family && std::string_view(scope.tune) == tune &&
+           std::string_view(scope.profile) == profile &&
+           std::string_view(scope.activity) == activity && scope.classId == classId;
   });
   if (found == domains.scopes.end()) throw std::runtime_error("requested scope is absent");
   return *found;
