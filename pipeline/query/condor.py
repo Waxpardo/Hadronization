@@ -280,6 +280,7 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
         r.atomic_json(stage / "work.json", work, exclusive=True)
         for script in ("worker.py", "collector.py", "preflight.py"):
             (stage / script).write_text(BOOTSTRAP)
+        shutil.copy2(Path(__file__).with_name("site_probe.py"), stage / "site_probe.py")
         work_sha = r.sha_file(stage / "work.json")
         submit = ("universe = vanilla\nexecutable = /usr/bin/python3\n"
                   "arguments = worker.py worker --work work.json --expected-work-sha256 " + work_sha +
@@ -311,12 +312,34 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
                      "output = logs/collector.out\n"
                      "error = logs/collector.err\nlog = logs/collector.events\nqueue 1\n")
         (stage / "collector.sub").write_text(collector)
+        (stage / "site-canary.sub").write_text(
+            "# Inert. Replace every placeholder only after allocation; submit once for evidence.\n"
+            "universe = vanilla\nexecutable = /usr/bin/python3\n"
+            "arguments = site_probe.py --input-root __ACCEPTED_ANALYZED_SAMPLE_ROOT__"
+            " --input-sha256 __INDEPENDENT_INPUT_SHA256__"
+            " --bulk-root __ALLOCATED_POSIX_BULK_QUALIFICATION_ROOT__"
+            " --control-root __PROTECTED_CONTROL_QUALIFICATION_ROOT__"
+            " --root-config __ROOT_CONFIG__ --cxx __GCC_14_2_0_CXX__"
+            " --pythia-config __PYTHIA_8_317_CONFIG__"
+            " --cvmfs-path __REQUIRED_CVMFS_PATH__\n"
+            "should_transfer_files = YES\ntransfer_input_files = site_probe.py\n"
+            "when_to_transfer_output = ON_EXIT\n"
+            "output = __FRESH_CONTROL_EVIDENCE_DIR__/canary.out\n"
+            "error = __FRESH_CONTROL_EVIDENCE_DIR__/canary.err\n"
+            "log = __FRESH_CONTROL_EVIDENCE_DIR__/canary.events\n"
+            "request_cpus = 1\nrequest_memory = __MEASURED_CANARY_MEMORY_MB__\n"
+            "request_disk = __MEASURED_CANARY_SCRATCH_KB__\nqueue 1\n")
         (stage / "BUILD_LINUX_PACK.sh").write_text(
             "#!/usr/bin/env bash\nset -euo pipefail\n"
             "# Run in a fresh external build directory, never inside a sealed bundle.\n"
             "test ! -e bundle-manifest.json && test ! -e workflow.dag && test ! -e source && test ! -e prepared-pack && test ! -e query-pack.tar.gz\n"
-            "# Run on a qualified AlmaLinux 9.8 submit/build node after L1 admission.\n"
+            "# SITE_CONF is an independently reviewed, measured site.conf, outside this bundle.\n"
+            "test -n \"${SITE_CONF:-}\" && test -f \"$SITE_CONF\"\n"
             "mkdir -p source && tar -xzf source.tar.gz -C source\n"
+            "cp \"$SITE_CONF\" source/config/site.conf\n"
+            "python3 -B source/pipeline/generate/runtime.py check --require-root --require-pythia\n"
+            "test \"$(\"$(sed -n 's/^ROOT_PREFIX=//p' \"$SITE_CONF\")/bin/root-config\" --version)\" = 6.30.01\n"
+            "test \"$(\"$(sed -n 's/^CXX=//p' \"$SITE_CONF\")\" -dumpfullversion -dumpversion | head -1)\" = 14.2.0\n"
             "python3 -B source/hadronization query prepare-pack --output \"$PWD/prepared-pack\" --work-root \"$PWD/build-scratch\"\n"
             "tar -czf query-pack.tar.gz -C prepared-pack .\nsha256sum query-pack.tar.gz\n")
         (stage / "PREFLIGHT.txt").write_text(
@@ -335,18 +358,27 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
             "inert_bundle_manifest_sha256": "__INERT_BUNDLE_MANIFEST_SHA256__",
             "qualified_pack_sha256": "__LINUX_PREPARED_PACK_SHA256__",
             "maxjobs": 4, "memory_mb": 0, "scratch_kb": 0,
+            "resource_envelope": "PENDING",
             "input_root": "__NIKHEF_ACCEPTED_ANALYZED_ROOT__",
             "durable_bulk_root": "__NIKHEF_POSIX_BULK_ROOT__",
             "durable_control_root": "__INDEPENDENT_POSIX_CONTROL_ROOT__",
             "execute_node_canary": "PENDING", "runtime_versions": "PENDING",
             "input_readback": "PENDING", "posix_nooverwrite": "PENDING",
-            "posix_readback": "PENDING", "quota": "PENDING", "retention": "PENDING"}, exclusive=True)
+            "posix_readback": "PENDING", "quota": "PENDING", "retention": "PENDING",
+            "evidence": {key: "PENDING" for key in
+                ("execute_node_canary", "runtime_versions", "input_readback",
+                 "posix_nooverwrite", "posix_readback", "quota", "retention",
+                 "classads", "capacity", "control_custody", "pair_population",
+                 "resource_budget")}}, exclusive=True)
         (stage / "README.txt").write_text(
             ("TEST_ONLY INERT DOMAIN. " if test_only else "TEST/LAUNCH STATUS: INERT. ") +
             str(len(domain["work"])) + " input pairs and source topology"
             " derive from the independently pinned acquisition manifest and campaign.\n"
             "Do not submit workflow.dag or collector.sub before L1 scientific/runtime/storage admission.\n"
-            "After qualified Linux pack build and readback, use bind-site with an"
+            "Run site-canary.sub once on an execute node; its output is observation,"
+            " not admission. Record ClassAds, input hashes, no-overwrite and"
+            " interrupted sibling evidence in protected control custody."
+            " After qualified Linux pack build and readback, use bind-site with an"
             " independently pinned L1/site admission record to produce a new"
             " immutable site-bound bundle. Do not hand-edit the inert bundle."
             " Populate SITE_ADMISSION_TEMPLATE.json only in independent control"
@@ -419,15 +451,53 @@ def bind_site(bundle, bundle_sha, pack, pack_sha, admission, admission_sha, outp
                 ("execute_node_canary", "runtime_versions", "input_readback",
                  "posix_nooverwrite", "posix_readback", "quota", "retention"))):
         raise ValueError("independent L1/site admission is incomplete")
+    evidence_keys = ("execute_node_canary", "runtime_versions", "input_readback",
+                     "posix_nooverwrite", "posix_readback", "quota", "retention",
+                     "classads", "capacity", "control_custody", "pair_population",
+                     "resource_budget")
+    evidence = record.get("evidence")
+    if not isinstance(evidence, dict) or set(evidence) != set(evidence_keys):
+        raise ValueError("site admission evidence inventory is incomplete")
+    for key in evidence_keys:
+        fact = evidence[key]
+        if not isinstance(fact, dict) or set(fact) != {"path", "bytes", "sha256"}:
+            raise ValueError("site admission evidence fact is incomplete: " + key)
+        path = Path(fact["path"])
+        r.lower_sha(fact["sha256"], "site admission evidence SHA")
+        if (not path.is_absolute() or not path.is_file() or path.is_symlink() or
+                type(fact["bytes"]) is not int or fact["bytes"] <= 0 or
+                path.stat().st_size != fact["bytes"] or r.sha_file(path) != fact["sha256"]):
+            raise ValueError("site admission evidence readback differs: " + key)
     memory, scratch = record.get("memory_mb"), record.get("scratch_kb")
     if (type(memory) is not int or memory <= 0 or type(scratch) is not int or scratch <= 0):
         raise ValueError("site resource requests are not measured positive integers")
+    envelope = record.get("resource_envelope")
+    required_resource_keys = {"query_peak_rss_mb", "query_peak_scratch_kb",
+                              "merge_peak_rss_mb", "reduce_peak_rss_mb",
+                              "render_peak_rss_mb", "postprocess_limit_mb",
+                              "bulk_projected_peak_bytes", "bulk_allocated_bytes",
+                              "query_occupied_cells", "merged_occupied_cells",
+                              "screened_input_pairs", "covered_tune_blocks"}
+    if (not isinstance(envelope, dict) or set(envelope) != required_resource_keys or
+            any(type(value) is not int or value <= 0 for value in envelope.values())):
+        raise ValueError("measured resource envelope is incomplete")
+    if (memory * 4 < envelope["query_peak_rss_mb"] * 5 or
+            scratch * 4 < envelope["query_peak_scratch_kb"] * 5 or
+            envelope["postprocess_limit_mb"] * 4 <
+            5 * max(envelope[key] for key in
+                    ("merge_peak_rss_mb", "reduce_peak_rss_mb", "render_peak_rss_mb")) or
+            envelope["bulk_allocated_bytes"] * 4 <
+            envelope["bulk_projected_peak_bytes"] * 5):
+        raise ValueError("measured resource envelope does not fit allocated requests")
     paths = ("input_root", "durable_bulk_root", "durable_control_root")
     if any(not isinstance(record.get(key), str) or not Path(record[key]).is_absolute()
            for key in paths):
         raise ValueError("site paths are not absolute")
     inert_work_sha = r.sha_file(bundle / "work.json")
     work = _work(bundle / "work.json", inert_work_sha)
+    if (envelope["covered_tune_blocks"] != len(work["tune_ordinals"]) * work["block_count"] or
+            envelope["screened_input_pairs"] > len(work["work"])):
+        raise ValueError("measured resource screen domain differs from work manifest")
     if work["state"] != "INERT_SITE_BINDING_REQUIRED":
         raise ValueError("work manifest is already bound")
     if output.exists():
@@ -553,6 +623,57 @@ def preflight(work_path, work_sha, source_tar, pack_tar=None, full_input_hash=Fa
         good = good and all(report["site_checks"][key].get("readable", False)
                             for key in ("input_root", "durable_bulk_root", "durable_control_root"))
     return 0 if good else 42
+
+
+def screen_plan(work_path, work_sha, expected_sources_path, input_root=None):
+    """Choose real pinned input shards covering each tune/original block."""
+    work = _work(work_path, work_sha)
+    if work["state"] == "SITE_BOUND":
+        _resolved(work)
+        if input_root is not None:
+            raise ValueError("bound work already owns the input root")
+        input_root = Path(work["input_root"])
+    elif work["state"] == "INERT_SITE_BINDING_REQUIRED":
+        if input_root is None or not input_root.is_absolute():
+            raise ValueError("inert screen requires an explicit accepted input root")
+    else:
+        raise ValueError("representative screen requires a real accepted work domain")
+    if r.sha_file(expected_sources_path) != work["expected_sources_sha256"]:
+        raise ValueError("expected source manifest differs")
+    sources = r.json_file(expected_sources_path)
+    if not isinstance(sources, list) or len(sources) != work["expected_source_count"]:
+        raise ValueError("expected source domain differs")
+    required = {(tune, block) for tune in work["tune_ordinals"]
+                for block in range(1, work["block_count"] + 1)}
+    chosen = {}
+    seen = []
+    for item in work["work"]:
+        receipt_path = input_root / item["receipt"]["name"]
+        _checked_input(receipt_path, item["receipt"])
+        receipt = r.json_file(receipt_path)
+        if (receipt.get("state") != "PASS" or
+                receipt.get("shard_ordinal") != item["ordinal"]):
+            raise ValueError("accepted analyzed receipt state/ordinal differs")
+        source_ids = receipt.get("storage_identity", {}).get("source_ids")
+        if not isinstance(source_ids, list) or not source_ids:
+            raise ValueError("accepted analyzed receipt source IDs missing")
+        for source_id in source_ids:
+            if type(source_id) is not int or not 0 <= source_id < len(sources):
+                raise ValueError("accepted analyzed source ID is foreign")
+            source = sources[source_id]
+            key = (source["tune"], source["block"])
+            if key not in required:
+                raise ValueError("accepted analyzed tune/block is foreign")
+            chosen.setdefault(key, item["ordinal"])
+        seen.extend(source_ids)
+    if seen != list(range(len(sources))) or set(chosen) != required:
+        raise ValueError("accepted analyzed receipt source partition/coverage differs")
+    return {"schema": "hadronization_representative_screen_plan_v1",
+            "status": "PLAN_ONLY_NOT_PAIR_SCREEN_OR_ADMISSION",
+            "work_sha256": work_sha,
+            "ordinals": sorted(set(chosen.values())),
+            "coverage": [{"tune": tune, "block": block, "ordinal": chosen[tune, block]}
+                         for tune, block in sorted(required)]}
 
 
 def _extract_frozen(source_tar, source_facts, destination):
@@ -693,7 +814,8 @@ def _external_pins(path, expected_sha, ordinals):
     if payload.get("schema") != PINS_SCHEMA or payload.get("authority") != "EXTERNAL_REVIEW":
         raise ValueError("content pins lack external review authority")
     pins = payload.get("pins")
-    if not isinstance(pins, list) or [x.get("ordinal") for x in pins] != list(range(ordinals)):
+    expected = list(range(ordinals)) if type(ordinals) is int else list(ordinals)
+    if not isinstance(pins, list) or [x.get("ordinal") for x in pins] != expected:
         raise ValueError("external accepted pin ordinal domain differs")
     for item in pins:
         if type(item.get("attempt")) is not int or item["attempt"] not in (0, 1, 2):
@@ -702,7 +824,8 @@ def _external_pins(path, expected_sha, ordinals):
     return pins
 
 
-def collect(work_path, expected_work_sha, expected_sources, source_tar, pins_path, pins_sha):
+def collect(work_path, expected_work_sha, expected_sources, source_tar, pins_path, pins_sha,
+            screen_path=None, screen_sha=None):
     work = _work(work_path, expected_work_sha)
     _resolved(work)
     control = Path(work["durable_control_root"]).resolve()
@@ -713,7 +836,30 @@ def collect(work_path, expected_work_sha, expected_sources, source_tar, pins_pat
         raise ValueError("expected source manifest differs")
     if r.sha_file(source_tar) != work["source_tar_sha256"]:
         raise ValueError("frozen source tar differs")
-    pins = _external_pins(pins_path, pins_sha, len(work["work"]))
+    screen = screen_path is not None
+    full_sources = r.json_file(expected_sources)
+    if screen:
+        if not screen_sha or r.sha_file(screen_path) != screen_sha:
+            raise ValueError("independent representative screen plan pin differs")
+        plan = r.json_file(screen_path)
+        if plan != screen_plan(work_path, expected_work_sha, expected_sources):
+            raise ValueError("representative screen plan differs from accepted receipts")
+        ordinals = plan["ordinals"]
+        source_ids = []
+        for ordinal in ordinals:
+            item = work["work"][ordinal]
+            receipt_path = Path(work["input_root"]) / item["receipt"]["name"]
+            _checked_input(receipt_path, item["receipt"])
+            source_ids.extend(r.json_file(receipt_path)["storage_identity"]["source_ids"])
+        if len(source_ids) != len(set(source_ids)):
+            raise ValueError("screened analyzed sources overlap")
+        expected_subset = [row for row in full_sources if row["source_id"] in set(source_ids)]
+        if len(expected_subset) != len(source_ids):
+            raise ValueError("screened analyzed source domain differs")
+    else:
+        ordinals = len(work["work"])
+        expected_subset = full_sources
+    pins = _external_pins(pins_path, pins_sha, ordinals)
     workspaces, contents = [], []
     for pin in pins:
         ordinal, attempt = pin["ordinal"], pin["attempt"]
@@ -733,30 +879,36 @@ def collect(work_path, expected_work_sha, expected_sources, source_tar, pins_pat
                 raise ValueError("accepted attempt durable readback differs")
         workspaces.append(workspace)
         contents.append(pin["scientific_content_sha256"])
-    output = control / "collections" / ("collection-" + expected_work_sha[:16])
+    output = (control / ("screens" if screen else "collections") /
+              (("screen-" + expected_work_sha[:16] + "-" + pins_sha[:12]) if screen
+               else "collection-" + expected_work_sha[:16]))
     if output.exists():
         raise ValueError("collection publication already exists")
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="."+output.name+".stage-", dir=str(output.parent)))
     try:
         index_path = stage / "index.json"
-        index = c.create(workspaces, contents, r.json_file(expected_sources), index_path,
-                         stage / "verify-work", test_only=False)
+        index = c.create(workspaces, contents, expected_subset, index_path,
+                         stage / "verify-work", test_only=screen)
         if (index["campaign"] != work["campaign_id"] or
                 index["manifest_sha256"] != work["source_manifest_sha256"] or
                 index["block_count"] != work["block_count"] or
                 index["tune_ordinals"] != work["tune_ordinals"] or
                 index["analysis_sha256"] != work["analysis_sha256"] or
                 index["layout_sha256"] != work["layout_sha256"] or
-                len(index["sources"]) != work["expected_source_count"] or
-                sum(s["events"] for s in index["sources"]) != work["expected_event_count"]):
+                len(index["sources"]) != len(expected_subset) or
+                sum(s["events"] for s in index["sources"]) !=
+                sum(s["events"] for s in expected_subset)):
             raise ValueError("full campaign source/event closure differs")
-        manifest = {"schema": "hadronization_query_collection_closure_v1", "state": "EXTERNALLY_PINNED",
+        manifest = {"schema": "hadronization_query_collection_closure_v1",
+                    "state": "TEST_ONLY_REPRESENTATIVE_SCREEN" if screen else "EXTERNALLY_PINNED",
                     "work_sha256": expected_work_sha, "external_pins_sha256": pins_sha,
                     "index_sha256": r.sha_file(index_path),
                     "scientific_identity_sha256": index["scientific_identity_sha256"],
                     "source_count": len(index["sources"]),
                     "event_count": sum(s["events"] for s in index["sources"])}
+        if screen:
+            manifest["screen_plan_sha256"] = screen_sha
         r.atomic_json(stage / "manifest.json", manifest, exclusive=True)
         for p in stage.iterdir():
             if p.is_file(): r.fsync_file(p)
@@ -793,7 +945,7 @@ def _checked_site_bundle(bundle, bundle_sha):
     return bundle, manifest, work_sha, work
 
 
-def stage_dag(bundle, bundle_sha, output):
+def stage_dag(bundle, bundle_sha, output, screen_path=None, screen_sha=None):
     """Copy checked worker inputs to a disposable no-overwrite DAGMan launch root."""
     bundle, manifest, work_sha, work = _checked_site_bundle(bundle, bundle_sha)
     output = Path(output).absolute()
@@ -821,20 +973,45 @@ def stage_dag(bundle, bundle_sha, output):
             dag.count("ABORT-DAG-ON q") != len(work["work"]) or
             "MAXJOBS query 4\n" not in dag):
         raise ValueError("DAG worker domain differs from bound work")
+    screen = screen_path is not None
+    if screen:
+        if (not screen_sha or r.sha_file(screen_path) != screen_sha or
+                r.json_file(screen_path) != screen_plan(
+                    bundle / "work.json", work_sha, bundle / "expected-sources.json")):
+            raise ValueError("staged representative screen plan differs")
+        selected = r.json_file(screen_path)["ordinals"]
+        dag_lines = ["# TEST_ONLY representative screen; no production closure.",
+                     "MAXJOBS query 4"]
+        for ordinal in selected:
+            name = "q%04d" % ordinal
+            dag_lines.extend(["JOB %s worker.sub" % name,
+                              "VARS %s ordinal=\"%d\"" % (name, ordinal),
+                              "CATEGORY %s query" % name,
+                              "RETRY %s 2 UNLESS-EXIT 42" % name,
+                              "ABORT-DAG-ON %s 42" % name])
+        dag = "\n".join(dag_lines) + "\n"
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="."+output.name+".stage-", dir=str(output.parent)))
     try:
         for name in names:
-            shutil.copy2(bundle / name, stage / name)
-            fact = manifest["files"][name]
+            if name == "workflow.dag" and screen:
+                (stage / name).write_text(dag)
+                fact = _fact(stage / name)
+            else:
+                shutil.copy2(bundle / name, stage / name)
+                fact = manifest["files"][name]
             if (stage / name).stat().st_size != fact["bytes"] or r.sha_file(stage / name) != fact["sha256"]:
                 raise ValueError("staged DAG input readback differs: " + name)
         (stage / "logs").mkdir()
-        receipt = {"schema": "hadronization_staged_query_dag_v1", "state": "READY_FOR_NO_SUBMIT_REVIEW",
+        receipt = {"schema": "hadronization_staged_query_dag_v1",
+                   "state": "TEST_ONLY_SCREEN_READY_FOR_NO_SUBMIT_REVIEW" if screen else "READY_FOR_NO_SUBMIT_REVIEW",
                    "site_bound_bundle_manifest_sha256": bundle_sha,
                    "work_sha256": work_sha,
-                   "worker_count": len(work["work"]),
-                   "files": {name: manifest["files"][name] for name in names}}
+                   "worker_count": len(selected) if screen else len(work["work"]),
+                   "files": {name: {"bytes": (stage / name).stat().st_size,
+                                   "sha256": r.sha_file(stage / name)} for name in names}}
+        if screen:
+            receipt["screen_plan_sha256"] = screen_sha
         r.atomic_json(stage / "launch-receipt.json", receipt, exclusive=True)
         for name in names: r.fsync_file(stage / name)
         r.fsync_file(stage / "launch-receipt.json")
@@ -928,6 +1105,12 @@ def main():
     preflight_parser.add_argument("--source-tar", type=Path, required=True)
     preflight_parser.add_argument("--pack-tar", type=Path)
     preflight_parser.add_argument("--full-input-hash", action="store_true")
+    screen_parser = commands.add_parser("screen-plan", help="choose pinned all-tune/block analyzed inputs for a real pair-population screen")
+    screen_parser.add_argument("--work", type=Path, required=True)
+    screen_parser.add_argument("--expected-work-sha256", required=True)
+    screen_parser.add_argument("--expected-sources", type=Path, required=True)
+    screen_parser.add_argument("--input-root", type=Path,
+                               help="explicit accepted analyzed input root before site binding")
     worker_parser = commands.add_parser("worker")
     worker_parser.add_argument("--work", type=Path, required=True)
     worker_parser.add_argument("--expected-work-sha256", required=True)
@@ -936,13 +1119,17 @@ def main():
     worker_parser.add_argument("--source-tar", type=Path, required=True)
     worker_parser.add_argument("--source-facts", type=Path, default=Path("source-files.json"))
     worker_parser.add_argument("--pack-tar", type=Path, required=True)
-    collector_parser = commands.add_parser("collect")
-    collector_parser.add_argument("--work", type=Path, required=True)
-    collector_parser.add_argument("--expected-work-sha256", required=True)
-    collector_parser.add_argument("--expected-sources", type=Path, required=True)
-    collector_parser.add_argument("--source-tar", type=Path, required=True)
-    collector_parser.add_argument("--pins", type=Path, required=True)
-    collector_parser.add_argument("--expected-pins-sha256", required=True)
+    for command_name in ("collect", "collect-screen"):
+        collector_parser = commands.add_parser(command_name)
+        collector_parser.add_argument("--work", type=Path, required=True)
+        collector_parser.add_argument("--expected-work-sha256", required=True)
+        collector_parser.add_argument("--expected-sources", type=Path, required=True)
+        collector_parser.add_argument("--source-tar", type=Path, required=True)
+        collector_parser.add_argument("--pins", type=Path, required=True)
+        collector_parser.add_argument("--expected-pins-sha256", required=True)
+        if command_name == "collect-screen":
+            collector_parser.add_argument("--screen-plan", type=Path, required=True)
+            collector_parser.add_argument("--expected-screen-plan-sha256", required=True)
     render_parser = commands.add_parser("render-collector", help="pin a separate collector submit file after accepted attempts")
     render_parser.add_argument("--bundle", type=Path, required=True)
     render_parser.add_argument("--expected-bundle-sha256", required=True)
@@ -953,6 +1140,12 @@ def main():
     stage_parser.add_argument("--bundle", type=Path, required=True)
     stage_parser.add_argument("--expected-bundle-sha256", required=True)
     stage_parser.add_argument("--output", type=Path, required=True)
+    screen_stage_parser = commands.add_parser("stage-screen-dag", help="copy only representative pinned worker nodes to a TEST_ONLY DAG launch")
+    screen_stage_parser.add_argument("--bundle", type=Path, required=True)
+    screen_stage_parser.add_argument("--expected-bundle-sha256", required=True)
+    screen_stage_parser.add_argument("--screen-plan", type=Path, required=True)
+    screen_stage_parser.add_argument("--expected-screen-plan-sha256", required=True)
+    screen_stage_parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
         if args.command == "prepare":
@@ -967,6 +1160,9 @@ def main():
         elif args.command == "preflight":
             return preflight(args.work, args.expected_work_sha256, args.source_tar,
                              args.pack_tar, args.full_input_hash)
+        elif args.command == "screen-plan":
+            print(r.canonical(screen_plan(args.work, args.expected_work_sha256,
+                                          args.expected_sources, args.input_root)))
         elif args.command == "worker":
             worker(args.work, args.expected_work_sha256, args.ordinal, args.attempt,
                    args.source_tar, args.source_facts, args.pack_tar)
@@ -977,6 +1173,14 @@ def main():
         elif args.command == "stage-dag":
             path = stage_dag(args.bundle, args.expected_bundle_sha256, args.output)
             print("STAGED_DAG="+str(path)+" SHA256="+r.sha_file(path))
+        elif args.command == "stage-screen-dag":
+            path = stage_dag(args.bundle, args.expected_bundle_sha256, args.output,
+                             args.screen_plan, args.expected_screen_plan_sha256)
+            print("STAGED_TEST_ONLY_SCREEN_DAG="+str(path)+" SHA256="+r.sha_file(path))
+        elif args.command == "collect-screen":
+            collect(args.work, args.expected_work_sha256, args.expected_sources,
+                    args.source_tar, args.pins, args.expected_pins_sha256,
+                    args.screen_plan, args.expected_screen_plan_sha256)
         else:
             collect(args.work, args.expected_work_sha256, args.expected_sources,
                     args.source_tar, args.pins, args.expected_pins_sha256)

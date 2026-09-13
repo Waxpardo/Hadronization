@@ -18,6 +18,10 @@ FIXTURE = ROOT / "tests/fixtures/query_multitune/queries/shard-0000"
 spec = importlib.util.spec_from_file_location("tested_condor", ROOT / "pipeline/query/condor.py")
 condor = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(condor)
+site_spec = importlib.util.spec_from_file_location(
+    "query_site_probe", ROOT / "pipeline/query/site_probe.py")
+site_probe = importlib.util.module_from_spec(site_spec)
+site_spec.loader.exec_module(site_probe)
 
 
 class QueryCondorPreparation(unittest.TestCase):
@@ -42,6 +46,131 @@ class QueryCondorPreparation(unittest.TestCase):
     def tearDown(self):
         self.temporary.cleanup()
 
+    def test_site_probe_preserves_unique_publication_and_interrupted_sibling(self):
+        bulk = self.base / "bulk"
+        bulk.mkdir()
+        receipt = site_probe.publish_probe(bulk, "TEST_ONLY bulk")
+        self.assertEqual(receipt["no_overwrite"], "PASS")
+        self.assertEqual(receipt["readback"], "PASS")
+        self.assertEqual(site_probe.sha(Path(receipt["published"])), receipt["sha256"])
+        self.assertEqual(Path(receipt["partial"]).read_bytes(),
+                         b"INTERRUPTED_QUALIFICATION_ONLY")
+
+    def test_screen_plan_covers_every_tune_block_from_pinned_receipts(self):
+        input_root = self.base / "inputs"
+        input_root.mkdir()
+        sources = [{"source_id": i, "tune": tune, "block": block}
+                   for i, (tune, block) in enumerate((
+                       ("MONASH", 1), ("MONASH", 2),
+                       ("JUNCTIONS", 1), ("JUNCTIONS", 2),
+                       ("CLOSEPACKING", 1), ("CLOSEPACKING", 2)))]
+        source_path = self.base / "sources.json"
+        source_path.write_text(json.dumps(sources))
+        items = []
+        for ordinal in range(3):
+            receipt_path = input_root / ("shard-%04d.json" % ordinal)
+            receipt_path.write_text(json.dumps({"state": "PASS", "shard_ordinal": ordinal,
+                "storage_identity": {"source_ids": [ordinal * 2, ordinal * 2 + 1]}}))
+            items.append({"ordinal": ordinal,
+                          "root": {"name": "shard-%04d.root" % ordinal, "bytes": 1,
+                                   "sha256": "a" * 64},
+                          "receipt": {"name": receipt_path.name,
+                                      "bytes": receipt_path.stat().st_size,
+                                      "sha256": condor.r.sha_file(receipt_path)}})
+        work = {"schema": condor.WORK_SCHEMA, "state": "SITE_BOUND",
+                "storage_semantics": "POSIX_NOOVERWRITE_VERIFIED",
+                "site_admission_sha256": "a" * 64,
+                "prepared_pack_tar_sha256": "b" * 64,
+                "input_root": str(input_root),
+                "durable_bulk_root": str(self.base / "bulk"),
+                "durable_control_root": str(self.base / "control"),
+                "expected_sources_sha256": condor.r.sha_file(source_path),
+                "input_file_count": 6, "input_root_bytes": 3,
+                "campaign_id": "TEST_ONLY", "block_count": 2,
+                "tune_ordinals": {tune: i for i, tune in
+                                  enumerate(("MONASH", "JUNCTIONS", "CLOSEPACKING"))},
+                "expected_source_count": 6, "expected_event_count": 6,
+                "work": items}
+        work_path = self.base / "work.json"
+        work_path.write_text(json.dumps(work))
+        plan = condor.screen_plan(work_path, condor.r.sha_file(work_path), source_path)
+        self.assertEqual(plan["ordinals"], [0, 1, 2])
+        self.assertEqual(len(plan["coverage"]), 6)
+        sources[-1]["block"] = 1
+        source_path.write_text(json.dumps(sources))
+        work["expected_sources_sha256"] = condor.r.sha_file(source_path)
+        work_path.write_text(json.dumps(work))
+        with self.assertRaisesRegex(ValueError, "coverage differs"):
+            condor.screen_plan(work_path, condor.r.sha_file(work_path), source_path)
+
+    def test_collector_shaped_screen_stays_test_only_on_all_tune_blocks(self):
+        fixture = ROOT / "tests/fixtures/query_multitune"
+        sources_path = fixture / "expected-sources.json"
+        sources = json.loads(sources_path.read_text())
+        metadata = json.loads((fixture / "queries/shard-0000/metadata.json").read_text())
+        binding = metadata["input_receipt"]["binding"]
+        input_root = self.base / "inputs"
+        bulk = self.base / "bulk"
+        control = self.base / "control"
+        input_root.mkdir(); (control / "pins").mkdir(parents=True)
+        work_items, pins = [], []
+        work_sha_placeholder = "a" * 64
+        for ordinal in range(3):
+            receipt = input_root / ("shard-%04d.json" % ordinal)
+            receipt.write_text(json.dumps({"state": "PASS", "shard_ordinal": ordinal,
+                "storage_identity": {"source_ids": list(range(ordinal * 10, ordinal * 10 + 10))}}))
+            work_items.append({"ordinal": ordinal,
+                "root": {"name": "shard-%04d.root" % ordinal, "bytes": 1,
+                         "sha256": "b" * 64},
+                "receipt": {"name": receipt.name, "bytes": receipt.stat().st_size,
+                            "sha256": condor.r.sha_file(receipt)}})
+        source_tar = self.base / "source.tar.gz"
+        source_tar.write_bytes(b"TEST_ONLY source pin")
+        work = {"schema": condor.WORK_SCHEMA, "state": "SITE_BOUND",
+                "storage_semantics": "POSIX_NOOVERWRITE_VERIFIED",
+                "site_admission_sha256": work_sha_placeholder,
+                "prepared_pack_tar_sha256": "c" * 64,
+                "input_root": str(input_root),
+                "durable_bulk_root": str(bulk),
+                "durable_control_root": str(control),
+                "expected_sources_sha256": condor.r.sha_file(sources_path),
+                "source_tar_sha256": condor.r.sha_file(source_tar),
+                "input_file_count": 6, "input_root_bytes": 3,
+                "campaign_id": binding["campaign"],
+                "source_manifest_sha256": binding["manifest_sha256"],
+                "analysis_sha256": metadata["analysis_sha256"],
+                "layout_sha256": metadata["layout_sha256"],
+                "block_count": 10, "tune_ordinals": binding["tune_ordinals"],
+                "expected_source_count": 30, "expected_event_count": 90,
+                "work": work_items}
+        work_path = self.base / "work.json"
+        work_path.write_text(json.dumps(work))
+        work_sha = condor.r.sha_file(work_path)
+        for ordinal in range(3):
+            workspace = fixture / "queries" / ("shard-%04d" % ordinal)
+            attempt = condor._stage_workspace(
+                workspace, bulk / ("shard-%04d" % ordinal) / "attempt-00",
+                ordinal, 0, work_sha)
+            pins.append({"ordinal": ordinal, "attempt": 0,
+                         "scientific_content_sha256": attempt["scientific_content_sha256"]})
+        plan_path = self.base / "screen.json"
+        plan_path.write_text(json.dumps(condor.screen_plan(work_path, work_sha, sources_path)))
+        pins_path = control / "pins/selected.json"
+        pins_path.write_text(json.dumps({"schema": condor.PINS_SCHEMA,
+                                        "authority": "EXTERNAL_REVIEW", "pins": pins}))
+        condor.collect(work_path, work_sha, sources_path, source_tar,
+                       pins_path, condor.r.sha_file(pins_path),
+                       plan_path, condor.r.sha_file(plan_path))
+        published = control / "screens" / ("screen-" + work_sha[:16] + "-" +
+                                            condor.r.sha_file(pins_path)[:12])
+        self.assertEqual(condor.r.json_file(published / "manifest.json")["state"],
+                         "TEST_ONLY_REPRESENTATIVE_SCREEN")
+        self.assertEqual(condor.r.json_file(published / "index.json")["state"], "TEST_ONLY")
+        with self.assertRaisesRegex(ValueError, "publication already exists"):
+            condor.collect(work_path, work_sha, sources_path, source_tar,
+                           pins_path, condor.r.sha_file(pins_path),
+                           plan_path, condor.r.sha_file(plan_path))
+
     def test_inert_dag_has_exact_domain_retry_budget_and_frozen_bootstrap(self):
         dictionary = FIXTURE / "dictionary.json"
         bundle = self.base / "bundle"
@@ -63,8 +192,54 @@ class QueryCondorPreparation(unittest.TestCase):
         admission = json.loads((bundle / "SITE_ADMISSION_TEMPLATE.json").read_text())
         self.assertEqual(admission["decision"], "PENDING")
         self.assertEqual(admission["execute_node_canary"], "PENDING")
+        forged = dict(admission)
+        pack = self.base / "fake-pack.tar.gz"
+        pack.write_bytes(b"TEST_ONLY_NOT_A_LINUX_PACK")
+        forged.update(decision="ADMITTED", authority="INDEPENDENT_L1_AND_SITE_REVIEW",
+                      inert_bundle_manifest_sha256=condor.r.sha_file(bundle / "bundle-manifest.json"),
+                      qualified_pack_sha256=condor.r.sha_file(pack),
+                      memory_mb=1024, scratch_kb=1024)
+        for key in ("execute_node_canary", "runtime_versions", "input_readback",
+                    "posix_nooverwrite", "posix_readback", "quota", "retention"):
+            forged[key] = "PASS"
+        forged_path = self.base / "forged-admission.json"
+        forged_path.write_text(json.dumps(forged))
+        with mock.patch.object(condor, "_extract_pack"), mock.patch.object(
+                condor.q, "load_prepared_pack"):
+            with self.assertRaisesRegex(ValueError, "evidence fact is incomplete"):
+                condor.bind_site(bundle, forged["inert_bundle_manifest_sha256"],
+                                 pack, forged["qualified_pack_sha256"],
+                                 forged_path, condor.r.sha_file(forged_path),
+                                 self.base / "forged-bound")
+        observed = self.base / "observed.json"
+        observed.write_text('{"status":"TEST_ONLY"}')
+        fact = {"path": str(observed), "bytes": observed.stat().st_size,
+                "sha256": condor.r.sha_file(observed)}
+        forged["evidence"] = {key: dict(fact) for key in admission["evidence"]}
+        forged["resource_envelope"] = {key: 1 for key in (
+            "query_peak_rss_mb", "query_peak_scratch_kb", "merge_peak_rss_mb",
+            "reduce_peak_rss_mb", "render_peak_rss_mb", "postprocess_limit_mb",
+            "bulk_projected_peak_bytes", "bulk_allocated_bytes",
+            "query_occupied_cells", "merged_occupied_cells",
+            "screened_input_pairs", "covered_tune_blocks")}
+        forged["resource_envelope"]["query_peak_rss_mb"] = 1000
+        forged_path.write_text(json.dumps(forged))
+        with mock.patch.object(condor, "_extract_pack"), mock.patch.object(
+                condor.q, "load_prepared_pack"):
+            with self.assertRaisesRegex(ValueError, "resource envelope does not fit"):
+                condor.bind_site(bundle, forged["inert_bundle_manifest_sha256"],
+                                 pack, forged["qualified_pack_sha256"],
+                                 forged_path, condor.r.sha_file(forged_path),
+                                 self.base / "forged-bound")
         self.assertNotIn("query-pack.tar.gz", {p.name for p in bundle.iterdir()})
         self.assertIn("test ! -e workflow.dag", (bundle / "BUILD_LINUX_PACK.sh").read_text())
+        self.assertIn('cp "$SITE_CONF" source/config/site.conf',
+                      (bundle / "BUILD_LINUX_PACK.sh").read_text())
+        self.assertEqual(subprocess.run(["bash", "-n", str(bundle / "BUILD_LINUX_PACK.sh")],
+                                        capture_output=True).returncode, 0)
+        self.assertIn("__ACCEPTED_ANALYZED_SAMPLE_ROOT__",
+                      (bundle / "site-canary.sub").read_text())
+        self.assertEqual(admission["evidence"]["resource_budget"], "PENDING")
         self.assertIn("stage-dag", (bundle / "README.txt").read_text())
         command = [sys.executable, "-B", str(bundle / "preflight.py"), "preflight",
                    "--work", str(bundle / "work.json"), "--expected-work-sha256",
@@ -95,19 +270,31 @@ class QueryCondorPreparation(unittest.TestCase):
         bundle = self.base / "site-bound"
         bulk, control = self.base / "bulk", self.base / "control"
         bundle.mkdir(); (control / "pins").mkdir(parents=True)
+        input_root = self.base / "input"
+        input_root.mkdir()
+        analyzed_receipt = input_root / "shard-0000.json"
+        analyzed_receipt.write_text(json.dumps({"state": "PASS", "shard_ordinal": 0,
+            "storage_identity": {"source_ids": [0]}}))
         attempt_dir = bulk / "shard-0000/attempt-00"
         attempt_dir.mkdir(parents=True)
         work = {"schema": condor.WORK_SCHEMA, "state": "SITE_BOUND",
                 "storage_semantics": "POSIX_NOOVERWRITE_VERIFIED",
                 "site_admission_sha256": "a" * 64,
                 "prepared_pack_tar_sha256": "b" * 64,
-                "input_root": str(self.base / "input"),
+                "input_root": str(input_root),
                 "durable_bulk_root": str(bulk), "durable_control_root": str(control),
                 "input_file_count": 2, "input_root_bytes": 1,
                 "campaign_id": "TEST_ONLY", "block_count": 1,
                 "tune_ordinals": {"TEST": 0},
                 "expected_source_count": 1, "expected_event_count": 1,
-                "work": [{"ordinal": 0, "root": {"bytes": 1}}]}
+                "work": [{"ordinal": 0, "root": {"name": "shard-0000.root", "bytes": 1},
+                          "receipt": {"name": analyzed_receipt.name,
+                                      "bytes": analyzed_receipt.stat().st_size,
+                                      "sha256": condor.r.sha_file(analyzed_receipt)}}]}
+        expected_source = bundle / "expected-sources.json"
+        expected_source.write_text(json.dumps([{"source_id": 0, "tune": "TEST",
+                                                "block": 1, "events": 1}]))
+        work["expected_sources_sha256"] = condor.r.sha_file(expected_source)
         for name, key in (("source.tar.gz", "source_tar_sha256"),
                           ("source-files.json", "source_files_sha256"),
                           ("dictionary.json", "dictionary_sha256"),
@@ -141,6 +328,16 @@ class QueryCondorPreparation(unittest.TestCase):
         self.assertEqual(condor.r.sha_file(bundle / "bundle-manifest.json"), bundle_sha)
         with self.assertRaisesRegex(ValueError, "distinct unused"):
             condor.stage_dag(bundle, bundle_sha, launch)
+        plan_path = self.base / "screen-plan.json"
+        plan_path.write_text(json.dumps(condor.screen_plan(
+            bundle / "work.json", work_sha, expected_source)))
+        screen_launch = self.base / "screen-launch"
+        condor.stage_dag(bundle, bundle_sha, screen_launch,
+                         plan_path, condor.r.sha_file(plan_path))
+        self.assertIn("TEST_ONLY representative screen",
+                      (screen_launch / "workflow.dag").read_text())
+        self.assertEqual(condor.r.json_file(screen_launch / "launch-receipt.json")[
+            "state"], "TEST_ONLY_SCREEN_READY_FOR_NO_SUBMIT_REVIEW")
         content = "c" * 64
         (attempt_dir / "attempt.json").write_text(json.dumps({
             "schema": condor.ATTEMPT_SCHEMA, "ordinal": 0, "attempt": 0,

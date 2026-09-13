@@ -91,19 +91,16 @@ ANALYSIS_SHA="$(shasum -a 256 config/analysis.json | awk '{print $1}')"
 
 `--representative` is a small TEST_ONLY diagnostic domain. Omit it to request
 the full current paper numerical domain, or pass a separately pinned
-`--request` and `--request-sha` for a reviewed subset. `reduce verify` and
-`reduce explain` require the written ROOT and report paths plus the report's
-SHA-256. The explicit `--charm-trigger 411` selects the D⁺ alternate; the
+`--request` and `--request-sha` for a reviewed subset. The explicit
+`--charm-trigger 411` selects the D⁺ alternate; the
 default is D⁰.
 
 Query, collection, merge, reduction and plotting require independently pinned
 input paths and SHA-256 values; see their command help before running them on
 an accepted campaign. Keep the work/output directories outside source control
 and never reuse an output path. A small explicitly `TEST_ONLY` fixture verifies
-the local interfaces; it is not a physical PYTHIA prediction. The tracked
-`results/` material predates the current v2.2 selection and THnSparse/v4
-contract. It is preserved as historical evidence, **not** a completed current
-P1–P8 or 300-million-event result. Full paper numerics require the authenticated
+the local interfaces; it is not a physical PYTHIA prediction. No current
+result is tracked in `results/`. Full paper numerics require the authenticated
 physically merged 323-query-shard/3,000-source collection and its site/admission
 receipts. The Nikhef runtime, storage and scheduler gates have not been passed
 by a local verification run.
@@ -113,3 +110,183 @@ Only an explicit continuation submission with a configured site may contact a
 scheduler. Accepted raw files live under ignored `data/raw/`; attempt evidence
 and scratch live under ignored `data/work/`. `./hadronization clean` is dry-run
 by default and does not remove raw files or durable attempt evidence.
+
+## Accepted-input to portable-result commands
+
+The source-controlled campaign, source manifest, analysis and query model are
+read-only inputs. An independent custodian supplies the accepted analyzed-input
+manifest, a dictionary from accepted shards, and physical SHA-256 pins. Query
+workers hash each analyzed ROOT and receipt before opening ROOT. One frozen
+source tar and one qualified Linux query pack serve all workers; workers never
+rebuild independently.
+
+`./hadronization condor prepare --help` creates an inert native DAG. Its bundle
+contains `BUILD_LINUX_PACK.sh`, `site-canary.sub`, preflight and a PENDING
+admission template. Copy the build script and source tar to a fresh external
+build directory. `SITE_CONF` must name a measured site.conf. The build checks
+ROOT 6.30.01, GCC 14.2.0 and PYTHIA 8.317. Bind a copy of the canary template
+to an actual execute node only after choosing allocated endpoints. Its probe
+checks x86_64/AlmaLinux 9.8, CVMFS and ROOT libraries, ClassAds, full accepted
+input SHA and ROOT open, then unique POSIX writes, close/SHA readback, exclusive
+no-overwrite and interrupted sibling isolation at separate bulk/control roots.
+The probe is observation, not admission. `condor bind-site` requires an
+independent record with hashed evidence for every PASS, including quota,
+capacity, retention, custody, all-tune pair population and resource budget.
+Before binding, run `./hadronization condor screen-plan --work
+"$INERT_BUNDLE/work.json" --expected-work-sha256 "$INERT_WORK_SHA"
+--expected-sources "$INERT_BUNDLE/expected-sources.json" --input-root
+"$ACCEPTED_ANALYZED_ROOT"`. It reads every pinned analyzed receipt and selects
+real shard ordinals covering all tunes/original blocks. Query-build and verify
+these selected accepted inputs with the frozen pack to establish pair
+population before site admission. After binding, rerun screen-plan against the
+bound work (without --input-root); independently pin that plan and selected
+attempts. `condor collect-screen` uses the same collector/publisher checks but
+marks its partial index TEST_ONLY. Merge, reduce and render that representative
+index before staging the full DAG. A plan alone does not prove pair population;
+a real omission holds for a retained-input/scientific ruling.
+
+For each prebinding screen ordinal, the direct pair-proof command is:
+
+```sh
+./hadronization query build --input "$ACCEPTED_ANALYZED_ROOT/shard-$SCREEN_ORDINAL.root" \
+  --receipt "$ACCEPTED_ANALYZED_ROOT/shard-$SCREEN_ORDINAL.json" \
+  --accepted-receipt-sha256 "$PINNED_SCREEN_RECEIPT_SHA" \
+  --dictionary "$DICTIONARY" --analysis config/analysis.json \
+  --layout config/query.json --prepared-pack "$FRESH_BUILD/prepared-pack" \
+  --work-root "$SCREEN_WORK" --output "$SCREEN_QUERY_OUTPUT"
+./hadronization query verify --workspace "$SCREEN_QUERY_OUTPUT" \
+  --expected-content-sha256 "$SCREEN_CONTENT_SHA" \
+  --prepared-pack "$FRESH_BUILD/prepared-pack" --work-root "$SCREEN_WORK"
+```
+
+Use four-digit zero-padded ordinal text, a fresh output per shard and the
+receipt SHA from the accepted acquisition manifest. Independently pin the
+workspace's scientific content digest before verification. The current
+pair-population proof fails closed per input; no synthetic screen can qualify
+the other accepted shards.
+
+The publisher currently supports allocated writable POSIX storage. dCache has
+no adapter in this release. Retain the original query shards after merge:
+their exact support and source ranges remain numerical inputs. One merged ROOT
+partition per tune is the physical layout; measure occupancy, RSS and scratch
+and refuse admission if it cannot fit. The DAG defaults to four workers and
+at most two retries per classified transient failure. Deterministic identity,
+schema or pair-population errors hold the campaign. An independent custodian
+pins accepted attempt contents. The collector alone closes the sharded index;
+`merge build` separately pins the physical transformation.
+
+After independent admission, use fresh paths and independently read-back SHAs:
+
+```sh
+./hadronization condor prepare --acquisition "$ACQUISITION" \
+  --expected-acquisition-sha256 "$ACQUISITION_SHA" \
+  --dictionary "$DICTIONARY" --expected-dictionary-sha256 "$DICTIONARY_SHA" \
+  --output "$INERT_BUNDLE"
+# Copy source.tar.gz and BUILD_LINUX_PACK.sh from that bundle to $FRESH_BUILD.
+(cd "$FRESH_BUILD" && SITE_CONF="$MEASURED_SITE_CONF" bash BUILD_LINUX_PACK.sh)
+./hadronization condor bind-site --bundle "$INERT_BUNDLE" \
+  --expected-bundle-sha256 "$INERT_MANIFEST_SHA" --pack "$QUERY_PACK" \
+  --expected-pack-sha256 "$QUERY_PACK_SHA" --admission "$ADMISSION" \
+  --expected-admission-sha256 "$ADMISSION_SHA" --output "$BOUND_BUNDLE"
+./hadronization condor preflight --work "$BOUND_BUNDLE/work.json" \
+  --expected-work-sha256 "$WORK_SHA" --source-tar "$BOUND_BUNDLE/source.tar.gz" \
+  --pack-tar "$BOUND_BUNDLE/query-pack.tar.gz" --full-input-hash
+# Persist and independently pin the bound representative screen plan.
+./hadronization condor screen-plan --work "$BOUND_BUNDLE/work.json" \
+  --expected-work-sha256 "$WORK_SHA" \
+  --expected-sources "$BOUND_BUNDLE/expected-sources.json" > "$SCREEN_PLAN"
+./hadronization condor stage-screen-dag --bundle "$BOUND_BUNDLE" \
+  --expected-bundle-sha256 "$BOUND_MANIFEST_SHA" --screen-plan "$SCREEN_PLAN" \
+  --expected-screen-plan-sha256 "$SCREEN_PLAN_SHA" --output "$SCREEN_LAUNCH"
+(cd "$SCREEN_LAUNCH" && condor_submit_dag -no_submit workflow.dag)
+# Submit this TEST_ONLY screen after separate authorization and review.
+(cd "$SCREEN_LAUNCH" && condor_submit_dag workflow.dag)
+# Independent review writes pins only for the screened ordinals.
+./hadronization condor collect-screen --work "$BOUND_BUNDLE/work.json" \
+  --expected-work-sha256 "$WORK_SHA" \
+  --expected-sources "$BOUND_BUNDLE/expected-sources.json" \
+  --source-tar "$BOUND_BUNDLE/source.tar.gz" --pins "$SCREEN_PINS" \
+  --expected-pins-sha256 "$SCREEN_PINS_SHA" --screen-plan "$SCREEN_PLAN" \
+  --expected-screen-plan-sha256 "$SCREEN_PLAN_SHA"
+# Merge, reduce and render the resulting TEST_ONLY screen index for resource proof.
+# The full DAG below remains pending that separate vertical review.
+./hadronization condor stage-dag --bundle "$BOUND_BUNDLE" \
+  --expected-bundle-sha256 "$BOUND_MANIFEST_SHA" --output "$FRESH_LAUNCH"
+(cd "$FRESH_LAUNCH" && condor_submit_dag -no_submit workflow.dag)
+# Submission below is only after separate authorization and review.
+(cd "$FRESH_LAUNCH" && condor_submit_dag workflow.dag)
+# Independent review writes the all-ordinal accepted-pins file.
+./hadronization condor render-collector --bundle "$BOUND_BUNDLE" \
+  --expected-bundle-sha256 "$BOUND_MANIFEST_SHA" --pins "$ACCEPTED_PINS" \
+  --expected-pins-sha256 "$ACCEPTED_PINS_SHA" --output "$FRESH_COLLECTOR"
+condor_submit "$FRESH_COLLECTOR/collector.sub"
+```
+
+After manifest-last collector closure, the downstream chain is:
+
+```sh
+./hadronization collection admit --index "$SHARDED_INDEX" \
+  --expected-index-sha256 "$SHARDED_SHA" \
+  --expected-sources "$EXPECTED_SOURCES" --expected-sources-sha256 "$SOURCES_SHA" \
+  --site-work "$BOUND_BUNDLE/work.json" --site-work-sha256 "$WORK_SHA" \
+  --collector-closure "$COLLECTOR_CLOSURE" --collector-closure-sha256 "$CLOSURE_SHA"
+./hadronization merge build --index "$SHARDED_INDEX" \
+  --expected-index-sha256 "$SHARDED_SHA" --output "$MERGED_DIR"
+./hadronization merge verify --index "$MERGED_DIR/index.json" \
+  --expected-index-sha256 "$MERGED_SHA" \
+  --merge-receipt "$MERGED_DIR/merge-receipt.json" \
+  --merge-receipt-sha256 "$MERGE_RECEIPT_SHA"
+./hadronization collection admit --index "$MERGED_DIR/index.json" \
+  --expected-index-sha256 "$MERGED_SHA" \
+  --expected-sources "$EXPECTED_SOURCES" --expected-sources-sha256 "$SOURCES_SHA" \
+  --site-work "$BOUND_BUNDLE/work.json" --site-work-sha256 "$WORK_SHA" \
+  --collector-closure "$COLLECTOR_CLOSURE" --collector-closure-sha256 "$CLOSURE_SHA" \
+  --merge-receipt "$MERGED_DIR/merge-receipt.json" \
+  --merge-receipt-sha256 "$MERGE_RECEIPT_SHA"
+./hadronization reduce run --collection-index "$MERGED_DIR/index.json" \
+  --collection-index-sha "$MERGED_SHA" \
+  --expected-sources "$EXPECTED_SOURCES" --expected-sources-sha "$SOURCES_SHA" \
+  --analysis config/analysis.json --analysis-sha "$ANALYSIS_SHA" \
+  --site-work "$BOUND_BUNDLE/work.json" --site-work-sha "$WORK_SHA" \
+  --collector-closure "$COLLECTOR_CLOSURE" --collector-closure-sha "$CLOSURE_SHA" \
+  --merge-receipt "$MERGED_DIR/merge-receipt.json" \
+  --merge-receipt-sha "$MERGE_RECEIPT_SHA" \
+  --work-root "$REDUCE_WORK" --output-dir "$RESULT"
+./hadronization reduce verify --mode producer --root "$RESULT/numerics.root" \
+  --report "$RESULT/report.json" --report-sha "$REPORT_SHA"
+./hadronization plot render-cold --numerics-root "$RESULT/numerics.root" \
+  --expected-root-sha256 "$NUMERICS_SHA" --expected-value-sha256 "$VALUE_SHA" \
+  --work-dir "$PLOT_WORK" --output "$FIGURES"
+./hadronization plot verify-render-cold --numerics-root "$RESULT/numerics.root" \
+  --expected-root-sha256 "$NUMERICS_SHA" --expected-value-sha256 "$VALUE_SHA" \
+  --expected-manifest-sha256 "$FIGURE_MANIFEST_SHA" \
+  --work-dir "$PLOT_WORK" --output "$FIGURES"
+./hadronization reduce verify --mode portable --package-dir "$COPIED_RESULT" \
+  --package-manifest-sha "$PACKAGE_MANIFEST_SHA"
+./hadronization package build --numerical "$RESULT" \
+  --numerical-manifest-sha256 "$PACKAGE_MANIFEST_SHA" --figures "$FIGURES" \
+  --figure-manifest-sha256 "$FIGURE_MANIFEST_SHA" --output "$COLLAB_PACKAGE"
+./hadronization package verify --package "$COPIED_COLLAB_PACKAGE" \
+  --manifest-sha256 "$COLLAB_MANIFEST_SHA" --work-dir "$PACKAGE_VERIFY_WORK"
+```
+
+The default full request yields P1–P8, G9 signed-heavy marginals, conditional
+activity supplements, T1/diagnostics, compact CSV/TeX exports and a typed
+numerical ROOT. Exact counts derive from the request and data. This ROOT stores
+separate materialization, center, uncertainty and covariance validity. Negative
+centers may be valid; an unavailable error is not zero. Nonlinear full-sample
+centers use pooled additive primitives. K=10 delete-one original blocks per
+tune and independent tune-deletion covariance factors preserve shared point
+keys and masks across observables and references. Balancing is `(OS−SS)/T`
+with eligible zero-partner triggers in the denominator. The result is a
+conditional generator-level complete tune-bundle comparison with finite-MC
+statistical uncertainty; it is not a systematic or detector-level prediction.
+
+`package-manifest.json` pins the exact relative typed ROOT, receipts and compact
+exports with SHA/size. Portable verification works from a copied directory
+without the producer checkout or binary and explicitly reports external
+execution as unchecked. Keep large analyzed/query/support/merged ROOT, build
+packs and execution evidence in immutable external custody with scientific and
+physical IDs, locator, custodian, retention and dependency pins. Only current,
+owner-reviewed compact products belong in the collaboration release. Synthetic
+fixtures must remain labelled TEST_ONLY.

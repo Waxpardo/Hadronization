@@ -13,7 +13,6 @@ import time
 
 
 ROOT = Path(__file__).resolve().parent
-UNAVAILABLE = set()
 
 
 def doctor():
@@ -172,8 +171,8 @@ def merge(arguments):
     return subprocess.run(command, cwd=str(ROOT)).returncode
 
 
-def prepare_condor(arguments):
-    command = [sys.executable, str(ROOT / "pipeline/query/condor.py"), "prepare"] + arguments
+def condor(arguments):
+    command = [sys.executable, str(ROOT / "pipeline/query/condor.py")] + arguments
     return subprocess.run(command, cwd=str(ROOT)).returncode
 
 
@@ -184,6 +183,11 @@ def reduce(arguments):
 
 def plot(arguments):
     command = [sys.executable, str(ROOT / "pipeline/plot/run.py")] + arguments
+    return subprocess.run(command, cwd=str(ROOT)).returncode
+
+
+def package(arguments):
+    command = [sys.executable, "-m", "pipeline.release"] + arguments
     return subprocess.run(command, cwd=str(ROOT)).returncode
 
 
@@ -205,8 +209,6 @@ def build_parser():
     analyze_parser.add_argument("arguments", nargs=argparse.REMAINDER)
     query_parser = sub.add_parser("query", help="build and verify ROOT query shards", add_help=False)
     query_parser.add_argument("arguments", nargs=argparse.REMAINDER)
-    campaign_parser = sub.add_parser("query-campaign", help="plan and close a pinned query collection", add_help=False)
-    campaign_parser.add_argument("arguments", nargs=argparse.REMAINDER)
     collection_parser = sub.add_parser("collection", help="create and verify one ROOT collection locator", add_help=False)
     collection_parser.add_argument("arguments", nargs=argparse.REMAINDER)
     reduce_parser = sub.add_parser(
@@ -217,9 +219,11 @@ def build_parser():
         "plot", help="query and export verified numerical plot projections",
         add_help=False)
     plot_parser.add_argument("arguments", nargs=argparse.REMAINDER)
+    package_parser = sub.add_parser("package", help="assemble and verify the exact portable numerical/figure set", add_help=False)
+    package_parser.add_argument("arguments", nargs=argparse.REMAINDER)
     merge_parser = sub.add_parser("merge", help="build or verify block-resolved physical THnSparse collection", add_help=False)
     merge_parser.add_argument("arguments", nargs=argparse.REMAINDER)
-    condor_parser = sub.add_parser("prepare-condor", help="write an inert native query DAG bundle", add_help=False)
+    condor_parser = sub.add_parser("condor", help="prepare and operate an admitted native query DAG bundle", add_help=False)
     condor_parser.add_argument("arguments", nargs=argparse.REMAINDER)
     sub.add_parser("verify", help="run the focused active-contract suite")
     clean_parser = sub.add_parser("clean", help="remove reproducible checkout residue")
@@ -236,18 +240,18 @@ def main():
         if len(sys.argv) > 2 and sys.argv[2] == "campaign":
             return query_campaign(sys.argv[3:])
         return query(sys.argv[2:])
-    if len(sys.argv) > 1 and sys.argv[1] == "query-campaign":
-        return query_campaign(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == "collection":
         return collection(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == "merge":
         return merge(sys.argv[2:])
-    if len(sys.argv) > 1 and sys.argv[1] == "prepare-condor":
-        return prepare_condor(sys.argv[2:])
+    if len(sys.argv) > 1 and sys.argv[1] == "condor":
+        return condor(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == "reduce":
         return reduce(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == "plot":
         return plot(sys.argv[2:])
+    if len(sys.argv) > 1 and sys.argv[1] == "package":
+        return package(sys.argv[2:])
     args = build_parser().parse_args()
     if args.command == "doctor":
         return doctor()
@@ -260,10 +264,6 @@ def main():
         return reduce(args.arguments)
     if args.command == "plot":
         return plot(args.arguments)
-    if args.command in UNAVAILABLE:
-        print("ERROR: {} direct stage is not yet implemented".format(
-            args.command), file=sys.stderr)
-        return 3
     if args.command == "verify":
         return verify()
     if args.command == "clean":

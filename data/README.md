@@ -14,3 +14,15 @@ The data plane has four objects:
 public cleanup command only removes old scratch for attempts explicitly marked
 accepted; it never traverses `raw/` or removes reservation/outcome evidence.
 Neither `raw/` nor `work/` is created by repository verification.
+
+The accepted analyzed ROOT and receipts are a separate externally pinned input
+plane. The query work manifest records every expected path, SHA-256 and byte
+size and is hashed before a worker opens an analyzed ROOT. The original query
+shards contain both sparse families and exact support; they remain retrievable
+after the one-partition-per-tune physical merge. A collector closure pins the
+original sharded index and independent accepted-attempt custody. The merge
+receipt pins the transformed index/ROOT without rewriting that closure. The
+large analyzed, query, merged and execution planes stay outside ordinary Git.
+Each retained object needs an immutable locator, custodian, SHA/size,
+dependencies and explicit retention period. Local TEST_ONLY fixtures have no
+production acceptance authority.

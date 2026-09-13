@@ -263,7 +263,10 @@ def main():
         merged = BASE / "merged" / "index.json"
         merged_sha = sha256(merged)
         command([ROOT / "hadronization", "merge", "verify", "--index", merged,
-                 "--expected-index-sha256", merged_sha], F.environment, BASE / "merge-verify.log")
+                 "--expected-index-sha256", merged_sha,
+                 "--merge-receipt", BASE / "merged" / "merge-receipt.json",
+                 "--merge-receipt-sha256", sha256(BASE / "merged" / "merge-receipt.json")],
+                F.environment, BASE / "merge-verify.log")
         print(json.dumps({"base":str(BASE),"source_sha256":hashlib.sha256(source.encode()).hexdigest(),
                           "raw_sources":len(rows),"plan":str(work / "plan.json"),
                           "query_pins":pins,"sharded_sha256":sharded_sha,
