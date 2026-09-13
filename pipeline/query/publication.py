@@ -24,4 +24,3 @@ def publish_directory(staging, output):
     if rename(*arguments) != 0:
         error = ctypes.get_errno()
         raise OSError(error, os.strerror(error), str(output))
-
