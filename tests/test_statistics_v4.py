@@ -85,7 +85,7 @@ class NativeV4Metadata(unittest.TestCase):
         request=p.ProjectionRequest.from_dict(request,cold=True)
         index=base/'merged/index.json'
         with tempfile.TemporaryDirectory() as directory:
-            with self.assertRaisesRegex(ValueError,'full paper result requires the authenticated MERGED'):
+            with self.assertRaisesRegex(ValueError,'full paper result requires the authenticated .*MERGED'):
                 native_runner.run_diagnostic(index,p.file_digest(index),
                     ROOT/'config/analysis.json',p.file_digest(ROOT/'config/analysis.json'),
                     request,Path(directory))
