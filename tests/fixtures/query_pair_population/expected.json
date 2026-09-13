@@ -1,0 +1,47 @@
+{
+  "corrupt_origin_sha256": "2c813600cc80b5ed6b4d537a174548b1c9b23c9d5a0999f5452781ea2a4397f9",
+  "dictionary_sha256": "762665150d9a7350d444264f328b3dd0b5fb17922899c097db7a68a0a7d01d65",
+  "expected_error": "missing in-domain pair event=",
+  "malformed_provenance_error": "malformed mandatory pair provenance event=844424930131968 heavy=22 sector=4",
+  "mutator_sha256": "9605c2ffc07cd2dcaab5d6f8480dd5209662bff53b363c0d7156ea05466600c0",
+  "omitted_pair": {
+    "associate_heavy_index": 21,
+    "associate_pdg": -421,
+    "event_id": 844424930131968,
+    "sign": -1,
+    "trigger_heavy_index": 20,
+    "trigger_pdg": 421
+  },
+  "positive_expected": {
+    "in_domain_os_min": 1,
+    "in_domain_ss_min": 1,
+    "unresolved_origin_pair_min": 1
+  },
+  "positive_materializer_sha256": "5de99069f96053116959aa1f67316ea66afe93e1c1103a6791ae13aae48611ee",
+  "schema": "hadronization_query_pair_population_test_fixture_v1",
+  "selected_hard_noncompanion": {
+    "associate_heavy_index": 22,
+    "associate_matched_hard": 11,
+    "associate_pdg": 431,
+    "event_id": 844424930131968,
+    "sign": 1,
+    "same_root_opposite_sign_trigger_heavy_index": 21,
+    "same_root_opposite_sign_trigger_pdg": -421,
+    "trigger_heavy_index": 20,
+    "trigger_matched_hard": 10,
+    "trigger_pdg": 421
+  },
+  "selected_hard_noncompanion_mutator_sha256": "65a9de73b9e9240a2800120228fd4734280562c094a96baff713f739c820fdb6",
+  "source_provenance": "TEST_ONLY synthetic multitune analyzed shard 0000; no production admission",
+  "source_receipt_sha256": "0d3e9f03f85c84362c21c33f0c6401d66388940046bcae2ce6a309859a3d3b6a",
+  "source_root_sha256": "04eaa05fd8c6a8d65a4e0678a9e66190074a31b51450e44d280101b4fea8cad6",
+  "unresolved_same_sign_pair": {
+    "associate_heavy_index": 22,
+    "associate_origin": 5,
+    "associate_pdg": 431,
+    "event_id": 844424930131968,
+    "sign": 1,
+    "trigger_heavy_index": 20,
+    "trigger_pdg": 421
+  }
+}

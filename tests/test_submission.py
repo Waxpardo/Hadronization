@@ -981,7 +981,7 @@ class SubmissionContract(unittest.TestCase):
         if hasattr(cls, "temporary"):
             cls.temporary.cleanup()
 
-    def make_and_validate(self, mode, mutation=None):
+    def make_and_validate(self, mode, mutation=None, validator_arguments=()):
         output = self.base / "{}.root".format(mode)
         fixture_command = [str(self.fixture), str(output), mode]
         if mutation is not None:
@@ -993,6 +993,7 @@ class SubmissionContract(unittest.TestCase):
                    "--events", "3", "--pthat-min", "2", "--config-sha256", "a" * 64,
                    "--executable-sha256", "b" * 64, "--repository-commit", "c" * 40,
                    "--pythia-version", "8.317"]
+        command.extend(validator_arguments)
         return subprocess.run(command, text=True, stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT, env=self.environment)
 
@@ -1003,6 +1004,15 @@ class SubmissionContract(unittest.TestCase):
         self.assertIn('if (pdg == 411) particleName = "D+";',
                       self.fixture_source)
         self.assertIn('{411, "dplus", "Dplus"', self.generated_header)
+
+    def test_validator_rejects_duplicate_authority_option(self):
+        accepted = self.make_and_validate("valid")
+        self.assertEqual(accepted.returncode, 0, accepted.stdout)
+        duplicate = self.make_and_validate(
+            "valid", validator_arguments=("--campaign", "CONTRADICTORY"))
+        self.assertEqual(duplicate.returncode, 2, duplicate.stdout)
+        self.assertIn("duplicate validator option --campaign", duplicate.stdout)
+        self.assertNotIn("authorization mismatch", duplicate.stdout)
 
     def test_validator_rejects_schema_counterfeits_and_branch_mutations(self):
         diagnostics = {

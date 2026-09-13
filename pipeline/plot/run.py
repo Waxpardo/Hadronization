@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
-"""Verify one compact ROOT and query or export deterministic numerical projections."""
+"""Draw S-verified numerical ROOT without computing scientific quantities."""
 
 import argparse
-import csv
+import copy
 import fcntl
+import gzip
 import hashlib
+import importlib
 import importlib.util
 import io
 import json
 import math
 import os
+import re
 from pathlib import Path
 import shlex
 import shutil
@@ -17,39 +20,29 @@ import subprocess
 import sys
 import tempfile
 from contextlib import contextmanager
-
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[2]
-ANALYSIS = ROOT / "config/analysis.json"
 PLOT_CONFIG = ROOT / "config/plot.json"
-EXPORT_SCHEMA = "hadronization_numerical_plot_export_v1"
-REQUEST_SCHEMA = "hadronization_plot_request_v1"
-DEFAULT_FAMILIES = ("balancing", "correlations", "kinematics",
-                    "multiplicity", "sample_counts")
-QUERY_FAMILIES = DEFAULT_FAMILIES + (
-    "origin", "closure_species", "closure_full_visible",
-    "closure_category_dphi")
-CSV_FIELDS = (
-    "semantic_id", "request_id", "compact_root_sha256",
-    "compact_scientific_content_digest", "family", "role_id", "quantity",
-    "tune", "reference_tune", "profile", "activity_id", "class_id",
-    "percentile_low", "percentile_high", "nch_low", "nch_high",
-    "trigger_pdg", "associate_pdg", "reference_pdg", "eligibility_status",
-    "component", "axis", "bin_index", "bin_low", "bin_high", "value",
-    "value_status", "finite_mc_error", "uncertainty_status", "variance",
-    "source_tune_leave_mean", "reference_tune_leave_mean",
-    "source_tune_complements", "reference_tune_complements", "reasons",
-    "diagnostic", "estimator")
+TARGET_CAMPAIGN = ROOT / "data/campaign.json"
+TARGET_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d"
+DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v7"
+CANVAS_NAME = "canvases.root"
+RECORD_NAME = "drawing-record.tsv.gz"
+TYPED_POINT_FIELDS = (
+    "semantic_id", "role_id", "family", "quantity", "tune",
+    "reference_tune", "profile", "activity_id", "class_id",
+    "trigger_pdg", "associate_pdg", "reference_pdg", "component", "axis",
+    "bin_index", "bin_low", "bin_high", "flow", "units", "value",
+    "value_status", "finite_mc_error", "uncertainty_status", "reasons")
 
 
 def canonical(value):
     return json.dumps(value, sort_keys=True, separators=(",", ":"),
                       ensure_ascii=True)
 
-
 def sha_bytes(value):
     return hashlib.sha256(value).hexdigest()
-
 
 def sha_file(path):
     digest = hashlib.sha256()
@@ -58,16 +51,13 @@ def sha_file(path):
             digest.update(chunk)
     return digest.hexdigest()
 
-
 def exact_keys(value, expected, label):
     if not isinstance(value, dict) or set(value) != set(expected):
         raise ValueError("{} field set differs".format(label))
 
-
 def regular_file(path, label):
     if path.is_symlink() or not path.is_file():
         raise ValueError("{} is not a regular file: {}".format(label, path))
-
 
 def json_file(path, label="JSON input"):
     regular_file(path, label)
@@ -76,23 +66,15 @@ def json_file(path, label="JSON input"):
     except (UnicodeError, json.JSONDecodeError) as error:
         raise ValueError("invalid JSON {}: {}".format(path, error)) from error
 
-
 def load_module(name, path):
     specification = importlib.util.spec_from_file_location(name, str(path))
     module = importlib.util.module_from_spec(specification)
     specification.loader.exec_module(module)
     return module
 
-
-def reduce_module():
-    return load_module("hadronization_plot_reduce_contract",
-                       ROOT / "pipeline/reduce/run.py")
-
-
 def runtime_module():
     return load_module("hadronization_plot_runtime_contract",
                        ROOT / "pipeline/generate/runtime.py")
-
 
 def reject_symlink_components(path, label):
     absolute = path.absolute()
@@ -102,7 +84,6 @@ def reject_symlink_components(path, label):
         if os.path.lexists(str(current)) and current.is_symlink():
             raise ValueError("{} has a symlink component: {}".format(label, current))
 
-
 def fsync_file(path):
     descriptor = os.open(str(path), os.O_RDONLY)
     try:
@@ -110,14 +91,12 @@ def fsync_file(path):
     finally:
         os.close(descriptor)
 
-
 def fsync_directory(path):
     descriptor = os.open(str(path), os.O_RDONLY)
     try:
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
-
 
 @contextmanager
 def build_lock(path):
@@ -130,7 +109,6 @@ def build_lock(path):
         fcntl.flock(descriptor, fcntl.LOCK_UN)
         os.close(descriptor)
 
-
 def cached_build(binary, receipt, identity):
     if not binary.is_file() or not receipt.is_file():
         return None
@@ -142,7 +120,6 @@ def cached_build(binary, receipt, identity):
             current.get("binary_sha256") == sha_file(binary)):
         return current
     return None
-
 
 def atomic_json(path, value):
     payload = (canonical(value) + "\n").encode("ascii")
@@ -159,15 +136,14 @@ def atomic_json(path, value):
         if temporary.exists():
             temporary.unlink()
 
-
 def checked_plot_config(path):
     reject_symlink_components(path, "plot presentation config")
     path = path.resolve()
     payload = json_file(path, "plot presentation config")
     exact_keys(payload, {"schema", "version", "families", "presets", "layout",
                          "style_identities"}, "plot presentation config")
-    if (payload["schema"] != "hadronization_plot_presentation_v1" or
-            payload["version"] != "1.0.0"):
+    if (payload["schema"] != "hadronization_plot_presentation_v3" or
+            payload["version"] != "3.1.0"):
         raise ValueError("plot presentation schema/version differs")
     families = payload["families"]
     required = {"D", "B", "LambdaC", "LambdaB", "Ds", "Bs", "Bc",
@@ -190,8 +166,17 @@ def checked_plot_config(path):
     presets = payload["presets"]
     exact_keys(presets, {"paper_default", "all_central", "all_registered"},
                "plot presets")
-    if presets["paper_default"] != {
-            "families": ["D", "LambdaC", "B", "LambdaB"]}:
+    paper = presets["paper_default"]
+    exact_keys(paper, {"families", "trigger_pdgs",
+                       "baryon_meson_trigger_pdgs"},
+               "paper_default preset")
+    charm_meson = paper["trigger_pdgs"][0] if (
+        isinstance(paper["trigger_pdgs"], list) and
+        paper["trigger_pdgs"]) else None
+    if (paper["families"] != ["D", "LambdaC", "B", "LambdaB"] or
+            charm_meson not in (421, 411) or
+            paper["trigger_pdgs"] != [charm_meson, 4122, 521, 5122] or
+            paper["baryon_meson_trigger_pdgs"] != [charm_meson, 521]):
         raise ValueError("paper_default family selection differs")
     if (presets["all_central"] != {"selector": "all_central"} or
             presets["all_registered"] != {"selector": "all_registered"}):
@@ -199,7 +184,10 @@ def checked_plot_config(path):
     layout = payload["layout"]
     exact_keys(layout, {"axis_padding_fraction", "facet_dimension",
                         "grid_columns_maximum", "maximum_panels_per_page",
-                        "shared_legend_reservation", "text_pixel_size"},
+                        "shared_legend_reservation", "text_pixel_size",
+                        "physical_width_cm", "minimum_body_text_pt",
+                        "categorical_tune_dodge", "p1_inset_geometry",
+                        "correlation_view"},
                "plot layout")
     if (type(layout["maximum_panels_per_page"]) is not int or
             layout["maximum_panels_per_page"] < 1 or
@@ -210,11 +198,21 @@ def checked_plot_config(path):
             type(layout["axis_padding_fraction"]) not in (int, float) or
             not 0.0 <= layout["axis_padding_fraction"] <= 1.0 or
             type(layout["text_pixel_size"]) is not int or
-            layout["text_pixel_size"] < 1):
+            layout["text_pixel_size"] < 1 or
+            layout["physical_width_cm"] != 18.0 or
+            layout["minimum_body_text_pt"] != 8.0 or
+            layout["p1_inset_geometry"] != [.18, .07, .50, .38] or
+            layout["correlation_view"] not in
+                ("monash_pair_sign", "monash_balance", "all_tune_ratio") or
+            layout["categorical_tune_dodge"] != {
+                "upper": {"MONASH": -.08, "JUNCTIONS": 0.0,
+                          "CLOSEPACKING": .08},
+                "lower": {"JUNCTIONS": -.04, "CLOSEPACKING": .04}}):
         raise ValueError("plot layout contract differs")
     styles = payload["style_identities"]
-    exact_keys(styles, {"class_line_style_rule", "species_encoding", "tunes",
-                        "unity_reference"}, "plot style identities")
+    exact_keys(styles, {"class_line_style_rule", "class_line_patterns",
+                        "species_encoding", "tunes", "unity_reference"},
+               "plot style identities")
     expected_tunes = [
         {"id": "MONASH", "color": "#000000", "marker": "filled_circle",
          "line": "solid"},
@@ -226,102 +224,27 @@ def checked_plot_config(path):
     if (styles["tunes"] != expected_tunes or
             styles["species_encoding"] != "facet_only" or
             styles["class_line_style_rule"] !=
-            "root_line_style=1+class_id" or
+            "integrated=1;nonintegrated=2+typed_class_ordinal" or
             styles["unity_reference"] != {
                 "color": "neutral_gray", "line": "dashed",
                 "role": "reference_only"}):
         raise ValueError("plot style identity differs")
+    expected_patterns = [
+        (1, "solid"), (2, "24 12"), (3, "4 8"),
+        (4, "24 8 4 8"), (5, "24 8 4 8 4 8"), (6, "12 8"),
+        (7, "40 12"), (8, "40 8 12 8"), (9, "12 8 4 8"),
+        (10, "4 16"), (11, "24 8 12 8 4 8"),
+        (12, "12 8 12 8 4 8")]
+    patterns = styles["class_line_patterns"]
+    if (not isinstance(patterns, list) or
+            [(item.get("root_style"), item.get("dash_pattern"))
+             for item in patterns] != expected_patterns or
+            patterns[0] != {"root_style": 1, "dash_pattern": "solid",
+                            "role": "inclusive"} or
+            any(set(item) != {"root_style", "dash_pattern"}
+                for item in patterns[1:])):
+        raise ValueError("class line-pattern registry differs")
     return payload, sha_file(path)
-
-
-def checked_plot_request(path):
-    payload = json_file(path, "plot request")
-    exact_keys(payload, {"schema", "preset", "include", "exclude"},
-               "plot request")
-    if payload["schema"] != REQUEST_SCHEMA:
-        raise ValueError("plot request schema differs")
-    for name in ("include", "exclude"):
-        if (not isinstance(payload[name], list) or
-                any(not isinstance(value, str) or not value
-                    for value in payload[name])):
-            raise ValueError("plot request {} differs".format(name))
-    if not isinstance(payload["preset"], str):
-        raise ValueError("plot request preset differs")
-    return payload
-
-
-def resolve_selection(config, domains, preset, includes, excludes):
-    if preset not in config["presets"]:
-        raise ValueError("unknown plot preset: {}".format(preset))
-    for label, tokens in (("include", includes), ("exclude", excludes)):
-        unknown = sorted(set(tokens) - set(config["families"]))
-        if unknown:
-            raise ValueError("unknown {} family token(s): {}".format(label, unknown))
-        if len(tokens) != len(set(tokens)):
-            raise ValueError("duplicate {} family token".format(label))
-    conflict = sorted(set(includes).intersection(excludes))
-    if conflict:
-        raise ValueError("contradictory include/exclude token(s): {}".format(conflict))
-    pairs = domains["pair_query_dictionary"]
-    pair_pdgs = {item["associate_pdg"] for item in pairs}
-    configured_pdgs = {pdg for values in config["families"].values()
-                       for pdg in values}
-    if configured_pdgs != pair_pdgs:
-        raise ValueError("plot families do not exactly partition compact associates")
-    by_pdg = {}
-    for item in pairs:
-        previous = by_pdg.setdefault(item["associate_pdg"],
-                                     item["central_eligible"])
-        if previous is not item["central_eligible"]:
-            raise ValueError("compact associate eligibility is inconsistent")
-    definition = config["presets"][preset]
-    eligibility = "all_registered" if preset == "all_registered" else "central"
-    if "families" in definition:
-        selected_families = list(definition["families"])
-    else:
-        selected_families = list(config["families"])
-    for token in includes:
-        if token in selected_families:
-            raise ValueError("include token is already selected: {}".format(token))
-        selected_families.append(token)
-    for token in excludes:
-        if token not in selected_families:
-            raise ValueError("exclude token is not selected: {}".format(token))
-        selected_families.remove(token)
-    if not selected_families:
-        raise ValueError("plot request selects no presentation family")
-    selected_pdgs = []
-    for token in selected_families:
-        for pdg in config["families"][token]:
-            if eligibility == "all_registered" or by_pdg[pdg]:
-                selected_pdgs.append(pdg)
-    if any(-pdg not in selected_pdgs for pdg in selected_pdgs):
-        raise ValueError("resolved selection is not charge-conjugate complete")
-    selected_pair_ids = [item["id"] for item in pairs
-                         if item["associate_pdg"] in set(selected_pdgs)]
-    noncentral = sorted(pdg for pdg in selected_pdgs if not by_pdg[pdg])
-    expected_noncentral = sorted(pdg for pdg, central in by_pdg.items() if not central)
-    if eligibility == "all_registered" and noncentral != expected_noncentral:
-        raise ValueError("all_registered does not expose the exact noncentral set")
-    if eligibility == "central" and noncentral:
-        raise ValueError("central selection contains noncentral states")
-    result = {
-        "schema": "hadronization_resolved_plot_selection_v1",
-        "preset": preset,
-        "include": list(includes),
-        "exclude": list(excludes),
-        "eligibility": eligibility,
-        "eligibility_status": ("ALL_REGISTERED_WITH_NONCENTRAL_DIAGNOSTICS"
-                               if eligibility == "all_registered" else
-                               "CENTRAL_ONLY"),
-        "family_tokens": selected_families,
-        "signed_pdgs": selected_pdgs,
-        "pair_ids": selected_pair_ids,
-        "noncentral_signed_pdgs": noncentral,
-    }
-    result["selection_id"] = sha_bytes(canonical(result).encode("ascii"))
-    return result
-
 
 def command_tokens(command, argument, environment):
     completed = subprocess.run([command, argument], env=environment, text=True,
@@ -331,59 +254,47 @@ def command_tokens(command, argument, environment):
             completed.stderr.strip() or completed.stdout.strip()))
     return shlex.split(completed.stdout.strip())
 
-
-def build_engine(work_root):
+def build_renderer(work_root):
+    """Build the presentation-only renderer in the existing private cache."""
     runtime = runtime_module().resolve(require_root=True)
     environment = os.environ.copy()
     environment.update(runtime["environment"])
     environment["PYTHONDONTWRITEBYTECODE"] = "1"
-    source = ROOT / "pipeline/plot/plot.cpp"
-    header = ROOT / "pipeline/plot/projection.hpp"
-    statistics = ROOT / "pipeline/reduce/statistics.hpp"
+    source = ROOT / "pipeline/plot/render.cpp"
     identity = {
-        "schema": "hadronization_plot_engine_build_v1",
-        "source_sha256": sha_file(source),
-        "projection_sha256": sha_file(header),
-        "statistics_sha256": sha_file(statistics),
-        "compiler": runtime["environment"]["CXX"],
+        "schema": "hadronization_plot_renderer_build_v1",
+        "source_sha256": sha_file(source), "compiler": runtime["environment"]["CXX"],
         "root": next(value.split("=", 1)[1] for value in runtime["diagnostics"]
                      if value.startswith("ROOT=")),
-        "flags": ["-std=c++17", "-O2", "-Wall", "-Wextra", "-Wpedantic",
-                  "-Werror"],
+        "flags": ["-std=c++17", "-O2", "-Wall", "-Wextra", "-Wpedantic", "-Werror"],
     }
     build_id = sha_bytes(canonical(identity).encode("ascii"))
-    work_root = work_root.resolve(strict=False)
-    reject_symlink_components(work_root, "plot work root")
-    binary_root = work_root / "bin"
+    binary_root = work_root.resolve(strict=False) / "bin"
+    reject_symlink_components(binary_root, "plot renderer work root")
     binary_root.mkdir(parents=True, exist_ok=True)
-    binary = binary_root / ("plot-" + build_id[:20])
+    binary = binary_root / ("render-" + build_id[:20])
     receipt = binary.with_suffix(".build.json")
     lock = binary.with_suffix(".build.lock")
     with build_lock(lock):
         current = cached_build(binary, receipt, identity)
         if current is not None:
             return environment, binary, current
-        # A mismatched pair is an owned cache entry.  Only its key holder may
-        # retire it; invocation-private files are never named or removed here.
         for path in (binary, receipt):
             if path.exists() or path.is_symlink():
                 path.unlink()
         flags = command_tokens(environment["ROOT_CONFIG"], "--cflags", environment)
         libraries = command_tokens(environment["ROOT_CONFIG"], "--libs", environment)
-        descriptor, temporary_name = tempfile.mkstemp(
-            prefix="." + binary.name + ".", suffix=".tmp", dir=str(binary_root))
+        descriptor, temporary_name = tempfile.mkstemp(prefix="." + binary.name + ".",
+                                                     suffix=".tmp", dir=str(binary_root))
         os.close(descriptor)
         temporary = Path(temporary_name)
         try:
-            command = [environment["CXX"]] + identity["flags"] + [
-                "-I" + str(ROOT / "pipeline/plot"),
-                "-I" + str(ROOT / "pipeline/reduce"), str(source)] + flags + libraries + [
-                "-o", str(temporary)]
-            completed = subprocess.run(command, env=environment, text=True,
-                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if (completed.returncode or completed.stdout.strip() or
-                    completed.stderr.strip()):
-                raise ValueError("plot-engine warning-free build failed: {}".format(
+            completed = subprocess.run([environment["CXX"]] + identity["flags"] +
+                                       [str(source)] + flags + libraries + ["-o", str(temporary)],
+                                       env=environment, text=True, stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
+            if completed.returncode or completed.stdout.strip() or completed.stderr.strip():
+                raise ValueError("plot renderer warning-free build failed: {}".format(
                     completed.stderr.strip() or completed.stdout.strip()))
             os.chmod(str(temporary), 0o700)
             os.replace(str(temporary), str(binary))
@@ -392,515 +303,78 @@ def build_engine(work_root):
         finally:
             if temporary.exists():
                 temporary.unlink()
-        build_receipt = {
-            "schema": "hadronization_plot_engine_build_receipt_v1",
-            "build_id": build_id,
-            "build_identity": identity,
-            "binary_sha256": sha_file(binary),
-        }
-        atomic_json(receipt, build_receipt)
+        atomic_json(receipt, {"schema": "hadronization_plot_renderer_build_receipt_v1",
+                              "build_id": build_id, "build_identity": identity,
+                              "binary_sha256": sha_file(binary)})
         current = cached_build(binary, receipt, identity)
         if current is None:
-            raise ValueError("plot build cache publication did not validate")
+            raise ValueError("plot renderer cache publication did not validate")
         return environment, binary, current
 
+def typed_point_rows(projection):
+    """Flatten validated v2 points without changing their scientific values."""
+    payload = (projection.to_dict() if hasattr(projection, "to_dict")
+               else projection)
 
-def number(value):
-    return float(value).hex()
+    def decimal(token):
+        if token is None:
+            return ""
+        value = float.fromhex(token)
+        if not math.isfinite(value):
+            raise ValueError("typed projection contains a nonfinite number")
+        if value == 0.0:
+            value = 0.0
+        return format(value, ".17g")
 
-
-def write_engine_request(path, receipt, families):
-    domains = receipt["scientific_identity"]["compact_domains"]
-    lines = ["hadronization_plot_engine_request_v1"]
-    lines.extend("FAMILY\t{}".format(value) for value in families)
-    lines.extend("BLOCK\t{}".format(value) for value in domains["block_ids"])
-    lines.extend("TUNE\t{}".format(value) for value in domains["tune_dictionary"])
-    lines.extend("PROFILE\t{}".format(value["id"]) for value in domains["profiles"])
-    lines.extend("ACTIVITY\t{}".format(value["id"])
-                 for value in domains["activities"])
-    for scope in domains["scope_dictionary"]:
-        lines.append("SCOPE\t{id}\t{family}\t{tune}\t{profile}\t{activity}\t{class_id}".format(
-            **{**scope,
-               "profile": scope["profile"] if scope["profile"] is not None else "-",
-               "activity": scope["activity"] if scope["activity"] is not None else "-",
-               "class_id": scope["class_id"] if scope["class_id"] is not None else -1}))
-    for pair in domains["pair_query_dictionary"]:
-        lines.append("PAIR\t{id}\t{trigger_pdg}\t{associate_pdg}\t{sign}\t"
-                     "{reference_meson_pdg}\t{central_eligible}\t{sector}".format(
-                         **{**pair, "central_eligible":
-                            int(pair["central_eligible"])}))
-    for trigger in domains["trigger_dictionary"]:
-        lines.append("TRIGGER\t{id}\t{signed_pdg}".format(**trigger))
-    for correlation in domains["correlation_dictionary"]:
-        lines.append("CORRELATION\t{id}\t{trigger_pdg}\t{associate_pdg}".format(
-            **correlation))
-    for species in domains["g9_species_dictionary"]:
-        lines.append("G9\t{id}\t{signed_pdg}".format(**species))
-    for index, pdg in enumerate(domains["dynamic_species"]["closure_species_pdgs"]):
-        lines.append("CLOSURE_SPECIES\t{}\t{}".format(index, pdg))
-    for index, pdg in enumerate(domains["dynamic_species"]["t1_all_final_pdgs"]):
-        lines.append("T1_SPECIES\t{}\t{}".format(index, pdg))
-    for origin in domains["origin_dictionary"]:
-        lines.append("ORIGIN\t{id}\t{label}".format(**origin))
-    for category in domains["closure_category_dictionary"]:
-        lines.append("CLOSURE_CATEGORY\t{id}\t{label}".format(**category))
-    for klass in domains["class_dictionary"]:
-        lines.append("CLASS\t{}\t{}\t{}\t{}".format(
-            klass["id"], int(klass["integrated"]),
-            klass["percentile_interval"][0], klass["percentile_interval"][1]))
-    embedded_receipts = receipt.get("_embedded_activity_receipts")
-    if embedded_receipts is None:
-        embedded_receipts = receipt["scientific_identity"].get("activity_receipts")
-    if embedded_receipts is None:
-        raise ValueError("verified receipt lacks activity boundary receipts")
-    for activity in embedded_receipts:
-        for class_id, boundary in enumerate(activity["classes"]):
-            lines.append("BOUNDARY\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}".format(
-                activity["tune"], activity["activity_id"], class_id,
-                boundary["low"], boundary["high"], int(boundary["stable"]),
-                int(boundary["resolved"]), int(boundary["empty"])))
-    axes = domains["axes"]
-    for name in ("dphi", "eta", "phi"):
-        axis = axes[name]
-        lines.append("AXIS\t{}\t{}\t{}\t{}".format(
-            name, axis["bins"], number(axis["low"]), number(axis["high"])))
-    lines.extend("PTEDGE\t{}".format(number(value))
-                 for value in axes["pt"]["edges"])
-    lines.append("ACTIVITY_BINS\t{}".format(axes["activity"]["bins"]))
-    lines.append("EVENTS\t{}".format(receipt["scientific_identity"]["events"]))
-    lines.append("END")
-    path.write_text("\n".join(lines) + "\n", encoding="ascii")
-
-
-def admit(root_path, receipt_path, analysis_path, work_root):
-    for path, label in ((root_path, "compact ROOT"),
-                        (receipt_path, "compact receipt"),
-                        (analysis_path, "analysis request")):
-        reject_symlink_components(path, label)
-    reducer = reduce_module()
-    receipt, summary = reducer.verify_output(root_path, receipt_path,
-                                             analysis_path, work_root / "reduce")
-    if receipt["state"] != "PUBLICATION_ELIGIBLE":
-        raise ValueError("plot export requires PUBLICATION_ELIGIBLE compact input")
-    # The embedded activity receipt is read back by the reducer verifier and is
-    # digest-bound to the external scientific identity. Keep it transient only.
-    environment, binary, unused = reducer.build_reducer(work_root / "reduce")
-    completed = reducer.run_binary(binary, environment, ["verify", str(root_path)],
-                                   "compact activity-receipt readback")
-    del completed, unused
-    oracle = _read_embedded_payload(root_path, work_root)
-    if oracle["activity_receipts"] != summary.get("activity_receipts",
-                                                   oracle["activity_receipts"]):
-        raise ValueError("compact activity receipt readback differs")
-    receipt["_embedded_activity_receipts"] = oracle["activity_receipts"]
-    receipt["_embedded_block_accounting"] = oracle["block_accounting"]
-    return receipt, summary
-
-
-def _read_embedded_payload(root_path, work_root):
-    environment, binary, unused_build = build_engine(work_root)
-    del unused_build
-    with tempfile.TemporaryDirectory(prefix="plot-embedded-", dir=str(work_root)) as directory:
-        output = Path(directory) / "embedded-receipt.json"
-        completed = subprocess.run(
-            [str(binary), "embedded", str(root_path), str(output)], env=environment,
-            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if completed.returncode or not output.is_file():
-            raise ValueError("compact embedded receipt readback failed: {}".format(
-                completed.stderr.strip() or completed.stdout.strip()))
-        return json_file(output, "embedded compact receipt")
-
-
-def engine_rows(root_path, receipt, families, work_root):
-    environment, binary, build = build_engine(work_root)
-    with tempfile.TemporaryDirectory(prefix="plot-engine-",
-                                     dir=str(work_root)) as directory:
-        temporary = Path(directory)
-        request = temporary / "request.tsv"
-        output = temporary / "output.tsv"
-        write_engine_request(request, receipt, families)
-        completed = subprocess.run([str(binary), str(root_path), str(request),
-                                    str(output)], env=environment, text=True,
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if completed.returncode or completed.stdout.strip() or completed.stderr.strip():
-            raise ValueError("plot engine failed: {}".format(
-                completed.stderr.strip() or completed.stdout.strip()))
-        lines = output.read_text(encoding="ascii").splitlines()
-    if not lines or lines[0] != "hadronization_plot_engine_output_v1" or \
-            lines[-1] != "END":
-        raise ValueError("plot engine output framing differs")
-    roles = []
     rows = []
-    for line in lines[1:-1]:
-        fields = line.split("\t")
-        if fields[0] == "R":
-            if len(fields) != 4:
-                raise ValueError("plot role record differs")
-            roles.append({"id": fields[1], "family": fields[2],
-                          "selector": fields[3]})
-            continue
-        if fields[0] != "D" or len(fields) != 34:
-            raise ValueError("plot numerical row differs")
-        values = fields[1:]
-        names = ("family", "semantic_id", "role_id", "quantity", "tune",
-                 "reference_tune", "profile", "activity_id", "class_id",
-                 "percentile_low", "percentile_high", "nch_low", "nch_high",
-                 "trigger_pdg", "associate_pdg", "reference_pdg", "component",
-                 "axis", "bin_index", "bin_low", "bin_high", "value",
-                 "value_status", "finite_mc_error", "uncertainty_status",
-                 "variance", "source_tune_leave_mean",
-                 "reference_tune_leave_mean", "source_tune_complements",
-                 "reference_tune_complements", "reasons", "diagnostic", "estimator")
-        row = dict(zip(names, values))
-        rows.append(row)
-    if len({role["id"] for role in roles}) != len(roles):
-        raise ValueError("plot role IDs collide")
-    validate_engine_relations(roles, rows, receipt, families)
-    return roles, rows, build
-
-
-def _replicas(token, label):
-    if token == "-":
-        return []
-    replicas = token.split(";")
-    if len(replicas) != 10:
-        raise ValueError("{} cardinality differs from K=10".format(label))
-    for value in replicas:
-        if value != "-":
-            numeric = float.fromhex(value)
-            if not math.isfinite(numeric):
-                raise ValueError("{} contains a nonfinite value".format(label))
-    return replicas
-
-
-def _role_matches(row, pairs):
-    matches = []
-    role_id = row["role_id"]
-    canonical_pair = (row["profile"] == "inclusive" and
-                      row["activity_id"] ==
-                      "charged_light_sector_activity_a15_v1_eta4")
-    pair = pairs.get((int(row["trigger_pdg"]), int(row["associate_pdg"])))
-    if row["family"] == "balancing" and canonical_pair and pair is not None:
-        class_id = int(row["class_id"])
-        if class_id == 0:
-            matches.append("balancing.integrated." + pair["sector"])
-        elif class_id > 0:
-            if row["quantity"] in {
-                    "baryon_meson_reference_ratio",
-                    "baryon_meson_ratio_to_reference_tune"}:
-                matches.append("balancing.baryon_meson.activity")
-            elif row["quantity"] in {
-                    "os_minus_ss_per_trigger", "ratio_to_reference_tune"}:
-                matches.append("balancing.activity." + pair["sector"])
-    if row["family"] == "correlations" and canonical_pair and pair is not None:
-        matches.append("correlations.{}.{}".format(row["tune"], pair["sector"]))
-    if row["family"] == "kinematics":
-        matches.append("kinematics.{}.{}".format(row["associate_pdg"],
-                                                  row["axis"]))
-    if (row["family"] == "multiplicity" and row["activity_id"] ==
-            "charged_light_sector_activity_a15_v1_eta4"):
-        matches.append("multiplicity.composite")
-    return [value for value in matches if value == role_id]
-
-
-def validate_engine_relations(roles, rows, receipt, families):
-    """Validate emitted rows relationally; role selector prose is non-authoritative."""
-    domains = receipt["scientific_identity"]["compact_domains"]
-    role_map = {role["id"]: role["family"] for role in roles}
-    if len(roles) != 42 or len(role_map) != 42:
-        raise ValueError("plot role registry is not the frozen 42-ID set")
-    expected_roles = {
-        "balancing.integrated.charm": "balancing",
-        "balancing.integrated.beauty": "balancing",
-        "balancing.activity.charm": "balancing",
-        "balancing.activity.beauty": "balancing",
-        "balancing.baryon_meson.activity": "balancing",
-        "multiplicity.composite": "multiplicity",
-    }
-    for tune in domains["tune_dictionary"]:
-        for sector in ("charm", "beauty"):
-            expected_roles["correlations.{}.{}".format(tune, sector)] = \
-                "correlations"
-    for species in domains["g9_species_dictionary"]:
-        for axis in ("pt", "eta", "phi"):
-            expected_roles["kinematics.{}.{}".format(
-                species["signed_pdg"], axis)] = "kinematics"
-    if role_map != expected_roles:
-        raise ValueError("plot role registry differs from the frozen IDs/families")
-    semantic_ids = [row["semantic_id"] for row in rows]
-    if len(semantic_ids) != len(set(semantic_ids)):
-        raise ValueError("plot semantic IDs collide")
-    natural_fields = (
-        "family", "quantity", "tune", "reference_tune", "profile",
-        "activity_id", "class_id", "trigger_pdg", "associate_pdg",
-        "reference_pdg", "component", "axis", "bin_index")
-    natural_keys = [tuple(row[name] for name in natural_fields) for row in rows]
-    if len(natural_keys) != len(set(natural_keys)):
-        raise ValueError("plot emitted-row natural keys collide")
-
-    reached = set()
-    pairs = {(item["trigger_pdg"], item["associate_pdg"]): item
-             for item in domains["pair_query_dictionary"]}
-    available_uncertainty = {"AVAILABLE", "AVAILABLE_ZERO_DISPERSION"}
-    tune_ratio_quantities = {"ratio_to_reference_tune",
-                             "baryon_meson_ratio_to_reference_tune"}
-    for row in rows:
-        role_id = row["role_id"]
-        if role_id != "-":
-            if role_id not in role_map or role_map[role_id] != row["family"]:
-                raise ValueError("plot row role/family agreement differs")
-            if len(_role_matches(row, pairs)) != 1:
-                raise ValueError("plot row role/context predicate differs")
-            reached.add(role_id)
-        if row["reference_tune"] != "-" and row["tune"] == row["reference_tune"]:
-            raise ValueError("plot emitted a fake reference-tune ratio row")
-        has_value = row["value"] != "-"
-        if has_value != (row["value_status"] in {"AVAILABLE",
-                                                  "UNSTABLE_DENOMINATOR"}):
-            raise ValueError("plot value/status relation differs")
-        has_uncertainty = row["uncertainty_status"] in available_uncertainty
-        if has_uncertainty != (row["finite_mc_error"] != "-" and
-                               row["variance"] != "-"):
-            raise ValueError("plot uncertainty/status relation differs")
-        if has_uncertainty and not has_value:
-            raise ValueError("plot uncertainty is available without a value")
-        source = _replicas(row["source_tune_complements"],
-                           "source-tune complements")
-        reference = _replicas(row["reference_tune_complements"],
-                              "reference-tune complements")
-        if has_uncertainty and (len(source) != 10 or "-" in source or
-                                row["source_tune_leave_mean"] == "-"):
-            raise ValueError("available uncertainty lacks K source complements")
-        is_tune_ratio = row["quantity"] in tune_ratio_quantities
-        if is_tune_ratio != (row["reference_tune"] != "-"):
-            raise ValueError("tune-ratio/reference-tune relation differs")
-        if is_tune_ratio:
-            if has_value and len(reference) != 10:
-                raise ValueError("tune ratio lacks aligned K reference complements")
-            if has_uncertainty and ("-" in reference or
-                                    row["reference_tune_leave_mean"] == "-"):
-                raise ValueError("available tune-ratio uncertainty lacks references")
-        elif reference or row["reference_tune_leave_mean"] != "-":
-            raise ValueError("non-tune ratio carries reference complements")
-
-    requested = set(families)
-    role_families = {"balancing", "correlations", "kinematics", "multiplicity"}
-    if role_families.issubset(requested) and reached != set(role_map):
-        raise ValueError("not every frozen plot role is reachable")
-
-    if "correlations" in requested:
-        components = ("OS", "SS", "OS_MINUS_SS")
-        expected = {
-            (scope["tune"], scope["profile"], scope["activity"],
-             str(scope["class_id"]), str(correlation["trigger_pdg"]),
-             str(correlation["associate_pdg"]), component, str(bin_index))
-            for scope in domains["scope_dictionary"] if scope["family"] == "pair"
-            for correlation in domains["correlation_dictionary"]
-            for component in components
-            for bin_index in range(domains["axes"]["dphi"]["bins"])
+    for point in payload["points"]:
+        key = point["key"]
+        curve = key["curve"]
+        role = curve["role_id"]
+        if role.startswith("balancing."):
+            family = "balancing"
+        elif role.startswith("correlations."):
+            family = "correlations"
+        elif role == "multiplicity.composite":
+            family = "multiplicity"
+        elif role.startswith(("kinematics.", "spectra.")):
+            family = "kinematics"
+        elif role.startswith("accounting."):
+            family = "sample_counts"
+        else:
+            raise ValueError("typed projection carries an unknown paper role")
+        bins = key["bins"]
+        if len(bins) > 1:
+            raise ValueError("typed point has more than one plotted axis bin")
+        axis_bin = bins[0] if bins else None
+        row = {
+            "semantic_id": point["semantic_id"],
+            "role_id": role,
+            "family": family,
+            "quantity": curve["quantity"],
+            "tune": curve["tune_id"],
+            "reference_tune": curve["reference_tune_id"] or "",
+            "profile": curve["profile_id"] or "",
+            "activity_id": curve["activity_id"] or "",
+            "class_id": "" if curve["class_id"] is None else str(curve["class_id"]),
+            "trigger_pdg": "" if curve["trigger_pdg"] is None else str(curve["trigger_pdg"]),
+            "associate_pdg": "" if curve["associate_pdg"] is None else str(curve["associate_pdg"]),
+            "reference_pdg": "" if curve["reference_pdg"] is None else str(curve["reference_pdg"]),
+            "component": "" if curve["component"] == "NONE" else curve["component"],
+            "axis": curve["axis_id"] or "",
+            "bin_index": "" if axis_bin is None else str(axis_bin["index"]),
+            "bin_low": "" if axis_bin is None else decimal(axis_bin["low"]),
+            "bin_high": "" if axis_bin is None else decimal(axis_bin["high"]),
+            "flow": "" if axis_bin is None else axis_bin["flow"],
+            "units": point["units"],
+            "value": decimal(point["center"]),
+            "value_status": point["center_status"],
+            "finite_mc_error": decimal(point["standard_error"]),
+            "uncertainty_status": point["uncertainty_status"],
+            "reasons": ",".join(point["reasons"]),
         }
-        observed = {
-            (row["tune"], row["profile"], row["activity_id"], row["class_id"],
-             row["trigger_pdg"], row["associate_pdg"], row["component"],
-             row["bin_index"])
-            for row in rows if row["family"] == "correlations"
-        }
-        if observed != expected:
-            raise ValueError("correlation rows differ from compact Cartesian domain")
-
-
-def float_text(token):
-    if token == "-":
-        return ""
-    value = float.fromhex(token)
-    if not math.isfinite(value):
-        raise ValueError("plot engine emitted a nonfinite value")
-    if value == 0.0:
-        value = 0.0
-    return format(value, ".17g")
-
-
-def complement_text(token):
-    if token == "-":
-        return ""
-    return ";".join(float_text(value) if value != "-" else ""
-                    for value in token.split(";"))
-
-
-def public_row(row, request_id, root_sha, scientific_digest, eligibility):
-    converted = dict(row)
-    for name in ("bin_low", "bin_high", "value", "finite_mc_error", "variance",
-                 "source_tune_leave_mean", "reference_tune_leave_mean"):
-        converted[name] = float_text(converted[name])
-    for name in ("source_tune_complements", "reference_tune_complements"):
-        converted[name] = complement_text(converted[name])
-    for name in ("role_id", "reference_tune", "profile", "activity_id",
-                 "component", "axis", "reasons", "diagnostic"):
-        if converted[name] == "-":
-            converted[name] = ""
-    for name in ("class_id", "percentile_low", "percentile_high", "nch_low",
-                 "nch_high", "bin_index"):
-        if converted[name] == "-1":
-            converted[name] = ""
-    for name in ("trigger_pdg", "associate_pdg", "reference_pdg"):
-        if converted[name] == "0":
-            converted[name] = ""
-    converted.update({
-        "request_id": request_id,
-        "compact_root_sha256": root_sha,
-        "compact_scientific_content_digest": scientific_digest,
-        "eligibility_status": eligibility,
-    })
-    return {field: converted.get(field, "") for field in CSV_FIELDS}
-
-
-def filter_rows(rows, selection, arguments=None):
-    selected_pdgs = set(selection["signed_pdgs"])
-    filtered = []
-    for row in rows:
-        associate = int(row["associate_pdg"])
-        if row["family"] in {"balancing", "correlations"} and associate != 0:
-            if associate not in selected_pdgs:
-                continue
-        if arguments is not None:
-            if arguments.tune and row["tune"] != arguments.tune:
-                continue
-            if arguments.profile and row["profile"] != arguments.profile:
-                continue
-            if arguments.activity and row["activity_id"] != arguments.activity:
-                continue
-            if arguments.class_id is not None and \
-                    int(row["class_id"]) != arguments.class_id:
-                continue
-            if arguments.bin is not None and int(row["bin_index"]) != arguments.bin:
-                continue
-            if arguments.pair:
-                trigger, associate_query = map(int, arguments.pair.split(":"))
-                if (int(row["trigger_pdg"]) != trigger or
-                        int(row["associate_pdg"]) != associate_query):
-                    continue
-        filtered.append(row)
-    return filtered
-
-
-def compact_scale(receipt):
-    domains = receipt["scientific_identity"]["compact_domains"]
-    accounting = receipt["_embedded_block_accounting"]
-    blocks = accounting["blocks"]
-    tune_names = domains["tune_dictionary"]
-    per_tune = []
-    for tune_id, tune in enumerate(tune_names):
-        selected = [item for item in blocks if item["tune"] == tune_id]
-        per_tune.append({
-            "tune": tune,
-            "successful_events": sum(item["successful_events"]
-                                     for item in selected),
-            "sources": sum(item["sources"] for item in selected),
-            "blocks": [{"block": item["block"],
-                        "successful_events": item["successful_events"],
-                        "sources": item["sources"]} for item in selected],
-        })
-    return {
-        "successful_events_total": receipt["scientific_identity"]["events"],
-        "sources_total": receipt["scientific_identity"]["sources"],
-        "tunes": per_tune,
-        "block_ids": domains["block_ids"],
-        "class_count": len(domains["class_dictionary"]),
-        "class_dictionary": domains["class_dictionary"],
-        "pair_count": len(domains["pair_query_dictionary"]),
-        "g9_species_count": len(domains["g9_species_dictionary"]),
-    }
-
-
-def layout_primitives(config, selection, rows):
-    layout = config["layout"]
-    tokens = selection["family_tokens"]
-    maximum = layout["maximum_panels_per_page"]
-    columns_maximum = layout["grid_columns_maximum"]
-    by_pdg = {pdg: token for token in tokens
-              for pdg in config["families"][token]}
-    ranges = {"facet.associate_family.{}".format(token): [] for token in tokens}
-    for row in rows:
-        if row["family"] != "balancing" or row["value"] == "-":
-            continue
-        facet = by_pdg.get(int(row["associate_pdg"]))
-        if facet is None:
-            continue
-        value = float.fromhex(row["value"])
-        error = 0.0 if row["finite_mc_error"] == "-" else \
-            float.fromhex(row["finite_mc_error"])
-        ranges["facet.associate_family." + facet].append((value - error,
-                                                           value + error))
-    pages = []
-    selection_short = selection["selection_id"][:16]
-    for first in range(0, len(tokens), maximum):
-        page_tokens = tokens[first:first + maximum]
-        count = len(page_tokens)
-        columns = min(columns_maximum, count)
-        rows_count = (count + columns - 1) // columns
-        page_number = len(pages) + 1
-        facets = []
-        for offset, token in enumerate(page_tokens):
-            facet_id = "facet.associate_family." + token
-            values = ranges[facet_id]
-            facets.append({
-                "facet_id": facet_id,
-                "family_token": token,
-                "order": first + offset,
-                "grid_row": offset // columns,
-                "grid_column": offset % columns,
-                "axis_range_input": {
-                    "valid_points": len(values),
-                    "minimum_value_minus_uncertainty": (
-                        None if not values else min(value[0] for value in values)),
-                    "maximum_value_plus_uncertainty": (
-                        None if not values else max(value[1] for value in values)),
-                    "padding_fraction": layout["axis_padding_fraction"],
-                },
-            })
-        pages.append({
-            "page_id": "page.{}.{:03d}".format(selection_short, page_number),
-            "output_role": "plot.{}.{}.page.{:03d}".format(
-                selection["preset"], selection_short, page_number),
-            "page_number": page_number,
-            "grid_rows": rows_count,
-            "grid_columns": columns,
-            "shared_legend_reservation": layout["shared_legend_reservation"],
-            "text_pixel_size": layout["text_pixel_size"],
-            "facets": facets,
-        })
-    roles = [page["output_role"] for page in pages]
-    if len(roles) != len(set(roles)):
-        raise ValueError("layout page roles collide")
-    return {"schema": "hadronization_plot_layout_primitives_v1",
-            "maximum_panels_per_page": maximum,
-            "facet_dimension": layout["facet_dimension"], "pages": pages}
-
-
-def csv_payload(rows):
-    handle = io.StringIO(newline="")
-    writer = csv.DictWriter(handle, fieldnames=CSV_FIELDS,
-                            lineterminator="\n")
-    writer.writeheader()
-    writer.writerows(rows)
-    return handle.getvalue().encode("ascii")
-
-
-def tex_payload(rows):
-    selected = [row for row in rows if row["family"] == "sample_counts"]
-    selected.sort(key=lambda row: (row["semantic_id"], row["tune"]))
-    lines = [r"\begin{tabular}{lll}",
-             r"Semantic ID & Tune & Exact count \\", r"\hline"]
-    for row in selected:
-        label = row["semantic_id"].replace("_", r"\_")
-        numeric = float.fromhex(row["value"])
-        if not numeric.is_integer():
-            raise ValueError("T1 exact count is not an integer")
-        value = str(int(numeric))
-        lines.append("{} & {} & {} \\\\".format(label, row["tune"], value))
-    lines.append(r"\end{tabular}")
-    return ("\n".join(lines) + "\n").encode("ascii")
-
+        rows.append({field: row[field] for field in TYPED_POINT_FIELDS})
+    return rows
 
 def write_payload(path, payload):
     with path.open("wb") as handle:
@@ -908,500 +382,2372 @@ def write_payload(path, payload):
         handle.flush()
         os.fsync(handle.fileno())
 
+def deterministic_gzip(payload):
+    output = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", fileobj=output,
+                       compresslevel=9, mtime=0) as handle:
+        handle.write(payload)
+    return output.getvalue()
 
-def expected_export_model(root_path, receipt, config, config_sha, selection,
-                          roles, rows, build):
-    scientific = receipt["scientific_identity"]["scientific_content_digest"]
-    request_identity = {
-        "schema": REQUEST_SCHEMA,
-        "analysis_request_sha256": receipt["scientific_identity"][
-            "analysis_request_sha256"],
-        "compact_scientific_content_digest": scientific,
-        "plot_config_sha256": config_sha,
-        "resolved_selection": selection,
-        "families": list(DEFAULT_FAMILIES),
+def canonical_page_name(role_id, page_index=1, page_count=1):
+    allowed = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-")
+    if not role_id or any(character not in allowed for character in role_id):
+        raise ValueError("plot role cannot form a canonical page name: {}".format(role_id))
+    suffix = "" if page_count == 1 else ".page.{:03d}".format(page_index)
+    return role_id + suffix + ".pdf"
+
+def decimal_number(token):
+    """The public CSV is decimal; only the private drawing protocol is hex."""
+    if token == "":
+        return None
+    if not isinstance(token, str) or not re.fullmatch(
+            r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?", token):
+        raise ValueError("invalid public decimal token: {!r}".format(token))
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError("nonfinite public decimal")
+    return value
+
+def verify_flat_fileset(directory, names, label):
+    if (len(names) != len(set(names)) or any(
+            not isinstance(name, str) or Path(name).name != name or
+            name in {"", ".", ".."} for name in names)):
+        raise ValueError(label + " filesystem set differs")
+    entries = list(directory.iterdir())
+    if (any(path.is_symlink() or not path.is_file() for path in entries) or
+            {path.name for path in entries} != set(names)):
+        raise ValueError(label + " filesystem set differs")
+
+def _render_numbers(row):
+    allowed = {
+        "balancing": {"ordered_pair_yield", "os_minus_ss_per_trigger",
+                      "baryon_meson_reference_ratio", "ratio_to_reference_tune",
+                      "baryon_meson_ratio_to_reference_tune"},
+        "correlations": {"dphi_per_trigger", "ratio_to_reference_tune"},
+        "kinematics": {"normalized_distribution", "ratio_to_reference_tune",
+                       "normalized_spectrum", "spectrum_ratio_to_reference_tune"},
+        "multiplicity": {"normalized_distribution", "ratio_to_reference_tune"},
+        "sample_counts": {"exact_t1_count"},
     }
-    request_id = sha_bytes(canonical(request_identity).encode("ascii"))
-    selected = filter_rows(rows, selection)
-    root_sha = receipt["storage_identity"]["root_sha256"]
-    eligibility = selection["eligibility_status"]
-    public = [public_row(row, request_id, root_sha, scientific, eligibility)
-              for row in selected]
-    public.sort(key=lambda row: row["semantic_id"])
-    payloads = {
-        family + ".csv": csv_payload(
-            [row for row in public if row["family"] == family])
-        for family in DEFAULT_FAMILIES
+    if row["quantity"] not in allowed.get(row["family"], set()):
+        raise ValueError("quantity absent from public emitter contract")
+    values = {k: decimal_number(row[k]) for k in
+              ("value", "finite_mc_error", "bin_low", "bin_high")}
+    has_value = row["value_status"] in {
+        "AVAILABLE", "AVAILABLE_ZERO_DISPERSION", "UNSTABLE_DENOMINATOR"}
+    has_error = row["uncertainty_status"] in {"AVAILABLE", "AVAILABLE_ZERO_DISPERSION"}
+    if has_value != (values["value"] is not None):
+        raise ValueError("public value/status relation differs")
+    if has_error != (values["finite_mc_error"] is not None) or (has_error and not has_value):
+        raise ValueError("public uncertainty/status relation differs")
+    if has_error and values["finite_mc_error"] < 0:
+        raise ValueError("public uncertainty is negative")
+    if row["reference_tune"] and row["tune"] == row["reference_tune"]:
+        raise ValueError("fake reference-tune ratio")
+    if row["family"] == "balancing":
+        if any(row[k] for k in ("bin_index", "bin_low", "bin_high", "axis")):
+            raise ValueError("balancing has invented bin support")
+    elif row["family"] != "sample_counts":
+        if (row.get("flow") in ("", "REGULAR") and
+                not re.fullmatch(r"[0-9]+", row["bin_index"])):
+            raise ValueError("public histogram bin index differs")
+        low, high = values["bin_low"], values["bin_high"]
+        if low is None or high is None:
+            if (row["family"] != "kinematics" or
+                    row.get("flow") in ("", "REGULAR")):
+                raise ValueError("public histogram support is absent")
+        elif low >= high:
+            raise ValueError("public histogram support is reversed")
+    if row["family"] == "correlations" and row["component"] not in {"OS", "SS", "OS_MINUS_SS"}:
+        raise ValueError("public correlation component differs")
+    return values
+
+def _panel_key(row, by_pdg, presentation):
+    role = row['role_id']
+    if role == 'balancing.baryon_meson.activity':
+        return '{}.{}.{}'.format('lower' if row['reference_tune'] else 'upper',
+            presentation['trigger_sectors'][row['trigger_pdg']], row['trigger_pdg'])
+    if role == 'multiplicity.composite':
+        return 'lower.ratio' if row['reference_tune'] else 'upper.distribution'
+    if row['family'] == 'correlations':
+        layer = 'compare' if row['reference_tune'] else 'main'
+        return 'correlation.{}.{}.{}'.format(
+            layer, row['trigger_pdg'], row['component'])
+    if row['family'] == 'balancing':
+        return '{}.{}'.format('lower' if row['reference_tune'] else 'upper',
+                              row['trigger_pdg'])
+    return 'main'
+
+def _series_identity(row):
+    fields = ['quantity','component','trigger_pdg','associate_pdg','reference_pdg',
+              'tune','reference_tune','profile','activity_id','axis']
+    identity = {k:row[k] for k in fields}
+    if row['family'] == 'balancing' and row['role_id'] != 'balancing.baryon_meson.activity':
+        # Species are categorical x coordinates in the reference-style panels.
+        identity['associate_pdg'] = ''
+        identity['reference_pdg'] = ''
+        identity['class_id'] = row['class_id']
+    elif row['family'] != 'balancing':
+        identity['class_id'] = row['class_id']
+    return identity
+
+def _padded_range(values, padding, log=False):
+    if any(not math.isfinite(v) for v in values):
+        raise ValueError('presentation range exceeds finite domain')
+    values = [v for v in values if not log or v > 0]
+    if not values: return [0.01,1.] if log else [-.5,1.5]
+    low,high=min(values),max(values)
+    if log:
+        factor=math.exp(max(math.log(high)-math.log(low),1.)*max(padding,.04))
+        return [max(low/factor,float.fromhex('0x0.0000000000001p-1022')),min(high*factor,sys.float_info.max)]
+    if low == high == 0: return [-.5,1.5]
+    span=high-low or max(abs(low),1.)
+    result=[low-span*max(padding,.04),high+span*max(padding,.04)]
+    if not all(math.isfinite(v) for v in result): raise ValueError('presentation range exceeds finite domain')
+    return result
+
+def checked_p1_occupied_support(support, series):
+    """Use S's authenticated observed extent, while refusing a cropped tail."""
+    exact_keys(support, {"low", "high", "positive_low"},
+               "P1 occupied support")
+    low, high, positive_low = (support[name] for name in
+                               ("low", "high", "positive_low"))
+    if (any(type(value) not in (int, float) or not math.isfinite(value)
+            for value in (low, high, positive_low)) or
+            low != 0 or positive_low <= 0 or high <= low or
+            high < positive_low):
+        raise ValueError("P1 occupied support geometry differs")
+    material = [point for item in series for point in item["points"]
+                if point["state"] == "DRAW" and point["y"] is not None and
+                (point["y"] != 0 or point["error"] not in (None, 0))]
+    if any(point["support_high"] is not None and
+           point["support_high"] > high for point in material):
+        raise ValueError("P1 authenticated support crops materialized tail")
+    if any(point["support_low"] is not None and
+           point["support_low"] >= 0 and point["support_low"] < positive_low and
+           point["support_high"] > positive_low and point["y"] != 0
+           for point in material):
+        raise ValueError("P1 positive inset misses occupied support")
+    return [float(low), float(high)], [float(positive_low),
+                                     float(max(high, positive_low + 1.))]
+
+def checked_category_order(declared, present_species, partial, role, trigger):
+    if declared is None and not present_species and partial:
+        declared = []
+    if (not isinstance(declared, list) or
+            len(declared) != len(set(declared)) or
+            (not present_species.issubset(set(declared)) if partial else
+             set(declared) != present_species)):
+        raise ValueError('S numerical category order/key set differs: '+
+                         role+' '+trigger)
+    return list(declared)
+
+def checked_tune_ratio_layout(tunes, reference_tune, rows, role,
+                              partial=False):
+    """Bind lower-pad topology to authenticated tune/reference rows."""
+    if (not tunes or len(tunes) != len(set(tunes)) or
+            reference_tune not in tunes):
+        raise ValueError("plot tune/reference layout differs")
+    ratio_capable = role == "multiplicity.composite" or \
+        role.startswith(("balancing.", "correlations.", "spectra."))
+    ratio_rows = [row for row in rows if row["reference_tune"]]
+    if any(row["reference_tune"] != reference_tune for row in ratio_rows):
+        raise ValueError("plot ratio reference identity differs")
+    observed = {row["tune"] for row in ratio_rows}
+    expected = set(tunes) - {reference_tune} if ratio_capable else set()
+    if observed != expected and not (partial and observed.issubset(expected)):
+        raise ValueError("plot tune-ratio coverage differs")
+    if role.startswith("correlations.") and expected and not partial:
+        absolute = {(row["trigger_pdg"], row["component"], row["tune"])
+                    for row in rows if not row["reference_tune"]}
+        comparisons = {(row["trigger_pdg"], row["component"], row["tune"])
+                       for row in ratio_rows}
+        required = {(trigger, component, tune)
+                    for trigger, component, _ in absolute
+                    for tune in expected}
+        if comparisons != required:
+            raise ValueError("correlation OS/SS/net comparison key set differs")
+    return bool(expected)
+
+def categorical_display_x(base, role, class_id, tune, tunes, class_order,
+                          dodge, ratio=False):
+    """All tune/class markers coincide with their S-owned category center."""
+    if role.startswith('balancing.activity.') and class_id not in class_order:
+        raise ValueError('activity class display identity differs')
+    return base
+
+def resolved_class_styles(classes, patterns):
+    """Resolve typed class IDs to unique authenticated ROOT dash styles."""
+    integrated = [str(item['id']) for item in classes if item['integrated']]
+    if len(integrated) != 1:
+        raise ValueError("typed class registry must contain one integrated class")
+    ordered = sorted((str(item['id']) for item in classes
+                      if not item['integrated']), key=int)
+    if len(patterns) < len(ordered) + 1:
+        raise ValueError("class pattern registry is too short")
+    mapping = {integrated[0]: patterns[0]['root_style']}
+    mapping.update({class_id: patterns[index + 1]['root_style']
+                    for index, class_id in enumerate(ordered)})
+    if mapping[integrated[0]] != 1 or len(set(mapping.values())) != len(mapping):
+        raise ValueError("class style registry is not unique/inclusive-solid")
+    return mapping
+
+
+def selected_extreme_class_ids(classes):
+    """Select display-only endpoints from S's requested percentile intervals."""
+    regular = [item for item in classes if not item['integrated']]
+    if len(regular) < 2:
+        raise ValueError('focused activity view needs two typed classes')
+    high_activity = min(regular, key=lambda item:(
+        item['percentile_interval'][0], item['percentile_interval'][1]))
+    low_activity = max(regular, key=lambda item:(
+        item['percentile_interval'][1], item['percentile_interval'][0]))
+    if high_activity['id'] == low_activity['id']:
+        raise ValueError('focused activity endpoints coincide')
+    return [str(high_activity['id']), str(low_activity['id'])]
+
+def activity_emphasis(role, class_id, classes):
+    if (role.startswith('balancing.activity.') and class_id and
+            class_id in selected_extreme_class_ids(classes)):
+        return 'EXTREME'
+    return 'NORMAL'
+
+def join_ratio_pads(pages):
+    """Make each saved absolute/comparison frame share one physical edge."""
+    for page in pages:
+        by_id={panel['id']:panel for panel in page['panels']}
+        for lower_id, lower in by_id.items():
+            if lower_id=='lower.ratio': upper_id='upper.distribution'
+            elif lower_id=='g9.ratio': upper_id='g9.absolute'
+            elif (lower_id.startswith('correlation.balance.') and
+                  lower_id.endswith('.lower')):
+                upper_id=lower_id[:-len('.lower')]+'.upper'
+            elif (lower_id.startswith('correlation.teaching.') and
+                  lower_id.endswith('.inclusive')):
+                upper_id=lower_id[:-len('.inclusive')]+'.identified'
+            elif lower_id.startswith('lower.'):
+                upper_id='upper.'+lower_id[len('lower.'):]
+            elif lower_id.startswith('correlation.compare.'):
+                upper_id='correlation.main.'+lower_id[len('correlation.compare.'):]
+            else: continue
+            upper=by_id.get(upper_id)
+            if upper is None: continue
+            if (upper['geometry'][0] != lower['geometry'][0] or
+                    upper['geometry'][2] != lower['geometry'][2] or
+                    upper['margins'][0] != lower['margins'][0] or
+                    upper['margins'][1] != lower['margins'][1] or
+                    upper['x_range'] != lower['x_range']):
+                raise ValueError('absolute/ratio horizontal plotting edges differ')
+            upper['geometry'][1]=lower['geometry'][3]
+            upper['margins'][2]=0.
+            lower['margins'][3]=0.
+            lower['title']=''
+            if (page['role']=='correlations.beauty' and
+                    lower_id=='correlation.compare.521.OS_MINUS_SS'):
+                # Keep the joined border, but separate the upper 0 and
+                # comparison 1.6 y labels at manuscript width.
+                lower['y_range'][1]=max(lower['y_range'][1],1.8)
+            if page['role'].startswith('balancing.') or lower_id=='g9.ratio':
+                lower['geometry'][1]=.08
+
+def correlation_reference_partners(pairs, trigger):
+    partners={}
+    for sign,component in ((-1,'OS'),(1,'SS')):
+        matches=[pair for pair in pairs
+                 if str(pair['trigger_pdg'])==str(trigger) and
+                 pair['sign']==sign and
+                 abs(pair['associate_pdg'])==
+                 abs(pair['reference_meson_pdg'])]
+        if len(matches)!=1:
+            raise ValueError('typed signed correlation reference '
+                             'pair absent/ambiguous: '+str(trigger)+'/'+
+                             component)
+        partners[component]=matches[0]['associate_pdg']
+    return partners
+
+
+def checked_charm_recipe_binding(scope, config):
+    """A/S own the charm recipe; a P alternate may only select matching science."""
+    triggers = config['presets']['paper_default']['trigger_pdgs']
+    if scope['ordered_triggers'] != triggers:
+        raise ValueError('plot charm preset differs from S ordered triggers')
+    charm = triggers[0]
+    pairs = scope['ordered_associate_pairs']
+    for trigger in (charm, 4122):
+        selected = [pair for pair in pairs if
+                    pair['trigger_pdg'] == trigger and
+                    pair['sector'] == 'CHARM']
+        if (not selected or any(pair['reference_meson_pdg'] != -charm
+                                for pair in selected)):
+            raise ValueError('plot charm preset differs from S reference meson')
+        reference = {(pair['sign'], pair['associate_pdg']) for pair in
+                     selected if abs(pair['associate_pdg']) == charm}
+        if reference != {('OS', -charm), ('SS', charm)}:
+            raise ValueError('plot charm preset differs from S signed pairs')
+    for role in scope['roles']:
+        if role['role_id'] != 'balancing.baryon_meson.activity':
+            continue
+        if any(key['reference_pdg'] != -charm for key in
+               role['required_curve_keys'] if key['trigger_pdg'] == charm):
+            raise ValueError('plot charm preset differs from S P8 reference')
+
+
+def checked_paper_pair_profile(payload, config, profile):
+    """Bind P2-P8 to A/S's archived no-floor, no-diagonal selection."""
+    if payload['schema'] != 'hadronization_projection_result_v4':
+        return ''
+    if (profile['id'] != 'inclusive' or
+            profile['relative_pt'] != 'NONE' or
+            profile['minimum_hierarchy'] != 'NONE'):
+        raise ValueError('S paper requires inclusive no-diagonal pair profile')
+    for field in ('trigger_pt', 'associate_pt'):
+        cut = profile[field]
+        if (cut['domain'] != 'PHYSICAL' or cut['units'] != 'GeV' or
+                any(cut[key] is not None for key in
+                    ('low', 'high', 'low_operator', 'high_operator'))):
+            raise ValueError('S pair profile carries a fixed pT cut')
+    for role in payload['request_echo']['scope']['roles']:
+        if role['role_id'].startswith(('balancing.', 'correlations.')) and any(
+                key['profile_id'] != profile['id'] for key in
+                role['required_curve_keys']):
+            raise ValueError('S paper role uses a different pair profile')
+    return ('P2-P8: no final-hadron p_{T} floor; '
+            'N_{trig}: eligible singles')
+
+
+def focused_extreme_pages(pages, context, padding):
+    """Add supplemental P5/P7 views by filtering saved class series only."""
+    if len(context.tunes) < 2:
+        return []
+    selected = selected_extreme_class_ids(context.classes)
+    by_id = {str(item['id']): item for item in context.classes}
+    descriptions = ['{}-{}%'.format(*(
+        format(float(value), '.15g') for value in
+        by_id[class_id]['percentile_interval']))
+                    for class_id in selected]
+    result = []
+    for source in pages:
+        if source['role'] not in ('balancing.activity.charm',
+                                  'balancing.activity.beauty'):
+            continue
+        upper = [panel for panel in source['panels']
+                 if panel['id'].startswith('upper.')]
+        if not upper or any(
+                not all(any(series['class_id'] == class_id and
+                            any(point['state'] == 'DRAW'
+                                for point in series['points'])
+                            for series in panel['series'])
+                        for class_id in selected)
+                for panel in upper):
+            if not partial_numerics(context):
+                raise ValueError('complete activity endpoint drawing absent')
+            continue
+        page = copy.deepcopy(source)
+        page['filename'] = 'supplemental.'+source['role']+'.extremes.pdf'
+        page['title'] = ('Supplemental current activity extremes: '+
+                         descriptions[0]+' and '+descriptions[1])
+        for panel in page['panels']:
+            panel['series'] = [series for series in panel['series']
+                               if series['class_id'] in selected]
+            valid = [point for series in panel['series']
+                     for point in series['points']
+                     if point['state'] == 'DRAW' and point['y'] is not None]
+            signed = any(point['y']-(point['error'] or 0) <= 0
+                         for point in valid)
+            panel['log_y'] = panel['log_y'] and not signed
+            values = [value for point in valid
+                      for value in (point['y'],
+                                    point['y']-(point['error'] or 0),
+                                    point['y']+(point['error'] or 0))]
+            if panel['id'].startswith('lower.'):
+                values.append(1.)
+            panel['y_range'] = _padded_range(values, padding,
+                                              panel['log_y'])
+            panel['status'] = 'AVAILABLE' if valid else 'NOT_MATERIALIZED'
+            missing = sum(point['state'] != 'DRAW'
+                          for series in panel['series']
+                          for point in series['points'])
+            panel['note'] = ('signed y uses linear scale; ' if signed else '') + \
+                ('{} missing (#times)'.format(missing) if missing else '')
+            panel['guides'] = [guide for guide in panel['guides']
+                               if guide['id'] != 'signed_zero']
+            if signed:
+                panel['guides'].append({'id':'signed_zero',
+                    'x_low':panel['x_range'][0],
+                    'x_high':panel['x_range'][1],
+                    'y_low':0.,'y_high':0.,'color':'#777777',
+                    'line_style':3,'label':''})
+        result.append(page)
+    return result
+
+def projection_materialization(payload):
+    """Collapse point materialization into deterministic render-role status."""
+    materialization = {canonical(item["point_key"]): item
+                       for item in payload["materialization"]}
+    groups = {}
+    for point in payload["points"]:
+        curve = point["key"]["curve"]
+        key = (curve["role_id"], curve["trigger_pdg"])
+        groups.setdefault(key, []).append(materialization[canonical(
+            point["key"])])
+    statuses = []
+    for (role, trigger), items in sorted(
+            groups.items(), key=lambda item: canonical(item[0])):
+        missing = [item for item in items if item["status"] != "PRESENT"]
+        statuses.append(SimpleNamespace(
+            role_id=role, trigger_pdg=trigger,
+            status="AVAILABLE" if not missing else "NOT_MATERIALIZED",
+            reason="" if not missing else ",".join(sorted({reason
+                for item in missing for reason in item["reason_codes"]}))))
+    return statuses
+
+
+def partial_numerics(value):
+    """Keep v3 package incompleteness distinct from v4 campaign sampling."""
+    if isinstance(value, dict):
+        schema = value['schema']
+        package_state = value['package_state']
+        campaign_state = value['campaign_state']
+    else:
+        schema = value.numerics_schema
+        package_state = value.package_state
+        campaign_state = value.campaign_state
+    if schema == 'hadronization_projection_result_v3_g9_science':
+        return package_state == 'VALIDATED_PARTIAL'
+    if schema == 'hadronization_projection_result_v4':
+        if package_state != 'VALIDATED_COMPLETE':
+            raise ValueError('v4 numerical package state differs')
+        return campaign_state == 'PARTIAL_SAMPLE'
+    raise ValueError('unsupported S numerical schema')
+
+
+def synthetic_provenance(payload):
+    return any(isinstance(item, str) and
+               item.startswith('TEST_ONLY_SYNTHETIC')
+               for item in payload['provenance']['data_limitations'])
+
+
+def g9_signed_species(curve):
+    """The S G9 curve keys store the plotted signed species as associate."""
+    if (curve['role_id'] != 'spectra.signed_heavy' or
+            curve['trigger_pdg'] is not None or
+            curve['associate_pdg'] is None):
+        raise ValueError('G9 signed-species curve key differs')
+    return curve['associate_pdg']
+
+def target_analysis_caption(payload):
+    """Bind preview context to accepted campaign bytes, never synthetic provenance."""
+    provenance=payload['provenance']
+    synthetic=synthetic_provenance(payload)
+    source_campaign=payload['request_echo']['sources']['campaign_id']
+    if not synthetic and source_campaign!='HF_RUN3_V1':
+        return '{name} {version}; {beam}, #sqrt{{s}} = {energy} TeV'.format(
+            name=provenance['generator_name'],
+            version=provenance['generator_version'],
+            beam=provenance['collision_system'],
+            energy=format(float.fromhex(provenance['energy_gev'])/1000,'.15g'))
+    reject_symlink_components(TARGET_CAMPAIGN, 'target campaign descriptor')
+    if sha_file(TARGET_CAMPAIGN) != TARGET_CAMPAIGN_SHA256:
+        raise ValueError('target campaign descriptor SHA256 differs')
+    target=json_file(TARGET_CAMPAIGN, 'target campaign descriptor')
+    source_tunes = payload['request_echo']['scope']['ordered_tunes']
+    if payload['schema'] == 'hadronization_projection_result_v4' and synthetic:
+        same_tunes = (len(source_tunes) == len(set(source_tunes)) and
+                      set(target['tune_order']) == set(source_tunes))
+    else:
+        same_tunes = target['tune_order'] == source_tunes
+    if (target['schema']!='hadronization_campaign_record_v1' or
+            not same_tunes):
+        raise ValueError('target campaign scope differs')
+    version=target['runtime']['pythia_version']
+    beam=target['physics']['beam']
+    energy=target['physics']['sqrt_s_gev']
+    if (not isinstance(version,str) or not version or
+            not isinstance(beam,str) or not beam or
+            type(energy) not in (int,float) or energy<=0):
+        raise ValueError('target campaign generator/collision differs')
+    if not synthetic:
+        if (provenance['generator_name'].upper()!='PYTHIA' or
+                provenance['generator_version']!=version or
+                provenance['collision_system']!=beam or
+                float.fromhex(provenance['energy_gev'])!=energy):
+            raise ValueError('numerical provenance contradicts target campaign')
+    caption='PYTHIA {}; {}, #sqrt{{s}} = {} TeV'.format(
+        version, beam, format(energy/1000,'.15g'))
+    # Synthetic packets carry their own visible TEST_ONLY marker.  The
+    # authenticated target campaign is 13.6 TeV; calling it merely planned
+    # here would misdescribe the existing production dataset.
+    return caption
+
+
+def activity_proxy_caption(selection, threshold, eta_window):
+    """Describe only the population authenticated by the typed activity cut."""
+    if not (selection['charged'] and selection['final'] and
+            selection['exclude_heavy_constituents'] and
+            selection['pt']['low_operator']=='GT'):
+        raise ValueError('P1 typed charged-final activity differs')
+    return ('N_{ch}: charged-light final-particle activity, heavy flavour excluded; '
+            'p_{T} > '+format(threshold,'.15g')+
+            ' GeV/c, |#eta| #leq '+format(eta_window,'.15g'))
+
+def apply_cold_page_style(pages, context):
+    """The owner layout applies equally to preview and full science packets."""
+    for page in pages:
+        if page['role']=='multiplicity.composite':
+            page['title']=context.target_analysis_caption
+        else:
+            page['title']=''
+            if page['role']!='spectra.signed_heavy':
+                science=(getattr(context, 'pair_selection_caption', '')
+                         if page['role'].startswith(('balancing.', 'correlations.'))
+                         else '')
+                teaching=any(panel['id'].startswith('correlation.teaching.')
+                             for panel in page.get('panels', []))
+                page['information']=(
+                    (science+'; ' if science else '')+
+                    CORRELATION_CENTER_ONLY_DISCLOSURE) if teaching else science
+        page['scientific_header']=(
+            'TEST_ONLY / SYNTHETIC / PARTIAL_SAMPLE'
+            if context.numerics_schema == 'hadronization_projection_result_v4'
+            and context.synthetic and context.campaign_state == 'PARTIAL_SAMPLE'
+            else 'TEST_ONLY / SYNTHETIC' if context.synthetic else
+            'TEST_ONLY PARTIAL_SAMPLE' if context.campaign_state=='PARTIAL_SAMPLE'
+            else '')
+
+def p1_uncertainty_display(synthetic):
+    return 'CENTERS_ONLY' if synthetic else 'DENSE_BAND'
+
+def prelean_inset_geometry(relative, parent, width, height):
+    """Map the original nested TPad to this canvas without stretching it.
+
+    Pre-lean: 1800x1650 canvas, main pad height .69; inset .18,.07,.50,.38.
+    Preserve its physical aspect when the surrounding current page is taller.
+    """
+    x0,y0,x1,y1=relative
+    left,bottom,right,top=parent
+    inset_bottom=bottom+y0*(top-bottom)
+    inset_height=(y1-y0)*.69*(1650./1800.)*width/height*(right-left)
+    return [left+x0*(right-left),inset_bottom,
+            left+x1*(right-left),inset_bottom+inset_height]
+
+CORRELATION_CENTER_ONLY_DISCLOSURE = (
+    'Statistical errors omitted for display; K10 errors and covariance '
+    'saved in ROOT')
+
+def review_uncertainty_presentation(page):
+    """Keep retained K10 errors distinct from errors drawn in a PDF."""
+    role=page['role']
+    active=[(panel,point) for panel in page['panels']
+            for series in panel['series'] for point in series['points']
+            if point['state']=='DRAW']
+    if not any(point['error'] is not None and point['error']>0
+               for _,point in active):
+        return role+' lacks retained finite-MC error'
+    teaching=[panel for panel in page['panels']
+              if panel['id'].startswith('correlation.teaching.')]
+    if teaching and any(panel['uncertainty_display']=='CENTERS_ONLY'
+                        for panel in teaching):
+        if not page['information'].endswith(
+                CORRELATION_CENTER_ONLY_DISCLOSURE):
+            return role+' centers-only teaching lacks visible SE disclosure'
+        return None
+    if any(panel['uncertainty_display']!='CENTERS_ONLY' and
+           point['error'] is not None and point['error']>0
+           for panel,point in active):
+        return None
+    if role=='multiplicity.composite' and any(
+            'SE not drawn' in panel['note'] for panel in page['panels']):
+        return None
+    return role+' has neither drawn finite-MC errors nor a display disclosure'
+
+def g9_science_caption(science, reference, numerics_schema):
+    """Translate S's authenticated G9 selection and normalization into text."""
+    current = numerics_schema == 'hadronization_projection_result_v4'
+    legacy = numerics_schema == 'hadronization_projection_result_v3_g9_science'
+    if not (current or legacy):
+        raise ValueError('S G9 numerical schema differs')
+    model = ('G9_direct_primary_selected_no_pt_floor_eta4' if current else
+             'G9_direct_primary_selected_strict_pt0p15_eta4')
+    denominator = ('weighted_all_origin_selected_final_same_signed_species_and_tune'
+                   if current else
+                   'weighted_selected_final_same_signed_species_and_tune')
+    pt_flow = ('negative_underflow_rejected_overflow_in_denominator_and_output'
+               if current else
+               'underflow_and_overflow_in_denominator_and_output')
+    if (science['model_id'] != model or
+            science['status_low'] != 81 or science['status_high'] != 89 or
+            science['source_family'] != 'kinematics' or
+            science['final'] is not True or science['selected'] is not True or
+            science['denominator'] != denominator or
+            science['normalization'] !=
+            'per_bin_probability_no_bin_width_division' or
+            science['units'] != 'probability_per_bin' or
+            science['ratio'] !=
+            'same_bin_probability_over_reference_tune_probability' or
+            science['pt_flow'] != pt_flow or
+            science['eta_flow'] !=
+            'no_materialized_flow_inclusive_upper_endpoint' or
+            science['phi_flow'] !=
+            'no_materialized_flow_inclusive_upper_endpoint' or
+            science['axis_ids'] != ['pt', 'eta', 'phi']):
+        raise ValueError('S G9 selection/normalization contract differs')
+    pt, eta = science['pt'], science['eta']
+    if ((current and (science.get('origin_scope') != 'ALL_ORIGINS' or
+                      any(pt[key] is not None for key in
+                          ('low', 'high', 'low_operator', 'high_operator')))) or
+            (legacy and (pt['low_operator'] != 'GT' or
+                         pt['high'] is not None)) or
+            eta['low_operator'] != 'GE' or
+            eta['high_operator'] != 'LE' or
+            float.fromhex(eta['low']) != -float.fromhex(eta['high']) or
+            (current and pt['domain'] != 'PHYSICAL') or
+            pt['units'] != 'GeV'):
+        raise ValueError('S G9 cut predicates differ')
+    if current:
+        cut = ('G9 direct final {}-{}, all origins, no p_{{T}} floor, '
+               '|#eta| #leq {}; P_{{bin}}=W_{{bin}}/W_{{sel}} per species/tune (no bin-width divide)'
+               .format(science['status_low'], science['status_high'],
+                       format(float.fromhex(eta['high']), '.15g')))
+    else:
+        cut = ('G9 selected final (status {}-{}), p_{{T}} > {} GeV, '
+               '|#eta| #leq {}; P_{{bin}} = W_{{bin}}/W_{{sel}} per species/tune (no bin-width divide)'
+               .format(science['status_low'], science['status_high'],
+                       format(float.fromhex(pt['low']), '.15g'),
+                       format(float.fromhex(eta['high']), '.15g')))
+    return cut, 'P_{bin} / P_{bin,'+reference+'}', 'Probability / bin'
+
+def cold_drawing_inputs(payload, config):
+    """Adapt one S-validated numerical DTO to presentation fields only.
+
+    The supplied metadata is part of the archived science payload.  This
+    function never opens a campaign file, invokes a projector, or infers an
+    unarchived category, support boundary, or particle identity.
+    """
+    resolved = payload["resolved"]
+    if payload['schema'] not in (
+            'hadronization_projection_result_v3_g9_science',
+            'hadronization_projection_result_v4'):
+        raise ValueError('S numerical ROOT lacks typed G9 science record')
+    partial = partial_numerics(payload)
+    if payload['schema'] == 'hadronization_projection_result_v4':
+        checked_charm_recipe_binding(payload['request_echo']['scope'], config)
+    g9_science = resolved['g9_science']
+    order_records = resolved.get("category_order")
+    support_records = resolved.get("observed_support")
+    if not isinstance(order_records, list) or not isinstance(support_records, list):
+        raise ValueError("S numerical ROOT lacks typed category/support records")
+    category_orders = {}
+    labels = {}
+    for record in order_records:
+        pdgs, captions = record["associate_pdgs"], record["labels"]
+        if len(pdgs) != len(captions) or len(set(pdgs)) != len(pdgs):
+            raise ValueError("numerical category order/label bijection differs")
+        role = record["role_id"]
+        trigger = str(record["trigger_pdg"])
+        if trigger in category_orders.setdefault(role, {}):
+            raise ValueError("duplicate numerical category order")
+        category_orders[role][trigger] = [str(pdg) for pdg in pdgs]
+        for pdg, caption in zip(pdgs, captions):
+            if not isinstance(caption, str) or not caption:
+                raise ValueError("empty numerical category label")
+            previous = labels.setdefault(str(pdg), caption)
+            if previous != caption:
+                raise ValueError("contradictory numerical species label")
+    request = payload["request_echo"]
+    nch = next((axis for axis in request["axes"] if axis["id"] == "nch"), None)
+    if nch is None:
+        raise ValueError("P1 numerical axis is absent")
+    support = [item for item in support_records
+               if item["role_id"] == "multiplicity.composite" and
+               item["axis_id"] == "nch" and item["status"] == "OBSERVED"]
+    if not support:
+        if not partial:
+            raise ValueError("complete numerical P1 occupied support absent")
+        occupied = None
+    else:
+        last = max(item["last_nonzero"] for item in support)
+        if last is None or last + 1 >= len(nch["edges"]):
+            raise ValueError("P1 occupied support bin index differs")
+        positive_edges = [float.fromhex(edge) for edge in nch["edges"]
+                          if float.fromhex(edge) > 0]
+        if not positive_edges:
+            raise ValueError("P1 axis has no positive inset domain")
+        occupied = {"low": 0.,
+                    "high": float.fromhex(nch["edges"][last + 1]),
+                    "positive_low": positive_edges[0]}
+    g9_pages = sorted({(g9_signed_species(point["key"]["curve"]),
+                        point["key"]["curve"]["axis_id"])
+                       for point in payload["points"]
+                       if point["key"]["curve"]["role_id"] ==
+                       "spectra.signed_heavy"})
+    metadata = {"p1_occupied_support": occupied,
+                "category_orders": category_orders,
+                "species_labels": labels,
+                "g9_pages": [{"pdg": pdg, "axis_id": axis}
+                             for pdg, axis in g9_pages]}
+    scope = request["scope"]
+    tunes = scope["ordered_tunes"]
+    reference_tune = scope["reference_tune"]
+    if reference_tune not in tunes:
+        raise ValueError("numerical reference tune is absent")
+    profiles = payload["resolved"]["profiles"]
+    # A/S fix the scientific profile in the archived request. Presentation
+    # config cannot select or silently replace that profile.
+    if len(profiles) != 1 or len(request["profiles"]) != 1 or \
+            profiles[0]["id"] != request["profiles"][0]["id"]:
+        raise ValueError("numerical profile selection is absent/ambiguous")
+    profile = profiles[0]
+    selected_profile = profile["id"]
+    pair_selection_caption = checked_paper_pair_profile(
+        payload, config, profile)
+    rows = [row for row in typed_point_rows(payload)
+            if row["profile"] in ("", selected_profile)]
+    if len({row["semantic_id"] for row in rows}) != len(rows):
+        raise ValueError("numerical point identity collision")
+    classes = [{"id": item["id"],
+                "integrated": item["kind"] == "INTEGRATED",
+                "percentile_interval": [float.fromhex(value)
+                                        for value in item["percentile_interval"]]
+                if item["percentile_interval"] is not None else [0., 100.]}
+               for item in request["classes"]]
+    activity_ids = {row["activity_id"] for row in rows
+                    if row["activity_id"]}
+    if len(activity_ids) != 1:
+        raise ValueError("numerical activity ID is absent/ambiguous")
+    activity_id = next(iter(activity_ids))
+    activity = request["activity"]
+    boundary_activity_id = (activity['semantic_id']
+                            if payload['schema'] ==
+                            'hadronization_projection_result_v4'
+                            else activity_id)
+    boundaries = []
+    requested_class_ids = [str(item["id"]) for item in classes]
+    if len(set(requested_class_ids)) != len(requested_class_ids):
+        raise ValueError("numerical class IDs are duplicated")
+    for tune in tunes:
+        entries = [item for item in payload["resolved"]["class_boundaries"]
+                   if item["tune_id"] == tune and
+                   item["activity_id"] == boundary_activity_id]
+        by_class = {str(item["class_id"]): item for item in entries}
+        if len(by_class) != len(entries):
+            raise ValueError("duplicate numerical class boundary")
+        if entries and set(by_class) != set(requested_class_ids):
+            raise ValueError("numerical class boundary key set differs")
+        if not entries and not partial:
+            raise ValueError("complete numerical class boundaries absent")
+        boundaries.append({"tune": tune, "activity_id": activity_id,
+                           "classes": [{"id": class_id,
+                                        "low": by_class[class_id]["actual_integer_low"],
+                                        "high": by_class[class_id]["actual_integer_high"],
+                                        "empty": by_class[class_id]["empty"]}
+                                       for class_id in requested_class_ids
+                                       if class_id in by_class]})
+    pairs = [{"trigger_pdg": item["trigger_pdg"],
+              "associate_pdg": item["associate_pdg"],
+              "reference_meson_pdg": item["reference_meson_pdg"],
+              "sector": item["sector"].lower(),
+              "sign": -1 if item["sign"] == "OS" else 1}
+             for item in scope["ordered_associate_pairs"]]
+    provenance = payload["provenance"]
+    synthetic = synthetic_provenance(payload)
+    generator = {"name": provenance["generator_name"],
+                 "version": provenance["generator_version"]}
+    collision = {"beam": provenance["collision_system"],
+                 "sqrt_s_gev": float.fromhex(provenance["energy_gev"])}
+    selection = {"profiles": profiles,
+                 "activities": [{"id": activity_id,
+                                 "semantic_id": activity["semantic_id"],
+                                 "eta_window": float.fromhex(activity["eta_window"])}],
+                 "pair_acceptance": {"eta": {
+                     "operator": "abs<=",
+                     "value": float.fromhex(profile["trigger_eta"]["high"])}}}
+    labels = metadata["species_labels"]
+    # A missing display name is shown as its authenticated signed PDG number;
+    # the renderer never invents a particle name from a local registry.
+    for item in pairs:
+        for key in ("trigger_pdg", "associate_pdg", "reference_meson_pdg"):
+            pdg = item[key]
+            labels.setdefault(str(pdg), "PDG " + str(pdg))
+    for point in payload["points"]:
+        curve = point["key"]["curve"]
+        pdg = (g9_signed_species(curve)
+               if curve["role_id"] == "spectra.signed_heavy"
+               else curve["trigger_pdg"])
+        if pdg is not None:
+            labels.setdefault(str(pdg), "PDG " + str(pdg))
+    if (not isinstance(labels, dict) or
+            any(not isinstance(key, str) or not isinstance(value, str) or
+                not value for key, value in labels.items())):
+        raise ValueError("numerical species labels differ")
+    presentation = {
+        "scientific_provenance": {"generator": generator,
+                                  "collision_system": collision},
+        "selection_definitions": selection,
+        "activity_boundaries": boundaries,
+        "trigger_sectors": {str(item["trigger_pdg"]): item["sector"]
+                            for item in pairs},
+        "pairs": pairs,
+        "correlations": [item for item in pairs
+                         if item["sign"] == -1 and
+                         abs(item["associate_pdg"]) ==
+                         abs(item["reference_meson_pdg"])],
+        "species_labels": labels,
     }
-    payloads["sample_counts.tex"] = tex_payload(selected)
+    campaign_state = payload["campaign_state"]
+    if campaign_state not in ("FULL_ACCEPTED_CAMPAIGN", "PARTIAL_SAMPLE"):
+        raise ValueError("numerical campaign state differs")
+    event_count = sum(item["count"] for item in
+                      request["sources"]["expected_events_by_tune"])
+    context = SimpleNamespace(
+        cold=True, typed=True, request_id=payload["request_sha256"],
+        numerics_schema=payload['schema'],
+        tunes=tunes, reference_tune=reference_tune,
+        profile_id=selected_profile, profile_definition=profile,
+        profile_caption=metadata.get("profile_caption", selected_profile),
+        pair_selection_caption=pair_selection_caption,
+        activity_id=activity_id, public_rows=rows,
+        activity_selection=activity,
+        materialization=projection_materialization(payload),
+        classes=classes,
+        block_ids=request["statistics"]["block_ids"],
+        events=event_count,
+        activity_threshold=float.fromhex(activity["pt"]["low"]),
+        p1_occupied_support=metadata["p1_occupied_support"],
+        category_orders=metadata["category_orders"],
+        g9_pages=metadata["g9_pages"],
+        g9_science=g9_science,
+        axes=request["axes"],
+        campaign_state=campaign_state,
+        synthetic=synthetic,
+        target_analysis_caption=target_analysis_caption(payload),
+        package_state=payload["package_state"],
+        sampled_tunes=[item["tune_id"] for item in
+                       request["sources"]["expected_events_by_tune"]])
+    def role_family(role_id):
+        if role_id.startswith("balancing."): return "balancing"
+        if role_id.startswith("correlations."): return "correlations"
+        if role_id.startswith(("kinematics.", "spectra.")): return "kinematics"
+        if role_id.startswith("accounting."): return "sample_counts"
+        if role_id == "multiplicity.composite": return "multiplicity"
+        raise ValueError("unknown numerical plot role: "+role_id)
+    roles = [{"id": item["role_id"],
+              "family": role_family(item["role_id"])}
+             for item in scope["roles"]
+             if not item["role_id"].startswith("accounting.")]
+    return context, {"request_id": payload["request_sha256"],
+                     "roles": roles, "presentation": presentation}
+
+def drawing_plan(projection, manifest, config):
+    if not isinstance(projection, SimpleNamespace) or not projection.cold:
+        raise ValueError("paper layout requires S-admitted cold numerics")
+    context = projection
+    if context.request_id != manifest["request_id"]:
+        raise ValueError("projection/layout request identity differs")
+    presentation=manifest["presentation"]
+    def label(pdg):
+        labels = presentation.get("species_labels", {})
+        value = labels.get(str(pdg))
+        if not isinstance(value, str) or not value:
+            raise ValueError("S numerical species display label is absent: "+str(pdg))
+        # This is typography only: the species identity and categorical order
+        # remain the authenticated signed PDG and label supplied by S.
+        signed_identity = {
+            '411':'D^{+}', '-411':'D^{-}',
+            '421':'D^{0}', '-421':'#bar{D}^{0}',
+            '431':'D_{s}^{+}', '-431':'D_{s}^{-}',
+            '4122':'#Lambda_{c}^{+}', '-4122':'#bar{#Lambda}_{c}^{-}',
+            '521':'B^{+}', '-521':'B^{-}',
+            '511':'B^{0}', '-511':'#bar{B}^{0}',
+            '531':'B_{s}^{0}', '-531':'#bar{B}_{s}^{0}',
+            '541':'B_{c}^{+}', '-541':'B_{c}^{-}',
+            '5122':'#Lambda_{b}^{0}', '-5122':'#bar{#Lambda}_{b}^{0}',
+        }
+        if str(pdg) in signed_identity:
+            return signed_identity[str(pdg)]
+        compact = {
+            'Dplus': 'D^{+}', 'Dminus': 'D^{-}',
+            'Dzero': 'D^{0}', 'Dzerobar': '#bar{D}^{0}',
+            'Dsplus': 'D_{s}^{+}', 'Dsminus': 'D_{s}^{-}',
+            'Lambdacplus': '#Lambda_{c}^{+}',
+            'Lambdacplusbar': '#bar{#Lambda}_{c}^{-}',
+            'Bminus': 'B^{-}', 'Bplus': 'B^{+}',
+            'Bzero': 'B^{0}', 'Bzerobar': '#bar{B}^{0}',
+            'Bszero': 'B_{s}^{0}', 'Bszerobar': '#bar{B}_{s}^{0}',
+            'Bcminus': 'B_{c}^{-}', 'Bcplus': 'B_{c}^{+}',
+            'Lambdabzero': '#Lambda_{b}^{0}',
+            'Lambdabzerobar': '#bar{#Lambda}_{b}^{0}',
+        }
+        return compact.get(value, value)
+    threshold=context.activity_threshold
+    provenance=presentation['scientific_provenance']
+    header='{name} {version}, {beam}, #sqrt{{s}} = {energy} TeV'.format(
+        **provenance['generator'],beam=provenance['collision_system']['beam'],
+        energy=format(provenance['collision_system']['sqrt_s_gev']/1000.,'.15g'))
+    classes=context.classes
+    labels={str(c['id']):'{}-{}'.format(
+        *(format(float(value),'.15g') for value in c['percentile_interval']))
+        for c in classes}
+    order=[str(c['id']) for c in reversed(classes) if not c['integrated']]
+    styles={s['id']:s for s in config['style_identities']['tunes']}
+    class_styles=resolved_class_styles(
+        classes, config['style_identities']['class_line_patterns'])
+    class_pattern_digest=sha_bytes(canonical(
+        config['style_identities']['class_line_patterns']).encode('ascii'))
+    categorical_dodge=config['layout']['categorical_tune_dodge']
+    tunes=context.tunes
+    reference_tune=context.reference_tune
+    if any(tune not in styles for tune in tunes):
+        raise ValueError('projection requests a tune without a presentation style')
+    definitions=presentation['selection_definitions']
+    pair_eta=definitions['pair_acceptance']['eta']
+    profile_definition=context.profile_definition
+    profile_caption=context.profile_caption
+    blocks=len(context.block_ids)
+    events=context.events
+    base_information=(profile_caption+'; |#eta_{trig,assoc}| '
+                      +('#leq ' if pair_eta['operator']=='abs<=' else
+                        pair_eta['operator']+' ')
+                      +format(pair_eta['value'],'.15g')+
+                      '; finite-MC SE: K='+str(blocks)+
+                      ', N_{evt,total}='+format(events,','))
+    by_pdg={p:f for f,ps in config['families'].items() for p in ps}
+    assigned={r['id']:[] for r in manifest['roles']}; exclusions=[]
+    for r in context.public_rows:
+        if not r['role_id']:
+            exclusions.append((r['semantic_id'],'NON_NOMINAL_ROLE')); continue
+        if (r['role_id'].startswith(('correlations.', 'balancing.')) and
+                not r['trigger_pdg']):
+            if not partial_numerics(context):
+                raise ValueError('complete numerical point lacks a channel key')
+            exclusions.append((r['semantic_id'], 'UNBOUND_TEST_CHANNEL'))
+            continue
+        if r['family'] == 'sample_counts':
+            exclusions.append((r['semantic_id'], 'S_OWNS_TABLE_EXPORT'))
+            continue
+        if r['role_id'] not in assigned: raise ValueError('undeclared render role')
+        _render_numbers(r); assigned[r['role_id']].append(r)
+    pages=[]; padding=config['layout']['axis_padding_fraction']
+    quantities=['os_minus_ss_per_trigger','ratio_to_reference_tune',
+                'baryon_meson_reference_ratio','baryon_meson_ratio_to_reference_tune']
+    ytitles={'os_minus_ss_per_trigger':'Y = (N_{OS}-N_{SS}) / N_{trig}',
+             'ratio_to_reference_tune':'Y / Y_{'+reference_tune+'}',
+             'baryon_meson_reference_ratio':'Y_{assoc} / Y_{ref}',
+             'baryon_meson_ratio_to_reference_tune':'(Y_{assoc}/Y_{ref}) / '+reference_tune}
+    for role,rows in sorted(assigned.items()):
+        family=next(r['family'] for r in manifest['roles'] if r['id']==role)
+        if family == 'kinematics':
+            continue
+        paper = config['presets']['paper_default']
+        configured_charm = str(paper['trigger_pdgs'][0])
+        if ((family in ('balancing', 'correlations') and
+             role.endswith('charm')) or
+            role == 'balancing.baryon_meson.activity'):
+            science_charm = {r['trigger_pdg'] for r in rows
+                             if r['trigger_pdg'] in ('411', '421')}
+            if science_charm and configured_charm not in science_charm:
+                raise ValueError('configured charm meson lacks S-owned '
+                                 'science tuples: '+configured_charm)
+        allowed_triggers = {str(value) for value in (
+            paper['baryon_meson_trigger_pdgs']
+            if role == 'balancing.baryon_meson.activity' else
+            paper['trigger_pdgs'])}
+        trigger_shown = [r for r in rows if r['trigger_pdg'] in
+                         allowed_triggers] if family in ('balancing',
+                         'correlations') else rows
+        trigger_shown_ids = {r['semantic_id'] for r in trigger_shown}
+        exclusions.extend((r['semantic_id'], 'PRESENTATION_TRIGGER_FILTER')
+                          for r in rows if r['semantic_id'] not in
+                          trigger_shown_ids)
+        correlation_view = config['layout']['correlation_view']
+        pair_sign_view = (family == 'correlations' and
+                          correlation_view == 'monash_pair_sign')
+        teaching_view = (family == 'correlations' and
+                         correlation_view in ('monash_pair_sign',
+                                              'monash_balance'))
+        if family == 'correlations':
+            unfiltered = trigger_shown
+            if pair_sign_view:
+                trigger_shown = [r for r in trigger_shown
+                    if r['quantity'] == 'dphi_per_trigger' and
+                    r['component'] in ('OS', 'SS') and
+                    r['associate_pdg'] in ('', str(-int(r['trigger_pdg'])))]
+            else:
+                reference_pairs = {(str(p['trigger_pdg']),
+                    str(p['associate_pdg'])) for p in presentation['pairs']
+                    if p['sign'] == -1 and abs(p['associate_pdg']) ==
+                    abs(p['reference_meson_pdg'])}
+                trigger_shown = [r for r in trigger_shown
+                    if (r['trigger_pdg'], r['associate_pdg']) in reference_pairs]
+            selected_ids = {r['semantic_id'] for r in trigger_shown}
+            exclusions.extend((r['semantic_id'], 'PRESENTATION_CORRELATION_SCOPE')
+                              for r in unfiltered if r['semantic_id'] not in
+                              selected_ids)
+        if teaching_view:
+            shown = [r for r in trigger_shown if r['tune'] == reference_tune and
+                     not r['reference_tune']]
+            shown_ids = {r['semantic_id'] for r in shown}
+            exclusions.extend((r['semantic_id'], 'PRESENTATION_TUNE_FILTER')
+                              for r in trigger_shown if r['semantic_id'] not in
+                              shown_ids)
+        else:
+            shown = trigger_shown
+        grouped={}
+        for r in shown:
+            key = ('correlation.teaching.{}.{}'.format(
+                r['trigger_pdg'], 'inclusive' if r['associate_pdg'] == ''
+                else 'identified') if pair_sign_view else
+                'correlation.balance.{}.{}'.format(
+                r['trigger_pdg'], 'lower' if r['component'] ==
+                'OS_MINUS_SS' else 'upper') if teaching_view else
+                _panel_key(r,by_pdg,presentation))
+            grouped.setdefault(key,[]).append(r)
+        triggers=sorted({r['trigger_pdg'] for r in shown if r['trigger_pdg']},key=lambda p:(abs(int(p)),int(p)<0))
+        has_tune_ratios=checked_tune_ratio_layout(
+            tunes, reference_tune, rows, role,
+            partial=partial_numerics(context))
+        if teaching_view:
+            has_tune_ratios = False
+        recipes=[]; width,height=1100,850
+        title=''; information=base_information
+        def add(name,geometry,**options): recipes.append((name,geometry,options))
+        if family=='balancing' and role!='balancing.baryon_meson.activity':
+            integrated='.integrated.' in role
+            title=('Multiplicity-integrated' if integrated else 'Multiplicity-dependent')+' '+role.split('.')[-1]+' balancing'
+            width,height=1900,1250
+            for ti,t in enumerate(triggers):
+                left=ti/len(triggers); right=(ti+1)/len(triggers)
+                add('upper.'+t,[left,.30 if has_tune_ratios else 0.,right,.89],
+                    title=label(t)+' trigger',x_title='',
+                    y_title=ytitles['os_minus_ss_per_trigger'],categorical=True,
+                    log_y=True,ratio=False,legend=False)
+                if has_tune_ratios:
+                    add('lower.'+t,[left,0.,right,.30],title='',
+                        x_title='Associate species',
+                        y_title=ytitles['ratio_to_reference_tune'],categorical=True,
+                        log_y=False,ratio=True,legend=False)
+                else:
+                    recipes[-1][2]['x_title']='Associate species'
+        elif role=='balancing.baryon_meson.activity':
+            title='Balancing baryon / reference-meson ratio versus activity'
+            width,height=1900,1250
+            for sector_index,sector in enumerate(('charm','beauty')):
+                sector_triggers=[t for t in triggers if presentation['trigger_sectors'][t]==sector]
+                halves=('upper','lower') if has_tune_ratios else ('upper',)
+                for half in halves:
+                    for i,t in enumerate(sector_triggers):
+                        left=sector_index*.5+i*.5/max(1,len(sector_triggers))
+                        right=sector_index*.5+(i+1)*.5/max(1,len(sector_triggers))
+                        name='.'.join((half,sector,t)); members=grouped.get(name,[])
+                        ref=members[0]['reference_pdg'] if members else t
+                        add(name,[left,.32 if half=='upper' and has_tune_ratios else 0.,right,
+                                  .89 if half=='upper' else .32],
+                            title=sector.capitalize()+': '+label(t)+' trigger',
+                            x_title='' if half=='upper' else 'Multiplicity percentile (%)',
+                            y_title=('Y_{assoc} / Y('+label(ref)+')' if half=='upper' else 'Ratio to '+reference_tune),
+                            log_y=half=='upper',ratio=half=='lower',legend=half=='upper')
+        elif role=='multiplicity.composite':
+            title=''
+            activity=next(item for item in definitions['activities']
+                          if item['id']==context.activity_id)
+            selection=context.activity_selection
+            information=activity_proxy_caption(
+                selection, threshold, activity['eta_window'])
+            # Retain the pre-lean portrait-like hierarchy: a dominant log-y
+            # spectrum, a compact ratio pad and an embedded percentile inset.
+            # The scientific x range remains the complete nonzero support.
+            width,height=1050,1360
+            add('upper.distribution',[0.,.26 if has_tune_ratios else 0.,1.,.98],
+                title='',x_title='' if has_tune_ratios else 'Multiplicity N_{ch}',
+                y_title='Normalized event counts',log_y=True,legend=True)
+            if has_tune_ratios:
+                add('lower.ratio',[0.,0.,1.,.26],title='',x_title='Multiplicity N_{ch}',y_title='Tune / '+reference_tune,ratio=True)
+            # Original nested-pad placement, retaining its physical aspect.
+            add('inset.monash_boundaries',
+                prelean_inset_geometry(config['layout']['p1_inset_geometry'],
+                    [0.,.26 if has_tune_ratios else 0.,1.,.98],width,height),
+                title='',x_title='Multiplicity N_{ch}',
+                y_title='Normalized event counts',inset=True)
+        elif family=='correlations':
+            sector=role.split('.')[-1]
+            title=(('' if pair_sign_view else 'MONASH balance' if teaching_view else
+                    'All-tune' if len(tunes)>1 else tunes[0])+' '+sector+
+                   ' angular correlations')
+            information=(base_information+
+                         '; #Delta#varphi = #varphi_{trig}-#varphi_{assoc}')
+            if pair_sign_view:
+                title=''
+                information=(base_information+'; '+
+                             CORRELATION_CENTER_ONLY_DISCLOSURE)
+            width,height=1900,2600 if has_tune_ratios else 1850
+            paper_triggers=[str(value) for value in
+                            config['presets']['paper_default']['trigger_pdgs']
+                            if presentation['trigger_sectors'][str(value)]==sector]
+            for index,trigger in enumerate(paper_triggers):
+                left=index/len(paper_triggers);right=(index+1)/len(paper_triggers)
+                partners=correlation_reference_partners(
+                    presentation['pairs'], trigger)
+                if pair_sign_view:
+                    add('correlation.teaching.'+trigger+'.identified',
+                        [left,.48,right,.97],
+                        title=label(trigger)+' trigger (MONASH)',x_title='',
+                        y_title='Identified pair / trigger / bin',
+                        log_y=True,legend=True)
+                    add('correlation.teaching.'+trigger+'.inclusive',
+                        [left,.05,right,.48],title='',
+                        x_title='#Delta#varphi (rad)',
+                        y_title='All associates / trigger / bin',
+                        legend=True)
+                    continue
+                if teaching_view:
+                    add('correlation.balance.'+trigger+'.upper',
+                        [left,.45,right,.89],
+                        title='MONASH '+label(trigger)+' trigger',
+                        x_title='',y_title='OS, SS / trigger / bin',
+                        legend=True)
+                    add('correlation.balance.'+trigger+'.lower',
+                        [left,.08,right,.45],title='',
+                        x_title='#Delta#varphi (rad)',
+                        y_title='OS - SS / trigger / bin',legend=False)
+                    continue
+                if has_tune_ratios:
+                    geometry={
+                        'OS': ((.73,.89),(.62,.72)),
+                        'SS': ((.45,.61),(.34,.44)),
+                        'OS_MINUS_SS': ((.17,.33),(.04,.16)),
+                    }
+                else:
+                    geometry={
+                        'OS': ((.64,.89),None),
+                        'SS': ((.36,.61),None),
+                        'OS_MINUS_SS': ((.08,.33),None),
+                    }
+                for component,(main_range,compare_range) in geometry.items():
+                    caption=component.replace('OS_MINUS_SS','OS - SS')
+                    caption_title=(label(trigger)+' trigger, OS - SS'
+                                   if component=='OS_MINUS_SS' else
+                                   label(trigger)+' trigger #rightarrow '+
+                                   label(partners[component])+', '+component)
+                    add('correlation.main.'+trigger+'.'+component,
+                        [left,main_range[0],right,main_range[1]],
+                        title=caption_title,
+                        x_title='' if component!='OS_MINUS_SS' or
+                            has_tune_ratios else
+                            '#Delta#varphi (rad)',
+                        y_title=caption+' / trigger / bin',legend=False)
+                    if compare_range:
+                        add('correlation.compare.'+trigger+'.'+component,
+                            [left,compare_range[0],right,compare_range[1]],
+                            title='',
+                            x_title='#Delta#varphi (rad)'
+                                if component=='OS_MINUS_SS' else '',
+                            y_title=caption+' / '+reference_tune,
+                            ratio=True,legend=False)
+        if not recipes:
+            add('unavailable',[0.,0.,1.,.88],title='Unavailable',x_title='Bin coordinate',y_title='Value')
+        header_bottom=.99 if role=='multiplicity.composite' or pair_sign_view else .89
+        page={'role':role,'family':family,'page_index':1,'page_count':1,'filename':canonical_page_name(role),
+              'text_pixels':config['layout']['text_pixel_size'],'title':title,'information':information,
+              'scientific_header':header,
+              'style_header':'class_patterns_sha256='+class_pattern_digest,
+              'header_bottom':header_bottom,'width':width,'height':height,'panels':[]}
+        for name,geometry,options in recipes:
+            members=grouped.get(name,[]); groups={}
+            present_species={r['associate_pdg'] for r in members
+                             if r['associate_pdg']}
+            if (family == 'balancing' and
+                    role != 'balancing.baryon_meson.activity' and
+                    getattr(context, 'cold', False)):
+                trigger_key=name.rsplit('.',1)[-1]
+                declared=getattr(context, 'category_orders', {}).get(
+                    role, {}).get(trigger_key)
+                species=checked_category_order(
+                    declared, present_species,
+                    partial_numerics(context),
+                    role, trigger_key)
+            else:
+                species=sorted(present_species,key=lambda p:abs(int(p)))
+            for r in members:
+                ident=_series_identity(r);key='|'.join(ident.values())
+                groups.setdefault(key,[]).append(r)
+            series=[]
+            extreme_ids=set(selected_extreme_class_ids(classes))
+            for key,values in sorted(groups.items(),key=lambda kv:(
+                    kv[1][0]['class_id'] in extreme_ids,
+                    tunes.index(kv[1][0]['tune']),
+                    int(kv[1][0]['class_id'] or 0),kv[0])):
+                ident=_series_identity(values[0]); tune=ident['tune'];cl=ident.get('class_id','')
+                points=[]
+                for r in values:
+                    v=_render_numbers(r); low,high=v['bin_low'],v['bin_high']; sl,sh=low,high
+                    if family=='balancing':
+                        base=float((species.index(r['associate_pdg']) if options.get('categorical') else order.index(r['class_id']))+1)
+                        display_class=(r['class_id'] if role==
+                            'balancing.baryon_meson.activity' else cl)
+                        scientific_x=base
+                        x=categorical_display_x(
+                            base,role,display_class,tune,tunes,order,
+                            categorical_dodge, bool(r['reference_tune']))
+                    else:
+                        if family=='kinematics' and role.endswith('.pt') and sl is not None: sl=max(sl,threshold)
+                        x=None if sl is None or sh is None or sl>=sh else (sl+sh)/2
+                        scientific_x=x
+                    state='FLOW_BIN' if family=='kinematics' and low is None else 'EMPTY_SUPPORT' if x is None else 'MISSING_VALUE' if v['value'] is None else 'DRAW'
+                    points.append({'semantic_id':r['semantic_id'],'bin':int(r['bin_index']) if r['bin_index'] else -1,
+                        'scientific_x':scientific_x,'display_x':x,
+                        'x':x,'y':v['value'],'error':v['finite_mc_error'],
+                        'bin_low':low,'bin_high':high,'support_low':sl,
+                        'support_high':sh,'class_id':r['class_id'],
+                        'value_status':r['value_status'],
+                        'uncertainty_status':r['uncertainty_status'],
+                        'reasons':r['reasons'],'state':state})
+                points.sort(key=lambda q:(q['x'] is None,q['x'] or 0,q['semantic_id']))
+                class_series=family=='balancing' and '.activity.' in role
+                legend_label=labels[cl]+'%' if class_series and cl else tune
+                line_style=class_styles.get(cl, 1)
+                if family=='correlations':
+                    component=ident['component']
+                    line_style={'OS':1,'SS':2,'OS_MINUS_SS':3}[component]
+                    legend_label=((label(int(ident['trigger_pdg']))+
+                                   ' - '+label(-int(ident['trigger_pdg'])
+                                   if component=='OS' else
+                                   int(ident['trigger_pdg']))
+                                   if ident['associate_pdg'] else
+                                   ('HF opposite sign (OS)'
+                                    if component=='OS' else
+                                    'HF same sign (SS)'))
+                                  if pair_sign_view else
+                                  component if teaching_view else tune)
+                if role=='balancing.baryon_meson.activity':
+                    line_style=1+species.index(ident['associate_pdg'])
+                    legend_label=label(ident['associate_pdg'])+' / '+label(ident['reference_pdg'])
+                series.append({'key':key,'identity':ident,'tune':tune,'class_id':cl,
+                    'color':({'OS':'#000000','SS':'#0072B2'}[ident['component']]
+                             if pair_sign_view else styles[tune]['color']),
+                    'marker':styles[tune]['marker'],'line_style':line_style,'label':legend_label,
+                    'emphasis':activity_emphasis(role, cl, classes),
+                    'legend_label':legend_label if options.get('legend') and (role!='balancing.baryon_meson.activity' or tune==reference_tune) else '',
+                    'draw_mode':'histogram' if family in {'correlations','kinematics','multiplicity'} else 'categories' if options.get('categorical') or role=='balancing.baryon_meson.activity' else 'curve','points':points})
+            valid=[q for s in series for q in s['points'] if q['state']=='DRAW']
+            log_y=options.get('log_y',False)
+            signed_linear=family=='balancing' and any(
+                q['y']-(q['error'] or 0)<=0 for q in valid)
+            if signed_linear: log_y=False
+            bounds=[z for q in valid for z in (q['y'],q['y']-(q['error'] or 0),q['y']+(q['error'] or 0))]
+            if options.get('ratio'): bounds.append(1.)
+            yr=_padded_range(bounds,padding,log_y)
+            xs=[z for q in valid for z in (q['support_low'],q['support_high']) if z is not None]
+            xr=[min(xs),max(xs)] if xs else [0.,1.]; ticks=[];note=''
+            if family=='balancing' and name!='unavailable':
+                tick_labels=[label(p) for p in species] if options.get('categorical') else [labels[c] for c in order]
+                xr=[.5,len(tick_labels)+.5] if tick_labels else [.5,1.5]
+                # Shared categorical coordinates appear once, below the lower
+                # tune-comparison pad; duplicating them cuts into its title.
+                if not (has_tune_ratios and name.startswith('upper.')):
+                    ticks=[{'x':float(i+1),'label':label}
+                           for i,label in enumerate(tick_labels)]
+            elif name=='upper.distribution':
+                occupied = getattr(context, "p1_occupied_support", None)
+                if occupied is None and not partial_numerics(context):
+                    raise ValueError("S numerical ROOT lacks authenticated P1 occupied support")
+                if (occupied is not None and
+                        occupied['high'] <= occupied['positive_low'] and
+                        not partial_numerics(context)):
+                    raise ValueError('complete numerical P1 positive support absent')
+                xr=(checked_p1_occupied_support(occupied, series)[0]
+                    if occupied is not None else [0.,1.])
+                visible=[q for q in valid if q['x'] is not None and xr[0]<=q['x']<=xr[1]]
+                yr=_padded_range([z for q in visible for z in (q['y'],q['y']-(q['error'] or 0),q['y']+(q['error'] or 0))],.10,log_y)
+                note=('SE not drawn; full bin errors saved in ROOT' if
+                      context.synthetic else
+                      'Finite-MC SE band; full bin errors saved in ROOT')
+                positive=[q['y'] for q in visible if q['y']>0]
+                if log_y and positive:
+                    # One decade below the smallest positive visible center;
+                    # nearly cancelling lower errors must not set a log floor.
+                    yr[0]=max(yr[0],min(positive)/10.)
+                    # The paper axis shows the full logarithmic count scale.
+                    # Extend farther for a future sample with rarer occupied
+                    # bins instead of clipping its authenticated support.
+                    # Leave the 10^-8 tick/label clear of the ratio-pad seam.
+                    yr[0]=min(yr[0],3e-9)
+                    yr[1]=max(yr[1],1.)
+                    # The exact errors remain in ROOT/drawing record; no
+                    # dense SE bars are painted on this owner-style page.
+            if (family=='correlations' and options.get('x_title')) or (family=='kinematics' and role.endswith('.phi')):
+                ticks=[{'x':value,'label':label} for value,label in
+                       [(-math.pi,'-#pi'),(-math.pi/2,'-#pi/2'),(0.,'0'),
+                        (math.pi/2,'#pi/2'),(math.pi,'#pi'),(3*math.pi/2,'3#pi/2')]
+                       if xr[0]-1e-12<=value<=xr[1]+1e-12]
+            if log_y:
+                for q in valid:
+                    if q['y']<=0:q['state']='LOG_NONPOSITIVE'
+            if signed_linear:
+                note='signed y uses linear scale'
+            missing=[q for s in series for q in s['points']
+                     if q['state']!='DRAW']
+            if missing:
+                status_note='{} missing (#times)'.format(len(missing))
+                if name != 'upper.distribution':
+                    note=(note+'; ' if note else '')+status_note
+                else:
+                    note+='; #times = unavailable'
+            state_keys=[]
+            if any(q['uncertainty_status']=='AVAILABLE_ZERO_DISPERSION'
+                   for q in valid):
+                state_keys.append('exact-zero SE saved in ROOT')
+            if any(q['error'] is None for q in valid):
+                state_keys.append('? = withheld SE')
+            if state_keys:
+                note=(note+'; ' if note else '')+'; '.join(state_keys)
+            if family=='balancing' and name.startswith('lower.'):
+                # The signed zero guide and the upper-pad note already carry
+                # this explanation; status crosses show missing points. A
+                # second footer collides with the categorical x-title.
+                note=''
+            # The page information line explains withheld error bars; a
+            # second full sentence here would be cut by narrow facet pads.
+            small=family=='balancing'
+            margins=[.20,.035,.22,.17] if small else [.14,.04,.16,.10]
+            legend=[.24,.68,.96,.82] if small else [.59,.69,.95,.85]
+            if small and has_tune_ratios and name.startswith('upper.'):
+                margins=[.20,.035,.10,.17]
+            if small and has_tune_ratios and name.startswith('lower.'):
+                margins=[.20,.035,.43,.17]
+            if role=='balancing.baryon_meson.activity':
+                margins=[.20,.035,.29,.21]; legend=[.23,.80,.98,.91]
+            if family=='correlations':
+                margins=[.17,.04,
+                         .29 if options.get('x_title') else .13,
+                         .10]
+                legend=[.48,.63,.96,.93]
+                if pair_sign_view:
+                    margins[3]=.22
+                if teaching_view and name.endswith('.upper'):
+                    legend=[.62,.91,.96,.98]
+                if pair_sign_view and name.endswith('.identified'):
+                    legend=[.20,.62,.66,.75]
+                if pair_sign_view and name.endswith('.inclusive'):
+                    legend=[.20,.63,.70,.76]
+            if name=='upper.distribution':
+                margins=[.16,.045,.0,.12]
+                legend=[.76,.765,.95,.885]
+            if name=='lower.ratio': margins=[.16,.045,.34,.0]
+            panel_trigger=(name.split('.')[2] if name.startswith('correlation.')
+                           else name.rsplit('.',1)[-1])
+            materialization=next((item for item in context.materialization
+                                  if item.role_id==role and
+                                  (item.trigger_pdg is None or
+                                   str(item.trigger_pdg)==panel_trigger)),None)
+            status='AVAILABLE' if valid else (
+                materialization.status if materialization else 'UNAVAILABLE')
+            if (not valid and context.numerics_schema ==
+                    'hadronization_projection_result_v4' and
+                    partial_numerics(context)):
+                status = 'NOT_MATERIALIZED'
+            if not valid and materialization and materialization.reason:
+                note=materialization.reason
+            panel={'id':name,'status':status,'log_y':log_y,'log_x':False,'geometry':geometry,
+                   'x_range':xr,'y_range':yr,'title':options.get('title',''),'x_title':options['x_title'],'y_title':options['y_title'],
+                   'note':note,'series':series,'guides':[],'ticks':ticks,'margins':margins,'legend':legend,'reuse':None,
+                   'uncertainty_display':p1_uncertainty_display(context.synthetic)
+                       if role=='multiplicity.composite' else
+                       'CENTERS_ONLY' if pair_sign_view else 'STANDARD'}
+            if options.get('ratio'):
+                panel['guides'].append({'id':'unity','x_low':xr[0],'x_high':xr[1],'y_low':1.,'y_high':1.,'color':'#777777','line_style':2,'label':''})
+            if signed_linear:
+                panel['guides'].append({'id':'signed_zero','x_low':xr[0],
+                    'x_high':xr[1],'y_low':0.,'y_high':0.,
+                    'color':'#777777','line_style':3,'label':''})
+            page['panels'].append(panel)
+        if family == 'correlations' and shown:
+            axis_ids = {r['axis'] for r in shown}
+            if len(axis_ids) != 1:
+                raise ValueError('correlation axis is ambiguous')
+            axis = next((item for item in context.axes if item['id'] in
+                         axis_ids), None)
+            if axis is None or len(axis['edges']) < 2:
+                raise ValueError('correlation axis is absent')
+            domain = [float.fromhex(axis['edges'][0]),
+                      float.fromhex(axis['edges'][-1])]
+            for panel in page['panels']:
+                panel['x_range'] = domain[:]
+        if role.startswith('balancing.activity.'):
+            for panel in page['panels']:
+                panel['geometry'][1] *= .79/.90
+                panel['geometry'][3] *= .79/.90
+        pages.append(page)
+    mult={p['id']:p for page in pages if page['role']=='multiplicity.composite' for p in page['panels']}
+    if mult:
+        top=mult['upper.distribution']; inset=mult['inset.monash_boundaries']
+        # Leave enough common right-hand x support for the vertical text in
+        # a one-bin extreme class.  This is presentation whitespace beyond
+        # the last occupied bin, never a multiplicity boundary change.
+        active_bounds=[b for activity in presentation['activity_boundaries']
+                       if activity['activity_id']==context.activity_id and
+                       activity['tune']==reference_tune
+                       for b in activity['classes'] if not b['empty']]
+        if active_bounds:
+            if any(b['low'] is None or b['high'] is None for b in active_bounds):
+                raise ValueError('typed P1 class interval lacks an edge')
+            domain_high=max(b['high']+1 for b in active_bounds)
+            rightmost_low=max(b['low'] for b in active_bounds)
+            top['x_range'][1]=min(float(domain_high),max(top['x_range'][1],
+                                                        float(rightmost_low+4)))
+        monash_series=[series for series in top['series']
+                       if series['tune']==reference_tune]
+        lower=mult.get('lower.ratio')
+        if lower:
+            lower['x_range']=top['x_range'][:]
+            lower['guides'][0].update(x_low=top['x_range'][0],x_high=top['x_range'][1])
+        occupied = getattr(context, "p1_occupied_support", None)
+        inset.update(reuse={'panel':'upper.distribution','tune':reference_tune},
+            status=top['status'],
+            x_range=[1.0,top['x_range'][1]],
+            y_range=top['y_range'][:],log_y=True, log_x=True,
+            margins=[.18,.065,.25,.20],
+            uncertainty_display='CENTERS_ONLY',
+            x_title='Multiplicity N_{ch}')
+        if (occupied is not None and
+                occupied['high'] <= occupied['positive_low']):
+            inset['status']='NOT_MATERIALIZED'
+            inset['note']='No positive occupied N_{ch} bin in partial sample'
+        for activity in presentation['activity_boundaries']:
+            if activity['activity_id'] != context.activity_id:
+                continue
+            tune=activity['tune']
+            if tune != reference_tune:
+                continue
+            for b in activity['classes']:
+                class_id = b['id']
+                if class_id not in order or b['empty']:
+                    continue
+                if b['low'] is None:
+                    raise ValueError('nonempty numerical class boundary lacks low edge')
+                if b['high'] is None or b['high'] < b['low']:
+                    raise ValueError('typed P1 class interval has no inclusive upper edge')
+                boundary = float(b['low'])
+                guide = {
+                    'id':'class.'+tune+'.'+class_id,
+                    'x_low':boundary,'x_high':float(b['high']+1),
+                    'color':styles[tune]['color'],
+                    'line_style':class_styles[class_id],
+                }
+                class_definition=labels[class_id]+'%'
+                inset['guides'].append({
+                    'id':guide['id'],
+                    'x_low':guide['x_low'],'x_high':guide['x_high'],
+                    'y_low':inset['y_range'][0],
+                    'y_high':inset['y_range'][1],
+                    'color':'#666666','line_style':2,
+                    'label':class_definition})
+    if mult:
+        inset['note']=''
+        inset['ticks']=[]
+        inset_values=[point['y'] for series in monash_series for point in series['points']
+                      if point['state']=='DRAW' and point['display_x'] is not None
+                      and inset['x_range'][0]<=point['display_x']<=inset['x_range'][1]
+                      and point['y']>0]
+        if inset_values:
+            low=max(min(inset_values)*.5,1e-300)
+            inset['y_range']=[low,max(max(inset_values)*3.,low*10.)]
+        for guide in inset['guides']:
+            guide['y_low']=inset['y_range'][0]
+            guide['y_high']=inset['y_range'][1]
+    pages.extend(focused_extreme_pages(
+        pages, context, config['layout']['axis_padding_fraction']))
+    maximum=config['layout']['maximum_panels_per_page']
+    if maximum < 6:
+        paginated=[]
+        for page in pages:
+            panels=page['panels']; count=(len(panels)+maximum-1)//maximum
+            for index in range(count):
+                part=dict(page, page_index=index+1, page_count=count,
+                          filename=canonical_page_name(page['role'],index+1,count),
+                          panels=panels[index*maximum:(index+1)*maximum])
+                for pi,panel in enumerate(part['panels']):
+                    panel['geometry']=[pi/len(part['panels']),0.,(pi+1)/len(part['panels']),.90]
+                paginated.append(part)
+        pages=paginated
+    if getattr(context, 'cold', False) and 'spectra.signed_heavy' in assigned:
+        pages.extend(g9_drawing_pages(
+            context, assigned['spectra.signed_heavy'], config,
+            header, base_information, presentation['species_labels']))
+    join_ratio_pads(pages)
+    if getattr(context, 'cold', False):
+        apply_cold_page_style(pages,context)
+    return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}
+
+def g9_drawing_pages(context, rows, config, header, information, labels):
+    """Lay out saved signed-species spectra; every number comes from S rows."""
+    information, ratio_title, absolute_title = g9_science_caption(
+        context.g9_science, context.reference_tune, context.numerics_schema)
+    axes = {axis['id']: axis for axis in context.axes}
+    tunes = context.tunes
+    reference = context.reference_tune
+    styles = {style['id']: style for style in config['style_identities']['tunes']}
+    pattern_digest = sha_bytes(canonical(
+        config['style_identities']['class_line_patterns']).encode('ascii'))
+    pages = []
+    seen = set()
+    for item in context.g9_pages:
+        pdg, axis_id = item['pdg'], item['axis_id']
+        if (not isinstance(pdg, int) or axis_id not in axes or
+                (pdg, axis_id) in seen):
+            raise ValueError('G9 signed-species/axis page domain differs')
+        seen.add((pdg, axis_id))
+        axis = axes[axis_id]
+        members = [row for row in rows if row['associate_pdg'] == str(pdg)
+                   and row['axis'] == axis_id]
+        if not members and not partial_numerics(context):
+            raise ValueError('complete numerical G9 page has no points')
+        regular_edges = [float.fromhex(edge) for edge in axis['edges']]
+        if len(regular_edges) < 2:
+            raise ValueError('G9 numerical axis has no regular support')
+        drawn_support = [(float(row['bin_low']), float(row['bin_high']))
+                         for row in members
+                         if row['flow'] == 'REGULAR' and row['value'] and
+                         float(row['value']) != 0 and row['bin_low'] and
+                         row['bin_high']]
+        if drawn_support:
+            x_low = min(low for low, _ in drawn_support)
+            x_high = max(high for _, high in drawn_support)
+        else:
+            x_low, x_high = regular_edges[0], regular_edges[-1]
+        if x_low >= x_high:
+            raise ValueError('G9 display axis is reversed')
+        variable = axis['variable'].rsplit('_', 1)[-1]
+        no_floor_pt = (variable == 'pt' and
+                       context.numerics_schema ==
+                       'hadronization_projection_result_v4')
+        log_x = variable == 'pt' and not no_floor_pt
+        if no_floor_pt:
+            if regular_edges[0] != 0. or regular_edges[1] != .5:
+                raise ValueError('G9 no-floor first pT bin support differs')
+            x_low = 0.
+            x_high = max(x_high, regular_edges[1])
+        if log_x:
+            # The authenticated pT axis can span several orders of magnitude.
+            # A positive center keeps the first regular bin visible; only its
+            # drawn left edge is clipped by the renderer at the frame edge.
+            positive_centers = [(low + high) / 2 for low, high in drawn_support
+                                if (low + high) / 2 > 0]
+            if not positive_centers:
+                positive_centers = [(low + high) / 2
+                                    for low, high in zip(regular_edges,
+                                                         regular_edges[1:])
+                                    if (low + high) / 2 > 0]
+            x_low = min(positive_centers)
+        x_title = ({'pt':'p_{T}', 'eta':'#eta', 'phi':'#varphi'}.get(
+            variable, variable) +
+            (' (' + axis['units'] + ')' if axis['units'] else ''))
+        filename = 'G9_{}_{}.pdf'.format(pdg, axis_id)
+        page = {
+            'role':'spectra.signed_heavy', 'family':'kinematics',
+            'page_index':1, 'page_count':1, 'filename':filename,
+            'text_pixels':config['layout']['text_pixel_size'],
+            'title':'G9 '+{'521':'B^{+}',
+                          '5122':'#Lambda_{b}^{0}'}.get(
+                              str(pdg), labels.get(str(pdg),
+                                                   'PDG '+str(pdg)))+' '+x_title,
+            'information':information,
+            'scientific_header':header,
+            'style_header':'class_patterns_sha256='+pattern_digest,
+            'header_bottom':.99, 'width':1100, 'height':1000,
+            'panels':[],
+        }
+        for ratio in (False, True):
+            selected = [row for row in members
+                        if bool(row['reference_tune']) == ratio]
+            units = {row['units'] for row in selected if row['units']}
+            if len(units) > 1:
+                raise ValueError('G9 panel has incompatible saved ordinate units')
+            y_unit = next(iter(units), '')
+            groups = {}
+            for row in selected:
+                groups.setdefault(row['tune'], []).append(row)
+            series = []
+            for tune in tunes:
+                if tune not in groups:
+                    continue
+                points = []
+                for row in groups[tune]:
+                    values = _render_numbers(row)
+                    flow = row['flow']
+                    low, high = values['bin_low'], values['bin_high']
+                    x = ((low + high) / 2 if low is not None and
+                         high is not None and low < high else None)
+                    state = ('FLOW_BIN' if flow != 'REGULAR' else
+                             'EMPTY_SUPPORT' if x is None else
+                             'MISSING_VALUE' if values['value'] is None else
+                             'DRAW')
+                    points.append({
+                        'semantic_id':row['semantic_id'],
+                        'bin':int(row['bin_index']) if row['bin_index'] else -1,
+                        'scientific_x':x, 'display_x':x, 'x':x,
+                        'y':values['value'], 'error':values['finite_mc_error'],
+                        'bin_low':low, 'bin_high':high,
+                        'support_low':low, 'support_high':high,
+                        'class_id':row['class_id'],
+                        'value_status':row['value_status'],
+                        'uncertainty_status':row['uncertainty_status'],
+                        'reasons':row['reasons'], 'state':state,
+                    })
+                points.sort(key=lambda point:(point['x'] is None,
+                                               point['x'] or 0,
+                                               point['semantic_id']))
+                style = styles[tune]
+                series.append({
+                    'key':'G9|{}|{}|{}|{}'.format(pdg,axis_id,
+                                                 'ratio' if ratio else 'absolute',
+                                                 tune),
+                    'identity':{'pdg':pdg, 'axis':axis_id, 'tune':tune,
+                                'ratio':ratio},
+                    'tune':tune, 'class_id':'', 'color':style['color'],
+                    'marker':style['marker'], 'line_style':1,
+                    'emphasis':'NORMAL',
+                    'label':tune, 'legend_label':'' if ratio else tune,
+                    'draw_mode':'histogram', 'points':points,
+                })
+            valid = [point for item in series for point in item['points']
+                     if point['state'] == 'DRAW' and point['y'] is not None]
+            y_values = [value for point in valid
+                        for value in (point['y'],
+                                      point['y']-(point['error'] or 0),
+                                      point['y']+(point['error'] or 0))]
+            if ratio:
+                y_values.append(1.)
+            log_y = not ratio and variable == 'pt' and bool(valid) and all(
+                value > 0 for value in y_values)
+            y_range = _padded_range(y_values,
+                                    config['layout']['axis_padding_fraction'],
+                                    log_y)
+            flow_count = sum(row['flow'] != 'REGULAR' for row in selected)
+            missing_count = sum(point['state'] == 'MISSING_VALUE'
+                                for item in series for point in item['points'])
+            note = ('flow bins retained: '+str(flow_count) if flow_count else '')
+            if axis_id == 'pt':
+                note += ('; ' if note else '')+(
+                    'p_{T}<0 rejected; high overflow counted' if no_floor_pt else
+                    'p_{T} under/overflow in denominator')
+            else:
+                note += ('; ' if note else '')+'no '+axis_id+' flow bins'
+            if missing_count:
+                note += ('; ' if note else '')+'missing bins: '+str(missing_count)
+            if any(point['state'] == 'DRAW' and point['error'] is None
+                   for item in series for point in item['points']):
+                note += ('; ' if note else '')+'? = withheld SE'
+            panel = {
+                'id':'g9.ratio' if ratio else 'g9.absolute',
+                'status':'AVAILABLE' if valid else 'NOT_MATERIALIZED',
+                'log_y':log_y, 'log_x':log_x,
+                'geometry':[0.,.02,1.,.30] if ratio else [0.,.31,1.,.97],
+                'x_range':[x_low,x_high], 'y_range':y_range,
+                'title':'',
+                'x_title':x_title if ratio else '',
+                'y_title':ratio_title if ratio else absolute_title,
+                'note':'' if not ratio else note, 'series':series,
+                'uncertainty_display':'STANDARD',
+                'guides':([{'id':'unity','x_low':x_low,'x_high':x_high,
+                            'y_low':1.,'y_high':1.,'color':'#777777',
+                            'line_style':2,'label':''}] if ratio else []),
+                'ticks':[],
+                'margins':[.16,.04,.28,.08] if ratio else [.16,.04,.06,.16],
+                'legend':[.53,.69,.95,.87] if ratio else
+                         [.53,.86,.95,.98], 'reuse':None,
+            }
+            page['panels'].append(panel)
+        pages.append(page)
+    return pages
+
+def drawing_payload(plan):
+    lines = [[DRAWING_SCHEMA,plan["request_id"]]]
+    for p in plan["pages"]:
+        lines.append(["PAGE",p["filename"],p["role"],p["page_index"],p["page_count"],p["text_pixels"],
+                      p["information"],p["title"],p["width"],p["height"],p["header_bottom"],
+                      p["scientific_header"],p["style_header"]])
+        for a in p["panels"]:
+            prefix = [p["filename"],a["id"]]
+            lines.append(["PANEL"]+prefix+[a["status"],int(a["log_y"])]+a["x_range"]+a["y_range"]+a["geometry"]+
+                         [a["title"],a["x_title"],a["y_title"],a["note"]]+a["margins"]+a["legend"]+[int(a["log_x"]),a["uncertainty_display"]])
+            for s in a["series"]:
+                lines.append(["SERIES"]+prefix+[s["key"],s["tune"],s["class_id"] or "-",s["color"],s["marker"],
+                                                s["line_style"],s["label"],s["draw_mode"],s["legend_label"],s["emphasis"]])
+                for q in s["points"]:
+                    lines.append(["POINT"]+prefix+[s["key"],q["semantic_id"],
+                        q["bin"],q["scientific_x"],q["display_x"],q["y"],
+                        q["error"],q["bin_low"],q["bin_high"],
+                        q["support_low"],q["support_high"],
+                        q["class_id"] or "-",q["value_status"],
+                        q["uncertainty_status"],q["state"],q["reasons"] or "-"])
+            for g in a["guides"]:
+                lines.append(["GUIDE"]+prefix+[g["id"],g["x_low"],g["x_high"],g["y_low"],g["y_high"],g["color"],g["line_style"],g["label"]])
+            for t in a["ticks"]:
+                lines.append(["TICK"]+prefix+[t["x"],t["label"]])
+            if a["reuse"]:
+                lines.append(["REUSE"]+prefix+[a["reuse"]["panel"],a["reuse"]["tune"]])
+    lines.append(["END"])
+    def token(value):
+        if value is None: return "-"
+        if type(value) is float:
+            if not math.isfinite(value): raise ValueError("nonfinite drawing number")
+            return value.hex()
+        value = str(value)
+        if any(c in value for c in "\t\r\n"): raise ValueError("drawing text contains a delimiter")
+        return value
+    return ("\n".join("\t".join(token(v) for v in line) for line in lines)+"\n").encode("ascii")
+
+def normalized_drawing_record(payload):
+    """Canonicalize numbers reconstructed by C++, never just echo input bytes."""
+    numeric = {"PAGE":[10], "PANEL":list(range(5,13))+list(range(17,25)),
+               "POINT":list(range(6,14)), "GUIDE":list(range(4,8)), "TICK":[3]}
+    lines=[]
+    for line in payload.decode("ascii").splitlines():
+        fields=line.split("\t")
+        for i in numeric.get(fields[0],[]):
+            if fields[i]!="-":
+                v=float.fromhex(fields[i])
+                if not math.isfinite(v): raise ValueError("nonfinite consumed drawing record")
+                fields[i]=v.hex()
+        lines.append("\t".join(fields))
+    return ("\n".join(lines)+"\n").encode("ascii")
+
+def verify_canvas_archive(binary, environment, directory, record_payload,
+                          work_dir):
+    with tempfile.TemporaryDirectory(prefix="canvas-verify-",
+                                     dir=str(work_dir)) as temporary:
+        record = Path(temporary) / "drawing-record.tsv"
+        write_payload(record, record_payload)
+        completed = subprocess.run(
+            [str(binary), "verify", str(directory), str(record)],
+            env=environment, text=True, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+    if (completed.returncode or completed.stdout.strip() or
+            completed.stderr.strip()):
+        raise ValueError("ROOT canvas reopen verification failed: {}".format(
+            completed.stderr.strip() or completed.stdout.strip()))
+
+def canonical_root_pdf(payload, filename):
+    """Normalize ROOT's single-page classic PDF without touching drawing streams.
+
+    ROOT uses an A4 MediaBox even for a canvas-sized CropBox. Make both physical
+    bounds agree, remove private staging paths and timestamps, and rebuild the
+    classic cross-reference table from its authenticated object boundaries.
+    Unexpected PDF framing is refused rather than guessed.
+    """
+    ending = re.search(rb"startxref\s+(\d+)\s+%%EOF\s*$", payload)
+    if not ending:
+        raise ValueError("ROOT PDF classic framing differs")
+    offset = int(ending.group(1))
+    table = payload[offset:].splitlines()
+    if table[0] != b"xref" or not re.fullmatch(rb"0 \d+", table[1]):
+        raise ValueError("ROOT PDF xref framing differs")
+    count = int(table[1].split()[1])
+    entries = table[2:2+count]
+    if len(entries) != count or entries[0].split() != [b"0000000000", b"65535", b"f"]:
+        raise ValueError("ROOT PDF xref count differs")
+    positions = []
+    for object_id, entry in enumerate(entries[1:], 1):
+        if not re.fullmatch(rb"\d{10} 00000 n ?", entry):
+            raise ValueError("ROOT PDF object reference differs")
+        positions.append((int(entry.split()[0]), object_id))
+    positions.sort()
+    output = bytearray(payload[:positions[0][0]])
+    rewritten = {}; page_count = 0; info_count = 0
+    for index, (start, object_id) in enumerate(positions):
+        end = positions[index+1][0] if index+1 < len(positions) else offset
+        obj = payload[start:end]
+        if not obj.startswith((str(object_id)+" 0 obj\n").encode("ascii")):
+            raise ValueError("ROOT PDF object offset differs")
+        if re.search(rb"/Type /Page\s", obj):
+            crop = re.search(rb"/CropBox (\[[^\]]+\])", obj)
+            if crop is None:
+                raise ValueError("ROOT PDF canvas bounds missing")
+            obj, changed = re.subn(rb"/MediaBox \[[^\]]+\]", b"/MediaBox "+crop.group(1), obj)
+            if changed != 1:
+                raise ValueError("ROOT PDF media bounds differ")
+            page_count += 1
+        if b"/CreationDate " in obj:
+            obj = re.sub(rb"/(CreationDate|ModDate) \([^\n]*\)",
+                         rb"/\1 (D:20000101000000Z)", obj)
+            obj, changed = re.subn(rb"/Title \([^\n]*\)",
+                                  b"/Title ("+filename.encode("ascii")+b")", obj)
+            if changed != 1:
+                raise ValueError("ROOT PDF document title differs")
+            info_count += 1
+        rewritten[object_id] = len(output); output.extend(obj)
+    if page_count != 1 or info_count != 1:
+        raise ValueError("ROOT PDF single-page metadata differs")
+    new_offset = len(output)
+    output.extend(("xref\n0 {}\n0000000000 65535 f \n".format(count)).encode("ascii"))
+    for object_id in range(1, count):
+        output.extend(("{:010d} 00000 n \n".format(rewritten[object_id])).encode("ascii"))
+    trailer = b"\n".join(table[2+count:])
+    trailer = re.sub(rb"startxref\s+\d+", b"startxref\n"+str(new_offset).encode("ascii"), trailer)
+    output.extend(trailer+b"\n")
+    return bytes(output)
+
+
+def canonical_root_archive(path, drawing_record):
+    """Normalize ROOT container metadata, leaving every object byte intact.
+
+    TFile writes a UUID and wall-clock TDatime into the file header, root
+    directory, and TKey headers/index. The parser accepts only the small-file
+    layout used here. The fresh-process canvas verifier runs afterwards.
+    """
+    data = path.read_bytes()
+    if len(data) < 128 or data[:4] != b"root":
+        raise ValueError("canvas archive is not a ROOT small file")
+    version = int.from_bytes(data[4:8], "big")
+    begin = int.from_bytes(data[8:12], "big")
+    end = int.from_bytes(data[12:16], "big")
+    if version >= 1_000_000 or begin < 64 or begin >= end or end != len(data):
+        raise ValueError("canvas ROOT header layout differs")
+    raw_uuid = data[47:63]
+    if len(raw_uuid) != 16 or data.count(raw_uuid) != 2:
+        raise ValueError("canvas ROOT UUID layout differs")
+    dates = set()
+    key_count = 0
+    offset = begin
+    while offset < end:
+        if offset + 14 > end:
+            raise ValueError("canvas ROOT key header is truncated")
+        size = int.from_bytes(data[offset:offset+4], "big", signed=True)
+        if size <= 0 or offset + size > end:
+            raise ValueError("canvas ROOT key map differs")
+        key_version = int.from_bytes(data[offset+4:offset+6], "big")
+        if key_version not in (4, 1004):
+            raise ValueError("canvas ROOT key version differs")
+        dates.add(data[offset+10:offset+14])
+        offset += size
+        key_count += 1
+    if offset != end or key_count < 3 or len(dates) > key_count:
+        raise ValueError("canvas ROOT key map is incomplete")
+    canonical_date = (339869696).to_bytes(4, "big")  # 2000-01-01 UTC
+    canonical_uuid = hashlib.sha256(drawing_record).digest()[:16]
+    result = data.replace(raw_uuid, canonical_uuid)
+    for date in dates:
+        if result.count(date) < 1:
+            raise ValueError("canvas ROOT datetime index differs")
+        result = result.replace(date, canonical_date)
+    temporary = path.with_name(path.name + ".canonicalizing")
+    try:
+        with temporary.open("xb") as stream:
+            stream.write(result)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        fsync_directory(path.parent)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+def promote_render_pages(pages, output):
+    """Publish regular PDF pages first and the verified manifest last."""
+    output.mkdir(mode=0o700)
+    try:
+        for path in sorted(list(pages.glob("*.pdf")) +
+                           [pages / CANVAS_NAME, pages / RECORD_NAME]):
+            regular_file(path, "staged render page")
+            os.link(str(path), str(output / path.name))
+        fsync_directory(output)
+        if os.environ.get("HADRONIZATION_RENDER_FAIL_BEFORE_MANIFEST") == "1":
+            raise ValueError("injected interruption before render manifest commit")
+        os.link(str(pages / "manifest.json"), str(output / "manifest.json"))
+        fsync_directory(output)
+        fsync_directory(output.parent)
+    except Exception:
+        if output.exists():
+            shutil.rmtree(str(output))
+            fsync_directory(output.parent)
+        raise
+
+def cold_numerics(args):
+    """Read S's frozen ROOT once, with trusted physical and logical digests."""
+    path = ROOT / "pipeline/reduce/archive.py"
+    if not path.is_file():
+        raise ValueError("S cold reader has not been integrated into this tree")
+    # Launching run.py by filename puts pipeline/plot, rather than the repository
+    # root, on sys.path. Import the verified sibling as a package so its v4
+    # reader can resolve its own relative imports on a cold CLI invocation.
+    sys.path.insert(0, str(ROOT))
+    try:
+        archive = importlib.import_module("pipeline.reduce.archive")
+    finally:
+        sys.path.pop(0)
+    if Path(archive.__file__).resolve() != path.resolve():
+        raise ValueError("S cold reader resolves outside this source tree")
+    if not hasattr(archive, "read"):
+        raise ValueError("S cold reader lacks read(source, work, hashes)")
+    args.work_dir.mkdir(parents=True, exist_ok=True)
+    return archive.read(args.numerics_root, args.work_dir,
+                        args.expected_root_sha256,
+                        args.expected_value_sha256)
+
+def cold_render_manifest(args, payload, config, config_sha, build, plan,
+                         pages, record):
     files = []
-    for family in DEFAULT_FAMILIES:
-        name = family + ".csv"
-        payload = payloads[name]
-        files.append({"name": name, "family": family, "bytes": len(payload),
-                      "sha256": sha_bytes(payload)})
-    tex = payloads["sample_counts.tex"]
-    files.append({"name": "sample_counts.tex", "family": "sample_counts",
-                  "bytes": len(tex), "sha256": sha_bytes(tex)})
-    manifest = {
-        "schema": EXPORT_SCHEMA,
-        "version": "1.0.0",
-        "state": "COMPLETE",
-        "compact_input": {
-            "root_sha256": root_sha,
-            "root_bytes": receipt["storage_identity"]["root_bytes"],
-            "scientific_content_digest": scientific,
-            "scientific_identity_sha256": receipt[
-                "scientific_identity_sha256"],
-            "publication_state": receipt["state"],
-            "scale": compact_scale(receipt),
-        },
-        "analysis_request_sha256": receipt["scientific_identity"][
-            "analysis_request_sha256"],
+    for path in sorted(list(pages.glob("*.pdf")) +
+                       [pages / CANVAS_NAME, pages / RECORD_NAME]):
+        regular_file(path, "cold plot artifact")
+        files.append({"name": path.name, "bytes": path.stat().st_size,
+                      "sha256": sha_file(path)})
+    return {
+        "schema": "hadronization_cold_plot_render_v1",
+        "version": "1.0.0", "state": "COMPLETE",
+        "campaign_state": payload["campaign_state"],
+        "presentation_state": (
+            "TEST_ONLY_SYNTHETIC" if synthetic_provenance(payload) else
+            "TEST_ONLY_PARTIAL" if payload["campaign_state"] == "PARTIAL_SAMPLE"
+            else "FULL_ACCEPTED_CAMPAIGN"),
+        "numerics_root": {
+            "logical_name": "numerics.root",
+            "payload_schema": payload["schema"],
+            "sha256": args.expected_root_sha256,
+            "bytes": args.numerics_root.stat().st_size,
+            "value_sha256": args.expected_value_sha256,
+            "science_content_sha256": payload["science_content_sha256"]},
         "plot_config_sha256": config_sha,
-        "resolved_selection": selection,
-        "request_id": request_id,
-        "roles": roles,
-        "layout_primitives": layout_primitives(config, selection, selected),
+        "presentation_scope": {
+            "correlation_view": config['layout']['correlation_view'],
+            "paper_trigger_pdgs": config['presets']['paper_default'][
+                'trigger_pdgs'],
+            "baryon_meson_trigger_pdgs": config['presets'][
+                'paper_default']['baryon_meson_trigger_pdgs'],
+            "exclusion_counts": {reason:sum(item[1] == reason for item in
+                plan['exclusions']) for reason in sorted({item[1] for item in
+                plan['exclusions']})}},
+        "target_campaign": ({"logical_name":"data/campaign.json",
+                            "sha256":TARGET_CAMPAIGN_SHA256,
+                            "bytes":TARGET_CAMPAIGN.stat().st_size}
+                            if synthetic_provenance(payload) or
+                            payload['request_echo']['sources']['campaign_id']==
+                            'HF_RUN3_V1' else None),
+        "source_sha256": {
+            name:sha_file(ROOT / name) for name in ((
+                "pipeline/plot/run.py", "pipeline/plot/render.cpp",
+                "pipeline/reduce/archive.py", "pipeline/reduce/archive.cpp",
+                "pipeline/reduce/projection.py") +
+                (("pipeline/reduce/archive_v4.py",) if payload["schema"] ==
+                 "hadronization_projection_result_v4" else ()))},
+        "renderer_build": build,
+        "drawing_record_sha256": sha_bytes(record),
+        "roles": [item["role_id"] for item in
+                  payload["request_echo"]["scope"]["roles"]],
         "files": files,
         "filesystem_set": sorted([item["name"] for item in files] +
                                  ["manifest.json"]),
-        "numerical_exports_sha256": sha_bytes(canonical(
-            [item["sha256"] for item in files]).encode("ascii")),
-        "build": build,
     }
-    return {"manifest": manifest, "payloads": payloads}
 
-
-def verify_export_transport(directory, expected_request_id=None):
-    """Verify only the self-consistency and transport integrity of an export."""
-    reject_symlink_components(directory, "plot export directory")
-    if directory.is_symlink() or not directory.is_dir():
-        raise ValueError("plot export is not a regular directory")
-    manifest_path = directory / "manifest.json"
-    manifest = json_file(manifest_path, "plot export manifest")
-    exact_keys(manifest, {"schema", "version", "state", "compact_input",
-                          "analysis_request_sha256", "plot_config_sha256",
-                          "resolved_selection", "request_id", "roles",
-                          "layout_primitives", "files", "filesystem_set",
-                          "numerical_exports_sha256", "build"},
-               "plot export manifest")
-    if (manifest["schema"] != EXPORT_SCHEMA or manifest["version"] != "1.0.0" or
-            manifest["state"] != "COMPLETE"):
-        raise ValueError("plot export manifest state/schema differs")
-    if expected_request_id is not None and manifest["request_id"] != expected_request_id:
-        raise ValueError("plot export request identity differs")
-    request_identity = {
-        "schema": REQUEST_SCHEMA,
-        "analysis_request_sha256": manifest["analysis_request_sha256"],
-        "compact_scientific_content_digest": manifest["compact_input"][
-            "scientific_content_digest"],
-        "plot_config_sha256": manifest["plot_config_sha256"],
-        "resolved_selection": manifest["resolved_selection"],
-        "families": list(DEFAULT_FAMILIES),
-    }
-    if manifest["request_id"] != sha_bytes(canonical(request_identity).encode(
-            "ascii")):
-        raise ValueError("plot export request digest differs")
-    exact_keys(manifest["resolved_selection"], {
-        "schema", "preset", "include", "exclude", "eligibility",
-        "eligibility_status", "family_tokens", "signed_pdgs", "pair_ids",
-        "noncentral_signed_pdgs", "selection_id"},
-        "plot resolved selection")
-    selection = dict(manifest["resolved_selection"])
-    selection_id = selection.pop("selection_id")
-    if selection_id != sha_bytes(canonical(selection).encode("ascii")):
-        raise ValueError("plot resolved-selection digest differs")
-    compact_input = manifest["compact_input"]
-    exact_keys(compact_input, {"root_sha256", "root_bytes",
-                               "scientific_content_digest",
-                               "scientific_identity_sha256",
-                               "publication_state", "scale"},
-               "plot compact input")
-    for key in ("root_sha256", "scientific_content_digest",
-                "scientific_identity_sha256"):
-        value = compact_input[key]
-        if (not isinstance(value, str) or len(value) != 64 or
-                any(character not in "0123456789abcdef" for character in value)):
-            raise ValueError("plot compact input digest differs: {}".format(key))
-    if (type(compact_input["root_bytes"]) is not int or
-            compact_input["root_bytes"] < 1 or
-            compact_input["publication_state"] != "PUBLICATION_ELIGIBLE"):
-        raise ValueError("plot compact input state/size differs")
-    expected = set(manifest["filesystem_set"])
-    observed = {path.name for path in directory.iterdir()
-                if path.is_file() and not path.is_symlink()}
-    if any(path.is_symlink() or not path.is_file() for path in directory.iterdir()):
-        raise ValueError("plot export contains a non-regular entry")
-    if observed != expected or expected != {"manifest.json"}.union(
-            item["name"] for item in manifest["files"]):
-        raise ValueError("plot export exact filesystem set differs")
-    payload_hashes = []
-    expected_payload_names = {family + ".csv" for family in DEFAULT_FAMILIES}
-    expected_payload_names.add("sample_counts.tex")
-    if {item.get("name") for item in manifest["files"]} != expected_payload_names:
-        raise ValueError("plot export payload set differs")
-    semantic_ids = set()
-    natural_keys = set()
-    natural_fields = (
-        "family", "quantity", "tune", "reference_tune", "profile",
-        "activity_id", "class_id", "trigger_pdg", "associate_pdg",
-        "reference_pdg", "component", "axis", "bin_index")
-    for item in manifest["files"]:
-        exact_keys(item, {"name", "family", "bytes", "sha256"},
-                   "plot export file")
-        path = directory / item["name"]
-        if path.stat().st_size != item["bytes"] or sha_file(path) != item["sha256"]:
-            raise ValueError("plot export file identity differs: {}".format(item["name"]))
-        payload_hashes.append(item["sha256"])
-        if path.suffix == ".csv":
-            with path.open(newline="", encoding="ascii") as handle:
-                reader = csv.DictReader(handle)
-                if reader.fieldnames != list(CSV_FIELDS):
-                    raise ValueError("plot CSV schema differs: {}".format(item["name"]))
-                file_semantic_ids = []
-                for row in reader:
-                    if (row["request_id"] != manifest["request_id"] or
-                            row["compact_root_sha256"] !=
-                            manifest["compact_input"]["root_sha256"] or
-                            row["compact_scientific_content_digest"] !=
-                            manifest["compact_input"]["scientific_content_digest"] or
-                            row["family"] != item["family"] or
-                            not row["semantic_id"] or
-                            row["semantic_id"] in semantic_ids):
-                        raise ValueError("plot CSV row identity differs: {}".format(
-                            item["name"]))
-                    semantic_ids.add(row["semantic_id"])
-                    file_semantic_ids.append(row["semantic_id"])
-                    natural = tuple(row[name] for name in natural_fields)
-                    if natural in natural_keys:
-                        raise ValueError("plot CSV natural key collides: {}".format(
-                            item["name"]))
-                    natural_keys.add(natural)
-                if file_semantic_ids != sorted(file_semantic_ids):
-                    raise ValueError("plot CSV deterministic row order differs: {}".format(
-                        item["name"]))
-    if manifest["numerical_exports_sha256"] != sha_bytes(
-            canonical(payload_hashes).encode("ascii")):
-        raise ValueError("plot numerical export digest differs")
-    roles = manifest["roles"]
-    if (not isinstance(roles, list) or
-            any(not isinstance(role, dict) or
-                set(role) != {"id", "family", "selector"} for role in roles) or
-            len({role["id"] for role in roles}) != len(roles)):
-        raise ValueError("plot manifest role collision")
-    page_roles = [page["output_role"] for page in
-                  manifest["layout_primitives"]["pages"]]
-    if len(page_roles) != len(set(page_roles)):
-        raise ValueError("plot manifest page-role collision")
-    scale = manifest["compact_input"]["scale"]
-    if (sum(item["successful_events"] for item in scale["tunes"]) !=
-            scale["successful_events_total"] or
-            sum(item["sources"] for item in scale["tunes"]) !=
-            scale["sources_total"] or
-            any([item["block"] for item in tune["blocks"]] != scale["block_ids"]
-                for tune in scale["tunes"])):
-        raise ValueError("plot compact scale accounting differs")
-    build = manifest["build"]
-    exact_keys(build, {"schema", "build_id", "build_identity",
-                       "binary_sha256"}, "plot export build receipt")
-    exact_keys(build["build_identity"], {
-        "schema", "source_sha256", "projection_sha256", "statistics_sha256",
-        "compiler", "root", "flags"}, "plot export build identity")
-    if (build["schema"] != "hadronization_plot_engine_build_receipt_v1" or
-            build["build_identity"]["schema"] !=
-            "hadronization_plot_engine_build_v1" or
-            build["build_id"] != sha_bytes(canonical(
-                build["build_identity"]).encode("ascii"))):
-        raise ValueError("plot export build provenance differs")
-    for key in ("source_sha256", "projection_sha256", "statistics_sha256"):
-        value = build["build_identity"][key]
-        if (not isinstance(value, str) or len(value) != 64 or
-                any(character not in "0123456789abcdef" for character in value)):
-            raise ValueError("plot export build source digest differs")
-    binary_sha = build["binary_sha256"]
-    if (not isinstance(binary_sha, str) or len(binary_sha) != 64 or
-            any(character not in "0123456789abcdef" for character in binary_sha)):
-        raise ValueError("plot export build binary digest differs")
-    return manifest
-
-
-def verify_export_scientific(directory, expected_model):
-    """Verify exact equality with a model freshly derived from compact inputs."""
-    expected = expected_model["manifest"]
-    manifest = verify_export_transport(directory, expected["request_id"])
-    if manifest["resolved_selection"] != expected["resolved_selection"]:
-        raise ValueError("plot export resolved selection differs from current inputs")
-    for name, payload in expected_model["payloads"].items():
-        if (directory / name).read_bytes() != payload:
-            raise ValueError("plot export scientific payload differs: {}".format(name))
-    if manifest != expected:
-        differing = sorted(key for key in expected
-                           if manifest.get(key) != expected[key])
-        raise ValueError("plot export scientific manifest differs: {}".format(
-            differing))
-    return manifest
-
-
-def resolved_arguments(args, config, domains):
-    if args.plot_request:
-        reject_symlink_components(args.plot_request, "plot request")
-    file_request = checked_plot_request(args.plot_request.resolve()) \
-        if args.plot_request else None
-    if file_request is not None and args.preset is not None and \
-            args.preset != file_request["preset"]:
-        raise ValueError("CLI and plot-request presets contradict")
-    preset = args.preset or (file_request["preset"] if file_request else
-                             "paper_default")
-    includes = ((file_request["include"] if file_request else []) +
-                list(args.include))
-    excludes = ((file_request["exclude"] if file_request else []) +
-                list(args.exclude))
-    return resolve_selection(config, domains, preset, includes, excludes)
-
-
-def prepare(args, families, manifest_selection=None):
-    for path, label in ((args.root, "compact ROOT"),
-                        (args.receipt, "compact receipt"),
-                        (args.analysis, "analysis request")):
-        reject_symlink_components(path, label)
-    root_path = args.root.resolve()
-    receipt_path = args.receipt.resolve()
-    analysis_path = args.analysis.resolve()
-    work_root = args.work_dir.resolve(strict=False)
-    work_root.mkdir(parents=True, exist_ok=True)
-    receipt, summary = admit(root_path, receipt_path, analysis_path, work_root)
-    config, config_sha = checked_plot_config(args.plot_config)
-    domains = receipt["scientific_identity"]["compact_domains"]
-    if manifest_selection is None:
-        selection = resolved_arguments(args, config, domains)
-    else:
-        selection = resolve_selection(
-            config, domains, manifest_selection["preset"],
-            manifest_selection["include"], manifest_selection["exclude"])
-    request_identity = {
-        "schema": REQUEST_SCHEMA,
-        "analysis_request_sha256": receipt["scientific_identity"][
-            "analysis_request_sha256"],
-        "compact_scientific_content_digest": receipt["scientific_identity"][
-            "scientific_content_digest"],
-        "plot_config_sha256": config_sha,
-        "resolved_selection": selection,
-        "families": list(families),
-    }
-    request_id = sha_bytes(canonical(request_identity).encode("ascii"))
-    roles, rows, build = engine_rows(root_path, receipt, families, work_root)
-    return (root_path, receipt, summary, config, config_sha, selection,
-            request_id, roles, rows, build)
-
-
-def export(args):
-    prepared = prepare(args, DEFAULT_FAMILIES)
-    (root_path, receipt, unused_summary, config, config_sha, selection,
-     request_id, roles, rows, build) = prepared
-    del unused_summary
-    reject_symlink_components(args.output, "plot export output")
+def render_cold(args):
+    """Render persisted coordinates/errors/statuses; never run projection."""
+    reject_symlink_components(args.numerics_root, "numerics ROOT")
+    reject_symlink_components(args.output, "cold plot output")
     output = args.output.resolve(strict=False)
     if output.exists():
-        if args.reuse:
-            transport = verify_export_transport(output, request_id)
-            expected = expected_export_model(
-                root_path, receipt, config, config_sha, selection, roles, rows,
-                transport["build"])
-            manifest = verify_export_scientific(output, expected)
-            print("RESOLVED_SELECTION {}".format(canonical(selection)))
-            print("REUSED OUTPUT={} REQUEST_ID={}".format(output,
-                                                           manifest["request_id"]))
-            return
-        raise ValueError("no-overwrite plot export collision: {}".format(output))
+        raise ValueError("no-overwrite cold plot output collision")
+    config, config_sha = checked_plot_config(args.plot_config)
+    payload = cold_numerics(args)
+    context, adapter = cold_drawing_inputs(payload, config)
+    plan = drawing_plan(context, adapter, config)
+    record_expected = drawing_payload(plan)
     output.parent.mkdir(parents=True, exist_ok=True)
-    stage = Path(tempfile.mkdtemp(prefix="." + output.name + ".plot-stage-",
-                                 dir=str(output.parent)))
-    created_output = False
+    environment, binary, build = build_renderer(args.work_dir)
+    stage = Path(tempfile.mkdtemp(prefix="." + output.name + ".cold-stage-",
+                                  dir=str(output.parent)))
     try:
-        expected = expected_export_model(
-            root_path, receipt, config, config_sha, selection, roles, rows, build)
-        manifest = expected["manifest"]
-        if manifest["request_id"] != request_id:
-            raise ValueError("fresh export request identity differs")
-        files = manifest["files"]
-        for name, payload in expected["payloads"].items():
-            write_payload(stage / name, payload)
-        atomic_json(stage / "manifest.json", manifest)
-        verify_export_scientific(stage, expected)
-        output.mkdir(mode=0o700)
-        created_output = True
-        for item in files:
-            os.link(str(stage / item["name"]), str(output / item["name"]))
-        fsync_directory(output)
-        if os.environ.get("HADRONIZATION_PLOT_FAIL_BEFORE_MANIFEST") == "1":
-            raise ValueError("injected interruption before plot manifest commit")
-        os.link(str(stage / "manifest.json"), str(output / "manifest.json"))
-        fsync_directory(output)
-        fsync_directory(output.parent)
-        verify_export_scientific(output, expected)
-        created_output = False
-        print("RESOLVED_SELECTION {}".format(canonical(selection)))
-        print("EXPORTED OUTPUT={} REQUEST_ID={} FILES={}".format(
-            output, request_id, len(files) + 1))
+        pages = stage / "pages"
+        plan_path = stage / "drawing-plan.tsv"
+        record_path = stage / "drawing-record.tsv"
+        write_payload(plan_path, record_expected)
+        completed = subprocess.run([str(binary), str(plan_path), str(pages),
+                                    str(record_path)], env=environment,
+                                   capture_output=True, text=True)
+        if completed.returncode or completed.stdout.strip() or completed.stderr.strip():
+            raise ValueError("cold ROOT drawing failed: " +
+                             (completed.stderr or completed.stdout))
+        record = record_path.read_bytes()
+        if normalized_drawing_record(record) != record_expected:
+            raise ValueError("cold ROOT drawing record differs")
+        canonical_root_archive(pages / CANVAS_NAME, record)
+        verify_canvas_archive(binary, environment, pages, record, args.work_dir)
+        for page in pages.glob("*.pdf"):
+            page.write_bytes(canonical_root_pdf(page.read_bytes(), page.name))
+        write_payload(pages / RECORD_NAME, deterministic_gzip(record))
+        manifest = cold_render_manifest(args, payload, config, config_sha,
+                                        build, plan, pages, record)
+        atomic_json(pages / "manifest.json", manifest)
+        promote_render_pages(pages, output)
+        verify_cold_files(args, payload, config_sha, build, plan,
+                          output, binary, environment)
     finally:
-        if created_output and output.exists():
-            shutil.rmtree(str(output))
-            fsync_directory(output.parent)
-        if stage.exists():
-            shutil.rmtree(str(stage))
+        shutil.rmtree(stage)
+    print("COLD_RENDERED OUTPUT={} ROOT_SHA256={} PAGES={}".format(
+        output, args.expected_root_sha256,
+        sum(name.endswith(".pdf") for name in manifest["filesystem_set"])))
 
+def verify_cold_files(args, payload, config_sha, build, plan, output,
+                      binary, environment):
+    expected_manifest = getattr(args, "expected_manifest_sha256", None)
+    if expected_manifest is not None and (
+            re.fullmatch(r"[0-9a-f]{64}", expected_manifest) is None or
+            sha_file(output / "manifest.json") != expected_manifest):
+        raise ValueError("trusted cold render manifest SHA256 differs")
+    manifest = json_file(output / "manifest.json", "cold plot manifest")
+    verify_flat_fileset(output, manifest["filesystem_set"], "cold plots")
+    expected_pages = {page["filename"] for page in plan["pages"]}
+    actual_pages = {path.name for path in output.glob("*.pdf")}
+    if expected_pages != actual_pages:
+        raise ValueError("cold page role/fileset differs")
+    record = gzip.decompress((output / RECORD_NAME).read_bytes())
+    if (manifest["drawing_record_sha256"] != sha_bytes(record) or
+            normalized_drawing_record(record) != drawing_payload(plan)):
+        raise ValueError("cold drawing record/science binding differs")
+    original_build = manifest.get("renderer_build")
+    if (not isinstance(original_build, dict) or
+            set(original_build) != {"schema", "build_id",
+                                    "build_identity", "binary_sha256"} or
+            original_build.get("schema") !=
+                "hadronization_plot_renderer_build_receipt_v1" or
+            original_build.get("build_identity") != build["build_identity"] or
+            original_build.get("build_id") != build["build_id"] or
+            original_build.get("build_id") != sha_bytes(canonical(
+                original_build["build_identity"]).encode("ascii")) or
+            not isinstance(original_build.get("binary_sha256"), str) or
+            re.fullmatch(r"[0-9a-f]{64}",
+                         original_build["binary_sha256"]) is None):
+        raise ValueError("original renderer execution receipt differs")
+    config, _ = checked_plot_config(args.plot_config)
+    expected = cold_render_manifest(args, payload, config, config_sha,
+                                    original_build, plan, output, record)
+    if manifest != expected:
+        raise ValueError("cold plot manifest/byte identity differs")
+    verify_canvas_archive(binary, environment, output, record, args.work_dir)
+    return manifest
 
-def query(args):
-    prepared = prepare(args, (args.family,))
-    (unused_root, receipt, unused_summary, unused_config, unused_config_sha,
-     selection, request_id, roles, rows, unused_build) = prepared
-    del (unused_root, unused_summary, unused_config, unused_config_sha, unused_build)
-    domains = receipt["scientific_identity"]["compact_domains"]
-    if args.tune and args.tune not in domains["tune_dictionary"]:
-        raise ValueError("requested tune is NOT_MATERIALIZED")
-    if args.profile and args.profile not in {item["id"] for item in
-                                             domains["profiles"]}:
-        raise ValueError("requested profile is NOT_MATERIALIZED")
-    if args.activity and args.activity not in {item["id"] for item in
-                                                domains["activities"]}:
-        raise ValueError("requested activity is NOT_MATERIALIZED")
-    if args.class_id is not None and args.class_id not in {
-            item["id"] for item in domains["class_dictionary"]}:
-        raise ValueError("requested class is NOT_MATERIALIZED")
-    if args.bin is not None and args.bin < 0:
-        raise ValueError("requested bin is outside its domain")
-    if args.pair:
-        try:
-            trigger, associate = map(int, args.pair.split(":"))
-        except ValueError as error:
-            raise ValueError("--pair must be TRIGGER_PDG:ASSOCIATE_PDG") from error
-        pair = next((item for item in receipt["scientific_identity"][
-            "compact_domains"]["pair_query_dictionary"]
-                     if item["trigger_pdg"] == trigger and
-                     item["associate_pdg"] == associate), None)
-        if pair is None:
-            raise ValueError("requested ordered pair is NOT_MATERIALIZED")
-        if not pair["central_eligible"] and not args.diagnostic_pdg:
-            raise ValueError("noncentral pair requires --diagnostic-pdg")
-        selection = dict(selection)
-        selection["signed_pdgs"] = sorted({associate, -associate})
-        selection["pair_ids"] = [pair["id"]]
-        selection["noncentral_signed_pdgs"] = (
-            [] if pair["central_eligible"] else sorted({associate, -associate}))
-        selection["eligibility_status"] = "EXACT_PDG_DIAGNOSTIC"
-        selection["selection_id"] = sha_bytes(canonical({
-            key: value for key, value in selection.items()
-            if key != "selection_id"}).encode("ascii"))
-    query_identity = {
-        "base_request_id": request_id,
-        "family": args.family,
-        "tune": args.tune,
-        "profile": args.profile,
-        "activity": args.activity,
-        "class_id": args.class_id,
-        "pair": args.pair,
-        "diagnostic_pdg": args.diagnostic_pdg,
-        "bin": args.bin,
-        "resolved_selection": selection,
+def record_verifier_attestation(args, manifest, build, output):
+    """Keep this execution separate from the immutable render receipt."""
+    receipt = {
+        "schema":"hadronization_plot_verifier_attestation_v1",
+        "render_manifest_sha256":sha_file(output / "manifest.json"),
+        "render_binary_sha256":manifest["renderer_build"]["binary_sha256"],
+        "verifier_build_id":build["build_id"],
+        "verifier_binary_sha256":build["binary_sha256"],
+        "verified_fileset":manifest["filesystem_set"],
     }
-    request_id = sha_bytes(canonical(query_identity).encode("ascii"))
-    selected = filter_rows(rows, selection, args)
-    payload = {
-        "schema": "hadronization_plot_query_result_v1",
-        "request_id": request_id,
-        "compact_scientific_content_digest": receipt["scientific_identity"][
-            "scientific_content_digest"],
-        "compact_scale": compact_scale(receipt),
-        "resolved_selection": selection,
-        "roles": roles,
-        "query_status": "AVAILABLE" if selected else "NOT_MATERIALIZED",
-        "row_count": len(selected),
-        "rows": [public_row(
-            row, request_id, receipt["storage_identity"]["root_sha256"],
-            receipt["scientific_identity"]["scientific_content_digest"],
-            selection["eligibility_status"]) for row in selected],
-    }
-    print(json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=True))
+    attestation_dir = args.work_dir / "verifier-attestations"
+    reject_symlink_components(attestation_dir, "plot verifier attestations")
+    attestation_dir.mkdir(parents=True, exist_ok=True)
+    path = attestation_dir / (receipt["render_manifest_sha256"][:20] + "-" +
+                              receipt["verifier_binary_sha256"][:20] +
+                              ".json")
+    if path.exists():
+        if json_file(path, "plot verifier attestation") != receipt:
+            raise ValueError("verifier attestation collision")
+    else:
+        atomic_json(path, receipt)
+    return {"path":str(path), **receipt}
 
 
-def verify(args):
-    reject_symlink_components(args.output, "plot export output")
+def review_packet_coverage(plan, context, config):
+    """Require visible S-owned test points in every approved paper panel."""
+    failures = []
+    if context.campaign_state != 'PARTIAL_SAMPLE':
+        failures.append('review packet must be a test-only partial sample')
+    if not getattr(context, 'synthetic', False):
+        failures.append('review packet lacks S synthetic provenance')
+    expected_tunes = [item['id'] for item in
+                      config['style_identities']['tunes']]
+    if (len(context.tunes) != len(expected_tunes) or
+            set(context.tunes) != set(expected_tunes)):
+        failures.append('three-tune style coverage differs')
+    paper = config['presets']['paper_default']
+    charm_meson = str(paper['trigger_pdgs'][0])
+    compared = [tune for tune in expected_tunes
+                if tune != context.reference_tune]
+    page_map = {page['filename']:page for page in plan['pages']}
+    if len(page_map) != len(plan['pages']):
+        failures.append('review page filename collision')
+    roles = ('multiplicity.composite', 'correlations.charm',
+             'correlations.beauty', 'balancing.integrated.charm',
+             'balancing.activity.charm', 'balancing.integrated.beauty',
+             'balancing.activity.beauty',
+             'balancing.baryon_meson.activity')
+    def page(name):
+        value = page_map.get(name)
+        if value is None:
+            failures.append(name+' absent')
+        elif value['scientific_header'] not in (
+                'TEST_ONLY / SYNTHETIC',
+                'TEST_ONLY / SYNTHETIC / PARTIAL_SAMPLE'):
+            failures.append(name+' lacks synthetic marking')
+        return value
+    def panel(owner, name):
+        if owner is None:
+            return None
+        value = next((item for item in owner['panels']
+                      if item['id'] == name), None)
+        if value is None:
+            failures.append(owner['filename']+'/'+name+' absent')
+        return value
+    def visible(item, tune=None, class_id=None):
+        if item is None:
+            return []
+        return [point for series in item['series']
+                if tune is None or series['tune'] == tune
+                for point in series['points']
+                if (class_id is None or point['class_id'] == class_id) and
+                point['state'] == 'DRAW'
+                and point['y'] is not None]
+    def require_points(owner, name, tunes, minimum):
+        item = panel(owner, name)
+        for tune in tunes:
+            if len(visible(item, tune)) < minimum:
+                failures.append((owner['filename'] if owner else '?')+
+                                '/'+name+'/'+tune+' lacks visible points')
+        return item
+    canonical = {role:page(canonical_page_name(role)) for role in roles}
+    p1 = canonical['multiplicity.composite']
+    main = require_points(p1, 'upper.distribution', expected_tunes, 5)
+    require_points(p1, 'lower.ratio', compared, 5)
+    inset = panel(p1, 'inset.monash_boundaries')
+    class_count = len([item for item in context.classes
+                       if not item['integrated']])
+    if class_count != 11:
+        failures.append('current eleven-class review domain differs')
+    guides = ([] if main is None else [guide for guide in main['guides']
+              if guide['id'].startswith('class.')])
+    inset_guides = ([] if inset is None else [guide for guide in inset['guides']
+                    if guide['id'].startswith('class.')])
+    if (guides or len(inset_guides) != class_count or
+            len({guide['x_low'] for guide in inset_guides}) <
+            min(8, class_count)):
+        failures.append('P1 current class boundaries absent/overlap')
+    if len([guide for guide in inset_guides
+            if guide['label'].endswith('%') and
+            '[' not in guide['label'] and
+            guide['x_high'] > guide['x_low']]) != class_count:
+        failures.append('P1 inset percentile slice labels incomplete')
+    lower=panel(p1,'lower.ratio')
+    if (main is not None and inset is not None and lower is not None and
+            (main['x_range'] != lower['x_range'] or
+             inset['x_range'] != [1., main['x_range'][1]] or
+             main['x_range'][0] != 0 or not inset['log_x'] or
+             not inset['log_y'])):
+        failures.append('P1 full-support aligned x domain differs')
+    if main is not None and len([point for point in visible(main,
+                                            context.reference_tune)
+                                 if point['y'] > 0 and
+                                 point['support_low'] is not None and
+                                 point['support_low'] > 0]) < 5:
+        failures.append('P1 reference positive occupied support invisible')
+    for role, triggers in (
+            ('correlations.charm', (charm_meson,'4122')),
+            ('correlations.beauty', ('521','5122'))):
+        owner = canonical[role]
+        for trigger in triggers:
+            if config['layout']['correlation_view'] == 'monash_pair_sign':
+                for suffix, associate in (('identified', str(-int(trigger))),
+                                          ('inclusive', '')):
+                    item = require_points(owner,
+                        'correlation.teaching.'+trigger+'.'+suffix,
+                        [context.reference_tune], 6)
+                    if item is None:
+                        continue
+                    identities = {(s['identity']['component'],
+                                   s['identity']['associate_pdg'])
+                                  for s in item['series']}
+                    if identities != {('OS', associate), ('SS', associate)}:
+                        failures.append(role+'/'+trigger+'/'+suffix+
+                                        ' signed pair identity differs')
+            elif config['layout']['correlation_view'] == 'monash_balance':
+                upper = require_points(owner,
+                    'correlation.balance.'+trigger+'.upper',
+                    [context.reference_tune], 6)
+                lower = require_points(owner,
+                    'correlation.balance.'+trigger+'.lower',
+                    [context.reference_tune], 3)
+                if upper is not None and {series['identity']['component']
+                        for series in upper['series']} != {'OS','SS'}:
+                    failures.append(role+'/'+trigger+' OS/SS overlay differs')
+                if lower is not None and {series['identity']['component']
+                        for series in lower['series']} != {'OS_MINUS_SS'}:
+                    failures.append(role+'/'+trigger+' subtraction differs')
+            else:
+                for component in ('OS', 'SS', 'OS_MINUS_SS'):
+                    require_points(owner,
+                        'correlation.main.'+trigger+'.'+component,
+                        expected_tunes, 3)
+                    require_points(owner,
+                        'correlation.compare.'+trigger+'.'+component,
+                        compared, 3)
+    for role, triggers, categories in (
+            ('balancing.integrated.charm', (charm_meson,'4122'), 3),
+            ('balancing.integrated.beauty', ('521','5122'), 5)):
+        owner = canonical[role]
+        for trigger in triggers:
+            upper = require_points(owner, 'upper.'+trigger,
+                                   expected_tunes, categories-1)
+            require_points(owner, 'lower.'+trigger,
+                           compared, categories-1)
+            if upper is not None and len({point['scientific_x']
+                    for point in visible(upper)}) != categories:
+                failures.append(role+'/'+trigger+' category coverage differs')
+    class_ids = [str(item['id']) for item in context.classes
+                 if not item['integrated']]
+    for role, triggers in (
+            ('balancing.activity.charm', (charm_meson,'4122')),
+            ('balancing.activity.beauty', ('521','5122'))):
+        owner = canonical[role]
+        for trigger in triggers:
+            upper = require_points(owner, 'upper.'+trigger,
+                                   expected_tunes, len(class_ids))
+            require_points(owner, 'lower.'+trigger,
+                           compared, len(class_ids))
+            for class_id in class_ids:
+                if not visible(upper, class_id=class_id):
+                    failures.append(role+'/'+trigger+'/class '+class_id+
+                                    ' lacks visible point')
+        focused = page('supplemental.'+role+'.extremes.pdf')
+        for trigger in triggers:
+            upper = panel(focused, 'upper.'+trigger)
+            lower = panel(focused, 'lower.'+trigger)
+            for class_id in selected_extreme_class_ids(context.classes):
+                if not visible(upper, class_id=class_id):
+                    failures.append(role+' focused '+trigger+'/class '+
+                                    class_id+' lacks visible point')
+                for tune in compared:
+                    if not visible(lower, tune=tune, class_id=class_id):
+                        failures.append(role+' focused '+trigger+'/'+tune+
+                                        '/class '+class_id+
+                                        ' comparison lacks visible point')
+    p8 = canonical['balancing.baryon_meson.activity']
+    for sector,trigger in (('charm',charm_meson),('beauty','521')):
+        upper = require_points(p8,'upper.'+sector+'.'+trigger,
+                               expected_tunes,len(class_ids))
+        lower = require_points(p8,'lower.'+sector+'.'+trigger,
+                               compared,len(class_ids)-1)
+        if lower is not None:
+            for tune in compared:
+                points = [point for series in lower['series']
+                          if series['tune'] == tune
+                          for point in series['points']]
+                if len([point for point in points
+                        if point['state']=='DRAW']) < len(class_ids) and not any(
+                        point['state']=='MISSING_VALUE' for point in points):
+                    failures.append('P8 '+sector+'/'+tune+
+                                    ' incomplete comparison lacks missing status')
+        for class_id in class_ids:
+            if not visible(upper,class_id=class_id):
+                failures.append('P8 '+sector+'/class '+class_id+
+                                ' lacks visible point')
+    g9 = [owner for owner in plan['pages']
+          if owner['role'] == 'spectra.signed_heavy']
+    if len(g9) < 2:
+        failures.append('representative G9 signed-species pages absent')
+    for owner in g9:
+        require_points(owner,'g9.absolute',expected_tunes,3)
+        require_points(owner,'g9.ratio',compared,3)
+    for owner in canonical.values():
+        if owner is not None:
+            issue=review_uncertainty_presentation(owner)
+            if issue:
+                failures.append(issue)
+    all_points = [point for owner in plan['pages']
+                  for item in owner['panels']
+                  for series in item['series']
+                  for point in series['points']]
+    if not any(point['state'] == 'DRAW' and point['y'] < 0
+               for point in all_points):
+        failures.append('negative synthetic center absent')
+    if not any(point['state'] == 'DRAW' and point['y'] == 0
+               for point in all_points):
+        failures.append('zero synthetic center absent')
+    if not any(point['state'] == 'MISSING_VALUE'
+               for point in all_points):
+        failures.append('missing synthetic point/status rail absent')
+    if not any(point['state'] == 'DRAW' and point['error'] is None
+               for point in all_points):
+        failures.append('withheld synthetic uncertainty case absent')
+    if failures:
+        raise ValueError('synthetic review coverage failed ({}): {}'.format(
+            len(failures), '; '.join(failures[:16])))
+    return {'schema':'hadronization_test_only_review_coverage_v1',
+            'canonical_paper_pages':len(roles),
+            'supplemental_extreme_pages':2,
+            'representative_g9_pages':len(g9),
+            'visible_points':sum(len(visible(item)) for owner in plan['pages']
+                                  for item in owner['panels']),
+            'p1_class_boundary_guides':len(inset_guides)}
+
+
+def verify_review_packet(args):
+    config, config_sha = checked_plot_config(args.plot_config)
+    payload = cold_numerics(args)
+    context, adapter = cold_drawing_inputs(payload, config)
+    plan = drawing_plan(context, adapter, config)
+    environment, binary, build = build_renderer(args.work_dir)
     output = args.output.resolve()
-    transport = verify_export_transport(output)
-    prepared = prepare(args, DEFAULT_FAMILIES,
-                       transport["resolved_selection"])
-    (root_path, receipt, unused_summary, config, config_sha, selection,
-     unused_request_id, roles, rows, unused_build) = prepared
-    del unused_summary, unused_request_id, unused_build
-    if selection != transport["resolved_selection"]:
-        raise ValueError("plot export resolved selection is not derivable")
-    expected = expected_export_model(
-        root_path, receipt, config, config_sha, selection, roles, rows,
-        transport["build"])
-    manifest = verify_export_scientific(output, expected)
-    print("VERIFIED OUTPUT={} REQUEST_ID={} FILES={}".format(
-        output, manifest["request_id"],
-        len(manifest["filesystem_set"])))
+    manifest = verify_cold_files(args, payload, config_sha, build, plan,
+                                 output, binary, environment)
+    coverage = review_packet_coverage(plan, context, config)
+    print(canonical({**coverage, "verifier_attestation":
+                     record_verifier_attestation(args, manifest, build,
+                                                 output)}))
 
+def verify_render_cold(args):
+    config, config_sha = checked_plot_config(args.plot_config)
+    payload = cold_numerics(args)
+    context, adapter = cold_drawing_inputs(payload, config)
+    plan = drawing_plan(context, adapter, config)
+    environment, binary, build = build_renderer(args.work_dir)
+    manifest = verify_cold_files(args, payload, config_sha, build, plan,
+                                 args.output.resolve(), binary, environment)
+    attestation = record_verifier_attestation(
+        args, manifest, build, args.output.resolve())
+    print("COLD_RENDER_VERIFIED OUTPUT={} FILES={}".format(
+        args.output.resolve(), len(manifest["filesystem_set"])))
+    print(canonical(attestation))
 
-def authoritative_inputs(parser):
-    parser.add_argument("--root", type=Path, required=True,
-                        help="verified compact plot-source ROOT")
-    parser.add_argument("--receipt", type=Path, required=True,
-                        help="matching compact reduction receipt")
-    parser.add_argument("--analysis", type=Path, default=ANALYSIS)
+def cold_inputs(parser):
+    parser.add_argument("--numerics-root", type=Path, required=True)
+    parser.add_argument("--expected-root-sha256", required=True)
+    parser.add_argument("--expected-value-sha256", required=True)
+    parser.add_argument("--expected-manifest-sha256",
+        help="optional independent manifest pin for verification")
     parser.add_argument("--plot-config", type=Path, default=PLOT_CONFIG)
-    parser.add_argument("--work-dir", type=Path, default=ROOT / "data/work/plot")
-
-
-def common(parser):
-    authoritative_inputs(parser)
-    parser.add_argument("--plot-request", type=Path)
-    parser.add_argument("--preset", choices=("paper_default", "all_central",
-                                              "all_registered"))
-    parser.add_argument("--include", action="append", default=[])
-    parser.add_argument("--exclude", action="append", default=[])
-
+    parser.add_argument("--work-dir", type=Path, required=True,
+                        help="private renderer/archive build scratch")
+    parser.add_argument("--output", type=Path, required=True)
 
 def parser():
-    top = argparse.ArgumentParser(prog="hadronization plot", description=__doc__)
+    top = argparse.ArgumentParser(
+        prog="hadronization plot",
+        description="Draw and verify a frozen S numerical ROOT without projection")
     sub = top.add_subparsers(dest="command", required=True)
-    query_parser = sub.add_parser("query", help="verify and query numerical projections")
-    common(query_parser)
-    query_parser.add_argument("--family", choices=QUERY_FAMILIES, required=True)
-    query_parser.add_argument("--tune")
-    query_parser.add_argument("--profile")
-    query_parser.add_argument("--activity")
-    query_parser.add_argument("--class-id", type=int)
-    query_parser.add_argument("--pair", help="exact TRIGGER_PDG:ASSOCIATE_PDG diagnostic")
-    query_parser.add_argument("--diagnostic-pdg", action="store_true")
-    query_parser.add_argument("--bin", type=int)
-    export_parser = sub.add_parser("export", help="write deterministic CSV/TeX exports")
-    common(export_parser)
-    export_parser.add_argument("--output", type=Path, required=True)
-    export_parser.add_argument("--reuse", action="store_true")
-    verify_parser = sub.add_parser(
-        "verify", help="scientifically verify an exact completed export set")
-    authoritative_inputs(verify_parser)
-    verify_parser.add_argument("--output", type=Path, required=True)
+    cold_render_parser = sub.add_parser(
+        "render-cold", help="draw S-verified numerics.root")
+    cold_inputs(cold_render_parser)
+    cold_verify_parser = sub.add_parser(
+        "verify-render-cold", help="reopen every ROOT canvas and verify bytes")
+    cold_inputs(cold_verify_parser)
+    review_parser = sub.add_parser(
+        "verify-review-packet",
+        help="require visible synthetic P1-P8 and representative G9 coverage")
+    cold_inputs(review_parser)
     return top
-
 
 def main():
     args = parser().parse_args()
     try:
-        if args.command == "query":
-            query(args)
-        elif args.command == "export":
-            export(args)
+        if args.command == "render-cold":
+            render_cold(args)
+        elif args.command == "verify-render-cold":
+            verify_render_cold(args)
         else:
-            verify(args)
+            verify_review_packet(args)
         return 0
     except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as error:
         print("ERROR: {}".format(error), file=sys.stderr)
         return 2
-
 
 if __name__ == "__main__":
     sys.exit(main())

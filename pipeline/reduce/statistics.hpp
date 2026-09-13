@@ -63,12 +63,53 @@ struct JackknifeResult {
   std::vector<std::vector<double>> complements;
   std::vector<double> leaveMean;
   std::vector<double> covariance;
+  // The diagonal is always available when uncertainty is valid. Dense
+  // covariance is an optional derived view; leaves are the primary factors.
+  std::vector<double> diagonalVariance;
   std::vector<double> standardError;
   std::vector<DenominatorAudit> denominatorAudits;
   std::vector<std::string> cancelledParentDiagnostics;
   std::size_t dimension = 0;
   std::size_t blocks = 0;
   int dof = 0;
+};
+
+struct ActivityAtom {
+  double measure = 0.0;
+  double numerator = 0.0;
+  double denominator = 0.0;
+};
+
+struct ActivityClassSpec {
+  bool integrated = false;
+  int lowPercent = 0;
+  int highPercent = 100;
+};
+
+struct ActivityClassBoundary {
+  int low = -1;
+  int high = -1;
+  bool empty = true;
+};
+
+struct ActivityThresholdAudit {
+  int percentile = -1;
+  int pooledThreshold = -1;
+  std::vector<double> belowMargins;
+  std::vector<double> throughMargins;
+  bool statisticallyResolved = false;
+};
+
+struct ReclassifiedRatioResult {
+  ActivityClassBoundary pooledBoundary;
+  std::vector<ActivityClassBoundary> deleteOneBoundaries;
+  double center = std::numeric_limits<double>::quiet_NaN();
+  std::vector<double> complements;
+  double leaveMean = std::numeric_limits<double>::quiet_NaN();
+  double variance = std::numeric_limits<double>::quiet_NaN();
+  std::string centerStatus = "UNDEFINED";
+  std::string uncertaintyStatus = "WITHHELD_UNCERTAINTY";
+  std::vector<std::string> reasons;
 };
 
 inline void AddReason(JackknifeResult& result, const std::string& reason) {
@@ -96,6 +137,209 @@ inline double Sum(const std::vector<double>& values) {
     total = next;
   }
   return total + correction;
+}
+
+inline int ActivityThreshold(const std::vector<double>& histogram,
+                             int percentile) {
+  if (percentile < 0 || percentile > 100 || histogram.empty() ||
+      !FiniteVector(histogram) ||
+      std::any_of(histogram.begin(), histogram.end(),
+                  [](double value) { return value < 0.0; })) {
+    throw std::invalid_argument("activity measure/percentile is invalid");
+  }
+  const double total = Sum(histogram);
+  if (!(total > 0.0)) throw std::domain_error("ACTIVITY_MEASURE_UNDEFINED");
+  const double target = (100.0 - percentile) / 100.0 * total;
+  double cumulative = 0.0;
+  for (std::size_t bin = 0; bin < histogram.size(); ++bin) {
+    cumulative += histogram[bin];
+    if (cumulative >= target) return static_cast<int>(bin);
+  }
+  return static_cast<int>(histogram.size() - 1);
+}
+
+inline ActivityClassBoundary ResolveActivityClass(
+    const std::vector<double>& histogram, const ActivityClassSpec& spec) {
+  if (spec.lowPercent < 0 || spec.highPercent > 100 ||
+      spec.lowPercent >= spec.highPercent || histogram.empty() ||
+      !FiniteVector(histogram) ||
+      std::any_of(histogram.begin(),histogram.end(),
+                  [](double value){return value < 0.0;})) {
+    throw std::invalid_argument("activity class interval is invalid");
+  }
+  if (!(Sum(histogram) > 0.0))
+    throw std::domain_error("ACTIVITY_MEASURE_UNDEFINED");
+  ActivityClassBoundary result;
+  if (spec.integrated) {
+    result.low = 0;
+    result.high = static_cast<int>(histogram.size() - 1);
+  } else {
+    result.low = spec.highPercent == 100 ? 0 :
+        ActivityThreshold(histogram, spec.highPercent) + 1;
+    result.high = spec.lowPercent == 0 ?
+        static_cast<int>(histogram.size() - 1) :
+        ActivityThreshold(histogram, spec.lowPercent);
+  }
+  result.empty = result.low > result.high;
+  if (!result.empty) {
+    std::vector<double> classMeasure(histogram.begin()+result.low,
+                                     histogram.begin()+result.high+1);
+    result.empty = !(Sum(classMeasure) > 0.0);
+  }
+  return result;
+}
+
+// The t9 test asks whether the pooled cumulative curve is distinguishable
+// from the target on both sides of the integer threshold. It is distinct from
+// delete-one boundary stability: all ten leaves can select the same bin while
+// the pooled threshold remains statistically unresolved.
+inline ActivityThresholdAudit AuditActivityThreshold(
+    const std::vector<std::vector<double>>& blockHistogram, int percentile,
+    const EstimatorPolicy& policy = {}) {
+  if (blockHistogram.size() != 10 || blockHistogram.front().empty())
+    throw std::invalid_argument("activity margin requires the K10 design");
+  const std::size_t bins = blockHistogram.front().size();
+  for (const auto& block : blockHistogram)
+    if (block.size() != bins || !FiniteVector(block))
+      throw std::invalid_argument("activity margin block domain differs");
+  std::vector<double> pooled;
+  pooled.reserve(bins);
+  for (std::size_t bin=0;bin<bins;++bin) {
+    std::vector<double> terms;
+    terms.reserve(10);
+    for (const auto& block:blockHistogram) terms.push_back(block[bin]);
+    pooled.push_back(Sum(terms));
+  }
+  ActivityThresholdAudit audit;
+  audit.percentile=percentile;
+  audit.pooledThreshold=ActivityThreshold(pooled,percentile);
+  if (percentile==0 || percentile==100) {
+    audit.statisticallyResolved=true;
+    return audit;
+  }
+  const double targetFraction=(100.0-percentile)/100.0;
+  for (const auto& block:blockHistogram) {
+    const double total=Sum(block);
+    const double below=Sum(std::vector<double>(
+        block.begin(),block.begin()+audit.pooledThreshold));
+    const double through=Sum(std::vector<double>(
+        block.begin(),block.begin()+audit.pooledThreshold+1));
+    audit.belowMargins.push_back(below-targetFraction*total);
+    audit.throughMargins.push_back(through-targetFraction*total);
+  }
+  const auto resolvedSide=[&](const std::vector<double>& margins, bool positive) {
+    const double pooledMargin=Sum(margins);
+    const double mean=pooledMargin/10.0;
+    std::vector<double> squares;
+    squares.reserve(10);
+    for (double margin:margins)
+      squares.push_back((margin-mean)*(margin-mean));
+    const double variance=10.0/9.0*Sum(squares);
+    return std::isfinite(variance) && variance>=0.0 &&
+        (positive?pooledMargin:-pooledMargin)>
+            policy.phaseAT9Quantile*std::sqrt(variance);
+  };
+  audit.statisticallyResolved=resolvedSide(audit.throughMargins,true) &&
+      resolvedSide(audit.belowMargins,false);
+  return audit;
+}
+
+// The activity coordinate is retained until each tune-local block omission is
+// evaluated. Reusing pooled class membership would change the estimator.
+inline ReclassifiedRatioResult ReclassifiedActivityRatio(
+    const std::vector<std::vector<ActivityAtom>>& blockAtoms,
+    const ActivityClassSpec& spec) {
+  ReclassifiedRatioResult result;
+  if (blockAtoms.empty() || blockAtoms.front().empty())
+    throw std::invalid_argument("activity block atoms are empty");
+  const std::size_t bins = blockAtoms.front().size();
+  for (const auto& block : blockAtoms) {
+    if (block.size() != bins) throw std::invalid_argument("activity bins differ");
+    for (const auto& atom : block) {
+      // Event weights may be signed. The pooled and each leave-one-out
+      // histogram, rather than each source block, must be nonnegative.
+      if (!std::isfinite(atom.measure) ||
+          !std::isfinite(atom.numerator) || !std::isfinite(atom.denominator))
+        throw std::invalid_argument("activity atom is nonfinite/negative measure");
+    }
+  }
+  const auto aggregate = [&](std::size_t omitted) {
+    std::vector<ActivityAtom> binsOut(bins);
+    for (std::size_t bin = 0; bin < bins; ++bin) {
+      std::vector<double> measure, numerator, denominator;
+      for (std::size_t block = 0; block < blockAtoms.size(); ++block) {
+        if (block == omitted) continue;
+        measure.push_back(blockAtoms[block][bin].measure);
+        numerator.push_back(blockAtoms[block][bin].numerator);
+        denominator.push_back(blockAtoms[block][bin].denominator);
+      }
+      binsOut[bin] = {Sum(measure),Sum(numerator),Sum(denominator)};
+    }
+    return binsOut;
+  };
+  const auto evaluate = [&](const std::vector<ActivityAtom>& atoms,
+                            ActivityClassBoundary& boundary) {
+    std::vector<double> measure;
+    measure.reserve(bins);
+    for (const auto& atom : atoms) measure.push_back(atom.measure);
+    boundary = ResolveActivityClass(measure,spec);
+    if (boundary.empty) return std::numeric_limits<double>::quiet_NaN();
+    std::vector<double> numerators,denominators;
+    for (int bin = boundary.low; bin <= boundary.high; ++bin) {
+      numerators.push_back(atoms[bin].numerator);
+      denominators.push_back(atoms[bin].denominator);
+    }
+    const double denominator = Sum(denominators);
+    return denominator == 0.0 ? std::numeric_limits<double>::quiet_NaN()
+                              : Sum(numerators) / denominator;
+  };
+  try {
+    result.center = evaluate(aggregate(blockAtoms.size()),result.pooledBoundary);
+  } catch (const std::domain_error&) {
+    return result;
+  }
+  if (!std::isfinite(result.center)) {
+    result.centerStatus = result.pooledBoundary.empty ? "EMPTY_CLASS" : "UNDEFINED";
+    return result;
+  }
+  result.centerStatus = "AVAILABLE";
+  if (blockAtoms.size() != 10) {
+    result.uncertaintyStatus = "INCOMPLETE_BLOCK_COVERAGE";
+    return result;
+  }
+  result.complements.reserve(10);
+  for (std::size_t omitted = 0; omitted < 10; ++omitted) {
+    ActivityClassBoundary boundary;
+    double leaf = std::numeric_limits<double>::quiet_NaN();
+    try {
+      leaf = evaluate(aggregate(omitted),boundary);
+    } catch (const std::domain_error&) {
+      // Undefined retained activity measure is a point-local refusal.
+    }
+    result.deleteOneBoundaries.push_back(boundary);
+    result.complements.push_back(leaf);
+  }
+  if (!FiniteVector(result.complements)) return result;
+  result.leaveMean = Sum(result.complements) / 10.0;
+  std::vector<double> terms;
+  for (double leaf : result.complements)
+    terms.push_back((leaf-result.leaveMean)*(leaf-result.leaveMean));
+  result.variance = 0.9 * Sum(terms);
+  if (std::any_of(result.deleteOneBoundaries.begin(),
+                  result.deleteOneBoundaries.end(),
+                  [&](const ActivityClassBoundary& leaf) {
+                    return leaf.low != result.pooledBoundary.low ||
+                           leaf.high != result.pooledBoundary.high ||
+                           leaf.empty != result.pooledBoundary.empty;
+                  })) {
+    result.reasons.push_back("CLASS_BOUNDARY_UNSTABLE");
+    // Correct deletion-specific leaves remain diagnostic. The accepted
+    // boundary policy withholds unconditional class uncertainty.
+    return result;
+  }
+  result.uncertaintyStatus = result.variance == 0.0 ?
+      "AVAILABLE_ZERO_DISPERSION" : "AVAILABLE";
+  return result;
 }
 
 inline double AccumulationErrorBound(double sumabs, std::uint64_t fills) {
@@ -212,7 +456,8 @@ inline JackknifeResult PooledDeleteOne(
     const EstimatorFunction& function,
     const std::vector<DenominatorSeries>& denominators = {},
     const EstimatorPolicy& policy = {},
-    const std::vector<std::string>& externalUncertaintyReasons = {}) {
+    const std::vector<std::string>& externalUncertaintyReasons = {},
+    bool materializeDense = true) {
   JackknifeResult result;
   result.blocks = blockVectors.size();
   result.dof = result.blocks == 0 ? 0 : static_cast<int>(result.blocks - 1);
@@ -364,28 +609,36 @@ inline JackknifeResult PooledDeleteOne(
     result.leaveMean[component] = Sum(column) /
                                   static_cast<double>(result.blocks);
   }
-  result.covariance.assign(outputDimension * outputDimension, 0.0);
+  if (materializeDense) {
+    if (outputDimension > std::numeric_limits<std::size_t>::max() / outputDimension)
+      throw std::overflow_error("dense covariance dimension overflows");
+    result.covariance.assign(outputDimension * outputDimension, 0.0);
+  }
+  result.diagonalVariance.assign(outputDimension, 0.0);
   const double factor = static_cast<double>(result.blocks - 1) /
                         static_cast<double>(result.blocks);
   for (std::size_t row = 0; row < outputDimension; ++row) {
-    for (std::size_t column = 0; column < outputDimension; ++column) {
+    for (std::size_t column = materializeDense ? 0 : row;
+         column < (materializeDense ? outputDimension : row + 1); ++column) {
       std::vector<double> terms;
       terms.reserve(result.blocks);
       for (const auto& value : result.complements) {
         terms.push_back(factor * (value[row] - result.leaveMean[row]) *
                         (value[column] - result.leaveMean[column]));
       }
-      result.covariance[row * outputDimension + column] = Sum(terms);
+      const double value = Sum(terms);
+      if (materializeDense) result.covariance[row * outputDimension + column] = value;
+      if (row == column) result.diagonalVariance[row] = value;
     }
   }
   result.standardError.resize(outputDimension);
   bool zeroDispersion = true;
   for (std::size_t component = 0; component < outputDimension; ++component) {
-    const double diagonal = result.covariance[
-        component * outputDimension + component];
+    const double diagonal = result.diagonalVariance[component];
     if (diagonal < 0.0 || !std::isfinite(diagonal)) {
       AddReason(result, "COVARIANCE_ARITHMETIC_FAILURE");
       result.covariance.clear();
+      result.diagonalVariance.clear();
       result.standardError.clear();
       return result;
     }

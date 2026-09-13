@@ -1,0 +1,30 @@
+{
+  "schema": "hadronization_root_query_layout_v1",
+  "compression": {"algorithm": "ZSTD", "level": 5},
+  "row_authority": "accepted lossless analyzed TTrees; binary64 values retained",
+  "source_identity": "source_id columns remain shard-local; ordered receipt binding/source_ids supplies the immutable local-to-global campaign map",
+  "dictionary": "one externally supplied campaign-wide signed-PDG census dictionary; identical body/digest in every shard; unknown observed PDGs refuse",
+  "sparse_exactness": "Phase-A inclusive and endpoint-inclusive historical-threshold rectangles on ordinary aligned edges",
+  "flows": "retain underflow and overflow; physical inclusive high endpoint occupies last regular bin",
+  "trees": {
+    "events": ["event_id", "weight", "a15_eta1", "a15_eta4", "process_code", "pthat", "hard_scale", "n_mpi"],
+    "heavy": ["event_id", "heavy_index", "pdg", "status", "final", "selected", "pair_eligible", "category", "nc", "ncbar", "nb", "nbbar", "qc", "qb", "pt", "eta", "rapidity", "phi"],
+    "triggers": ["event_id", "heavy_index", "sector", "rejection_mask"],
+    "pairs": ["event_id", "trigger_heavy_index", "associate_heavy_index", "sign", "dphi", "deta", "trigger_pt", "associate_pt", "a15_eta1", "a15_eta4", "associate_origin", "associate_category", "weight"],
+    "origins": ["event_id", "heavy_index", "sector", "origin", "resolution", "matched_hard", "rejected_hard", "depth"],
+    "closure": ["event_id", "trigger_heavy_index", "associate_heavy_index", "coefficient", "visible", "dense_category"],
+    "constituents": ["event_id", "heavy_index", "signed_flavour", "constituent_ordinal", "origin", "resolution", "matched_hard", "rejected_hard", "depth"],
+    "event_compatibility": ["event_id", "diagnostic_id", "cell_id", "value"],
+    "event_ranges": ["first_id", "count", "source_id"],
+    "source_blocks": ["source_id", "assignment_id", "block"],
+    "sources": ["source_id", "tune", "logical_id", "attempt", "events", "attempted_events", "sumw", "sumw2", "sumabsw"],
+    "source_counts": ["source_id", "family_id", "rows"]
+  },
+  "sparse": {
+    "activity": ["tune", "block", "a15_eta4", "a15_eta1"],
+    "triggers": ["tune", "block", "a15_eta4", "a15_eta1", "trigger_pdg", "trigger_pt", "trigger_eta"],
+    "pairs": ["tune", "block", "a15_eta4", "a15_eta1", "trigger_pdg", "associate_pdg", "sign", "trigger_pt", "associate_pt", "trigger_eta", "associate_eta", "dphi", "deta", "origin", "category"],
+    "kinematics": ["tune", "block", "a15_eta4", "a15_eta1", "pdg", "pt", "eta", "phi"],
+    "closure": ["tune", "block", "a15_eta4", "a15_eta1", "trigger_pdg", "associate_pdg", "trigger_pt", "associate_pt", "trigger_eta", "associate_eta", "dphi", "category"]
+  }
+}

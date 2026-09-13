@@ -15,6 +15,8 @@ import unittest
 from helpers import ROOT, sha256
 from test_analysis import MUTATOR, fixture_source
 
+LEGACY_ANALYSIS = ROOT / "tests/fixtures/analysis_v1_compact.json"
+LEGACY_ANALYSIS_SHA256 = "2d386155e65a35951dbd9545b9f157b2f643b20ab81282cc0a38d2fa3fb5e4f9"
 
 STATISTICS_HARNESS = r'''
 #include "statistics.hpp"
@@ -31,6 +33,25 @@ int main(int argc,char**argv){if(argc!=2)return 2;std::cout<<std::setprecision(1
  if(mode=="unstable"){const double values[]={10,-1,-1,-1,-1,-1,-1,-1,-1,-1};std::vector<std::vector<double>> z;HR::DenominatorSeries d{"D",{}, {},true,true};for(double v:values){z.push_back({1,v});d.blocks.push_back(v);}auto r=HR::PooledDeleteOne(z,[](const auto&v){return HR::Ratio(0,1,v);},{d});std::cout<<r.valueStatus<<' '<<r.uncertaintyStatus<<' '<<r.center[0]<<' '<<r.complements.size()<<' '<<r.covariance.size()<<'\n';return 0;}
  if(mode=="event"){const auto c=HR::EventInfluenceCovariance({1.0},1,1,{14.0},{6.0},3);std::cout<<c[0]<<'\n';return 0;}
  if(mode=="bounds"){const std::uint64_t finite=(std::uint64_t{1}<<52)-2,overflow=finite+1;std::cout<<HR::AccumulationErrorBound(7.0,0)<<' '<<HR::AccumulationErrorBound(7.0,1)<<' '<<HR::AccumulationErrorBound(7.0,2)<<' '<<HR::AccumulationErrorBound(7.0,finite)<<' '<<std::isinf(HR::AccumulationErrorBound(7.0,overflow))<<' '<<std::isinf(HR::AccumulationErrorBound(7.0,std::numeric_limits<std::uint64_t>::max()))<<'\n';return 0;}return 3;}
+'''
+
+
+ACTIVITY_ROUNDING_HARNESS = r'''
+#define main reducer_program_main
+#include "reduce.cpp"
+#undef main
+int main(){
+  ActivityCellValues cells;
+  for(std::uint32_t block=1;block<=10;++block){
+    cells[{1,150,block,0,0}]=9897400;
+    cells[{1,150,block,1,0}]=4350;
+    cells[{1,150,block,2,0}]=98250;
+  }
+  const auto receipts=ResolveActivityReceipts(
+      10,3,{{0,0,100,true},{1,0,1,false}},{{0,0,150}},cells,{{0,true}});
+  std::cout<<JsonDouble(std::fma(-0.99,10000000.0,9897400.0))<<'\n'
+           <<ActivityJson(receipts)<<'\n';
+}
 '''
 
 
@@ -87,6 +108,8 @@ int main(int argc,char**argv){if(argc!=2)return 2;TFile f(argv[1],"READ");if(f.I
 class ReductionContract(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        if sha256(LEGACY_ANALYSIS) != LEGACY_ANALYSIS_SHA256:
+            raise AssertionError("historical compact analysis fixture changed")
         sys.path.insert(0, str(ROOT / "pipeline/generate"))
         import runtime
         try:
@@ -243,10 +266,11 @@ class ReductionContract(unittest.TestCase):
 
     @classmethod
     def _compile(cls, source, source_path, output, include_generate=False,
-                 include_reduce=False, root=True):
+                 include_reduce=False, root=True, compiler_flags=None):
         source_path.write_text(source, encoding="utf-8")
-        command = [cls.environment["CXX"], "-std=c++17", "-O2", "-Wall",
-                   "-Wextra", "-Wpedantic", "-Werror", str(source_path)]
+        flags = (list(compiler_flags) if compiler_flags is not None else
+                 ["-std=c++17", "-O2", "-Wall", "-Wextra", "-Wpedantic", "-Werror"])
+        command = [cls.environment["CXX"]] + flags + [str(source_path)]
         if include_generate:
             command.append("-I" + str(ROOT / "pipeline/generate"))
         if include_reduce:
@@ -321,8 +345,13 @@ class ReductionContract(unittest.TestCase):
 
     @classmethod
     def _reduce(cls, *arguments, check=False, environment=None):
+        arguments = list(arguments)
+        if arguments and arguments[0] in ("run", "verify", "explain"):
+            arguments[0] = "legacy-" + arguments[0]
+        if "--analysis" not in arguments:
+            arguments.extend(("--analysis", str(LEGACY_ANALYSIS)))
         result = subprocess.run([str(ROOT / "hadronization"), "reduce"] +
-                                list(arguments), cwd=str(ROOT),
+                                arguments, cwd=str(ROOT),
                                 env=environment or cls.environment, text=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if check and result.returncode:
@@ -508,13 +537,13 @@ class ReductionContract(unittest.TestCase):
             "reduction_run_test", str(ROOT / "pipeline/reduce/run.py"))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        analysis, digest = module.checked_analysis(ROOT / "config/analysis.json")
+        analysis, digest = module.checked_analysis(LEGACY_ANALYSIS)
         self.assertEqual(analysis["version"], "1.0.0")
         states, pairs = module.state_registry(analysis)
         self.assertEqual(len(states), 50)
         self.assertEqual(len(pairs), 300)
         self.assertEqual({item["sign"] for item in pairs}, {-1, 1})
-        self.assertEqual(digest, sha256(ROOT / "config/analysis.json"))
+        self.assertEqual(digest, sha256(LEGACY_ANALYSIS))
         self.assertNotIn("analysis", json.loads(
             (ROOT / "config/study.json").read_text(encoding="utf-8")))
 
@@ -873,7 +902,7 @@ class ReductionContract(unittest.TestCase):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         analysis, analysis_sha = module.checked_analysis(
-            ROOT / "config/analysis.json")
+            LEGACY_ANALYSIS)
         metadata, embedded = module.stress_compact_payloads(
             analysis, analysis_sha)
         self.assertEqual(metadata["compact_domains"],
@@ -921,7 +950,7 @@ class ReductionContract(unittest.TestCase):
             "reduction_size_test", str(ROOT / "pipeline/reduce/run.py"))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        analysis = json.loads((ROOT / "config/analysis.json").read_text(
+        analysis = json.loads((LEGACY_ANALYSIS).read_text(
             encoding="utf-8"))
         analysis["compact_storage"]["maximum_complete_default_bytes"] = (
             self.compact_root.stat().st_size)
@@ -932,7 +961,7 @@ class ReductionContract(unittest.TestCase):
             "NONPUBLICATION_PARTIAL", self.compact_root, analysis)
 
     def test_configurable_three_class_request_changes_only_downstream_projection(self):
-        analysis = json.loads((ROOT / "config/analysis.json").read_text(encoding="utf-8"))
+        analysis = json.loads((LEGACY_ANALYSIS).read_text(encoding="utf-8"))
         analysis["percentile_intervals"] = [[0, 10], [10, 50], [50, 100]]
         path = self.base / "analysis-three.json"
         path.write_text(json.dumps(analysis, sort_keys=True), encoding="utf-8")
@@ -993,6 +1022,33 @@ class ReductionContract(unittest.TestCase):
         self.assertNotEqual(sha256(root), sha256(self.compact_root))
         self.assertIn("PUBLICATION_ELIGIBLE", result.stdout)
 
+    def test_activity_margins_preserve_separate_binary64_rounding(self):
+        spec = importlib.util.spec_from_file_location(
+            "reduction_rounding_test", str(ROOT / "pipeline/reduce/run.py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        unused_environment, unused_binary, build = module.build_reducer(self.reduce_work)
+        binary = self.base / "activity_rounding"
+        self._compile(ACTIVITY_ROUNDING_HARNESS,
+                      self.base / "activity_rounding.cpp", binary,
+                      include_generate=True, include_reduce=True,
+                      compiler_flags=build["build_identity"]["flags"])
+        result = subprocess.run([str(binary)], env=self.environment,
+                                text=True, capture_output=True, check=True)
+        fused, payload = result.stdout.splitlines()
+        # Each block has 10M events: the exact 99% target is 9,900,000.
+        self.assertNotEqual(float(fused), -2600.0)
+        activity = json.loads(payload)[0]
+        threshold = next(t for t in activity["thresholds"]
+                         if t["percentile"] == 1)
+        self.assertEqual(threshold["pooled"], 1)
+        self.assertEqual(threshold["complements"], [1] * 10)
+        self.assertEqual(threshold["below_margins"], [-2600] * 10)
+        self.assertEqual(threshold["through_margins"], [1750] * 10)
+        self.assertTrue(threshold["resolved"])
+        self.assertTrue(all(c["stable"] and c["resolved"]
+                            for c in activity["classes"]))
+
     def test_activity_receipt_is_rederived_from_projection_one_cells(self):
         def bound(payload):
             return payload.replace('"low":0,', '"low":1,', 1)
@@ -1039,7 +1095,7 @@ class ReductionContract(unittest.TestCase):
             "reduction_profile_test", str(ROOT / "pipeline/reduce/run.py"))
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        analysis = json.loads((ROOT / "config/analysis.json").read_text(encoding="utf-8"))
+        analysis = json.loads((LEGACY_ANALYSIS).read_text(encoding="utf-8"))
         analysis["profiles"].append({
             "id": "strict_2p0_0p25",
             "trigger_pt": {"operator": ">", "value": 2.0},
@@ -1048,7 +1104,7 @@ class ReductionContract(unittest.TestCase):
         path.write_text(json.dumps(analysis, sort_keys=True), encoding="utf-8")
         checked, changed_digest = module.checked_analysis(path)
         self.assertEqual(len(checked["profiles"]), 3)
-        self.assertNotEqual(changed_digest, sha256(ROOT / "config/analysis.json"))
+        self.assertNotEqual(changed_digest, sha256(LEGACY_ANALYSIS))
         output = self.base / "reduced-profile"
         self._reduce("run", "--plan", str(self.combined_plan), "--analysis",
                      str(path), "--analyzed-root", str(self.combined_root),
@@ -1346,7 +1402,7 @@ class ReductionContract(unittest.TestCase):
                         "scientific digest differs" if mode == "scientific" else
                         "metadata_sha256")
             self.assertIn(expected, verify.stderr)
-        config = json.loads((ROOT / "config/analysis.json").read_text(encoding="utf-8"))
+        config = json.loads((LEGACY_ANALYSIS).read_text(encoding="utf-8"))
         config["version"] = "session-tag"
         bad_config = self.base / "analysis-tampered.json"
         bad_config.write_text(json.dumps(config, sort_keys=True), encoding="utf-8")

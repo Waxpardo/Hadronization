@@ -37,7 +37,7 @@ def validate_references(study):
 
 
 def edges(rows, observable, low, high):
-    chosen = [row for row in rows if row.get("observable") == observable]
+    chosen = [row for row in rows if row.get("axis") == observable and row[low] and row[high]]
     bins = sorted({(int(row["bin_index"]), row[low], row[high]) for row in chosen})
     return [bins[0][1]] + [row[2] for row in bins]
 
@@ -161,84 +161,102 @@ class StudyContract(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "mis-PDG"):
             validate_references(wrong)
 
-    def test_activity_and_balancing_identity_bijections(self):
-        balancing = csv_rows("results/measurement/balancing.csv")
-        configured_classes = {
-            (row["id"], row["percentile_low"], row["percentile_high"])
+    def test_activity_and_balancing_export_identities(self):
+        balancing = csv_rows("results/numerical/balancing.csv")
+        manifest = load_json("results/numerical/manifest.json")
+        exported_classes = {
+            (int(row["class_id"]), float(row["percentile_low"]),
+             float(row["percentile_high"])) for row in balancing
+            if row["profile"] == "inclusive" and
+            row["activity_id"] == "charged_light_sector_activity_a15_v1_eta1"}
+        compact_classes = {
+            (row["id"], float(row["percentile_interval"][0]),
+             float(row["percentile_interval"][1]))
+            for row in manifest["compact_input"]["scale"]["class_dictionary"]}
+        configured_intervals = {
+            (float(row["percentile_low"]), float(row["percentile_high"]))
             for row in self.study["activity"]["classes"]}
-        canonical_classes = {
-            (row["activity_id"], row["percentile_low"], row["percentile_high"])
-            for row in balancing}
-        self.assertEqual(configured_classes, canonical_classes)
-        bounds = self.study["activity"]["canonical_realized_nch_bounds"]
-        canonical_bounds = {
-            (row["tune"], row["activity_id"], int(row["nch_low"]),
-             int(row["nch_high"])) for row in balancing}
-        configured_bounds = {
-            (tune, activity, values["nch_low"], values["nch_high"])
-            for tune, tune_rows in bounds.items()
-            for activity, values in tune_rows.items()}
-        self.assertEqual(configured_bounds, canonical_bounds)
-        configured_pairs = {
-            (row["flavour"], row["trigger"], row["os_associate"],
-             row["ss_associate"]) for row in
-            self.study["pair_observable"]["balancing_pairs"]}
-        canonical_pairs = {
-            (row["flavour"], row["trigger"], row["os_associate"],
-             row["ss_associate"]) for row in balancing}
-        self.assertEqual(len(configured_pairs), 16)
-        self.assertEqual(configured_pairs, canonical_pairs)
-        self.assertEqual(
-            len(self.study["pair_observable"]["balancing_pairs"]),
-            len(configured_pairs))
+        self.assertEqual(exported_classes, compact_classes)
+        self.assertEqual(configured_intervals,
+                         {(low, high) for unused, low, high in compact_classes})
+        self.assertEqual({row["tune"] for row in balancing},
+                         {row["name"] for row in self.study["tunes"]})
+        self.assertEqual({row["quantity"] for row in balancing}, {
+            "ordered_pair_yield", "os_minus_ss_per_trigger", "ratio_to_reference_tune",
+            "baryon_meson_reference_ratio", "baryon_meson_ratio_to_reference_tune"})
+        selected = ({int(row["trigger_pdg"]) for row in balancing} |
+                    {int(row["associate_pdg"]) for row in balancing})
+        self.assertEqual(selected, {
+            -5122, -4122, -521, -511, -421, -411,
+            411, 421, 511, 521, 4122, 5122})
 
-    def test_all_other_measurement_identities_and_binnings(self):
-        correlation = csv_rows("results/measurement/correlations.csv")
-        configured_contexts = {
-            (tune, pair["flavour"], pair["trigger"], pair["associate"],
-             context, pair["activity_id"])
-            for tune in self.study["observables"]["correlations"]["tunes"]
-            for pair in self.study["observables"]["correlations"]["pairs"]
-            for context in pair["contexts"]}
-        canonical_contexts = {
-            (row["tune"], row["flavour"], row["trigger"], row["associate"],
-             row["context"], row["activity_id"]) for row in correlation}
-        self.assertEqual(configured_contexts, canonical_contexts)
+    def test_all_other_numerical_export_identities_and_binnings(self):
+        correlation = csv_rows("results/numerical/correlations.csv")
+        by_id = {state["id"]: state["pdg"] for state in self.study["selected_states"]}
+        configured_pairs = {
+            (by_id[pair["trigger"]], by_id[pair["associate"]])
+            for pair in self.study["observables"]["correlations"]["pairs"]}
+        exported_pairs = {
+            (int(row["trigger_pdg"]), int(row["associate_pdg"]))
+            for row in correlation if row["profile"] == "inclusive"}
+        self.assertEqual(configured_pairs, exported_pairs)
+        self.assertEqual({row["component"] for row in correlation},
+                         {"OS", "SS", "OS_MINUS_SS"})
+        groups = {}
+        for row in correlation:
+            key = tuple(row[field] for field in (
+                "tune", "profile", "activity_id", "class_id",
+                "trigger_pdg", "associate_pdg", "component"))
+            groups.setdefault(key, []).append(row)
+        self.assertTrue(all(len(rows) == 100 for rows in groups.values()))
         corr_axis = self.study["observables"]["correlations"]["delta_phi"]
         self.assertEqual(corr_axis,
                          {"kind": "uniform", "bins": 100,
                           "low": "-1.570796", "high": "4.712389"})
+        example = sorted(next(iter(groups.values())), key=lambda row: int(row["bin_index"]))
+        self.assertTrue(math.isclose(float(example[0]["bin_low"]), float(corr_axis["low"]),
+                                     abs_tol=1e-6))
+        self.assertTrue(math.isclose(float(example[-1]["bin_high"]), float(corr_axis["high"]),
+                                     abs_tol=1e-6))
 
-        kinematics = csv_rows("results/measurement/kinematics.csv")
-        configured_species = {(row["id"], str(row["pdg"])) for row in
+        kinematics = csv_rows("results/numerical/kinematics.csv")
+        configured_species = {str(row["pdg"]) for row in
                               self.study["observables"]["inclusive_kinematics"]["species"]}
-        canonical_species = {(row["species"], row["pdg"]) for row in kinematics}
-        self.assertEqual(configured_species, canonical_species)
+        self.assertEqual(configured_species, {row["associate_pdg"] for row in kinematics})
         axes = self.study["observables"]["inclusive_kinematics"]["axes"]
-        self.assertEqual(axes["pt"]["edges"], edges(kinematics, "pt", "bin_low", "bin_high"))
+        representative = [row for row in kinematics
+                          if row["tune"] == "MONASH" and row["associate_pdg"] == "411"]
+        self.assertEqual([float(value) for value in axes["pt"]["edges"]],
+                         [float(value) for value in edges(
+                             representative, "pt", "bin_low", "bin_high")])
         for observable in ("eta", "phi"):
-            observed = edges(kinematics, observable, "bin_low", "bin_high")
+            observed = edges(representative, observable, "bin_low", "bin_high")
             axis = axes[observable]
             self.assertEqual(len(observed) - 1, axis["bins"])
-            self.assertEqual(float(observed[0]), float(axis["low"]))
-            self.assertEqual(float(observed[-1]), float(axis["high"]))
+            self.assertTrue(math.isclose(float(observed[0]), float(axis["low"]),
+                                         abs_tol=1e-6))
+            self.assertTrue(math.isclose(float(observed[-1]), float(axis["high"]),
+                                         abs_tol=1e-6))
 
-        multiplicity = csv_rows("results/measurement/multiplicity.csv")
+        multiplicity = csv_rows("results/numerical/multiplicity.csv")
         mult_axis = self.study["observables"]["multiplicity"]["binning"]
-        mult_bins = {(int(row["bin_index"]), row["nch_low"], row["nch_high"])
-                     for row in multiplicity}
-        self.assertEqual((len(mult_bins), min(mult_bins)[1], max(mult_bins)[2]),
-                         (mult_axis["bins"], mult_axis["low"], mult_axis["high"]))
+        representative = [row for row in multiplicity
+                          if row["tune"] == "MONASH" and
+                          row["activity_id"] == "charged_light_sector_activity_a15_v1_eta1" and
+                          row["quantity"] == "normalized_distribution"]
+        self.assertEqual(len(representative), mult_axis["bins"])
+        self.assertEqual({int(row["bin_index"]) for row in representative}, set(range(4096)))
 
-        sample = csv_rows("results/measurement/sample_counts.csv")
-        configured_quantities = set(self.study["observables"]["sample_counts"]["quantities"])
-        configured_quantities.update(row["id"] for row in
-                                     self.study["observables"]["sample_counts"]["signed_species"])
-        self.assertEqual(configured_quantities, {row["quantity"] for row in sample})
-        configured_t1 = {(row["id"], str(row["pdg"])) for row in
+        sample = csv_rows("results/numerical/sample_counts.csv")
+        configured_t1 = {str(row["pdg"]) for row in
                          self.study["observables"]["sample_counts"]["signed_species"]}
-        canonical_t1 = {(row["quantity"], row["pdg"]) for row in sample if row["pdg"]}
-        self.assertEqual(configured_t1, canonical_t1)
+        exported_t1 = {row["associate_pdg"] for row in sample
+                       if row["component"] == "hadron_count"}
+        self.assertLessEqual(configured_t1, exported_t1)
+        self.assertEqual({row["quantity"] for row in sample}, {"exact_t1_count"})
+        self.assertEqual({row["component"] for row in sample}, {
+            "hadron_count", "charm_plus_anticharm_constituent_count",
+            "beauty_plus_antibeauty_constituent_count"})
 
     def test_no_selectable_variation_structure(self):
         forbidden_keys = {"variations", "variation_modes", "systematics_selector"}

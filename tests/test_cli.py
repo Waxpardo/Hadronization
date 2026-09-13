@@ -25,17 +25,15 @@ class CliContract(unittest.TestCase):
         self.assertIn("RUNTIME ROOT=", doctor.stdout)
         help_result = self.run_cli("--help")
         self.assertEqual(help_result.returncode, 0)
-        for command in ("doctor", "generate", "analyze", "merge", "reduce",
-                        "plot", "verify", "clean"):
+        for command in ("doctor", "generate", "analyze", "query", "collection",
+                        "merge", "reduce", "plot", "verify", "clean"):
             self.assertIn(command, help_result.stdout)
 
-    def test_unavailable_stages_refuse_without_fallthrough(self):
-        for command in ("merge",):
-            result = self.run_cli(command)
-            self.assertEqual(result.returncode, 3)
-            self.assertEqual(
-                result.stderr.strip(),
-                "ERROR: {} direct stage is not yet implemented".format(command))
+    def test_merge_stage_is_implemented_without_fallthrough(self):
+        result = self.run_cli("merge", "--help")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("build", result.stdout)
+        self.assertIn("verify", result.stdout)
         unknown = self.run_cli("retired-command")
         self.assertEqual(unknown.returncode, 2)
 
@@ -52,8 +50,20 @@ class CliContract(unittest.TestCase):
             self.assertIn(command, result.stdout)
         plot = self.run_cli("plot", "--help")
         self.assertEqual(plot.returncode, 0, plot.stderr)
-        for command in ("query", "export", "verify"):
+        for command in ("render-cold", "verify-render-cold", "verify-review-packet"):
             self.assertIn(command, plot.stdout)
+
+    def test_plot_cold_cli_loads_statistics_reader_from_external_cwd(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = self.run_cli(
+                "plot", "verify-render-cold", "--numerics-root",
+                str(Path(directory) / "missing.root"),
+                "--expected-root-sha256", "a" * 64,
+                "--expected-value-sha256", "b" * 64,
+                "--work-dir", str(Path(directory) / "work"),
+                "--output", str(Path(directory) / "output"))
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn("typed ROOT archive", result.stderr)
 
     def test_setup_is_idempotent_and_has_no_dataset_dependency(self):
         script = r'''
@@ -101,6 +111,8 @@ test -z "${HADRONIZATION_DATASET+x}"
             analyze_staging = checkout / "data/work/analyze/staging/interrupted"
             analyze_staging.mkdir(parents=True)
             (analyze_staging / "shard.root").write_bytes(b"partial")
+            (analyze_staging / "worker-active").write_text(
+                "plausible live stage", encoding="utf-8")
             reduce_cache = checkout / "data/work/reduce/bin"
             reduce_cache.mkdir(parents=True)
             (reduce_cache / "reduce-fixture").write_bytes(b"cache")
@@ -121,6 +133,8 @@ test -z "${HADRONIZATION_DATASET+x}"
             self.assertIn("data/work/evidence/MONASH/job000/attempt00/scratch", dry.stdout)
             self.assertNotIn("job001/attempt00/scratch", dry.stdout)
             self.assertIn("data/work/plot/bin", dry.stdout)
+            self.assertNotIn("data/work/analyze/staging", dry.stdout)
+            self.assertNotIn("data/work/reduce/staging", dry.stdout)
             applied = subprocess.run(
                 [str(checkout / "hadronization"), "clean", "--apply"],
                 cwd="/tmp", text=True, stdout=subprocess.PIPE,
@@ -131,9 +145,12 @@ test -z "${HADRONIZATION_DATASET+x}"
             self.assertEqual(protected.read_bytes(), b"raw")
             self.assertFalse(scratch.exists())
             self.assertFalse(analyze_cache.exists())
-            self.assertFalse((checkout / "data/work/analyze/staging").exists())
+            self.assertEqual(
+                (analyze_staging / "worker-active").read_text(encoding="utf-8"),
+                "plausible live stage")
+            self.assertTrue((analyze_staging / "shard.root").is_file())
             self.assertFalse(reduce_cache.exists())
-            self.assertFalse((checkout / "data/work/reduce/staging").exists())
+            self.assertTrue((reduce_staging / "plot-source.root").is_file())
             self.assertFalse(plot_cache.exists())
             self.assertTrue((completed / "outcome.json").is_file())
             self.assertTrue((active / "scratch/partial.root").is_file())

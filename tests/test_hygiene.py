@@ -47,8 +47,7 @@ class LeanTreeContract(unittest.TestCase):
             ROOT / "pipeline/generate/validate_raw.cpp",
             ROOT / "pipeline/generate/producer.cpp",
             ROOT / "pipeline/generate/physics.hpp",
-            ROOT / "pipeline/plot/plot.cpp",
-            ROOT / "pipeline/plot/projection.hpp",
+            ROOT / "pipeline/plot/render.cpp",
             ROOT / "pipeline/plot/run.py",
             ROOT / "config/study.json",
             ROOT / "config/plot.json",
@@ -84,7 +83,8 @@ class LeanTreeContract(unittest.TestCase):
 
     def test_only_target_layout_exceptions_exist(self):
         expected_config = {
-            "config/study.json", "config/analysis.json", "config/plot.json",
+            "config/study.json", "config/analysis.json", "config/query.json",
+            "config/plot.json", "config/plot-dplus.json", "config/plot-all-tune.json",
             "config/site.example.conf",
             "config/tunes/monash.cmnd", "config/tunes/junctions.cmnd",
             "config/tunes/close_packing.cmnd"}
@@ -98,13 +98,27 @@ class LeanTreeContract(unittest.TestCase):
              "pipeline/analyze/run.py",
              "pipeline/analyze/reference_analysis.C"})
         self.assertEqual(
+            {path for path in paths if path.startswith("pipeline/query/")},
+            {"pipeline/query/campaign.py", "pipeline/query/collection.py",
+             "pipeline/query/condor.py", "pipeline/query/merge.py",
+             "pipeline/query/model.py", "pipeline/query/query.cpp",
+             "pipeline/query/row_schema.hpp", "pipeline/query/run.py",
+             "pipeline/query/selection.hpp", "pipeline/query/sparse.hpp",
+             "pipeline/query/support.py"})
+        self.assertEqual(
             {path for path in paths if path.startswith("pipeline/reduce/")},
-            {"pipeline/reduce/reduce.cpp", "pipeline/reduce/run.py",
-             "pipeline/reduce/statistics.hpp"})
+            {"pipeline/reduce/accounting.py", "pipeline/reduce/archive.cpp",
+             "pipeline/reduce/archive.py", "pipeline/reduce/archive_v4.py",
+             "pipeline/reduce/native.py", "pipeline/reduce/native_archive.py",
+             "pipeline/reduce/native_engine.cpp", "pipeline/reduce/native_runner.py",
+             "pipeline/reduce/native_v4.py", "pipeline/reduce/native_v4_result.py",
+             "pipeline/reduce/projection.cpp", "pipeline/reduce/projection.hpp",
+             "pipeline/reduce/projection.py", "pipeline/reduce/public_v4.py",
+             "pipeline/reduce/reduce.cpp",
+             "pipeline/reduce/run.py", "pipeline/reduce/statistics.hpp"})
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/plot/")},
-            {"pipeline/plot/plot.cpp", "pipeline/plot/projection.hpp",
-             "pipeline/plot/run.py"})
+            {"pipeline/plot/render.cpp", "pipeline/plot/run.py"})
 
     def test_importer_metadata_builders_match_the_retained_plane(self):
         path = ROOT / "pipeline/analyze/import_accepted.py"

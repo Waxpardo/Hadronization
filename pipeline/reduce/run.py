@@ -346,8 +346,16 @@ def checked_analysis(path):
     ]
     if payload["projection_recipes"] != expected_recipes:
         raise ValueError("analysis projection recipes differ")
-    if payload["g9_species_pdgs"] != [
-            -5212, -5122, -4122, -521, -411, 411, 521, 4122, 5122, 5212]:
+    # G9 admits configured signed final species, including species that are not
+    # pair-analysis eligible. Physical sparse-axis support is checked at scan.
+    registered_g9 = {state["pdg"] for state in
+                     json_file(study)["selected_states"]
+                     if state["sector"] in ("charm", "beauty")}
+    g9_species = payload["g9_species_pdgs"]
+    if (not isinstance(g9_species, list) or not g9_species or
+            len(g9_species) != len(set(g9_species)) or
+            any(type(pdg) is not int or pdg not in registered_g9
+                for pdg in g9_species)):
         raise ValueError("analysis G9 registry differs")
     policy = payload["estimator_policy"]
     exact_keys(policy, {"id", "release_block_count", "variance_dof",
@@ -1311,7 +1319,10 @@ def build_reducer(work_root):
         "compiler": runtime["environment"]["CXX"],
         "root": next(item.split("=", 1)[1] for item in runtime["diagnostics"]
                      if item.startswith("ROOT=")),
-        "flags": ["-std=c++17", "-O2", "-Wall", "-Wextra", "-Wpedantic", "-Werror"],
+        # Exact rederived receipt bytes require separate binary64 operations
+        # across GCC/Clang and x86/ARM; implicit FMA changes activity margins.
+        "flags": ["-std=c++17", "-O2", "-Wall", "-Wextra", "-Wpedantic", "-Werror",
+                  "-ffp-contract=off"],
     }
     build_id = sha_bytes(canonical(identity).encode("ascii"))
     work_root = work_root.resolve(strict=False)
@@ -1949,6 +1960,16 @@ def parser():
 
 
 def main():
+    # The public command is the current A v2.2 collection/native v4 route.
+    # The compact v1 reducer remains available only by an explicit legacy name.
+    if len(sys.argv) > 1 and sys.argv[1] in (
+            "legacy-run", "legacy-verify", "legacy-explain"):
+        sys.argv[1] = sys.argv[1][7:]
+    else:
+        if str(ROOT) not in sys.path:
+            sys.path.insert(0, str(ROOT))
+        from pipeline.reduce import public_v4
+        return public_v4.main(sys.argv[1:])
     args = parser().parse_args()
     try:
         if args.command == "run":

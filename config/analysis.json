@@ -1,6 +1,12 @@
 {
-  "schema": "hadronization_downstream_analysis_request_v1",
-  "version": "1.0.0",
+  "schema": "hadronization_downstream_analysis_request_v2",
+  "version": "2.2.0",
+  "paper_defaults": {
+    "charm_meson_pdg": 421,
+    "selectable_charm_meson_pdgs": [421, 411],
+    "historical_charm_meson_pdg": 411,
+    "p8_charm_tuple": [421, -4122, -421]
+  },
   "base_study": {
     "schema": "hadronization_study_v1",
     "sha256": "d3eac08d732dd5d9642b650ac69cb3512bf3245ae450387e57ace7690a8ef4f5"
@@ -36,7 +42,7 @@
       "endpoint_rule": "both physical endpoints inclusive; high occupies last bin"
     },
     "pt": {
-      "edges": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0, 20.5, 21.0, 21.5, 22.0, 22.5, 23.0, 23.5, 24.0, 24.5, 25.0, 25.5, 26.0, 26.5, 27.0, 27.5, 28.0, 28.5, 29.0, 29.5, 30.0, 30.5, 31.0, 31.5, 32.0, 32.5, 33.0, 33.5, 34.0, 34.5, 35.0, 35.5, 36.0, 36.5, 37.0, 37.5, 38.0, 38.5, 39.0, 39.5, 40.0, 40.5, 41.0, 41.5, 42.0, 42.5, 43.0, 43.5, 44.0, 44.5, 45.0, 45.5, 46.0, 46.5, 47.0, 47.5, 48.0, 48.5, 49.0, 49.5, 50.0, 60.0, 75.0, 100.0, 150.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 7000.0],
+      "edges": [0.0, 0.15, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5, 18.0, 18.5, 19.0, 19.5, 20.0, 20.5, 21.0, 21.5, 22.0, 22.5, 23.0, 23.5, 24.0, 24.5, 25.0, 25.5, 26.0, 26.5, 27.0, 27.5, 28.0, 28.5, 29.0, 29.5, 30.0, 30.5, 31.0, 31.5, 32.0, 32.5, 33.0, 33.5, 34.0, 34.5, 35.0, 35.5, 36.0, 36.5, 37.0, 37.5, 38.0, 38.5, 39.0, 39.5, 40.0, 40.5, 41.0, 41.5, 42.0, 42.5, 43.0, 43.5, 44.0, 44.5, 45.0, 45.5, 46.0, 46.5, 47.0, 47.5, 48.0, 48.5, 49.0, 49.5, 50.0, 60.0, 75.0, 100.0, 150.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 7000.0],
       "endpoint_rule": "low inclusive, high inclusive; underflow and overflow retained"
     }
   },
@@ -44,12 +50,8 @@
     {
       "id": "inclusive",
       "trigger_pt": null,
-      "associate_pt": null
-    },
-    {
-      "id": "historical_1p0_0p15",
-      "trigger_pt": {"operator": ">", "value": 1.0},
-      "associate_pt": {"operator": ">", "value": 0.15}
+      "associate_pt": null,
+      "relative_pt": null
     }
   ],
   "pair_acceptance": {
@@ -94,7 +96,7 @@
     },
     "reference_meson_by_trigger": {
       "-5122": -521,
-      "-4122": 411,
+      "-4122": 421,
       "-521": 521,
       "-511": 511,
       "-421": 421,
@@ -103,7 +105,7 @@
       "421": -421,
       "511": -511,
       "521": -521,
-      "4122": -411,
+      "4122": -421,
       "5122": 521
     },
     "expected_count": 300,
@@ -111,13 +113,13 @@
   },
   "correlations": {
     "tunes": "all admitted tunes",
-    "identities": [[521, -521], [-5122, -521], [411, -411], [4122, -411]],
+    "identities": [[521, -521], [5122, 521], [421, -421], [4122, -421]],
     "components": ["OS", "SS"],
     "difference_recipe": "OS-SS"
   },
   "projection_recipes": [
     "G1_activity_eta1_eta4",
-    "G9_direct_primary_selected_strict_pt0p15_eta4",
+    "G9_direct_primary_selected_no_pt_floor_eta4",
     "T1_all_final_heavy_no_acceptance",
     "ordered_pair_scalars",
     "configured_dphi_correlations",
@@ -126,7 +128,7 @@
     "closure_species_integrated",
     "closure_category_dphi_integrated"
   ],
-  "g9_species_pdgs": [-5212, -5122, -4122, -521, -411, 411, 521, 4122, 5122, 5212],
+  "g9_species_pdgs": [-5212, -5122, -4122, -521, -421, 421, 521, 4122, 5122, 5212],
   "estimator_policy": {
     "id": "pooled_delete_one_source_block_jackknife_v2",
     "release_block_count": 10,

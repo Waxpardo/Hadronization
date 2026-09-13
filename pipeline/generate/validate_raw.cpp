@@ -328,7 +328,10 @@ Authorization Arguments(int argc, char** argv) {
     if (index + 1 >= argc || std::string(argv[index]).rfind("--", 0) != 0) {
       throw std::invalid_argument("validator options must be --key value pairs");
     }
-    values.emplace(std::string(argv[index]).substr(2), argv[index + 1]);
+    const std::string name = std::string(argv[index]).substr(2);
+    if (!values.emplace(name, argv[index + 1]).second) {
+      throw std::invalid_argument("duplicate validator option --" + name);
+    }
   }
   const auto required = [&values](const std::string& name) {
     const auto found = values.find(name);
