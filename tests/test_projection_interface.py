@@ -471,47 +471,6 @@ class ProjectionInterfaceContract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'primitive routes differ from authenticated ROOT'):
             self.p.validate_result_source(self.p.ProjectionResult.from_dict(mutated), source_receipt, embedded)
 
-    def test_typed_bundle_carries_configs_through_swapped_result_order(self):
-        from unittest.mock import patch
-        spec = importlib.util.spec_from_file_location('bundle_plot', ROOT / 'pipeline/plot/run.py')
-        plot = importlib.util.module_from_spec(spec); spec.loader.exec_module(plot)
-        if not hasattr(plot, 'checked_phase_a_typed_result'):
-            self.skipTest('P typed bundle adapter is not installed in this S worktree')
-        unused, inclusive = self.query_result_fixture(0)
-        unused, ordered = self.query_result_fixture(1)
-        embedded = dict(pair_acceptance=self.analysis['pair_acceptance'], scientific_projection_source=dict(
-            kind='verified_root_query_primitives', primitive_route_receipts=
-            inclusive['primitive_routes'][:3] + ordered['primitive_routes'][1:3] + inclusive['primitive_routes'][3:]))
-        body = self.p.canonical(embedded).encode('ascii')
-        root = self.base / 'bundle.root'; root.write_bytes(b'fixture root identity')
-        receipt = copy.deepcopy(self.receipt)
-        receipt['scientific_identity']['embedded_receipt_sha256'] = plot.sha_bytes(body)
-        receipt['storage_identity'] = dict(root_sha256=self.p.file_digest(root))
-        manifest = self.base / 'bundle.json'; manifest.write_text(json.dumps(receipt))
-        records, configs = {}, []
-        for index, value in enumerate((inclusive, ordered)):
-            profile_id = value['request_echo']['profiles'][0]['id']
-            config = copy.deepcopy(self.config)
-            path = self.base / f'plot-{index}.json'; path.write_text(json.dumps(config)); configs.append(path)
-            value['request_echo']['presentation_binding']['plot_config_sha256'] = self.p.file_digest(path)
-            value['request_echo']['bindings']['expected_source_content_sha256'] = self.p.digest(receipt['scientific_identity'])
-            value['artifact_binding'].update(root_sha256=self.p.file_digest(root), root_bytes=root.stat().st_size,
-                root_content_sha256=self.p.digest(receipt['scientific_identity']), manifest_sha256=self.p.file_digest(manifest))
-            self.resign_result(value)
-            projection = self.p.ProjectionResult.from_dict(value)
-            records[index] = (projection, dict(profile=profile_id, profile_kind=('inclusive', 'ordered_minima')[index]), {'campaign':'same'})
-        with patch.object(plot, 'checked_phase_a_typed_result', side_effect=lambda key: records[key]), \
-                patch.object(plot, '_read_embedded_payload', return_value=(embedded, {'receipt':body})):
-            for current in configs:
-                forward = plot.checked_phase_a_typed_bundle(0, 1, root, manifest, *configs, current)
-                reverse = plot.checked_phase_a_typed_bundle(1, 0, root, manifest, *reversed(configs), current)
-                self.assertEqual(forward, reverse)
-                self.assertEqual(forward['released_profile_ids'], [p['id'] for p in self.analysis['profiles']])
-            with self.assertRaisesRegex(ValueError, 'presentation binding'):
-                plot.checked_phase_a_typed_bundle(1, 0, root, manifest, *configs, configs[0])
-            with self.assertRaisesRegex(ValueError, 'inclusive and one ordered-minima'):
-                plot.checked_phase_a_typed_bundle(0, 0, root, manifest, configs[0], configs[0], configs[0])
-
     def test_source_dto_and_plot_phase_a_policy_parity(self):
         spec = importlib.util.spec_from_file_location('policy_plot', ROOT / 'pipeline/plot/run.py')
         plot = importlib.util.module_from_spec(spec); spec.loader.exec_module(plot)

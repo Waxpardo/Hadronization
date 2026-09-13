@@ -47,7 +47,7 @@ SOURCE_FILES = (
     "hadronization", "config/analysis.json", "config/query.json", "config/study.json",
     "pipeline/analyze/run.py", "pipeline/generate/runtime.py", "pipeline/generate/sha256.hpp",
     "pipeline/query/model.py", "pipeline/query/support.py", "pipeline/query/run.py",
-    "pipeline/query/campaign.py", "pipeline/query/collection.py", "pipeline/query/merge.py",
+    "pipeline/query/collection.py", "pipeline/query/merge.py",
     "pipeline/query/condor.py", "pipeline/query/query.cpp", "pipeline/query/selection.hpp",
     "pipeline/query/row_schema.hpp", "pipeline/query/sparse.hpp",
 )

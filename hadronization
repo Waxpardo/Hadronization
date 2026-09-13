@@ -156,11 +156,6 @@ def query(arguments):
     return subprocess.run(command, cwd=str(ROOT)).returncode
 
 
-def query_campaign(arguments):
-    command = [sys.executable, str(ROOT / "pipeline/query/campaign.py")] + arguments
-    return subprocess.run(command, cwd=str(ROOT)).returncode
-
-
 def collection(arguments):
     command = [sys.executable, str(ROOT / "pipeline/query/collection.py")] + arguments
     return subprocess.run(command, cwd=str(ROOT)).returncode
@@ -237,8 +232,6 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == "analyze":
         return analyze(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == "query":
-        if len(sys.argv) > 2 and sys.argv[2] == "campaign":
-            return query_campaign(sys.argv[3:])
         return query(sys.argv[2:])
     if len(sys.argv) > 1 and sys.argv[1] == "collection":
         return collection(sys.argv[2:])

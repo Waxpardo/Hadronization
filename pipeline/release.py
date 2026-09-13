@@ -42,8 +42,18 @@ def file_map(numerical, figures, numerical_manifest, figures_manifest):
         raise ValueError("figure package schema differs")
     if figures_manifest["numerics_root"]["sha256"] != numerical_manifest["root_sha256"]:
         raise ValueError("figures do not bind the numerical ROOT")
+    report = json.loads((numerical / "report.json").read_text(encoding="utf-8"))
+    if (figures_manifest["numerics_root"]["value_sha256"] !=
+            report["root"]["value_sha256"]):
+        raise ValueError("figures do not bind the numerical value digest")
     if sha(ROOT / "config/plot.json") != figures_manifest["plot_config_sha256"]:
         raise ValueError("figure configuration differs from current package source")
+    source_hashes = figures_manifest.get("source_sha256")
+    if (not isinstance(source_hashes, dict) or not source_hashes or
+            any(Path(name).is_absolute() or ".." in Path(name).parts or
+                not (ROOT / name).is_file() or sha(ROOT / name) != digest
+                for name, digest in source_hashes.items())):
+        raise ValueError("figure source differs from current package source")
     names = {"numerical/package-manifest.json": numerical / "package-manifest.json",
              "figures/manifest.json": figures / "manifest.json",
              "config/plot.json": ROOT / "config/plot.json"}

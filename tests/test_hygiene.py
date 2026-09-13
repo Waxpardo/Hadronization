@@ -93,13 +93,10 @@ class LeanTreeContract(unittest.TestCase):
                          expected_config)
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/analyze/")},
-            {"pipeline/analyze/analyze.cpp",
-             "pipeline/analyze/import_accepted.py",
-             "pipeline/analyze/run.py",
-             "pipeline/analyze/reference_analysis.C"})
+            {"pipeline/analyze/analyze.cpp", "pipeline/analyze/run.py"})
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/query/")},
-            {"pipeline/query/campaign.py", "pipeline/query/collection.py",
+            {"pipeline/query/collection.py",
              "pipeline/query/condor.py", "pipeline/query/merge.py",
              "pipeline/query/model.py", "pipeline/query/query.cpp",
              "pipeline/query/row_schema.hpp", "pipeline/query/run.py",
