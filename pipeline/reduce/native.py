@@ -795,12 +795,18 @@ def write_native_transport(source, primitives, g9, t1, event_totals, path,
         raise ValueError('native transport requested tune domain differs')
     selected_members=[member for member in source.index['sources']
                       if member['tune'] in tunes]
-    expected_exposure = {(member['tune'], member['block']): member['events']
-                         for member in selected_members}
-    if (len(expected_exposure) != len(selected_members) or
-            event_totals != expected_exposure or
+    expected_exposure = {}
+    for member in selected_members:
+        count = member['events']
+        if type(count) is not int or count < 1:
+            raise ValueError('native event exposure differs from authenticated sources')
+        key = (member['tune'], member['block'])
+        expected_exposure[key] = expected_exposure.get(key, 0) + count
+    if ({tune for tune, _ in expected_exposure} != tunes or
+            not isinstance(event_totals, dict) or
             any(type(count) is not int or count < 1
-                for count in expected_exposure.values())):
+                for count in event_totals.values()) or
+            event_totals != expected_exposure):
         raise ValueError('native event exposure differs from authenticated sources')
     for mapping, tune_index, block_index in (
             (primitives.activity, 0, 1), (primitives.triggers, 1, 2),

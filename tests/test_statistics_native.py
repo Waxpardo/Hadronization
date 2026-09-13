@@ -1,6 +1,7 @@
 """Native numerical scan contracts independent of compact plot storage."""
 from dataclasses import dataclass
 import bisect
+import hashlib
 import importlib.util
 import json
 import math
@@ -213,6 +214,123 @@ class NativeStatisticsContract(unittest.TestCase):
             receipt = n.write_native_transport(source,primitives,g9,{},expected,path)
             self.assertEqual(receipt['path'],str(path))
             self.assertEqual(path.read_text().count('EXPOSURE\tMONASH\t'),10)
+
+    def test_transport_sums_two_distinct_sources_in_each_original_block(self):
+        n = self.n
+        members = [dict(source_id=source_id, tune='MONASH',
+                        logical_id=logical, block=block, events=events)
+                   for block in range(1, 11)
+                   for source_id, logical, events in ((block-1, block-1, 2),
+                                                      (block+9, block+9, 3))]
+        self.assertEqual(len(members), 20)
+        self.assertEqual(len({row['source_id'] for row in members}), 20)
+        source = SimpleNamespace(index={'sources': members,
+            'tune_ordinals': {'MONASH': 0},
+            'scientific_identity_sha256': 'b'*64,
+            'analysis_sha256': 'c'*64}, expected_sha256='a'*64)
+        primitives = n.NativePrimitives({}, {}, {}, n.ScanMetrics(),
+            ('inclusive',), 'a15_eta4', (411,), ((411, -411),))
+        g9 = n.G9Primitives({}, n.ScanMetrics(), (421,))
+        expected = {('MONASH', block): 5 for block in range(1, 11)}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'native.tsv'
+            n.write_native_transport(source, primitives, g9, {}, expected, path)
+            lines = [line for line in path.read_text().splitlines()
+                     if line.startswith('EXPOSURE\t')]
+            self.assertEqual(lines,
+                [f'EXPOSURE\tMONASH\t{block}\t5' for block in range(1, 11)])
+            mutants = {}
+            mutants['wrong_total'] = dict(expected)
+            mutants['wrong_total']['MONASH', 10] = 4
+            mutants['missing_block'] = {key: value for key, value in expected.items()
+                                        if key != ('MONASH', 10)}
+            mutants['extra_block'] = dict(expected)
+            mutants['extra_block']['MONASH', 11] = 1
+            mutants['zero_scan_count'] = dict(expected)
+            mutants['zero_scan_count']['MONASH', 1] = 0
+            mutants['float_scan_count'] = dict(expected)
+            mutants['float_scan_count']['MONASH', 1] = 5.0
+            for name, totals in mutants.items():
+                bad_path = Path(directory) / f'{name}.tsv'
+                with self.subTest(name=name), self.assertRaisesRegex(
+                        ValueError, 'differs from authenticated sources'):
+                    n.write_native_transport(source, primitives, g9, {},
+                                             totals, bad_path)
+                self.assertFalse(bad_path.exists())
+            for name, count in (('zero_source', 0), ('float_source', 2.0),
+                                ('bool_source', True)):
+                bad_members = [dict(row) for row in members]
+                bad_members[0]['events'] = count
+                bad_source = SimpleNamespace(index=dict(source.index,
+                    sources=bad_members), expected_sha256=source.expected_sha256)
+                bad_path = Path(directory) / f'{name}.tsv'
+                with self.subTest(name=name), self.assertRaisesRegex(
+                        ValueError, 'differs from authenticated sources'):
+                    n.write_native_transport(bad_source, primitives, g9, {},
+                                             expected, bad_path)
+                self.assertFalse(bad_path.exists())
+
+    def test_manifest_3000_source_30_group_transport_control(self):
+        n = self.n
+        from pipeline.query import collection
+        manifest_path = ROOT / 'data/raw_manifest.jsonl'
+        self.assertEqual(hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
+            '5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f8f247585912e2df247')
+        rows = [json.loads(line) for line in manifest_path.read_text().splitlines()]
+        tunes = {'MONASH': 0, 'JUNCTIONS': 1, 'CLOSEPACKING': 2}
+        members = [dict(source_id=source_id, tune=row['tune'],
+                        tune_ordinal=tunes[row['tune']],
+                        logical_id=row['logical_id'], block=row['block'],
+                        events=row['successful_events'])
+                   for source_id, row in enumerate(rows)]
+        self.assertEqual(len(members), 3000)
+        self.assertEqual(len({row['source_id'] for row in members}), 3000)
+        self.assertEqual(len({(row['tune'], row['logical_id']) for row in members}), 3000)
+        index = dict(sources=members, shards=[dict(members=members)],
+                     tune_ordinals=tunes, block_count=10,
+                     scientific_identity_sha256='b'*64,
+                     analysis_sha256='c'*64)
+        collection._check_members(index, members)
+        source = SimpleNamespace(index=index, expected_sha256='a'*64)
+        groups = {}
+        source_counts = {}
+        for row in members:
+            key = (row['tune'], row['block'])
+            groups[key] = groups.get(key, 0) + row['events']
+            source_counts[key] = source_counts.get(key, 0) + 1
+        self.assertEqual(len(groups), 30)
+        self.assertEqual(set(source_counts.values()), {100})
+        self.assertEqual(set(groups.values()), {10_000_000})
+        primitives = n.NativePrimitives({}, {}, {}, n.ScanMetrics(),
+            ('inclusive',), 'a15_eta4', (411,), ((411, -411),))
+        g9 = n.G9Primitives({}, n.ScanMetrics(), (421,))
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'manifest-control.tsv'
+            n.write_native_transport(source, primitives, g9, {}, groups, path)
+            exposures = [line for line in path.read_text().splitlines()
+                         if line.startswith('EXPOSURE\t')]
+            self.assertEqual(len(exposures), 30)
+            self.assertEqual(len(set(exposures)), 30)
+            parsed = {(parts[1], int(parts[2])): int(parts[3]) for parts in
+                      (line.split('\t') for line in exposures)}
+            self.assertEqual(parsed, groups)
+            wrong = dict(groups)
+            wrong['CLOSEPACKING', 10] -= 1
+            refused = Path(directory) / 'wrong-total.tsv'
+            with self.assertRaisesRegex(ValueError,
+                    'differs from authenticated sources'):
+                n.write_native_transport(source, primitives, g9, {}, wrong,
+                                         refused)
+            self.assertFalse(refused.exists())
+        duplicate = [dict(row) for row in members]
+        duplicate[1]['source_id'] = duplicate[0]['source_id']
+        with self.assertRaisesRegex(ValueError, 'duplicate global'):
+            collection._check_members(dict(index, sources=duplicate,
+                shards=[dict(members=duplicate)]), duplicate)
+        missing = members[:-1]
+        with self.assertRaisesRegex(ValueError, 'membership'):
+            collection._check_members(dict(index, sources=missing,
+                shards=[dict(members=missing)]), members)
 
 
 class AuthenticatedNativeLayoutParity(unittest.TestCase):

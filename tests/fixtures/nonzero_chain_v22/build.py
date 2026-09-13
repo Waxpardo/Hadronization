@@ -18,6 +18,7 @@ from test_analysis import AnalysisShardContract, fixture_source, sha256
 
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 EVENTS = 120
+SOURCES_PER_BLOCK = int(os.environ.get("NONZERO_CHAIN_SOURCES_PER_BLOCK", "1"))
 
 
 def claim_fresh_base():
@@ -153,6 +154,8 @@ def command(args, env, log=None):
 
 
 def main():
+    if SOURCES_PER_BLOCK not in (1, 2):
+        raise ValueError("NONZERO_CHAIN_SOURCES_PER_BLOCK must be 1 or 2")
     BASE = claim_fresh_base()
     F = AnalysisShardContract
     F.setUpClass()
@@ -173,7 +176,7 @@ def main():
         rows = []
         attempts = ["tune,logical_id,attempt,seed,outcome,evidence_status,raw_storage_key"]
         for ordinal, tune in enumerate(TUNES):
-            for logical in range(10):
+            for logical in range(10 * SOURCES_PER_BLOCK):
                 key = f"{tune}/toy-{logical:04d}.root"
                 path = raw_root / key
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -181,20 +184,21 @@ def main():
                 if logical == 0:
                     settings[tune] = json.loads(command([F.base / "analyzer", "inspect-raw", path], F.environment))["effective_settings_sha256"]
                 seed = 130000001 + ordinal * 1000000 + logical
-                rows.append(dict(accepted_attempt=0, accepted_seed=seed, block=logical + 1,
+                rows.append(dict(accepted_attempt=0, accepted_seed=seed,
+                                 block=logical % 10 + 1,
                                  bytes=path.stat().st_size, logical_id=logical, raw_sha256=sha256(path),
                                  raw_storage_key=key, successful_events=EVENTS, tune=tune,
                                  validation_log_sha256="d" * 64, validation_receipt_sha256="e" * 64))
                 attempts.append(f"{tune},{logical},0,{seed},accepted,accepted_manifest_confirmed,{key}")
         campaign = json.loads((ROOT / "data/campaign.json").read_text())
         campaign["tune_order"] = list(TUNES)
-        campaign["logical_jobs_per_tune"] = 10
+        campaign["logical_jobs_per_tune"] = 10 * SOURCES_PER_BLOCK
         campaign["successful_events_per_logical_job"] = EVENTS
-        campaign["successful_events_per_tune"] = 10 * EVENTS
-        campaign["blocks"] = {"count":10,"logical_id_domain":[0,9],"logical_id_rule":"block=(logical_id%10)+1"}
+        campaign["successful_events_per_tune"] = 10 * SOURCES_PER_BLOCK * EVENTS
+        campaign["blocks"] = {"count":10,"logical_id_domain":[0,10 * SOURCES_PER_BLOCK - 1],"logical_id_rule":"block=(logical_id%10)+1"}
         campaign["seed"]["attempt_domain"] = [0,1]
         campaign["seed"]["tune_ordinals"] = {t:i for i,t in enumerate(TUNES)}
-        campaign["attempt_evidence_inventory"] = {"file_count":30,"sha256":"a"*64}
+        campaign["attempt_evidence_inventory"] = {"file_count":30 * SOURCES_PER_BLOCK,"sha256":"a"*64}
         campaign["accepted_source"]["producer_executable_sha256"] = "b"*64
         campaign["accepted_source"]["producer_repository_commit"] = "c"*40
         for tune in TUNES:
@@ -219,7 +223,8 @@ def main():
         census = [ROOT / "hadronization", "query", "census"]
         for raw, receipt in zip(qroots, receipts):
             census += ["--input", raw, "--receipt", receipt]
-        census += ["--expected-source-count", 30, "--output", BASE / "dictionary.json",
+        census += ["--expected-source-count", 30 * SOURCES_PER_BLOCK,
+                   "--output", BASE / "dictionary.json",
                    "--work-root", qwork]
         command(census, F.environment, BASE / "census.log")
         workspaces = []
@@ -268,6 +273,7 @@ def main():
                  "--merge-receipt-sha256", sha256(BASE / "merged" / "merge-receipt.json")],
                 F.environment, BASE / "merge-verify.log")
         print(json.dumps({"base":str(BASE),"source_sha256":hashlib.sha256(source.encode()).hexdigest(),
+                          "sources_per_block":SOURCES_PER_BLOCK,
                           "raw_sources":len(rows),"plan":str(work / "plan.json"),
                           "query_pins":pins,"sharded_sha256":sharded_sha,
                           "merged_sha256":merged_sha}, indent=2))
