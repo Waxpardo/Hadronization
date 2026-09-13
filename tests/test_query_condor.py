@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import tarfile
 import tempfile
 import unittest
 from unittest import mock
@@ -51,10 +52,78 @@ class QueryCondorPreparation(unittest.TestCase):
         bulk.mkdir()
         receipt = site_probe.publish_probe(bulk, "TEST_ONLY bulk")
         self.assertEqual(receipt["no_overwrite"], "PASS")
+        self.assertEqual(receipt["directory_publish"], "PASS")
         self.assertEqual(receipt["readback"], "PASS")
-        self.assertEqual(site_probe.sha(Path(receipt["published"])), receipt["sha256"])
-        self.assertEqual(Path(receipt["partial"]).read_bytes(),
+        self.assertEqual(site_probe.sha(Path(receipt["payload"])), receipt["sha256"])
+        self.assertEqual((Path(receipt["interrupted_stage"]) / "payload.bin").read_bytes(),
                          b"INTERRUPTED_QUALIFICATION_ONLY")
+        for kind in ("empty", "nonempty"):
+            self.assertEqual(receipt["existing_destinations"][kind]["refused"], "PASS")
+            self.assertTrue(Path(receipt["existing_destinations"][kind]["stage"]).is_dir())
+
+    def test_site_probe_uses_production_publication_and_refuses_unsupported_or_corrupt(self):
+        bulk = self.base / "bulk"
+        bulk.mkdir()
+        with mock.patch.object(site_probe.publication, "publish_directory",
+                               side_effect=OSError(errno.ENOTSUP, "TEST_ONLY unsupported")) as publish:
+            with self.assertRaises(OSError) as error:
+                site_probe.publish_probe(bulk, "TEST_ONLY bulk")
+        self.assertEqual(error.exception.errno, errno.ENOTSUP)
+        self.assertEqual(publish.call_count, 1)
+        self.assertEqual(len(list(bulk.glob(".qualification-*.stage"))), 1)
+        self.assertEqual(list(bulk.glob("qualification-*")), [])
+        with mock.patch.object(site_probe, "sha", return_value="0" * 64):
+            with self.assertRaisesRegex(ValueError, "durable readback differs"):
+                site_probe.publish_probe(bulk, "TEST_ONLY bulk")
+
+    def test_site_probe_reads_separate_job_and_machine_classads(self):
+        job = self.base / "job.ad"
+        machine = self.base / "machine.ad"
+        job.write_text('MyType = "Job"\nRequestMemory = 1024\nRequestDisk = 1048576\n')
+        machine.write_text('MyType = "Machine"\nArch = "X86_64"\nOpSys = "LINUX"\n'
+                           'Memory = 2048\nDisk = 2097152\n')
+        with mock.patch.dict(os.environ, {"_CONDOR_JOB_AD": str(job),
+                                       "_CONDOR_MACHINE_AD": str(machine)}):
+            facts = site_probe.classad_evidence()
+            self.assertEqual(facts["job"]["sha256"], site_probe.sha(job))
+            self.assertEqual(facts["machine"]["sha256"], site_probe.sha(machine))
+            self.assertNotEqual(facts["job"]["sha256"], facts["machine"]["sha256"])
+            self.assertEqual(facts["job"]["request_memory_mb"], 1024)
+            self.assertEqual(facts["machine"]["arch"], "X86_64")
+            for wrong_job, wrong_machine, reason in (
+                    ('MyType = "Machine"\nRequestMemory = 1024\nRequestDisk = 1048576\n',
+                     None, "wrong MyType"),
+                    ('MyType = "Job"\nRequestMemory = 0\nRequestDisk = 1048576\n',
+                     None, "positive integer"),
+                    ('MyType = "Job"\nRequestMemory = 1024\n', None, "lacks RequestDisk"),
+                    (None, 'MyType = "Job"\nArch = "X86_64"\nOpSys = "LINUX"\n',
+                     "wrong MyType"),
+                    (None, 'MyType = "Machine"\nArch = "ARM64"\nOpSys = "LINUX"\n',
+                     "architecture/OS differs"),
+                    (None, 'MyType = "Machine"\nArch = "X86_64"\n',
+                     "lacks OpSys"),
+                    (None, 'MyType = "Machine"\nArch = "X86_64"\nOpSys = "LINUX"\n'
+                     'Memory = 100\n', "cannot satisfy")):
+                original_job, original_machine = job.read_text(), machine.read_text()
+                if wrong_job is not None:
+                    job.write_text(wrong_job)
+                if wrong_machine is not None:
+                    machine.write_text(wrong_machine)
+                with self.assertRaisesRegex(ValueError, reason):
+                    site_probe.classad_evidence()
+                job.write_text(original_job); machine.write_text(original_machine)
+        with mock.patch.dict(os.environ, {"_CONDOR_JOB_AD": str(job),
+                                       "_CONDOR_MACHINE_AD": str(self.base / "missing")}) :
+            with self.assertRaisesRegex(ValueError, "machine ClassAd is missing"):
+                site_probe.classad_evidence()
+        with mock.patch.dict(os.environ, {"_CONDOR_JOB_AD": str(self.base / "missing"),
+                                       "_CONDOR_MACHINE_AD": str(machine)}):
+            with self.assertRaisesRegex(ValueError, "job ClassAd is missing"):
+                site_probe.classad_evidence()
+        with mock.patch.dict(os.environ, {"_CONDOR_JOB_AD": str(job),
+                                       "_CONDOR_MACHINE_AD": str(job)}):
+            with self.assertRaisesRegex(ValueError, "not distinct"):
+                site_probe.classad_evidence()
 
     def test_screen_plan_covers_every_tune_block_from_pinned_receipts(self):
         input_root = self.base / "inputs"
@@ -239,6 +308,24 @@ class QueryCondorPreparation(unittest.TestCase):
                                         capture_output=True).returncode, 0)
         self.assertIn("__ACCEPTED_ANALYZED_SAMPLE_ROOT__",
                       (bundle / "site-canary.sub").read_text())
+        self.assertIn("transfer_input_files = site_probe.py,publication.py",
+                      (bundle / "site-canary.sub").read_text())
+        self.assertEqual((bundle / "publication.py").read_bytes(),
+                         (ROOT / "pipeline/query/publication.py").read_bytes())
+        self.assertIn("pipeline/query/publication.py", condor.SOURCE_FILES)
+        helper = (ROOT / "pipeline/query/publication.py").read_bytes()
+        source_facts = json.loads((bundle / "source-files.json").read_text())
+        self.assertEqual(source_facts["pipeline/query/publication.py"], {
+            "bytes": len(helper), "sha256": condor.r.sha_file(
+                ROOT / "pipeline/query/publication.py")})
+        with tarfile.open(bundle / "source.tar.gz", "r:gz") as archive:
+            self.assertEqual(archive.extractfile("pipeline/query/publication.py").read(),
+                             helper)
+        bundle_files = json.loads((bundle / "bundle-manifest.json").read_text())["files"]
+        self.assertEqual(bundle_files["publication.py"]["sha256"],
+                         condor.r.sha_file(bundle / "publication.py"))
+        self.assertEqual(subprocess.run([sys.executable, str(bundle / "site_probe.py"),
+                                         "--help"], capture_output=True).returncode, 0)
         self.assertEqual(admission["evidence"]["resource_budget"], "PENDING")
         self.assertIn("stage-dag", (bundle / "README.txt").read_text())
         command = [sys.executable, "-B", str(bundle / "preflight.py"), "preflight",

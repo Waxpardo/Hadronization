@@ -101,7 +101,8 @@ class LeanTreeContract(unittest.TestCase):
              "pipeline/query/model.py", "pipeline/query/query.cpp",
              "pipeline/query/row_schema.hpp", "pipeline/query/run.py",
              "pipeline/query/selection.hpp", "pipeline/query/sparse.hpp",
-             "pipeline/query/support.py", "pipeline/query/site_probe.py"})
+             "pipeline/query/support.py", "pipeline/query/site_probe.py",
+             "pipeline/query/publication.py"})
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/reduce/")},
             {"pipeline/reduce/accounting.py",

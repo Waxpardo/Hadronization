@@ -47,6 +47,7 @@ SOURCE_FILES = (
     "hadronization", "config/analysis.json", "config/query.json", "config/study.json",
     "pipeline/analyze/run.py", "pipeline/generate/runtime.py", "pipeline/generate/sha256.hpp",
     "pipeline/query/model.py", "pipeline/query/support.py", "pipeline/query/run.py",
+    "pipeline/query/publication.py",
     "pipeline/query/collection.py", "pipeline/query/merge.py",
     "pipeline/query/condor.py", "pipeline/query/query.cpp", "pipeline/query/selection.hpp",
     "pipeline/query/row_schema.hpp", "pipeline/query/sparse.hpp",
@@ -281,6 +282,7 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
         for script in ("worker.py", "collector.py", "preflight.py"):
             (stage / script).write_text(BOOTSTRAP)
         shutil.copy2(Path(__file__).with_name("site_probe.py"), stage / "site_probe.py")
+        shutil.copy2(Path(__file__).with_name("publication.py"), stage / "publication.py")
         work_sha = r.sha_file(stage / "work.json")
         submit = ("universe = vanilla\nexecutable = /usr/bin/python3\n"
                   "arguments = worker.py worker --work work.json --expected-work-sha256 " + work_sha +
@@ -322,7 +324,7 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
             " --root-config __ROOT_CONFIG__ --cxx __GCC_14_2_0_CXX__"
             " --pythia-config __PYTHIA_8_317_CONFIG__"
             " --cvmfs-path __REQUIRED_CVMFS_PATH__\n"
-            "should_transfer_files = YES\ntransfer_input_files = site_probe.py\n"
+            "should_transfer_files = YES\ntransfer_input_files = site_probe.py,publication.py\n"
             "when_to_transfer_output = ON_EXIT\n"
             "output = __FRESH_CONTROL_EVIDENCE_DIR__/canary.out\n"
             "error = __FRESH_CONTROL_EVIDENCE_DIR__/canary.err\n"
@@ -376,8 +378,9 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
             " derive from the independently pinned acquisition manifest and campaign.\n"
             "Do not submit workflow.dag or collector.sub before L1 scientific/runtime/storage admission.\n"
             "Run site-canary.sub once on an execute node; its output is observation,"
-            " not admission. Record ClassAds, input hashes, no-overwrite and"
-            " interrupted sibling evidence in protected control custody."
+            " not admission. Record separate job/machine ClassAds, input hashes,"
+            " directory no-overwrite, collision and interrupted-stage evidence"
+            " in protected control custody."
             " After qualified Linux pack build and readback, use bind-site with an"
             " independently pinned L1/site admission record to produce a new"
             " immutable site-bound bundle. Do not hand-edit the inert bundle."

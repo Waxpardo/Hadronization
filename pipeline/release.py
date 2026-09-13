@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -35,7 +36,19 @@ def fact(path):
     return {"bytes": path.stat().st_size, "sha256": sha(path)}
 
 
-def file_map(numerical, figures, numerical_manifest, figures_manifest):
+def config_locator(path):
+    name = path.name
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*\.json", name):
+        raise ValueError("selected plot config has an unsafe package name")
+    return "config/" + name
+
+
+def file_map(numerical, figures, numerical_manifest, figures_manifest,
+             plot_config=None, plot_config_name=None):
+    plot_config = Path(plot_config) if plot_config is not None else ROOT / "config/plot.json"
+    plot_config_name = plot_config_name or config_locator(plot_config)
+    if plot_config_name != config_locator(plot_config):
+        raise ValueError("selected plot config locator differs")
     if numerical_manifest.get("schema") != "hadronization_public_v4_portable_package_v1":
         raise ValueError("numerical package schema differs")
     if figures_manifest.get("schema") != "hadronization_cold_plot_render_v1":
@@ -46,8 +59,8 @@ def file_map(numerical, figures, numerical_manifest, figures_manifest):
     if (figures_manifest["numerics_root"]["value_sha256"] !=
             report["root"]["value_sha256"]):
         raise ValueError("figures do not bind the numerical value digest")
-    if sha(ROOT / "config/plot.json") != figures_manifest["plot_config_sha256"]:
-        raise ValueError("figure configuration differs from current package source")
+    if fact(plot_config)["sha256"] != figures_manifest["plot_config_sha256"]:
+        raise ValueError("selected plot configuration differs from figure manifest")
     source_hashes = figures_manifest.get("source_sha256")
     if (not isinstance(source_hashes, dict) or not source_hashes or
             any(Path(name).is_absolute() or ".." in Path(name).parts or
@@ -56,7 +69,7 @@ def file_map(numerical, figures, numerical_manifest, figures_manifest):
         raise ValueError("figure source differs from current package source")
     names = {"numerical/package-manifest.json": numerical / "package-manifest.json",
              "figures/manifest.json": figures / "manifest.json",
-             "config/plot.json": ROOT / "config/plot.json"}
+             plot_config_name: plot_config}
     for name in numerical_manifest["files"]:
         path = numerical / name
         if fact(path) != numerical_manifest["files"][name]:
@@ -94,7 +107,16 @@ def verify(package, manifest_sha, work_dir):
                                    manifest["files"]["numerical/package-manifest.json"]["sha256"])
     figure_manifest = read_pinned(figures / "manifest.json",
                                   manifest["files"]["figures/manifest.json"]["sha256"])
-    expected_names = file_map(numerical, figures, numeric_manifest, figure_manifest)
+    config = manifest.get("plot_config")
+    if (not isinstance(config, dict) or set(config) != {"path", "sha256"} or
+            not isinstance(config["path"], str) or
+            config["path"] not in manifest["files"] or
+            config["path"] != config_locator(Path(config["path"])) or
+            config["sha256"] != manifest["files"][config["path"]]["sha256"]):
+        raise ValueError("collaboration selected plot config locator/pin differs")
+    selected_config = package / config["path"]
+    expected_names = file_map(numerical, figures, numeric_manifest, figure_manifest,
+                              selected_config, config["path"])
     if set(expected_names) != set(manifest["files"]):
         raise ValueError("collaboration manifest is not complete")
     commands = [
@@ -106,7 +128,7 @@ def verify(package, manifest_sha, work_dir):
          "--expected-root-sha256", figure_manifest["numerics_root"]["sha256"],
          "--expected-value-sha256", figure_manifest["numerics_root"]["value_sha256"],
          "--expected-manifest-sha256", manifest["files"]["figures/manifest.json"]["sha256"],
-         "--plot-config", str(package / "config/plot.json"),
+         "--plot-config", str(selected_config),
          "--work-dir", str(work_dir), "--output", str(figures)]
     ]
     for command in commands:
@@ -118,12 +140,15 @@ def verify(package, manifest_sha, work_dir):
             "file_count": len(manifest["files"]), "manifest_sha256": manifest_sha}
 
 
-def build(numerical, numerical_sha, figures, figures_sha, output):
+def build(numerical, numerical_sha, figures, figures_sha, output, plot_config=None):
     if output.exists():
         raise ValueError("collaboration package path already exists")
     numeric_manifest = read_pinned(numerical / "package-manifest.json", numerical_sha)
     figure_manifest = read_pinned(figures / "manifest.json", figures_sha)
-    paths = file_map(numerical, figures, numeric_manifest, figure_manifest)
+    plot_config = Path(plot_config) if plot_config is not None else ROOT / "config/plot.json"
+    locator = config_locator(plot_config)
+    paths = file_map(numerical, figures, numeric_manifest, figure_manifest,
+                     plot_config, locator)
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="." + output.name + ".stage-", dir=output.parent))
     try:
@@ -136,6 +161,8 @@ def build(numerical, numerical_sha, figures, figures_sha, output):
             "schema": SCHEMA, "state": "EXACT_PORTABLE_FILESET",
             "numerical_manifest_sha256": numerical_sha,
             "figure_manifest_sha256": figures_sha,
+            "plot_config": {"path": locator,
+                            "sha256": files[locator]["sha256"]},
             "presentation_state": figure_manifest["presentation_state"],
             "files": files}, sort_keys=True, separators=(",", ":")) + "\n")
         publish_directory(stage, output)
@@ -153,6 +180,8 @@ def main():
     make.add_argument("--numerical-manifest-sha256", required=True)
     make.add_argument("--figures", type=Path, required=True)
     make.add_argument("--figure-manifest-sha256", required=True)
+    make.add_argument("--plot-config", type=Path,
+                      help="exact config supplied to plot render-cold; defaults to config/plot.json")
     make.add_argument("--output", type=Path, required=True)
     check = subs.add_parser("verify")
     check.add_argument("--package", type=Path, required=True)
@@ -162,7 +191,8 @@ def main():
     try:
         if args.command == "build":
             digest = build(args.numerical, args.numerical_manifest_sha256,
-                           args.figures, args.figure_manifest_sha256, args.output)
+                           args.figures, args.figure_manifest_sha256, args.output,
+                           args.plot_config)
             print("COLLABORATION_PACKAGE={} SHA256={}".format(args.output, digest))
         else:
             print(json.dumps(verify(args.package, args.manifest_sha256, args.work_dir),

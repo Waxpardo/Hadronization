@@ -126,9 +126,13 @@ admission template. Copy the build script and source tar to a fresh external
 build directory. `SITE_CONF` must name a measured site.conf. The build checks
 ROOT 6.30.01, GCC 14.2.0 and PYTHIA 8.317. Bind a copy of the canary template
 to an actual execute node only after choosing allocated endpoints. Its probe
-checks x86_64/AlmaLinux 9.8, CVMFS and ROOT libraries, ClassAds, full accepted
-input SHA and ROOT open, then unique POSIX writes, close/SHA readback, exclusive
-no-overwrite and interrupted sibling isolation at separate bulk/control roots.
+checks x86_64/AlmaLinux 9.8, CVMFS and ROOT libraries, separate hashed job and
+matched-machine ClassAds, full accepted input SHA and ROOT open. At each
+allocated bulk/control root it stages and fsyncs a directory, invokes the same
+no-replace directory publisher as query, reopens and hashes the result, rejects
+existing empty and nonempty destinations, and retains an interrupted private
+stage. An unsupported directory rename is a failed probe even if exclusive file
+creation works. These observations do not grant admission.
 The probe is observation, not admission. `condor bind-site` requires an
 independent record with hashed evidence for every PASS, including quota,
 capacity, retention, custody, all-tune pair population and resource budget.
@@ -256,16 +260,17 @@ After manifest-last collector closure, the downstream chain is:
   --report "$RESULT/report.json" --report-sha "$REPORT_SHA"
 ./hadronization plot render-cold --numerics-root "$RESULT/numerics.root" \
   --expected-root-sha256 "$NUMERICS_SHA" --expected-value-sha256 "$VALUE_SHA" \
-  --work-dir "$PLOT_WORK" --output "$FIGURES"
+  --plot-config "$SELECTED_PLOT_CONFIG" --work-dir "$PLOT_WORK" --output "$FIGURES"
 ./hadronization plot verify-render-cold --numerics-root "$RESULT/numerics.root" \
   --expected-root-sha256 "$NUMERICS_SHA" --expected-value-sha256 "$VALUE_SHA" \
   --expected-manifest-sha256 "$FIGURE_MANIFEST_SHA" \
-  --work-dir "$PLOT_WORK" --output "$FIGURES"
+  --plot-config "$SELECTED_PLOT_CONFIG" --work-dir "$PLOT_WORK" --output "$FIGURES"
 ./hadronization reduce verify --mode portable --package-dir "$COPIED_RESULT" \
   --package-manifest-sha "$PACKAGE_MANIFEST_SHA"
 ./hadronization package build --numerical "$RESULT" \
   --numerical-manifest-sha256 "$PACKAGE_MANIFEST_SHA" --figures "$FIGURES" \
-  --figure-manifest-sha256 "$FIGURE_MANIFEST_SHA" --output "$COLLAB_PACKAGE"
+  --figure-manifest-sha256 "$FIGURE_MANIFEST_SHA" \
+  --plot-config "$SELECTED_PLOT_CONFIG" --output "$COLLAB_PACKAGE"
 ./hadronization package verify --package "$COPIED_COLLAB_PACKAGE" \
   --manifest-sha256 "$COLLAB_MANIFEST_SHA" --work-dir "$PACKAGE_VERIFY_WORK"
 ```
@@ -290,3 +295,8 @@ packs and execution evidence in immutable external custody with scientific and
 physical IDs, locator, custodian, retention and dependency pins. Only current,
 owner-reviewed compact products belong in the collaboration release. Synthetic
 fixtures must remain labelled TEST_ONLY.
+Use `config/plot.json` as `SELECTED_PLOT_CONFIG` for the default presentation,
+or pass the same checked-in alternative (for example `config/plot-all-tune.json`)
+to render, figure verification and package build. The collaboration package
+pins and carries those selected config bytes at a relative `config/` locator;
+relocated verification reads that included file.
