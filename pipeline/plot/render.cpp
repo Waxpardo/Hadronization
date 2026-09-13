@@ -706,12 +706,22 @@ std::vector<std::string> StatusNoteLines(const std::string& note) {
   return result;
 }
 double BlankStatusY(const Page& page, const Panel& panel) {
+  if (page.role=="spectra.signed_heavy" && panel.id=="g9.ratio")
+    return .78;
   return page.role.rfind("balancing.",0)==0 &&
          panel.id.rfind("lower.",0)==0 ? .82 : .54;
 }
 double BlankNoteY(const Page& page, const Panel& panel) {
+  if (page.role=="spectra.signed_heavy" && panel.id=="g9.ratio")
+    return .59;
   return page.role.rfind("balancing.",0)==0 &&
          panel.id.rfind("lower.",0)==0 ? .55 : .46;
+}
+double BlankNoteStep(const Page& page, const Panel& panel) {
+  // The G9 ratio pad is shorter than the absolute pad; keep complete status
+  // reasons clear of each other and the x axis at publication size.
+  return page.role=="spectra.signed_heavy" && panel.id=="g9.ratio"
+             ? .10 : .045;
 }
 // This information column and the tune key occupy disjoint horizontal bands.
 // Keep the complete charged-activity caption in the typed page information;
@@ -799,7 +809,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
       const auto lines=StatusNoteLines(panel.note);
       for (std::size_t i=0;i<lines.size();++i)
         result.push_back(TextExpectation(lines[i], .5,
-                                         BlankNoteY(page,panel)-.045*i,
+                                         BlankNoteY(page,panel)-BlankNoteStep(page,panel)*i,
                                          std::max(12, textPixels - 3),
                                          kGray + 2, 22));
     }
@@ -1627,7 +1637,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
         status.SetTextColor(kGray + 2);
         const auto lines=StatusNoteLines(panel.note);
         for (std::size_t i=0;i<lines.size();++i)
-          status.DrawLatex(.5, BlankNoteY(page,panel)-.045*i,
+          status.DrawLatex(.5, BlankNoteY(page,panel)-BlankNoteStep(page,panel)*i,
                            lines[i].c_str());
       }
     }
