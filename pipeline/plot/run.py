@@ -2324,7 +2324,7 @@ def cold_render_manifest(args, payload, config, config_sha, build, plan,
         "source_sha256": {
             name:sha_file(ROOT / name) for name in ((
                 "pipeline/plot/run.py", "pipeline/plot/render.cpp",
-                "pipeline/reduce/archive.py", "pipeline/reduce/archive.cpp",
+                "pipeline/reduce/archive.py", "pipeline/reduce/typed_nodes.py",
                 "pipeline/reduce/projection.py") +
                 (("pipeline/reduce/archive_v4.py",) if payload["schema"] ==
                  "hadronization_projection_result_v4" else ()))},

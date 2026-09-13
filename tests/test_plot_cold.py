@@ -31,7 +31,7 @@ class ColdDrawingBoundary(unittest.TestCase):
                 str(external / 'output')], cwd=external,
                 capture_output=True, text=True)
             self.assertEqual(result.returncode, 2)
-            self.assertIn('typed ROOT archive', result.stderr)
+            self.assertIn('v4 ROOT differs from trusted physical hash', result.stderr)
             self.assertNotIn('ModuleNotFoundError', result.stderr)
 
     def test_p1_owner_inset_is_small_lower_left(self):

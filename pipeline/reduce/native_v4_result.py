@@ -206,7 +206,7 @@ def from_verified_diagnostic(request,run_receipt,event_moments,
                 boundary_status=field[5],coverage_status='COMPLETE_K10',
                 boundary_receipt_sha256=p.digest(dict(field=field,request=klass,
                     source_members_sha256=req['sources']['selected_members_sha256']))))
-    states,_=p._reducer().state_registry(analysis)
+    states,_=p._query_model().state_registry(analysis)
     labels={state['pdg']:state['name'] for state in states}
     if science_only:
         return dict(points=points,covariance=covariance,

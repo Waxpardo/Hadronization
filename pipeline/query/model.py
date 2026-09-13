@@ -546,6 +546,65 @@ def select_charm_meson_recipe(analysis, meson_pdg, include_alternate_g9=False):
     return selected
 
 
+def compatible_interpretation(construction, requested):
+    """Prove that a new pinned recipe uses only content retained by a query.
+
+    The query keeps its original whole-file analysis digest.  Only supported
+    post-query profiles and the tune-local percentile recipe are interpretive.
+    Every other normalized field remains construction content or provenance.
+    """
+    if not isinstance(construction, Mapping) or not isinstance(requested, Mapping):
+        raise ValueError("query/request normalized model is absent")
+    if set(construction) != set(requested):
+        raise ValueError("query/request normalized model fields differ")
+    for field in construction:
+        if field in {"profiles", "percentile_intervals"}:
+            continue
+        if construction[field] != requested[field]:
+            raise ValueError("requested analysis changes unretained query content: " + field)
+    validate_phase_a_profiles(requested["profiles"], construction["axes"]["pt"]["edges"])
+    if requested["profiles"][0] != construction["profiles"][0]:
+        raise ValueError("requested analysis changes inclusive query profile")
+    # Both validated models have contiguous percentile partitions.  The
+    # retained event-activity support permits a new boundary calculation.
+    return {"schema": "hadronization_query_interpretation_compatibility_v1",
+            "construction_content_sha256": hashlib.sha256(
+                json.dumps({key: construction[key] for key in construction
+                            if key not in {"profiles", "percentile_intervals"}},
+                           sort_keys=True, separators=(",", ":"),
+                           ensure_ascii=True).encode("ascii")).hexdigest(),
+            "profile_ids": [profile["id"] for profile in requested["profiles"]],
+            "percentile_intervals": requested["percentile_intervals"]}
+
+
+def state_registry(analysis):
+    """Expand signed structural pair identities from the one study model."""
+    study = support.json_file(support.ROOT / "config/study.json")
+    states = study["selected_states"]
+    by_pdg = {item["pdg"]: item for item in states}
+    query = analysis["pair_query_registry"]
+    pairs = []
+    for trigger in query["trigger_pdgs"]:
+        if trigger not in by_pdg or not by_pdg[trigger]["pair_analysis_eligible"]:
+            raise ValueError("pair trigger registry is not structurally eligible")
+        sector = by_pdg[trigger]["sector"]
+        trigger_charge = by_pdg[trigger]["qc"] if sector == "charm" else by_pdg[trigger]["qb"]
+        for associate in query["associate_pdgs"][sector]:
+            state = by_pdg.get(associate)
+            if state is None or state["sector"] != sector:
+                raise ValueError("pair associate registry differs from structural states")
+            associate_charge = state["qc"] if sector == "charm" else state["qb"]
+            pairs.append({"id": len(pairs), "trigger_pdg": trigger,
+                          "associate_pdg": associate,
+                          "sign": -1 if trigger_charge * associate_charge < 0 else 1,
+                          "reference_meson_pdg": int(query["reference_meson_by_trigger"][str(trigger)]),
+                          "central_eligible": bool(state["pair_analysis_eligible"]),
+                          "sector": sector})
+    if len(pairs) != query["expected_count"] or len(pairs) != 300:
+        raise ValueError("expanded pair registry is not the required 300 queries")
+    return states, pairs
+
+
 def _freeze(value):
     if isinstance(value, dict):
         return MappingProxyType({key: _freeze(item) for key, item in value.items()})

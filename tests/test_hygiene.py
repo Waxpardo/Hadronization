@@ -21,7 +21,7 @@ class LeanTreeContract(unittest.TestCase):
         paths = self.tracked_and_new_paths()
         top = {path.split("/", 1)[0] for path in paths}
         expected = {".gitignore", "CITATION.cff", "README.md", "hadronization",
-                    "setup.sh", "config", "pipeline", "data", "results", "tests"}
+                    "setup.sh", "config", "pipeline", "data", "tests"}
         self.assertEqual(top, expected)
         forbidden = {"paper", "evidence", "docs", "docs2", "environment",
                      "Validation", "contracts", "tools", "generation", "analysis",
@@ -107,51 +107,16 @@ class LeanTreeContract(unittest.TestCase):
              "pipeline/query/support.py"})
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/reduce/")},
-            {"pipeline/reduce/accounting.py", "pipeline/reduce/archive.cpp",
+            {"pipeline/reduce/accounting.py",
              "pipeline/reduce/archive.py", "pipeline/reduce/archive_v4.py",
-             "pipeline/reduce/native.py", "pipeline/reduce/native_archive.py",
+             "pipeline/reduce/native.py", "pipeline/reduce/support_scan.cpp",
              "pipeline/reduce/native_engine.cpp", "pipeline/reduce/native_runner.py",
              "pipeline/reduce/native_v4.py", "pipeline/reduce/native_v4_result.py",
-             "pipeline/reduce/projection.cpp", "pipeline/reduce/projection.hpp",
              "pipeline/reduce/projection.py", "pipeline/reduce/public_v4.py",
-             "pipeline/reduce/reduce.cpp",
-             "pipeline/reduce/run.py", "pipeline/reduce/statistics.hpp"})
+             "pipeline/reduce/statistics.hpp", "pipeline/reduce/typed_nodes.py"})
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/plot/")},
             {"pipeline/plot/render.cpp", "pipeline/plot/run.py"})
-
-    def test_importer_metadata_builders_match_the_retained_plane(self):
-        path = ROOT / "pipeline/analyze/import_accepted.py"
-        spec = importlib.util.spec_from_file_location("accepted_importer", str(path))
-        importer = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(importer)
-        self.assertEqual(importer.DATA_README,
-                         (ROOT / "data/README.md").read_text(encoding="utf-8"))
-        campaign = json.loads((ROOT / "data/campaign.json").read_text(encoding="utf-8"))
-        self.assertEqual(
-            campaign["current_interpretation_definitions"]["files"],
-            importer.current_definition_entries(ROOT))
-        result = json.loads((ROOT / "results/manifest.json").read_text(encoding="utf-8"))
-        self.assertEqual(result["current_study_definition"],
-                         importer.current_study_definition(ROOT))
-
-    def test_importer_parity_gate_rejects_an_omitted_definition_record(self):
-        path = ROOT / "pipeline/analyze/import_accepted.py"
-        spec = importlib.util.spec_from_file_location("accepted_importer_mutation", str(path))
-        importer = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(importer)
-        campaign = json.loads((ROOT / "data/campaign.json").read_text(encoding="utf-8"))
-        campaign["current_interpretation_definitions"]["files"].pop()
-        with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory)
-            (output / "data").mkdir()
-            (output / "results").mkdir()
-            (output / "data/campaign.json").write_text(
-                json.dumps(campaign), encoding="utf-8")
-            (output / "data/README.md").write_text(importer.DATA_README, encoding="utf-8")
-            shutil.copyfile(ROOT / "results/manifest.json", output / "results/manifest.json")
-            with self.assertRaisesRegex(ValueError, "definition record"):
-                importer.validate_metadata_parity(output, ROOT)
 
 
 if __name__ == "__main__":

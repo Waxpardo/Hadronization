@@ -174,6 +174,46 @@ class QueryCollectionContract(unittest.TestCase):
                                     work_path=work_path, expected_work_sha256=work_sha,
                                     closure_path=closure_path, expected_closure_sha256=closure_sha)
         self.assertEqual(proof["qualification"], "FULL_ACCEPTED_DOMAIN_CLOSED")
+        # TEST_ONLY administrative simulation of the collector-shaped trust
+        # chain.  These fabricated site pins never authorize production.
+        simulated_merged_path = m.merge(index_path, index_sha, self.base / "simulated-merged")
+        merged_sha = c.r.sha_file(simulated_merged_path)
+        lineage_path = simulated_merged_path.parent / "merge-receipt.json"
+        lineage_sha = c.r.sha_file(lineage_path)
+        merged_proof = c.admission_closure(simulated_merged_path, merged_sha,
+            expected_path, expected_sha, work_path=work_path,
+            expected_work_sha256=work_sha, closure_path=closure_path,
+            expected_closure_sha256=closure_sha,
+            merge_receipt_path=lineage_path,
+            expected_merge_receipt_sha256=lineage_sha)
+        self.assertEqual(merged_proof["qualification"], "FULL_ACCEPTED_DOMAIN_CLOSED")
+        self.assertEqual(merged_proof["collection_index_sha256"], merged_sha)
+        from pipeline.reduce import public_v4
+        self.assertTrue(public_v4._full_preflight(
+            type("Source", (), {"index": c.read(simulated_merged_path, merged_sha)})(),
+            merged_proof, {"status": "COMMITTED_SOURCE"}))
+        with self.assertRaisesRegex(ValueError, "requires pinned merge lineage"):
+            c.admission_closure(simulated_merged_path, merged_sha,
+                expected_path, expected_sha, work_path=work_path,
+                expected_work_sha256=work_sha, closure_path=closure_path,
+                expected_closure_sha256=closure_sha)
+        altered_lineage = c.r.json_file(lineage_path)
+        altered_lineage["parent_index_sha256"] = "e" * 64
+        altered_path = self.base / "wrong-parent-lineage.json"
+        altered_path.write_text(json.dumps(altered_lineage))
+        with self.assertRaises((ValueError, OSError)):
+            c.admission_closure(simulated_merged_path, merged_sha,
+                expected_path, expected_sha, work_path=work_path,
+                expected_work_sha256=work_sha, closure_path=closure_path,
+                expected_closure_sha256=closure_sha,
+                merge_receipt_path=altered_path,
+                expected_merge_receipt_sha256=c.r.sha_file(altered_path))
+        altered_lineage["parent_index_sha256"] = index_sha
+        altered_lineage["merged_index_sha256"] = "e" * 64
+        altered_path.write_text(json.dumps(altered_lineage))
+        with self.assertRaisesRegex(ValueError, "child index differs"):
+            c.verify_merge_lineage(simulated_merged_path, merged_sha,
+                                   altered_path, c.r.sha_file(altered_path))
         self.assertEqual(proof["natural_members_sha256"],
                          c.admission_closure(self.index_path, c.r.sha_file(self.index_path),
                                              expected_path, expected_sha)["natural_members_sha256"])
@@ -217,6 +257,55 @@ class QueryCollectionContract(unittest.TestCase):
                                         for a, b in zip(expected[coord], actual[coord])), (family, tune, coord))
                 self.assertEqual(hist.GetEntries(), entries)
                 file.Close()
+
+    def test_re_pinned_child_cannot_change_sparse_cell_or_source_domain(self):
+        ROOT = c._root()
+        original = self.merged["partitions"][0]["root"]["path"]
+        root_path = self.base / "changed-merged-cell.root"
+        shutil.copy2(original, root_path)
+        ROOT.gInterpreter.Declare(r'''
+            #include <TFile.h>
+            #include <THnSparse.h>
+            void mutate_test_merge_cell(const char* path) {
+                TFile file(path, "UPDATE");
+                auto* hist = file.Get<THnSparseD>("sparse_pairs");
+                if (!hist || hist->GetNbins() == 0) throw std::runtime_error("empty sparse test input");
+                const Long64_t occupied = 0;
+                hist->SetBinContent(occupied, hist->GetBinContent(occupied) + 1.0);
+                hist->Write("sparse_pairs", TObject::kOverwrite);
+            }
+        ''')
+        ROOT.mutate_test_merge_cell(str(root_path))
+        file = ROOT.TFile.Open(str(root_path), "READ")
+        hist = file.Get("sparse_pairs")
+        changed_digest = m._digest(hist)
+        file.Close()
+        child = copy.deepcopy(self.merged)
+        child["partitions"][0]["root"]["path"] = str(root_path)
+        stale_path = self.base / "changed-cell-stale-fact.json"
+        c.r.atomic_json(stale_path, child, exclusive=True)
+        with self.assertRaisesRegex(ValueError, "physical identity"):
+            c.read(stale_path, c.r.sha_file(stale_path))
+        child["partitions"][0]["root"] = c._fact(root_path)
+        child["partitions"][0]["cell_digests"]["pairs"] = changed_digest
+        child_path = self.base / "changed-cell-child.json"
+        c.r.atomic_json(child_path, child, exclusive=True)
+        child_sha = c.r.sha_file(child_path)
+        c.read(child_path, child_sha)
+        receipt = c.r.json_file(self.merged_path.parent / "merge-receipt.json")
+        receipt["merged_index_sha256"] = child_sha
+        receipt["partitions"] = child["partitions"]
+        receipt_path = self.base / "changed-cell-receipt.json"
+        c.r.atomic_json(receipt_path, receipt, exclusive=True)
+        with self.assertRaisesRegex(ValueError, "merged sparse cell/Sumw2"):
+            c.verify_merge_lineage(child_path, child_sha, receipt_path,
+                                   c.r.sha_file(receipt_path))
+        receipt["expected_sources_sha256"] = "0" * 64
+        domain_path = self.base / "changed-source-domain-receipt.json"
+        c.r.atomic_json(domain_path, receipt, exclusive=True)
+        with self.assertRaisesRegex(ValueError, "parent/content/domain"):
+            c.verify_merge_lineage(child_path, child_sha, domain_path,
+                                   c.r.sha_file(domain_path))
 
     def test_missing_duplicate_foreign_source_and_missing_support_refuse(self):
         for mutant in (self.sources[:-1], self.sources + self.sources[:1],

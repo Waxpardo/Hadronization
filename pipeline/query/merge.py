@@ -177,6 +177,15 @@ def merge(index_path, expected_sha256, output):
             part["root"]["path"] = str(output / Path(part["root"]["path"]).name)
         merged_index.pop("merge_elapsed_seconds")
         c.r.atomic_json(stage / "index.json", merged_index, exclusive=True)
+        receipt = {"schema": c.MERGE_SCHEMA,
+                   "parent_index_path": str(Path(index_path).absolute()),
+                   "parent_index_sha256": expected_sha256,
+                   "merged_index_sha256": c.r.sha_file(stage / "index.json"),
+                   "scientific_identity_sha256": index["scientific_identity_sha256"],
+                   "expected_sources_sha256": c.r.sha_bytes(
+                       c.r.canonical(index["sources"]).encode("ascii")),
+                   "partitions": partitions}
+        c.r.atomic_json(stage / "merge-receipt.json", receipt, exclusive=True)
         for path in stage.iterdir():
             c.r.fsync_file(path)
         c.r.fsync_directory(stage)
@@ -185,6 +194,9 @@ def merge(index_path, expected_sha256, output):
         published = c.read(output / "index.json", c.r.sha_file(output / "index.json"))
         if published["scientific_identity_sha256"] != index["scientific_identity_sha256"]:
             raise ValueError("merged scientific identity changed")
+        c.verify_merge_lineage(output / "index.json", c.r.sha_file(output / "index.json"),
+                               output / "merge-receipt.json",
+                               c.r.sha_file(output / "merge-receipt.json"))
         return output / "index.json"
     finally:
         if stage.exists():
@@ -201,16 +213,23 @@ def main():
     verify = commands.add_parser("verify")
     verify.add_argument("--index", type=Path, required=True)
     verify.add_argument("--expected-index-sha256", required=True)
+    verify.add_argument("--merge-receipt", type=Path, required=True)
+    verify.add_argument("--merge-receipt-sha256", required=True)
     args = parser.parse_args()
     try:
         if args.command == "build":
             path = merge(args.index, args.expected_index_sha256, args.output)
             print("MERGED_COLLECTION_INDEX="+str(path))
             print("MERGED_COLLECTION_SHA256="+c.r.sha_file(path))
+            print("MERGE_LINEAGE="+str(path.parent / "merge-receipt.json"))
+            print("MERGE_LINEAGE_SHA256="+c.r.sha_file(path.parent / "merge-receipt.json"))
         else:
             index = c.read(args.index, args.expected_index_sha256)
             if index["layout"] != "MERGED":
                 raise ValueError("collection is not physically merged")
+            c.verify_merge_lineage(args.index, args.expected_index_sha256,
+                                   args.merge_receipt,
+                                   args.merge_receipt_sha256)
             print("MERGED_COLLECTION_VERIFIED="+index["scientific_identity_sha256"])
     except (OSError, ValueError, KeyError, TypeError) as error:
         print("ERROR: "+str(error), file=sys.stderr)

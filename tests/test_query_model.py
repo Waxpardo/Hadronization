@@ -147,6 +147,37 @@ class ReleasedQueryModel(unittest.TestCase):
                    "associate_pt": {"operator": ">=", "value": 0.15}}
         self.assertEqual(model.profile_tokens(ordered), [">=1.0", ">=0.15", "NONE"])
 
+    def test_postquery_compatibility_is_content_based_and_rejects_mutants(self):
+        requested = copy.deepcopy(self.analysis)
+        requested['profiles'].append({'id': 'equal_minima',
+            'trigger_pt': {'operator': '>=', 'value': 1.0},
+            'associate_pt': {'operator': '>=', 'value': 1.0},
+            'relative_pt': None})
+        requested['percentile_intervals'] = [[0, 10], [10, 50], [50, 100]]
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / 'request.json'
+            path.write_text(json.dumps(requested))
+            verified, _ = model.checked_analysis(path)
+        compatible = model.compatible_interpretation(self.analysis, verified)
+        self.assertEqual(compatible['profile_ids'], ['inclusive', 'equal_minima'])
+        self.assertEqual(compatible['percentile_intervals'], [[0, 10], [10, 50], [50, 100]])
+        for field, mutate in (
+                ('axes', lambda x: x['pt']['edges'].__setitem__(1, 0.16)),
+                ('g9_species_pdgs', lambda x: x.__setitem__(0, -9999)),
+                ('pair_query_registry', lambda x: x['trigger_pdgs'].__setitem__(0, 9999)),
+                ('activities', lambda x: x[0].__setitem__('physical_field', 'missing')),
+                ('lossless_input', lambda x: x.__setitem__('schema_digest', '0'*64))):
+            changed = copy.deepcopy(verified)
+            mutate(changed[field])
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, field):
+                model.compatible_interpretation(self.analysis, changed)
+        for trigger, associate in ((-1., 0.5), (1.1, 0.5), (0.5, 1.0)):
+            changed = copy.deepcopy(verified)
+            changed['profiles'][-1]['trigger_pt']['value'] = trigger
+            changed['profiles'][-1]['associate_pt']['value'] = associate
+            with self.subTest(minima=(trigger, associate)), self.assertRaises(ValueError):
+                model.compatible_interpretation(self.analysis, changed)
+
 
 if __name__ == "__main__":
     unittest.main()

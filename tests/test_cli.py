@@ -63,7 +63,7 @@ class CliContract(unittest.TestCase):
                 "--work-dir", str(Path(directory) / "work"),
                 "--output", str(Path(directory) / "output"))
         self.assertEqual(result.returncode, 2, result.stderr)
-        self.assertIn("typed ROOT archive", result.stderr)
+        self.assertIn("v4 ROOT differs from trusted physical hash", result.stderr)
 
     def test_setup_is_idempotent_and_has_no_dataset_dependency(self):
         script = r'''

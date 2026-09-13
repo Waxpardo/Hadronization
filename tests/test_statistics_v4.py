@@ -347,7 +347,7 @@ class NativeV4Metadata(unittest.TestCase):
             external_pins_sha256='3'*64,
             acquisition_manifest_sha256='4'*64,campaign_sha256='5'*64)
         closed['campaign_state']='FULL_ACCEPTED_CAMPAIGN'
-        with self.assertRaisesRegex(ValueError,'MERGED 3000-source three-tune domain'):
+        with self.assertRaisesRegex(ValueError,'complete MERGED three-tune domain'):
             p.ProjectionResult.from_dict(closed,request,routes,cold=True)
         for mutation,reason in (
                 (lambda x:x['admission_closure'].update(domain_complete=False),
@@ -424,7 +424,7 @@ class NativeV4Metadata(unittest.TestCase):
             self.assertIn('selected query',accounting_tex)
             self.assertIn('all submitted attempts',accounting_tex)
             self.assertIn('unavailable',accounting_tex)
-            with self.assertRaisesRegex(ValueError,'trusted hash'):
+            with self.assertRaisesRegex(ValueError,'trusted physical hash'):
                 archive.read(output,directory,'0'*64,receipt['value_sha256'])
             import ROOT as root_api
             file=root_api.TFile.Open(str(output),'UPDATE')

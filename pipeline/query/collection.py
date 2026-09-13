@@ -31,6 +31,7 @@ TREES = tuple(sorted(q.require_phase_a_layout(r.json_file(ROOT_DIR / "config/que
 SCHEMA = "hadronization_query_collection_v1"
 LINEAGE_SCHEMA = "hadronization_query_collection_source_lineage_v1"
 ADMISSION_SCHEMA = "hadronization_query_collection_admission_closure_v1"
+MERGE_SCHEMA = "hadronization_query_merge_lineage_v1"
 
 
 def _root():
@@ -189,7 +190,8 @@ def read(path, expected_sha256, verify_roots=True):
 
 def admission_closure(index_path, expected_index_sha256, expected_sources_path,
                       expected_sources_sha256, *, work_path=None, expected_work_sha256=None,
-                      closure_path=None, expected_closure_sha256=None):
+                      closure_path=None, expected_closure_sha256=None,
+                      merge_receipt_path=None, expected_merge_receipt_sha256=None):
     """Prove exact query-source closure without promoting TEST_ONLY to accepted.
 
     An externally pinned site-bound work record and collector closure are both
@@ -222,6 +224,18 @@ def admission_closure(index_path, expected_index_sha256, expected_sources_path,
         raise ValueError("admission proof path and independent SHA must be paired")
     if (work_path is None) != (closure_path is None):
         raise ValueError("accepted closure requires both site work and collector manifest")
+    if (merge_receipt_path is None) != (expected_merge_receipt_sha256 is None):
+        raise ValueError("merge lineage path and independent SHA must be paired")
+    parent_index_sha = expected_index_sha256
+    if index["layout"] == "MERGED" and merge_receipt_path is not None:
+        merge_lineage = verify_merge_lineage(index_path, expected_index_sha256,
+                                             merge_receipt_path,
+                                             expected_merge_receipt_sha256)
+        parent_index_sha = merge_lineage["parent_index_sha256"]
+    elif merge_receipt_path is not None:
+        raise ValueError("sharded collection cannot carry merge lineage")
+    elif index["layout"] == "MERGED" and work_path is not None:
+        raise ValueError("accepted merged collection requires pinned merge lineage")
     source_count = len(index["sources"])
     event_count = sum(member["events"] for member in index["sources"])
     qualification = "TEST_ONLY_DOMAIN_CLOSED" if index["state"] == "TEST_ONLY" else "NO_ACCEPTED_CLOSURE"
@@ -276,7 +290,7 @@ def admission_closure(index_path, expected_index_sha256, expected_sources_path,
         if (closure.get("schema") != "hadronization_query_collection_closure_v1" or
                 closure.get("state") != "EXTERNALLY_PINNED" or
                 closure.get("work_sha256") != expected_work_sha256 or
-                closure.get("index_sha256") != expected_index_sha256 or
+                closure.get("index_sha256") != parent_index_sha or
                 closure.get("scientific_identity_sha256") != index["scientific_identity_sha256"] or
                 closure.get("source_count") != source_count or
                 closure.get("event_count") != event_count):
@@ -305,6 +319,76 @@ def admission_closure(index_path, expected_index_sha256, expected_sources_path,
             "accepted_manifest_sha256": index["manifest_sha256"],
             "work_sha256": work_sha, "collector_closure_sha256": closure_sha,
             "external_pins_sha256": external_pins_sha}
+
+
+def _sparse_content_equal(sharded, merged):
+    """Compare the complete occupied cell domain and additive Sumw2 per tune.
+
+    Object-add can change binary64 reduction order.  A 1e-12 relative/absolute
+    tolerance bounds that arithmetic only; it never permits missing cells.
+    """
+    ROOT = _root()
+    for family in FAMILIES:
+        for tune, ordinal in sorted(sharded["tune_ordinals"].items(), key=lambda x: x[1]):
+            expected = {}
+            for shard in sharded["shards"]:
+                if not any(member["tune"] == tune for member in shard["members"]):
+                    continue
+                file = ROOT.TFile.Open(shard["query_root"]["path"], "READ")
+                if not file or file.IsZombie():
+                    raise ValueError("merge parent sparse ROOT cannot open")
+                try:
+                    for coordinates, value, variance in _cells(file.Get("sparse_" + family)):
+                        if coordinates[0] == ordinal + 1:
+                            old = expected.setdefault(coordinates, ([], []))
+                            old[0].append(value)
+                            old[1].append(variance)
+                finally:
+                    file.Close()
+            part = next(p for p in merged["partitions"] if p["tune"] == tune)
+            file = ROOT.TFile.Open(part["root"]["path"], "READ")
+            if not file or file.IsZombie():
+                raise ValueError("merge child sparse ROOT cannot open")
+            try:
+                actual = {coordinates: (value, variance)
+                          for coordinates, value, variance in _cells(file.Get("sparse_" + family))}
+            finally:
+                file.Close()
+            if set(expected) != set(actual):
+                raise ValueError("merged sparse occupied cell domain differs from shards")
+            for key, (values, variances) in expected.items():
+                if not (math.isclose(math.fsum(values), actual[key][0], rel_tol=1e-12, abs_tol=1e-12) and
+                        math.isclose(math.fsum(variances), actual[key][1], rel_tol=1e-12, abs_tol=1e-12)):
+                    raise ValueError("merged sparse cell/Sumw2 differs from shards")
+
+
+def verify_merge_lineage(index_path, expected_index_sha256, receipt_path,
+                         expected_receipt_sha256):
+    """Verify a transformation receipt against both independently pinned layouts."""
+    receipt_path = Path(receipt_path).absolute()
+    r.lower_sha(expected_receipt_sha256, "trusted merge lineage")
+    if r.sha_file(receipt_path) != expected_receipt_sha256:
+        raise ValueError("merge lineage differs from independent pin")
+    receipt = r.json_file(receipt_path)
+    r.exact_keys(receipt, {"schema", "parent_index_path", "parent_index_sha256",
+                           "merged_index_sha256", "scientific_identity_sha256",
+                           "expected_sources_sha256", "partitions"}, "merge lineage")
+    if receipt["schema"] != MERGE_SCHEMA or receipt["merged_index_sha256"] != expected_index_sha256:
+        raise ValueError("merge lineage child index differs")
+    parent = read(Path(receipt["parent_index_path"]), receipt["parent_index_sha256"])
+    child = read(index_path, expected_index_sha256)
+    if (parent["layout"] != "SHARDED" or child["layout"] != "MERGED" or
+            child["state"] != parent["state"] or
+            child["scientific_identity_sha256"] != parent["scientific_identity_sha256"] or
+            receipt["scientific_identity_sha256"] != parent["scientific_identity_sha256"] or
+            receipt["expected_sources_sha256"] != r.sha_bytes(
+                r.canonical(parent["sources"]).encode("ascii")) or
+            receipt["partitions"] != child["partitions"] or
+            {key: value for key, value in child.items() if key not in ("layout", "partitions")} !=
+            {key: value for key, value in parent.items() if key not in ("layout", "partitions")}):
+        raise ValueError("merge lineage parent/content/domain differs")
+    _sparse_content_equal(parent, child)
+    return receipt
 
 
 def source_lineage(index_path, expected_sha256, requested_tunes=None):
@@ -513,6 +597,17 @@ def main():
     verify_parser = commands.add_parser("verify")
     verify_parser.add_argument("--index", type=Path, required=True)
     verify_parser.add_argument("--expected-index-sha256", required=True)
+    admit_parser = commands.add_parser("admit")
+    admit_parser.add_argument("--index", type=Path, required=True)
+    admit_parser.add_argument("--expected-index-sha256", required=True)
+    admit_parser.add_argument("--expected-sources", type=Path, required=True)
+    admit_parser.add_argument("--expected-sources-sha256", required=True)
+    admit_parser.add_argument("--site-work", type=Path)
+    admit_parser.add_argument("--site-work-sha256")
+    admit_parser.add_argument("--collector-closure", type=Path)
+    admit_parser.add_argument("--collector-closure-sha256")
+    admit_parser.add_argument("--merge-receipt", type=Path)
+    admit_parser.add_argument("--merge-receipt-sha256")
     args = parser.parse_args()
     try:
         if args.command == "create":
@@ -522,9 +617,19 @@ def main():
             index = create(args.workspace, args.expected_content_sha256, sources,
                            args.output, args.work_root, args.test_only)
             print("COLLECTION_INDEX="+str(args.output.absolute()))
-        else:
+        elif args.command == "verify":
             index = read(args.index, args.expected_index_sha256)
             print("COLLECTION_VERIFIED="+index["scientific_identity_sha256"])
+        else:
+            proof = admission_closure(args.index, args.expected_index_sha256,
+                args.expected_sources, args.expected_sources_sha256,
+                work_path=args.site_work,
+                expected_work_sha256=args.site_work_sha256,
+                closure_path=args.collector_closure,
+                expected_closure_sha256=args.collector_closure_sha256,
+                merge_receipt_path=args.merge_receipt,
+                expected_merge_receipt_sha256=args.merge_receipt_sha256)
+            print(r.canonical(proof))
     except (OSError, ValueError, KeyError, TypeError) as error:
         print("ERROR: "+str(error), file=sys.stderr)
         return 2

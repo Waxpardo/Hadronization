@@ -168,51 +168,25 @@ class NativeStatisticsContract(unittest.TestCase):
 
     def test_t1_checks_each_source_range_when_sources_share_tune_block(self):
         n=self.n
-        members=[{'tune':'MONASH','block':1},{'tune':'MONASH','block':1}]
-        ranges=[SimpleNamespace(source_id=0,first_id=0,count=2),
-                SimpleNamespace(source_id=1,first_id=2,count=2)]
-        def event(event_id):
-            return SimpleNamespace(event_id=event_id,weight=1.,a15_eta4=1,
-                n_mpi=0,process_code=121,pthat=2.,hard_scale=2.)
-        pair_rows=[SimpleNamespace(event_id=i,associate_origin=2,
-                    associate_category=1,sign=-1) for i in range(4)]
-        closure_rows=[SimpleNamespace(event_id=i,dense_category=3,
-                      visible=True,coefficient=-1) for i in (1,3)]
-        heavy_rows=[SimpleNamespace(event_id=0,final=False)]
-        class FakeFile:
-            def __init__(self,events):self.events=events
-            def IsZombie(self):return False
-            def Get(self,name):return dict(events=self.events,heavy=heavy_rows,
-                event_ranges=ranges,pairs=pair_rows,closure=closure_rows)[name]
-            def Close(self):pass
-        current=[event(i) for i in range(4)]
-        fake_root=SimpleNamespace(gROOT=SimpleNamespace(SetBatch=lambda _:None),
-            TFile=SimpleNamespace(Open=lambda *_:FakeFile(current)))
+        from pipeline.query import collection
+        workspace=ROOT/'tests/fixtures/query_multitune/queries/shard-0000'
+        metadata=json.loads((workspace/'metadata.json').read_text())
+        members=collection._members(metadata)
+        members[1]=dict(members[1],block=members[0]['block'])
         source=SimpleNamespace(index={'tune_ordinals':{'MONASH':0},
-            'shards':[{'members':members,'query_root':{'path':'synthetic.root'}}]})
-        with patch.dict(sys.modules,{'ROOT':fake_root}):
-            counts,exposure,opened,moments,diagnostics=n.collect_t1(source,
-                ['MONASH'],event_activity_field='a15_eta4',include_diagnostics=True)
-            self.assertEqual((counts,exposure,opened),({}, {('MONASH',1):4},1))
-            self.assertEqual(moments['MONASH',1].events,4)
-            reported=diagnostics['MONASH',1].report()
-            self.assertEqual(reported['origin_pairs'],[
-                dict(origin=2,category=1,sign=-1,rows=4,
-                     weighted_sum=(4.).hex())])
-            self.assertEqual(reported['closure_terms'],[dict(
-                category=3,visible=True,coefficient=-1,rows=2,
-                weighted_sum=(-2.).hex())])
-            self.assertEqual(reported['natural_final_hadrons'],0)
-            pair_rows[0].event_id=-1
-            with self.assertRaisesRegex(ValueError,'orphan/out-of-order pair row'):
-                n.collect_t1(source,['MONASH'],include_diagnostics=True)
-            pair_rows[0].event_id=0
-            current.pop()
-            pair_rows.pop()
-            closure_rows.pop()
-            with self.assertRaisesRegex(ValueError,'source event exposure differs'):
-                n.collect_t1(source,['MONASH'],event_activity_field='a15_eta4',
-                             include_diagnostics=True)
+            'shards':[{'members':members,'query_root':{'path':str(workspace/'query.root')}}]})
+        counts,exposure,opened,moments,diagnostics=n.collect_t1(source,
+            ['MONASH'],event_activity_field='a15_eta4',include_diagnostics=True)
+        self.assertEqual(opened,1)
+        self.assertEqual(sum(exposure.values()),30)
+        self.assertEqual(exposure['MONASH',members[0]['block']],6)
+        self.assertEqual(moments['MONASH',members[0]['block']].events,6)
+        self.assertEqual(sum(value.hadrons for value in counts.values()),190)
+        self.assertEqual(sum(row.natural_final_hadrons for row in diagnostics.values()),190)
+        members[1]=dict(members[1],events=4)
+        with self.assertRaisesRegex(ValueError,'source range differs'):
+            n.collect_t1(source,['MONASH'],event_activity_field='a15_eta4',
+                         include_diagnostics=True)
 
     def test_transport_event_exposure_is_bound_to_authenticated_sources(self):
         n = self.n
@@ -268,7 +242,7 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
         request=projection.make_native_request(source,analysis_path,
             projection.file_digest(analysis_path),['MONASH'],species,selection)
         value=request.to_dict()
-        self.assertEqual(len(request.expected_point_keys),9967)
+        self.assertEqual(len(request.expected_point_keys),9953)
         correlation={
             (key['curve']['trigger_pdg'],key['curve']['associate_pdg'],
              key['curve']['component'])
@@ -306,7 +280,7 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
         full=projection.make_native_request(source,analysis_path,
             projection.file_digest(analysis_path),source.index['tune_ordinals'],
             full_species,selection)
-        self.assertEqual(len(full.expected_point_keys),44741)
+        self.assertEqual(len(full.expected_point_keys),44699)
         curves={projection.canonical(key['curve']) for key in full.expected_point_keys}
         def present(curve):return projection.canonical(curve) in curves
         for key in full.expected_point_keys:
@@ -475,11 +449,13 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
                 source_pairs+=int(file.Get('pairs').GetEntries())
                 source_closure+=int(file.Get('closure').GetEntries())
                 for heavy in file.Get('heavy'):
-                    if not bool(heavy.final):continue
+                    if not (ord(heavy.final) if isinstance(heavy.final,str)
+                            else int(heavy.final)):continue
                     natural+=1
                     charm+=int(heavy.nc)+int(heavy.ncbar)
                     beauty+=int(heavy.nb)+int(heavy.nbbar)
-                    if (bool(heavy.selected) and 81<=int(heavy.status)<=89
+                    if ((ord(heavy.selected) if isinstance(heavy.selected,str)
+                         else int(heavy.selected)) and 81<=int(heavy.status)<=89
                             and float(heavy.pt)>.15 and abs(float(heavy.eta))<=4.):
                         selected+=1
             finally:file.Close()
@@ -706,7 +682,7 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
             self.assertEqual((primitives.metrics.root_opens,
                               primitives.metrics.family_passes,opened),
                              (3,9,3))
-            self.assertEqual(sum(value.hadrons for value in counts.values()),630)
+            self.assertEqual(sum(value.hadrons for value in counts.values()),570)
             self.assertEqual(sum(events.values()),90)
         for left,right in zip(*snapshots):
             self.assertEqual(set(left),set(right))

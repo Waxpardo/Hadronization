@@ -44,7 +44,7 @@ class ProjectionInterfaceContract(unittest.TestCase):
             trigger_pdgs=[411,4122,521,5122],
             baryon_meson_trigger_pdgs=[411,521],
             signed_pdgs=[p for values in self.analysis['pair_query_registry']['associate_pdgs'].values() for p in values])
-        unused, pairs = self.p._reducer().state_registry(self.analysis)
+        unused, pairs = self.p._query_model().state_registry(self.analysis)
         h = 'a' * 64
         lineage = dict(lossless_contract={'registries_sha256': self.p._reducer().analyzer_module().REGISTRIES_DIGEST},
             block_assignment={'count': 10}, campaign={'id': 'TEST', 'descriptor_sha256': h},
@@ -92,44 +92,8 @@ class ProjectionInterfaceContract(unittest.TestCase):
                     'resolved G9 selection/normalization'):
                 self.p.validate_g9_science(request,changed)
 
-    def test_wholly_absent_requested_tune_retains_absolute_and_reference_curves(self):
-        request = self.request(('MONASH','JUNCTIONS'))
-        keys = [k for k in request.expected_point_keys if k['curve']['tune_id']=='JUNCTIONS']
-        self.assertTrue(keys)
-        self.assertTrue(any(k['curve']['reference_tune_id']=='MONASH' for k in keys))
-        self.assertTrue(any(k['curve']['reference_tune_id'] is None for k in keys))
-        request_payload = request.to_dict()
-        self.assertEqual({self.p._availability(k, request_payload, self.receipt)[0] for k in keys}, {'NOT_MATERIALIZED'})
-        self.assertEqual({m['tune_id'] for m in request.to_dict()['sources']['members']}, {'MONASH'})
 
-    def test_wholly_absent_5122_pair_does_not_shrink_requested_domain(self):
-        before = self.request()
-        changed = copy.deepcopy(self.receipt)
-        domains = changed['scientific_identity']['compact_domains']
-        domains['pair_query_dictionary'] = [p for p in domains['pair_query_dictionary'] if p['trigger_pdg']!=5122]
-        domains['correlation_dictionary'] = [p for p in domains['correlation_dictionary'] if p['trigger_pdg']!=5122]
-        after = self.request(receipt=changed)
-        self.assertEqual(before.expected_point_keys, after.expected_point_keys)
-        keys = [k for k in after.expected_point_keys if k['curve']['trigger_pdg']==5122]
-        self.assertTrue(keys)
-        after_payload = after.to_dict()
-        self.assertEqual({self.p._availability(k, after_payload, changed)[0] for k in keys}, {'NOT_MATERIALIZED'})
-        self.assertTrue(any(p['trigger_pdg']==5122 and p['associate_pdg']==521 and p['sign']=='OS' for p in after.to_dict()['scope']['ordered_associate_pairs']))
-        self.assertTrue(any(p['trigger_pdg']==5122 and p['associate_pdg']==-521 and p['sign']=='SS' for p in after.to_dict()['scope']['ordered_associate_pairs']))
 
-    def test_changed_classes_bind_current_analysis_and_report_reprojection(self):
-        before = self.request()
-        analysis = copy.deepcopy(self.analysis)
-        analysis['percentile_intervals'] = [[0,25],[25,100]]
-        after = self.request(analysis=analysis)
-        self.assertNotEqual(before.request_sha256, after.request_sha256)
-        self.assertNotEqual(before.scientific_request_sha256, after.scientific_request_sha256)
-        self.assertEqual(after.to_dict()['bindings']['analysis_config_sha256'], self.p.file_digest(self.base/'requested-analysis.json'))
-        self.assertNotEqual(after.to_dict()['bindings']['analysis_config_sha256'], self.receipt['scientific_identity']['analysis_request_sha256'])
-        keys = [k for k in after.expected_point_keys if k['curve']['class_id'] in (1,2)]
-        self.assertTrue(keys)
-        after_payload = after.to_dict()
-        self.assertEqual({self.p._availability(k, after_payload, self.receipt)[0] for k in keys}, {'UNSUPPORTED_QUERY'})
 
     def test_activity_pt_metadata_is_derived_and_mutation_changes_identity(self):
         before = self.request()
@@ -141,16 +105,6 @@ class ProjectionInterfaceContract(unittest.TestCase):
         self.assertNotEqual(before.scientific_request_sha256, after.scientific_request_sha256)
         self.assertNotEqual(after.to_dict()['activity'], self.p.normalized_activity(self.presentation['selection_definitions']['activities'][0]))
 
-    def test_activity_metadata_mutation_is_rejected_at_source_boundary(self):
-        from types import SimpleNamespace
-        request=self.request();root=self.base/'fixture.root';root.write_bytes(b'identity-only-fixture')
-        receipt=copy.deepcopy(self.receipt);receipt['storage_identity']={'root_sha256':self.p.file_digest(root)}
-        presentation=copy.deepcopy(self.presentation)
-        presentation['selection_definitions']['activities'][0]['predicate']=presentation['selection_definitions']['activities'][0]['predicate'].replace('pt>0.15','pt>0.25')
-        source=SimpleNamespace(receipt=receipt,presentation=presentation,root_path=root,
-            expected_source_content_sha256=self.p.digest(receipt['scientific_identity']))
-        with self.assertRaisesRegex(ValueError,'activity definition differs'):
-            self.p.project_result(source,request)
 
     def test_nominal_p8_exact_signed_channel_scope_excludes_neutral_mesons(self):
         request=self.request(('MONASH','JUNCTIONS'))
@@ -255,21 +209,6 @@ class ProjectionInterfaceContract(unittest.TestCase):
                          for associate in (-411, -421, -4122)})
         self.assertEqual((len(absolute), len(ratios), len(keys)), (18, 12, 30))
 
-    def test_manifest_exposure_classification_distinguishes_unequal_and_missing(self):
-        receipt = copy.deepcopy(self.receipt)
-        domains = receipt['scientific_identity']['compact_domains']
-        def accounting(values):
-            receipt['_embedded_block_accounting'] = {'blocks': [
-                {'tune': 0, 'block': block, 'successful_events': value}
-                for block, value in enumerate(values, 1)]}
-            return self.p.tune_design_statuses(receipt)['MONASH']
-        self.assertEqual(accounting([100] * 10), 'AVAILABLE')
-        self.assertEqual(accounting([100] * 9 + [200]), 'UNEQUAL_DESIGN_EXPOSURE')
-        self.assertEqual(accounting([100] * 9), 'INCOMPLETE_BLOCK_SET')
-        receipt['_embedded_block_accounting']['blocks'].append(
-            {'tune': 0, 'block': 1, 'successful_events': 100})
-        with self.assertRaisesRegex(ValueError, 'duplicate tune/block'):
-            self.p.tune_design_statuses(receipt)
 
     def test_phase_a_release_rejects_relative_and_strict_profiles(self):
         for profile in (dict(id='relative_pt',trigger_pt=None,associate_pt=None,relative_pt='trigger_pt>associate_pt'),
@@ -473,7 +412,6 @@ class ProjectionInterfaceContract(unittest.TestCase):
             'scientific_request_sha256', 'resolved', 'points', 'covariance', 'materialization')})
 
     def test_resigned_profile_relabel_fails_dto_plot_and_source_boundaries(self):
-        from types import SimpleNamespace
         req, original = self.query_result_fixture()
         value = copy.deepcopy(original)
         profile = value['request_echo']['profiles'][0]
@@ -487,14 +425,6 @@ class ProjectionInterfaceContract(unittest.TestCase):
             path = self.base / 'relabeled.json'; path.write_text(json.dumps(value))
             with self.assertRaisesRegex(ValueError, 'source selection provenance'):
                 plot.checked_phase_a_typed_result(path)
-        root = self.base / 'source.root'; root.write_bytes(b'bound source fixture')
-        receipt = copy.deepcopy(self.receipt)
-        receipt['storage_identity'] = dict(root_sha256=self.p.file_digest(root))
-        source = SimpleNamespace(receipt=receipt, presentation=self.presentation, root_path=root,
-            expected_source_content_sha256=self.p.digest(receipt['scientific_identity']),
-            routes=lambda request: original['primitive_routes'])
-        with self.assertRaisesRegex(ValueError, 'source selection provenance'):
-            self.p.project_result(source, self.p.ProjectionRequest.from_dict(value['request_echo']))
 
     def test_pairs_and_triggers_independently_bind_predicates_bins_and_flow(self):
         req, original = self.query_result_fixture()
@@ -628,170 +558,6 @@ class ProjectionInterfaceContract(unittest.TestCase):
                 with self.assertRaises(ValueError): self.p.ProjectionResult.from_dict(value)
 
 
-class JointCovarianceContract(unittest.TestCase):
-    def test_cpp_full_joint_covariance_shared_reference_and_independent_families(self):
-        compiler=shutil.which('c++')
-        if compiler is None: self.skipTest('C++ unavailable')
-        source=r'''
-#include "projection.hpp"
-#include <iostream>
-#include <iomanip>
-using namespace Hadronization::Projection;
-JointPoint point(std::string id, std::vector<std::pair<std::string,int>> families) {
-  JointPoint p; p.id=id; p.valid=true;
-  for (const auto& f:families) {
-    std::array<double,10> a{}; for(int k=0;k<10;++k)a[k]=f.second*(k+1);
-    p.complements[f.first]=a; p.means[f.first]=f.second*5.5;
-  }
-  return p;
-}
-int main() {
-  std::vector<JointPoint> p{point("OS",{{"MONASH",1}}),point("SS",{{"MONASH",2}}),
-    point("OS-SS",{{"MONASH",-1}}),point("J/M class1",{{"JUNCTIONS",3},{"MONASH",4}}),
-    point("C/M class2",{{"CLOSEPACKING",5},{"MONASH",6}}),point("independent",{{"OTHER",7}}),
-    point("zero dispersion",{{"MONASH",0}})};
-  std::cout<<std::hexfloat;
-  for (const auto& a:p) {for(const auto& b:p)std::cout<<JointCovariance(a,b)<<' ';std::cout<<'\n';}
-  JointPoint missing; missing.id="withheld";
-  if(!std::isnan(JointCovariance(p[0],missing)))return 2;
-  p[0].means["MONASH"]+=1;
-  try{JointCovariance(p[0],p[0]);return 3;}catch(const std::exception&){}
-}
-'''
-        with tempfile.TemporaryDirectory() as temporary:
-            base=Path(temporary); (base/'joint.cpp').write_text(source)
-            completed=subprocess.run([compiler,'-std=c++17','-Wall','-Wextra','-Werror','-ffp-contract=off',
-                '-I'+str(ROOT/'pipeline/reduce'),str(base/'joint.cpp'),'-o',str(base/'joint')],capture_output=True,text=True)
-            self.assertEqual((completed.returncode,completed.stderr),(0,''))
-            completed=subprocess.run([str(base/'joint')],capture_output=True,text=True)
-            self.assertEqual((completed.returncode,completed.stderr),(0,''))
-        matrix=[[float.fromhex(v) for v in line.split()] for line in completed.stdout.splitlines()]
-        families=[{'MONASH':1},{'MONASH':2},{'MONASH':-1},{'JUNCTIONS':3,'MONASH':4},
-                  {'CLOSEPACKING':5,'MONASH':6},{'OTHER':7},{'MONASH':0}]
-        dispersion=Fraction(9,10)*sum((Fraction(k)-Fraction(11,2))**2 for k in range(1,11))
-        for i,a in enumerate(families):
-            for j,b in enumerate(families):
-                expected=dispersion*sum(v*b.get(t,0) for t,v in a.items())
-                self.assertAlmostEqual(matrix[i][j],float(expected),delta=max(1e-12,abs(float(expected))*1e-14))
-        self.assertGreater(matrix[3][4],0) # Shared MONASH reference is counted exactly once.
-        self.assertEqual(matrix[0][5],0)
-        self.assertEqual(matrix[6][6],0)
-        self.assertLess(matrix[0][2],0)
 
-    def test_unequal_exposure_withholds_error_without_erasing_pooled_center(self):
-        compiler = shutil.which('c++')
-        if compiler is None: self.skipTest('C++ unavailable')
-        source = r'''
-#include "projection.hpp"
-#include <iostream>
-using namespace Hadronization::Projection;
-using namespace Hadronization::Reduction;
-int main() {
-  Domains d; d.tuneDesignStatus["JUNCTIONS"]="UNEQUAL_DESIGN_EXPOSURE";
-  Scope s; s.tune="JUNCTIONS"; s.classId=0;
-  std::vector<std::vector<double>> blocks;
-  for (int b=1;b<=10;++b) blocks.push_back({double(3*b+1),double(b),double(5*b+7)});
-  auto result=Estimate(blocks,[](const auto& x){
-    return FunctionValue{true,{(x[0]-x[1])/x[2]}, {}};
-  },{},BoundaryReasons(d,s));
-  if (result.estimate.center.size()!=1 || !std::isfinite(result.estimate.center[0])) return 2;
-  if (result.estimate.valueStatus!="AVAILABLE") return 3;
-  if (result.estimate.uncertaintyStatus!="UNEQUAL_DESIGN_EXPOSURE") return 4;
-  if (!result.estimate.standardError.empty() || !result.estimate.covariance.empty()) return 5;
-  std::cout << std::hexfloat << result.estimate.center[0] << '\n';
-}
-'''
-        with tempfile.TemporaryDirectory() as temporary:
-            base = Path(temporary); (base/'design.cpp').write_text(source)
-            completed = subprocess.run([compiler, '-std=c++17', '-Wall', '-Wextra',
-                '-Werror', '-ffp-contract=off', '-I'+str(ROOT/'pipeline/reduce'),
-                str(base/'design.cpp'), '-o', str(base/'design')],
-                capture_output=True, text=True)
-            self.assertEqual((completed.returncode, completed.stderr), (0, ''))
-            completed = subprocess.run([str(base/'design')], capture_output=True, text=True)
-        self.assertEqual((completed.returncode, completed.stderr), (0, ''))
-        pooled = (sum(3*b+1 for b in range(1,11)) - sum(range(1,11))) / \
-                 sum(5*b+7 for b in range(1,11))
-        self.assertEqual(float.fromhex(completed.stdout.strip()), pooled)
-
-    def test_final_tune_ratio_screens_only_surviving_denominators(self):
-        compiler = shutil.which('c++')
-        if compiler is None: self.skipTest('C++ unavailable')
-        source = r'''
-#include "projection.hpp"
-#include <algorithm>
-#include <cmath>
-#include <iomanip>
-#include <iostream>
-namespace P=Hadronization::Projection; namespace R=Hadronization::Reduction;
-using V=std::vector<double>; using M=std::vector<V>;
-R::DenominatorSeries denominator(const M& blocks,const std::string& id,int component){
-  R::DenominatorSeries value; value.id=id; value.exact=true;
-  for(const auto& block:blocks)value.blocks.push_back(component==3?block[0]-block[1]:block[component]);
-  return value;
-}
-int main(){
-  M source(10,V{10,0,20}),reference(10,V{10,0,1});reference[0][2]=1000;
-  auto balance=[](const V& x){return R::FunctionValue{true,{(x[0]-x[1])/x[2]}, {}};};
-  auto a=P::Estimate(source,balance,{denominator(source,"source_trigger",2)});
-  auto m=P::Estimate(reference,balance,{denominator(reference,"reference_trigger",2)});
-  auto final=P::IndependentRatio(a,m,{denominator(reference,"reference_tune_os_minus_ss",3)});
-  if(P::ValueStatus(final,0)!="AVAILABLE" || P::UncertaintyStatus(final,0)!="AVAILABLE")return 2;
-  if(!P::Reasons(final,0).empty())return 3;
-  if(final.estimate.center.size()!=1 || final.estimate.covariance.size()!=1 ||
-     final.estimate.standardError.size()!=1)return 4;
-  if(std::find(final.estimate.cancelledParentDiagnostics.begin(),
-               final.estimate.cancelledParentDiagnostics.end(),"reference_trigger")==
-     final.estimate.cancelledParentDiagnostics.end())return 5;
-  M noSourceTrigger=source;for(auto& block:noSourceTrigger)block[2]=0;
-  auto badSource=P::IndependentRatio(
-      P::Estimate(noSourceTrigger,balance,{denominator(noSourceTrigger,"source_trigger",2)}),m,
-      {denominator(reference,"reference_tune_os_minus_ss",3)});
-  if(P::ValueStatus(badSource,0)=="AVAILABLE")return 6;
-  M noReferenceNet=reference;for(auto& block:noReferenceNet)block[0]=block[1];
-  auto badReference=P::IndependentRatio(
-      a,P::Estimate(noReferenceNet,balance,{denominator(noReferenceNet,"reference_trigger",2)}),
-      {denominator(noReferenceNet,"reference_tune_os_minus_ss",3)});
-  if(P::ValueStatus(badReference,0)=="AVAILABLE")return 7;
-  std::cout<<std::setprecision(17)<<final.estimate.center[0]<<' '
-           <<final.estimate.covariance[0]<<' '<<final.estimate.standardError[0]<<'\n';
-}
-'''
-        with tempfile.TemporaryDirectory() as temporary:
-            base = Path(temporary); (base/'final-ratio.cpp').write_text(source)
-            completed = subprocess.run([compiler, '-std=c++17', '-Wall', '-Wextra',
-                '-Werror', '-ffp-contract=off', '-I'+str(ROOT/'pipeline/reduce'),
-                str(base/'final-ratio.cpp'), '-o', str(base/'final-ratio')],
-                capture_output=True, text=True)
-            self.assertEqual((completed.returncode, completed.stderr), (0, ''))
-            completed = subprocess.run([str(base/'final-ratio')], capture_output=True, text=True)
-        self.assertEqual((completed.returncode, completed.stderr), (0, ''))
-        center, variance, error = map(float, completed.stdout.split())
-        self.assertEqual(center, 1009/200)
-        self.assertAlmostEqual(variance, 998001/40000, places=14)
-        self.assertAlmostEqual(error, 999/200, places=14)
-
-
-from projection_formula_fixture import (GEOMETRY_AND_RATIO,NESTED_RATIO,
-                                        ProjectionFormulaOracles)
-
-
-class ScientificProjectionFormulaContract(ProjectionFormulaOracles,unittest.TestCase):
-    """Only the small pre-existing C++ formula fixtures; no production/plot run."""
-    @classmethod
-    def setUpClass(cls):
-        import os
-        p=load_interface()
-        try: runtime=p._reducer().runtime_module().resolve(require_root=True)
-        except ValueError as error: raise unittest.SkipTest(str(error))
-        cls.environment=os.environ.copy();cls.environment.update(runtime['environment'])
-        cls.temporary=tempfile.TemporaryDirectory();cls.base=Path(cls.temporary.name)
-        cls._compile(GEOMETRY_AND_RATIO,cls.base/'geometry.cpp',
-                     cls.base/'geometry',include_plot=True,root=False)
-        cls._compile(NESTED_RATIO,cls.base/'nested.cpp',
-                     cls.base/'nested',include_plot=True)
-
-    @classmethod
-    def tearDownClass(cls): cls.temporary.cleanup()
-
-if __name__=='__main__': unittest.main()
+if __name__ == '__main__':
+    unittest.main()

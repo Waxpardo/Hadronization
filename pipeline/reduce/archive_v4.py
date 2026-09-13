@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 import tempfile
 
-from . import projection as p
+from . import projection as p, typed_nodes
 
 SCHEMA='hadronization_self_contained_typed_root_v4'
 
@@ -292,8 +292,7 @@ def _fill(tree,holders,row):
 
 
 def _node_tree(ROOT,value):
-    from . import archive
-    stream=io.StringIO();root_id=archive.nodes(value,stream)
+    stream=io.StringIO();root_id=typed_nodes.nodes(value,stream)
     tree=ROOT.TTree('nodes','Typed deduplicated value DAG')
     identifier=array('Q',[0]);kind=ROOT.std.string();text=ROOT.std.string()
     children=ROOT.std.vector('unsigned long long')()
@@ -304,11 +303,11 @@ def _node_tree(ROOT,value):
     for line in stream.getvalue().splitlines():
         fields=line.split('\t')
         identifier[0]=int(fields[1]);kind.assign(fields[2])
-        text.assign(archive.decode(fields[3]));children.clear();keys.clear()
+        text.assign(typed_nodes.decode(fields[3]));children.clear();keys.clear()
         if fields[4]!='-':
             for item in fields[4].split(','):children.push_back(int(item))
         if fields[5]!='-':
-            for item in fields[5].split(','):keys.push_back(archive.decode(item))
+            for item in fields[5].split(','):keys.push_back(typed_nodes.decode(item))
         tree.Fill()
     return tree,root_id
 

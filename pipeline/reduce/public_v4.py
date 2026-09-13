@@ -19,6 +19,7 @@ from . import native_v4, native_v4_result, projection as p
 
 ROOT = Path(__file__).resolve().parents[2]
 ANALYSIS = ROOT / 'config/analysis.json'
+PACKAGE_SCHEMA = 'hadronization_public_v4_portable_package_v1'
 
 
 def _json(path, expected_sha, label):
@@ -38,6 +39,45 @@ def _write(path, value):
     with path.open('x', encoding='ascii', newline='\n') as stream:
         stream.write(json.dumps(value, sort_keys=True, indent=2) + '\n')
     return p.file_digest(path)
+
+
+def _package_manifest(output, report, *, collection_index, expected_sources,
+                      expected_sources_sha, site_work,
+                      site_work_sha, collector_closure, collector_closure_sha,
+                      merge_receipt, merge_receipt_sha):
+    names = ['report.json', 'numerics.root', 'admission-closure.json',
+             'native-run-receipt.json', 'source-build-ledger.json']
+    names += ['exports/' + name for name in sorted(report['exports']['files'])]
+    names += ['exports/receipt.json']
+    files = {name: {'sha256': p.file_digest(output / name),
+                    'bytes': (output / name).stat().st_size} for name in names}
+    external = [{'role': role, 'locator': str(path) if path else None,
+                 'sha256': digest, 'portable_status': 'NOT_CHECKED_EXTERNAL'}
+                for role, path, digest in (
+                    ('collection_index', collection_index, report['collection_index_sha256']),
+                    ('expected_sources', expected_sources, expected_sources_sha),
+                    ('site_work', site_work, site_work_sha),
+                    ('collector_closure', collector_closure, collector_closure_sha),
+                    ('merge_receipt', merge_receipt, merge_receipt_sha))]
+    return {'schema': PACKAGE_SCHEMA, 'files': files,
+            'science_content_sha256': report['science_content_sha256'],
+            'root_sha256': report['root']['root_sha256'],
+            'execution_attestation': external}
+
+
+def _package_file(package, name, fact):
+    if (not isinstance(name, str) or name.startswith('/') or
+            Path(name).as_posix() != name or
+            any(part in ('', '.', '..') for part in Path(name).parts)):
+        raise ValueError('portable package has an unsafe required locator')
+    path = package / name
+    p._reducer().reject_symlink_components(path, 'portable package artifact')
+    p._reducer().regular_file(path, 'portable package artifact')
+    if (set(fact) != {'sha256', 'bytes'} or type(fact['bytes']) is not int or
+            fact['bytes'] < 0 or path.stat().st_size != fact['bytes'] or
+            p.file_digest(path) != fact['sha256']):
+        raise ValueError('portable package required artifact differs: ' + name)
+    return path
 
 
 def _real_directory(path, label):
@@ -111,9 +151,9 @@ def _full_preflight(source, closure, snapshot):
         return False
     if source.index['state'] != 'EXTERNAL_ACCEPTANCE_REQUIRED':
         raise ValueError('A collection state is not releasable')
-    if (source.index['layout'] != 'MERGED' or len(source.index['shards']) != 323
-            or len(source.index['sources']) != 3000
-            or len(source.index['partitions']) != 3
+    if (source.index['layout'] != 'MERGED' or not source.index['shards']
+            or len(source.index['sources']) != closure['source_count']
+            or len(source.index['partitions']) != len(source.index['tune_ordinals'])
             or set(source.index['tune_ordinals']) !=
                 {'MONASH', 'JUNCTIONS', 'CLOSEPACKING'} or
             {part['tune'] for part in source.index['partitions']} !=
@@ -121,7 +161,7 @@ def _full_preflight(source, closure, snapshot):
             any(set(part['families']) !=
                 {'activity', 'closure', 'kinematics', 'pairs', 'triggers'}
                 for part in source.index['partitions'])):
-        raise ValueError('full v4 release requires physical MERGED 323/3000/3 collection')
+        raise ValueError('full v4 release requires complete physical MERGED collection')
     if (closure['qualification'] != 'FULL_ACCEPTED_DOMAIN_CLOSED'
             or not closure['domain_complete']
             or any(closure[key] is None for key in (
@@ -149,7 +189,7 @@ def _representative_request(source, args, analysis):
     """Bound a TEST_ONLY page-style domain without changing any formula."""
     tunes = args.tunes or list(source.index['tune_ordinals'])
     t1, _, _ = native.collect_t1(source, tunes)
-    full = p.make_native_request(source, ANALYSIS, args.analysis_sha,
+    full = p.make_native_request(source, getattr(args, 'analysis', ANALYSIS), args.analysis_sha,
         tunes, sorted({key[2] for key in t1}), _selection(args, analysis))
     payload = full.to_dict()
     preferred = [-args.charm_trigger, args.charm_trigger, -4122, 4122,
@@ -215,8 +255,9 @@ def _provenance(source, request, run, ledger, analysis, campaign):
         raise ValueError('public v4 request/source lineage differs')
     files = {row['path']: row['sha256'] for row in ledger[
         'tracked_source_files']}
-    if (files['config/analysis.json'] != req['bindings'][
-            'analysis_config_sha256'] or
+    if (files['config/analysis.json'] != source.index['analysis_sha256'] or
+            req['bindings']['analysis_config_sha256'] != run[
+                'interpretation_analysis_sha256'] or
             files['pipeline/reduce/native_engine.cpp'] != run['build'][
                 'source_sha256'] or
             files['pipeline/reduce/statistics.hpp'] != run['build'][
@@ -323,23 +364,27 @@ def run(args):
     _real_directory(output.parent, 'v4 output parent')
     if output.exists() or output.is_symlink():
         raise FileExistsError(output)
-    if Path(args.analysis).absolute() != ANALYSIS or ANALYSIS.is_symlink():
-        raise ValueError('public v4 route requires shipped config/analysis.json')
-    analysis = _json(ANALYSIS, args.analysis_sha, 'v2.2 analysis')
+    if ANALYSIS.is_symlink():
+        raise ValueError('public v4 shipped analysis is symlinked')
+    analysis = _json(args.analysis, args.analysis_sha, 'v2.2 requested analysis')
     from pipeline.query import model as model_api
-    checked, normalized_sha = model_api.checked_analysis(ANALYSIS)
+    checked, normalized_sha = model_api.checked_analysis(Path(args.analysis))
     if normalized_sha != args.analysis_sha or checked != analysis or analysis[
             'version'] != '2.2.0':
         raise ValueError('public v4 route requires normalized A v2.2 analysis')
     source = native.NativeCollection(args.collection_index,
                                      args.collection_index_sha, collection_api)
-    if source.index['analysis_sha256'] != args.analysis_sha:
-        raise ValueError('A collection/shipped analysis binding differs')
+    if source.index['analysis_sha256'] != p.file_digest(ANALYSIS):
+        raise ValueError('A collection/shipped construction analysis binding differs')
+    construction, _ = model_api.checked_analysis(ANALYSIS)
+    model_api.compatible_interpretation(construction, analysis)
     closure = native_v4.admission_closure(source, args.expected_sources,
         args.expected_sources_sha, work_path=args.site_work,
         expected_work_sha256=args.site_work_sha,
         closure_path=args.collector_closure,
-        expected_closure_sha256=args.collector_closure_sha)
+        expected_closure_sha256=args.collector_closure_sha,
+        merge_receipt_path=args.merge_receipt,
+        expected_merge_receipt_sha256=args.merge_receipt_sha)
     snapshot = _source_snapshot(source.index['state'] != 'TEST_ONLY')
     full = _full_preflight(source, closure, snapshot)
     if args.tunes and (len(args.tunes) != len(set(args.tunes)) or
@@ -374,12 +419,12 @@ def run(args):
     if request is None:
         tunes = args.tunes or list(source.index['tune_ordinals'])
         receipt = native_runner.run_diagnostic(args.collection_index,
-            args.collection_index_sha, ANALYSIS, args.analysis_sha, None,
+            args.collection_index_sha, args.analysis, args.analysis_sha, None,
             run_dir, selected_tunes=tunes,
             selection=_selection(args, analysis))
     else:
         receipt = native_runner.run_diagnostic(args.collection_index,
-            args.collection_index_sha, ANALYSIS, args.analysis_sha, request,
+            args.collection_index_sha, args.analysis, args.analysis_sha, request,
             run_dir)
     _verify_source_snapshot(snapshot)
     native_receipt_path = output / 'native-run-receipt.json'
@@ -437,6 +482,7 @@ def run(args):
         native_run_receipt_path=str(native_receipt_path),
         native_run_receipt_sha256=p.file_digest(native_receipt_path),
         collection_index_sha256=source.expected_sha256,
+        merge_lineage_sha256=args.merge_receipt_sha,
         analysis_sha256=args.analysis_sha,
         request_sha256=request.request_sha256,
         scientific_request_sha256=request.scientific_request_sha256,
@@ -449,34 +495,115 @@ def run(args):
         covariance_groups=len(cold['covariance']),
         science_content_sha256=cold['science_content_sha256'])
     report_sha = _write(output / 'report.json', report)
+    package_sha = _write(output / 'package-manifest.json',
+        _package_manifest(output, report,
+            collection_index=args.collection_index,
+            expected_sources=args.expected_sources,
+            expected_sources_sha=args.expected_sources_sha,
+            site_work=args.site_work, site_work_sha=args.site_work_sha,
+            collector_closure=args.collector_closure,
+            collector_closure_sha=args.collector_closure_sha,
+            merge_receipt=args.merge_receipt,
+            merge_receipt_sha=args.merge_receipt_sha))
     print(p.canonical(dict(root=str(root), root_sha256=written['root_sha256'],
         value_sha256=written['value_sha256'], points=len(cold['points']),
         science_content_sha256=cold['science_content_sha256'],
         campaign_state=report['campaign_state'],
-        report=str(output / 'report.json'), report_sha256=report_sha)))
+        report=str(output / 'report.json'), report_sha256=report_sha,
+        package_manifest_sha256=package_sha)))
 
 
 def _verify(args):
-    report = _json(args.report, args.report_sha, 'v4 report')
+    portable = args.mode == 'portable'
+    if portable:
+        if args.package_dir is None or args.package_manifest_sha is None:
+            raise ValueError('portable verification requires package directory and independently pinned manifest SHA')
+        package = _real_directory(args.package_dir, 'portable package directory')
+        manifest = _json(package / 'package-manifest.json',
+                         args.package_manifest_sha, 'portable package manifest')
+        if (manifest.get('schema') != PACKAGE_SCHEMA or
+                not isinstance(manifest.get('files'), dict) or
+                set(manifest) != {'schema', 'files', 'science_content_sha256',
+                                  'root_sha256', 'execution_attestation'}):
+            raise ValueError('portable package manifest schema differs')
+        files = manifest['files']
+        required = {'report.json', 'numerics.root', 'admission-closure.json',
+                    'native-run-receipt.json', 'source-build-ledger.json'}
+        if not required.issubset(files):
+            raise ValueError('portable package required locator is absent')
+        paths = {name: _package_file(package, name, fact)
+                 for name, fact in files.items()}
+        report = _json(paths['report.json'], files['report.json']['sha256'],
+                       'portable v4 report')
+        ledger_path, closure_path, native_path = (paths[name] for name in
+            ('source-build-ledger.json', 'admission-closure.json',
+             'native-run-receipt.json'))
+        root = paths['numerics.root']
+        if (args.root is not None or args.report is not None or args.report_sha is not None):
+            raise ValueError('portable verification uses package-relative artifacts only')
+    else:
+        if args.report is None or args.report_sha is None or args.root is None:
+            raise ValueError('producer verification requires root, report and independent report SHA')
+        report = _json(args.report, args.report_sha, 'v4 report')
+        ledger_path = report['source_ledger_path']
+        closure_path = report['admission_closure_path']
+        native_path = report['native_run_receipt_path']
+        root = Path(args.root).absolute()
     if report.get('schema') != 'hadronization_public_v4_numerical_report_v1':
         raise ValueError('public v4 report schema differs')
-    ledger = _json(report['source_ledger_path'],
+    ledger = _json(ledger_path,
         report['source_ledger_sha256'], 'v4 source/build ledger')
-    closure = _json(report['admission_closure_path'],
+    closure = _json(closure_path,
         report['admission_closure_sha256'], 'v4 admission closure')
-    native_receipt = _json(report['native_run_receipt_path'],
+    native_receipt = _json(native_path,
         report['native_run_receipt_sha256'], 'v4 native run receipt')
-    binary = Path(ledger['build_receipt']['binary_path'])
-    p._reducer().reject_symlink_components(binary, 'v4 native binary')
-    p._reducer().regular_file(binary, 'v4 native binary')
-    if (p.file_digest(binary) !=
-            ledger['build_receipt']['binary_sha256'] or
-            ledger['build_receipt']['native_run_receipt_sha256'] !=
-                report['native_run_receipt_sha256']):
+    if ledger['build_receipt']['native_run_receipt_sha256'] != report['native_run_receipt_sha256']:
         raise ValueError('public v4 observed build/receipt differs')
-    root = Path(args.root).absolute()
-    if root != Path(report['root']['path']).absolute():
+    if not portable:
+        binary = Path(ledger['build_receipt']['binary_path'])
+        p._reducer().reject_symlink_components(binary, 'v4 native binary')
+        p._reducer().regular_file(binary, 'v4 native binary')
+        if p.file_digest(binary) != ledger['build_receipt']['binary_sha256']:
+            raise ValueError('public v4 observed binary differs')
+        _verify_source_snapshot(ledger)
+        locator_manifest_path = Path(args.report).absolute().parent / 'package-manifest.json'
+        locator_manifest = json.loads(locator_manifest_path.read_text(encoding='utf-8'))
+        if locator_manifest.get('schema') != PACKAGE_SCHEMA:
+            raise ValueError('producer package locator manifest differs')
+        locators = {item['role']: item for item in
+                    locator_manifest['execution_attestation']}
+        if set(locators) != {'collection_index', 'expected_sources',
+                            'site_work', 'collector_closure', 'merge_receipt'}:
+            raise ValueError('producer execution locator roles differ')
+        if (locators['collection_index']['sha256'] != report['collection_index_sha256'] or
+                locators['expected_sources']['sha256'] != closure['expected_sources_sha256'] or
+                locators['site_work']['sha256'] != closure['work_sha256'] or
+                locators['collector_closure']['sha256'] != closure['collector_closure_sha256'] or
+                locators['merge_receipt']['sha256'] != report.get('merge_lineage_sha256')):
+            raise ValueError('producer execution locator pins differ from report')
+        observed_closure = collection_api.admission_closure(
+            Path(locators['collection_index']['locator']),
+            report['collection_index_sha256'],
+            Path(locators['expected_sources']['locator']),
+            closure['expected_sources_sha256'],
+            work_path=locators['site_work']['locator'],
+            expected_work_sha256=closure['work_sha256'],
+            closure_path=locators['collector_closure']['locator'],
+            expected_closure_sha256=closure['collector_closure_sha256'],
+            merge_receipt_path=locators['merge_receipt']['locator'],
+            expected_merge_receipt_sha256=report.get('merge_lineage_sha256'))
+        if observed_closure != closure:
+            raise ValueError('producer execution collection closure differs')
+    if not portable and root != Path(report['root']['path']).absolute():
         raise ValueError('public v4 report/ROOT path differs')
+    if portable and (manifest['science_content_sha256'] != report['science_content_sha256'] or
+                     manifest['root_sha256'] != report['root']['root_sha256'] or
+                     set(files) != {'report.json', 'numerics.root',
+                                    'admission-closure.json', 'native-run-receipt.json',
+                                    'source-build-ledger.json'} |
+                                    {'exports/' + name for name in report['exports']['files']} |
+                                    {'exports/receipt.json'}):
+        raise ValueError('portable package manifest/science domain differs')
     value = archive_v4.read(root, report['root']['root_sha256'],
                             report['root']['value_sha256'])
     if (value['science_content_sha256'] != report['science_content_sha256']
@@ -502,7 +629,41 @@ def _verify(args):
                 report['class_boundary_deletions'] or
             len(value['covariance']) != report['covariance_groups']):
         raise ValueError('public v4 report point/support domain differs')
-    return report, value
+    with tempfile.TemporaryDirectory(prefix='v4-export-verify-') as scratch:
+        exported = archive_v4.export(root, report['root']['root_sha256'],
+                                     report['root']['value_sha256'],
+                                     Path(scratch) / 'exports')
+        if exported != report['exports']:
+            raise ValueError('public v4 compact exports differ from numerical ROOT')
+        expected_receipt_sha = p.file_digest(Path(scratch) / 'exports' / 'receipt.json')
+    export_dir = package / 'exports' if portable else Path(report['root']['path']).parent / 'exports'
+    for name, digest in report['exports']['files'].items():
+        export_path = export_dir / name
+        if not export_path.is_file() or export_path.is_symlink() or p.file_digest(export_path) != digest:
+            raise ValueError('public v4 required compact export differs: ' + name)
+    if p.file_digest(export_dir / 'receipt.json') != expected_receipt_sha:
+        raise ValueError('public v4 export receipt differs from numerical ROOT')
+    if portable:
+        attestations = manifest['execution_attestation']
+        if (not isinstance(attestations, list) or
+                any(not isinstance(item, dict) or set(item) !=
+                    {'role', 'locator', 'sha256', 'portable_status'} or
+                    item['portable_status'] != 'NOT_CHECKED_EXTERNAL' or
+                    (item['locator'] is None) != (item['sha256'] is None)
+                    for item in attestations)):
+            raise ValueError('portable external execution attestation status differs')
+        pins = {item['role']: item['sha256'] for item in attestations}
+        if (len(pins) != len(attestations) or
+                pins != {'collection_index': report['collection_index_sha256'],
+                         'expected_sources': closure['expected_sources_sha256'],
+                         'site_work': closure['work_sha256'],
+                         'collector_closure': closure['collector_closure_sha256'],
+                         'merge_receipt': report.get('merge_lineage_sha256')}):
+            raise ValueError('portable external execution pins differ from report')
+        status = 'EXTERNAL_EXECUTION_NOT_CHECKED'
+    else:
+        status = 'PRODUCER_SOURCE_BUILD_AND_COLLECTION_CHECKED'
+    return report, value, status
 
 
 def parser():
@@ -524,6 +685,8 @@ def parser():
     command.add_argument('--site-work-sha')
     command.add_argument('--collector-closure', type=Path)
     command.add_argument('--collector-closure-sha')
+    command.add_argument('--merge-receipt', type=Path)
+    command.add_argument('--merge-receipt-sha')
     command.add_argument('--tunes', nargs='+')
     command.add_argument('--profile-id', default='inclusive')
     command.add_argument('--activity-id')
@@ -534,9 +697,12 @@ def parser():
         help='bounded all-role TEST_ONLY page-style request')
     for name in ('verify', 'explain'):
         item = sub.add_parser(name, help='cold-check typed v4 ROOT and report')
-        item.add_argument('--root', type=Path, required=True)
-        item.add_argument('--report', type=Path, required=True)
-        item.add_argument('--report-sha', required=True)
+        item.add_argument('--mode', choices=('producer', 'portable'), default='producer')
+        item.add_argument('--root', type=Path)
+        item.add_argument('--report', type=Path)
+        item.add_argument('--report-sha')
+        item.add_argument('--package-dir', type=Path)
+        item.add_argument('--package-manifest-sha')
     return top
 
 
@@ -546,16 +712,18 @@ def main(arguments=None):
         if args.command == 'run':
             run(args)
         else:
-            report, value = _verify(args)
+            report, value, verification_status = _verify(args)
             if args.command == 'explain':
                 print(json.dumps(report, sort_keys=True, indent=2))
             else:
-                print(p.canonical(dict(root=str(Path(args.root).absolute()),
+                print(p.canonical(dict(root=str((Path(args.root) if args.root else
+                    Path(args.package_dir) / 'numerics.root').absolute()),
                     root_sha256=report['root']['root_sha256'],
                     value_sha256=report['root']['value_sha256'],
                     science_content_sha256=value['science_content_sha256'],
                     points=len(value['points']),
-                    campaign_state=value['campaign_state'])))
+                    campaign_state=value['campaign_state'],
+                    verification_status=verification_status)))
         return 0
     except (OSError, ValueError, RuntimeError,
             subprocess.CalledProcessError) as error:

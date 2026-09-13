@@ -12,6 +12,9 @@ import hashlib
 import json
 import math
 import os
+import shlex
+import shutil
+import subprocess
 import tempfile
 
 G9_PT_EDGES = tuple([i / 2 for i in range(101)] +
@@ -429,6 +432,10 @@ class EventMoments:
             pthat_sum=self.pthat_sum.hex(),hard_scale_sum=self.hard_scale_sum.hex())
 
 
+def _root_byte(value):
+    return ord(value) if isinstance(value, str) and len(value) == 1 else int(value)
+
+
 @dataclass
 class RawDiagnostics:
     """Observed support-row summaries, retaining original integer categories."""
@@ -453,7 +460,7 @@ class RawDiagnostics:
         self.origin_pairs[key]=(count+1,weighted+event_weight)
 
     def add_closure(self,row,event_weight):
-        key=(int(row.dense_category),int(bool(row.visible)),int(row.coefficient))
+        key=(int(row.dense_category),int(_root_byte(row.visible)),int(row.coefficient))
         count,weighted=self.closure_terms.get(key,(0,0.0))
         self.closure_terms[key]=(count+1,weighted+event_weight*key[2])
 
@@ -468,7 +475,7 @@ class RawDiagnostics:
         self.charm_constituent_weighted_sum+=event_weight*charm
         self.beauty_constituents+=beauty
         self.beauty_constituent_weighted_sum+=event_weight*beauty
-        if bool(row.selected) and 81<=int(row.status)<=89 and \
+        if _root_byte(row.selected) and 81<=int(row.status)<=89 and \
                 float(row.pt)>.15 and abs(float(row.eta))<=4.:
             self.strict_selected_final_hadrons+=1
             self.strict_selected_final_weighted_sum+=event_weight
@@ -518,152 +525,177 @@ def _aligned_sparse_bin(axis, coordinate, edges):
     return first
 
 
-def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=False,
-               event_activity_field=None, include_diagnostics=False):
-    """Stream event weights and natural-final heavy rows in event order.
+def _compile_support_scan(work_root):
+    source = Path(__file__).with_name('support_scan.cpp')
+    root_config = os.environ.get('ROOT_CONFIG') or shutil.which('root-config')
+    compiler = os.environ.get('CXX') or shutil.which('c++')
+    if not root_config or not compiler:
+        raise ValueError('compiled exact-support reader requires ROOT and C++ compiler')
+    work_root = Path(work_root).absolute()
+    work_root.mkdir(parents=True, exist_ok=True)
+    cflags = shlex.split(subprocess.check_output([root_config, '--cflags'], text=True))
+    libraries = shlex.split(subprocess.check_output([root_config, '--libs'], text=True))
+    identity = hashlib.sha256(json.dumps([hashlib.sha256(source.read_bytes()).hexdigest(),
+        compiler, cflags, libraries], sort_keys=True).encode()).hexdigest()
+    binary = work_root / ('support-scan-' + identity[:20])
+    if not binary.is_file():
+        command = [compiler, *cflags, '-O2', '-Wall', '-Wextra', '-Wpedantic',
+            '-Werror', '-ffp-contract=off', str(source), '-o', str(binary), *libraries]
+        result = subprocess.run(command, capture_output=True, text=True)
+        if result.returncode or result.stdout or result.stderr:
+            raise ValueError('compiled exact-support reader build failed: ' +
+                             result.stdout + result.stderr)
+    return binary
 
-    Only one event and its heavy rows are live. The exact support shard remains
-    the source; no selected-final G9 or pair-acceptance predicate is applied.
-    """
-    import ROOT
-    ROOT.gROOT.SetBatch(True)
+
+def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=False,
+               event_activity_field=None, include_diagnostics=False, work_root=None):
+    """One compiled exact-support pass for additive T1, exposure and diagnostics."""
     selected_tunes = set(selected_tunes)
-    if selected_tunes - set(source.index['tune_ordinals']):
+    if not selected_tunes or selected_tunes - set(source.index['tune_ordinals']):
         raise ValueError('T1 requested an absent tune')
-    if event_activity_field is not None and event_activity_field not in (
-            'a15_eta4','a15_eta1'):
+    if event_activity_field not in (None, 'a15_eta4', 'a15_eta1'):
         raise ValueError('T1 event accounting activity field differs')
-    result = {}
-    event_totals = {}
-    boundary = {}
-    moments = {}
-    diagnostics = {}
-    support_upper = {'activity':0,'triggers':0,'pairs':0,'kinematics':0}
-    if boundary_axes is not None:
-        if set(boundary_axes) != {'pt','eta','phi'}:
-            raise ValueError('G9 exact boundary axes differ')
-        if tuple(boundary_axes['pt']) != G9_PT_EDGES:
-            raise ValueError('G9 historical pT axis differs')
-    opened = 0
-    for shard in source.index['shards']:
-        members = shard['members']
-        if not any(m['tune'] in selected_tunes for m in members):
-            continue
-        file = ROOT.TFile.Open(shard['query_root']['path'],'READ')
-        if not file or file.IsZombie():
-            raise ValueError('T1 support shard cannot open')
-        opened += 1
-        try:
-            events,heavy,ranges = (file.Get(name) for name in
-                                    ('events','heavy','event_ranges'))
-            if not events or not heavy or not ranges:
-                raise ValueError('T1 exact support trees are absent')
-            if include_diagnostics:
-                pairs,closure=file.Get('pairs'),file.Get('closure')
-                if not pairs or not closure:
-                    raise ValueError('T1 origin/closure support trees are absent')
-                remaining_pairs,remaining_closure=iter(pairs),iter(closure)
-                pair_row=next(remaining_pairs,None)
-                closure_row=next(remaining_closure,None)
-            if row_upper_bounds:
-                for family,tree_name in (('activity','events'),
-                    ('triggers','triggers'),('pairs','pairs'),('kinematics','heavy')):
-                    tree=file.Get(tree_name)
-                    if not tree:
-                        raise ValueError('native support row-count tree is absent')
-                    support_upper[family] += int(tree.GetEntries())
-            intervals = []
-            for row in ranges:
-                local = int(row.source_id)
-                if not 0 <= local < len(members):
-                    raise ValueError('T1 local source mapping differs')
-                intervals.append((int(row.first_id),int(row.first_id)+int(row.count),
-                                  members[local]))
-            intervals.sort(key=lambda item:item[0])
-            if any(a[1] > b[0] for a,b in zip(intervals,intervals[1:])):
-                raise ValueError('T1 event ranges overlap')
-            remaining = iter(heavy)
-            current = next(remaining,None)
-            range_index = 0
-            observed_ranges = [0] * len(intervals)
-            previous_event = -1
-            for event in events:
-                event_id = int(event.event_id)
-                if event_id <= previous_event:
-                    raise ValueError('T1 event order differs')
-                previous_event = event_id
-                while range_index < len(intervals) and event_id >= intervals[range_index][1]:
-                    range_index += 1
-                if range_index == len(intervals) or event_id < intervals[range_index][0]:
-                    raise ValueError('T1 event lacks admitted source range')
-                member = intervals[range_index][2]
-                observed_ranges[range_index] += 1
-                weight = float(event.weight)
-                if not math.isfinite(weight):
-                    raise ValueError('T1 event weight is nonfinite')
-                key = (member['tune'],member['block'])
-                if member['tune'] in selected_tunes:
-                    event_totals[key] = event_totals.get(key,0)+1
-                    if event_activity_field is not None:
-                        moments.setdefault(key,EventMoments()).add(
-                            event,weight,event_activity_field)
-                if include_diagnostics:
-                    for current_row,aux_remaining,kind in (
-                            (pair_row,remaining_pairs,'pair'),
-                            (closure_row,remaining_closure,'closure')):
-                        if current_row is not None and int(current_row.event_id)<event_id:
-                            raise ValueError('T1 orphan/out-of-order '+kind+' row')
-                        while current_row is not None and int(current_row.event_id)==event_id:
-                            if member['tune'] in selected_tunes:
-                                summary=diagnostics.setdefault(key,RawDiagnostics())
-                                if kind=='pair':summary.add_pair(current_row,weight)
-                                else:summary.add_closure(current_row,weight)
-                            current_row=next(aux_remaining,None)
-                        if kind=='pair':pair_row=current_row
-                        else:closure_row=current_row
-                while current is not None and int(current.event_id) == event_id:
-                    if bool(current.final) and member['tune'] in selected_tunes:
-                        if include_diagnostics:
-                            diagnostics.setdefault(key,RawDiagnostics()).add_heavy(
-                                current,weight)
-                        state = (member['tune'],member['block'],int(current.pdg))
-                        result.setdefault(state,T1Counts()).add(current,weight)
-                        if (boundary_axes is not None and bool(current.selected) and
-                                81 <= int(current.status) <= 89 and
-                                float(current.pt) == .15 and
-                                abs(float(current.eta)) <= 4.):
-                            for axis_name in ('pt','eta','phi'):
-                                bin_id = _histogram_bin(float(getattr(current,axis_name)),
-                                                        boundary_axes[axis_name])
-                                boundary.setdefault(state+(axis_name,bin_id),
-                                                    AdditiveCell()).add_exact(weight)
-                    current = next(remaining,None)
-                if current is not None and int(current.event_id) < event_id:
-                    raise ValueError('T1 orphan/out-of-order heavy row')
-            if current is not None:
-                raise ValueError('T1 heavy rows remain after final event')
-            if include_diagnostics and (pair_row is not None or closure_row is not None):
-                raise ValueError('T1 origin/closure rows remain after final event')
-            for (begin,end,_),observed in zip(intervals,observed_ranges):
-                if observed != end-begin:
-                    raise ValueError('T1 source event exposure differs')
-        finally:
-            file.Close()
-    if event_activity_field is not None:
-        if set(moments)!=set(event_totals) or any(
-                moments[key].events!=events for key,events in event_totals.items()):
-            raise ValueError('T1 event moments differ from authenticated exposure')
-    if boundary_axes is None:
-        if row_upper_bounds:
-            output=(result,event_totals,opened,support_upper)
-        else:output=(result,event_totals,opened)
-        if event_activity_field is not None:output+=(moments,)
-        return output+(diagnostics,) if include_diagnostics else output
-    if row_upper_bounds:
-        output=(result,event_totals,boundary,opened,support_upper)
-    else:output=(result,event_totals,boundary,opened)
-    if event_activity_field is not None:output+=(moments,)
-    return output+(diagnostics,) if include_diagnostics else output
+    if boundary_axes is not None and (set(boundary_axes) != {'pt', 'eta', 'phi'} or
+                                      tuple(boundary_axes['pt']) != G9_PT_EDGES):
+        raise ValueError('G9 exact boundary axes differ')
+    if work_root is None:
+        temporary = tempfile.TemporaryDirectory(prefix='hadronization-support-')
+        work = Path(temporary.name)
+    else:
+        temporary = None
+        work = Path(work_root).absolute()
+        work.mkdir(parents=True, exist_ok=True)
+    try:
+        binary = _compile_support_scan(work)
+        mapping = work / 'support-map.tsv'
+        output = work / 'support-scan.tsv'
+        for path in (mapping, output):
+            if path.exists() or path.is_symlink():
+                raise FileExistsError(path)
+        included = [shard for shard in source.index['shards']
+                    if any(member['tune'] in selected_tunes for member in shard['members'])]
+        with mapping.open('x', encoding='utf-8', newline='\n') as stream:
+            for shard in included:
+                root = shard['query_root']['path']
+                if '\t' in root or '\n' in root or ' ' in root:
+                    raise ValueError('support ROOT path cannot enter compiled map')
+                stream.write('SHARD\t' + root + '\n')
+                for local, member in enumerate(shard['members']):
+                    for token in (member['tune'],):
+                        if not token or any(char.isspace() for char in token):
+                            raise ValueError('support tune token differs')
+                    stream.write('MEMBER\t{}\t{}\t{}\t{}\n'.format(
+                        local, member['tune'], member['block'], member['events']))
+        field = 'eta1' if event_activity_field == 'a15_eta1' else 'eta4'
+        completed = subprocess.run([str(binary), str(mapping), field, str(output)],
+                                   capture_output=True, text=True)
+        if completed.returncode or completed.stdout or completed.stderr:
+            raise ValueError('compiled exact-support reader failed: ' +
+                             completed.stdout + completed.stderr)
+        result, event_totals, moments, diagnostics = {}, {}, {}, {}
+        boundaries = {}
+        opened = None
+        upper = {}
+        seen = set()
+        with output.open(encoding='ascii') as stream:
+            if stream.readline().rstrip('\n') != 'hadronization_support_scan_v1':
+                raise ValueError('compiled exact-support output schema differs')
+            for raw in stream:
+                fields = raw.rstrip('\n').split('\t')
+                if fields == ['END']:
+                    break
+                kind = fields[0]
+                if kind == 'OPEN' and len(fields) == 2:
+                    opened = int(fields[1])
+                elif kind == 'UPPER' and len(fields) == 3:
+                    upper[fields[1]] = int(fields[2])
+                elif kind == 'MOMENT' and len(fields) == 9:
+                    key = (fields[1], int(fields[2]))
+                    if key in moments:
+                        raise ValueError('duplicate exact event moment')
+                    m = EventMoments()
+                    m.events = int(fields[3])
+                    (m.sumw, m.sumw2, m.sumabsw, m.pthat_sum,
+                     m.hard_scale_sum) = tuple(float.fromhex(x) for x in fields[4:9])
+                    moments[key] = m
+                    event_totals[key] = m.events
+                elif kind in ('ACTIVITY', 'NMPI', 'PROCESS') and len(fields) == 5:
+                    key = (fields[1], int(fields[2]))
+                    target = {'ACTIVITY': 'activity_counts', 'NMPI': 'n_mpi_counts',
+                              'PROCESS': 'process_counts'}[kind]
+                    bucket = getattr(moments[key], target)
+                    value = int(fields[3])
+                    if value in bucket:
+                        raise ValueError('duplicate exact event category')
+                    bucket[value] = int(fields[4])
+                elif kind == 'T1' and len(fields) == 10:
+                    key = (fields[1], int(fields[2]), int(fields[3]))
+                    if key in result:
+                        raise ValueError('duplicate exact T1 key')
+                    result[key] = T1Counts(hadrons=int(fields[4]),
+                        charm_constituents=int(fields[5]), beauty_constituents=int(fields[6]),
+                        weighted_hadrons=float.fromhex(fields[7]),
+                        weighted_charm_constituents=float.fromhex(fields[8]),
+                        weighted_beauty_constituents=float.fromhex(fields[9]))
+                elif kind == 'DIAG' and len(fields) == 11:
+                    key = (fields[1], int(fields[2]))
+                    if key in diagnostics:
+                        raise ValueError('duplicate exact diagnostic key')
+                    diagnostics[key] = RawDiagnostics(
+                        natural_final_hadrons=int(fields[3]),
+                        natural_final_weighted_sum=float.fromhex(fields[4]),
+                        charm_constituents=int(fields[5]),
+                        charm_constituent_weighted_sum=float.fromhex(fields[6]),
+                        beauty_constituents=int(fields[7]),
+                        beauty_constituent_weighted_sum=float.fromhex(fields[8]),
+                        strict_selected_final_hadrons=int(fields[9]),
+                        strict_selected_final_weighted_sum=float.fromhex(fields[10]))
+                elif kind in ('ORIGIN', 'CLOSURE') and len(fields) == 8:
+                    key = (fields[1], int(fields[2]))
+                    summary = diagnostics.setdefault(key, RawDiagnostics())
+                    grouping = summary.origin_pairs if kind == 'ORIGIN' else summary.closure_terms
+                    group = (int(fields[3]), int(fields[4]), int(fields[5]))
+                    if group in grouping:
+                        raise ValueError('duplicate exact diagnostic group')
+                    grouping[group] = (int(fields[6]), float.fromhex(fields[7]))
+                elif kind == 'BOUNDARY' and len(fields) == 8:
+                    if boundary_axes is not None and fields[1] in selected_tunes:
+                        state = (fields[1], int(fields[2]), int(fields[3]))
+                        for axis_name, coordinate in zip(('pt', 'eta', 'phi'), fields[4:7]):
+                            bin_id = _histogram_bin(float.fromhex(coordinate),
+                                                    boundary_axes[axis_name])
+                            boundaries.setdefault(state + (axis_name, bin_id),
+                                                  AdditiveCell()).add_exact(float.fromhex(fields[7]))
+                else:
+                    raise ValueError('compiled exact-support output record differs')
+                seen.add(kind)
+            else:
+                raise ValueError('compiled exact-support output lacks END')
+        if opened != len(included) or set(upper) != {'activity', 'triggers', 'pairs', 'kinematics'}:
+            raise ValueError('compiled exact-support input coverage differs')
+        expected = {(m['tune'], m['block']) for shard in included
+                    for m in shard['members'] if m['tune'] in selected_tunes}
+        if expected != {key for key in moments if key[0] in selected_tunes}:
+            raise ValueError('compiled exact-support tune/block exposure differs')
+        result = {key: row for key, row in result.items() if key[0] in selected_tunes}
+        event_totals = {key: row for key, row in event_totals.items() if key[0] in selected_tunes}
+        moments = {key: row for key, row in moments.items() if key[0] in selected_tunes}
+        diagnostics = {key: row for key, row in diagnostics.items() if key[0] in selected_tunes}
+        if boundary_axes is None:
+            value = (result, event_totals, opened, upper) if row_upper_bounds else (
+                result, event_totals, opened)
+        else:
+            value = (result, event_totals, boundaries, opened, upper) if row_upper_bounds else (
+                result, event_totals, boundaries, opened)
+        if event_activity_field is not None:
+            value += (moments,)
+        if include_diagnostics:
+            value += (diagnostics,)
+        return value
+    finally:
+        if temporary is not None:
+            temporary.cleanup()
 
 
 @dataclass

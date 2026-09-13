@@ -36,14 +36,13 @@ def require_full_campaign_input(source,value):
         return
     if (source.index['layout']!='MERGED' or
             source.index['state']!='EXTERNAL_ACCEPTANCE_REQUIRED' or
-            len(source.index['shards'])!=323 or
-            len(source.index['sources'])!=3000 or
-            len(source.index['partitions'])!=3 or
+            not source.index['shards'] or
+            len(source.index['partitions'])!=len(source.index['tune_ordinals']) or
             set(source.index['tune_ordinals'])!=
                 {'MONASH','JUNCTIONS','CLOSEPACKING'} or
             set(value['scope']['ordered_tunes'])!=
                 {'MONASH','JUNCTIONS','CLOSEPACKING'}):
-        raise ValueError('full paper result requires the authenticated MERGED 323-shard/3000-source three-tune A collection')
+        raise ValueError('full paper result requires the authenticated complete MERGED three-tune A collection')
 
 
 def native_point_query(request,source,path):
@@ -576,11 +575,18 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
     if collection_api is None:collection_api=_load('native_runner_collection','pipeline/query/collection.py')
     if model_api is None:model_api=_load('native_runner_model','pipeline/query/model.py')
     source=n.NativeCollection(index_path,index_sha256,collection_api)
-    if sha(analysis_path)!=analysis_sha256 or source.index['analysis_sha256']!=analysis_sha256:
-        raise ValueError('native analysis bytes/index binding differs')
+    if sha(analysis_path)!=analysis_sha256:
+        raise ValueError('native requested analysis bytes differ from pin')
     analysis,validated_sha=model_api.checked_analysis(Path(analysis_path))
     if validated_sha!=analysis_sha256:
         raise ValueError('A normalized analysis digest differs')
+    construction_path=Path(source.index['shards'][0]['workspace_manifest']['path']).parent/'analysis.json'
+    if sha(construction_path)!=source.index['analysis_sha256']:
+        raise ValueError('query construction analysis bytes/index binding differs')
+    construction,construction_sha=model_api.checked_analysis(construction_path)
+    if construction_sha!=source.index['analysis_sha256']:
+        raise ValueError('query construction normalized model differs')
+    compatibility=model_api.compatible_interpretation(construction,analysis)
     support_prepared=None;pre_support_seconds=0.0
     if request is None:
         if selected_tunes is None or selection is None:
@@ -596,7 +602,8 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         before_support=time.perf_counter()
         support_prepared=n.collect_t1(source,selected_tunes,None,
             row_upper_bounds=True,event_activity_field=selected_activity[
-                'physical_field'],include_diagnostics=True)
+                'physical_field'],include_diagnostics=True,
+            work_root=work/'support-scan')
         pre_support_seconds=time.perf_counter()-before_support
         species=sorted({key[2] for key in support_prepared[0]})
         request=p.make_native_request(source,analysis_path,analysis_sha256,
@@ -631,11 +638,14 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         if p.normalized_activity(item)==value['activity']),None)
     if activity is None:
         raise ValueError('native requested activity differs from A normalized model')
+    expected_classes=[[analysis['integrated_interval'][0],analysis['integrated_interval'][1]]]+analysis['percentile_intervals']
+    if [list(map(p.number,item['percentile_interval'])) for item in value['classes']] != expected_classes:
+        raise ValueError('native requested classes differ from pinned analysis recipe')
     registered={
         (item['trigger_pdg'],item['associate_pdg']):(
             item['reference_meson_pdg'],
             'OS' if item['sign']==-1 else 'SS',item['sector'].upper())
-        for item in p._reducer().state_registry(analysis)[1]
+        for item in model_api.state_registry(analysis)[1]
         if item['trigger_pdg'] in value['scope']['ordered_triggers']}
     scoped={
         (item['trigger_pdg'],item['associate_pdg']):(
@@ -655,7 +665,8 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
     if support_prepared is None:
         t1,events,support_opens,support_upper,event_moments,raw_diagnostics=n.collect_t1(
             source,tunes,None,row_upper_bounds=True,
-            event_activity_field=activity['physical_field'],include_diagnostics=True)
+            event_activity_field=activity['physical_field'],include_diagnostics=True,
+            work_root=work/'support-scan')
     else:
         t1,events,support_opens,support_upper,event_moments,raw_diagnostics=support_prepared
     support_done=time.perf_counter()
@@ -701,6 +712,9 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         analyzed_source_scientific_content_digests=lineage['analyzed_source_scientific_content_digests'],
         request_sha256=typed.request_sha256,
         scientific_request_sha256=typed.scientific_request_sha256,
+        interpretation_analysis_sha256=analysis_sha256,
+        construction_analysis_sha256=source.index['analysis_sha256'],
+        interpretation_compatibility=compatibility,
         request_path=str(request_path),request_file_sha256=sha(request_path),
         primitive_transport=primitive_receipt,primitive_transport_sha256=sha(primitive_path),
         point_transport=query_receipt,
@@ -732,31 +746,3 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
             g9=g9_done-support_done,engine=finished-g9_done),
         scratch_transport_bytes=scratch_bytes,
         build=build)
-
-
-def run_paper_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
-                         selected_tunes,selection,work):
-    """One-pass exact-support paper diagnostic with cold ROOT and exports.
-
-    The returned package remains TEST_ONLY diagnostic.  It does not claim the
-    release ProjectionResult primitive/denominator receipts or campaign state.
-    """
-    from pipeline.reduce import native_archive
-    work=Path(work).absolute()
-    receipt=run_diagnostic(index_path,index_sha256,analysis_path,
-        analysis_sha256,None,work,selected_tunes=selected_tunes,
-        selection=selection)
-    request=p.ProjectionRequest.from_dict(json.loads(Path(receipt[
-        'request_path']).read_text(encoding='ascii')),cold=True)
-    root=native_archive.write(receipt['diagnostic_path'],request,index_sha256,
-                              work/'numerics.root')
-    exports=native_archive.export_tables(root['path'],root['root_sha256'],
-        work/'points.csv',work/'summary.tex',work/'missing.csv')
-    manifest=dict(schema='hadronization_native_paper_diagnostic_package_v1_TEST_ONLY',
-        state='TEST_ONLY_DIAGNOSTIC_NOT_RELEASE_DTO',diagnostic=receipt,
-        typed_root=root,exports=exports)
-    path=work/'manifest.json'
-    if path.exists() or path.is_symlink():raise FileExistsError(path)
-    with path.open('x',encoding='ascii',newline='\n') as stream:
-        stream.write(p.canonical(manifest)+'\n')
-    return manifest

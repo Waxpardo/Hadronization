@@ -117,7 +117,8 @@ def collection_binding(source):
 
 def admission_closure(source, expected_sources_path, expected_sources_sha256,
                       *, work_path=None, expected_work_sha256=None,
-                      closure_path=None, expected_closure_sha256=None):
+                      closure_path=None, expected_closure_sha256=None,
+                      merge_receipt_path=None, expected_merge_receipt_sha256=None):
     """Obtain A's independently pinned exact-domain/site admission proof."""
     if not hasattr(source.api, 'admission_closure'):
         raise ValueError('A query collection has no admission closure verifier')
@@ -126,7 +127,9 @@ def admission_closure(source, expected_sources_path, expected_sources_sha256,
         expected_sources_path,expected_sources_sha256,
         work_path=work_path,expected_work_sha256=expected_work_sha256,
         closure_path=closure_path,
-        expected_closure_sha256=expected_closure_sha256)
+        expected_closure_sha256=expected_closure_sha256,
+        merge_receipt_path=merge_receipt_path,
+        expected_merge_receipt_sha256=expected_merge_receipt_sha256)
     p.validate(receipt,'AdmissionClosureV4')
     if (receipt['collection_index_sha256']!=source.expected_sha256 or
             receipt['collection_scientific_identity_sha256']!=source.index[

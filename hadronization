@@ -178,7 +178,7 @@ def prepare_condor(arguments):
 
 
 def reduce(arguments):
-    command = [sys.executable, str(ROOT / "pipeline/reduce/run.py")] + arguments
+    command = [sys.executable, "-m", "pipeline.reduce.public_v4"] + arguments
     return subprocess.run(command, cwd=str(ROOT)).returncode
 
 
