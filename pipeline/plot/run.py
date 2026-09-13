@@ -647,7 +647,14 @@ def join_ratio_pads(pages):
                 # Keep the joined border, but separate the upper 0 and
                 # comparison 1.6 y labels at manuscript width.
                 lower['y_range'][1]=max(lower['y_range'][1],1.8)
-            if page['role'].startswith('balancing.') or lower_id=='g9.ratio':
+            if page['role']=='balancing.baryon_meson.activity':
+                # The densely labeled P8 y axes need breathing room at the
+                # absolute/comparison seam; both scientific ranges stay whole.
+                upper['geometry'][1]=lower['geometry'][3]+.015
+                upper['margins'][2]=.05
+                lower['margins'][3]=.04
+                lower['geometry'][1]=.08
+            elif page['role'].startswith('balancing.'):
                 lower['geometry'][1]=.08
 
 def correlation_reference_partners(pairs, trigger):
@@ -780,26 +787,49 @@ def focused_extreme_pages(pages, context, padding):
         result.append(page)
     return result
 
-def projection_materialization(payload):
-    """Collapse point materialization into deterministic render-role status."""
-    materialization = {canonical(item["point_key"]): item
-                       for item in payload["materialization"]}
-    groups = {}
-    for point in payload["points"]:
-        curve = point["key"]["curve"]
-        key = (curve["role_id"], curve["trigger_pdg"])
-        groups.setdefault(key, []).append(materialization[canonical(
-            point["key"])])
-    statuses = []
-    for (role, trigger), items in sorted(
-            groups.items(), key=lambda item: canonical(item[0])):
-        missing = [item for item in items if item["status"] != "PRESENT"]
-        statuses.append(SimpleNamespace(
-            role_id=role, trigger_pdg=trigger,
-            status="AVAILABLE" if not missing else "NOT_MATERIALIZED",
-            reason="" if not missing else ",".join(sorted({reason
-                for item in missing for reason in item["reason_codes"]}))))
-    return statuses
+def typed_panel_status(context, rows):
+    """Summarize saved materialization and estimator statuses for a blank pad."""
+    if not rows:
+        return 'NOT_MATERIALIZED', ''
+    records = [context.materialization_by_semantic_id[row['semantic_id']]
+               for row in rows]
+    statuses = {item['status'] for item in records}
+    if statuses == {'PRESENT'}:
+        status = ('PRESENT_UNDEFINED'
+                  if {row['value_status'] for row in rows} == {'UNDEFINED'}
+                  else 'PRESENT_NO_DRAWABLE_CENTER')
+    elif statuses == {'NOT_MATERIALIZED'}:
+        status = 'NOT_MATERIALIZED'
+    elif statuses == {'UNSUPPORTED_QUERY'}:
+        status = 'UNSUPPORTED_QUERY'
+    else:
+        status = 'PARTIAL_MATERIALIZATION'
+    typed_statuses = sorted({row['value_status'] for row in rows} |
+                            {row['uncertainty_status'] for row in rows})
+    # Retain the exact source-qualified codes on every point and in ROOT.
+    # A facet only needs their distinct typed cause, not one repeated code
+    # per source, which otherwise runs across adjacent pads.
+    reasons = sorted({reason.split(':', 1)[0] for row in rows
+                      for reason in row['reasons'].split(',') if reason} |
+                     {reason.split(':', 1)[0] for item in records
+                      for reason in item['reason_codes']})
+    return status, '; '.join(typed_statuses + reasons)
+
+
+def compact_paper_status_note(status, note):
+    """Fit a typed cause in narrow paper facets; point codes remain exact."""
+    codes = [code for code in note.split('; ') if code]
+    if status == 'PRESENT_UNDEFINED':
+        codes = [code for code in codes
+                 if code not in ('UNDEFINED', 'UNDEFINED_CENTER')]
+    captions = {'WITHHELD_UNCERTAINTY': 'SE withheld',
+                'DENOMINATOR_NUMERICALLY_UNRESOLVED':
+                    'denominator unresolved'}
+    readable = [captions.get(code, code.replace('_', ' ').lower())
+                for code in codes]
+    if len(readable) > 2:
+        readable = readable[:2] + [str(len(readable)-2)+' more codes in ROOT']
+    return ', '.join(readable)
 
 
 def partial_numerics(value):
@@ -895,17 +925,16 @@ def apply_cold_page_style(pages, context):
     for page in pages:
         if page['role']=='multiplicity.composite':
             page['title']=context.target_analysis_caption
-        else:
+        elif page['role'] != 'spectra.signed_heavy':
             page['title']=''
-            if page['role']!='spectra.signed_heavy':
-                science=(getattr(context, 'pair_selection_caption', '')
-                         if page['role'].startswith(('balancing.', 'correlations.'))
-                         else '')
-                teaching=any(panel['id'].startswith('correlation.teaching.')
-                             for panel in page.get('panels', []))
-                page['information']=(
-                    (science+'; ' if science else '')+
-                    CORRELATION_CENTER_ONLY_DISCLOSURE) if teaching else science
+            science=(getattr(context, 'pair_selection_caption', '')
+                     if page['role'].startswith(('balancing.', 'correlations.'))
+                     else '')
+            teaching=any(panel['id'].startswith('correlation.teaching.')
+                         for panel in page.get('panels', []))
+            page['information']=(
+                (science+'; ' if science else '')+
+                CORRELATION_CENTER_ONLY_DISCLOSURE) if teaching else science
         page['scientific_header']=(
             'TEST_ONLY / SYNTHETIC / PARTIAL_SAMPLE'
             if context.numerics_schema == 'hadronization_projection_result_v4'
@@ -1198,6 +1227,11 @@ def cold_drawing_inputs(payload, config):
         raise ValueError("numerical campaign state differs")
     event_count = sum(item["count"] for item in
                       request["sources"]["expected_events_by_tune"])
+    materialization_by_key = {canonical(item['point_key']): item
+                              for item in payload['materialization']}
+    materialization_by_semantic_id = {
+        point['semantic_id']: materialization_by_key[canonical(point['key'])]
+        for point in payload['points']}
     context = SimpleNamespace(
         cold=True, typed=True, request_id=payload["request_sha256"],
         numerics_schema=payload['schema'],
@@ -1207,7 +1241,7 @@ def cold_drawing_inputs(payload, config):
         pair_selection_caption=pair_selection_caption,
         activity_id=activity_id, public_rows=rows,
         activity_selection=activity,
-        materialization=projection_materialization(payload),
+        materialization_by_semantic_id=materialization_by_semantic_id,
         classes=classes,
         block_ids=request["statistics"]["block_ids"],
         events=event_count,
@@ -1732,20 +1766,16 @@ def drawing_plan(projection, manifest, config):
                 margins=[.16,.045,.0,.12]
                 legend=[.76,.765,.95,.885]
             if name=='lower.ratio': margins=[.16,.045,.34,.0]
-            panel_trigger=(name.split('.')[2] if name.startswith('correlation.')
-                           else name.rsplit('.',1)[-1])
-            materialization=next((item for item in context.materialization
-                                  if item.role_id==role and
-                                  (item.trigger_pdg is None or
-                                   str(item.trigger_pdg)==panel_trigger)),None)
-            status='AVAILABLE' if valid else (
-                materialization.status if materialization else 'UNAVAILABLE')
-            if (not valid and context.numerics_schema ==
-                    'hadronization_projection_result_v4' and
-                    partial_numerics(context)):
-                status = 'NOT_MATERIALIZED'
-            if not valid and materialization and materialization.reason:
-                note=materialization.reason
+            if valid:
+                status='AVAILABLE'
+            else:
+                status, note = typed_panel_status(context, members)
+                note = compact_paper_status_note(status, note)
+                if family=='balancing' and name.startswith('lower.'):
+                    # The comparison pad is too shallow for both status and
+                    # cause text beside categorical labels. Its point codes
+                    # remain exact in the ROOT and drawing record.
+                    note=''
             panel={'id':name,'status':status,'log_y':log_y,'log_x':False,'geometry':geometry,
                    'x_range':xr,'y_range':yr,'title':options.get('title',''),'x_title':options['x_title'],'y_title':options['y_title'],
                    'note':note,'series':series,'guides':[],'ticks':ticks,'margins':margins,'legend':legend,'reuse':None,
@@ -1916,6 +1946,10 @@ def g9_drawing_pages(context, rows, config, header, information, labels):
         if x_low >= x_high:
             raise ValueError('G9 display axis is reversed')
         variable = axis['variable'].rsplit('_', 1)[-1]
+        if variable in ('eta', 'phi'):
+            # These bounded scientific axes must not collapse to the few
+            # occupied bins of a sparse partial sample.
+            x_low, x_high = regular_edges[0], regular_edges[-1]
         no_floor_pt = (variable == 'pt' and
                        context.numerics_schema ==
                        'hadronization_projection_result_v4')
@@ -1941,18 +1975,18 @@ def g9_drawing_pages(context, rows, config, header, information, labels):
             variable, variable) +
             (' (' + axis['units'] + ')' if axis['units'] else ''))
         filename = 'G9_{}_{}.pdf'.format(pdg, axis_id)
+        species_label = labels.get(str(pdg), 'PDG '+str(pdg))
+        if not species_label.strip():
+            raise ValueError('G9 signed-species label is empty')
         page = {
             'role':'spectra.signed_heavy', 'family':'kinematics',
             'page_index':1, 'page_count':1, 'filename':filename,
             'text_pixels':config['layout']['text_pixel_size'],
-            'title':'G9 '+{'521':'B^{+}',
-                          '5122':'#Lambda_{b}^{0}'}.get(
-                              str(pdg), labels.get(str(pdg),
-                                                   'PDG '+str(pdg)))+' '+x_title,
+            'title':'G9 '+species_label+' '+x_title,
             'information':information,
             'scientific_header':header,
             'style_header':'class_patterns_sha256='+pattern_digest,
-            'header_bottom':.99, 'width':1100, 'height':1000,
+            'header_bottom':.99, 'width':1100, 'height':1200,
             'panels':[],
         }
         for ratio in (False, True):
@@ -2036,22 +2070,27 @@ def g9_drawing_pages(context, rows, config, header, information, labels):
             if any(point['state'] == 'DRAW' and point['error'] is None
                    for item in series for point in item['points']):
                 note += ('; ' if note else '')+'? = withheld SE'
+            if valid:
+                panel_status = 'AVAILABLE'
+            else:
+                panel_status, note = typed_panel_status(context, selected)
             panel = {
                 'id':'g9.ratio' if ratio else 'g9.absolute',
-                'status':'AVAILABLE' if valid else 'NOT_MATERIALIZED',
+                'status':panel_status,
                 'log_y':log_y, 'log_x':log_x,
-                'geometry':[0.,.02,1.,.30] if ratio else [0.,.31,1.,.97],
+                'geometry':[0.,.12,1.,.34] if ratio else [0.,.34,1.,.90],
                 'x_range':[x_low,x_high], 'y_range':y_range,
                 'title':'',
                 'x_title':x_title if ratio else '',
                 'y_title':ratio_title if ratio else absolute_title,
-                'note':'' if not ratio else note, 'series':series,
+                'note':(note if not valid or ratio else ''),
+                'series':series,
                 'uncertainty_display':'STANDARD',
                 'guides':([{'id':'unity','x_low':x_low,'x_high':x_high,
                             'y_low':1.,'y_high':1.,'color':'#777777',
                             'line_style':2,'label':''}] if ratio else []),
                 'ticks':[],
-                'margins':[.16,.04,.28,.08] if ratio else [.16,.04,.06,.16],
+                'margins':[.16,.04,.28,.08] if ratio else [.16,.04,.06,.13],
                 'legend':[.53,.69,.95,.87] if ratio else
                          [.53,.86,.95,.98], 'reuse':None,
             }

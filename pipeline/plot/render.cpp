@@ -693,6 +693,26 @@ std::vector<std::string> P1InformationLines(const Page& page) {
           "charged-light final particles",
           "heavy flavour excluded"};
 }
+std::vector<std::string> StatusNoteLines(const std::string& note) {
+  std::vector<std::string> result;
+  std::size_t start=0;
+  while (start<note.size()) {
+    const auto split=note.find("; ",start);
+    result.push_back(note.substr(start,
+        split==std::string::npos ? split : split-start));
+    if (split==std::string::npos) break;
+    start=split+2;
+  }
+  return result;
+}
+double BlankStatusY(const Page& page, const Panel& panel) {
+  return page.role.rfind("balancing.",0)==0 &&
+         panel.id.rfind("lower.",0)==0 ? .82 : .54;
+}
+double BlankNoteY(const Page& page, const Panel& panel) {
+  return page.role.rfind("balancing.",0)==0 &&
+         panel.id.rfind("lower.",0)==0 ? .55 : .46;
+}
 // This information column and the tune key occupy disjoint horizontal bands.
 // Keep the complete charged-activity caption in the typed page information;
 // these shorter lines fit beside the three-entry legend at publication width.
@@ -758,7 +778,8 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
     result.push_back(TextExpectation(
         panel.xTitle, p1 ? 1-panel.margins[1] :
             (panel.margins[0] + 1 - panel.margins[1]) / 2,
-        p1 ? (inset ? .08 : .23) : (inset ? .14 : .09),
+        p1 ? (inset ? .08 : .23) :
+            (page.role=="spectra.signed_heavy" ? .18 : (inset ? .14 : .09)),
         inset ? 15 : textPixels, 1, p1 ? 33 : 23));
   }
   const bool drawn = PanelHasDrawing(page, panel, pages, panelIndex);
@@ -766,14 +787,21 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
     result.push_back(TextExpectation(
         panel.status == "NOT_MATERIALIZED"
             ? "NOT_MATERIALIZED"
+            : panel.status == "PRESENT_UNDEFINED"
+                  ? "PRESENT / UNDEFINED"
+            : panel.status == "PRESENT_NO_DRAWABLE_CENTER"
+                  ? "PRESENT / NO REGULAR DRAW"
             : panel.logY && panel.status == "AVAILABLE"
                   ? "No positive values on logarithmic axis"
                   : "Unavailable projection",
-        .5, .54, textPixels, 1, 22));
+        .5, BlankStatusY(page,panel), textPixels, 1, 22));
     if (!panel.note.empty()) {
-      result.push_back(TextExpectation(panel.note, .5, .46,
-                                       std::max(12, textPixels - 3),
-                                       kGray + 2, 22));
+      const auto lines=StatusNoteLines(panel.note);
+      for (std::size_t i=0;i<lines.size();++i)
+        result.push_back(TextExpectation(lines[i], .5,
+                                         BlankNoteY(page,panel)-.045*i,
+                                         std::max(12, textPixels - 3),
+                                         kGray + 2, 22));
     }
   }
   const auto classTexts = InsetClassTexts(page, panel);
@@ -1022,16 +1050,19 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
     const double center=panel.geometry[0]+
         (panel.geometry[2]-panel.geometry[0])*
         (panel.margins[0]+1-panel.margins[1])/2;
-    result.push_back(TextExpectation(panel.xTitle,center,.075,
+    result.push_back(TextExpectation(panel.xTitle,center,
+        page.role=="balancing.baryon_meson.activity" ? .045 : .075,
         BodyTextPixels(page),1,23));
   }
   if (page.role=="spectra.signed_heavy") {
+    Need(!page.title.empty(), "G9 visible signed-species title is absent");
+    result.push_back(TextExpectation(page.title,.16,.95,22));
     std::size_t start=0,index=0;
     while (start<page.information.size()) {
       const auto split=page.information.find("; ",start);
       result.push_back(TextExpectation(page.information.substr(start,
           split==std::string::npos ? split : split-start),
-          .16,.065-.025*index,18));
+          .16,.10-.025*index,18));
       if (split==std::string::npos) break;
       start=split+2; ++index;
     }
@@ -1462,7 +1493,8 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       label.SetTextAlign(p1 ? 33 : 23);
       label.DrawLatex(p1 ? 1-panel.margins[1] :
           (panel.margins[0]+1-panel.margins[1])/2,
-          p1 ? (inset ? .08 : .23) : (inset ? .14 : .09),
+          p1 ? (inset ? .08 : .23) :
+              (page.role=="spectra.signed_heavy" ? .18 : (inset ? .14 : .09)),
           panel.xTitle.c_str());
     }
     const auto& box = panel.legend;
@@ -1580,16 +1612,23 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       TLatex status;
       status.SetNDC(); status.SetTextFont(43); status.SetTextSize(textPixels);
       status.SetTextAlign(22);
-      status.DrawLatex(.5, .54,
+      status.DrawLatex(.5, BlankStatusY(page,panel),
                        panel.status == "NOT_MATERIALIZED"
                            ? "NOT_MATERIALIZED"
+                           : panel.status == "PRESENT_UNDEFINED"
+                               ? "PRESENT / UNDEFINED"
+                           : panel.status == "PRESENT_NO_DRAWABLE_CENTER"
+                               ? "PRESENT / NO REGULAR DRAW"
                            : panel.logY && panel.status == "AVAILABLE"
                                ? "No positive values on logarithmic axis"
                                : "Unavailable projection");
       if (!panel.note.empty()) {
         status.SetTextSize(std::max(12, textPixels - 3));
         status.SetTextColor(kGray + 2);
-        status.DrawLatex(.5, .46, panel.note.c_str());
+        const auto lines=StatusNoteLines(panel.note);
+        for (std::size_t i=0;i<lines.size();++i)
+          status.DrawLatex(.5, BlankNoteY(page,panel)-.045*i,
+                           lines[i].c_str());
       }
     }
     if (!inset && drawn && !legendLabels.empty()) legend.Draw();

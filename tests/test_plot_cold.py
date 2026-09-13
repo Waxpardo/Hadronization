@@ -389,6 +389,21 @@ class ColdDrawingBoundary(unittest.TestCase):
         self.assertEqual(upper['geometry'][1],lower['geometry'][3])
         self.assertEqual(lower['y_range'][1],1.8)
 
+    def test_p8_shared_x_frames_leave_y_tick_headroom(self):
+        upper={"id":"upper.charm.421", "geometry":[0.,.32,.5,.89],
+               "margins":[.20,.035,.29,.21], "x_range":[.5,3.5]}
+        lower={"id":"lower.charm.421", "geometry":[0.,0.,.5,.32],
+               "margins":[.20,.035,.29,.21], "x_range":[.5,3.5],
+               "title":"old"}
+        plot.join_ratio_pads([{"role":"balancing.baryon_meson.activity",
+                               "panels":[upper,lower]}])
+        self.assertGreater(upper['geometry'][1], lower['geometry'][3])
+        self.assertGreaterEqual(upper['margins'][2], .05)
+        self.assertGreaterEqual(lower['margins'][3], .04)
+        self.assertEqual(lower['geometry'][1], .08)
+        self.assertEqual(upper['x_range'], lower['x_range'])
+        self.assertEqual(lower['title'], '')
+
     def test_owner_style_applies_to_preview_and_full_campaign(self):
         self.assertEqual(plot.p1_uncertainty_display(True),'CENTERS_ONLY')
         self.assertEqual(plot.p1_uncertainty_display(False),'DENSE_BAND')
@@ -401,7 +416,7 @@ class ColdDrawingBoundary(unittest.TestCase):
                                 numerics_schema='hadronization_projection_result_v3_g9_science')
         plot.apply_cold_page_style(pages,preview)
         self.assertEqual([p['title'] for p in pages],
-                         ['Target analysis','',''])
+                         ['Target analysis','','old heading'])
         self.assertEqual(pages[1]['information'],'')
         self.assertEqual(pages[2]['information'],'typed details')
         self.assertTrue(all(p['scientific_header']==
@@ -411,7 +426,7 @@ class ColdDrawingBoundary(unittest.TestCase):
                              numerics_schema='hadronization_projection_result_v4')
         plot.apply_cold_page_style(pages,full)
         self.assertEqual([p['title'] for p in pages],
-                         ['PYTHIA 8.317','',''])
+                         ['PYTHIA 8.317','','old heading'])
         self.assertTrue(all(p['scientific_header']=='' for p in pages))
         full.pair_selection_caption = 'P2-P8: no final-hadron p_{T} floor'
         plot.apply_cold_page_style(pages,full)
@@ -424,6 +439,113 @@ class ColdDrawingBoundary(unittest.TestCase):
         plot.apply_cold_page_style(pages,v4_partial)
         self.assertTrue(all(p['scientific_header']==
             'TEST_ONLY / SYNTHETIC / PARTIAL_SAMPLE' for p in pages))
+
+    def test_g9_signed_header_and_typed_no_draw_statuses(self):
+        config,_=plot.checked_plot_config(ROOT / 'config/plot.json')
+        science={
+            'model_id':'G9_direct_primary_selected_no_pt_floor_eta4',
+            'source_family':'kinematics','final':True,'selected':True,
+            'status_low':81,'status_high':89,'origin_scope':'ALL_ORIGINS',
+            'pt':{'domain':'PHYSICAL','units':'GeV','low':None,'high':None,
+                  'low_operator':None,'high_operator':None},
+            'eta':{'low':float(-4).hex(),'high':float(4).hex(),
+                   'low_operator':'GE','high_operator':'LE'},
+            'denominator':'weighted_all_origin_selected_final_same_signed_species_and_tune',
+            'normalization':'per_bin_probability_no_bin_width_division',
+            'units':'probability_per_bin',
+            'ratio':'same_bin_probability_over_reference_tune_probability',
+            'pt_flow':'negative_underflow_rejected_overflow_in_denominator_and_output',
+            'eta_flow':'no_materialized_flow_inclusive_upper_endpoint',
+            'phi_flow':'no_materialized_flow_inclusive_upper_endpoint',
+            'axis_ids':['pt','eta','phi']}
+        context=SimpleNamespace(g9_science=science,reference_tune='MONASH',
+            numerics_schema='hadronization_projection_result_v4',
+            axes=[{'id':'eta','variable':'g9_eta','units':'1',
+                   'edges':[float(x).hex() for x in (-4,0,4)]}],
+            tunes=['MONASH','JUNCTIONS'],
+            g9_pages=[{'pdg':5212,'axis_id':'eta'}],
+            materialization_by_semantic_id={})
+        def row(semantic_id,ratio,value,value_status,uncertainty,reason):
+            return {'semantic_id':semantic_id,'associate_pdg':'5212',
+                    'axis':'eta','tune':'JUNCTIONS' if ratio else 'MONASH',
+                    'reference_tune':'MONASH' if ratio else '',
+                    'family':'kinematics','quantity':'normalized_spectrum'
+                    if not ratio else 'spectrum_ratio_to_reference_tune',
+                    'flow':'REGULAR','bin_low':'-4','bin_high':'0',
+                    'bin_index':'0','class_id':'','units':'probability_per_bin',
+                    'value':value,'value_status':value_status,
+                    'finite_mc_error':'','uncertainty_status':uncertainty,
+                    'reasons':reason}
+        rows=[row('absolute',False,'','UNDEFINED',
+                  'WITHHELD_UNCERTAINTY','G9_NONPOSITIVE_TOTAL'),
+              row('ratio',True,'','UNDEFINED',
+                  'WITHHELD_UNCERTAINTY','G9_NONPOSITIVE_TOTAL')]
+        context.materialization_by_semantic_id={
+            item['semantic_id']:{'status':'PRESENT','reason_codes':[]}
+            for item in rows}
+        pages=plot.g9_drawing_pages(context,rows,config,'TEST_ONLY','typed',
+                                    {'5212':'#Sigma_{b}^{+}'})
+        plot.apply_cold_page_style(pages,SimpleNamespace(
+            numerics_schema='hadronization_projection_result_v4',
+            synthetic=True,campaign_state='PARTIAL_SAMPLE'))
+        self.assertEqual(pages[0]['title'],'G9 #Sigma_{b}^{+} #eta (1)')
+        self.assertTrue(all(p['status']=='PRESENT_UNDEFINED'
+                            for p in pages[0]['panels']))
+        self.assertTrue(all('WITHHELD_UNCERTAINTY' in p['note'] and
+                            'G9_NONPOSITIVE_TOTAL' in p['note']
+                            for p in pages[0]['panels']))
+        for item in rows:
+            context.materialization_by_semantic_id[item['semantic_id']]={
+                'status':'NOT_MATERIALIZED',
+                'reason_codes':['ABSENT_SELECTED_SPECIES']}
+        absent=plot.g9_drawing_pages(context,rows,config,'TEST_ONLY','typed',
+                                     {'5212':'#Sigma_{b}^{+}'})[0]
+        self.assertTrue(all(p['status']=='NOT_MATERIALIZED'
+                            for p in absent['panels']))
+        self.assertTrue(all('ABSENT_SELECTED_SPECIES' in p['note']
+                            for p in absent['panels']))
+        rows[0]['value']='0'
+        rows[0]['value_status']='AVAILABLE'
+        rows[0]['reasons']=''
+        context.materialization_by_semantic_id['absolute']={
+            'status':'PRESENT','reason_codes':[]}
+        zero=plot.g9_drawing_pages(context,rows,config,'TEST_ONLY','typed',
+                                   {'5212':'#Sigma_{b}^{+}'})[0]
+        self.assertEqual(zero['panels'][0]['status'],'AVAILABLE')
+        self.assertEqual(zero['panels'][0]['series'][0]['points'][0]['y'],0.)
+        self.assertEqual(zero['panels'][0]['x_range'],[-4.,4.])
+
+    def test_blank_paper_pad_uses_typed_materialization_not_drawability(self):
+        row={'semantic_id':'point','value_status':'UNDEFINED',
+             'uncertainty_status':'WITHHELD_UNCERTAINTY',
+             'reasons':'ZERO_DENOMINATOR'}
+        context=SimpleNamespace(materialization_by_semantic_id={
+            'point':{'status':'PRESENT','reason_codes':[]}})
+        self.assertEqual(plot.typed_panel_status(context,[row]),
+            ('PRESENT_UNDEFINED',
+             'UNDEFINED; WITHHELD_UNCERTAINTY; ZERO_DENOMINATOR'))
+        self.assertEqual(plot.typed_panel_status(context,[
+            dict(row,value_status='AVAILABLE')])[0],
+            'PRESENT_NO_DRAWABLE_CENTER')
+        compact=plot.typed_panel_status(context,[
+            dict(row,reasons='DENOMINATOR_NUMERICALLY_UNRESOLVED:SOURCE_MONASH_INTERNAL'),
+            dict(row,reasons='DENOMINATOR_NUMERICALLY_UNRESOLVED:SOURCE_JUNCTIONS_INTERNAL')])[1]
+        self.assertEqual(compact,
+            'UNDEFINED; WITHHELD_UNCERTAINTY; DENOMINATOR_NUMERICALLY_UNRESOLVED')
+        self.assertEqual(plot.compact_paper_status_note(
+            'PRESENT_UNDEFINED',compact),
+            'SE withheld, denominator unresolved')
+        self.assertEqual(plot.compact_paper_status_note(
+            'PRESENT_UNDEFINED',compact+'; UNDEFINED_CENTER'),
+            'SE withheld, denominator unresolved')
+        context.materialization_by_semantic_id['point']={
+            'status':'NOT_MATERIALIZED',
+            'reason_codes':['ABSENT_SELECTED_SPECIES']}
+        status,note=plot.typed_panel_status(context,[row])
+        self.assertEqual(status,'NOT_MATERIALIZED')
+        self.assertIn('ABSENT_SELECTED_SPECIES',note)
+        self.assertEqual(plot.typed_panel_status(context,[]),
+                         ('NOT_MATERIALIZED',''))
 
     def test_p1_caption_describes_typed_proxy_without_primary_overclaim(self):
         selection={'charged':True,'final':True,
