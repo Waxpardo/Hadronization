@@ -218,7 +218,8 @@ struct PairProof {
        <<",\"candidate_pairs\":"<<candidates<<",\"stored_pairs\":"<<stored<<",\"by_tune_sector_sign\":[";
     bool first=true;
     for (const auto& item:byTuneSectorSign) {
-      if (!first) out<<','; first=false;
+      if (!first) out<<',';
+      first=false;
       out<<"{\"tune_ordinal\":"<<std::get<0>(item.first)
          <<",\"sector\":"<<std::get<1>(item.first)
          <<",\"sign\":"<<std::get<2>(item.first)
@@ -231,7 +232,8 @@ struct PairProof {
     out<<"{\"by_tune_sector_sign\":[";
     bool first=true;
     for (const auto& item:byTuneSectorSign) {
-      if (!first) out<<','; first=false;
+      if (!first) out<<',';
+      first=false;
       out<<"{\"count\":"<<item.second
          <<",\"sector\":"<<std::get<1>(item.first)
          <<",\"sign\":"<<std::get<2>(item.first)
