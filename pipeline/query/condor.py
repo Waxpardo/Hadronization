@@ -109,9 +109,10 @@ try:
             selected = manifest.get("environment")
             if (not isinstance(selected, dict) or
                     not all(isinstance(selected.get(key), str) and selected[key]
-                            for key in ("PATH", "ROOTSYS", "LD_LIBRARY_PATH", "PYTHONPATH")) or
+                            for key in ("PATH", "ROOTSYS", "LD_LIBRARY_PATH", "ROOT_DYN_PATH",
+                                        "PYTHONPATH")) or
                     set(selected) - {"PATH", "ROOTSYS", "LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH",
-                                     "PYTHONPATH"}):
+                                     "ROOT_DYN_PATH", "ROOT_INCLUDE_PATH", "PYTHONPATH"}):
                 raise ValueError("collector qualified runtime environment differs")
             child_environment = dict(os.environ, **selected)
         result = subprocess.run([sys.executable, "-B", str(root / "pipeline/query/condor.py"),
