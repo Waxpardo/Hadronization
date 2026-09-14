@@ -1043,11 +1043,12 @@ void Evaluate(const Data& data,const Queries& query,const std::string& path,
         !point.referenceTune.empty()?
         evaluator.G9Status(point.referenceTune,0,point.associate):std::string{};
     const auto base=evaluator.Value(point,point.tune,0);
-    const auto reference=point.referenceTune.empty()?std::optional<double>{}:
-        evaluator.Value(point,point.referenceTune,0);
-    std::optional<double> center=point.referenceTune.empty()?base:
-        (!base || !reference || *reference==0.0?std::nullopt:
-         std::optional<double>(*base / *reference));
+    std::optional<double> reference;
+    if (!point.referenceTune.empty())
+      reference=evaluator.Value(point,point.referenceTune,0);
+    std::optional<double> center;
+    if (point.referenceTune.empty())center=base;
+    else if (base && reference && *reference!=0.0)center=*base / *reference;
     const auto denominatorReasons=evaluator.DenominatorReasons(point);
     const bool denominatorValueFailure=std::any_of(
         denominatorReasons.begin(),denominatorReasons.end(),[](const auto& reason){
