@@ -200,7 +200,7 @@ class NativeCollection:
             metrics.root_bytes += Path(path).stat().st_size
             try:
                 for family, allowed_tunes in entries:
-                    hist = file.Get('sparse_' + family)
+                    hist = self.api.read_sparse(file, 'sparse_' + family)
                     if not hist or not hist.InheritsFrom('THnSparse') or not hist.GetCalculateErrors():
                         raise ValueError('native sparse family/Sumw2 differs')
                     axes = tuple(hist.GetAxis(i) for i in range(hist.GetNdimensions()))

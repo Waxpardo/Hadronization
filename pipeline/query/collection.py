@@ -40,6 +40,21 @@ def _root():
     return ROOT
 
 
+def read_sparse(file, name):
+    """Give the returned THnSparse a Python owner for its native allocation.
+
+    ROOT's sparse reader does not attach these objects to the TFile, and
+    PyROOT otherwise returns a non-owning proxy. Closing the file or dropping
+    that proxy then leaks the histogram. Detach first if a ROOT version does
+    attach it, so the file and Python cannot both delete the same object.
+    """
+    histogram = file.Get(name)
+    if histogram and histogram.InheritsFrom("THnSparse"):
+        file.GetList().Remove(histogram)
+        _root().SetOwnership(histogram, True)
+    return histogram
+
+
 def _fact(path):
     path = Path(path).absolute()
     r.reject_symlink_components(path, "collection artifact")
@@ -339,7 +354,7 @@ def _sparse_content_equal(sharded, merged):
                 if not file or file.IsZombie():
                     raise ValueError("merge parent sparse ROOT cannot open")
                 try:
-                    for coordinates, value, variance in _cells(file.Get("sparse_" + family)):
+                    for coordinates, value, variance in _cells(read_sparse(file, "sparse_" + family)):
                         if coordinates[0] == ordinal + 1:
                             old = expected.setdefault(coordinates, ([], []))
                             old[0].append(value)
@@ -352,7 +367,7 @@ def _sparse_content_equal(sharded, merged):
                 raise ValueError("merge child sparse ROOT cannot open")
             try:
                 actual = {coordinates: (value, variance)
-                          for coordinates, value, variance in _cells(file.Get("sparse_" + family))}
+                          for coordinates, value, variance in _cells(read_sparse(file, "sparse_" + family))}
             finally:
                 file.Close()
             if set(expected) != set(actual):
@@ -535,7 +550,7 @@ def _verify_sparse_roots(index):
                             [branch.GetName() for branch in rows.GetListOfBranches()] != layout["trees"][tree]):
                         raise ValueError("required exact support tree schema differs")
             for family in FAMILIES:
-                hist = file.Get("sparse_"+family)
+                hist = read_sparse(file, "sparse_"+family)
                 signature = _geometry(hist, layout["sparse"][family])
                 if family in baseline and baseline[family] != signature:
                     raise ValueError("sparse geometry/dictionary differs across collection")

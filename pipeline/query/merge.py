@@ -71,6 +71,7 @@ def _select_tune(hist, ordinal, entries):
     # ProjectionND contracts the selected tune axis. Retain the original
     # campaign geometry so natural tune ordinals remain additive across files.
     selected = hist.Clone(hist.GetName()+"__selected")
+    c._root().SetOwnership(selected, True)
     selected.Reset()
     selected.Sumw2()
     for coordinates, value, variance in c._cells(hist):
@@ -121,7 +122,7 @@ def merge(index_path, expected_sha256, output):
                         if not source or source.IsZombie():
                             raise ValueError("cannot open merge source")
                         try:
-                            hist = source.Get("sparse_"+family)
+                            hist = c.read_sparse(source, "sparse_"+family)
                             signature = c._geometry(hist, layout["sparse"][family])
                             if baseline is not None and baseline != signature:
                                 raise ValueError("merge geometry/dictionary differs")
@@ -136,6 +137,7 @@ def merge(index_path, expected_sha256, output):
                                     raise ValueError("tune projection retained foreign cell")
                             if merged is None:
                                 merged = selected.Clone("sparse_"+family)
+                                ROOT.SetOwnership(merged, True)
                             else:
                                 for axis in range(merged.GetNdimensions()):
                                     merged.GetAxis(axis).SetRange(0, 0)
@@ -161,7 +163,7 @@ def merge(index_path, expected_sha256, output):
                 if {key.GetName() for key in reopened.GetListOfKeys()} != {"sparse_"+f for f in c.FAMILIES}:
                     raise ValueError("merged ROOT object set differs")
                 for family in c.FAMILIES:
-                    hist = reopened.Get("sparse_"+family)
+                    hist = c.read_sparse(reopened, "sparse_"+family)
                     c._geometry(hist, layout["sparse"][family])
                     if _digest(hist) != family_digests[family]:
                         raise ValueError("merged ROOT readback content differs")
