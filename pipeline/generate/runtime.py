@@ -319,6 +319,7 @@ def resolve(values=None, base_environment=None, require_root=False,
             base.get("ROOT_INCLUDE_PATH", ""), include_prefixes)
     if root_lib:
         environment["ROOT_DYN_PATH"] = prepend(base.get("ROOT_DYN_PATH", ""), [root_lib])
+        environment["PYTHONPATH"] = prepend(base.get("PYTHONPATH", ""), [root_lib])
     diagnostics.append("CXX={}".format(command_output(cxx, ["--version"]) or cxx))
     return {"environment": environment, "diagnostics": diagnostics,
             "site_configured": bool(values),

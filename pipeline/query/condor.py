@@ -38,6 +38,10 @@ PINS_SCHEMA = "hadronization_external_query_content_pins_v1"
 ATTEMPT_SCHEMA = "hadronization_condor_query_attempt_v1"
 FAILURE_SCHEMA = "hadronization_condor_query_failed_attempt_v1"
 ADMISSION_SCHEMA = "hadronization_query_site_admission_v1"
+# Resolved EL9 image proved by an execute-node runtime check. The moving
+# alma9-core:latest alias is not a production runtime identity.
+PINNED_EL9_IMAGE = ("/cvmfs/unpacked.cern.ch/.flat/80/"
+                    "80fe7cc69c91332a0733c5aea408913df2f1944ab2e9a895ee51de8324cb232a")
 # Narrow legacy acceptance adapter for the current, independently reviewed
 # Phase-A source/data snapshot. These are identity pins, not scheduler sizes.
 CURRENT_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d"
@@ -283,16 +287,20 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
             (stage / script).write_text(BOOTSTRAP)
         shutil.copy2(Path(__file__).with_name("site_probe.py"), stage / "site_probe.py")
         shutil.copy2(Path(__file__).with_name("publication.py"), stage / "publication.py")
+        shutil.copy2(ROOT / "pipeline/generate/runtime.py", stage / "runtime.py")
         work_sha = r.sha_file(stage / "work.json")
         submit = ("universe = vanilla\nexecutable = /usr/bin/python3\n"
                   "arguments = worker.py worker --work work.json --expected-work-sha256 " + work_sha +
                   " --ordinal $(ordinal) --attempt $(RETRY) --source-tar source.tar.gz"
                   " --pack-tar query-pack.tar.gz\n"
                   "should_transfer_files = YES\nwhen_to_transfer_output = ON_EXIT\n"
+                  "transfer_executable = False\n"
                   "transfer_input_files = worker.py,work.json,source.tar.gz,source-files.json,dictionary.json,query-pack.tar.gz\n"
                   "transfer_output_files = \"\"\n"
                   "request_cpus = 1\nrequest_memory = __MEASURED_MEMORY_MB__\n"
                   "request_disk = __MEASURED_SCRATCH_KB__\n"
+                  '+SingularityImage = "' + PINNED_EL9_IMAGE + '"\n'
+                  '+JobCategory = "long"\n'
                   "output = logs/$(JOB).$(RETRY).out\nerror = logs/$(JOB).$(RETRY).err\n"
                   "log = logs/worker.events\nqueue 1\n")
         (stage / "worker.sub").write_text(submit)
@@ -312,7 +320,8 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
                      " --expected-pins-sha256 __EXTERNALLY_ACCEPTED_PINS_SHA256__\n"
                      "should_transfer_files = NO\ninitialdir = __BUNDLE_DIRECTORY__\n"
                      "output = logs/collector.out\n"
-                     "error = logs/collector.err\nlog = logs/collector.events\nqueue 1\n")
+                     "error = logs/collector.err\nlog = logs/collector.events\n"
+                     '+JobCategory = "long"\nqueue 1\n')
         (stage / "collector.sub").write_text(collector)
         (stage / "site-canary.sub").write_text(
             "# Inert. Replace every placeholder only after allocation; submit once for evidence.\n"
@@ -323,14 +332,20 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
             " --control-root __PROTECTED_CONTROL_QUALIFICATION_ROOT__"
             " --root-config __ROOT_CONFIG__ --cxx __GCC_14_2_0_CXX__"
             " --pythia-config __PYTHIA_8_317_CONFIG__"
+            " --expected-almalinux-version 9.6"
+            " --expected-image-path " + PINNED_EL9_IMAGE +
+            " --site-conf __PINNED_SITE_CONF__"
             " --cvmfs-path __REQUIRED_CVMFS_PATH__\n"
-            "should_transfer_files = YES\ntransfer_input_files = site_probe.py,publication.py\n"
+            "should_transfer_files = YES\ntransfer_input_files = site_probe.py,publication.py,runtime.py\n"
+            "transfer_executable = False\n"
             "when_to_transfer_output = ON_EXIT\n"
             "output = __FRESH_CONTROL_EVIDENCE_DIR__/canary.out\n"
             "error = __FRESH_CONTROL_EVIDENCE_DIR__/canary.err\n"
             "log = __FRESH_CONTROL_EVIDENCE_DIR__/canary.events\n"
             "request_cpus = 1\nrequest_memory = __MEASURED_CANARY_MEMORY_MB__\n"
-            "request_disk = __MEASURED_CANARY_SCRATCH_KB__\nqueue 1\n")
+            "request_disk = __MEASURED_CANARY_SCRATCH_KB__\n"
+            '+SingularityImage = "' + PINNED_EL9_IMAGE + '"\n'
+            '+JobCategory = "express"\n+MaxWallTime = 600\nqueue 1\n')
         (stage / "BUILD_LINUX_PACK.sh").write_text(
             "#!/usr/bin/env bash\nset -euo pipefail\n"
             "# Run in a fresh external build directory, never inside a sealed bundle.\n"

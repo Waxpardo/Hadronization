@@ -47,6 +47,20 @@ class QueryCondorPreparation(unittest.TestCase):
     def tearDown(self):
         self.temporary.cleanup()
 
+    def test_site_probe_requires_exact_selected_almalinux_minor(self):
+        release = 'NAME="AlmaLinux"\nID="almalinux"\nVERSION_ID="9.6"\n'
+        observed = site_probe.check_almalinux_release(release, "9.6")
+        self.assertEqual(observed["version"], "9.6")
+        self.assertEqual(observed["os_release_sha256"],
+                         site_probe.hashlib.sha256(release.encode()).hexdigest())
+        with self.assertRaisesRegex(ValueError, "selected pin"):
+            site_probe.check_almalinux_release(release, "9.8")
+        with self.assertRaisesRegex(ValueError, "explicit EL9 pin"):
+            site_probe.check_almalinux_release(release, "9")
+        with self.assertRaisesRegex(ValueError, "distribution differs"):
+            site_probe.check_almalinux_release(
+                release.replace('ID="almalinux"', 'ID="debian"'), "9.6")
+
     def test_site_probe_preserves_unique_publication_and_interrupted_sibling(self):
         bulk = self.base / "bulk"
         bulk.mkdir()
@@ -79,7 +93,8 @@ class QueryCondorPreparation(unittest.TestCase):
     def test_site_probe_reads_separate_job_and_machine_classads(self):
         job = self.base / "job.ad"
         machine = self.base / "machine.ad"
-        job.write_text('MyType = "Job"\nRequestMemory = 1024\nRequestDisk = 1048576\n')
+        job.write_text('MyType = "Job"\nRequestMemory = 1024\nRequestDisk = 1048576\n'
+                       'SingularityImage = "/cvmfs/pinned-image"\n')
         machine.write_text('MyType = "Machine"\nArch = "X86_64"\nOpSys = "LINUX"\n'
                            'Memory = 2048\nDisk = 2097152\n')
         with mock.patch.dict(os.environ, {"_CONDOR_JOB_AD": str(job),
@@ -89,6 +104,11 @@ class QueryCondorPreparation(unittest.TestCase):
             self.assertEqual(facts["machine"]["sha256"], site_probe.sha(machine))
             self.assertNotEqual(facts["job"]["sha256"], facts["machine"]["sha256"])
             self.assertEqual(facts["job"]["request_memory_mb"], 1024)
+            self.assertEqual(
+                site_probe.classad_evidence("/cvmfs/pinned-image")["job"]["container_image"],
+                "/cvmfs/pinned-image")
+            with self.assertRaisesRegex(ValueError, "container image differs"):
+                site_probe.classad_evidence("/cvmfs/other-image")
             self.assertEqual(facts["machine"]["arch"], "X86_64")
             for wrong_job, wrong_machine, reason in (
                     ('MyType = "Machine"\nRequestMemory = 1024\nRequestDisk = 1048576\n',
@@ -308,8 +328,27 @@ class QueryCondorPreparation(unittest.TestCase):
                                         capture_output=True).returncode, 0)
         self.assertIn("__ACCEPTED_ANALYZED_SAMPLE_ROOT__",
                       (bundle / "site-canary.sub").read_text())
-        self.assertIn("transfer_input_files = site_probe.py,publication.py",
+        self.assertIn("--expected-almalinux-version 9.6",
                       (bundle / "site-canary.sub").read_text())
+        self.assertIn("--expected-image-path " + condor.PINNED_EL9_IMAGE,
+                      (bundle / "site-canary.sub").read_text())
+        for submit_name in ("site-canary.sub", "worker.sub"):
+            submit = (bundle / submit_name).read_text()
+            self.assertIn('+SingularityImage = "' + condor.PINNED_EL9_IMAGE + '"',
+                          submit)
+            self.assertIn("+JobCategory = ", submit)
+        self.assertIn('+JobCategory = "long"',
+                      (bundle / "collector.sub").read_text())
+        self.assertIn("transfer_input_files = site_probe.py,publication.py,runtime.py",
+                      (bundle / "site-canary.sub").read_text())
+        self.assertIn("--site-conf __PINNED_SITE_CONF__",
+                      (bundle / "site-canary.sub").read_text())
+        self.assertEqual((bundle / "runtime.py").read_bytes(),
+                         (ROOT / "pipeline/generate/runtime.py").read_bytes())
+        self.assertIn("transfer_executable = False",
+                      (bundle / "site-canary.sub").read_text())
+        self.assertIn("transfer_executable = False",
+                      (bundle / "worker.sub").read_text())
         self.assertEqual((bundle / "publication.py").read_bytes(),
                          (ROOT / "pipeline/query/publication.py").read_bytes())
         self.assertIn("pipeline/query/publication.py", condor.SOURCE_FILES)

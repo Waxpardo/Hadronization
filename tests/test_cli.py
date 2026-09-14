@@ -264,6 +264,8 @@ test -z "${HADRONIZATION_DATASET+x}"
             self.assertTrue(environment["LD_LIBRARY_PATH"].startswith(
                 str((gcc / "lib64").resolve()) + os.pathsep
                 + str((pythia / "lib").resolve())))
+            self.assertEqual(environment["PYTHONPATH"],
+                             str((root / "lib").resolve()))
             self.assertEqual(resolved["pythia_cxxflags"],
                              shlex.split(valid_cxxflags))
             self.assertEqual(resolved["pythia_libs"], shlex.split(valid_libs))

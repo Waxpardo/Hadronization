@@ -126,9 +126,12 @@ admission template. Copy the build script and source tar to a fresh external
 build directory. `SITE_CONF` must name a measured site.conf. The build checks
 ROOT 6.30.01, GCC 14.2.0 and PYTHIA 8.317. Bind a copy of the canary template
 to an actual execute node only after choosing allocated endpoints. Its probe
-checks x86_64/AlmaLinux 9.8, CVMFS and ROOT libraries, separate hashed job and
-matched-machine ClassAds, full accepted input SHA and ROOT open. At each
-allocated bulk/control root it stages and fsyncs a directory, invokes the same
+checks x86_64 and the selected AlmaLinux 9.6 image, CVMFS and ROOT libraries,
+separate hashed job and matched-machine ClassAds, full accepted input SHA and
+ROOT open. A real 9.6 worker passed the pinned ROOT/GCC/PYTHIA and PyROOT
+runtime smoke checks; accepted-input and durable-storage admission remain
+separate gates. At each allocated bulk/control root it stages and fsyncs a
+directory, invokes the same
 no-replace directory publisher as query, reopens and hashes the result, rejects
 existing empty and nonempty destinations, and retains an interrupted private
 stage. An unsupported directory rename is a failed probe even if exclusive file

@@ -33,6 +33,15 @@ def _publication():
 publication = _publication()
 
 
+def _runtime():
+    local = Path(__file__).with_name("runtime.py")
+    path = local if local.is_file() else Path(__file__).parents[1] / "generate/runtime.py"
+    spec = importlib.util.spec_from_file_location("site_runtime", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def sha(path):
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -41,11 +50,28 @@ def sha(path):
     return digest.hexdigest()
 
 
-def run(command):
-    result = subprocess.run(command, text=True, capture_output=True, timeout=30)
+def run(command, environment=None):
+    result = subprocess.run(command, text=True, capture_output=True, timeout=30,
+                            env=environment)
     if result.returncode:
         raise ValueError("command failed: {}: {}".format(command, result.stderr[-500:]))
     return result.stdout.strip()
+
+
+def check_almalinux_release(os_release, expected_version):
+    if not re.fullmatch(r"9\.[0-9]+", expected_version):
+        raise ValueError("expected AlmaLinux minor version is not an explicit EL9 pin")
+    fields = {}
+    for line in os_release.splitlines():
+        key, separator, value = line.partition("=")
+        if separator:
+            fields[key] = value.strip().strip('"')
+    if fields.get("ID") != "almalinux":
+        raise ValueError("execute-node distribution differs")
+    if fields.get("VERSION_ID") != expected_version:
+        raise ValueError("execute-node AlmaLinux version differs from selected pin")
+    return {"distribution": "almalinux", "version": expected_version,
+            "os_release_sha256": hashlib.sha256(os_release.encode("utf-8")).hexdigest()}
 
 
 def _ad(path, role, required):
@@ -70,13 +96,16 @@ def _ad(path, role, required):
     return fields, hashlib.sha256(raw).hexdigest()
 
 
-def classad_evidence():
+def classad_evidence(expected_image=None):
     job = Path(os.environ.get("_CONDOR_JOB_AD", ""))
     machine = Path(os.environ.get("_CONDOR_MACHINE_AD", ""))
     if job == machine or (job.is_file() and machine.is_file() and job.samefile(machine)):
         raise ValueError("job and machine ClassAd paths are not distinct")
     requests, job_sha = _ad(job, "job", ("RequestMemory", "RequestDisk"))
     matched, machine_sha = _ad(machine, "machine", ("Arch", "OpSys"))
+    if expected_image is not None and requests.get("singularityimage") != (
+            '"' + expected_image + '"'):
+        raise ValueError("job ClassAd container image differs from selected pin")
     for role, fields in (("job", requests), ("machine", matched)):
         my_type = fields.get("mytype")
         if my_type is not None and my_type != '"' + role.capitalize() + '"':
@@ -95,6 +124,7 @@ def classad_evidence():
                                 int(raw) < values[request]):
             raise ValueError("matched machine ClassAd " + field + " cannot satisfy job request")
     return {"job": {"path": str(job), "sha256": job_sha,
+                    "container_image": expected_image,
                     "request_memory_mb": values["RequestMemory"],
                     "request_disk_kb": values["RequestDisk"]},
             "machine": {"path": str(machine), "sha256": machine_sha,
@@ -190,36 +220,47 @@ def probe(args):
         raise ValueError("bulk and protected control roots must be separate")
     if sha(args.input_root) != args.input_sha256:
         raise ValueError("accepted input SHA differs before ROOT open")
-    classads = classad_evidence()
-    root_version = run([args.root_config, "--version"])
-    gcc_version = run([args.cxx, "-dumpfullversion", "-dumpversion"]).splitlines()[0]
-    pythia_version = run([args.pythia_config, "--version"])
+    classads = classad_evidence(str(args.expected_image_path))
+    resolver = _runtime()
+    resolved = resolver.resolve(resolver.site_values(args.site_conf),
+                                require_root=True, require_pythia=True)
+    environment = dict(os.environ, **resolved["environment"])
+    if (environment["ROOT_CONFIG"], environment["CXX"],
+            environment["PYTHIA8_CONFIG"]) != (
+            args.root_config, args.cxx, args.pythia_config):
+        raise ValueError("execute-node site runtime paths differ from selected pin")
+    root_version = run([args.root_config, "--version"], environment)
+    gcc_version = run([args.cxx, "-dumpfullversion", "-dumpversion"],
+                      environment).splitlines()[0]
+    pythia_version = run([args.pythia_config, "--version"], environment)
     if (root_version, gcc_version, pythia_version) != ("6.30.01", "14.2.0", "8.317"):
         raise ValueError("pinned runtime versions differ")
     if platform.machine() != "x86_64":
         raise ValueError("execute-node architecture differs")
     os_release = Path("/etc/os-release").read_text(encoding="utf-8")
-    if 'VERSION_ID="9.8"' not in os_release and 'VERSION_ID=9.8' not in os_release:
-        raise ValueError("execute-node AlmaLinux 9.8 release differs")
-    if 'ID="almalinux"' not in os_release and 'ID=almalinux' not in os_release:
-        raise ValueError("execute-node distribution differs")
+    operating_system = check_almalinux_release(
+        os_release, args.expected_almalinux_version)
     if not args.cvmfs_path.is_dir() or not os.access(args.cvmfs_path, os.R_OK):
         raise ValueError("execute-node CVMFS path is unavailable")
     root_binary = Path(args.root_config).with_name("root")
-    run([str(root_binary), "-b", "-q", "-e", 'gSystem->Load("libTree");'])
+    run([str(root_binary), "-b", "-q", "-e", 'gSystem->Load("libTree");'],
+        environment)
     run([sys.executable, "-c",
          "import ROOT,sys; f=ROOT.TFile.Open(sys.argv[1]); "
-         "assert f and not f.IsZombie(); f.Close()", str(args.input_root)])
+         "assert f and not f.IsZombie(); f.Close()", str(args.input_root)],
+        environment)
     bulk = publish_probe(args.bulk_root, "bulk")
     control = publish_probe(args.control_root, "control")
     stat = shutil.disk_usage(args.bulk_root)
     return {"schema": "hadronization_execute_node_site_probe_v1",
             "status": "OBSERVED_ONLY_NOT_ADMISSION", "hostname": platform.node(),
             "architecture": platform.machine(), "platform": platform.platform(),
+            "operating_system": operating_system,
             "classads": classads,
             "input": {"path": str(args.input_root), "bytes": args.input_root.stat().st_size,
                       "sha256": args.input_sha256},
             "versions": {"root": root_version, "gcc": gcc_version, "pythia": pythia_version},
+            "site_conf_sha256": sha(args.site_conf),
             "cvmfs_path": str(args.cvmfs_path.resolve()),
             "bulk": bulk, "control": control,
             "bulk_free_bytes_observed": stat.free,
@@ -238,6 +279,11 @@ def main():
     parser.add_argument("--cxx", required=True)
     parser.add_argument("--pythia-config", required=True)
     parser.add_argument("--cvmfs-path", type=Path, required=True)
+    parser.add_argument("--site-conf", type=Path, required=True)
+    parser.add_argument("--expected-almalinux-version", required=True,
+                        help="exact EL9 minor version selected for this canary")
+    parser.add_argument("--expected-image-path", type=Path, required=True,
+                        help="exact container image path pinned in the job ClassAd")
     args = parser.parse_args()
     try:
         print(json.dumps(probe(args), sort_keys=True))
