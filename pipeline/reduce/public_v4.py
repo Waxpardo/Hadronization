@@ -273,9 +273,8 @@ def _provenance(source, request, run, ledger, analysis, campaign):
         raise ValueError('public v4 observed native binary differs')
     import ROOT as root_api
     root_version = str(root_api.gROOT.GetVersion())
-    compiler = '/usr/bin/c++'
-    compiler_version = subprocess.check_output([compiler, '--version'],
-        text=True).splitlines()[0]
+    compiler = run['build']['compiler_id']
+    compiler_version = run['build']['compiler_version']
     flags = ['-std=c++17', '-O2', '-Wall', '-Wextra', '-Wpedantic',
              '-Werror', '-ffp-contract=off']
     runtime = dict(os=platform.system(), architecture=platform.machine(),

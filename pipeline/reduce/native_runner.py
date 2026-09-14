@@ -11,6 +11,7 @@ import json
 import math
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -117,20 +118,28 @@ def compile_engine(work):
     work=Path(work);work.mkdir(parents=True,exist_ok=True)
     source=ROOT/'pipeline/reduce/native_engine.cpp'
     header=ROOT/'pipeline/reduce/statistics.hpp'
-    identity=p.digest(dict(source=sha(source),statistics=sha(header),flags=[
+    compiler=shutil.which(os.environ.get('CXX') or 'c++')
+    if compiler is None:
+        raise ValueError('native engine requires the configured C++ compiler')
+    compiler=str(Path(compiler).absolute())
+    compiler_version=subprocess.check_output([compiler,'--version'],
+        text=True).splitlines()[0]
+    identity=p.digest(dict(source=sha(source),statistics=sha(header),
+        compiler=compiler,compiler_version=compiler_version,flags=[
         '-std=c++17','-O2','-Wall','-Wextra','-Wpedantic','-Werror','-ffp-contract=off']))
     binary=work/('native-engine-'+identity[:20])
     if not binary.exists():
         with tempfile.TemporaryDirectory(prefix='native-build-',dir=work) as directory:
             staged=Path(directory)/'engine'
-            result=subprocess.run(['/usr/bin/c++','-std=c++17','-O2','-Wall',
+            result=subprocess.run([compiler,'-std=c++17','-O2','-Wall',
                 '-Wextra','-Wpedantic','-Werror','-ffp-contract=off',str(source),
                 '-o',str(staged)],capture_output=True,text=True)
             if result.returncode or result.stdout or result.stderr:
                 raise ValueError('native engine build failed: '+result.stdout+result.stderr)
             os.replace(staged,binary)
     return binary,dict(build_identity_sha256=identity,binary_sha256=sha(binary),
-                       source_sha256=sha(source),statistics_sha256=sha(header))
+                       source_sha256=sha(source),statistics_sha256=sha(header),
+                       compiler_id=compiler,compiler_version=compiler_version)
 
 def read_native_diagnostic(path,request):
     """Check C++ R/F rows against exact request/source-family identities."""
