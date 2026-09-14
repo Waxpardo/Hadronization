@@ -162,7 +162,7 @@ def publish_probe(root, label):
     _write_closed(stage / "payload.bin", payload)
     _fsync_directory(stage)
     _fsync_directory(root)
-    publication.publish_directory(stage, final)
+    published_by = publication.publish_directory(stage, final)
     _fsync_directory(root)
     payload_path = final / "payload.bin"
     if payload_path.stat().st_size != len(payload) or sha(payload_path) != expected:
@@ -209,7 +209,8 @@ def publish_probe(root, label):
             "bytes": len(payload), "sha256": expected, "interrupted_stage": str(partial),
             "interrupted_sha256": hashlib.sha256(partial_content).hexdigest(),
             "existing_destinations": collisions, "directory_publish": "PASS",
-            "no_overwrite": "PASS", "readback": "PASS"}
+            "no_overwrite": "PASS", "readback": "PASS",
+            "publication": published_by}
 
 
 def probe(args):

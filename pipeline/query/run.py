@@ -293,6 +293,7 @@ def prepare_pack(args):
     environment, binary, receipt = build_tool(work)
     output.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix="."+output.name+".staging-", dir=str(output.parent)))
+    publication_started = False
     try:
         shutil.copy2(str(binary), str(staging / "query"))
         reduce.atomic_json(staging / "build-receipt.json", receipt, exclusive=True)
@@ -312,11 +313,12 @@ def prepare_pack(args):
         for artifact in staging.iterdir():
             reduce.fsync_file(artifact)
         reduce.fsync_directory(staging)
+        publication_started = True
         publish_directory(staging, output)
         reduce.fsync_directory(output.parent)
         print("QUERY_PREPARED_PACK="+str(output)+" BUILD_ID="+receipt["build_id"])
     finally:
-        if staging.exists():
+        if not publication_started and staging.exists():
             shutil.rmtree(str(staging))
 
 
@@ -601,6 +603,8 @@ def create_query_stage(output, work):
 
 def preserve_query_failure(staging, output, error):
     """Best-effort bounded evidence; never removes or replaces an earlier stage."""
+    if not staging.is_dir() or staging.is_symlink():
+        return  # A completed-but-unacknowledged rename must not recreate a stage.
     record = {
         "schema": "hadronization_query_failed_stage_v1",
         "state": "PRESERVED_FAILED_ATTEMPT",

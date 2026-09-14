@@ -172,7 +172,14 @@ workspace's scientific content digest before verification. The current
 pair-population proof fails closed per input; no synthetic screen can qualify
 the other accepted shards.
 
-The publisher currently supports allocated writable POSIX storage. dCache has
+The publisher currently supports allocated writable POSIX storage. On Linux
+filesystems without atomic no-replace rename, it reserves an absent destination
+with exclusive mode-000 mkdir, then replaces only that pinned reservation with
+the complete private stage. This requires owned parents without group/other write
+access, no symlinks or foreign mounts, and cooperating processes under the same
+owner. A visible empty reservation is never a completed artifact: readers require
+the existing manifests and content pins. Interrupted publication retains stages
+and reservations for review; do not remove or retry them automatically. dCache has
 no adapter in this release. Retain the original query shards after merge:
 their exact support and source ranges remain numerical inputs. One merged ROOT
 partition per tune is the physical layout; measure occupancy, RSS and scratch

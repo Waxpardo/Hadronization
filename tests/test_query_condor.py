@@ -375,6 +375,27 @@ class QueryCondorPreparation(unittest.TestCase):
         finally:
             RootQueryContract.tearDownClass()
 
+    def test_inert_publisher_interruption_retains_complete_private_bundle(self):
+        dictionary = FIXTURE / "dictionary.json"
+        output = self.base / "bundle-interrupted"
+        def interrupted(stage, destination):
+            destination.mkdir(mode=0o000)
+            raise KeyboardInterrupt("TEST_ONLY after reservation")
+        try:
+            with mock.patch.object(condor.q, "publish_directory", side_effect=interrupted):
+                with self.assertRaises(KeyboardInterrupt):
+                    condor.prepare(self.acquisition, condor.r.sha_file(self.acquisition),
+                                   dictionary, condor.r.sha_file(dictionary), output)
+            stages = list(self.base.glob(".bundle-interrupted.stage-*"))
+            self.assertEqual(len(stages), 1)
+            self.assertTrue((stages[0] / "bundle-manifest.json").is_file())
+            self.assertTrue((stages[0] / "source.tar.gz").is_file())
+            self.assertEqual(output.stat().st_mode & 0o777, 0)
+            with self.assertRaises((OSError, ValueError)):
+                condor._checked_site_bundle(output, "a" * 64)
+        finally:
+            if output.exists(): output.chmod(0o700)
+
     def test_inert_dag_has_exact_domain_retry_budget_and_frozen_bootstrap(self):
         dictionary = FIXTURE / "dictionary.json"
         bundle = self.base / "bundle"

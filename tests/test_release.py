@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 from pipeline import release
 
@@ -45,6 +46,30 @@ class PortableAssemblyBoundary(unittest.TestCase):
             self.assertEqual(release.sha(output / locator), release.sha(config))
             self.assertEqual(digest, release.sha(output / "manifest.json"))
             self.assertNotIn("config/plot.json", manifest["files"])
+
+    def test_publisher_failure_preserves_complete_nested_package(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary).resolve()
+            config = release.ROOT / "config/plot-all-tune.json"
+            numerical, figures, numeric_pin, figure_pin = self._fixture(base, config)
+            output = base / "collaboration"
+            def interrupted(stage, destination):
+                destination.mkdir(mode=0o000)
+                raise KeyboardInterrupt("TEST_ONLY after reservation")
+            try:
+                with mock.patch.object(release, "publish_directory", side_effect=interrupted):
+                    with self.assertRaises(KeyboardInterrupt):
+                        release.build(numerical, release.sha(numeric_pin), figures,
+                                      release.sha(figure_pin), output, config)
+                stages = list(base.glob(".collaboration.stage-*"))
+                self.assertEqual(len(stages), 1)
+                self.assertTrue((stages[0] / "manifest.json").is_file())
+                self.assertTrue((stages[0] / "config/plot-all-tune.json").is_file())
+                self.assertEqual(output.stat().st_mode & 0o777, 0)
+                with self.assertRaises((OSError, ValueError)):
+                    release.verify(output, "a" * 64, base / "work")
+            finally:
+                if output.exists(): output.chmod(0o700)
 
     def test_wrong_or_missing_selected_config_and_wrong_root_refuse(self):
         with tempfile.TemporaryDirectory() as temporary:

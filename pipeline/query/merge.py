@@ -102,6 +102,7 @@ def merge(index_path, expected_sha256, output):
     started = time.monotonic()
     partitions = []
     entry_counts = {s["ordinal"]: _family_entries(s) for s in index["shards"]}
+    publication_started = False
     try:
         for tune, ordinal in sorted(index["tune_ordinals"].items(), key=lambda x: x[1]):
             root_path = stage / ("tune-%02d.root" % ordinal)
@@ -189,6 +190,7 @@ def merge(index_path, expected_sha256, output):
         for path in stage.iterdir():
             c.r.fsync_file(path)
         c.r.fsync_directory(stage)
+        publication_started = True
         c.q.publish_directory(stage, output)
         c.r.fsync_directory(output.parent)
         published = c.read(output / "index.json", c.r.sha_file(output / "index.json"))
@@ -199,7 +201,7 @@ def merge(index_path, expected_sha256, output):
                                c.r.sha_file(output / "merge-receipt.json"))
         return output / "index.json"
     finally:
-        if stage.exists():
+        if not publication_started and stage.exists():
             shutil.rmtree(stage)
 
 

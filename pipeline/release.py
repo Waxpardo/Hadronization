@@ -151,6 +151,7 @@ def build(numerical, numerical_sha, figures, figures_sha, output, plot_config=No
                      plot_config, locator)
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="." + output.name + ".stage-", dir=output.parent))
+    publication_started = False
     try:
         for name, source in paths.items():
             target = stage / name
@@ -165,9 +166,10 @@ def build(numerical, numerical_sha, figures, figures_sha, output, plot_config=No
                             "sha256": files[locator]["sha256"]},
             "presentation_state": figure_manifest["presentation_state"],
             "files": files}, sort_keys=True, separators=(",", ":")) + "\n")
+        publication_started = True
         publish_directory(stage, output)
     finally:
-        if stage.exists():
+        if not publication_started and stage.exists():
             shutil.rmtree(stage)
     return sha(output / "manifest.json")
 

@@ -276,6 +276,7 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
         raise ValueError("Condor launch bundle already exists")
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="."+output.name+".stage-", dir=str(output.parent)))
+    publication_started = False
     try:
         source_facts = _source_tar(stage / "source.tar.gz")
         shutil.copy2(dictionary, stage / "dictionary.json")
@@ -452,11 +453,12 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
         for p in stage.iterdir():
             if p.is_file(): r.fsync_file(p)
         r.fsync_directory(stage)
+        publication_started = True
         q.publish_directory(stage, output)
         r.fsync_directory(output.parent)
         return output / "bundle-manifest.json"
     finally:
-        if stage.exists():
+        if not publication_started and stage.exists():
             shutil.rmtree(stage)
 
 
@@ -547,6 +549,7 @@ def bind_site(bundle, bundle_sha, pack, pack_sha, admission, admission_sha, outp
         raise ValueError("site-bound bundle already exists")
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="."+output.name+".stage-", dir=str(output.parent)))
+    publication_started = False
     try:
         for name in manifest["files"]:
             shutil.copy2(bundle / name, stage / name)
@@ -578,11 +581,12 @@ def bind_site(bundle, bundle_sha, pack, pack_sha, admission, admission_sha, outp
         for path in stage.iterdir():
             if path.is_file(): r.fsync_file(path)
         r.fsync_directory(stage)
+        publication_started = True
         q.publish_directory(stage, output)
         r.fsync_directory(output.parent)
         return output / "bundle-manifest.json"
     finally:
-        if stage.exists(): shutil.rmtree(stage)
+        if not publication_started and stage.exists(): shutil.rmtree(stage)
 
 
 def _work(path, expected_sha):
@@ -931,6 +935,7 @@ def collect(work_path, expected_work_sha, expected_sources, source_tar, pack_tar
         raise ValueError("collection publication already exists")
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="."+output.name+".stage-", dir=str(output.parent)))
+    publication_started = False
     try:
         index_path = stage / "index.json"
         pack_dir = Path(tempfile.mkdtemp(prefix="hadronization-collector-pack-",
@@ -966,13 +971,14 @@ def collect(work_path, expected_work_sha, expected_sources, source_tar, pack_tar
         for p in stage.iterdir():
             if p.is_file(): r.fsync_file(p)
         r.fsync_directory(stage)
+        publication_started = True
         q.publish_directory(stage, output)
         r.fsync_directory(output.parent)
         if r.sha_file(output / "index.json") != manifest["index_sha256"]:
             raise ValueError("published collection readback differs")
         print("COLLECTION_CLOSED="+str(output / "index.json"))
     finally:
-        if stage.exists(): shutil.rmtree(stage)
+        if not publication_started and stage.exists(): shutil.rmtree(stage)
 
 
 def _checked_site_bundle(bundle, bundle_sha):
@@ -1045,6 +1051,7 @@ def stage_dag(bundle, bundle_sha, output, screen_path=None, screen_sha=None):
         dag = "\n".join(dag_lines) + "\n"
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="."+output.name+".stage-", dir=str(output.parent)))
+    publication_started = False
     try:
         for name in names:
             if name == "workflow.dag" and screen:
@@ -1070,6 +1077,7 @@ def stage_dag(bundle, bundle_sha, output, screen_path=None, screen_sha=None):
         r.fsync_file(stage / "launch-receipt.json")
         r.fsync_directory(stage / "logs")
         r.fsync_directory(stage)
+        publication_started = True
         q.publish_directory(stage, output)
         r.fsync_directory(output.parent)
         for name, fact in receipt["files"].items():
@@ -1077,7 +1085,7 @@ def stage_dag(bundle, bundle_sha, output, screen_path=None, screen_sha=None):
                 raise ValueError("published DAG input readback differs: " + name)
         return output / "workflow.dag"
     finally:
-        if stage.exists(): shutil.rmtree(stage)
+        if not publication_started and stage.exists(): shutil.rmtree(stage)
 
 
 def render_collector(bundle, bundle_sha, pins_path, pins_sha, output):
@@ -1119,6 +1127,7 @@ def render_collector(bundle, bundle_sha, pins_path, pins_sha, output):
         raise ValueError("collector submit template has unresolved site placeholder")
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="." + output.name + ".stage-", dir=str(output.parent)))
+    publication_started = False
     try:
         (stage / "collector.sub").write_text(submit)
         receipt = {"schema": "hadronization_rendered_collector_submit_v1",
@@ -1129,13 +1138,14 @@ def render_collector(bundle, bundle_sha, pins_path, pins_sha, output):
         r.atomic_json(stage / "receipt.json", receipt, exclusive=True)
         for path in stage.iterdir(): r.fsync_file(path)
         r.fsync_directory(stage)
+        publication_started = True
         q.publish_directory(stage, output)
         r.fsync_directory(output.parent)
         if r.sha_file(output / "collector.sub") != receipt["collector_submit_sha256"]:
             raise ValueError("rendered collector submit readback differs")
         return output / "collector.sub"
     finally:
-        if stage.exists(): shutil.rmtree(stage)
+        if not publication_started and stage.exists(): shutil.rmtree(stage)
 
 
 def main():
