@@ -180,7 +180,8 @@ and refuse admission if it cannot fit. The DAG defaults to four workers and
 at most two retries per classified transient failure. Deterministic identity,
 schema or pair-population errors hold the campaign. An independent custodian
 pins accepted attempt contents. The collector alone closes the sharded index;
-`merge build` separately pins the physical transformation.
+it loads the bound Linux query pack for verification and PyROOT. `merge build`
+separately pins the physical transformation.
 
 After independent admission, use fresh paths and independently read-back SHAs:
 
@@ -209,10 +210,12 @@ After independent admission, use fresh paths and independently read-back SHAs:
 # Submit this TEST_ONLY screen after separate authorization and review.
 (cd "$SCREEN_LAUNCH" && condor_submit_dag workflow.dag)
 # Independent review writes pins only for the screened ordinals.
-./hadronization condor collect-screen --work "$BOUND_BUNDLE/work.json" \
+python3 "$BOUND_BUNDLE/collector.py" collect-screen \
+  --work "$BOUND_BUNDLE/work.json" \
   --expected-work-sha256 "$WORK_SHA" \
   --expected-sources "$BOUND_BUNDLE/expected-sources.json" \
-  --source-tar "$BOUND_BUNDLE/source.tar.gz" --pins "$SCREEN_PINS" \
+  --source-tar "$BOUND_BUNDLE/source.tar.gz" \
+  --pack-tar "$BOUND_BUNDLE/query-pack.tar.gz" --pins "$SCREEN_PINS" \
   --expected-pins-sha256 "$SCREEN_PINS_SHA" --screen-plan "$SCREEN_PLAN" \
   --expected-screen-plan-sha256 "$SCREEN_PLAN_SHA"
 # Merge, reduce and render the resulting TEST_ONLY screen index for resource proof.

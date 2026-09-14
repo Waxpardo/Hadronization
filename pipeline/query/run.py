@@ -297,7 +297,8 @@ def prepare_pack(args):
         shutil.copy2(str(binary), str(staging / "query"))
         reduce.atomic_json(staging / "build-receipt.json", receipt, exclusive=True)
         kept_environment = {key: environment[key] for key in
-                            ("PATH", "ROOTSYS", "LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH")
+                            ("PATH", "ROOTSYS", "LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH",
+                             "PYTHONPATH")
                             if key in environment}
         reduce.atomic_json(staging / "manifest.json", {
             "schema": "hadronization_prepared_query_pack_v1",

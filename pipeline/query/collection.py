@@ -101,7 +101,8 @@ def _check_members(index, expected_sources):
             raise ValueError("collection natural tune/block membership differs")
 
 
-def create(workspaces, content_pins, expected_sources, output, work_root, test_only=False):
+def create(workspaces, content_pins, expected_sources, output, work_root, test_only=False,
+           prepared_pack=None):
     if len(workspaces) != len(content_pins) or not workspaces:
         raise ValueError("one independently supplied content pin is required per shard")
     if output.exists():
@@ -110,7 +111,7 @@ def create(workspaces, content_pins, expected_sources, output, work_root, test_o
     common = None
     for workspace, pin in zip(workspaces, content_pins):
         workspace = Path(workspace).absolute()
-        q.verify(workspace, work_root, pin)
+        q.verify(workspace, work_root, pin, prepared_pack=prepared_pack)
         metadata = r.json_file(workspace / "metadata.json")
         binding = metadata["input_receipt"]["binding"]
         identity = (metadata["analysis_sha256"], metadata["layout_sha256"],

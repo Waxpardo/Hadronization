@@ -60,6 +60,7 @@ BOOTSTRAP = '''#!/usr/bin/env python3
 """Start the hash-frozen query program from a transferred source tar."""
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -92,7 +93,29 @@ try:
                     raise ValueError("unsafe frozen source member")
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 destination.write_bytes(archive.extractfile(member).read())
-        result = subprocess.run([sys.executable, "-B", str(root / "pipeline/query/condor.py"), *sys.argv[1:]])
+        child_environment = None
+        if sys.argv[1] in ("collect", "collect-screen"):
+            pack_tar = option("--pack-tar")
+            if hashlib.sha256(pack_tar.read_bytes()).hexdigest() != work["prepared_pack_tar_sha256"]:
+                raise ValueError("collector qualified pack differs from bound work")
+            with tarfile.open(pack_tar, "r:gz") as pack_archive:
+                names = {member.name.removeprefix("./") for member in pack_archive.getmembers()
+                         if member.isfile()}
+                if names != {"query", "build-receipt.json", "manifest.json"}:
+                    raise ValueError("collector qualified pack fileset differs")
+                manifest_member = next(member for member in pack_archive.getmembers()
+                                       if member.name.removeprefix("./") == "manifest.json")
+                manifest = json.load(pack_archive.extractfile(manifest_member))
+            selected = manifest.get("environment")
+            if (not isinstance(selected, dict) or
+                    not all(isinstance(selected.get(key), str) and selected[key]
+                            for key in ("PATH", "ROOTSYS", "LD_LIBRARY_PATH", "PYTHONPATH")) or
+                    set(selected) - {"PATH", "ROOTSYS", "LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH",
+                                     "PYTHONPATH"}):
+                raise ValueError("collector qualified runtime environment differs")
+            child_environment = dict(os.environ, **selected)
+        result = subprocess.run([sys.executable, "-B", str(root / "pipeline/query/condor.py"),
+                                 *sys.argv[1:]], env=child_environment)
         sys.exit(result.returncode)
 except OSError as error:
     print("BOOTSTRAP ERROR: " + str(error), file=sys.stderr)
@@ -316,6 +339,7 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
                      "universe = local\nexecutable = /usr/bin/python3\n"
                      "arguments = collector.py collect --work work.json --expected-work-sha256 " + work_sha +
                      " --expected-sources expected-sources.json --source-tar source.tar.gz"
+                     " --pack-tar query-pack.tar.gz"
                      " --pins __EXTERNALLY_ACCEPTED_PINS_PATH__"
                      " --expected-pins-sha256 __EXTERNALLY_ACCEPTED_PINS_SHA256__\n"
                      "should_transfer_files = NO\ninitialdir = __BUNDLE_DIRECTORY__\n"
@@ -842,7 +866,7 @@ def _external_pins(path, expected_sha, ordinals):
     return pins
 
 
-def collect(work_path, expected_work_sha, expected_sources, source_tar, pins_path, pins_sha,
+def collect(work_path, expected_work_sha, expected_sources, source_tar, pack_tar, pins_path, pins_sha,
             screen_path=None, screen_sha=None):
     work = _work(work_path, expected_work_sha)
     _resolved(work)
@@ -854,6 +878,8 @@ def collect(work_path, expected_work_sha, expected_sources, source_tar, pins_pat
         raise ValueError("expected source manifest differs")
     if r.sha_file(source_tar) != work["source_tar_sha256"]:
         raise ValueError("frozen source tar differs")
+    if r.sha_file(pack_tar) != work["prepared_pack_tar_sha256"]:
+        raise ValueError("collector qualified pack differs from bound work")
     screen = screen_path is not None
     full_sources = r.json_file(expected_sources)
     if screen:
@@ -906,8 +932,16 @@ def collect(work_path, expected_work_sha, expected_sources, source_tar, pins_pat
     stage = Path(tempfile.mkdtemp(prefix="."+output.name+".stage-", dir=str(output.parent)))
     try:
         index_path = stage / "index.json"
-        index = c.create(workspaces, contents, expected_subset, index_path,
-                         stage / "verify-work", test_only=screen)
+        pack_dir = Path(tempfile.mkdtemp(prefix="hadronization-collector-pack-",
+                                         dir=os.environ.get("TMPDIR")))
+        try:
+            _extract_pack(pack_tar, pack_dir)
+            q.load_prepared_pack(pack_dir)
+            index = c.create(workspaces, contents, expected_subset, index_path,
+                             stage / "verify-work", test_only=screen,
+                             prepared_pack=pack_dir)
+        finally:
+            shutil.rmtree(pack_dir)
         if (index["campaign"] != work["campaign_id"] or
                 index["manifest_sha256"] != work["source_manifest_sha256"] or
                 index["block_count"] != work["block_count"] or
@@ -1143,6 +1177,7 @@ def main():
         collector_parser.add_argument("--expected-work-sha256", required=True)
         collector_parser.add_argument("--expected-sources", type=Path, required=True)
         collector_parser.add_argument("--source-tar", type=Path, required=True)
+        collector_parser.add_argument("--pack-tar", type=Path, required=True)
         collector_parser.add_argument("--pins", type=Path, required=True)
         collector_parser.add_argument("--expected-pins-sha256", required=True)
         if command_name == "collect-screen":
@@ -1197,11 +1232,11 @@ def main():
             print("STAGED_TEST_ONLY_SCREEN_DAG="+str(path)+" SHA256="+r.sha_file(path))
         elif args.command == "collect-screen":
             collect(args.work, args.expected_work_sha256, args.expected_sources,
-                    args.source_tar, args.pins, args.expected_pins_sha256,
+                    args.source_tar, args.pack_tar, args.pins, args.expected_pins_sha256,
                     args.screen_plan, args.expected_screen_plan_sha256)
         else:
             collect(args.work, args.expected_work_sha256, args.expected_sources,
-                    args.source_tar, args.pins, args.expected_pins_sha256)
+                    args.source_tar, args.pack_tar, args.pins, args.expected_pins_sha256)
     except TransientError as error:
         print("ERROR: "+str(error), file=sys.stderr)
         return 75

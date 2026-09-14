@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -247,18 +248,132 @@ class QueryCondorPreparation(unittest.TestCase):
         pins_path = control / "pins/selected.json"
         pins_path.write_text(json.dumps({"schema": condor.PINS_SCHEMA,
                                         "authority": "EXTERNAL_REVIEW", "pins": pins}))
-        condor.collect(work_path, work_sha, sources_path, source_tar,
-                       pins_path, condor.r.sha_file(pins_path),
-                       plan_path, condor.r.sha_file(plan_path))
-        published = control / "screens" / ("screen-" + work_sha[:16] + "-" +
-                                            condor.r.sha_file(pins_path)[:12])
-        self.assertEqual(condor.r.json_file(published / "manifest.json")["state"],
-                         "TEST_ONLY_REPRESENTATIVE_SCREEN")
-        self.assertEqual(condor.r.json_file(published / "index.json")["state"], "TEST_ONLY")
-        with self.assertRaisesRegex(ValueError, "publication already exists"):
-            condor.collect(work_path, work_sha, sources_path, source_tar,
-                           pins_path, condor.r.sha_file(pins_path),
-                           plan_path, condor.r.sha_file(plan_path))
+        self.assertEqual(len(condor.screen_plan(work_path, work_sha, sources_path)["coverage"]),
+                         30)
+        workspaces = [fixture / "queries" / ("shard-%04d" % ordinal)
+                      for ordinal in range(3)]
+        index_path = self.base / "screen-index.json"
+        index = condor.c.create(workspaces, [pin["scientific_content_sha256"] for pin in pins],
+                                sources, index_path, self.base / "screen-verify",
+                                test_only=True)
+        self.assertEqual(index["state"], "TEST_ONLY")
+        with self.assertRaisesRegex(ValueError, "already exists"):
+            condor.c.create(workspaces, [pin["scientific_content_sha256"] for pin in pins],
+                            sources, index_path, self.base / "screen-verify",
+                            test_only=True)
+
+    def test_cold_generated_collector_uses_pack_and_refuses_changed_runtime(self):
+        from test_query import RootQueryContract
+        RootQueryContract.setUpClass()
+        try:
+            fixture = RootQueryContract
+            bundle = self.base / "bundle"
+            dictionary = FIXTURE / "dictionary.json"
+            condor.prepare(self.acquisition, condor.r.sha_file(self.acquisition),
+                           dictionary, condor.r.sha_file(dictionary), bundle)
+            workspace = self.base / "fresh-query"
+            built = fixture.cli("build", "--input", fixture.fixture.shard,
+                                "--receipt", fixture.fixture.receipt,
+                                "--accepted-receipt-sha256",
+                                fixture.query.reduce.sha_file(fixture.fixture.receipt),
+                                "--dictionary", fixture.dictionary,
+                                "--prepared-pack", fixture.prepared_pack,
+                                "--output", workspace)
+            self.assertEqual(built.returncode, 0, built.stderr)
+            metadata = json.loads((workspace / "metadata.json").read_text())
+            binding = metadata["input_receipt"]["binding"]
+            expected_sources = []
+            for source in metadata["input_receipt"]["sources"]:
+                row = source["manifest_row"]
+                expected_sources.append({
+                    "source_id": source["source_id"], "tune": row["tune"],
+                    "tune_ordinal": binding["tune_ordinals"][row["tune"]],
+                    "logical_id": row["logical_id"], "block": row["block"],
+                    "events": row["successful_events"]})
+            sources_path = self.base / "expected-sources.json"
+            sources_path.write_text(json.dumps(expected_sources))
+            input_root = self.base / "inputs"
+            input_root.mkdir()
+            root = input_root / "shard-0000.root"
+            receipt = input_root / "shard-0000.json"
+            shutil.copy2(fixture.fixture.shard, root)
+            shutil.copy2(fixture.fixture.receipt, receipt)
+            pack_tar = self.base / "query-pack.tar.gz"
+            with tarfile.open(pack_tar, "w:gz") as archive:
+                for name in ("query", "build-receipt.json", "manifest.json"):
+                    archive.add(fixture.prepared_pack / name, arcname="./" + name)
+            source_tar = bundle / "source.tar.gz"
+            work = {"schema": condor.WORK_SCHEMA, "state": "SITE_BOUND",
+                    "storage_semantics": "POSIX_NOOVERWRITE_VERIFIED",
+                    "site_admission_sha256": "a" * 64,
+                    "prepared_pack_tar_sha256": condor.r.sha_file(pack_tar),
+                    "input_root": str(input_root),
+                    "durable_bulk_root": str(self.base / "bulk"),
+                    "durable_control_root": str(self.base / "control"),
+                    "expected_sources_sha256": condor.r.sha_file(sources_path),
+                    "source_tar_sha256": condor.r.sha_file(source_tar),
+                    "input_file_count": 2, "input_root_bytes": root.stat().st_size,
+                    "campaign_id": binding["campaign"],
+                    "source_manifest_sha256": binding["manifest_sha256"],
+                    "analysis_sha256": metadata["analysis_sha256"],
+                    "layout_sha256": metadata["layout_sha256"],
+                    "block_count": binding["block_assignment"]["count"],
+                    "tune_ordinals": binding["tune_ordinals"],
+                    "expected_source_count": len(expected_sources),
+                    "expected_event_count": sum(s["events"] for s in expected_sources),
+                    "work": [{"ordinal": 0,
+                              "root": {"name": root.name, "bytes": root.stat().st_size,
+                                       "sha256": condor.r.sha_file(root)},
+                              "receipt": {"name": receipt.name,
+                                          "bytes": receipt.stat().st_size,
+                                          "sha256": condor.r.sha_file(receipt)}}]}
+            work_path = self.base / "work.json"
+            work_path.write_text(json.dumps(work))
+            work_sha = condor.r.sha_file(work_path)
+            staged = condor._stage_workspace(
+                workspace, self.base / "bulk/shard-0000/attempt-00", 0, 0, work_sha)
+            control = self.base / "control"
+            (control / "pins").mkdir(parents=True)
+            pins_path = control / "pins/selected.json"
+            pins_path.write_text(json.dumps({"schema": condor.PINS_SCHEMA,
+                "authority": "EXTERNAL_REVIEW", "pins": [{"ordinal": 0, "attempt": 0,
+                "scientific_content_sha256": staged["scientific_content_sha256"]}]}))
+            command = [sys.executable, "-B", str(bundle / "collector.py"), "collect",
+                       "--work", str(work_path), "--expected-work-sha256", work_sha,
+                       "--expected-sources", str(sources_path),
+                       "--source-tar", str(source_tar), "--pack-tar", str(pack_tar),
+                       "--pins", str(pins_path), "--expected-pins-sha256",
+                       condor.r.sha_file(pins_path)]
+            environment = {"PATH": "/usr/bin:/bin", "TMPDIR": str(self.base),
+                           "HOME": str(self.base), "PYTHONPATH": "", "LD_LIBRARY_PATH": "",
+                           "PYTHONDONTWRITEBYTECODE": "1"}
+            mutant_dir = self.base / "mutant-pack"
+            mutant_dir.mkdir()
+            for name in ("query", "build-receipt.json", "manifest.json"):
+                shutil.copy2(fixture.prepared_pack / name, mutant_dir / name)
+            mutant_manifest = json.loads((mutant_dir / "manifest.json").read_text())
+            mutant_manifest["environment"]["PYTHONPATH"] = "/TEST_ONLY_changed_runtime"
+            (mutant_dir / "manifest.json").write_text(json.dumps(mutant_manifest))
+            mutant_tar = self.base / "mutant-pack.tar.gz"
+            with tarfile.open(mutant_tar, "w:gz") as archive:
+                for name in ("query", "build-receipt.json", "manifest.json"):
+                    archive.add(mutant_dir / name, arcname="./" + name)
+            mutant_command = list(command)
+            mutant_command[mutant_command.index(str(pack_tar))] = str(mutant_tar)
+            refused = subprocess.run(mutant_command, cwd=self.base, env=environment,
+                                     capture_output=True, text=True)
+            self.assertEqual(refused.returncode, 42, refused.stderr)
+            self.assertIn("qualified pack differs", refused.stderr)
+            accepted = subprocess.run(command, cwd=self.base, env=environment,
+                                      capture_output=True, text=True)
+            self.assertEqual(accepted.returncode, 0, accepted.stderr)
+            published = control / "collections" / ("collection-" + work_sha[:16])
+            self.assertEqual(condor.r.json_file(published / "manifest.json")["state"],
+                             "EXTERNALLY_PINNED")
+            self.assertEqual(len(condor.r.json_file(published / "index.json")["sources"]),
+                             len(expected_sources))
+        finally:
+            RootQueryContract.tearDownClass()
 
     def test_inert_dag_has_exact_domain_retry_budget_and_frozen_bootstrap(self):
         dictionary = FIXTURE / "dictionary.json"
@@ -338,6 +453,8 @@ class QueryCondorPreparation(unittest.TestCase):
                           submit)
             self.assertIn("+JobCategory = ", submit)
         self.assertIn('+JobCategory = "long"',
+                      (bundle / "collector.sub").read_text())
+        self.assertIn("--pack-tar query-pack.tar.gz",
                       (bundle / "collector.sub").read_text())
         self.assertIn("transfer_input_files = site_probe.py,publication.py,runtime.py",
                       (bundle / "site-canary.sub").read_text())
