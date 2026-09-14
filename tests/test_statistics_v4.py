@@ -236,6 +236,52 @@ class NativeV4Metadata(unittest.TestCase):
         p.ProjectionResult.from_dict(value,request,routes)
         return request,value,routes
 
+    @staticmethod
+    def _screen_shard_domain(value):
+        binding=value['artifact_binding']
+        originals=binding['member_files']
+        proof=binding['pair_proofs'][0]
+        ordinals=[0,100,101,211,212]
+        binding['member_files']=[dict(row,shard_ordinal=ordinal,
+            file_id='shard_{:04d}_{}'.format(ordinal,row['file_id'].split('_')[-1]))
+            for ordinal in ordinals for row in originals]
+        binding['member_files'].sort(key=lambda row:row['file_id'])
+        binding['member_files_sha256']=p.digest(binding['member_files'])
+        binding['pair_proofs']=[dict(proof,shard_ordinal=ordinal,
+            events=proof['events']//len(ordinals)) for ordinal in ordinals]
+        binding['pair_proofs_sha256']=p.digest(binding['pair_proofs'])
+
+    def test_v4_screen_preserves_original_noncontiguous_shard_ordinals(self):
+        request,value,routes=self._fixture_v4()
+        science=value['science_content_sha256']
+        self._screen_shard_domain(value)
+        checked=p.ProjectionResult.from_dict(value,request,routes,cold=True)
+        self.assertEqual(checked.to_dict()['science_content_sha256'],science)
+        with tempfile.TemporaryDirectory() as directory:
+            output=Path(directory)/'screen-ordinals.root'
+            written=archive.write(value,output,directory)
+            cold=archive.read(output,directory,written['root_sha256'],
+                              written['value_sha256'])
+            self.assertEqual(cold['artifact_binding'],value['artifact_binding'])
+            self.assertEqual(cold['science_content_sha256'],science)
+
+    def test_v4_screen_rejects_resealed_pair_proof_domain_mutants(self):
+        request,value,routes=self._fixture_v4()
+        self._screen_shard_domain(value)
+        for name,mutate in (
+                ('duplicate',lambda rows:rows[1].update(shard_ordinal=0)),
+                ('reordered',lambda rows:rows.reverse()),
+                ('uncovered shard',lambda rows:rows[-1].update(shard_ordinal=213)),
+                ('missing proof',lambda rows:rows.pop()),
+                ('wrong exposure',lambda rows:rows[0].update(events=41))):
+            changed=copy.deepcopy(value)
+            binding=changed['artifact_binding']
+            mutate(binding['pair_proofs'])
+            binding['pair_proofs_sha256']=p.digest(binding['pair_proofs'])
+            with self.subTest(name=name),self.assertRaisesRegex(
+                    ValueError,'collection v2.2 pair proof'):
+                p.ProjectionResult.from_dict(changed,request,routes,cold=True)
+
     def test_v4_fixture_rejects_legacy_gram_cross_block_and_attempt_status_mutants(self):
         request,value,routes=self._fixture_v4()
         changed=copy.deepcopy(value)

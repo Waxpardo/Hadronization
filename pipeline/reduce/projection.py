@@ -1226,9 +1226,9 @@ def validate_native_v4_receipts(result,request):
         raise ValueError('full paper result lacks a campaign-complete request')
     files=binding['member_files']
     pair_proofs=binding['pair_proofs']
+    proof_ordinals=[row['shard_ordinal'] for row in pair_proofs]
     if (binding['pair_proofs_sha256']!=digest(pair_proofs) or
-            [row['shard_ordinal'] for row in pair_proofs]!=
-                list(range(len(pair_proofs))) or
+            proof_ordinals!=sorted(set(proof_ordinals)) or
             sum(row['events'] for row in pair_proofs)!=closure['event_count']):
         raise ValueError('collection v2.2 pair proof domain/content differs')
     if (files!=sorted(files,key=lambda row:row['file_id']) or
@@ -1263,7 +1263,7 @@ def validate_native_v4_receipts(result,request):
             (binding['layout']=='MERGED')!=bool(partitions) or
             partition_ids!=set(range(len(partition_ids)))):
         raise ValueError('collection shard/partition role domain differs')
-    if set(shards)!=set(range(len(pair_proofs))):
+    if set(shards)!=set(proof_ordinals):
         raise ValueError('collection v2.2 pair proofs do not cover admitted shards')
     merged=binding['merged_partitions']
     if (binding['merged_partitions_sha256']!=digest(merged) or
@@ -1279,7 +1279,7 @@ def validate_native_v4_receipts(result,request):
                 for row in merged)):
         raise ValueError('merged five-family partition identity/content differs')
     if result['campaign_state']=='FULL_ACCEPTED_CAMPAIGN' and (
-            len(shards)!=323 or len(partitions)!=3 or
+            set(shards)!=set(range(323)) or len(partitions)!=3 or
             partitions!=set(request['scope']['ordered_tunes'])):
         raise ValueError('full paper result requires 323 authenticated shards and three merged partitions')
     provenance=result['provenance']
