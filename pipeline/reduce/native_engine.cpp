@@ -1046,9 +1046,13 @@ void Evaluate(const Data& data,const Queries& query,const std::string& path,
     std::optional<double> reference;
     if (!point.referenceTune.empty())
       reference=evaluator.Value(point,point.referenceTune,0);
-    std::optional<double> center;
-    if (point.referenceTune.empty())center=base;
-    else if (base && reference && *reference!=0.0)center=*base / *reference;
+    double center=0.0;
+    bool hasCenter=false;
+    if (point.referenceTune.empty()) {
+      if (base) {center=*base;hasCenter=true;}
+    } else if (base && reference && *reference!=0.0) {
+      center=*base / *reference;hasCenter=true;
+    }
     const auto denominatorReasons=evaluator.DenominatorReasons(point);
     const bool denominatorValueFailure=std::any_of(
         denominatorReasons.begin(),denominatorReasons.end(),[](const auto& reason){
@@ -1057,7 +1061,7 @@ void Evaluate(const Data& data,const Queries& query,const std::string& path,
     const bool denominatorStatisticalFailure=std::any_of(
         denominatorReasons.begin(),denominatorReasons.end(),[](const auto& reason){
           return reason.rfind("DENOMINATOR_STATISTICALLY_UNRESOLVED:",0)==0; });
-    if (denominatorValueFailure)center.reset();
+    if (denominatorValueFailure)hasCenter=false;
     const auto centerSourceBoundary=evaluator.Class(point.tune,0,point.classId);
     const auto centerReferenceBoundary=point.referenceTune.empty()?
         std::optional<HR::ActivityClassBoundary>{}:
@@ -1111,12 +1115,12 @@ void Evaluate(const Data& data,const Queries& query,const std::string& path,
           evaluator.MarginResolved(point.referenceTune,point.classId)));
     const bool deterministic=point.role=="accounting.natural_final_heavy" &&
         point.quantity!="normalized_yield";
-    const bool valid=center && std::isfinite(variance) && !unstable &&
+    const bool valid=hasCenter && std::isfinite(variance) && !unstable &&
         marginResolved && !deterministic && denominatorReasons.empty();
     output<<"R\t"<<point.id<<'\t'
-          <<(center?(denominatorStatisticalFailure?"UNSTABLE_DENOMINATOR":
+          <<(hasCenter?(denominatorStatisticalFailure?"UNSTABLE_DENOMINATOR":
                      "AVAILABLE"):"UNDEFINED")<<'\t'
-          <<(center?Hex(*center):"-")<<'\t'
+          <<(hasCenter?Hex(center):"-")<<'\t'
           <<(valid?(variance==0.0?"AVAILABLE_ZERO_DISPERSION":"AVAILABLE"):
               "WITHHELD_UNCERTAINTY")<<'\t'
           <<(valid?Hex(variance):"-")<<'\t'
@@ -1129,7 +1133,7 @@ void Evaluate(const Data& data,const Queries& query,const std::string& path,
               !g9ReferenceFailure.empty()?g9ReferenceFailure:
               g9LeafFailure?"G9_INVALID_DELETE_ONE":
               !denominatorReasons.empty()?denominatorReasons.front():
-              !center?"UNDEFINED_CENTER":
+              !hasCenter?"UNDEFINED_CENTER":
               !std::isfinite(variance)?"UNDEFINED_LEAF":"-")<<'\t'
           <<Hex(variance)<<'\n';
     const auto emitFamily=[&](const std::string& tune,
