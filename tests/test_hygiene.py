@@ -98,6 +98,7 @@ class LeanTreeContract(unittest.TestCase):
             {path for path in paths if path.startswith("pipeline/query/")},
             {"pipeline/query/collection.py",
              "pipeline/query/condor.py", "pipeline/query/merge.py",
+             "pipeline/query/merge_sparse.hpp",
              "pipeline/query/model.py", "pipeline/query/query.cpp",
              "pipeline/query/row_schema.hpp", "pipeline/query/run.py",
              "pipeline/query/selection.hpp", "pipeline/query/sparse.hpp",

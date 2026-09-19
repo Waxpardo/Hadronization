@@ -5,6 +5,7 @@ import importlib.util
 import json
 import math
 from pathlib import Path
+from unittest.mock import patch
 import shutil
 import tempfile
 import unittest
@@ -249,13 +250,13 @@ class QueryCollectionContract(unittest.TestCase):
                     file.Close()
                 part = next(p for p in self.merged["partitions"] if p["tune"] == tune)
                 file = ROOT.TFile.Open(part["root"]["path"])
-                hist = file.Get("sparse_" + family)
-                actual = {coord: (value, variance) for coord, value, variance in c._cells(hist)}
+                actual = {coord: (value, variance) for coord, value, variance in c.family_cells(file, family, part)}
+                actual_entries = sum(hist.GetEntries() for hist in c.read_family(file, family, part))
                 self.assertEqual(set(expected), set(actual), (family, tune))
                 for coord in expected:
                     self.assertTrue(all(math.isclose(a, b, rel_tol=1e-12, abs_tol=1e-12)
                                         for a, b in zip(expected[coord], actual[coord])), (family, tune, coord))
-                self.assertEqual(hist.GetEntries(), entries)
+                self.assertEqual(actual_entries, entries)
                 file.Close()
 
     def test_re_pinned_child_cannot_change_sparse_cell_or_source_domain(self):
@@ -266,21 +267,24 @@ class QueryCollectionContract(unittest.TestCase):
         ROOT.gInterpreter.Declare(r'''
             #include <TFile.h>
             #include <THnSparse.h>
-            void mutate_test_merge_cell(const char* path) {
+            void mutate_test_merge_cell(const char* path, const char* name) {
                 TFile file(path, "UPDATE");
-                auto* hist = file.Get<THnSparseD>("sparse_pairs");
+                auto* hist = file.Get<THnSparseD>(name);
                 if (!hist || hist->GetNbins() == 0) throw std::runtime_error("empty sparse test input");
                 const Long64_t occupied = 0;
                 hist->SetBinContent(occupied, hist->GetBinContent(occupied) + 1.0);
-                hist->Write("sparse_pairs", TObject::kOverwrite);
+                hist->Write(name, TObject::kOverwrite);
             }
         ''')
-        ROOT.mutate_test_merge_cell(str(root_path))
-        file = ROOT.TFile.Open(str(root_path), "READ")
-        hist = file.Get("sparse_pairs")
-        changed_digest = m._digest(hist)
-        file.Close()
         child = copy.deepcopy(self.merged)
+        part = child["partitions"][0]
+        obj = part["sparse_objects"]["pairs"][0]
+        ROOT.mutate_test_merge_cell(str(root_path), obj["name"])
+        file = ROOT.TFile.Open(str(root_path), "READ")
+        obj["cell_digest"] = m._digest(c.read_sparse(file, obj["name"]))
+        obj["serialized_bytes"] = file.GetKey(obj["name"]).GetObjlen()
+        changed_digest = c.cell_digest(c.family_cells(file, "pairs", part))
+        file.Close()
         child["partitions"][0]["root"]["path"] = str(root_path)
         stale_path = self.base / "changed-cell-stale-fact.json"
         c.r.atomic_json(stale_path, child, exclusive=True)
@@ -306,6 +310,107 @@ class QueryCollectionContract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "parent/content/domain"):
             c.verify_merge_lineage(child_path, child_sha, domain_path,
                                    c.r.sha_file(domain_path))
+
+    def test_block_storage_is_bounded_and_logical_scan_matches(self):
+        import sys
+        sys.path.insert(0, str(ROOT_DIR))
+        from pipeline.reduce.native import NativeCollection
+        snapshots = []
+        for path in (self.index_path, self.merged_path):
+            # This legacy fixture tests storage scanning only; production admission
+            # remains covered by the independently pinned v2.2 statistics fixtures.
+            source = NativeCollection.__new__(NativeCollection)
+            source.api = c
+            source.index = c.read(path, c.r.sha_file(path))
+            source.ordinal_to_tune = {v:k for k,v in source.index["tune_ordinals"].items()}
+            source.membership = {(m["tune"],m["block"]) for m in source.index["sources"]}
+            cells = {}
+            def consume(cell, axes):
+                key = (cell.family, cell.tune, cell.block, cell.coordinates)
+                old = cells.get(key, (0.0, 0.0))
+                cells[key] = (old[0]+cell.value, old[1]+cell.sumw2)
+            metrics = source.scan(c.FAMILIES, self.sharded["tune_ordinals"], consume)
+            self.assertEqual(metrics.root_opens, 3)
+            self.assertEqual(metrics.family_passes, 15)
+            snapshots.append(cells)
+        self.assertEqual(snapshots[0], snapshots[1])
+        for part in self.merged["partitions"]:
+            self.assertEqual(len(part["families"]), 5)
+            for objects in part["sparse_objects"].values():
+                self.assertEqual([obj["block"] for obj in objects], list(range(1, 11)))
+                self.assertTrue(all(0 < obj["serialized_bytes"] <= c.MAX_SPARSE_OBJECT_BYTES for obj in objects))
+
+    def test_component_manifest_missing_duplicate_or_foreign_block_refuses(self):
+        for kind in ("missing", "duplicate", "foreign", "oversized"):
+            child = copy.deepcopy(self.merged)
+            objects = child["partitions"][0]["sparse_objects"]["pairs"]
+            if kind == "missing": objects.pop()
+            if kind == "duplicate": objects.append(objects[0])
+            if kind == "foreign": objects[0]["block"] = 2
+            if kind == "oversized": objects[0]["serialized_bytes"] = c.MAX_SPARSE_OBJECT_BYTES+1
+            path = self.base / (kind+"-component.json")
+            c.r.atomic_json(path, child, exclusive=True)
+            with self.assertRaisesRegex(ValueError, "component"):
+                c.read(path, c.r.sha_file(path))
+
+    def test_full_dimension_synthetic_object_exceeds_limit_but_blocks_roundtrip(self):
+        ROOT = c._root()
+        ROOT.gInterpreter.Declare(r"""
+            void fill_merge_limit_fixture(THnSparseD* hist, int cells) {
+                std::vector<int> coord(hist->GetNdimensions(),1);
+                for(int block=1;block<=10;++block) for(int row=0;row<cells;++row) {
+                    coord[1]=block;
+                    int residual=row;
+                    for(int axis=2;axis<hist->GetNdimensions();++axis) {
+                        int bins=hist->GetAxis(axis)->GetNbins()+2;
+                        coord[axis]=residual%bins; residual/=bins;
+                    }
+                    if(residual) throw std::runtime_error("synthetic geometry exhausted");
+                    auto bin=hist->GetBin(coord.data(),true);
+                    hist->SetBinContent(bin, (row%7-3)*0.5);
+                    hist->SetBinError2(bin, (row%7+1)*0.25);
+                }
+            }
+        """)
+        file = ROOT.TFile.Open(self.sharded["shards"][0]["query_root"]["path"])
+        whole = m._empty_like(c.read_sparse(file, "sparse_pairs"), "synthetic_pairs")
+        file.Close()
+        cells_per_block = 65536
+        ROOT.fill_merge_limit_fixture(whole, cells_per_block)
+        self.assertEqual(whole.GetNbins(), cells_per_block*10)
+        blocks = [m._empty_like(whole, "synthetic_block_%02d" % b) for b in range(1,11)]
+        m._native().Accumulate(whole, blocks, 0)
+        limit = 4*1024*1024
+        with self.assertRaisesRegex(Exception, "serialization bound"):
+            m._native().SerializedSize(whole, limit)
+        path = self.base / "synthetic-limit.root"
+        output = ROOT.TFile.Open(str(path), "CREATE")
+        with patch.object(m.c, "MAX_SPARSE_OBJECT_BYTES", limit):
+            for hist in blocks:
+                self.assertLess(m._write_component(output, hist), limit)
+        output.Close()
+        reopened = ROOT.TFile.Open(str(path), "READ")
+        self.assertEqual(len(reopened.GetListOfKeys()), 10)
+        for block, expected in enumerate(blocks, 1):
+            actual = c.read_sparse(reopened, expected.GetName())
+            self.assertEqual(actual.GetNbins(), cells_per_block)
+            self.assertEqual(m._digest(actual), m._digest(expected))
+            for coordinates, value, variance in c._cells(actual):
+                self.assertEqual(coordinates[1], block)
+                row = 0
+                for axis in reversed(range(2, whole.GetNdimensions())):
+                    row = row*(whole.GetAxis(axis).GetNbins()+2) + coordinates[axis]
+                self.assertEqual(value, (row%7-3)*0.5)
+                self.assertEqual(variance, (row%7+1)*0.25)
+        reopened.Close()
+
+    def test_synthetic_serialization_limit_rejects_before_publication(self):
+        output = self.base / "over-limit"
+        with patch.object(m.c, "MAX_SPARSE_OBJECT_BYTES", 1):
+            with self.assertRaisesRegex(ValueError, "serialization bound"):
+                m.merge(self.index_path, c.r.sha_file(self.index_path), output)
+        self.assertFalse(output.exists())
+        self.assertEqual(len(list(self.base.glob(".over-limit.stage-*"))), 1)
 
     def test_missing_duplicate_foreign_source_and_missing_support_refuse(self):
         for mutant in (self.sources[:-1], self.sources + self.sources[:1],

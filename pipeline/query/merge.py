@@ -1,12 +1,9 @@
-"""Bounded native THnSparse object-add merge behind the collection locator."""
+"""Merge original blocks into bounded THnSparse objects in one ROOT file per tune."""
 
 import argparse
 from array import array
-from bisect import bisect_right
 import hashlib
-import math
 from pathlib import Path
-import shutil
 import sys
 import tempfile
 import time
@@ -21,72 +18,45 @@ except ImportError:
 
 
 def _digest(hist):
-    digest = hashlib.sha256()
-    for coordinates, value, variance in c._cells(hist):
-        digest.update(c.r.canonical([coordinates, value.hex(), variance.hex()]).encode("ascii"))
-        digest.update(b"\n")
-    return digest.hexdigest()
+    return c.cell_digest(c._cells(hist))
 
 
-def _family_entries(shard):
-    """Count fills by natural tune from exact support with bounded range state."""
-    tunes = {m["tune_ordinal"] for m in shard["members"]}
-    if len(tunes) == 1:
-        return None  # Each family histogram's own GetEntries is exact.
+def _native():
     ROOT = c._root()
-    file = ROOT.TFile.Open(shard["query_root"]["path"], "READ")
+    if not hasattr(ROOT, "PhaseAMerge"):
+        if not ROOT.gInterpreter.Declare(Path(__file__).with_name("merge_sparse.hpp").read_text()):
+            raise ValueError("cannot compile native block merge helper")
+    return ROOT.PhaseAMerge
+
+
+def _empty_like(hist, name):
+    ROOT = c._root()
+    axes = [hist.GetAxis(i) for i in range(hist.GetNdimensions())]
+    result = ROOT.THnSparseD(name, name, len(axes),
+        array("i", [a.GetNbins() for a in axes]),
+        array("d", [a.GetXmin() for a in axes]),
+        array("d", [a.GetXmax() for a in axes]), 16384)
+    ROOT.SetOwnership(result, True)
+    for i, axis in enumerate(axes):
+        axis.Copy(result.GetAxis(i))
+        result.GetAxis(i).SetRange(0, 0)
+    result.Sumw2()
+    return result
+
+
+def _write_component(target, hist):
+    # Fixed buffer preflight throws before ROOT can overflow; no giant clone.
     try:
-        def integer(value):
-            return ord(value) if isinstance(value, str) and len(value) == 1 else int(value)
-        members = {local: member["tune_ordinal"] for local, member in enumerate(shard["members"])}
-        ranges = [(int(row.first_id), int(row.count), int(row.source_id)) for row in file.Get("event_ranges")]
-        starts = [row[0] for row in ranges]
-        counts = {family: {tune: 0 for tune in tunes} for family in c.FAMILIES}
-        def tune_for(event_id):
-            position = bisect_right(starts, int(event_id)) - 1
-            if position < 0 or int(event_id) >= ranges[position][0] + ranges[position][1]:
-                raise ValueError("exact support event has no source range")
-            return members[ranges[position][2]]
-        for tree, family in (("events", "activity"), ("pairs", "pairs"),
-                             ("closure", "closure"), ("triggers", "triggers"),
-                             ("heavy", "kinematics")):
-            rows = file.Get(tree)
-            if not rows:
-                raise ValueError("required exact support tree is missing")
-            for row in rows:
-                if tree == "triggers" and integer(row.rejection_mask) != 0:
-                    continue
-                if tree == "heavy" and not (integer(row.final) and integer(row.selected) and
-                                            81 <= integer(row.status) <= 89):
-                    continue
-                counts[family][tune_for(row.event_id)] += 1
-        return counts
-    finally:
-        file.Close()
-
-
-def _select_tune(hist, ordinal, entries):
-    for axis in range(hist.GetNdimensions()):
-        hist.GetAxis(axis).SetRange(0, 0)
-    # ProjectionND contracts the selected tune axis. Retain the original
-    # campaign geometry so natural tune ordinals remain additive across files.
-    selected = hist.Clone(hist.GetName()+"__selected")
-    c._root().SetOwnership(selected, True)
-    selected.Reset()
-    selected.Sumw2()
-    for coordinates, value, variance in c._cells(hist):
-        if coordinates[0] != ordinal + 1:
-            continue
-        bins = array("i", coordinates)
-        selected.SetBinContent(bins, value)
-        selected.SetBinError2(selected.GetBin(bins), variance)
-    selected.SetEntries(entries)
-    for axis in range(hist.GetNdimensions()):
-        hist.GetAxis(axis).SetRange(0, 0)
-        selected.GetAxis(axis).SetRange(0, 0)
-    if not selected.GetCalculateErrors() or not math.isfinite(selected.GetEntries()):
-        raise ValueError("tune projection lost Sumw2")
-    return selected
+        _native().SerializedSize(hist, c.MAX_SPARSE_OBJECT_BYTES - 65536)
+    except Exception as error:
+        raise ValueError("sparse component serialization bound: " + str(error)) from error
+    target.cd()
+    if hist.Write(hist.GetName()) <= 0:
+        raise ValueError("cannot write merged sparse object")
+    size = target.GetKey(hist.GetName()).GetObjlen()
+    if size > c.MAX_SPARSE_OBJECT_BYTES:
+        raise ValueError("merged sparse serialization exceeded bound")
+    return size
 
 
 def merge(index_path, expected_sha256, output):
@@ -102,7 +72,7 @@ def merge(index_path, expected_sha256, output):
     layout = c.r.json_file(c.ROOT_DIR / "config/query.json")
     started = time.monotonic()
     partitions = []
-    entry_counts = {s["ordinal"]: _family_entries(s) for s in index["shards"]}
+    native = _native()
     publication_started = False
     try:
         for tune, ordinal in sorted(index["tune_ordinals"].items(), key=lambda x: x[1]):
@@ -111,10 +81,15 @@ def merge(index_path, expected_sha256, output):
             if not target or target.IsZombie():
                 raise ValueError("cannot create merge ROOT")
             family_digests = {}
+            objects = {}
             try:
                 for family in c.FAMILIES:
+                    objects[family] = []
+                    family_digest = hashlib.sha256()
                     merged = None
                     baseline = None
+                    entries = [0] * index["block_count"]
+                    print("MERGE_FAMILY tune=%s family=%s" % (tune, family), flush=True)
                     for shard in index["shards"]:
                         if not any(m["tune"] == tune for m in shard["members"]):
                             continue
@@ -127,50 +102,43 @@ def merge(index_path, expected_sha256, output):
                             if baseline is not None and baseline != signature:
                                 raise ValueError("merge geometry/dictionary differs")
                             baseline = signature
-                            by_tune = entry_counts[shard["ordinal"]]
-                            entries = hist.GetEntries() if by_tune is None else by_tune[family][ordinal]
-                            selected = _select_tune(hist, ordinal, entries)
-                            if c._geometry(selected, layout["sparse"][family]) != signature:
-                                raise ValueError("tune projection geometry differs")
-                            for coord, _, _ in c._cells(selected):
-                                if coord[0] != ordinal + 1:
-                                    raise ValueError("tune projection retained foreign cell")
                             if merged is None:
-                                merged = selected.Clone("sparse_"+family)
-                                ROOT.SetOwnership(merged, True)
-                            else:
-                                for axis in range(merged.GetNdimensions()):
-                                    merged.GetAxis(axis).SetRange(0, 0)
-                                merged.Add(selected)
-                            del selected
+                                merged = [_empty_like(hist, "sparse_%s__block_%02d" % (family, block))
+                                          for block in range(1, index["block_count"] + 1)]
+                            native.Accumulate(hist, merged, ordinal)
+                            counts = native.Entries(source, family,
+                                [m["tune_ordinal"] for m in shard["members"]],
+                                [m["block"] for m in shard["members"]], ordinal, index["block_count"])
+                            entries = [old + int(new) for old, new in zip(entries, counts)]
+                            del hist
                         finally:
                             source.Close()
                     if merged is None:
                         raise ValueError("tune has no sparse contribution")
-                    for axis in range(merged.GetNdimensions()):
-                        merged.GetAxis(axis).SetRange(0, 0)
-                    family_digests[family] = _digest(merged)
-                    target.cd()
-                    if merged.Write("sparse_"+family) <= 0:
-                        raise ValueError("cannot write merged sparse object")
-                    del merged
+                    for block, hist in enumerate(merged, 1):
+                        hist.SetEntries(entries[block-1])
+                        digest = hashlib.sha256()
+                        for coordinates, value, variance in c._cells(hist):
+                            line = (c.r.canonical([coordinates, value.hex(), variance.hex()]) + "\n").encode("ascii")
+                            digest.update(line)
+                            family_digest.update(line)
+                        print("MERGE_COMPONENT tune=%s family=%s block=%d cells=%d" %
+                              (tune, family, block, hist.GetNbins()), flush=True)
+                        size = _write_component(target, hist)
+                        objects[family].append({"name": hist.GetName(), "block": block,
+                                                "cell_digest": digest.hexdigest(),
+                                                "serialized_bytes": size})
+                    del hist, merged
+                    family_digests[family] = family_digest.hexdigest()
             finally:
                 target.Close()
-            reopened = ROOT.TFile.Open(str(root_path), "READ")
-            if not reopened or reopened.IsZombie():
-                raise ValueError("cannot reopen merged ROOT")
-            try:
-                if {key.GetName() for key in reopened.GetListOfKeys()} != {"sparse_"+f for f in c.FAMILIES}:
-                    raise ValueError("merged ROOT object set differs")
-                for family in c.FAMILIES:
-                    hist = c.read_sparse(reopened, "sparse_"+family)
-                    c._geometry(hist, layout["sparse"][family])
-                    if _digest(hist) != family_digests[family]:
-                        raise ValueError("merged ROOT readback content differs")
-            finally:
-                reopened.Close()
-            partitions.append({"tune": tune, "families": list(c.FAMILIES),
-                               "root": c._fact(root_path), "cell_digests": family_digests})
+            part = {"tune": tune, "families": list(c.FAMILIES),
+                    "root": c._fact(root_path), "cell_digests": family_digests,
+                    "sparse_objects": objects}
+            # Use the same component-aware verifier as cold collection readers.
+            check = dict(index, shards=[], partitions=[part])
+            c._verify_sparse_roots(check)
+            partitions.append(part)
         merged_index = dict(index)
         merged_index["layout"] = "MERGED"
         merged_index["partitions"] = partitions
@@ -204,7 +172,7 @@ def merge(index_path, expected_sha256, output):
         return output / "index.json"
     finally:
         if not publication_started and stage.exists():
-            shutil.rmtree(stage)
+            print("MERGE_RETAINED_STAGE=" + str(stage), file=sys.stderr, flush=True)
 
 
 def main():

@@ -3,6 +3,7 @@
 import gc
 from pathlib import Path
 import unittest
+import weakref
 
 from pipeline.query import collection, merge
 
@@ -70,18 +71,26 @@ class SparseLifetime(unittest.TestCase):
                 gc.collect()
                 self.assertEqual(ROOT.PhaseASparseLifetimeTest.live, 0)
 
-    def test_selected_clone_has_an_owner_and_survives_input_close(self):
+    def test_owned_block_components_survive_input_close_and_are_released(self):
         fixture = (Path(__file__).resolve().parent /
                    'fixtures/query_multitune/queries/shard-0000/query.root')
         file = self.ROOT.TFile.Open(str(fixture), 'READ')
         histogram = collection.read_sparse(file, 'sparse_activity')
-        selected = merge._select_tune(histogram, 0, histogram.GetEntries())
-        expected = list(collection._cells(selected))
-        self.assertTrue(selected.__python_owns__)
+        expected = list(collection._cells(histogram))
+        components = [merge._empty_like(histogram, 'activity_block_%02d' % block)
+                      for block in range(1, 11)]
+        merge._native().Accumulate(histogram, components, 0)
+        self.assertTrue(all(component.__python_owns__ for component in components))
+        references = [weakref.ref(component) for component in components]
         file.Close()
         del histogram
         gc.collect()
-        self.assertEqual(list(collection._cells(selected)), expected)
+        for block in range(1, 11):
+            self.assertEqual(list(collection._cells(components[block-1])),
+                             [cell for cell in expected if cell[0][1] == block])
+        del components
+        gc.collect()
+        self.assertTrue(all(reference() is None for reference in references))
 
 
 if __name__ == '__main__':

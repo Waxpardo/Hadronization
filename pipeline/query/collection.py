@@ -55,6 +55,40 @@ def read_sparse(file, name):
     return histogram
 
 
+# ROOT 6.30 uses 30-bit object byte counts and a signed 32-bit buffer size.
+# Keep each independently streamed object below half the stricter limit.
+MAX_SPARSE_OBJECT_BYTES = 512 * 1024 * 1024
+
+
+def family_objects(family, partition=None):
+    """Resolve one logical family; old five-object files remain readable."""
+    if partition is not None and "sparse_objects" in partition:
+        return partition["sparse_objects"][family]
+    return [{"name": "sparse_" + family, "block": None}]
+
+
+def read_family(file, family, partition=None):
+    """Yield independent storage objects without reassembling a giant ROOT object."""
+    for component in family_objects(family, partition):
+        hist = read_sparse(file, component["name"])
+        if not hist or not hist.InheritsFrom("THnSparse"):
+            raise ValueError("required sparse family component is missing")
+        yield hist
+
+
+def family_cells(file, family, partition=None):
+    for hist in read_family(file, family, partition):
+        yield from _cells(hist)
+
+
+def cell_digest(cells):
+    digest = hashlib.sha256()
+    for coordinates, value, variance in cells:
+        digest.update(r.canonical([coordinates, value.hex(), variance.hex()]).encode("ascii"))
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
 def _fact(path):
     path = Path(path).absolute()
     r.reject_symlink_components(path, "collection artifact")
@@ -191,12 +225,30 @@ def read(path, expected_sha256, verify_roots=True):
         if {p["tune"] for p in index["partitions"]} != expected or len(index["partitions"]) != len(expected):
             raise ValueError("merged tune partition coverage differs")
         for part in index["partitions"]:
-            r.exact_keys(part, {"tune", "families", "root", "cell_digests"}, "merged partition")
+            keys = {"tune", "families", "root", "cell_digests"}
+            if "sparse_objects" in part:
+                keys.add("sparse_objects")
+            r.exact_keys(part, keys, "merged partition")
             _check_fact(part["root"])
             if set(part["families"]) != set(FAMILIES):
                 raise ValueError("merged sparse family coverage differs")
             if set(part["cell_digests"]) != set(FAMILIES):
                 raise ValueError("merged sparse content digest coverage differs")
+            if "sparse_objects" in part:
+                r.exact_keys(part["sparse_objects"], set(FAMILIES), "sparse object families")
+                for family in FAMILIES:
+                    objects = part["sparse_objects"][family]
+                    if (not isinstance(objects, list) or
+                            [obj.get("block") for obj in objects] != list(range(1, index["block_count"] + 1))):
+                        raise ValueError("sparse component block coverage differs")
+                    for obj in objects:
+                        r.exact_keys(obj, {"name", "block", "cell_digest", "serialized_bytes"}, "sparse component")
+                        if (type(obj["block"]) is not int or
+                                obj["name"] != "sparse_%s__block_%02d" % (family, obj["block"]) or
+                                type(obj["serialized_bytes"]) is not int or
+                                not 0 < obj["serialized_bytes"] <= MAX_SPARSE_OBJECT_BYTES):
+                            raise ValueError("sparse component name/serialization bound differs")
+                        r.lower_sha(obj["cell_digest"], "sparse component digest")
     elif index["partitions"]:
         raise ValueError("sharded index cannot contain merged partitions")
     if verify_roots:
@@ -367,7 +419,7 @@ def _sparse_content_equal(sharded, merged):
                 raise ValueError("merge child sparse ROOT cannot open")
             try:
                 actual = {coordinates: (value, variance)
-                          for coordinates, value, variance in _cells(read_sparse(file, "sparse_" + family))}
+                          for coordinates, value, variance in family_cells(file, family, part)}
             finally:
                 file.Close()
             if set(expected) != set(actual):
@@ -538,10 +590,10 @@ def _verify_sparse_roots(index):
             raise ValueError("cannot open collection ROOT")
         try:
             keys = {key.GetName(): key.GetClassName() for key in file.GetListOfKeys()}
-            expected_keys = {"sparse_"+family for family in FAMILIES}
+            expected_keys = {obj["name"] for family in FAMILIES for obj in family_objects(family, partition)}
             if is_shard:
                 expected_keys |= set(TREES) | {"query_spec", "metadata"}
-            if set(keys) != expected_keys:
+            if set(keys) != expected_keys or len(file.GetListOfKeys()) != len(expected_keys):
                 raise ValueError("required exact support/sparse object set differs")
             if is_shard:
                 for tree in TREES:
@@ -550,22 +602,29 @@ def _verify_sparse_roots(index):
                             [branch.GetName() for branch in rows.GetListOfBranches()] != layout["trees"][tree]):
                         raise ValueError("required exact support tree schema differs")
             for family in FAMILIES:
-                hist = read_sparse(file, "sparse_"+family)
-                signature = _geometry(hist, layout["sparse"][family])
-                if family in baseline and baseline[family] != signature:
-                    raise ValueError("sparse geometry/dictionary differs across collection")
-                baseline[family] = signature
-                for coord, _, _ in _cells(hist):
-                    key = (coord[0]-1, coord[1])
-                    if key not in allowed or key not in source_map:
-                        raise ValueError("sparse occupied tune/block lies outside receipt membership")
-                if partition is not None:
-                    digest = hashlib.sha256()
-                    for coordinates, value, variance in _cells(hist):
-                        digest.update(r.canonical([coordinates, value.hex(), variance.hex()]).encode("ascii"))
-                        digest.update(b"\n")
-                    if digest.hexdigest() != partition["cell_digests"][family]:
-                        raise ValueError("merged sparse readback digest differs")
+                digest = hashlib.sha256()
+                for obj, hist in zip(family_objects(family, partition), read_family(file, family, partition)):
+                    signature = _geometry(hist, layout["sparse"][family])
+                    if family in baseline and baseline[family] != signature:
+                        raise ValueError("sparse geometry/dictionary differs across collection")
+                    baseline[family] = signature
+                    component_digest = hashlib.sha256()
+                    for coord, value, variance in _cells(hist):
+                        key = (coord[0]-1, coord[1])
+                        if key not in allowed or key not in source_map:
+                            raise ValueError("sparse occupied tune/block lies outside receipt membership")
+                        if obj["block"] is not None and coord[1] != obj["block"]:
+                            raise ValueError("sparse component contains a foreign block")
+                        if partition is not None:
+                            line = (r.canonical([coord, value.hex(), variance.hex()]) + "\n").encode("ascii")
+                            digest.update(line)
+                            component_digest.update(line)
+                    if obj["block"] is not None:
+                        if (file.GetKey(obj["name"]).GetObjlen() != obj["serialized_bytes"] or
+                                component_digest.hexdigest() != obj["cell_digest"]):
+                            raise ValueError("merged sparse component readback differs")
+                if partition is not None and digest.hexdigest() != partition["cell_digests"][family]:
+                    raise ValueError("merged sparse readback digest differs")
         finally:
             file.Close()
 

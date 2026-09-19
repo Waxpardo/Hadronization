@@ -200,32 +200,33 @@ class NativeCollection:
             metrics.root_bytes += Path(path).stat().st_size
             try:
                 for family, allowed_tunes in entries:
-                    hist = self.api.read_sparse(file, 'sparse_' + family)
-                    if not hist or not hist.InheritsFrom('THnSparse') or not hist.GetCalculateErrors():
-                        raise ValueError('native sparse family/Sumw2 differs')
-                    axes = tuple(hist.GetAxis(i) for i in range(hist.GetNdimensions()))
-                    if tuple(a.GetName() for a in axes[:2]) != ('tune','block'):
-                        raise ValueError('native sparse tune/block axis differs')
-                    if inspect_axes is not None:
-                        inspect_axes(family,axes)
-                    coordinates = array('i', [0]*len(axes))
                     metrics.family_passes += 1
-                    for ordinal in range(hist.GetNbins()):
-                        value = float(hist.GetBinContent(ordinal,coordinates))
-                        sumw2 = float(hist.GetBinError2(ordinal))
-                        metrics.occupied_cells += 1
-                        if not math.isfinite(value) or not math.isfinite(sumw2) or sumw2 < 0:
-                            raise ValueError('nonfinite native sparse cell/Sumw2')
-                        tune = self.ordinal_to_tune.get(coordinates[0]-1)
-                        block = coordinates[1]
-                        if tune is None or (tune,block) not in self.membership:
-                            raise ValueError('native sparse occupied tune/block outside admission')
-                        if tune not in allowed_tunes:
-                            continue
-                        cell = SparseCell(family,path,tune,block,
-                                          tuple(coordinates),value,sumw2)
-                        consume(cell,axes)
-                        metrics.selected_cells += 1
+                    partition = next((p for p in self.index['partitions'] if p['root']['path'] == path), None)
+                    for hist in self.api.read_family(file, family, partition):
+                        if not hist or not hist.InheritsFrom('THnSparse') or not hist.GetCalculateErrors():
+                            raise ValueError('native sparse family/Sumw2 differs')
+                        axes = tuple(hist.GetAxis(i) for i in range(hist.GetNdimensions()))
+                        if tuple(a.GetName() for a in axes[:2]) != ('tune','block'):
+                            raise ValueError('native sparse tune/block axis differs')
+                        if inspect_axes is not None:
+                            inspect_axes(family,axes)
+                        coordinates = array('i', [0]*len(axes))
+                        for ordinal in range(hist.GetNbins()):
+                            value = float(hist.GetBinContent(ordinal,coordinates))
+                            sumw2 = float(hist.GetBinError2(ordinal))
+                            metrics.occupied_cells += 1
+                            if not math.isfinite(value) or not math.isfinite(sumw2) or sumw2 < 0:
+                                raise ValueError('nonfinite native sparse cell/Sumw2')
+                            tune = self.ordinal_to_tune.get(coordinates[0]-1)
+                            block = coordinates[1]
+                            if tune is None or (tune,block) not in self.membership:
+                                raise ValueError('native sparse occupied tune/block outside admission')
+                            if tune not in allowed_tunes:
+                                continue
+                            cell = SparseCell(family,path,tune,block,
+                                              tuple(coordinates),value,sumw2)
+                            consume(cell,axes)
+                            metrics.selected_cells += 1
             finally:
                 file.Close()
         return metrics
