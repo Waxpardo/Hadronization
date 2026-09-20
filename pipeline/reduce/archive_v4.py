@@ -271,6 +271,11 @@ def _rows(value,name):
 
 def _tree(ROOT,name,fields):
     tree=ROOT.TTree(name,name)
+    # Production tables can exceed ROOT's default byte-triggered AutoSave
+    # threshold.  AutoSave creates additional key cycles, which violates this
+    # archive's exact one-object/one-cycle contract.  Basket flushing remains
+    # available; the surrounding temporary file supplies crash isolation.
+    tree.SetAutoSave(0)
     holders={}
     for field,kind in fields.items():
         if kind=='s':
@@ -294,6 +299,7 @@ def _fill(tree,holders,row):
 def _node_tree(ROOT,value):
     stream=io.StringIO();root_id=typed_nodes.nodes(value,stream)
     tree=ROOT.TTree('nodes','Typed deduplicated value DAG')
+    tree.SetAutoSave(0)
     identifier=array('Q',[0]);kind=ROOT.std.string();text=ROOT.std.string()
     children=ROOT.std.vector('unsigned long long')()
     keys=ROOT.std.vector('string')()

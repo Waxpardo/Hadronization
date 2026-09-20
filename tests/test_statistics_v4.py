@@ -467,6 +467,18 @@ class NativeV4Metadata(unittest.TestCase):
                              'hadronization_self_contained_typed_root_v4')
             self.assertEqual(receipt['direct_tables']['event_moments'],10)
             self.assertEqual(receipt['direct_tables']['block_values'],30)
+            import ROOT as root_api
+            root_file=root_api.TFile.Open(str(output),'READ')
+            try:
+                tree_keys=[key for key in root_file.GetListOfKeys()
+                           if str(key.GetClassName())=='TTree']
+                self.assertTrue(tree_keys)
+                self.assertTrue(all(int(key.GetCycle())==1
+                                    for key in tree_keys))
+                self.assertTrue(all(root_file.Get(str(key.GetName())).GetAutoSave()==0
+                                    for key in tree_keys))
+            finally:
+                root_file.Close()
             cold=archive.read(output,directory,receipt['root_sha256'],
                               receipt['value_sha256'])
             self.assertEqual(p.digest(cold),p.digest(value))
@@ -484,7 +496,6 @@ class NativeV4Metadata(unittest.TestCase):
             self.assertIn('unavailable',accounting_tex)
             with self.assertRaisesRegex(ValueError,'trusted physical hash'):
                 archive.read(output,directory,'0'*64,receipt['value_sha256'])
-            import ROOT as root_api
             file=root_api.TFile.Open(str(output),'UPDATE')
             file.Delete('event_moments;*')
             file.Close()
