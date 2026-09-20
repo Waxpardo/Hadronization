@@ -581,7 +581,9 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
     """One authenticated sparse/T1 scan and source-bound C++ diagnostic run."""
     started=time.perf_counter()
     work=Path(work).absolute();work.mkdir(parents=True,exist_ok=True)
-    if collection_api is None:collection_api=_load('native_runner_collection','pipeline/query/collection.py')
+    if collection_api is None:
+        collection_api=(source.api if source is not None else
+            _load('native_runner_collection','pipeline/query/collection.py'))
     if model_api is None:model_api=_load('native_runner_model','pipeline/query/model.py')
     if source is None:
         source=n.NativeCollection(index_path,index_sha256,collection_api)

@@ -91,6 +91,18 @@ class NativeV4Metadata(unittest.TestCase):
                     request,Path(directory))
             self.assertEqual(list(Path(directory).iterdir()),[])
 
+    def test_preauthenticated_source_reuses_its_collection_api(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            index=root/'index.json';index.write_text('{}')
+            analysis=root/'analysis.json';analysis.write_text('{}')
+            source=SimpleNamespace(index_path=index.absolute(),
+                expected_sha256='a'*64,api=object())
+            with self.assertRaisesRegex(ValueError,
+                    'native requested analysis bytes differ from pin'):
+                native_runner.run_diagnostic(index,'a'*64,analysis,'b'*64,
+                    None,root/'work',source=source)
+
     def _fixture_v4(self):
         from test_projection_interface import ProjectionInterfaceContract
         fixture=ProjectionInterfaceContract();fixture.setUpClass();fixture.setUp()
