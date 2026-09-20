@@ -138,11 +138,19 @@ class QueryCollectionContract(unittest.TestCase):
         self.assertEqual(value["schema"], c.MERGE_VERIFICATION_SCHEMA)
         self.assertEqual(value["status"],
                          "PASS_EXHAUSTIVE_SOURCE_TO_MERGED_CONTENT")
+        original_fact = c._fact
+        fact_paths = []
+        def counted_fact(path):
+            fact_paths.append(str(path))
+            return original_fact(path)
         with patch.object(c, "_sparse_content_equal",
                           side_effect=AssertionError("must not repeat exhaustive proof")):
             receipt = c.verify_merge_verification(
                 self.merged_path, c.r.sha_file(self.merged_path),
                 lineage, lineage_sha, verification, verification_sha)
+        with patch.object(c, "_sparse_content_equal",
+                          side_effect=AssertionError("must not repeat exhaustive proof")), \
+                patch.object(c, "_fact", side_effect=counted_fact):
             proof = c.admission_closure(
                 self.merged_path, c.r.sha_file(self.merged_path),
                 FIXTURE / "expected-sources.json",
@@ -151,6 +159,7 @@ class QueryCollectionContract(unittest.TestCase):
                 expected_merge_receipt_sha256=lineage_sha,
                 merge_verification_path=verification,
                 expected_merge_verification_sha256=verification_sha)
+        self.assertEqual(len(fact_paths), len(set(fact_paths)))
         self.assertEqual(receipt["merged_index_sha256"],
                          c.r.sha_file(self.merged_path))
         self.assertEqual(proof["qualification"], "TEST_ONLY_DOMAIN_CLOSED")

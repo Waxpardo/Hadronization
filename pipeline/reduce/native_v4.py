@@ -134,7 +134,8 @@ def admission_closure(source, expected_sources_path, expected_sources_sha256,
         expected_merge_receipt_sha256=expected_merge_receipt_sha256,
         merge_verification_path=merge_verification_path,
         expected_merge_verification_sha256=
-            expected_merge_verification_sha256)
+            expected_merge_verification_sha256,
+        fact_cache=source.fact_cache)
     p.validate(receipt,'AdmissionClosureV4')
     if (receipt['collection_index_sha256']!=source.expected_sha256 or
             receipt['collection_scientific_identity_sha256']!=source.index[

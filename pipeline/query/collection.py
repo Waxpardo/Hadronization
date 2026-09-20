@@ -97,11 +97,29 @@ def _fact(path):
     return {"path": str(path), "bytes": path.stat().st_size, "sha256": r.sha_file(path)}
 
 
-def _check_fact(fact):
+def _stat_signature(path):
+    value = path.stat()
+    return (value.st_dev, value.st_ino, value.st_mode, value.st_size,
+            value.st_mtime_ns, value.st_ctime_ns)
+
+
+def _check_fact(fact, fact_cache=None):
     r.exact_keys(fact, {"path", "bytes", "sha256"}, "collection file fact")
     path = Path(fact["path"])
-    if not path.is_absolute() or _fact(path) != fact:
+    if not path.is_absolute():
         raise ValueError("collection file physical identity differs")
+    r.reject_symlink_components(path, "collection artifact")
+    r.regular_file(path, "collection artifact")
+    signature = _stat_signature(path)
+    cached = None if fact_cache is None else fact_cache.get(str(path))
+    if cached is not None:
+        if cached != (fact, signature):
+            raise ValueError("collection file changed during authenticated operation")
+        return path
+    if _fact(path) != fact or _stat_signature(path) != signature:
+        raise ValueError("collection file physical identity differs")
+    if fact_cache is not None:
+        fact_cache[str(path)] = (fact, signature)
     return path
 
 
@@ -194,7 +212,7 @@ def create(workspaces, content_pins, expected_sources, output, work_root, test_o
     return index
 
 
-def read(path, expected_sha256, verify_roots=True):
+def read(path, expected_sha256, verify_roots=True, *, fact_cache=None):
     r.lower_sha(expected_sha256, "trusted collection index")
     if r.sha_file(path) != expected_sha256:
         raise ValueError("collection index differs from trusted SHA-256")
@@ -213,7 +231,7 @@ def read(path, expected_sha256, verify_roots=True):
     _check_members(index, sorted(index["sources"], key=lambda m: m["source_id"]))
     for shard in index["shards"]:
         for key in ("workspace_manifest", "query_root", "metadata"):
-            _check_fact(shard[key])
+            _check_fact(shard[key], fact_cache)
         metadata = r.json_file(Path(shard["metadata"]["path"]))
         if (_members(metadata) != shard["members"] or
                 metadata["query_content_sha256"] != shard["scientific_content_sha256"] or
@@ -230,7 +248,7 @@ def read(path, expected_sha256, verify_roots=True):
             if "sparse_objects" in part:
                 keys.add("sparse_objects")
             r.exact_keys(part, keys, "merged partition")
-            _check_fact(part["root"])
+            _check_fact(part["root"], fact_cache)
             if set(part["families"]) != set(FAMILIES):
                 raise ValueError("merged sparse family coverage differs")
             if set(part["cell_digests"]) != set(FAMILIES):
@@ -262,7 +280,8 @@ def admission_closure(index_path, expected_index_sha256, expected_sources_path,
                       closure_path=None, expected_closure_sha256=None,
                       merge_receipt_path=None, expected_merge_receipt_sha256=None,
                       merge_verification_path=None,
-                      expected_merge_verification_sha256=None):
+                      expected_merge_verification_sha256=None,
+                      fact_cache=None):
     """Prove exact query-source closure without promoting TEST_ONLY to accepted.
 
     An externally pinned site-bound work record and collector closure are both
@@ -274,8 +293,10 @@ def admission_closure(index_path, expected_index_sha256, expected_sources_path,
         raise ValueError("merge verification path and independent SHA must be paired")
     if merge_verification_path is not None and merge_receipt_path is None:
         raise ValueError("merge verification requires pinned merge lineage")
+    fact_cache = {} if fact_cache is None else fact_cache
     index = read(index_path, expected_index_sha256,
-                 verify_roots=merge_verification_path is None)
+                 verify_roots=merge_verification_path is None,
+                 fact_cache=fact_cache)
     expected_sources_path = Path(expected_sources_path).absolute()
     r.lower_sha(expected_sources_sha256, "trusted expected source domain")
     r.reject_symlink_components(expected_sources_path, "expected source domain")
@@ -313,7 +334,8 @@ def admission_closure(index_path, expected_index_sha256, expected_sources_path,
             merge_lineage = verify_merge_verification(
                 index_path, expected_index_sha256,
                 merge_receipt_path, expected_merge_receipt_sha256,
-                merge_verification_path, expected_merge_verification_sha256)
+                merge_verification_path, expected_merge_verification_sha256,
+                fact_cache=fact_cache)
         parent_index_sha = merge_lineage["parent_index_sha256"]
     elif merge_receipt_path is not None:
         raise ValueError("sharded collection cannot carry merge lineage")
@@ -446,7 +468,8 @@ def _sparse_content_equal(sharded, merged):
 
 
 def _merge_lineage_contract(index_path, expected_index_sha256, receipt_path,
-                            expected_receipt_sha256, *, verify_roots):
+                            expected_receipt_sha256, *, verify_roots,
+                            fact_cache=None):
     """Check exact lineage and return its pinned parent and child layouts."""
     receipt_path = Path(receipt_path).absolute()
     r.lower_sha(expected_receipt_sha256, "trusted merge lineage")
@@ -459,8 +482,9 @@ def _merge_lineage_contract(index_path, expected_index_sha256, receipt_path,
     if receipt["schema"] != MERGE_SCHEMA or receipt["merged_index_sha256"] != expected_index_sha256:
         raise ValueError("merge lineage child index differs")
     parent = read(Path(receipt["parent_index_path"]), receipt["parent_index_sha256"],
-                  verify_roots=verify_roots)
-    child = read(index_path, expected_index_sha256, verify_roots=verify_roots)
+                  verify_roots=verify_roots, fact_cache=fact_cache)
+    child = read(index_path, expected_index_sha256, verify_roots=verify_roots,
+                 fact_cache=fact_cache)
     if (parent["layout"] != "SHARDED" or child["layout"] != "MERGED" or
             child["state"] != parent["state"] or
             child["scientific_identity_sha256"] != parent["scientific_identity_sha256"] or
@@ -502,9 +526,10 @@ def _merge_verification_value(receipt, child, expected_index_sha256,
 def verify_merge_lineage(index_path, expected_index_sha256, receipt_path,
                          expected_receipt_sha256, *, verification_output=None):
     """Run the one exhaustive transformation proof and optionally receipt it."""
+    fact_cache = {}
     receipt, parent, child = _merge_lineage_contract(
         index_path, expected_index_sha256, receipt_path,
-        expected_receipt_sha256, verify_roots=True)
+        expected_receipt_sha256, verify_roots=True, fact_cache=fact_cache)
     _sparse_content_equal(parent, child)
     if verification_output is not None:
         r.atomic_json(Path(verification_output).absolute(),
@@ -517,7 +542,7 @@ def verify_merge_lineage(index_path, expected_index_sha256, receipt_path,
 
 def verify_merge_verification(index_path, expected_index_sha256, receipt_path,
                               expected_receipt_sha256, verification_path,
-                              expected_verification_sha256):
+                              expected_verification_sha256, *, fact_cache=None):
     """Authenticate a prior exhaustive proof without repeating sparse equality."""
     verification_path = Path(verification_path).absolute()
     r.lower_sha(expected_verification_sha256, "trusted merge verification")
@@ -530,9 +555,11 @@ def verify_merge_verification(index_path, expected_index_sha256, receipt_path,
         "merged_index_sha256", "merge_receipt_sha256",
         "scientific_identity_sha256", "expected_sources_sha256",
         "partitions_sha256", "checks"}, "merge verification")
+    fact_cache = {} if fact_cache is None else fact_cache
     receipt, _, child = _merge_lineage_contract(
         index_path, expected_index_sha256, receipt_path,
-        expected_receipt_sha256, verify_roots=False)
+        expected_receipt_sha256, verify_roots=False,
+        fact_cache=fact_cache)
     expected = _merge_verification_value(receipt, child,
                                          expected_index_sha256,
                                          expected_receipt_sha256)
@@ -542,14 +569,15 @@ def verify_merge_verification(index_path, expected_index_sha256, receipt_path,
 
 
 def source_lineage(index_path, expected_sha256, requested_tunes=None, *,
-                   verify_roots=True):
+                   verify_roots=True, fact_cache=None):
     """Project old compact source-selection fields from checked native parents.
 
     `read` authenticates the locator, physical query artifacts and native ROOT
     objects. Every field here then comes from its embedded admitted analyzed
     receipt; no raw-file or validation-receipt bytes are independently opened.
     """
-    index = read(index_path, expected_sha256, verify_roots=verify_roots)
+    index = read(index_path, expected_sha256, verify_roots=verify_roots,
+                 fact_cache=fact_cache)
     tunes = index["tune_ordinals"]
     if requested_tunes is None:
         selected = set(tunes)

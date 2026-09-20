@@ -45,11 +45,13 @@ class NativeCollection:
     """Verified logical SHARDED/MERGED collection with one physical scan path."""
 
     def __init__(self, index_path, expected_sha256, collection_api, *,
-                 verify_roots=True):
+                 verify_roots=True, fact_cache=None):
         self.api = collection_api
         self.index_path = Path(index_path).absolute()
+        self.fact_cache = {} if fact_cache is None else fact_cache
         self.index = collection_api.read(self.index_path, expected_sha256,
-                                         verify_roots=verify_roots)
+                                         verify_roots=verify_roots,
+                                         fact_cache=self.fact_cache)
         self.verify_roots = verify_roots
         self.expected_sha256 = expected_sha256
         self.pair_proofs=[]
@@ -109,11 +111,12 @@ class NativeCollection:
             raise ValueError('authenticated A source-lineage accessor is absent')
         if self.verify_roots:
             lineage = self.api.source_lineage(
-                self.index_path,self.expected_sha256,requested_tunes)
+                self.index_path,self.expected_sha256,requested_tunes,
+                fact_cache=self.fact_cache)
         else:
             lineage = self.api.source_lineage(
                 self.index_path,self.expected_sha256,requested_tunes,
-                verify_roots=False)
+                verify_roots=False,fact_cache=self.fact_cache)
         if (type(lineage) is not dict or set(lineage) != {
                 'schema','collection_index_sha256',
                 'collection_scientific_identity_sha256','collection_state',
