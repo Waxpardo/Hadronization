@@ -32,6 +32,7 @@ SCHEMA = "hadronization_query_collection_v1"
 LINEAGE_SCHEMA = "hadronization_query_collection_source_lineage_v1"
 ADMISSION_SCHEMA = "hadronization_query_collection_admission_closure_v1"
 MERGE_SCHEMA = "hadronization_query_merge_lineage_v1"
+MERGE_VERIFICATION_SCHEMA = "hadronization_query_merge_verification_v1"
 
 
 def _root():
@@ -259,14 +260,22 @@ def read(path, expected_sha256, verify_roots=True):
 def admission_closure(index_path, expected_index_sha256, expected_sources_path,
                       expected_sources_sha256, *, work_path=None, expected_work_sha256=None,
                       closure_path=None, expected_closure_sha256=None,
-                      merge_receipt_path=None, expected_merge_receipt_sha256=None):
+                      merge_receipt_path=None, expected_merge_receipt_sha256=None,
+                      merge_verification_path=None,
+                      expected_merge_verification_sha256=None):
     """Prove exact query-source closure without promoting TEST_ONLY to accepted.
 
     An externally pinned site-bound work record and collector closure are both
     required for the accepted-campaign qualification. A ledger or aggregate
     count alone cannot provide it.
     """
-    index = read(index_path, expected_index_sha256)
+    if ((merge_verification_path is None) !=
+            (expected_merge_verification_sha256 is None)):
+        raise ValueError("merge verification path and independent SHA must be paired")
+    if merge_verification_path is not None and merge_receipt_path is None:
+        raise ValueError("merge verification requires pinned merge lineage")
+    index = read(index_path, expected_index_sha256,
+                 verify_roots=merge_verification_path is None)
     expected_sources_path = Path(expected_sources_path).absolute()
     r.lower_sha(expected_sources_sha256, "trusted expected source domain")
     r.reject_symlink_components(expected_sources_path, "expected source domain")
@@ -296,9 +305,15 @@ def admission_closure(index_path, expected_index_sha256, expected_sources_path,
         raise ValueError("merge lineage path and independent SHA must be paired")
     parent_index_sha = expected_index_sha256
     if index["layout"] == "MERGED" and merge_receipt_path is not None:
-        merge_lineage = verify_merge_lineage(index_path, expected_index_sha256,
-                                             merge_receipt_path,
-                                             expected_merge_receipt_sha256)
+        if merge_verification_path is None:
+            merge_lineage = verify_merge_lineage(index_path, expected_index_sha256,
+                                                  merge_receipt_path,
+                                                  expected_merge_receipt_sha256)
+        else:
+            merge_lineage = verify_merge_verification(
+                index_path, expected_index_sha256,
+                merge_receipt_path, expected_merge_receipt_sha256,
+                merge_verification_path, expected_merge_verification_sha256)
         parent_index_sha = merge_lineage["parent_index_sha256"]
     elif merge_receipt_path is not None:
         raise ValueError("sharded collection cannot carry merge lineage")
@@ -430,9 +445,9 @@ def _sparse_content_equal(sharded, merged):
                     raise ValueError("merged sparse cell/Sumw2 differs from shards")
 
 
-def verify_merge_lineage(index_path, expected_index_sha256, receipt_path,
-                         expected_receipt_sha256):
-    """Verify a transformation receipt against both independently pinned layouts."""
+def _merge_lineage_contract(index_path, expected_index_sha256, receipt_path,
+                            expected_receipt_sha256, *, verify_roots):
+    """Check exact lineage and return its pinned parent and child layouts."""
     receipt_path = Path(receipt_path).absolute()
     r.lower_sha(expected_receipt_sha256, "trusted merge lineage")
     if r.sha_file(receipt_path) != expected_receipt_sha256:
@@ -443,8 +458,9 @@ def verify_merge_lineage(index_path, expected_index_sha256, receipt_path,
                            "expected_sources_sha256", "partitions"}, "merge lineage")
     if receipt["schema"] != MERGE_SCHEMA or receipt["merged_index_sha256"] != expected_index_sha256:
         raise ValueError("merge lineage child index differs")
-    parent = read(Path(receipt["parent_index_path"]), receipt["parent_index_sha256"])
-    child = read(index_path, expected_index_sha256)
+    parent = read(Path(receipt["parent_index_path"]), receipt["parent_index_sha256"],
+                  verify_roots=verify_roots)
+    child = read(index_path, expected_index_sha256, verify_roots=verify_roots)
     if (parent["layout"] != "SHARDED" or child["layout"] != "MERGED" or
             child["state"] != parent["state"] or
             child["scientific_identity_sha256"] != parent["scientific_identity_sha256"] or
@@ -455,18 +471,85 @@ def verify_merge_lineage(index_path, expected_index_sha256, receipt_path,
             {key: value for key, value in child.items() if key not in ("layout", "partitions")} !=
             {key: value for key, value in parent.items() if key not in ("layout", "partitions")}):
         raise ValueError("merge lineage parent/content/domain differs")
+    return receipt, parent, child
+
+
+def _merge_verification_value(receipt, child, expected_index_sha256,
+                              expected_receipt_sha256):
+    return {
+        "schema": MERGE_VERIFICATION_SCHEMA,
+        "status": "PASS_EXHAUSTIVE_SOURCE_TO_MERGED_CONTENT",
+        "method": "EXACT_OCCUPIED_DOMAIN_BINARY64_FSUM_V1",
+        "relative_tolerance": (1e-12).hex(),
+        "absolute_tolerance": (1e-12).hex(),
+        "parent_index_sha256": receipt["parent_index_sha256"],
+        "merged_index_sha256": expected_index_sha256,
+        "merge_receipt_sha256": expected_receipt_sha256,
+        "scientific_identity_sha256": child["scientific_identity_sha256"],
+        "expected_sources_sha256": receipt["expected_sources_sha256"],
+        "partitions_sha256": r.sha_bytes(
+            r.canonical(child["partitions"]).encode("ascii")),
+        "checks": [
+            "PARENT_AND_CHILD_PHYSICAL_FACTS",
+            "MERGE_LINEAGE_AND_COMPLETE_SOURCE_DOMAIN",
+            "SPARSE_GEOMETRY_AND_COMPONENT_DIGESTS",
+            "EXACT_OCCUPIED_CELL_DOMAIN",
+            "CELL_YIELD_AND_SUMW2",
+        ],
+    }
+
+
+def verify_merge_lineage(index_path, expected_index_sha256, receipt_path,
+                         expected_receipt_sha256, *, verification_output=None):
+    """Run the one exhaustive transformation proof and optionally receipt it."""
+    receipt, parent, child = _merge_lineage_contract(
+        index_path, expected_index_sha256, receipt_path,
+        expected_receipt_sha256, verify_roots=True)
     _sparse_content_equal(parent, child)
+    if verification_output is not None:
+        r.atomic_json(Path(verification_output).absolute(),
+                      _merge_verification_value(receipt, child,
+                                                expected_index_sha256,
+                                                expected_receipt_sha256),
+                      exclusive=True)
     return receipt
 
 
-def source_lineage(index_path, expected_sha256, requested_tunes=None):
+def verify_merge_verification(index_path, expected_index_sha256, receipt_path,
+                              expected_receipt_sha256, verification_path,
+                              expected_verification_sha256):
+    """Authenticate a prior exhaustive proof without repeating sparse equality."""
+    verification_path = Path(verification_path).absolute()
+    r.lower_sha(expected_verification_sha256, "trusted merge verification")
+    if r.sha_file(verification_path) != expected_verification_sha256:
+        raise ValueError("merge verification differs from trusted SHA-256")
+    verification = r.json_file(verification_path)
+    r.exact_keys(verification, {
+        "schema", "status", "method", "relative_tolerance",
+        "absolute_tolerance", "parent_index_sha256",
+        "merged_index_sha256", "merge_receipt_sha256",
+        "scientific_identity_sha256", "expected_sources_sha256",
+        "partitions_sha256", "checks"}, "merge verification")
+    receipt, _, child = _merge_lineage_contract(
+        index_path, expected_index_sha256, receipt_path,
+        expected_receipt_sha256, verify_roots=False)
+    expected = _merge_verification_value(receipt, child,
+                                         expected_index_sha256,
+                                         expected_receipt_sha256)
+    if verification != expected:
+        raise ValueError("merge verification binding or exhaustive checks differ")
+    return receipt
+
+
+def source_lineage(index_path, expected_sha256, requested_tunes=None, *,
+                   verify_roots=True):
     """Project old compact source-selection fields from checked native parents.
 
     `read` authenticates the locator, physical query artifacts and native ROOT
     objects. Every field here then comes from its embedded admitted analyzed
     receipt; no raw-file or validation-receipt bytes are independently opened.
     """
-    index = read(index_path, expected_sha256)
+    index = read(index_path, expected_sha256, verify_roots=verify_roots)
     tunes = index["tune_ordinals"]
     if requested_tunes is None:
         selected = set(tunes)
@@ -683,6 +766,8 @@ def main():
     admit_parser.add_argument("--collector-closure-sha256")
     admit_parser.add_argument("--merge-receipt", type=Path)
     admit_parser.add_argument("--merge-receipt-sha256")
+    admit_parser.add_argument("--merge-verification", type=Path)
+    admit_parser.add_argument("--merge-verification-sha256")
     args = parser.parse_args()
     try:
         if args.command == "create":
@@ -703,7 +788,9 @@ def main():
                 closure_path=args.collector_closure,
                 expected_closure_sha256=args.collector_closure_sha256,
                 merge_receipt_path=args.merge_receipt,
-                expected_merge_receipt_sha256=args.merge_receipt_sha256)
+                expected_merge_receipt_sha256=args.merge_receipt_sha256,
+                merge_verification_path=args.merge_verification,
+                expected_merge_verification_sha256=args.merge_verification_sha256)
             print(r.canonical(proof))
     except (OSError, ValueError, KeyError, TypeError) as error:
         print("ERROR: "+str(error), file=sys.stderr)

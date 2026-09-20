@@ -577,13 +577,17 @@ def verify_native_denominator_stream(path,request,event_moments,block_path=None)
 
 def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
                    request,work,collection_api=None,model_api=None,*,
-                   selected_tunes=None,selection=None):
+                   selected_tunes=None,selection=None,source=None):
     """One authenticated sparse/T1 scan and source-bound C++ diagnostic run."""
     started=time.perf_counter()
     work=Path(work).absolute();work.mkdir(parents=True,exist_ok=True)
     if collection_api is None:collection_api=_load('native_runner_collection','pipeline/query/collection.py')
     if model_api is None:model_api=_load('native_runner_model','pipeline/query/model.py')
-    source=n.NativeCollection(index_path,index_sha256,collection_api)
+    if source is None:
+        source=n.NativeCollection(index_path,index_sha256,collection_api)
+    elif (source.index_path != Path(index_path).absolute() or
+          source.expected_sha256 != index_sha256 or source.api is not collection_api):
+        raise ValueError('preauthenticated native collection binding differs')
     if sha(analysis_path)!=analysis_sha256:
         raise ValueError('native requested analysis bytes differ from pin')
     analysis,validated_sha=model_api.checked_analysis(Path(analysis_path))

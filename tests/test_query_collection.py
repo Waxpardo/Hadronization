@@ -129,6 +129,40 @@ class QueryCollectionContract(unittest.TestCase):
                                 work_path=self.base / "forged-ledger.json",
                                 expected_work_sha256="a" * 64)
 
+    def test_exhaustive_merge_receipt_is_reused_without_sparse_recomparison(self):
+        lineage = self.merged_path.parent / "merge-receipt.json"
+        verification = self.merged_path.parent / "merge-verification.json"
+        lineage_sha = c.r.sha_file(lineage)
+        verification_sha = c.r.sha_file(verification)
+        value = c.r.json_file(verification)
+        self.assertEqual(value["schema"], c.MERGE_VERIFICATION_SCHEMA)
+        self.assertEqual(value["status"],
+                         "PASS_EXHAUSTIVE_SOURCE_TO_MERGED_CONTENT")
+        with patch.object(c, "_sparse_content_equal",
+                          side_effect=AssertionError("must not repeat exhaustive proof")):
+            receipt = c.verify_merge_verification(
+                self.merged_path, c.r.sha_file(self.merged_path),
+                lineage, lineage_sha, verification, verification_sha)
+            proof = c.admission_closure(
+                self.merged_path, c.r.sha_file(self.merged_path),
+                FIXTURE / "expected-sources.json",
+                c.r.sha_file(FIXTURE / "expected-sources.json"),
+                merge_receipt_path=lineage,
+                expected_merge_receipt_sha256=lineage_sha,
+                merge_verification_path=verification,
+                expected_merge_verification_sha256=verification_sha)
+        self.assertEqual(receipt["merged_index_sha256"],
+                         c.r.sha_file(self.merged_path))
+        self.assertEqual(proof["qualification"], "TEST_ONLY_DOMAIN_CLOSED")
+        changed = copy.deepcopy(value)
+        changed["checks"].pop()
+        changed_path = self.base / "incomplete-merge-verification.json"
+        c.r.atomic_json(changed_path, changed, exclusive=True)
+        with self.assertRaisesRegex(ValueError, "binding or exhaustive checks"):
+            c.verify_merge_verification(
+                self.merged_path, c.r.sha_file(self.merged_path),
+                lineage, lineage_sha, changed_path, c.r.sha_file(changed_path))
+
     def test_simulated_full_domain_requires_pinned_work_and_exact_parent_facts(self):
         # Synthetic local qualification only; no production or site admission.
         expected_path = FIXTURE / "expected-sources.json"
@@ -181,12 +215,16 @@ class QueryCollectionContract(unittest.TestCase):
         merged_sha = c.r.sha_file(simulated_merged_path)
         lineage_path = simulated_merged_path.parent / "merge-receipt.json"
         lineage_sha = c.r.sha_file(lineage_path)
+        verification_path = simulated_merged_path.parent / "merge-verification.json"
+        verification_sha = c.r.sha_file(verification_path)
         merged_proof = c.admission_closure(simulated_merged_path, merged_sha,
             expected_path, expected_sha, work_path=work_path,
             expected_work_sha256=work_sha, closure_path=closure_path,
             expected_closure_sha256=closure_sha,
             merge_receipt_path=lineage_path,
-            expected_merge_receipt_sha256=lineage_sha)
+            expected_merge_receipt_sha256=lineage_sha,
+            merge_verification_path=verification_path,
+            expected_merge_verification_sha256=verification_sha)
         self.assertEqual(merged_proof["qualification"], "FULL_ACCEPTED_DOMAIN_CLOSED")
         self.assertEqual(merged_proof["collection_index_sha256"], merged_sha)
         from pipeline.reduce import public_v4

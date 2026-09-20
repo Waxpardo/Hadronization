@@ -163,12 +163,10 @@ def merge(index_path, expected_sha256, output):
         publication_started = True
         c.q.publish_directory(stage, output)
         c.r.fsync_directory(output.parent)
-        published = c.read(output / "index.json", c.r.sha_file(output / "index.json"))
-        if published["scientific_identity_sha256"] != index["scientific_identity_sha256"]:
-            raise ValueError("merged scientific identity changed")
         c.verify_merge_lineage(output / "index.json", c.r.sha_file(output / "index.json"),
                                output / "merge-receipt.json",
-                               c.r.sha_file(output / "merge-receipt.json"))
+                               c.r.sha_file(output / "merge-receipt.json"),
+                               verification_output=output / "merge-verification.json")
         return output / "index.json"
     finally:
         if not publication_started and stage.exists():
@@ -187,6 +185,7 @@ def main():
     verify.add_argument("--expected-index-sha256", required=True)
     verify.add_argument("--merge-receipt", type=Path, required=True)
     verify.add_argument("--merge-receipt-sha256", required=True)
+    verify.add_argument("--verification-output", type=Path)
     args = parser.parse_args()
     try:
         if args.command == "build":
@@ -195,14 +194,23 @@ def main():
             print("MERGED_COLLECTION_SHA256="+c.r.sha_file(path))
             print("MERGE_LINEAGE="+str(path.parent / "merge-receipt.json"))
             print("MERGE_LINEAGE_SHA256="+c.r.sha_file(path.parent / "merge-receipt.json"))
+            print("MERGE_VERIFICATION="+str(path.parent / "merge-verification.json"))
+            print("MERGE_VERIFICATION_SHA256="+
+                  c.r.sha_file(path.parent / "merge-verification.json"))
         else:
-            index = c.read(args.index, args.expected_index_sha256)
+            index = c.read(args.index, args.expected_index_sha256,
+                           verify_roots=False)
             if index["layout"] != "MERGED":
                 raise ValueError("collection is not physically merged")
             c.verify_merge_lineage(args.index, args.expected_index_sha256,
                                    args.merge_receipt,
-                                   args.merge_receipt_sha256)
+                                   args.merge_receipt_sha256,
+                                   verification_output=args.verification_output)
             print("MERGED_COLLECTION_VERIFIED="+index["scientific_identity_sha256"])
+            if args.verification_output is not None:
+                print("MERGE_VERIFICATION="+str(args.verification_output.absolute()))
+                print("MERGE_VERIFICATION_SHA256="+
+                      c.r.sha_file(args.verification_output.absolute()))
     except (OSError, ValueError, KeyError, TypeError) as error:
         print("ERROR: "+str(error), file=sys.stderr)
         return 2

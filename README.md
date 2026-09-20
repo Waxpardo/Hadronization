@@ -249,17 +249,19 @@ After manifest-last collector closure, the downstream chain is:
   --collector-closure "$COLLECTOR_CLOSURE" --collector-closure-sha256 "$CLOSURE_SHA"
 ./hadronization merge build --index "$SHARDED_INDEX" \
   --expected-index-sha256 "$SHARDED_SHA" --output "$MERGED_DIR"
-./hadronization merge verify --index "$MERGED_DIR/index.json" \
-  --expected-index-sha256 "$MERGED_SHA" \
-  --merge-receipt "$MERGED_DIR/merge-receipt.json" \
-  --merge-receipt-sha256 "$MERGE_RECEIPT_SHA"
+# Build performs the one exhaustive source-to-merged cell/Sumw2 proof and
+# publishes merge-verification.json only after that proof passes. Independently
+# pin its SHA-256; later stages authenticate the receipt without repeating the
+# exhaustive sparse comparison.
 ./hadronization collection admit --index "$MERGED_DIR/index.json" \
   --expected-index-sha256 "$MERGED_SHA" \
   --expected-sources "$EXPECTED_SOURCES" --expected-sources-sha256 "$SOURCES_SHA" \
   --site-work "$BOUND_BUNDLE/work.json" --site-work-sha256 "$WORK_SHA" \
   --collector-closure "$COLLECTOR_CLOSURE" --collector-closure-sha256 "$CLOSURE_SHA" \
   --merge-receipt "$MERGED_DIR/merge-receipt.json" \
-  --merge-receipt-sha256 "$MERGE_RECEIPT_SHA"
+  --merge-receipt-sha256 "$MERGE_RECEIPT_SHA" \
+  --merge-verification "$MERGED_DIR/merge-verification.json" \
+  --merge-verification-sha256 "$MERGE_VERIFICATION_SHA"
 ./hadronization reduce run --collection-index "$MERGED_DIR/index.json" \
   --collection-index-sha "$MERGED_SHA" \
   --expected-sources "$EXPECTED_SOURCES" --expected-sources-sha "$SOURCES_SHA" \
@@ -268,6 +270,8 @@ After manifest-last collector closure, the downstream chain is:
   --collector-closure "$COLLECTOR_CLOSURE" --collector-closure-sha "$CLOSURE_SHA" \
   --merge-receipt "$MERGED_DIR/merge-receipt.json" \
   --merge-receipt-sha "$MERGE_RECEIPT_SHA" \
+  --merge-verification "$MERGED_DIR/merge-verification.json" \
+  --merge-verification-sha "$MERGE_VERIFICATION_SHA" \
   --work-root "$REDUCE_WORK" --output-dir "$RESULT"
 ./hadronization reduce verify --mode producer --root "$RESULT/numerics.root" \
   --report "$RESULT/report.json" --report-sha "$REPORT_SHA"

@@ -44,21 +44,26 @@ def _write(path, value):
 def _package_manifest(output, report, *, collection_index, expected_sources,
                       expected_sources_sha, site_work,
                       site_work_sha, collector_closure, collector_closure_sha,
-                      merge_receipt, merge_receipt_sha):
+                      merge_receipt, merge_receipt_sha,
+                      merge_verification, merge_verification_sha):
     names = ['report.json', 'numerics.root', 'admission-closure.json',
              'native-run-receipt.json', 'source-build-ledger.json']
     names += ['exports/' + name for name in sorted(report['exports']['files'])]
     names += ['exports/receipt.json']
     files = {name: {'sha256': p.file_digest(output / name),
                     'bytes': (output / name).stat().st_size} for name in names}
+    attestations = [
+        ('collection_index', collection_index, report['collection_index_sha256']),
+        ('expected_sources', expected_sources, expected_sources_sha),
+        ('site_work', site_work, site_work_sha),
+        ('collector_closure', collector_closure, collector_closure_sha),
+        ('merge_receipt', merge_receipt, merge_receipt_sha)]
+    if merge_verification is not None or merge_verification_sha is not None:
+        attestations.append(('merge_verification', merge_verification,
+                             merge_verification_sha))
     external = [{'role': role, 'locator': str(path) if path else None,
                  'sha256': digest, 'portable_status': 'NOT_CHECKED_EXTERNAL'}
-                for role, path, digest in (
-                    ('collection_index', collection_index, report['collection_index_sha256']),
-                    ('expected_sources', expected_sources, expected_sources_sha),
-                    ('site_work', site_work, site_work_sha),
-                    ('collector_closure', collector_closure, collector_closure_sha),
-                    ('merge_receipt', merge_receipt, merge_receipt_sha))]
+                for role, path, digest in attestations]
     return {'schema': PACKAGE_SCHEMA, 'files': files,
             'science_content_sha256': report['science_content_sha256'],
             'root_sha256': report['root']['root_sha256'],
@@ -371,8 +376,12 @@ def run(args):
     if normalized_sha != args.analysis_sha or checked != analysis or analysis[
             'version'] != '2.2.0':
         raise ValueError('public v4 route requires normalized A v2.2 analysis')
-    source = native.NativeCollection(args.collection_index,
-                                     args.collection_index_sha, collection_api)
+    if ((args.merge_verification is None) !=
+            (args.merge_verification_sha is None)):
+        raise ValueError('merge verification path and independently pinned SHA must be paired')
+    source = native.NativeCollection(
+        args.collection_index,args.collection_index_sha,collection_api,
+        verify_roots=args.merge_verification is None)
     if source.index['analysis_sha256'] != p.file_digest(ANALYSIS):
         raise ValueError('A collection/shipped construction analysis binding differs')
     construction, _ = model_api.checked_analysis(ANALYSIS)
@@ -383,7 +392,9 @@ def run(args):
         closure_path=args.collector_closure,
         expected_closure_sha256=args.collector_closure_sha,
         merge_receipt_path=args.merge_receipt,
-        expected_merge_receipt_sha256=args.merge_receipt_sha)
+        expected_merge_receipt_sha256=args.merge_receipt_sha,
+        merge_verification_path=args.merge_verification,
+        expected_merge_verification_sha256=args.merge_verification_sha)
     snapshot = _source_snapshot(source.index['state'] != 'TEST_ONLY')
     full = _full_preflight(source, closure, snapshot)
     if args.tunes and (len(args.tunes) != len(set(args.tunes)) or
@@ -420,11 +431,11 @@ def run(args):
         receipt = native_runner.run_diagnostic(args.collection_index,
             args.collection_index_sha, args.analysis, args.analysis_sha, None,
             run_dir, selected_tunes=tunes,
-            selection=_selection(args, analysis))
+            selection=_selection(args, analysis),source=source)
     else:
         receipt = native_runner.run_diagnostic(args.collection_index,
             args.collection_index_sha, args.analysis, args.analysis_sha, request,
-            run_dir)
+            run_dir,source=source)
     _verify_source_snapshot(snapshot)
     native_receipt_path = output / 'native-run-receipt.json'
     _write(native_receipt_path, receipt)
@@ -482,6 +493,7 @@ def run(args):
         native_run_receipt_sha256=p.file_digest(native_receipt_path),
         collection_index_sha256=source.expected_sha256,
         merge_lineage_sha256=args.merge_receipt_sha,
+        merge_verification_sha256=args.merge_verification_sha,
         analysis_sha256=args.analysis_sha,
         request_sha256=request.request_sha256,
         scientific_request_sha256=request.scientific_request_sha256,
@@ -503,7 +515,9 @@ def run(args):
             collector_closure=args.collector_closure,
             collector_closure_sha=args.collector_closure_sha,
             merge_receipt=args.merge_receipt,
-            merge_receipt_sha=args.merge_receipt_sha))
+            merge_receipt_sha=args.merge_receipt_sha,
+            merge_verification=args.merge_verification,
+            merge_verification_sha=args.merge_verification_sha))
     print(p.canonical(dict(root=str(root), root_sha256=written['root_sha256'],
         value_sha256=written['value_sha256'], points=len(cold['points']),
         science_content_sha256=cold['science_content_sha256'],
@@ -571,14 +585,20 @@ def _verify(args):
             raise ValueError('producer package locator manifest differs')
         locators = {item['role']: item for item in
                     locator_manifest['execution_attestation']}
-        if set(locators) != {'collection_index', 'expected_sources',
-                            'site_work', 'collector_closure', 'merge_receipt'}:
+        expected_roles = {'collection_index', 'expected_sources',
+                          'site_work', 'collector_closure', 'merge_receipt'}
+        if report.get('merge_verification_sha256') is not None:
+            expected_roles.add('merge_verification')
+        if set(locators) != expected_roles:
             raise ValueError('producer execution locator roles differ')
         if (locators['collection_index']['sha256'] != report['collection_index_sha256'] or
                 locators['expected_sources']['sha256'] != closure['expected_sources_sha256'] or
                 locators['site_work']['sha256'] != closure['work_sha256'] or
                 locators['collector_closure']['sha256'] != closure['collector_closure_sha256'] or
-                locators['merge_receipt']['sha256'] != report.get('merge_lineage_sha256')):
+                locators['merge_receipt']['sha256'] != report.get('merge_lineage_sha256') or
+                (report.get('merge_verification_sha256') is not None and
+                 locators['merge_verification']['sha256'] !=
+                    report['merge_verification_sha256'])):
             raise ValueError('producer execution locator pins differ from report')
         observed_closure = collection_api.admission_closure(
             Path(locators['collection_index']['locator']),
@@ -590,7 +610,10 @@ def _verify(args):
             closure_path=locators['collector_closure']['locator'],
             expected_closure_sha256=closure['collector_closure_sha256'],
             merge_receipt_path=locators['merge_receipt']['locator'],
-            expected_merge_receipt_sha256=report.get('merge_lineage_sha256'))
+            expected_merge_receipt_sha256=report.get('merge_lineage_sha256'),
+            merge_verification_path=(locators.get('merge_verification') or {}).get('locator'),
+            expected_merge_verification_sha256=
+                report.get('merge_verification_sha256'))
         if observed_closure != closure:
             raise ValueError('producer execution collection closure differs')
     if not portable and root != Path(report['root']['path']).absolute():
@@ -652,12 +675,15 @@ def _verify(args):
                     for item in attestations)):
             raise ValueError('portable external execution attestation status differs')
         pins = {item['role']: item['sha256'] for item in attestations}
-        if (len(pins) != len(attestations) or
-                pins != {'collection_index': report['collection_index_sha256'],
+        expected_pins = {'collection_index': report['collection_index_sha256'],
                          'expected_sources': closure['expected_sources_sha256'],
                          'site_work': closure['work_sha256'],
                          'collector_closure': closure['collector_closure_sha256'],
-                         'merge_receipt': report.get('merge_lineage_sha256')}):
+                         'merge_receipt': report.get('merge_lineage_sha256')}
+        if report.get('merge_verification_sha256') is not None:
+            expected_pins['merge_verification'] = report['merge_verification_sha256']
+        if (len(pins) != len(attestations) or
+                pins != expected_pins):
             raise ValueError('portable external execution pins differ from report')
         status = 'EXTERNAL_EXECUTION_NOT_CHECKED'
     else:
@@ -686,6 +712,8 @@ def parser():
     command.add_argument('--collector-closure-sha')
     command.add_argument('--merge-receipt', type=Path)
     command.add_argument('--merge-receipt-sha')
+    command.add_argument('--merge-verification', type=Path)
+    command.add_argument('--merge-verification-sha')
     command.add_argument('--tunes', nargs='+')
     command.add_argument('--profile-id', default='inclusive')
     command.add_argument('--activity-id')

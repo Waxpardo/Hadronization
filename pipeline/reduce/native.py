@@ -44,11 +44,13 @@ class ScanMetrics:
 class NativeCollection:
     """Verified logical SHARDED/MERGED collection with one physical scan path."""
 
-    def __init__(self, index_path, expected_sha256, collection_api):
+    def __init__(self, index_path, expected_sha256, collection_api, *,
+                 verify_roots=True):
         self.api = collection_api
         self.index_path = Path(index_path).absolute()
         self.index = collection_api.read(self.index_path, expected_sha256,
-                                         verify_roots=True)
+                                         verify_roots=verify_roots)
+        self.verify_roots = verify_roots
         self.expected_sha256 = expected_sha256
         self.pair_proofs=[]
         for shard in self.index['shards']:
@@ -105,8 +107,13 @@ class NativeCollection:
         """
         if not callable(getattr(self.api, 'source_lineage', None)):
             raise ValueError('authenticated A source-lineage accessor is absent')
-        lineage = self.api.source_lineage(self.index_path,
-                                          self.expected_sha256,requested_tunes)
+        if self.verify_roots:
+            lineage = self.api.source_lineage(
+                self.index_path,self.expected_sha256,requested_tunes)
+        else:
+            lineage = self.api.source_lineage(
+                self.index_path,self.expected_sha256,requested_tunes,
+                verify_roots=False)
         if (type(lineage) is not dict or set(lineage) != {
                 'schema','collection_index_sha256',
                 'collection_scientific_identity_sha256','collection_state',
