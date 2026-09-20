@@ -881,7 +881,7 @@ def target_analysis_caption(payload):
         raise ValueError('target campaign descriptor SHA256 differs')
     target=json_file(TARGET_CAMPAIGN, 'target campaign descriptor')
     source_tunes = payload['request_echo']['scope']['ordered_tunes']
-    if payload['schema'] == 'hadronization_projection_result_v4' and synthetic:
+    if payload['schema'] == 'hadronization_projection_result_v4':
         same_tunes = (len(source_tunes) == len(set(source_tunes)) and
                       set(target['tune_order']) == set(source_tunes))
     else:

@@ -591,13 +591,18 @@ class ColdDrawingBoundary(unittest.TestCase):
         self.assertTrue(plot.partial_numerics(dict(v3,
             package_state='VALIDATED_PARTIAL')))
 
-    def test_v4_synthetic_tune_permutation_keeps_target_caption(self):
+    def test_v4_tune_permutation_keeps_target_caption(self):
         payload={'schema':'hadronization_projection_result_v4',
                  'request_echo':{'scope':{'ordered_tunes':
                      ['CLOSEPACKING','JUNCTIONS','MONASH']},
                      'sources':{'campaign_id':'HF_RUN3_V1'}},
                  'provenance':{'data_limitations':
-                     ['TEST_ONLY_SYNTHETIC_NO_PHYSICS']}}
+                     ['TEST_ONLY_SYNTHETIC_NO_PHYSICS'],
+                     'generator_name':'PYTHIA','generator_version':'8.317',
+                     'collision_system':'pp','energy_gev':float(13600).hex()}}
+        self.assertEqual(plot.target_analysis_caption(payload),
+            'PYTHIA 8.317; pp, #sqrt{s} = 13.6 TeV')
+        payload['provenance']['data_limitations'] = []
         self.assertEqual(plot.target_analysis_caption(payload),
             'PYTHIA 8.317; pp, #sqrt{s} = 13.6 TeV')
         payload['request_echo']['scope']['ordered_tunes'] = [
