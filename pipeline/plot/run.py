@@ -531,6 +531,25 @@ def checked_p1_occupied_support(support, series):
     return [float(low), float(high)], [float(positive_low),
                                      float(max(high, positive_low + 1.))]
 
+def p1_reference_display_high(series, reference_tune):
+    """Return the last occupied unit-bin edge of the reference distribution.
+
+    The numerical archive retains the full 4096-bin support.  The paper
+    comparison uses the reference tune's populated range so isolated
+    one-event bins in another tune cannot compress the common distribution
+    and ratio panels into the left edge of a very wide linear axis.
+    """
+    reference = [point for item in series if item["tune"] == reference_tune
+                 for point in item["points"]
+                 if point["state"] == "DRAW" and point["y"] is not None and
+                 point["y"] > 0 and point["support_high"] is not None]
+    if not reference:
+        raise ValueError("P1 reference tune has no positive occupied support")
+    high = max(point["support_high"] for point in reference)
+    if not math.isfinite(high) or high <= 0:
+        raise ValueError("P1 reference display support differs")
+    return high
+
 def checked_category_order(declared, present_species, partial, role, trigger):
     if declared is None and not present_species and partial:
         declared = []
@@ -944,7 +963,10 @@ def apply_cold_page_style(pages, context):
             else '')
 
 def p1_uncertainty_display(synthetic):
-    return 'CENTERS_ONLY' if synthetic else 'DENSE_BAND'
+    # The multiplicity owner page carries exact finite-MC errors in the ROOT
+    # archive.  Painting thousands of dense error envelopes turns sparse tail
+    # states into broad background bands and obscures the inset.
+    return 'CENTERS_ONLY'
 
 def prelean_inset_geometry(relative, parent, width, height):
     """Map the original nested TPad to this canvas without stretching it.
@@ -1488,7 +1510,9 @@ def drawing_plan(projection, manifest, config):
                 selection, threshold, activity['eta_window'])
             # Retain the pre-lean portrait-like hierarchy: a dominant log-y
             # spectrum, a compact ratio pad and an embedded percentile inset.
-            # The scientific x range remains the complete nonzero support.
+            # The numerical archive retains all 4096 bins.  The paper page is
+            # later restricted to the reference-tune occupied range so rare
+            # single-event bins in another tune do not flatten the comparison.
             width,height=1050,1360
             add('upper.distribution',[0.,.26 if has_tune_ratios else 0.,1.,.98],
                 title='',x_title='' if has_tune_ratios else 'Multiplicity N_{ch}',
@@ -1809,9 +1833,12 @@ def drawing_plan(projection, manifest, config):
     mult={p['id']:p for page in pages if page['role']=='multiplicity.composite' for p in page['panels']}
     if mult:
         top=mult['upper.distribution']; inset=mult['inset.monash_boundaries']
-        # Leave enough common right-hand x support for the vertical text in
-        # a one-bin extreme class.  This is presentation whitespace beyond
-        # the last occupied bin, never a multiplicity boundary change.
+        # Use the complete populated reference-tune range for the shared
+        # linear paper axis. Other tunes retain their complete 4096-bin
+        # numerical distributions in ROOT, including farther-tail entries.
+        monash_series=[series for series in top['series']
+                       if series['tune']==reference_tune]
+        top['x_range'][1]=p1_reference_display_high(top['series'], reference_tune)
         active_bounds=[b for activity in presentation['activity_boundaries']
                        if activity['activity_id']==context.activity_id and
                        activity['tune']==reference_tune
@@ -1819,12 +1846,9 @@ def drawing_plan(projection, manifest, config):
         if active_bounds:
             if any(b['low'] is None or b['high'] is None for b in active_bounds):
                 raise ValueError('typed P1 class interval lacks an edge')
-            domain_high=max(b['high']+1 for b in active_bounds)
             rightmost_low=max(b['low'] for b in active_bounds)
-            top['x_range'][1]=min(float(domain_high),max(top['x_range'][1],
-                                                        float(rightmost_low+4)))
-        monash_series=[series for series in top['series']
-                       if series['tune']==reference_tune]
+            if rightmost_low >= top['x_range'][1]:
+                raise ValueError('P1 reference classes exceed display support')
         lower=mult.get('lower.ratio')
         if lower:
             lower['x_range']=top['x_range'][:]

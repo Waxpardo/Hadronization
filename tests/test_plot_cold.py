@@ -118,6 +118,22 @@ class ColdDrawingBoundary(unittest.TestCase):
             plot.checked_p1_occupied_support(
                 {"low": 1., "positive_low": 1., "high": 164.}, series)
 
+    def test_p1_paper_range_uses_complete_reference_support(self):
+        series = [
+            {"tune": "MONASH", "points": [
+                {"state": "DRAW", "y": 0.3, "support_high": 1.},
+                {"state": "DRAW", "y": 1e-8, "support_high": 374.},
+                {"state": "MISSING", "y": None, "support_high": 4096.},
+            ]},
+            {"tune": "CLOSEPACKING", "points": [
+                {"state": "DRAW", "y": 1e-8, "support_high": 2109.},
+            ]},
+        ]
+        self.assertEqual(
+            plot.p1_reference_display_high(series, "MONASH"), 374.)
+        with self.assertRaisesRegex(ValueError, "no positive occupied"):
+            plot.p1_reference_display_high(series, "ABSENT")
+
     def test_category_order_preserves_signed_five_channel_beauty(self):
         order = ["-521", "-511", "-531", "-541", "5122"]
         self.assertEqual(plot.checked_category_order(
@@ -406,7 +422,7 @@ class ColdDrawingBoundary(unittest.TestCase):
 
     def test_owner_style_applies_to_preview_and_full_campaign(self):
         self.assertEqual(plot.p1_uncertainty_display(True),'CENTERS_ONLY')
-        self.assertEqual(plot.p1_uncertainty_display(False),'DENSE_BAND')
+        self.assertEqual(plot.p1_uncertainty_display(False),'CENTERS_ONLY')
         pages=[{'role':role,'title':'old heading',
                 'information':'typed details','scientific_header':'old'}
                for role in ('multiplicity.composite','correlations.charm',

@@ -424,6 +424,11 @@ std::vector<double> StatusRailCoordinates(const Page& page, const Panel& panel,
   // The inset repeats the histogram only; its source panel retains all status
   // marks and the page disclosure, without a second rail through class labels.
   if (!panel.reusePanel.empty()) return {};
+  // A complete multiplicity campaign can contain thousands of absent tail
+  // bins.  A cross for every absent bin aliases into a thick horizontal bar;
+  // the exact states remain in the drawing record and numerical ROOT.
+  if (page.role == "multiplicity.composite" &&
+      page.scientificHeader.empty()) return {};
   std::set<double> unique;
   for (const Series* series : SelectedSeries(page, panel, pages)) {
     for (const Point& point : series->points) {
@@ -583,6 +588,11 @@ bool CategoricalAxis(const Page& page, const Panel& panel) {
 std::vector<ExpectedText> StateGlyphTexts(
     const Page& page, const Panel& panel, const std::vector<Page>& pages) {
   if (!panel.reusePanel.empty()) return {};
+  // Missing/withheld uncertainties remain explicit in the numerical ROOT and
+  // drawing record. Question-mark glyphs obscure the compact paper ratio
+  // panel and do not add a scientific coordinate.
+  if (page.role == "multiplicity.composite" &&
+      page.scientificHeader.empty()) return {};
   std::vector<ExpectedText> result;
   std::set<std::pair<int,int>> occupied;
   const double frameWidth = 1 - panel.margins[0] - panel.margins[1];
@@ -661,14 +671,8 @@ std::vector<ExpectedText> InsetClassTexts(const Page& page,
     // at each interval's geometric center. Intervals remain numerics-owned.
     result.push_back(TextExpectation(guide.label, x,
         panel.margins[2] + .20*(1-panel.margins[2]-panel.margins[3]),
-        .044*(panel.geometry[3]-panel.geometry[1])*page.height, 1, 22, 90));
+        .039*(panel.geometry[3]-panel.geometry[1])*page.height, 1, 22, 90));
   }
-  const double pixels=(panel.geometry[3]-panel.geometry[1])*page.height;
-  result.push_back(TextExpectation("#bf{"+panel.reuseTune+" tune-local percentile classes}",
-      .02,.965,.054*pixels,1,13));
-  result.push_back(TextExpectation("thresholds: "+panel.reuseTune+
-      (partialSample ? " synthetic fixture" : " production sample"),
-      .02,.895,.042*pixels,1,13));
   return result;
 }
 std::vector<std::string> P1InformationLines(const Page& page) {
@@ -1045,6 +1049,7 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
           note,.015,.045,teaching ? BodyTextPixels(page) : 18,kGray+2));
   }
   if (page.role=="multiplicity.composite") {
+    if (page.scientificHeader.empty()) return result;
     const auto parent=std::find_if(page.panels.begin(),page.panels.end(),
         [](const Panel& item){return item.id=="upper.distribution";});
     if (parent!=page.panels.end() && !parent->note.empty())
@@ -1160,9 +1165,11 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
            "scientific frame object set differs from drawing record");
       const bool inset = !panel.reusePanel.empty();
       if (inset)
-        Need(pad->GetFillStyle() == 4000 && pad->GetFrameFillStyle() == 0 &&
+        Need(pad->GetFillColor() == kWhite && pad->GetFillStyle() == 1001 &&
+             pad->GetFrameFillColor() == kWhite &&
+             pad->GetFrameFillStyle() == 1001 &&
              pad->GetFrameLineWidth() == 1,
-             "percentile inset transparency differs from reference");
+             "percentile inset white background differs");
       const int textPixels = BodyTextPixels(page);
       const double baseLabelSize = inset ? .055 : textPixels;
       const double expectedXLabelSize =
@@ -1389,8 +1396,11 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     TPad& pad = *pads.back();
     pad.SetFillColor(0); pad.SetBorderMode(0); pad.SetTicks(1,1);
     if (inset) {
-      // TPad::SetFillStyle(0) in the reference normalizes to 4000 (transparent).
-      pad.SetFillStyle(4000); pad.SetFrameFillStyle(0); pad.SetFrameLineWidth(1);
+      // Keep the embedded plot visibly inside the parent without allowing the
+      // full-spectrum curves and tail-status marks to show through it.
+      pad.SetFillColor(kWhite); pad.SetFillStyle(1001);
+      pad.SetFrameFillColor(kWhite); pad.SetFrameFillStyle(1001);
+      pad.SetFrameLineWidth(1);
     }
     pad.SetLeftMargin(panel.margins[0]); pad.SetRightMargin(panel.margins[1]);
     pad.SetBottomMargin(panel.margins[2]); pad.SetTopMargin(panel.margins[3]);
