@@ -1066,7 +1066,8 @@ def apply_cold_page_style(pages, context):
             science=(getattr(context, 'pair_selection_caption', '')
                      if page['role'].startswith(('balancing.', 'correlations.'))
                      else '')
-            teaching=any(panel['id'].startswith('correlation.teaching.')
+            teaching=any(panel['id'].startswith('correlation.teaching.') and
+                         panel['uncertainty_display']=='CENTERS_ONLY'
                          for panel in page.get('panels', []))
             page['information']=(
                 (science+'; ' if science else '')+
@@ -1080,10 +1081,9 @@ def apply_cold_page_style(pages, context):
             else '')
 
 def p1_uncertainty_display(synthetic):
-    # The multiplicity owner page carries exact finite-MC errors in the ROOT
-    # archive.  Painting thousands of dense error envelopes turns sparse tail
-    # states into broad background bands and obscures the inset.
-    return 'CENTERS_ONLY'
+    # Display the persisted one-standard-error envelope without recomputing
+    # the estimator or drawing thousands of overlapping vertical bars.
+    return 'DENSE_BAND'
 
 def prelean_inset_geometry(relative, parent, width, height):
     """Map the original nested TPad to this canvas without stretching it.
@@ -1837,9 +1837,7 @@ def drawing_plan(projection, manifest, config):
                     if occupied is not None else [0.,1.])
                 visible=[q for q in valid if q['x'] is not None and xr[0]<=q['x']<=xr[1]]
                 yr=_padded_range([z for q in visible for z in (q['y'],q['y']-(q['error'] or 0),q['y']+(q['error'] or 0))],.10,log_y)
-                note=('SE not drawn; full bin errors saved in ROOT' if
-                      context.synthetic else
-                      'Finite-MC SE band; full bin errors saved in ROOT')
+                note='Finite-MC SE band; full bin errors saved in ROOT'
                 positive=[q['y'] for q in visible if q['y']>0]
                 if log_y and positive:
                     # One decade below the smallest positive visible center;
@@ -1851,8 +1849,7 @@ def drawing_plan(projection, manifest, config):
                     # Leave the 10^-8 tick/label clear of the ratio-pad seam.
                     yr[0]=min(yr[0],3e-9)
                     yr[1]=max(yr[1],1.)
-                    # The exact errors remain in ROOT/drawing record; no
-                    # dense SE bars are painted on this owner-style page.
+                    # The exact errors also remain in ROOT/drawing record.
             if (family=='correlations' and options.get('x_title')) or (family=='kinematics' and role.endswith('.phi')):
                 ticks=[{'x':value,'label':label} for value,label in
                        [(-math.pi,'-#pi'),(-math.pi/2,'-#pi/2'),(0.,'0'),
@@ -1932,7 +1929,7 @@ def drawing_plan(projection, manifest, config):
                        else True),
                    'uncertainty_display':p1_uncertainty_display(context.synthetic)
                        if role=='multiplicity.composite' else
-                       'CENTERS_ONLY' if pair_sign_view else 'STANDARD'}
+                       'STANDARD'}
             if options.get('ratio'):
                 panel['guides'].append({'id':'unity','x_low':xr[0],'x_high':xr[1],'y_low':1.,'y_high':1.,'color':'#777777','line_style':2,'label':''})
             if signed_linear:
@@ -1986,7 +1983,7 @@ def drawing_plan(projection, manifest, config):
             x_range=[1.0,top['x_range'][1]],
             y_range=top['y_range'][:],log_y=True, log_x=True,
             margins=[.18,.065,.25,.20],
-            uncertainty_display='CENTERS_ONLY',
+            uncertainty_display='DENSE_BAND',
             x_title='Multiplicity N_{ch}')
         if (occupied is not None and
                 occupied['high'] <= occupied['positive_low']):

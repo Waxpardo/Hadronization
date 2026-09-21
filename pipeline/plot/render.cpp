@@ -221,10 +221,8 @@ std::vector<Page> ReadPlan(const std::filesystem::path& path,
         panel.logX = Integer(f[25]) != 0;
         panel.uncertaintyDisplay=f[26];
         panel.categoryDividers=Integer(f[27]) != 0;
-        const bool teaching=panel.id.rfind("correlation.teaching.",0)==0;
-        Need(teaching ? panel.uncertaintyDisplay=="CENTERS_ONLY" :
-             (page.role=="multiplicity.composite") ==
-             (panel.uncertaintyDisplay!="STANDARD"),
+        Need(panel.uncertaintyDisplay ==
+             (page.role=="multiplicity.composite" ? "DENSE_BAND" : "STANDARD"),
              "paper uncertainty display identity differs");
         panel.xLow = Number(f[5]); panel.xHigh = Number(f[6]);
         panel.yLow = Number(f[7]); panel.yHigh = Number(f[8]);
@@ -497,7 +495,11 @@ std::vector<ExpectedGraph> ExpectedGraphs(const Page& page,
     }
   }
   if (points.x.empty()) return {};
-  if (!panel.reusePanel.empty()) return runs;
+  if (!panel.reusePanel.empty()) {
+    if (panel.uncertaintyDisplay != "CENTERS_ONLY")
+      runs.push_back(std::move(points));
+    return runs;
+  }
   std::vector<ExpectedGraph> result;
   if (series.mode != "points") {
     result.insert(result.end(), runs.begin(), runs.end());
@@ -598,6 +600,10 @@ std::vector<ExpectedText> StateGlyphTexts(
   // drawing record. Question-mark glyphs obscure the compact paper ratio
   // panel and do not add a scientific coordinate.
   if (page.role == "multiplicity.composite" &&
+      page.scientificHeader.empty()) return {};
+  // Production balancing pages disclose unavailable SE once in the footer;
+  // the exact per-point status and reason remain in the drawing record.
+  if (page.role.rfind("balancing.", 0) == 0 &&
       page.scientificHeader.empty()) return {};
   std::vector<ExpectedText> result;
   std::set<std::pair<int,int>> occupied;
@@ -1049,7 +1055,10 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
       note="Exact-zero SE saved in ROOT";
     }
     if (withheld) note += (note.empty() ? "" : "; ") +
-                           std::string("? = withheld SE");
+        std::string(page.role.rfind("balancing.", 0) == 0 &&
+                    page.scientificHeader.empty() ?
+                    "SE unavailable for unresolved ratios; see ROOT flags" :
+                    "? = withheld SE");
     if (!note.empty())
       result.push_back(TextExpectation(
           note,.015,.045,teaching ? BodyTextPixels(page) : 18,kGray+2));
@@ -1240,6 +1249,22 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
              observedGraphs.insert(graph->GetName()).second,
              "scientific graph object set differs from drawing record");
         VerifyGraph(*graph, *found->second, inset);
+        std::string drawOption = primitiveIterator.GetOption();
+        std::transform(drawOption.begin(), drawOption.end(), drawOption.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+        const auto same = drawOption.find("same");
+        if (same != std::string::npos) drawOption.erase(same, 4);
+        drawOption.erase(std::remove_if(drawOption.begin(), drawOption.end(),
+                         [](unsigned char c) { return std::isspace(c); }),
+                         drawOption.end());
+        const bool errorGraph = found->second->title.rfind("points:", 0) == 0;
+        const bool markers = found->second->title.rfind("dense_markers:", 0) == 0;
+        const std::string expectedOption = errorGraph ?
+            (panel.uncertaintyDisplay == "CENTERS_ONLY" ? "px" :
+             inset || found->second->dense ? "3" : "pz") :
+            markers ? "p" : "l";
+        Need(drawOption == expectedOption,
+             "scientific uncertainty drawing option differs from drawing record");
       }
       Need(observedGraphs.size() == expectedGraphs.size(),
            "scientific graph object set differs from drawing record");
@@ -1591,6 +1616,12 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       if (errors->GetN() == 0) continue;
       drawn = true;
       if (inset) {
+        if (panel.uncertaintyDisplay != "CENTERS_ONLY") {
+          errors->SetMarkerSize(0); errors->SetLineWidth(2);
+          errors->SetFillColorAlpha(Color(series.color), .08);
+          errors->SetFillStyle(1001);
+          errors->Draw("3 SAME");
+        }
         for (auto& line : runs) {
           line->SetMarkerSize(0); line->SetLineWidth(2);
           line->Draw("L SAME"); graphs.push_back(std::move(line));
@@ -1686,7 +1717,9 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       std::vector<TObject*> histogramLines;
       TIter primitives(pad.GetListOfPrimitives());
       while (auto* primitive = primitives())
-        if (dynamic_cast<TGraphErrors*>(primitive)) histogramLines.push_back(primitive);
+        if (dynamic_cast<TGraphErrors*>(primitive) &&
+            std::string(primitive->GetTitle()).rfind("line:", 0) == 0)
+          histogramLines.push_back(primitive);
       for (auto* line : histogramLines) {
         pad.GetListOfPrimitives()->Remove(line);
         pad.GetListOfPrimitives()->Add(line, "L SAME");

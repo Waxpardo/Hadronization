@@ -494,8 +494,8 @@ class ColdDrawingBoundary(unittest.TestCase):
             self.assertFalse(config['layout']['activity_category_dividers'])
 
     def test_owner_style_applies_to_preview_and_full_campaign(self):
-        self.assertEqual(plot.p1_uncertainty_display(True),'CENTERS_ONLY')
-        self.assertEqual(plot.p1_uncertainty_display(False),'CENTERS_ONLY')
+        self.assertEqual(plot.p1_uncertainty_display(True),'DENSE_BAND')
+        self.assertEqual(plot.p1_uncertainty_display(False),'DENSE_BAND')
         pages=[{'role':role,'title':'old heading',
                 'information':'typed details','scientific_header':'old'}
                for role in ('multiplicity.composite','correlations.charm',
