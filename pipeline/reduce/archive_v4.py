@@ -457,6 +457,97 @@ def read(path,expected_root_sha256,expected_value_sha256):
     finally:file.Close()
 
 
+def _latex_escape(value):
+    substitutions = {
+        '\\': r'\textbackslash{}', '&': r'\&', '%': r'\%',
+        '$': r'\$', '#': r'\#', '_': r'\_', '{': r'\{',
+        '}': r'\}', '~': r'\textasciitilde{}', '^': r'\textasciicircum{}',
+    }
+    return ''.join(substitutions.get(character, character)
+                   for character in str(value))
+
+
+def _raw_count(value):
+    if value is None:
+        return None
+    number=float.fromhex(value)
+    if not math.isfinite(number) or number<0. or not number.is_integer():
+        raise ValueError('raw T1 count is not a finite nonnegative integer')
+    return int(number)
+
+
+def _write_latex_exports(target,value):
+    accounting=value['provenance']['campaign_accounting']
+    rows=[]
+    for item in value['provenance']['successful_events_by_tune']:
+        rows.append((item['tune_id'],'selected query','successful events',
+                     item['count'],'AVAILABLE'))
+    for item in accounting['by_tune']:
+        for quantity,amount in (('successful events',item['successful_events']),
+            ('submitted job attempts',item['submitted_attempts']),
+            ('accepted job attempts',item['accepted_attempts']),
+            ('discarded job attempts',item['discarded_attempts'])):
+            rows.append((item['tune_id'],'accepted campaign ledger',quantity,
+                         amount,'AVAILABLE'))
+    for item in accounting['generator_event_trials_by_tune']:
+        rows.append((item['tune_id'],'all submitted attempts',
+                     'generator event trials',item['count'],item['status']))
+    lines=[r'\begin{table*}[tbp]',r'\centering',r'\small',
+        r'\caption{Accepted generator-campaign and selected-query accounting. Unavailable generator-trial totals are shown as dashes.}',
+        r'\label{tab:campaign-accounting}',
+        r'\begin{tabular}{@{}lllrl@{}}',r'\toprule',
+        r'Tune & Scope & Quantity & Value & State \\',r'\midrule']
+    for tune,scope,quantity,amount,status in rows:
+        shown='--' if amount is None else r'\num{'+str(amount)+'}'
+        lines.append(r'{} & {} & {} & {} & {} \\'.format(
+            _latex_escape(tune),_latex_escape(scope),_latex_escape(quantity),
+            shown,_latex_escape(status)))
+    lines.extend([r'\bottomrule',r'\end{tabular}',r'\end{table*}',''])
+    (target/'accounting.tex').write_text('\n'.join(lines),encoding='utf-8')
+
+    component_labels={
+        'hadron_count':'hadron count',
+        'charm_plus_anticharm_constituent_count':r'$n_c+n_{\bar c}$',
+        'beauty_plus_antibeauty_constituent_count':r'$n_b+n_{\bar b}$',
+    }
+    lines=[r'\begin{landscape}',r'\small',
+        r'\begin{longtable}{@{}lrlrl@{}}',
+        r'\caption{Raw natural-final-heavy accounting for every registered signed PDG state.}\label{tab:natural-heavy-accounting} \\',
+        r'\toprule',r'Tune & Signed PDG & Measure & Count & State \\',
+        r'\midrule',r'\endfirsthead',
+        r'\multicolumn{5}{l}{\tablename\ \thetable\ continued} \\',
+        r'\toprule',r'Tune & Signed PDG & Measure & Count & State \\',
+        r'\midrule',r'\endhead',r'\midrule',
+        r'\multicolumn{5}{r}{Continued on next page} \\',
+        r'\endfoot',r'\bottomrule',r'\endlastfoot']
+    for item in value['points']:
+        curve=item['key']['curve']
+        if curve['role_id']!='accounting.natural_final_heavy' or \
+                curve['quantity']!='raw_count':continue
+        count=_raw_count(item['center'])
+        shown='--' if count is None else r'\num{'+str(count)+'}'
+        lines.append(r'{} & {} & {} & {} & {} \\'.format(
+            _latex_escape(curve['tune_id']),curve['associate_pdg'],
+            component_labels.get(curve['component'],
+                                 _latex_escape(curve['component'])),
+            shown,_latex_escape(item['center_status'])))
+    lines.extend([r'\end{longtable}',r'\end{landscape}',''])
+    (target/'t1.tex').write_text('\n'.join(lines),encoding='utf-8')
+
+    (target/'overleaf-preamble.tex').write_text('\n'.join((
+        r'\usepackage{booktabs}',r'\usepackage{longtable}',
+        r'\usepackage{pdflscape}',r'\usepackage{siunitx}',
+        r'\sisetup{group-separator={,},group-minimum-digits=4}','')),
+        encoding='utf-8')
+    (target/'overleaf-tables.tex').write_text(
+        '\\input{accounting.tex}\n\\input{t1.tex}\n',encoding='utf-8')
+    (target/'overleaf-check.tex').write_text('\n'.join((
+        r'\documentclass{article}',r'\usepackage[margin=18mm]{geometry}',
+        r'\input{overleaf-preamble.tex}',r'\begin{document}',
+        r'\input{overleaf-tables.tex}',r'\end{document}','')),
+        encoding='utf-8')
+
+
 def export(path,expected_root_sha256,expected_value_sha256,output_directory):
     """Regenerate binary64-safe tables solely from a cold v4 numerical ROOT."""
     value=read(path,expected_root_sha256,expected_value_sha256)
@@ -517,44 +608,14 @@ def export(path,expected_root_sha256,expected_value_sha256,output_directory):
                     curve['associate_pdg'],curve['component'],curve['quantity'],
                     item['units'],item['center'] or '',item['center_status'],
                     item['uncertainty_status']))
-        with (target/'accounting.tex').open('x',encoding='utf-8') as stream:
-            stream.write('\\begin{tabular}{llll}\nTune & Scope & Quantity & Value \\\\\n\\hline\n')
-            for item in value['provenance']['successful_events_by_tune']:
-                stream.write('{} & selected query & successful events & {} \\\\\n'.format(
-                    item['tune_id'],item['count']))
-            for item in accounting['by_tune']:
-                for quantity,amount in (('successful events',
-                    item['successful_events']),('submitted job attempts',
-                    item['submitted_attempts']),('accepted job attempts',
-                    item['accepted_attempts']),('discarded job attempts',
-                    item['discarded_attempts'])):
-                    stream.write('{} & accepted campaign ledger & {} & {} \\\\\n'.format(
-                        item['tune_id'],quantity,amount))
-            for item in accounting['generator_event_trials_by_tune']:
-                stream.write('{} & all submitted attempts & generator event trials & {} \\\\\n'.format(
-                    item['tune_id'],item['count'] if item['count'] is not None
-                    else r'\textemdash{} (unavailable)'))
-            stream.write('\\end{tabular}\n')
-        with (target/'t1.tex').open('x',encoding='utf-8') as stream:
-            stream.write('\\begin{tabular}{lllll}\nTune & Signed PDG & '
-                'Constituent measure & Raw observed count & State \\\\\n\\hline\n')
-            for item in value['points']:
-                curve=item['key']['curve']
-                if curve['role_id']!='accounting.natural_final_heavy' or \
-                        curve['quantity']!='raw_count':continue
-                observed=(r'\texttt{'+item['center']+'}' if item['center']
-                          is not None else r'\textemdash{}')
-                stream.write('{} & {} & {} & {} & {} \\\\\n'.format(
-                    curve['tune_id'],curve['associate_pdg'],
-                    curve['component'].replace('_',r'\_'),observed,
-                    item['center_status'].replace('_',r'\_')))
-            stream.write('\\end{tabular}\n')
+        _write_latex_exports(target,value)
         receipt=dict(schema='hadronization_v4_root_exports_v1',
             numerical_root_sha256=expected_root_sha256,
             value_sha256=expected_value_sha256,
             files={name:p.file_digest(target/name) for name in
                 ('points.csv','missing.csv','accounting.csv','t1.csv',
-                 'accounting.tex','t1.tex')})
+                 'accounting.tex','t1.tex','overleaf-preamble.tex',
+                 'overleaf-tables.tex','overleaf-check.tex')})
         with (target/'receipt.json').open('x',encoding='ascii') as stream:
             stream.write(p.canonical(receipt)+'\n')
         return receipt

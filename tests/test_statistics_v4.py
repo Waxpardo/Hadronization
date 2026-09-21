@@ -482,18 +482,33 @@ class NativeV4Metadata(unittest.TestCase):
             cold=archive.read(output,directory,receipt['root_sha256'],
                               receipt['value_sha256'])
             self.assertEqual(p.digest(cold),p.digest(value))
-            archive_v4.export(output,receipt['root_sha256'],
-                              receipt['value_sha256'],Path(directory)/'exports')
-            accounting_csv=(Path(directory)/'exports/accounting.csv').read_text()
+            export_directory=Path(directory)/'exports'
+            exports=archive_v4.export(output,receipt['root_sha256'],
+                                      receipt['value_sha256'],export_directory)
+            accounting_csv=(export_directory/'accounting.csv').read_text()
             self.assertIn('SELECTED_ACCEPTED_QUERY_SOURCES',accounting_csv)
             self.assertIn('ACCEPTED_LEDGER_ONLY_NO_QUERY_CLOSURE',accounting_csv)
             self.assertIn('UNAVAILABLE',accounting_csv)
             self.assertIn('EVENT_TRIAL_COUNTS_NOT_RECORDED_IN_VERIFIED_INPUTS',
                           accounting_csv)
-            accounting_tex=(Path(directory)/'exports/accounting.tex').read_text()
+            accounting_tex=(export_directory/'accounting.tex').read_text()
             self.assertIn('selected query',accounting_tex)
             self.assertIn('all submitted attempts',accounting_tex)
-            self.assertIn('unavailable',accounting_tex)
+            self.assertIn('UNAVAILABLE',accounting_tex)
+            self.assertIn(r'\begin{table*}',accounting_tex)
+            t1_tex=(export_directory/'t1.tex').read_text()
+            self.assertIn(r'\begin{landscape}',t1_tex)
+            self.assertIn(r'\begin{longtable}',t1_tex)
+            self.assertNotIn('0x',t1_tex)
+            self.assertEqual(archive_v4._raw_count((100.).hex()),100)
+            self.assertEqual(
+                set(exports['files']),
+                {'points.csv','missing.csv','accounting.csv','t1.csv',
+                 'accounting.tex','t1.tex','overleaf-preamble.tex',
+                 'overleaf-tables.tex','overleaf-check.tex'})
+            self.assertEqual(
+                (export_directory/'overleaf-tables.tex').read_text(),
+                '\\input{accounting.tex}\n\\input{t1.tex}\n')
             with self.assertRaisesRegex(ValueError,'trusted physical hash'):
                 archive.read(output,directory,'0'*64,receipt['value_sha256'])
             file=root_api.TFile.Open(str(output),'UPDATE')
