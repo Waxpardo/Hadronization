@@ -383,8 +383,13 @@ class NativeEngineContract(unittest.TestCase):
             'REQUEST\t' + 'e'*64 + '\t' + 'f'*64,
             'AXES\t2\t1\t110', 'FAMILY\tMONASH\t' + 'd'*64,
             'CLASS\t0\t1\t0\t100',
+            'SIGN_ASSOCIATE\t421\tCHARM\tOS\t-421',
+            'SIGN_ASSOCIATE\t421\tCHARM\tSS\t421',
             point.format(0, 'OS'), point.format(1, 'SS'),
-            point.format(2, 'NET'), 'END']) + '\n')
+            point.format(2, 'NET'),
+            ('POINT\t3\tcorrelations.charm\tdphi_per_trigger\tMONASH'
+             '\t-\tinclusive\t0\t421\t0\t0\tNET\tdphi\t0'
+             '\tTEST_ONLY_DIAGNOSTIC'), 'END']) + '\n')
         output = self.base / 'd0-p2-zero-associate-results.tsv'
         blocks = self.base / 'd0-p2-zero-associate-blocks.tsv'
         parents = self.base / 'd0-p2-zero-associate-parents.tsv'
@@ -394,9 +399,10 @@ class NativeEngineContract(unittest.TestCase):
         self.assertEqual((run.returncode, run.stderr), (0, ''))
         points = [line.split('\t') for line in output.read_text().splitlines()
                   if line.startswith('R\t')]
-        self.assertEqual([row[2] for row in points], ['AVAILABLE']*3)
+        self.assertEqual([row[2] for row in points], ['AVAILABLE']*4)
         self.assertEqual([float.fromhex(row[3]) for row in points],
                          [os_count/trigger_count, ss_count/trigger_count,
+                          (os_count-ss_count)/trigger_count,
                           (os_count-ss_count)/trigger_count])
         block_rows = [line.split('\t') for line in blocks.read_text().splitlines()
                       if line.startswith('B\t')]

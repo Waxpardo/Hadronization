@@ -1,6 +1,6 @@
 {
   "schema": "hadronization_plot_presentation_v3",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "families": {
     "D": [421, -421, 411, -411],
     "LambdaC": [4122, -4122],
@@ -27,7 +27,7 @@
     "axis_padding_fraction": 0.08,
     "facet_dimension": "associate_family",
     "grid_columns_maximum": 3,
-    "maximum_panels_per_page": 6,
+    "maximum_panels_per_page": 8,
     "shared_legend_reservation": "page_top",
     "text_pixel_size": 18,
     "physical_width_cm": 18.0,
@@ -37,7 +37,8 @@
       "lower": {"JUNCTIONS": -0.04, "CLOSEPACKING": 0.04}
     },
     "p1_inset_geometry": [0.18, 0.07, 0.50, 0.38],
-    "correlation_view": "monash_pair_sign"
+    "correlation_view": "monash_pair_sign",
+    "activity_category_dividers": false
   },
   "style_identities": {
     "class_line_style_rule": "integrated=1;nonintegrated=2+typed_class_ordinal",

@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PLOT_CONFIG = ROOT / "config/plot.json"
 TARGET_CAMPAIGN = ROOT / "data/campaign.json"
 TARGET_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d"
-DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v7"
+DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v8"
 CANVAS_NAME = "canvases.root"
 RECORD_NAME = "drawing-record.tsv.gz"
 TYPED_POINT_FIELDS = (
@@ -143,7 +143,7 @@ def checked_plot_config(path):
     exact_keys(payload, {"schema", "version", "families", "presets", "layout",
                          "style_identities"}, "plot presentation config")
     if (payload["schema"] != "hadronization_plot_presentation_v3" or
-            payload["version"] != "3.1.0"):
+            payload["version"] != "3.2.0"):
         raise ValueError("plot presentation schema/version differs")
     families = payload["families"]
     required = {"D", "B", "LambdaC", "LambdaB", "Ds", "Bs", "Bc",
@@ -187,7 +187,7 @@ def checked_plot_config(path):
                         "shared_legend_reservation", "text_pixel_size",
                         "physical_width_cm", "minimum_body_text_pt",
                         "categorical_tune_dodge", "p1_inset_geometry",
-                        "correlation_view"},
+                        "correlation_view", "activity_category_dividers"},
                "plot layout")
     if (type(layout["maximum_panels_per_page"]) is not int or
             layout["maximum_panels_per_page"] < 1 or
@@ -202,6 +202,7 @@ def checked_plot_config(path):
             layout["physical_width_cm"] != 18.0 or
             layout["minimum_body_text_pt"] != 8.0 or
             layout["p1_inset_geometry"] != [.18, .07, .50, .38] or
+            type(layout["activity_category_dividers"]) is not bool or
             layout["correlation_view"] not in
                 ("monash_pair_sign", "monash_balance", "all_tune_ratio") or
             layout["categorical_tune_dodge"] != {
@@ -666,14 +667,7 @@ def join_ratio_pads(pages):
                 # Keep the joined border, but separate the upper 0 and
                 # comparison 1.6 y labels at manuscript width.
                 lower['y_range'][1]=max(lower['y_range'][1],1.8)
-            if page['role']=='balancing.baryon_meson.activity':
-                # The densely labeled P8 y axes need breathing room at the
-                # absolute/comparison seam; both scientific ranges stay whole.
-                upper['geometry'][1]=lower['geometry'][3]+.015
-                upper['margins'][2]=.05
-                lower['margins'][3]=.04
-                lower['geometry'][1]=.08
-            elif page['role'].startswith('balancing.'):
+            if page['role'].startswith('balancing.'):
                 lower['geometry'][1]=.08
 
 def correlation_reference_partners(pairs, trigger):
@@ -805,6 +799,129 @@ def focused_extreme_pages(pages, context, padding):
                     'line_style':3,'label':''})
         result.append(page)
     return result
+
+def tune_separated_activity_pages(pages, tunes):
+    """Replace each all-class activity page by three tune rows plus one ratio row."""
+    result = []
+    for source in pages:
+        if source['role'] not in ('balancing.activity.charm',
+                                  'balancing.activity.beauty'):
+            result.append(source)
+            continue
+        upper = sorted((panel for panel in source['panels']
+                        if panel['id'].startswith('upper.')),
+                       key=lambda panel: panel['geometry'][0])
+        lower = sorted((panel for panel in source['panels']
+                        if panel['id'].startswith('lower.')),
+                       key=lambda panel: panel['geometry'][0])
+        if len(upper) != 2 or len(lower) != 2 or len(tunes) != 3:
+            raise ValueError('three-tune activity page topology differs')
+        page = copy.deepcopy(source)
+        page['height'] = 2850
+        page['panels'] = []
+        ratio_bottom, ratio_top, science_top = .08, .22, .79
+        row_height = (science_top - ratio_top) / len(tunes)
+        for tune_index, tune in enumerate(tunes):
+            row_top = science_top - tune_index * row_height
+            row_bottom = row_top - row_height
+            for original in upper:
+                panel = copy.deepcopy(original)
+                trigger = original['id'].split('.', 1)[1]
+                panel['id'] = 'upper.{}.{}'.format(tune, trigger)
+                panel['geometry'] = [original['geometry'][0], row_bottom,
+                                     original['geometry'][2], row_top]
+                panel['title'] = tune+': '+original['title']
+                panel['series'] = [series for series in panel['series']
+                                   if series['tune'] == tune]
+                panel['margins'][2] = 0.
+                panel['margins'][3] = .15 if tune_index == 0 else 0.
+                page['panels'].append(panel)
+        for original in lower:
+            panel = copy.deepcopy(original)
+            trigger = original['id'].split('.', 1)[1]
+            panel['id'] = 'lower.shared.'+trigger
+            panel['geometry'] = [original['geometry'][0], ratio_bottom,
+                                 original['geometry'][2], ratio_top]
+            panel['title'] = ''
+            panel['y_title'] = 'TUNE/MONASH'
+            panel['margins'][3] = 0.
+            page['panels'].append(panel)
+        result.append(page)
+    return result
+
+def tune_separated_baryon_meson_page(pages, tunes):
+    """Add the requested three-row tune view while retaining the overlay page."""
+    sources = [page for page in pages
+               if page['filename'] ==
+               canonical_page_name('balancing.baryon_meson.activity')]
+    if len(sources) != 1 or len(tunes) != 3:
+        raise ValueError('baryon/meson tune-separated source differs')
+    source = sources[0]
+    upper = sorted((panel for panel in source['panels']
+                    if panel['id'].startswith('upper.')),
+                   key=lambda panel: panel['geometry'][0])
+    lower = sorted((panel for panel in source['panels']
+                    if panel['id'].startswith('lower.')),
+                   key=lambda panel: panel['geometry'][0])
+    if len(upper) != 2 or len(lower) != 2:
+        raise ValueError('baryon/meson source pair topology differs')
+    page = copy.deepcopy(source)
+    page['filename'] = 'supplemental.balancing.baryon_meson.activity.by_tune.pdf'
+    page['height'] = 2850
+    page['panels'] = []
+    ratio_bottom, ratio_top, science_top = .08, .22, .89
+    row_height = (science_top - ratio_top) / len(tunes)
+    for tune_index, tune in enumerate(tunes):
+        row_top = science_top - tune_index * row_height
+        row_bottom = row_top - row_height
+        for original in upper:
+            panel = copy.deepcopy(original)
+            suffix = original['id'][len('upper.'):]
+            panel['id'] = 'upper.{}.{}'.format(tune, suffix)
+            panel['geometry'] = [original['geometry'][0], row_bottom,
+                                 original['geometry'][2], row_top]
+            panel['title'] = tune+': '+original['title']
+            panel['series'] = [series for series in panel['series']
+                               if series['tune'] == tune]
+            panel['margins'][2] = 0.
+            panel['margins'][3] = .15 if tune_index == 0 else 0.
+            page['panels'].append(panel)
+    for original in lower:
+        panel = copy.deepcopy(original)
+        suffix = original['id'][len('lower.'):]
+        panel['id'] = 'lower.shared.'+suffix
+        panel['geometry'] = [original['geometry'][0], ratio_bottom,
+                             original['geometry'][2], ratio_top]
+        panel['title'] = ''
+        panel['x_title'] = 'Multiplicity Percentile Class (%)'
+        panel['y_title'] = 'TUNE/MONASH'
+        panel['margins'][3] = 0.
+        page['panels'].append(panel)
+    return page
+
+def synchronize_paired_y_ranges(pages):
+    """Give each left/right row one shared y scale without changing its data."""
+    for page in pages:
+        rows = {}
+        for panel in page['panels']:
+            if panel.get('reuse'):
+                continue
+            key = (panel['geometry'][1], panel['geometry'][3])
+            rows.setdefault(key, []).append(panel)
+        for panels in rows.values():
+            if len(panels) != 2:
+                continue
+            panels.sort(key=lambda panel: panel['geometry'][0])
+            if panels[0]['geometry'][2] > panels[1]['geometry'][0]:
+                continue
+            log_y = all(panel['log_y'] for panel in panels)
+            y_range = [min(panel['y_range'][0] for panel in panels),
+                       max(panel['y_range'][1] for panel in panels)]
+            if log_y and y_range[0] <= 0:
+                raise ValueError('paired logarithmic y range is nonpositive')
+            for panel in panels:
+                panel['log_y'] = log_y
+                panel['y_range'] = y_range[:]
 
 def typed_panel_status(context, rows):
     """Summarize saved materialization and estimator statuses for a blank pad."""
@@ -1425,8 +1542,10 @@ def drawing_plan(projection, manifest, config):
             if pair_sign_view:
                 trigger_shown = [r for r in trigger_shown
                     if r['quantity'] == 'dphi_per_trigger' and
-                    r['component'] in ('OS', 'SS') and
-                    r['associate_pdg'] in ('', str(-int(r['trigger_pdg'])))]
+                    ((r['component'] in ('OS', 'SS') and
+                      r['associate_pdg'] == str(-int(r['trigger_pdg']))) or
+                     (r['component'] == 'OS_MINUS_SS' and
+                      r['associate_pdg'] == ''))]
             else:
                 reference_pairs = {(str(p['trigger_pdg']),
                     str(p['associate_pdg'])) for p in presentation['pairs']
@@ -1474,7 +1593,7 @@ def drawing_plan(projection, manifest, config):
                 left=ti/len(triggers); right=(ti+1)/len(triggers)
                 add('upper.'+t,[left,.30 if has_tune_ratios else 0.,right,.89],
                     title=label(t)+' trigger',x_title='',
-                    y_title=ytitles['os_minus_ss_per_trigger'],categorical=True,
+                    y_title='Balancing Yield Y',categorical=True,
                     log_y=True,ratio=False,legend=False)
                 if has_tune_ratios:
                     add('lower.'+t,[left,0.,right,.30],title='',
@@ -1498,8 +1617,10 @@ def drawing_plan(projection, manifest, config):
                         add(name,[left,.32 if half=='upper' and has_tune_ratios else 0.,right,
                                   .89 if half=='upper' else .32],
                             title=sector.capitalize()+': '+label(t)+' trigger',
-                            x_title='' if half=='upper' else 'Multiplicity percentile (%)',
-                            y_title=('Y_{assoc} / Y('+label(ref)+')' if half=='upper' else 'Ratio to '+reference_tune),
+                            x_title='' if half=='upper' else
+                                'Multiplicity Percentile Class (%)',
+                            y_title=('Y_{assoc} / Y('+label(ref)+')'
+                                     if half=='upper' else 'TUNE/MONASH'),
                             log_y=half=='upper',ratio=half=='lower',legend=half=='upper')
         elif role=='multiplicity.composite':
             title=''
@@ -1548,12 +1669,12 @@ def drawing_plan(projection, manifest, config):
                     add('correlation.teaching.'+trigger+'.identified',
                         [left,.48,right,.97],
                         title=label(trigger)+' trigger (MONASH)',x_title='',
-                        y_title='Identified pair / trigger / bin',
+                        y_title='Per-trigger yield N_{pair}/N_{trig}',
                         log_y=True,legend=True)
                     add('correlation.teaching.'+trigger+'.inclusive',
                         [left,.05,right,.48],title='',
                         x_title='#Delta#varphi (rad)',
-                        y_title='All associates / trigger / bin',
+                        y_title='Per-trigger yield (N_{OS}-N_{SS})/N_{trig}',
                         legend=True)
                     continue
                 if teaching_view:
@@ -1670,16 +1791,17 @@ def drawing_plan(projection, manifest, config):
                                    if component=='OS' else
                                    int(ident['trigger_pdg']))
                                    if ident['associate_pdg'] else
-                                   ('HF opposite sign (OS)'
-                                    if component=='OS' else
-                                    'HF same sign (SS)'))
+                                   ({'OS':'HF opposite sign (OS)',
+                                     'SS':'HF same sign (SS)',
+                                     'OS_MINUS_SS':'OS - SS'}[component]))
                                   if pair_sign_view else
                                   component if teaching_view else tune)
                 if role=='balancing.baryon_meson.activity':
                     line_style=1+species.index(ident['associate_pdg'])
                     legend_label=label(ident['associate_pdg'])+' / '+label(ident['reference_pdg'])
                 series.append({'key':key,'identity':ident,'tune':tune,'class_id':cl,
-                    'color':({'OS':'#000000','SS':'#0072B2'}[ident['component']]
+                    'color':({'OS':'#000000','SS':'#0072B2',
+                              'OS_MINUS_SS':'#000000'}[ident['component']]
                              if pair_sign_view else styles[tune]['color']),
                     'marker':styles[tune]['marker'],'line_style':line_style,'label':legend_label,
                     'emphasis':activity_emphasis(role, cl, classes),
@@ -1803,6 +1925,11 @@ def drawing_plan(projection, manifest, config):
             panel={'id':name,'status':status,'log_y':log_y,'log_x':False,'geometry':geometry,
                    'x_range':xr,'y_range':yr,'title':options.get('title',''),'x_title':options['x_title'],'y_title':options['y_title'],
                    'note':note,'series':series,'guides':[],'ticks':ticks,'margins':margins,'legend':legend,'reuse':None,
+                   'category_dividers':(
+                       config['layout']['activity_category_dividers']
+                       if (role.startswith('balancing.activity.') or
+                           role == 'balancing.baryon_meson.activity')
+                       else True),
                    'uncertainty_display':p1_uncertainty_display(context.synthetic)
                        if role=='multiplicity.composite' else
                        'CENTERS_ONLY' if pair_sign_view else 'STANDARD'}
@@ -1907,8 +2034,13 @@ def drawing_plan(projection, manifest, config):
         for guide in inset['guides']:
             guide['y_low']=inset['y_range'][0]
             guide['y_high']=inset['y_range'][1]
-    pages.extend(focused_extreme_pages(
-        pages, context, config['layout']['axis_padding_fraction']))
+    focused = focused_extreme_pages(
+        pages, context, config['layout']['axis_padding_fraction'])
+    tune_order = [item['id'] for item in
+                  config['style_identities']['tunes']]
+    pages = tune_separated_activity_pages(pages, tune_order)
+    pages.extend(focused)
+    pages.append(tune_separated_baryon_meson_page(pages, tune_order))
     maximum=config['layout']['maximum_panels_per_page']
     if maximum < 6:
         paginated=[]
@@ -1927,6 +2059,7 @@ def drawing_plan(projection, manifest, config):
             context, assigned['spectra.signed_heavy'], config,
             header, base_information, presentation['species_labels']))
     join_ratio_pads(pages)
+    synchronize_paired_y_ranges(pages)
     if getattr(context, 'cold', False):
         apply_cold_page_style(pages,context)
     return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}
@@ -2109,6 +2242,7 @@ def g9_drawing_pages(context, rows, config, header, information, labels):
                 'y_title':ratio_title if ratio else absolute_title,
                 'note':(note if not valid or ratio else ''),
                 'series':series,
+                'category_dividers':True,
                 'uncertainty_display':'STANDARD',
                 'guides':([{'id':'unity','x_low':x_low,'x_high':x_high,
                             'y_low':1.,'y_high':1.,'color':'#777777',
@@ -2131,7 +2265,9 @@ def drawing_payload(plan):
         for a in p["panels"]:
             prefix = [p["filename"],a["id"]]
             lines.append(["PANEL"]+prefix+[a["status"],int(a["log_y"])]+a["x_range"]+a["y_range"]+a["geometry"]+
-                         [a["title"],a["x_title"],a["y_title"],a["note"]]+a["margins"]+a["legend"]+[int(a["log_x"]),a["uncertainty_display"]])
+                         [a["title"],a["x_title"],a["y_title"],a["note"]]+a["margins"]+a["legend"]+
+                         [int(a["log_x"]),a["uncertainty_display"],
+                          int(a["category_dividers"])])
             for s in a["series"]:
                 lines.append(["SERIES"]+prefix+[s["key"],s["tune"],s["class_id"] or "-",s["color"],s["marker"],
                                                 s["line_style"],s["label"],s["draw_mode"],s["legend_label"],s["emphasis"]])
@@ -2608,17 +2744,20 @@ def review_packet_coverage(plan, context, config):
         owner = canonical[role]
         for trigger in triggers:
             if config['layout']['correlation_view'] == 'monash_pair_sign':
-                for suffix, associate in (('identified', str(-int(trigger))),
-                                          ('inclusive', '')):
+                for suffix, associate, components in (
+                        ('identified', str(-int(trigger)), {'OS', 'SS'}),
+                        ('inclusive', '', {'OS_MINUS_SS'})):
                     item = require_points(owner,
                         'correlation.teaching.'+trigger+'.'+suffix,
-                        [context.reference_tune], 6)
+                        [context.reference_tune],
+                        6 if suffix == 'identified' else 3)
                     if item is None:
                         continue
                     identities = {(s['identity']['component'],
                                    s['identity']['associate_pdg'])
                                   for s in item['series']}
-                    if identities != {('OS', associate), ('SS', associate)}:
+                    if identities != {(component, associate)
+                                      for component in components}:
                         failures.append(role+'/'+trigger+'/'+suffix+
                                         ' signed pair identity differs')
             elif config['layout']['correlation_view'] == 'monash_balance':
@@ -2661,12 +2800,14 @@ def review_packet_coverage(plan, context, config):
             ('balancing.activity.beauty', ('521','5122'))):
         owner = canonical[role]
         for trigger in triggers:
-            upper = require_points(owner, 'upper.'+trigger,
-                                   expected_tunes, len(class_ids))
-            require_points(owner, 'lower.'+trigger,
+            uppers = [require_points(owner,
+                      'upper.{}.{}'.format(tune, trigger),
+                      [tune], len(class_ids)) for tune in expected_tunes]
+            require_points(owner, 'lower.shared.'+trigger,
                            compared, len(class_ids))
             for class_id in class_ids:
-                if not visible(upper, class_id=class_id):
+                if any(not visible(upper, class_id=class_id)
+                       for upper in uppers):
                     failures.append(role+'/'+trigger+'/class '+class_id+
                                     ' lacks visible point')
         focused = page('supplemental.'+role+'.extremes.pdf')
@@ -2702,6 +2843,16 @@ def review_packet_coverage(plan, context, config):
             if not visible(upper,class_id=class_id):
                 failures.append('P8 '+sector+'/class '+class_id+
                                 ' lacks visible point')
+    p8_by_tune = page(
+        'supplemental.balancing.baryon_meson.activity.by_tune.pdf')
+    for sector,trigger in (('charm',charm_meson),('beauty','521')):
+        for tune in expected_tunes:
+            require_points(p8_by_tune,
+                'upper.{}.{}.{}'.format(tune, sector, trigger),
+                [tune], len(class_ids))
+        require_points(p8_by_tune,
+            'lower.shared.{}.{}'.format(sector, trigger),
+            compared, len(class_ids)-1)
     g9 = [owner for owner in plan['pages']
           if owner['role'] == 'spectra.signed_heavy']
     if len(g9) < 2:
@@ -2736,6 +2887,7 @@ def review_packet_coverage(plan, context, config):
     return {'schema':'hadronization_test_only_review_coverage_v1',
             'canonical_paper_pages':len(roles),
             'supplemental_extreme_pages':2,
+            'supplemental_baryon_meson_pages':1,
             'representative_g9_pages':len(g9),
             'visible_points':sum(len(visible(item)) for owner in plan['pages']
                                   for item in owner['panels']),

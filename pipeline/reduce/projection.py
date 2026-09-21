@@ -543,21 +543,31 @@ class ProjectionRequest:
             if curve["role_id"].startswith("correlations.") and curve["associate_pdg"] is None:
                 sector = curve["role_id"].rsplit(".", 1)[1].upper()
                 trigger = curve["trigger_pdg"]
-                contributors = [pair for pair in signed_pairs
-                                if pair["trigger_pdg"] == trigger and
-                                pair["sector"] == sector and
-                                pair["sign"] == curve["component"]]
+                components = (("OS", "SS") if
+                              curve["component"] == "OS_MINUS_SS" else
+                              (curve["component"],))
+                def complete_sign(component):
+                    contributors = [pair for pair in signed_pairs
+                                    if pair["trigger_pdg"] == trigger and
+                                    pair["sector"] == sector and
+                                    pair["sign"] == component]
+                    conjugates = {-pair["associate_pdg"]
+                                  for pair in signed_pairs
+                                  if pair["trigger_pdg"] == trigger and
+                                  pair["sector"] == sector and
+                                  pair["sign"] != component}
+                    return (bool(contributors) and
+                            {pair["associate_pdg"] for pair in contributors} ==
+                            conjugates)
+                complete = all(complete_sign(component)
+                               for component in components)
                 if (curve["quantity"] != "dphi_per_trigger" or
                         curve["reference_tune_id"] is not None or
-                        curve["component"] not in ("OS", "SS") or
+                        curve["component"] not in
+                            ("OS", "SS", "OS_MINUS_SS") or
                         curve["reference_pdg"] is not None or
                         curve["class_id"] != 0 or curve["axis_id"] != "dphi" or
-                        not contributors or
-                        {pair["associate_pdg"] for pair in contributors} !=
-                        {-pair["associate_pdg"] for pair in signed_pairs
-                         if pair["trigger_pdg"] == trigger and
-                         pair["sector"] == sector and
-                         pair["sign"] != curve["component"]}):
+                        not complete):
                     raise ValueError("registry-bound correlation sign sum differs")
             if curve["tune_id"] not in tunes or (curve["reference_tune_id"] is not None and curve["reference_tune_id"] not in tunes):
                 raise ValueError("point names an unrequested tune")
@@ -974,7 +984,7 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
                                   abs(p["associate_pdg"]) == abs(trigger)}
                     if identified != {"OS": -trigger, "SS": trigger}:
                         raise ValueError("identified correlation pair is absent")
-                    for component in ("OS", "SS"):
+                    for component in ("OS", "SS", "OS_MINUS_SS"):
                         # A null associate is an explicit, registry-bound sum
                         # over every signed associate in this flavour sector.
                         add(tune, "dphi_per_trigger", trigger, None,

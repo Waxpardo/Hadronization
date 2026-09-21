@@ -98,7 +98,7 @@ struct Guide {
 struct Panel {
   std::string id, status, title, xTitle, yTitle, note, reusePanel, reuseTune,
       uncertaintyDisplay;
-  bool logY = false, logX = false;
+  bool logY = false, logX = false, categoryDividers = true;
   double xLow = 0, xHigh = 1, yLow = 0, yHigh = 1;
   std::array<double, 4> geometry{}, margins{}, legend{};
   std::vector<Series> series;
@@ -185,7 +185,7 @@ std::vector<Page> ReadPlan(const std::filesystem::path& path,
   std::string line;
   Need(bool(std::getline(input, line)), "missing plan header");
   const auto header = Fields(line);
-  Need(header.size() == 2 && header[0] == "hadronization_plot_drawing_plan_v7", "plan framing differs");
+  Need(header.size() == 2 && header[0] == "hadronization_plot_drawing_plan_v8", "plan framing differs");
   output << line << '\n';
   bool ended = false;
   while (std::getline(input, line)) {
@@ -212,13 +212,15 @@ std::vector<Page> ReadPlan(const std::filesystem::path& path,
       Page& page = pages.at(pageIndex.at(f[1]));
       const auto panelKey = std::make_pair(f[1], f[2]);
       if (f[0] == "PANEL") {
-        Need(f.size() == 27 && !panelIndex.count(panelKey) &&
+        Need(f.size() == 28 && !panelIndex.count(panelKey) &&
              (f[26]=="STANDARD" || f[26]=="CENTERS_ONLY" ||
-              f[26]=="DENSE_BAND"), "panel differs");
+              f[26]=="DENSE_BAND") &&
+             (f[27]=="0" || f[27]=="1"), "panel differs");
         Panel panel;
         panel.id = f[2]; panel.status = f[3]; panel.logY = Integer(f[4]) != 0;
         panel.logX = Integer(f[25]) != 0;
         panel.uncertaintyDisplay=f[26];
+        panel.categoryDividers=Integer(f[27]) != 0;
         const bool teaching=panel.id.rfind("correlation.teaching.",0)==0;
         Need(teaching ? panel.uncertaintyDisplay=="CENTERS_ONLY" :
              (page.role=="multiplicity.composite") ==
@@ -585,6 +587,10 @@ bool CategoricalAxis(const Page& page, const Panel& panel) {
   // Identity is the scientific role, independent of hidden upper-pad labels.
   return page.role.find("balancing.") == 0 && panel.reusePanel.empty();
 }
+bool RotateCategoryLabels(const Page& page, const Panel& panel) {
+  return panel.ticks.size() >= 5 &&
+         page.role != "balancing.integrated.beauty";
+}
 std::vector<ExpectedText> StateGlyphTexts(
     const Page& page, const Panel& panel, const std::vector<Page>& pages) {
   if (!panel.reusePanel.empty()) return {};
@@ -764,11 +770,11 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
   }
   const double frameWidth = 1 - panel.margins[0] - panel.margins[1];
   for (const auto& tick : panel.ticks) {
+    const bool rotate = RotateCategoryLabels(page, panel);
     result.push_back(TextExpectation(
         tick.second, panel.margins[0] + frameWidth * xFraction(tick.first),
         panel.margins[2] - .025, inset ? 14 : textPixels, 1,
-        panel.ticks.size() >= 5 ? 32 : 23,
-        panel.ticks.size() >= 5 ? 90 : 0));
+        rotate ? 32 : 23, rotate ? 90 : 0));
   }
   for (double coordinate : StatusRailCoordinates(page, panel, pages)) {
     result.push_back(TextExpectation(
@@ -1252,13 +1258,14 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
       }
       const auto boundaries = categoricalAxis ? CategoryBoundaries(panel) :
           std::vector<double>{};
-      const std::size_t dividers = boundaries.size() > 1 ?
+      const std::size_t dividers = panel.categoryDividers && boundaries.size() > 1 ?
           boundaries.size() - 2 : 0;
       Need(actualGuides.size() == expectedGuides.size() +
            2 * boundaries.size() + dividers,
            "scientific guide object set differs from drawing record");
       for (std::size_t index = 0; index < boundaries.size(); ++index) {
-        const std::size_t start = 2 * index + (index > 0 ? index - 1 : 0);
+        const std::size_t start = 2 * index +
+            (panel.categoryDividers && index > 0 ? index - 1 : 0);
         for (int side = 0; side < 2; ++side) {
           const TLine& tick = *actualGuides[start + side];
           const bool top = side == 1;
@@ -1270,7 +1277,8 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
                tick.GetLineStyle() == 1 && tick.GetLineWidth() == 1,
                "categorical boundary tick geometry differs");
         }
-        if (index > 0 && index + 1 < boundaries.size()) {
+        if (panel.categoryDividers && index > 0 &&
+            index + 1 < boundaries.size()) {
           const TLine& divider = *actualGuides[start + 2];
           Need(SameBinary64(divider.GetX1(), boundaries[index]) &&
                SameBinary64(divider.GetX2(), boundaries[index]) &&
@@ -1421,6 +1429,10 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     }
     frame->GetYaxis()->SetMoreLogLabels(
         !inset && panel.logY && panel.yHigh / panel.yLow < 10.);
+    if (!inset && panel.margins[2] == 0.)
+      frame->GetYaxis()->ChangeLabel(1, -1., 0.);
+    if (!inset && panel.margins[3] == 0.)
+      frame->GetYaxis()->ChangeLabel(-1, -1., 0.);
     if (page.role == "multiplicity.composite") {
       const bool mainAxis = panel.id == "upper.distribution" ||
           panel.id == "lower.ratio";
@@ -1459,9 +1471,11 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       frame->GetXaxis()->SetLabelSize(0);
       const double frameWidth = 1 - panel.margins[0] - panel.margins[1];
       for (const auto& tick : panel.ticks) {
+        const bool rotate = RotateCategoryLabels(page, panel);
         TLatex label; label.SetNDC(); label.SetTextFont(43);
         label.SetTextSize(inset ? 14 : textPixels);
-        label.SetTextAngle(panel.ticks.size() >= 5 ? 90 : 0); label.SetTextAlign(panel.ticks.size() >= 5 ? 32 : 23);
+        label.SetTextAngle(rotate ? 90 : 0);
+        label.SetTextAlign(rotate ? 32 : 23);
         const double x = panel.margins[0] + frameWidth * xFraction(tick.first);
         label.DrawLatex(x, panel.margins[2] - .025, tick.second.c_str());
       }
@@ -1478,7 +1492,8 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
           lines.back()->SetLineWidth(1);
           lines.back()->Draw();
         }
-        if (boundary > panel.xLow && boundary < panel.xHigh) {
+        if (panel.categoryDividers && boundary > panel.xLow &&
+            boundary < panel.xHigh) {
           lines.emplace_back(std::make_unique<TLine>(
               boundary, panel.yLow, boundary, panel.yHigh));
           lines.back()->SetLineColor(kGray+1);

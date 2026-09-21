@@ -366,7 +366,8 @@ Queries ReadQueries(const std::string& path,Data& data) {
           throw std::runtime_error("native correlation/balance point shape differs");
         const bool signSum=correlation && point.associate==0 &&
             point.quantity=="dphi_per_trigger" &&
-            (point.component=="OS" || point.component=="SS") &&
+            (point.component=="OS" || point.component=="SS" ||
+             point.component=="NET") &&
             point.referencePdg==0 && point.classId==0 &&
             point.referenceTune.empty();
         if (!data.triggerScope.count(point.trigger) ||
@@ -377,10 +378,11 @@ Queries ReadQueries(const std::string& path,Data& data) {
           throw std::runtime_error("native aggregate correlation identity differs");
         if (signSum) {
           const std::string sector=point.role=="correlations.charm"?"CHARM":"BEAUTY";
+          const std::string signComponent=point.component=="NET"?"OS":point.component;
           const auto& members=query.signAssociates.at(
-              {point.trigger,sector,point.component});
+              {point.trigger,sector,signComponent});
           const auto& opposite=query.signAssociates.at(
-              {point.trigger,sector,point.component=="OS"?"SS":"OS"});
+              {point.trigger,sector,signComponent=="OS"?"SS":"OS"});
           if (members.empty() || members.size()!=opposite.size())
             throw std::runtime_error("native sign-summed domain is incomplete");
           for (int member:members)
@@ -477,8 +479,11 @@ class Evaluator {
         const double denominator=Trigger(point.profile,tune,omit,*bounds,
                                          point.trigger);
         if (denominator==0.0)return std::nullopt;
-        return SignPairValue(point,tune,omit,*bounds,point.component,
-                             point.bin)/denominator;
+        const double numerator=(point.component=="NET"?
+            SignPairValue(point,tune,omit,*bounds,"OS",point.bin)-
+            SignPairValue(point,tune,omit,*bounds,"SS",point.bin):
+            SignPairValue(point,tune,omit,*bounds,point.component,point.bin));
+        return numerator/denominator;
       }
       const double os=Pair(point.profile,tune,omit,*bounds,point.trigger,
                            point.associate,-1,point.bin);
@@ -856,8 +861,13 @@ class Evaluator {
   Weighted PairNumeratorBlock(const Point& point,const std::string& tune,int block,
                               const HR::ActivityClassBoundary& boundary,
                               int associate,int bin) const {
-    if (point.role.rfind("correlations.",0)==0 && associate==0)
-      return SignPairBlock(point,tune,block,boundary,point.component,bin);
+    if (point.role.rfind("correlations.",0)==0 && associate==0) {
+      if (point.component!="NET")
+        return SignPairBlock(point,tune,block,boundary,point.component,bin);
+      const auto os=SignPairBlock(point,tune,block,boundary,"OS",bin);
+      const auto ss=SignPairBlock(point,tune,block,boundary,"SS",bin);
+      return {os.value-ss.value,os.sumw2+ss.sumw2};
+    }
     const auto os=PairBlock(point,tune,block,boundary,associate,-1,bin);
     const auto ss=PairBlock(point,tune,block,boundary,-associate,1,bin);
     if (point.role.rfind("correlations.",0)==0 && point.component=="OS")return os;

@@ -405,7 +405,7 @@ class ColdDrawingBoundary(unittest.TestCase):
         self.assertEqual(upper['geometry'][1],lower['geometry'][3])
         self.assertEqual(lower['y_range'][1],1.8)
 
-    def test_p8_shared_x_frames_leave_y_tick_headroom(self):
+    def test_p8_shared_x_frames_join_without_a_gap(self):
         upper={"id":"upper.charm.421", "geometry":[0.,.32,.5,.89],
                "margins":[.20,.035,.29,.21], "x_range":[.5,3.5]}
         lower={"id":"lower.charm.421", "geometry":[0.,0.,.5,.32],
@@ -413,12 +413,85 @@ class ColdDrawingBoundary(unittest.TestCase):
                "title":"old"}
         plot.join_ratio_pads([{"role":"balancing.baryon_meson.activity",
                                "panels":[upper,lower]}])
-        self.assertGreater(upper['geometry'][1], lower['geometry'][3])
-        self.assertGreaterEqual(upper['margins'][2], .05)
-        self.assertGreaterEqual(lower['margins'][3], .04)
+        self.assertEqual(upper['geometry'][1], lower['geometry'][3])
+        self.assertEqual(upper['margins'][2], 0.)
+        self.assertEqual(lower['margins'][3], 0.)
         self.assertEqual(lower['geometry'][1], .08)
         self.assertEqual(upper['x_range'], lower['x_range'])
         self.assertEqual(lower['title'], '')
+
+    def test_activity_pages_are_three_tune_rows_plus_one_shared_ratio_row(self):
+        tunes = ['MONASH', 'JUNCTIONS', 'CLOSEPACKING']
+        def panel(id_, left, right, series):
+            return {'id': id_, 'geometry': [left, .3, right, .89],
+                    'title': id_, 'series': series,
+                    'margins': [.2, .035, .1, .17],
+                    'y_title': 'old'}
+        series = [{'tune': tune} for tune in tunes]
+        source = {'role': 'balancing.activity.charm', 'height': 1250,
+                  'panels': [
+                      panel('upper.421', 0., .5, series),
+                      panel('upper.4122', .5, 1., series),
+                      panel('lower.421', 0., .5, series[1:]),
+                      panel('lower.4122', .5, 1., series[1:])]}
+        page = plot.tune_separated_activity_pages([source], tunes)[0]
+        self.assertEqual([item['id'] for item in page['panels']], [
+            'upper.MONASH.421', 'upper.MONASH.4122',
+            'upper.JUNCTIONS.421', 'upper.JUNCTIONS.4122',
+            'upper.CLOSEPACKING.421', 'upper.CLOSEPACKING.4122',
+            'lower.shared.421', 'lower.shared.4122'])
+        for row, tune in zip((page['panels'][0:2], page['panels'][2:4],
+                              page['panels'][4:6]), tunes):
+            self.assertTrue(all({entry['tune'] for entry in item['series']} ==
+                                {tune} for item in row))
+        for column in (0, 1):
+            stack = [page['panels'][column + 2 * row]
+                     for row in range(4)]
+            for upper, lower in zip(stack, stack[1:]):
+                self.assertAlmostEqual(upper['geometry'][1],
+                                       lower['geometry'][3])
+        self.assertEqual({item['y_title'] for item in page['panels'][-2:]},
+                         {'TUNE/MONASH'})
+
+    def test_tune_separated_baryon_meson_page_keeps_one_shared_ratio_row(self):
+        tunes = ['MONASH', 'JUNCTIONS', 'CLOSEPACKING']
+        def panel(id_, left, right, series):
+            return {'id': id_, 'geometry': [left, .32, right, .89],
+                    'title': id_, 'x_title': 'old', 'y_title': 'old',
+                    'series': series, 'margins': [.2, .035, .29, .21]}
+        series = [{'tune': tune} for tune in tunes]
+        source = {'role': 'balancing.baryon_meson.activity',
+                  'filename': 'balancing.baryon_meson.activity.pdf',
+                  'height': 1250, 'panels': [
+                      panel('upper.charm.421', 0., .5, series),
+                      panel('upper.beauty.521', .5, 1., series),
+                      panel('lower.charm.421', 0., .5, series[1:]),
+                      panel('lower.beauty.521', .5, 1., series[1:])]}
+        page = plot.tune_separated_baryon_meson_page([source], tunes)
+        self.assertEqual(page['filename'],
+                         'supplemental.balancing.baryon_meson.activity.by_tune.pdf')
+        self.assertEqual(len(page['panels']), 8)
+        self.assertEqual([item['id'] for item in page['panels'][-2:]],
+                         ['lower.shared.charm.421',
+                          'lower.shared.beauty.521'])
+        self.assertTrue(all(item['x_title'] ==
+            'Multiplicity Percentile Class (%)' for item in page['panels'][-2:]))
+        self.assertTrue(all(item['y_title'] == 'TUNE/MONASH'
+                            for item in page['panels'][-2:]))
+
+    def test_left_and_right_facets_receive_one_shared_y_range(self):
+        left = {'geometry': [0., .2, .5, .8], 'y_range': [1., 3.],
+                'log_y': False}
+        right = {'geometry': [.5, .2, 1., .8], 'y_range': [-2., 2.],
+                 'log_y': False}
+        plot.synchronize_paired_y_ranges([{'panels': [right, left]}])
+        self.assertEqual(left['y_range'], [-2., 3.])
+        self.assertEqual(right['y_range'], [-2., 3.])
+
+    def test_activity_category_dividers_are_default_off(self):
+        for name in ('plot.json', 'plot-dplus.json', 'plot-all-tune.json'):
+            config, unused = plot.checked_plot_config(ROOT / 'config' / name)
+            self.assertFalse(config['layout']['activity_category_dividers'])
 
     def test_owner_style_applies_to_preview_and_full_campaign(self):
         self.assertEqual(plot.p1_uncertainty_display(True),'CENTERS_ONLY')
