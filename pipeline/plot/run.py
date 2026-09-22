@@ -201,7 +201,7 @@ def checked_plot_config(path):
             layout["text_pixel_size"] < 1 or
             layout["physical_width_cm"] != 18.0 or
             layout["minimum_body_text_pt"] != 8.0 or
-            layout["p1_inset_geometry"] != [.18, .07, .50, .38] or
+            layout["p1_inset_geometry"] != [.15, .05, .62, .48] or
             type(layout["activity_category_dividers"]) is not bool or
             layout["correlation_view"] not in
                 ("monash_pair_sign", "monash_balance", "all_tune_ratio") or
@@ -231,11 +231,11 @@ def checked_plot_config(path):
                 "role": "reference_only"}):
         raise ValueError("plot style identity differs")
     expected_patterns = [
-        (1, "solid"), (2, "24 12"), (3, "4 8"),
+        (1, "solid"), (2, "80 8"), (3, "4 8"),
         (4, "24 8 4 8"), (5, "24 8 4 8 4 8"), (6, "12 8"),
         (7, "40 12"), (8, "40 8 12 8"), (9, "12 8 4 8"),
         (10, "4 16"), (11, "24 8 12 8 4 8"),
-        (12, "12 8 12 8 4 8")]
+        (12, "4 20")]
     patterns = styles["class_line_patterns"]
     if (not isinstance(patterns, list) or
             [(item.get("root_style"), item.get("dash_pattern"))
@@ -626,6 +626,19 @@ def selected_extreme_class_ids(classes):
         raise ValueError('focused activity endpoints coincide')
     return [str(high_activity['id']), str(low_activity['id'])]
 
+
+def exact_particle_ratio_title(rows, label):
+    """Name the signed numerator and denominator of one yield ratio."""
+    pairs = {(row['associate_pdg'], row['reference_pdg']) for row in rows
+             if row.get('associate_pdg') and row.get('reference_pdg')}
+    if not pairs:
+        return ''
+    if len(pairs) != 1:
+        raise ValueError('baryon/meson panel mixes particle yield ratios')
+    associate, reference = next(iter(pairs))
+    return '#it{{Y}}({}) / #it{{Y}}({})'.format(
+        label(associate), label(reference))
+
 def activity_emphasis(role, class_id, classes):
     if (role.startswith('balancing.activity.') and class_id and
             class_id in selected_extreme_class_ids(classes)):
@@ -731,8 +744,8 @@ def checked_paper_pair_profile(payload, config, profile):
                 key['profile_id'] != profile['id'] for key in
                 role['required_curve_keys']):
             raise ValueError('S paper role uses a different pair profile')
-    return ('P2-P8: no final-hadron p_{T} floor; '
-            'N_{trig}: eligible singles')
+    return ('P2-P8: no final-hadron #it{p}_{T} floor; '
+            '#it{N}_{trig}: eligible singles')
 
 
 def focused_extreme_pages(pages, context, padding):
@@ -830,7 +843,7 @@ def tune_separated_activity_pages(pages, tunes):
                 panel['id'] = 'upper.{}.{}'.format(tune, trigger)
                 panel['geometry'] = [original['geometry'][0], row_bottom,
                                      original['geometry'][2], row_top]
-                panel['title'] = tune+': '+original['title']
+                panel['title'] = original['title'] if tune_index == 0 else ''
                 panel['series'] = [series for series in panel['series']
                                    if series['tune'] == tune]
                 panel['margins'][2] = 0.
@@ -880,9 +893,12 @@ def tune_separated_baryon_meson_page(pages, tunes):
             panel['id'] = 'upper.{}.{}'.format(tune, suffix)
             panel['geometry'] = [original['geometry'][0], row_bottom,
                                  original['geometry'][2], row_top]
-            panel['title'] = tune+': '+original['title']
+            panel['title'] = (original['title'].split(': ', 1)[-1]
+                              if tune_index == 0 else '')
             panel['series'] = [series for series in panel['series']
                                if series['tune'] == tune]
+            for series in panel['series']:
+                series['legend_label'] = ''
             panel['margins'][2] = 0.
             panel['margins'][3] = .15 if tune_index == 0 else 0.
             page['panels'].append(panel)
@@ -1007,7 +1023,7 @@ def target_analysis_caption(payload):
     synthetic=synthetic_provenance(payload)
     source_campaign=payload['request_echo']['sources']['campaign_id']
     if not synthetic and source_campaign!='HF_RUN3_V1':
-        return '{name} {version}; {beam}, #sqrt{{s}} = {energy} TeV'.format(
+        return '{name} {version}; {beam}, #sqrt{{#it{{s}}}} = {energy} TeV'.format(
             name=provenance['generator_name'],
             version=provenance['generator_version'],
             beam=provenance['collision_system'],
@@ -1038,7 +1054,7 @@ def target_analysis_caption(payload):
                 provenance['collision_system']!=beam or
                 float.fromhex(provenance['energy_gev'])!=energy):
             raise ValueError('numerical provenance contradicts target campaign')
-    caption='PYTHIA {}; {}, #sqrt{{s}} = {} TeV'.format(
+    caption='PYTHIA {}; {}, #sqrt{{#it{{s}}}} = {} TeV'.format(
         version, beam, format(energy/1000,'.15g'))
     # Synthetic packets carry their own visible TEST_ONLY marker.  The
     # authenticated target campaign is 13.6 TeV; calling it merely planned
@@ -1052,8 +1068,8 @@ def activity_proxy_caption(selection, threshold, eta_window):
             selection['exclude_heavy_constituents'] and
             selection['pt']['low_operator']=='GT'):
         raise ValueError('P1 typed charged-final activity differs')
-    return ('N_{ch}: charged-light final-particle activity, heavy flavour excluded; '
-            'p_{T} > '+format(threshold,'.15g')+
+    return ('#it{N}_{ch}: charged-light final-particle activity, heavy flavour excluded; '
+            '#it{p}_{T} > '+format(threshold,'.15g')+
             ' GeV/c, |#eta| #leq '+format(eta_window,'.15g'))
 
 def apply_cold_page_style(pages, context):
@@ -1172,17 +1188,17 @@ def g9_science_caption(science, reference, numerics_schema):
             pt['units'] != 'GeV'):
         raise ValueError('S G9 cut predicates differ')
     if current:
-        cut = ('G9 direct final {}-{}, all origins, no p_{{T}} floor, '
-               '|#eta| #leq {}; P_{{bin}}=W_{{bin}}/W_{{sel}} per species/tune (no bin-width divide)'
+        cut = ('G9 direct final {}-{}, all origins, no #it{{p}}_{{T}} floor, '
+               '|#eta| #leq {}; #it{{P}}_{{bin}}=#it{{W}}_{{bin}}/#it{{W}}_{{sel}} per species/tune (no bin-width divide)'
                .format(science['status_low'], science['status_high'],
                        format(float.fromhex(eta['high']), '.15g')))
     else:
-        cut = ('G9 selected final (status {}-{}), p_{{T}} > {} GeV, '
-               '|#eta| #leq {}; P_{{bin}} = W_{{bin}}/W_{{sel}} per species/tune (no bin-width divide)'
+        cut = ('G9 selected final (status {}-{}), #it{{p}}_{{T}} > {} GeV, '
+               '|#eta| #leq {}; #it{{P}}_{{bin}} = #it{{W}}_{{bin}}/#it{{W}}_{{sel}} per species/tune (no bin-width divide)'
                .format(science['status_low'], science['status_high'],
                        format(float.fromhex(pt['low']), '.15g'),
                        format(float.fromhex(eta['high']), '.15g')))
-    return cut, 'P_{bin} / P_{bin,'+reference+'}', 'Probability / bin'
+    return cut, '#it{P}_{bin} / #it{P}_{bin,'+reference+'}', 'Probability / bin'
 
 def cold_drawing_inputs(payload, config):
     """Adapt one S-validated numerical DTO to presentation fields only.
@@ -1410,6 +1426,55 @@ def cold_drawing_inputs(payload, config):
     return context, {"request_id": payload["request_sha256"],
                      "roles": roles, "presentation": presentation}
 
+def species_latex_label(pdg, value):
+    """Return ROOT TLatex typography for an authenticated species label."""
+    signed_identity = {
+        '411':'#it{D}^{+}', '-411':'#it{D}^{-}',
+        '421':'#it{D}^{0}', '-421':'#bar{#it{D}}^{0}',
+        '431':'#it{D}_{s}^{+}', '-431':'#it{D}_{s}^{-}',
+        '4122':'#it{#Lambda}_{c}^{+}',
+        '-4122':'#bar{#it{#Lambda}}_{c}^{-}',
+        '521':'#it{B}^{+}', '-521':'#it{B}^{-}',
+        '511':'#it{B}^{0}', '-511':'#bar{#it{B}}^{0}',
+        '531':'#it{B}_{s}^{0}', '-531':'#bar{#it{B}}_{s}^{0}',
+        '541':'#it{B}_{c}^{+}', '-541':'#it{B}_{c}^{-}',
+        '5122':'#it{#Lambda}_{b}^{0}',
+        '-5122':'#bar{#it{#Lambda}}_{b}^{0}',
+        '4112':'#it{#Sigma}_{c}^{0}', '-4112':'#bar{#it{#Sigma}}_{c}^{0}',
+        '4212':'#it{#Sigma}_{c}^{+}', '-4212':'#bar{#it{#Sigma}}_{c}^{-}',
+        '4222':'#it{#Sigma}_{c}^{++}', '-4222':'#bar{#it{#Sigma}}_{c}^{--}',
+        '5112':'#it{#Sigma}_{b}^{-}', '-5112':'#bar{#it{#Sigma}}_{b}^{+}',
+        '5212':'#it{#Sigma}_{b}^{0}', '-5212':'#bar{#it{#Sigma}}_{b}^{0}',
+        '5222':'#it{#Sigma}_{b}^{+}', '-5222':'#bar{#it{#Sigma}}_{b}^{-}',
+        '4132':'#it{#Xi}_{c}^{0}', '-4132':'#bar{#it{#Xi}}_{c}^{0}',
+        '4232':'#it{#Xi}_{c}^{+}', '-4232':'#bar{#it{#Xi}}_{c}^{-}',
+        '5132':'#it{#Xi}_{b}^{-}', '-5132':'#bar{#it{#Xi}}_{b}^{+}',
+        '5232':'#it{#Xi}_{b}^{0}', '-5232':'#bar{#it{#Xi}}_{b}^{0}',
+        '4312':"#it{#Xi}'_{c}^{0}", '-4312':"#bar{#it{#Xi}}'_{c}^{0}",
+        '4322':"#it{#Xi}'_{c}^{+}", '-4322':"#bar{#it{#Xi}}'_{c}^{-}",
+        '5312':"#it{#Xi}'_{b}^{-}", '-5312':"#bar{#it{#Xi}}'_{b}^{+}",
+        '5322':"#it{#Xi}'_{b}^{0}", '-5322':"#bar{#it{#Xi}}'_{b}^{0}",
+        '4332':'#it{#Omega}_{c}^{0}', '-4332':'#bar{#it{#Omega}}_{c}^{0}',
+        '5332':'#it{#Omega}_{b}^{-}', '-5332':'#bar{#it{#Omega}}_{b}^{+}',
+    }
+    if str(pdg) in signed_identity:
+        return signed_identity[str(pdg)]
+    compact = {
+        'Dplus': '#it{D}^{+}', 'Dminus': '#it{D}^{-}',
+        'Dzero': '#it{D}^{0}', 'Dzerobar': '#bar{#it{D}}^{0}',
+        'Dsplus': '#it{D}_{s}^{+}', 'Dsminus': '#it{D}_{s}^{-}',
+        'Lambdacplus': '#it{#Lambda}_{c}^{+}',
+        'Lambdacplusbar': '#bar{#it{#Lambda}}_{c}^{-}',
+        'Bminus': '#it{B}^{-}', 'Bplus': '#it{B}^{+}',
+        'Bzero': '#it{B}^{0}', 'Bzerobar': '#bar{#it{B}}^{0}',
+        'Bszero': '#it{B}_{s}^{0}', 'Bszerobar': '#bar{#it{B}}_{s}^{0}',
+        'Bcminus': '#it{B}_{c}^{-}', 'Bcplus': '#it{B}_{c}^{+}',
+        'Lambdabzero': '#it{#Lambda}_{b}^{0}',
+        'Lambdabzerobar': '#bar{#it{#Lambda}}_{b}^{0}',
+    }
+    return compact.get(value, value)
+
+
 def drawing_plan(projection, manifest, config):
     if not isinstance(projection, SimpleNamespace) or not projection.cold:
         raise ValueError("paper layout requires S-admitted cold numerics")
@@ -1424,36 +1489,10 @@ def drawing_plan(projection, manifest, config):
             raise ValueError("S numerical species display label is absent: "+str(pdg))
         # This is typography only: the species identity and categorical order
         # remain the authenticated signed PDG and label supplied by S.
-        signed_identity = {
-            '411':'D^{+}', '-411':'D^{-}',
-            '421':'D^{0}', '-421':'#bar{D}^{0}',
-            '431':'D_{s}^{+}', '-431':'D_{s}^{-}',
-            '4122':'#Lambda_{c}^{+}', '-4122':'#bar{#Lambda}_{c}^{-}',
-            '521':'B^{+}', '-521':'B^{-}',
-            '511':'B^{0}', '-511':'#bar{B}^{0}',
-            '531':'B_{s}^{0}', '-531':'#bar{B}_{s}^{0}',
-            '541':'B_{c}^{+}', '-541':'B_{c}^{-}',
-            '5122':'#Lambda_{b}^{0}', '-5122':'#bar{#Lambda}_{b}^{0}',
-        }
-        if str(pdg) in signed_identity:
-            return signed_identity[str(pdg)]
-        compact = {
-            'Dplus': 'D^{+}', 'Dminus': 'D^{-}',
-            'Dzero': 'D^{0}', 'Dzerobar': '#bar{D}^{0}',
-            'Dsplus': 'D_{s}^{+}', 'Dsminus': 'D_{s}^{-}',
-            'Lambdacplus': '#Lambda_{c}^{+}',
-            'Lambdacplusbar': '#bar{#Lambda}_{c}^{-}',
-            'Bminus': 'B^{-}', 'Bplus': 'B^{+}',
-            'Bzero': 'B^{0}', 'Bzerobar': '#bar{B}^{0}',
-            'Bszero': 'B_{s}^{0}', 'Bszerobar': '#bar{B}_{s}^{0}',
-            'Bcminus': 'B_{c}^{-}', 'Bcplus': 'B_{c}^{+}',
-            'Lambdabzero': '#Lambda_{b}^{0}',
-            'Lambdabzerobar': '#bar{#Lambda}_{b}^{0}',
-        }
-        return compact.get(value, value)
+        return species_latex_label(pdg, value)
     threshold=context.activity_threshold
     provenance=presentation['scientific_provenance']
-    header='{name} {version}, {beam}, #sqrt{{s}} = {energy} TeV'.format(
+    header='{name} {version}, {beam}, #sqrt{{#it{{s}}}} = {energy} TeV'.format(
         **provenance['generator'],beam=provenance['collision_system']['beam'],
         energy=format(provenance['collision_system']['sqrt_s_gev']/1000.,'.15g'))
     classes=context.classes
@@ -1481,8 +1520,8 @@ def drawing_plan(projection, manifest, config):
                       +('#leq ' if pair_eta['operator']=='abs<=' else
                         pair_eta['operator']+' ')
                       +format(pair_eta['value'],'.15g')+
-                      '; finite-MC SE: K='+str(blocks)+
-                      ', N_{evt,total}='+format(events,','))
+                      '; finite-MC SE: #it{K}='+str(blocks)+
+                      ', #it{N}_{evt,total}='+format(events,','))
     by_pdg={p:f for f,ps in config['families'].items() for p in ps}
     assigned={r['id']:[] for r in manifest['roles']}; exclusions=[]
     for r in context.public_rows:
@@ -1502,10 +1541,10 @@ def drawing_plan(projection, manifest, config):
     pages=[]; padding=config['layout']['axis_padding_fraction']
     quantities=['os_minus_ss_per_trigger','ratio_to_reference_tune',
                 'baryon_meson_reference_ratio','baryon_meson_ratio_to_reference_tune']
-    ytitles={'os_minus_ss_per_trigger':'Y = (N_{OS}-N_{SS}) / N_{trig}',
-             'ratio_to_reference_tune':'Y / Y_{'+reference_tune+'}',
-             'baryon_meson_reference_ratio':'Y_{assoc} / Y_{ref}',
-             'baryon_meson_ratio_to_reference_tune':'(Y_{assoc}/Y_{ref}) / '+reference_tune}
+    ytitles={'os_minus_ss_per_trigger':'#it{Y} = (#it{N}_{OS}-#it{N}_{SS}) / #it{N}_{trig}',
+             'ratio_to_reference_tune':'#it{Y} / #it{Y}_{'+reference_tune+'}',
+             'baryon_meson_reference_ratio':'#it{Y}_{assoc} / #it{Y}_{ref}',
+             'baryon_meson_ratio_to_reference_tune':'(#it{Y}_{assoc}/#it{Y}_{ref}) / '+reference_tune}
     for role,rows in sorted(assigned.items()):
         family=next(r['family'] for r in manifest['roles'] if r['id']==role)
         if family == 'kinematics':
@@ -1593,7 +1632,7 @@ def drawing_plan(projection, manifest, config):
                 left=ti/len(triggers); right=(ti+1)/len(triggers)
                 add('upper.'+t,[left,.30 if has_tune_ratios else 0.,right,.89],
                     title=label(t)+' trigger',x_title='',
-                    y_title='Balancing Yield Y',categorical=True,
+                    y_title='Balancing Yield #it{Y}',categorical=True,
                     log_y=True,ratio=False,legend=False)
                 if has_tune_ratios:
                     add('lower.'+t,[left,0.,right,.30],title='',
@@ -1613,13 +1652,14 @@ def drawing_plan(projection, manifest, config):
                         left=sector_index*.5+i*.5/max(1,len(sector_triggers))
                         right=sector_index*.5+(i+1)*.5/max(1,len(sector_triggers))
                         name='.'.join((half,sector,t)); members=grouped.get(name,[])
-                        ref=members[0]['reference_pdg'] if members else t
+                        exact_ratio_title = exact_particle_ratio_title(
+                            members, label)
                         add(name,[left,.32 if half=='upper' and has_tune_ratios else 0.,right,
                                   .89 if half=='upper' else .32],
                             title=sector.capitalize()+': '+label(t)+' trigger',
                             x_title='' if half=='upper' else
                                 'Multiplicity Percentile Class (%)',
-                            y_title=('Y_{assoc} / Y('+label(ref)+')'
+                            y_title=(exact_ratio_title
                                      if half=='upper' else 'TUNE/MONASH'),
                             log_y=half=='upper',ratio=half=='lower',legend=half=='upper')
         elif role=='multiplicity.composite':
@@ -1636,15 +1676,15 @@ def drawing_plan(projection, manifest, config):
             # single-event bins in another tune do not flatten the comparison.
             width,height=1050,1360
             add('upper.distribution',[0.,.26 if has_tune_ratios else 0.,1.,.98],
-                title='',x_title='' if has_tune_ratios else 'Multiplicity N_{ch}',
+                title='',x_title='' if has_tune_ratios else 'Multiplicity #it{N}_{ch}',
                 y_title='Normalized event counts',log_y=True,legend=True)
             if has_tune_ratios:
-                add('lower.ratio',[0.,0.,1.,.26],title='',x_title='Multiplicity N_{ch}',y_title='Tune / '+reference_tune,ratio=True)
+                add('lower.ratio',[0.,0.,1.,.26],title='',x_title='Multiplicity #it{N}_{ch}',y_title='TUNE/'+reference_tune,ratio=True)
             # Original nested-pad placement, retaining its physical aspect.
             add('inset.monash_boundaries',
                 prelean_inset_geometry(config['layout']['p1_inset_geometry'],
                     [0.,.26 if has_tune_ratios else 0.,1.,.98],width,height),
-                title='',x_title='Multiplicity N_{ch}',
+                title='',x_title='Multiplicity #it{N}_{ch}',
                 y_title='Normalized event counts',inset=True)
         elif family=='correlations':
             sector=role.split('.')[-1]
@@ -1669,12 +1709,12 @@ def drawing_plan(projection, manifest, config):
                     add('correlation.teaching.'+trigger+'.identified',
                         [left,.48,right,.97],
                         title=label(trigger)+' trigger (MONASH)',x_title='',
-                        y_title='Per-trigger yield N_{pair}/N_{trig}',
+                        y_title='Per-trigger yield #it{N}_{pair}/#it{N}_{trig}',
                         log_y=True,legend=True)
                     add('correlation.teaching.'+trigger+'.inclusive',
                         [left,.05,right,.48],title='',
                         x_title='#Delta#varphi (rad)',
-                        y_title='Per-trigger yield (N_{OS}-N_{SS})/N_{trig}',
+                        y_title='Per-trigger yield (#it{N}_{OS}-#it{N}_{SS})/#it{N}_{trig}',
                         legend=True)
                     continue
                 if teaching_view:
@@ -1891,7 +1931,7 @@ def drawing_plan(projection, manifest, config):
             if small and has_tune_ratios and name.startswith('lower.'):
                 margins=[.20,.035,.43,.17]
             if role=='balancing.baryon_meson.activity':
-                margins=[.20,.035,.29,.21]; legend=[.23,.80,.98,.91]
+                margins=[.20,.035,.32,.21]; legend=[.23,.80,.98,.91]
             if family=='correlations':
                 margins=[.17,.04,
                          .29 if options.get('x_title') else .13,
@@ -1907,7 +1947,7 @@ def drawing_plan(projection, manifest, config):
                     legend=[.20,.63,.70,.76]
             if name=='upper.distribution':
                 margins=[.16,.045,.0,.12]
-                legend=[.76,.765,.95,.885]
+                legend=[.76,.750,.95,.870]
             if name=='lower.ratio': margins=[.16,.045,.34,.0]
             if valid:
                 status='AVAILABLE'
@@ -1924,9 +1964,7 @@ def drawing_plan(projection, manifest, config):
                    'note':note,'series':series,'guides':[],'ticks':ticks,'margins':margins,'legend':legend,'reuse':None,
                    'category_dividers':(
                        config['layout']['activity_category_dividers']
-                       if (role.startswith('balancing.activity.') or
-                           role == 'balancing.baryon_meson.activity')
-                       else True),
+                       if role.startswith('balancing.') else True),
                    'uncertainty_display':p1_uncertainty_display(context.synthetic)
                        if role=='multiplicity.composite' else
                        'STANDARD'}
@@ -1984,11 +2022,11 @@ def drawing_plan(projection, manifest, config):
             y_range=top['y_range'][:],log_y=True, log_x=True,
             margins=[.18,.065,.25,.20],
             uncertainty_display='DENSE_BAND',
-            x_title='Multiplicity N_{ch}')
+            x_title='Multiplicity #it{N}_{ch}')
         if (occupied is not None and
                 occupied['high'] <= occupied['positive_low']):
             inset['status']='NOT_MATERIALIZED'
-            inset['note']='No positive occupied N_{ch} bin in partial sample'
+            inset['note']='No positive occupied #it{N}_{ch} bin in partial sample'
         for activity in presentation['activity_boundaries']:
             if activity['activity_id'] != context.activity_id:
                 continue
@@ -2036,7 +2074,7 @@ def drawing_plan(projection, manifest, config):
     tune_order = [item['id'] for item in
                   config['style_identities']['tunes']]
     pages = tune_separated_activity_pages(pages, tune_order)
-    pages.extend(focused)
+    pages.extend(tune_separated_activity_pages(focused, tune_order))
     pages.append(tune_separated_baryon_meson_page(pages, tune_order))
     maximum=config['layout']['maximum_panels_per_page']
     if maximum < 6:
@@ -2125,11 +2163,12 @@ def g9_drawing_pages(context, rows, config, header, information, labels):
                                                          regular_edges[1:])
                                     if (low + high) / 2 > 0]
             x_low = min(positive_centers)
-        x_title = ({'pt':'p_{T}', 'eta':'#eta', 'phi':'#varphi'}.get(
+        x_title = ({'pt':'#it{p}_{T}', 'eta':'#eta', 'phi':'#varphi'}.get(
             variable, variable) +
             (' (' + axis['units'] + ')' if axis['units'] else ''))
         filename = 'G9_{}_{}.pdf'.format(pdg, axis_id)
-        species_label = labels.get(str(pdg), 'PDG '+str(pdg))
+        species_label = species_latex_label(
+            pdg, labels.get(str(pdg), 'PDG '+str(pdg)))
         if not species_label.strip():
             raise ValueError('G9 signed-species label is empty')
         page = {
@@ -2215,15 +2254,16 @@ def g9_drawing_pages(context, rows, config, header, information, labels):
             note = ('flow bins retained: '+str(flow_count) if flow_count else '')
             if axis_id == 'pt':
                 note += ('; ' if note else '')+(
-                    'p_{T}<0 rejected; high overflow counted' if no_floor_pt else
-                    'p_{T} under/overflow in denominator')
+                    '#it{p}_{T}<0 rejected; high overflow counted' if no_floor_pt else
+                    '#it{p}_{T} under/overflow in denominator')
             else:
                 note += ('; ' if note else '')+'no '+axis_id+' flow bins'
             if missing_count:
                 note += ('; ' if note else '')+'missing bins: '+str(missing_count)
             if any(point['state'] == 'DRAW' and point['error'] is None
                    for item in series for point in item['points']):
-                note += ('; ' if note else '')+'? = withheld SE'
+                note += ('; ' if note else '') + (
+                    'SE unavailable for unresolved ratios; see ROOT flags')
             if valid:
                 panel_status = 'AVAILABLE'
             else:

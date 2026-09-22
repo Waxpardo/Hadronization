@@ -34,19 +34,19 @@ class ColdDrawingBoundary(unittest.TestCase):
             self.assertIn('v4 ROOT differs from trusted physical hash', result.stderr)
             self.assertNotIn('ModuleNotFoundError', result.stderr)
 
-    def test_p1_owner_inset_is_small_lower_left(self):
+    def test_p1_owner_inset_is_large_lower_left(self):
         config, _ = plot.checked_plot_config(ROOT / "config/plot.json")
         self.assertEqual(config["layout"]["p1_inset_geometry"],
-                         [.18, .07, .50, .38])
+                         [.15, .05, .62, .48])
         self.assertEqual(config['layout']['correlation_view'],
                          'monash_pair_sign')
         self.assertEqual(config['presets']['paper_default']['trigger_pdgs'][0],
                          421)
 
     def test_p1_nested_inset_preserves_reference_physical_aspect(self):
-        relative=[.18,.07,.50,.38]
+        relative=[.15,.05,.62,.48]
         original=plot.prelean_inset_geometry(relative,[0.,.31,1.,1.],1800,1650)
-        for actual,expected in zip(original,[.18,.31+.07*.69,.50,.31+.38*.69]):
+        for actual,expected in zip(original,[.15,.31+.05*.69,.62,.31+.48*.69]):
             self.assertAlmostEqual(actual,expected)
         original_aspect=(original[2]-original[0])*1800/((original[3]-original[1])*1650)
         for width,height,parent in ((1050,1360,[0.,.26,1.,.98]),
@@ -54,7 +54,7 @@ class ColdDrawingBoundary(unittest.TestCase):
             mapped=plot.prelean_inset_geometry(relative,parent,width,height)
             self.assertAlmostEqual((mapped[2]-mapped[0])*width/
                                    ((mapped[3]-mapped[1])*height),original_aspect)
-            self.assertAlmostEqual((mapped[1]-parent[1])/(parent[3]-parent[1]),.07)
+            self.assertAlmostEqual((mapped[1]-parent[1])/(parent[3]-parent[1]),.05)
 
     def test_centers_only_teaching_discloses_hidden_nonzero_errors(self):
         point={'state':'DRAW','error':.2}
@@ -241,7 +241,7 @@ class ColdDrawingBoundary(unittest.TestCase):
                        'required_curve_keys': [{
                            'profile_id': 'inclusive'}]}]}}}
         caption = plot.checked_paper_pair_profile(payload, d0, profile)
-        self.assertIn('no final-hadron p_{T} floor', caption)
+        self.assertIn('no final-hadron #it{p}_{T} floor', caption)
         self.assertNotIn('#geq', caption)
         self.assertIn('eligible singles', caption)
         self.assertEqual(plot.checked_paper_pair_profile(
@@ -351,6 +351,19 @@ class ColdDrawingBoundary(unittest.TestCase):
             for class_id in ("0", "7", "2", "9")],
             ["NORMAL", "EXTREME", "NORMAL", "EXTREME"])
 
+    def test_baryon_meson_axis_names_exact_signed_particle_yields(self):
+        labels = {'-4122': '#bar{#it{#Lambda}}_{c}^{-}',
+                  '-421': '#bar{#it{D}}^{0}'}
+        rows = [{'associate_pdg': '-4122', 'reference_pdg': '-421'},
+                {'associate_pdg': '-4122', 'reference_pdg': '-421'}]
+        self.assertEqual(plot.exact_particle_ratio_title(
+            rows, labels.__getitem__),
+            '#it{Y}(#bar{#it{#Lambda}}_{c}^{-}) / #it{Y}(#bar{#it{D}}^{0})')
+        with self.assertRaisesRegex(ValueError, 'mixes particle yield ratios'):
+            plot.exact_particle_ratio_title(rows + [{
+                'associate_pdg': '5122', 'reference_pdg': '-521'}],
+                labels.get)
+
     def test_sparse_protocol_fixture_cannot_pass_style_review_gate(self):
         classes = [{"id": "0", "integrated": True,
                     "percentile_interval": [0., 100.]},
@@ -452,6 +465,13 @@ class ColdDrawingBoundary(unittest.TestCase):
                                        lower['geometry'][3])
         self.assertEqual({item['y_title'] for item in page['panels'][-2:]},
                          {'TUNE/MONASH'})
+        self.assertEqual([item['title'] for item in page['panels'][:6]],
+                         ['upper.421', 'upper.4122', '', '', '', ''])
+
+        source['filename'] = 'supplemental.balancing.activity.charm.extremes.pdf'
+        supplemental = plot.tune_separated_activity_pages([source], tunes)[0]
+        self.assertEqual(supplemental['filename'], source['filename'])
+        self.assertEqual(len(supplemental['panels']), 8)
 
     def test_tune_separated_baryon_meson_page_keeps_one_shared_ratio_row(self):
         tunes = ['MONASH', 'JUNCTIONS', 'CLOSEPACKING']
@@ -478,6 +498,21 @@ class ColdDrawingBoundary(unittest.TestCase):
             'Multiplicity Percentile Class (%)' for item in page['panels'][-2:]))
         self.assertTrue(all(item['y_title'] == 'TUNE/MONASH'
                             for item in page['panels'][-2:]))
+        self.assertEqual([item['title'] for item in page['panels'][:6]],
+                         ['upper.charm.421', 'upper.beauty.521',
+                          '', '', '', ''])
+        self.assertTrue(all(not series['legend_label']
+                            for item in page['panels'][:-2]
+                            for series in item['series']))
+
+    def test_species_typography_covers_representative_mesons_and_baryons(self):
+        self.assertEqual(plot.species_latex_label(421, 'Dzero'), '#it{D}^{0}')
+        self.assertEqual(plot.species_latex_label(-421, 'Dzerobar'),
+                         '#bar{#it{D}}^{0}')
+        self.assertEqual(plot.species_latex_label(5212, 'PDG 5212'),
+                         '#it{#Sigma}_{b}^{0}')
+        self.assertEqual(plot.species_latex_label(-5212, 'PDG -5212'),
+                         '#bar{#it{#Sigma}}_{b}^{0}')
 
     def test_left_and_right_facets_receive_one_shared_y_range(self):
         left = {'geometry': [0., .2, .5, .8], 'y_range': [1., 3.],
@@ -517,7 +552,7 @@ class ColdDrawingBoundary(unittest.TestCase):
         self.assertEqual([p['title'] for p in pages],
                          ['PYTHIA 8.317','','old heading'])
         self.assertTrue(all(p['scientific_header']=='' for p in pages))
-        full.pair_selection_caption = 'P2-P8: no final-hadron p_{T} floor'
+        full.pair_selection_caption = 'P2-P8: no final-hadron #it{p}_{T} floor'
         plot.apply_cold_page_style(pages,full)
         self.assertEqual(pages[1]['information'],
                          full.pair_selection_caption)
@@ -577,7 +612,7 @@ class ColdDrawingBoundary(unittest.TestCase):
         plot.apply_cold_page_style(pages,SimpleNamespace(
             numerics_schema='hadronization_projection_result_v4',
             synthetic=True,campaign_state='PARTIAL_SAMPLE'))
-        self.assertEqual(pages[0]['title'],'G9 #Sigma_{b}^{+} #eta (1)')
+        self.assertEqual(pages[0]['title'],'G9 #it{#Sigma}_{b}^{0} #eta (1)')
         self.assertTrue(all(p['status']=='PRESENT_UNDEFINED'
                             for p in pages[0]['panels']))
         self.assertTrue(all('WITHHELD_UNCERTAINTY' in p['note'] and
@@ -643,7 +678,7 @@ class ColdDrawingBoundary(unittest.TestCase):
         caption=plot.activity_proxy_caption(selection,0.15,4.0)
         self.assertIn('charged-light final-particle activity',caption)
         self.assertIn('heavy flavour excluded',caption)
-        self.assertIn('p_{T} > 0.15 GeV/c',caption)
+        self.assertIn('#it{p}_{T} > 0.15 GeV/c',caption)
         self.assertIn('|#eta| #leq 4',caption)
         self.assertNotIn('primary',caption)
         with self.assertRaisesRegex(ValueError,'typed charged-final activity'):
@@ -659,14 +694,14 @@ class ColdDrawingBoundary(unittest.TestCase):
                      'generator_name':'TEST_ONLY','generator_version':'2',
                      'collision_system':'TEST_ONLY','energy_gev':float(0).hex()}}
         self.assertEqual(plot.target_analysis_caption(payload),
-            'PYTHIA 8.317; pp, #sqrt{s} = 13.6 TeV')
+            'PYTHIA 8.317; pp, #sqrt{#it{s}} = 13.6 TeV')
         payload['provenance']['data_limitations']=[]
         payload['request_echo']['sources']['campaign_id']='HF_RUN3_V1'
         with self.assertRaisesRegex(ValueError,'contradicts target campaign'):
             plot.target_analysis_caption(payload)
         payload['request_echo']['sources']['campaign_id']='FUTURE_CAMPAIGN'
         self.assertEqual(plot.target_analysis_caption(payload),
-            'TEST_ONLY 2; TEST_ONLY, #sqrt{s} = 0 TeV')
+            'TEST_ONLY 2; TEST_ONLY, #sqrt{#it{s}} = 0 TeV')
 
     def test_v4_partial_campaign_is_distinct_from_complete_package(self):
         v4 = {'schema':'hadronization_projection_result_v4',
@@ -690,10 +725,10 @@ class ColdDrawingBoundary(unittest.TestCase):
                      'generator_name':'PYTHIA','generator_version':'8.317',
                      'collision_system':'pp','energy_gev':float(13600).hex()}}
         self.assertEqual(plot.target_analysis_caption(payload),
-            'PYTHIA 8.317; pp, #sqrt{s} = 13.6 TeV')
+            'PYTHIA 8.317; pp, #sqrt{#it{s}} = 13.6 TeV')
         payload['provenance']['data_limitations'] = []
         self.assertEqual(plot.target_analysis_caption(payload),
-            'PYTHIA 8.317; pp, #sqrt{s} = 13.6 TeV')
+            'PYTHIA 8.317; pp, #sqrt{#it{s}} = 13.6 TeV')
         payload['request_echo']['scope']['ordered_tunes'] = [
             'CLOSEPACKING','JUNCTIONS','JUNCTIONS']
         with self.assertRaisesRegex(ValueError, 'target campaign scope'):
@@ -730,10 +765,10 @@ class ColdDrawingBoundary(unittest.TestCase):
             science, 'MONASH', legacy_schema)
         self.assertIn('status 81-89', caption)
         self.assertIn('G9 selected final', caption)
-        self.assertIn('p_{T} > 0.15 GeV', caption)
+        self.assertIn('#it{p}_{T} > 0.15 GeV', caption)
         self.assertIn('|#eta| #leq 4', caption)
         self.assertIn('per species/tune', caption)
-        self.assertEqual(ratio, 'P_{bin} / P_{bin,MONASH}')
+        self.assertEqual(ratio, '#it{P}_{bin} / #it{P}_{bin,MONASH}')
         self.assertEqual(absolute, 'Probability / bin')
         with self.assertRaisesRegex(ValueError, 'G9 selection'):
             plot.g9_science_caption(dict(science,
@@ -749,10 +784,10 @@ class ColdDrawingBoundary(unittest.TestCase):
             pt_flow='negative_underflow_rejected_overflow_in_denominator_and_output')
         caption, ratio, absolute = plot.g9_science_caption(
             current, 'MONASH', current_schema)
-        self.assertIn('all origins, no p_{T} floor', caption)
+        self.assertIn('all origins, no #it{p}_{T} floor', caption)
         self.assertNotIn('0.15', caption)
         self.assertIn('per species/tune', caption)
-        self.assertEqual(ratio, 'P_{bin} / P_{bin,MONASH}')
+        self.assertEqual(ratio, '#it{P}_{bin} / #it{P}_{bin,MONASH}')
         self.assertEqual(absolute, 'Probability / bin')
         for mutation in (
                 dict(current, origin_scope='SELECTED_HARD'),

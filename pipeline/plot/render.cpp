@@ -1,4 +1,5 @@
 #include "TAxis.h"
+#include "TAxisModLab.h"
 #include "TCanvas.h"
 #include "TColor.h"
 #include "TError.h"
@@ -114,7 +115,7 @@ struct Page {
 constexpr double kPaperWidthCentimeters = 18.;
 constexpr double kPointsPerCentimeter = 72. / 2.54;
 constexpr const char* kClassPatternDigest =
-    "class_patterns_sha256=e171e4a18c8c169cbe78e738fbed586e21b0b8320e1ce0efd17dcbb3c2662d76";
+    "class_patterns_sha256=642d0b774f5c2956440d0840c105fd6d09b31b1fb792ec523cf89cbb05233bc8";
 int BodyTextPixels(const Page& page) {
   const double paperWidthPoints =
       kPaperWidthCentimeters * kPointsPerCentimeter;
@@ -590,8 +591,10 @@ bool CategoricalAxis(const Page& page, const Panel& panel) {
   return page.role.find("balancing.") == 0 && panel.reusePanel.empty();
 }
 bool RotateCategoryLabels(const Page& page, const Panel& panel) {
-  return panel.ticks.size() >= 5 &&
-         page.role != "balancing.integrated.beauty";
+  const bool uprightBeautySpecies =
+      page.role == "balancing.integrated.beauty" ||
+      page.role == "balancing.activity.beauty";
+  return panel.ticks.size() >= 5 && !uprightBeautySpecies;
 }
 std::vector<ExpectedText> StateGlyphTexts(
     const Page& page, const Panel& panel, const std::vector<Page>& pages) {
@@ -605,6 +608,10 @@ std::vector<ExpectedText> StateGlyphTexts(
   // the exact per-point status and reason remain in the drawing record.
   if (page.role.rfind("balancing.", 0) == 0 &&
       page.scientificHeader.empty()) return {};
+  // G9 ratio pages can contain many unresolved-reference bins.  Per-point
+  // question marks obscure the curve; the panel footer and drawing record
+  // retain the same explicit uncertainty state and reason.
+  if (page.role == "spectra.signed_heavy") return {};
   std::vector<ExpectedText> result;
   std::set<std::pair<int,int>> occupied;
   const double frameWidth = 1 - panel.margins[0] - panel.margins[1];
@@ -700,7 +707,7 @@ std::vector<std::string> P1InformationLines(const Page& page) {
        "P1 charged-light selection cannot be split into lines");
   const std::string population = page.information.substr(0, selectionSplit);
   Need(population ==
-           "N_{ch}: charged-light final-particle activity, heavy flavour excluded",
+           "#it{N}_{ch}: charged-light final-particle activity, heavy flavour excluded",
        "P1 charged-light population caption differs");
   return {"#bf{" + page.title.substr(0, titleSplit) + "}",
           page.title.substr(titleSplit + 2),
@@ -743,8 +750,48 @@ double BlankNoteStep(const Page& page, const Panel& panel) {
 // Keep the complete charged-activity caption in the typed page information;
 // these shorter lines fit beside the three-entry legend at publication width.
 constexpr double P1InformationX = .50;
-constexpr std::array<double, 5> kP1InformationY = {{.850, .825, .800, .775, .750}};
+constexpr std::array<double, 5> kP1InformationY = {{.835, .810, .785, .760, .735}};
 constexpr std::array<int, 5> kP1InformationPixels = {{20, 17, 16, 15, 15}};
+double CategoryLabelY(const Page& page, const Panel& panel) {
+  return panel.margins[2] -
+      (page.role == "balancing.baryon_meson.activity" ? .015 : .025);
+}
+double PanelTitleY(const Page& page, const Panel& panel) {
+  if (page.role.rfind("balancing.integrated.", 0) == 0 &&
+      panel.id.rfind("upper.", 0) == 0)
+    return 1 - panel.margins[3] + .035;
+  return .94;
+}
+double CategoricalXTitleY(const Page& page) {
+  if (page.role.rfind("balancing.integrated.", 0) == 0) return .120;
+  if (page.role.rfind("balancing.activity.", 0) == 0) return .105;
+  return .075;
+}
+bool PreserveJoinedLogLabels(const Page& page, const Panel& panel) {
+  return page.role.rfind("balancing.", 0) == 0 &&
+         page.role.size() >= 6 &&
+         page.role.compare(page.role.size() - 6, 6, ".charm") == 0 &&
+         panel.id.rfind("upper.", 0) == 0 && panel.logY;
+}
+bool BeautyCorrelationUsesFullTickValues(const Page& page,
+                                         const Panel& panel) {
+  return page.role == "correlations.beauty" &&
+         panel.id.rfind("correlation.teaching.", 0) == 0 &&
+         panel.id.size() >= 10 &&
+         panel.id.compare(panel.id.size() - 10, 10, ".inclusive") == 0;
+}
+bool AxisLabelSuppressed(const TAxis& axis, int labelNumber) {
+  const TList* modified = axis.GetModifiedLabels();
+  if (modified == nullptr) return false;
+  TIter iterator(modified);
+  while (const auto* object = iterator()) {
+    const auto* label = dynamic_cast<const TAxisModLab*>(object);
+    if (label != nullptr && label->GetLabNum() == labelNumber &&
+        label->GetSize() == 0.)
+      return true;
+  }
+  return false;
+}
 double CategoryTickInnerY(const Panel& panel, bool top) {
   constexpr double fraction = .012;
   if (panel.logY) {
@@ -779,7 +826,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
     const bool rotate = RotateCategoryLabels(page, panel);
     result.push_back(TextExpectation(
         tick.second, panel.margins[0] + frameWidth * xFraction(tick.first),
-        panel.margins[2] - .025, inset ? 14 : textPixels, 1,
+        CategoryLabelY(page, panel), inset ? 14 : textPixels, 1,
         rotate ? 32 : 23, rotate ? 90 : 0));
   }
   for (double coordinate : StatusRailCoordinates(page, panel, pages)) {
@@ -788,7 +835,8 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
         std::max(.03, panel.margins[2] - .005), inset ? 11 : textPixels - 2,
         kGray + 2, 22));
   }
-  result.push_back(TextExpectation(panel.title, panel.margins[0], .94,
+  result.push_back(TextExpectation(panel.title, panel.margins[0],
+                                   PanelTitleY(page, panel),
                                    inset ? 15 : textPixels + 1));
   if (page.role == "multiplicity.composite" &&
       panel.id == "upper.distribution") {
@@ -1081,7 +1129,7 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
         (panel.geometry[2]-panel.geometry[0])*
         (panel.margins[0]+1-panel.margins[1])/2;
     result.push_back(TextExpectation(panel.xTitle,center,
-        page.role=="balancing.baryon_meson.activity" ? .045 : .075,
+        CategoricalXTitleY(page),
         BodyTextPixels(page),1,23));
   }
   if (page.role=="spectra.signed_heavy") {
@@ -1180,11 +1228,11 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
            "scientific frame object set differs from drawing record");
       const bool inset = !panel.reusePanel.empty();
       if (inset)
-        Need(pad->GetFillColor() == kWhite && pad->GetFillStyle() == 1001 &&
+        Need(pad->GetFillColor() == 0 && pad->GetFillStyle() == 4000 &&
              pad->GetFrameFillColor() == kWhite &&
              pad->GetFrameFillStyle() == 1001 &&
              pad->GetFrameLineWidth() == 1,
-             "percentile inset white background differs");
+             "percentile inset transparent margin/white frame differs");
       const int textPixels = BodyTextPixels(page);
       const double baseLabelSize = inset ? .055 : textPixels;
       const double expectedXLabelSize =
@@ -1192,6 +1240,11 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
       const bool categoricalAxis = CategoricalAxis(page, panel);
       const bool p1MainAxis = page.role == "multiplicity.composite" &&
           (panel.id == "upper.distribution" || panel.id == "lower.ratio");
+      const bool suppressFirstYLabel =
+          !inset && panel.margins[2] == 0. &&
+          !PreserveJoinedLogLabels(page, panel);
+      const bool suppressLastYLabel =
+          !inset && panel.margins[3] == 0.;
       const int expectedXDivisions = p1MainAxis ? 507 : inset ? 510 : 505;
       const bool xDivisionsMatch = categoricalAxis
           ? frame->GetXaxis()->GetNdivisions() % 1000000 == 0
@@ -1217,6 +1270,12 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
                 panel.id == "upper.distribution" ? 509 : inset ? 503 : 505) &&
            frame->GetYaxis()->GetMoreLogLabels() ==
              (!inset && panel.logY && panel.yHigh / panel.yLow < 10.) &&
+           frame->GetYaxis()->GetNoExponent() ==
+             BeautyCorrelationUsesFullTickValues(page, panel) &&
+           AxisLabelSuppressed(*frame->GetYaxis(), 1) ==
+             suppressFirstYLabel &&
+           AxisLabelSuppressed(*frame->GetYaxis(), -1) ==
+             suppressLastYLabel &&
            (page.role != "multiplicity.composite" ||
             StoredFloatClose(frame->GetXaxis()->GetTickLength(),
                 p1MainAxis ? .025 : .03)) &&
@@ -1377,7 +1436,8 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
 }
 void Text(double x, double y, const std::string& label, int pixels, int color = 1) {
   TLatex text;
-  text.SetNDC(); text.SetTextFont(43); text.SetTextSize(pixels); text.SetTextColor(color);
+  text.SetNDC(); text.SetTextFont(43); text.SetTextSize(pixels);
+  text.SetTextColor(color); text.SetLineWidth(1);
   text.DrawLatex(x, y, label.c_str());
 }
 void LineStyle(int style) {
@@ -1385,8 +1445,8 @@ void LineStyle(int style) {
   // Multiples of four keep every dash/gap nonzero in small printed legends.
   // Integer style identity still follows the authenticated 1 + class_id rule.
   static const std::array<const char*, 11> patterns = {{
-    "24 12", "4 8", "24 8 4 8", "24 8 4 8 4 8", "12 8", "40 12",
-    "40 8 12 8", "12 8 4 8", "4 16", "24 8 12 8 4 8", "12 8 12 8 4 8"}};
+    "80 8", "4 8", "24 8 4 8", "24 8 4 8 4 8", "12 8", "40 12",
+    "40 8 12 8", "12 8 4 8", "4 16", "24 8 12 8 4 8", "4 20"}};
   if (style >= 2 && style <= 12) gStyle->SetLineStyleString(style,patterns[style-2]);
   if (style > 12) {
     std::string pattern = "40 12";
@@ -1429,9 +1489,10 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     TPad& pad = *pads.back();
     pad.SetFillColor(0); pad.SetBorderMode(0); pad.SetTicks(1,1);
     if (inset) {
-      // Keep the embedded plot visibly inside the parent without allowing the
-      // full-spectrum curves and tail-status marks to show through it.
-      pad.SetFillColor(kWhite); pad.SetFillStyle(1001);
+      // Keep the outer inset margin transparent so it cannot mask the parent
+      // y axis.  The plotted frame itself stays white, preventing the two
+      // spectra and their axis systems from being superimposed.
+      pad.SetFillColor(0); pad.SetFillStyle(4000);
       pad.SetFrameFillColor(kWhite); pad.SetFrameFillStyle(1001);
       pad.SetFrameLineWidth(1);
     }
@@ -1454,7 +1515,10 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     }
     frame->GetYaxis()->SetMoreLogLabels(
         !inset && panel.logY && panel.yHigh / panel.yLow < 10.);
-    if (!inset && panel.margins[2] == 0.)
+    if (BeautyCorrelationUsesFullTickValues(page, panel))
+      frame->GetYaxis()->SetNoExponent(true);
+    if (!inset && panel.margins[2] == 0. &&
+        !PreserveJoinedLogLabels(page, panel))
       frame->GetYaxis()->ChangeLabel(1, -1., 0.);
     if (!inset && panel.margins[3] == 0.)
       frame->GetYaxis()->ChangeLabel(-1, -1., 0.);
@@ -1486,6 +1550,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     }
     if (!inset && !panel.yTitle.empty()) {
       TLatex label; label.SetNDC(); label.SetTextFont(43); label.SetTextSize(textPixels);
+      label.SetLineWidth(1);
       label.SetTextAngle(90); label.SetTextAlign(23);
       label.DrawLatex(page.role.find("correlations.")==0 ? .045 :
                           (page.role.find("balancing.")==0 &&
@@ -1498,11 +1563,12 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       for (const auto& tick : panel.ticks) {
         const bool rotate = RotateCategoryLabels(page, panel);
         TLatex label; label.SetNDC(); label.SetTextFont(43);
+        label.SetLineWidth(1);
         label.SetTextSize(inset ? 14 : textPixels);
         label.SetTextAngle(rotate ? 90 : 0);
         label.SetTextAlign(rotate ? 32 : 23);
         const double x = panel.margins[0] + frameWidth * xFraction(tick.first);
-        label.DrawLatex(x, panel.margins[2] - .025, tick.second.c_str());
+        label.DrawLatex(x, CategoryLabelY(page, panel), tick.second.c_str());
       }
     }
     if (CategoricalAxis(page, panel)) {
@@ -1537,7 +1603,8 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       status.DrawLatex(panel.margins[0] + frameWidth * xFraction(coordinate),
                        std::max(.03, panel.margins[2] - .005), "#times");
     }
-    Text(panel.margins[0], .94, panel.title, inset ? 15 : textPixels + 1);
+    Text(panel.margins[0], PanelTitleY(page, panel), panel.title,
+         inset ? 15 : textPixels + 1);
     if (page.role == "multiplicity.composite" &&
         panel.id == "upper.distribution") {
       const auto lines = P1InformationLines(page);
@@ -1548,6 +1615,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     if (!inset && !panel.xTitle.empty() &&
         !(CategoricalAxis(page,panel) && panel.id.rfind("lower.",0)==0)) {
       TLatex label; label.SetNDC(); label.SetTextFont(43);
+      label.SetLineWidth(1);
       label.SetTextSize(inset ? 15 : textPixels);
       const bool p1 = page.role == "multiplicity.composite";
       label.SetTextAlign(p1 ? 33 : 23);
@@ -1727,6 +1795,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     }
     for (const auto& item : InsetClassTexts(page, panel)) {
       TLatex label; label.SetNDC(); label.SetTextFont(43);
+      label.SetLineWidth(1);
       label.SetTextSize(item.size); label.SetTextAlign(item.align);
       label.SetTextAngle(item.angle); label.SetTextColor(item.color);
       label.DrawLatex(item.x,item.y,item.text.c_str());
@@ -1807,6 +1876,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
   for (const auto& item : CanvasSupplementTexts(page)) {
     TLatex label;
     label.SetNDC(); label.SetTextFont(43);
+    label.SetLineWidth(1);
     label.SetTextSize(item.size); label.SetTextAlign(item.align);
     label.SetTextColor(item.color);
     label.DrawLatex(item.x,item.y,item.text.c_str());
