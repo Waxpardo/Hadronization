@@ -6,6 +6,7 @@
 #include "TFile.h"
 #include "TGraphErrors.h"
 #include "TH1F.h"
+#include "THLimitsFinder.h"
 #include "TKey.h"
 #include "TLatex.h"
 #include "TLegend.h"
@@ -116,6 +117,9 @@ constexpr double kPaperWidthCentimeters = 18.;
 constexpr double kPointsPerCentimeter = 72. / 2.54;
 constexpr const char* kClassPatternDigest =
     "class_patterns_sha256=642d0b774f5c2956440d0840c105fd6d09b31b1fb792ec523cf89cbb05233bc8";
+constexpr const char* kP1WithheldSeDisclosure =
+    "Tune-ratio SE unavailable for unresolved sparse-tail denominators; "
+    "see ROOT flags";
 int BodyTextPixels(const Page& page) {
   const double paperWidthPoints =
       kPaperWidthCentimeters * kPointsPerCentimeter;
@@ -773,6 +777,60 @@ bool PreserveJoinedLogLabels(const Page& page, const Panel& panel) {
          page.role.compare(page.role.size() - 6, 6, ".charm") == 0 &&
          panel.id.rfind("upper.", 0) == 0 && panel.logY;
 }
+struct YAxisLabelPolicy {
+  bool suppressFirst = false;
+  bool suppressLast = false;
+  int optimizedAnchors = -1;
+};
+YAxisLabelPolicy JoinedYAxisLabelPolicy(const Page& page,
+                                        const Panel& panel, bool inset) {
+  YAxisLabelPolicy policy;
+  policy.suppressFirst = !inset && panel.margins[2] == 0. &&
+                         !PreserveJoinedLogLabels(page, panel);
+  policy.suppressLast = !inset && panel.margins[3] == 0.;
+  // A panel touching one adjacent panel still owns an independent numerical
+  // scale.  Preserve its seam label when ROOT's five-primary-division
+  // optimization provides only two anchors; suppressing either would leave
+  // the scale numerically ambiguous.  Middle rows touch on both sides and
+  // inherit the explicitly common scale shown by the end row of their stack.
+  if (!inset && !panel.logY &&
+      policy.suppressFirst != policy.suppressLast) {
+    Double_t optimizedLow = 0., optimizedHigh = 0., width = 0.;
+    Int_t intervals = 0;
+    THLimitsFinder::Optimize(panel.yLow, panel.yHigh, 5, optimizedLow,
+                             optimizedHigh, intervals, width);
+    policy.optimizedAnchors = intervals + 1;
+    if (policy.optimizedAnchors -
+            static_cast<int>(policy.suppressFirst) -
+            static_cast<int>(policy.suppressLast) < 2) {
+      policy.suppressFirst = false;
+      policy.suppressLast = false;
+    }
+  }
+  return policy;
+}
+void VerifyYAxisLabelPolicyFixtures() {
+  Page page;
+  Panel panel;
+  panel.logY = false;
+  panel.margins = {{.20, .035, .22, 0.}};
+  panel.yLow = .8417700440987118;
+  panel.yHigh = 1.3866668947122398;
+  auto policy = JoinedYAxisLabelPolicy(page, panel, false);
+  Need(!policy.suppressLast && policy.optimizedAnchors == 2,
+       "joined lower linear scale loses its second numeric anchor");
+  panel.margins = {{.14, .04, 0., .10}};
+  panel.yLow = .009445158099908748;
+  panel.yHigh = .010449635455012034;
+  policy = JoinedYAxisLabelPolicy(page, panel, false);
+  Need(!policy.suppressFirst && policy.optimizedAnchors == 2,
+       "joined upper narrow-linear scale loses its first numeric anchor");
+  panel.yLow = -.007059155933277776;
+  panel.yHigh = .09529859279942896;
+  policy = JoinedYAxisLabelPolicy(page, panel, false);
+  Need(!policy.suppressFirst && policy.optimizedAnchors == 2,
+       "joined upper zero-bearing scale loses its first numeric anchor");
+}
 bool BeautyCorrelationUsesFullTickValues(const Page& page,
                                          const Panel& panel) {
   return page.role == "correlations.beauty" &&
@@ -1112,7 +1170,16 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
           note,.015,.045,teaching ? BodyTextPixels(page) : 18,kGray+2));
   }
   if (page.role=="multiplicity.composite") {
-    if (page.scientificHeader.empty()) return result;
+    if (page.scientificHeader.empty()) {
+      const auto ratio=std::find_if(page.panels.begin(),page.panels.end(),
+          [](const Panel& item){return item.id=="lower.ratio";});
+      if (ratio!=page.panels.end() && !ratio->note.empty()) {
+        Need(ratio->note==kP1WithheldSeDisclosure,
+             "paper P1 withheld-SE disclosure differs");
+        result.push_back(TextExpectation(ratio->note,.015,.015,14,kGray+2));
+      }
+      return result;
+    }
     const auto parent=std::find_if(page.panels.begin(),page.panels.end(),
         [](const Panel& item){return item.id=="upper.distribution";});
     if (parent!=page.panels.end() && !parent->note.empty())
@@ -1240,11 +1307,7 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
       const bool categoricalAxis = CategoricalAxis(page, panel);
       const bool p1MainAxis = page.role == "multiplicity.composite" &&
           (panel.id == "upper.distribution" || panel.id == "lower.ratio");
-      const bool suppressFirstYLabel =
-          !inset && panel.margins[2] == 0. &&
-          !PreserveJoinedLogLabels(page, panel);
-      const bool suppressLastYLabel =
-          !inset && panel.margins[3] == 0.;
+      const auto yLabelPolicy = JoinedYAxisLabelPolicy(page, panel, inset);
       const int expectedXDivisions = p1MainAxis ? 507 : inset ? 510 : 505;
       const bool xDivisionsMatch = categoricalAxis
           ? frame->GetXaxis()->GetNdivisions() % 1000000 == 0
@@ -1273,9 +1336,9 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
            frame->GetYaxis()->GetNoExponent() ==
              BeautyCorrelationUsesFullTickValues(page, panel) &&
            AxisLabelSuppressed(*frame->GetYaxis(), 1) ==
-             suppressFirstYLabel &&
+             yLabelPolicy.suppressFirst &&
            AxisLabelSuppressed(*frame->GetYaxis(), -1) ==
-             suppressLastYLabel &&
+             yLabelPolicy.suppressLast &&
            (page.role != "multiplicity.composite" ||
             StoredFloatClose(frame->GetXaxis()->GetTickLength(),
                 p1MainAxis ? .025 : .03)) &&
@@ -1517,10 +1580,10 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
         !inset && panel.logY && panel.yHigh / panel.yLow < 10.);
     if (BeautyCorrelationUsesFullTickValues(page, panel))
       frame->GetYaxis()->SetNoExponent(true);
-    if (!inset && panel.margins[2] == 0. &&
-        !PreserveJoinedLogLabels(page, panel))
+    const auto yLabelPolicy = JoinedYAxisLabelPolicy(page, panel, inset);
+    if (yLabelPolicy.suppressFirst)
       frame->GetYaxis()->ChangeLabel(1, -1., 0.);
-    if (!inset && panel.margins[3] == 0.)
+    if (yLabelPolicy.suppressLast)
       frame->GetYaxis()->ChangeLabel(-1, -1., 0.);
     if (page.role == "multiplicity.composite") {
       const bool mainAxis = panel.id == "upper.distribution" ||
@@ -1900,6 +1963,7 @@ int main(int argc, char** argv) {
     Need(argc == 4,
          "usage: render PLAN OUTPUT DRAWING_RECORD | render verify OUTPUT DRAWING_RECORD");
     gROOT->SetBatch(true); gStyle->SetOptStat(0); gErrorIgnoreLevel = kWarning;
+    VerifyYAxisLabelPolicyFixtures();
     if (std::string(argv[1]) == "verify") {
       const std::filesystem::path output(argv[2]), record(argv[3]);
       const auto pages = ReadPlan(record, "/dev/null");

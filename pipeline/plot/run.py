@@ -29,6 +29,9 @@ TARGET_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316
 DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v8"
 CANVAS_NAME = "canvases.root"
 RECORD_NAME = "drawing-record.tsv.gz"
+P1_WITHHELD_SE_DISCLOSURE = (
+    "Tune-ratio SE unavailable for unresolved sparse-tail denominators; "
+    "see ROOT flags")
 TYPED_POINT_FIELDS = (
     "semantic_id", "role_id", "family", "quantity", "tune",
     "reference_tune", "profile", "activity_id", "class_id",
@@ -625,6 +628,17 @@ def selected_extreme_class_ids(classes):
     if high_activity['id'] == low_activity['id']:
         raise ValueError('focused activity endpoints coincide')
     return [str(high_activity['id']), str(low_activity['id'])]
+
+
+def p1_ratio_uncertainty_note(role, panel_id, points, fallback):
+    """Keep withheld finite ratio errors visible without per-point glyphs."""
+    if (role == 'multiplicity.composite' and panel_id == 'lower.ratio' and
+            any(point.get('state') == 'DRAW' and
+                point.get('y') is not None and
+                math.isfinite(point['y']) and point.get('error') is None
+                for point in points)):
+        return P1_WITHHELD_SE_DISCLOSURE
+    return fallback
 
 
 def exact_particle_ratio_title(rows, label):
@@ -1916,6 +1930,7 @@ def drawing_plan(projection, manifest, config):
                 state_keys.append('? = withheld SE')
             if state_keys:
                 note=(note+'; ' if note else '')+'; '.join(state_keys)
+            note=p1_ratio_uncertainty_note(role,name,valid,note)
             if family=='balancing' and name.startswith('lower.'):
                 # The signed zero guide and the upper-pad note already carry
                 # this explanation; status crosses show missing points. A

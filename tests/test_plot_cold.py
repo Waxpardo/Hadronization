@@ -118,6 +118,20 @@ class ColdDrawingBoundary(unittest.TestCase):
             plot.checked_p1_occupied_support(
                 {"low": 1., "positive_low": 1., "high": 164.}, series)
 
+    def test_p1_finite_withheld_ratio_error_has_visible_disclosure(self):
+        points = [
+            {'state': 'DRAW', 'y': 1.2, 'error': .1},
+            {'state': 'DRAW', 'y': .8, 'error': None},
+            {'state': 'MISSING', 'y': None, 'error': None},
+        ]
+        self.assertEqual(plot.p1_ratio_uncertainty_note(
+            'multiplicity.composite', 'lower.ratio', points, 'old note'),
+            plot.P1_WITHHELD_SE_DISCLOSURE)
+        self.assertNotIn('?', plot.P1_WITHHELD_SE_DISCLOSURE)
+        self.assertEqual(plot.p1_ratio_uncertainty_note(
+            'multiplicity.composite', 'upper.distribution', points,
+            'old note'), 'old note')
+
     def test_p1_paper_range_uses_complete_reference_support(self):
         series = [
             {"tune": "MONASH", "points": [
