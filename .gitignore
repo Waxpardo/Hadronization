@@ -24,3 +24,7 @@ __pycache__/
 *.d
 *.pcm
 *.dylib
+
+# Local reference artifacts
+/docs/atlas.html
+/HADRONIZATION_PIPELINE_ATLAS.html
