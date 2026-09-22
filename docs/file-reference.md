@@ -8,6 +8,7 @@ This inventory identifies every tracked file. The release includes generated sci
 
 | Path | Caller or reader | Role or output |
 | --- | --- | --- |
+| [.gitattributes](../.gitattributes) | Git | Preserves checksum-bound result bytes and recognizes CSV record endings. |
 | [.gitignore](../.gitignore) | Git | Excludes local site configuration, bulk output, caches and build residue. |
 | [CITATION.cff](../CITATION.cff) | Citation software and readers | Supplied software title, authors and citation message. |
 | [README.md](../README.md) | Repository readers | Purpose, entry commands, limits and guide navigation. |

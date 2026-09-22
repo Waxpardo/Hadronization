@@ -20,7 +20,7 @@ class LeanTreeContract(unittest.TestCase):
     def test_visible_topology_and_forbidden_families(self):
         paths = self.tracked_and_new_paths()
         top = {path.split("/", 1)[0] for path in paths}
-        expected = {".gitignore", "CITATION.cff", "README.md", "hadronization",
+        expected = {".gitignore", ".gitattributes", "CITATION.cff", "README.md", "hadronization",
                     "setup.sh", "config", "pipeline", "data", "tests", "docs"}
         self.assertEqual(top, expected)
         forbidden = {"paper", "evidence", "docs2", "environment",
