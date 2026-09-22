@@ -846,7 +846,18 @@ def tune_separated_activity_pages(pages, tunes):
         page = copy.deepcopy(source)
         page['height'] = 2850
         page['panels'] = []
-        ratio_bottom, ratio_top, science_top = .08, .22, .79
+        class_ids = {
+            series.get('class_id')
+            for panel in upper for series in panel['series']
+            if series.get('class_id')
+        }
+        # Match the science stack to the actual height of the class key.  The
+        # two-class extreme pages need only one key row; retaining the
+        # eleven-class reservation left a large unused band above the plots.
+        class_rows = max(1, (len(class_ids) + 3) // 4)
+        class_legend_bottom = .897 - .026 * class_rows
+        ratio_bottom, ratio_top = .08, .22
+        science_top = class_legend_bottom - .015
         row_height = (science_top - ratio_top) / len(tunes)
         for tune_index, tune in enumerate(tunes):
             row_top = science_top - tune_index * row_height
@@ -1670,12 +1681,12 @@ def drawing_plan(projection, manifest, config):
                             members, label)
                         add(name,[left,.32 if half=='upper' and has_tune_ratios else 0.,right,
                                   .89 if half=='upper' else .32],
-                            title=sector.capitalize()+': '+label(t)+' trigger',
+                            title=label(t)+' trigger',
                             x_title='' if half=='upper' else
                                 'Multiplicity Percentile Class (%)',
                             y_title=(exact_ratio_title
                                      if half=='upper' else 'TUNE/MONASH'),
-                            log_y=half=='upper',ratio=half=='lower',legend=half=='upper')
+                            log_y=half=='upper',ratio=half=='lower',legend=False)
         elif role=='multiplicity.composite':
             title=''
             activity=next(item for item in definitions['activities']
@@ -1946,7 +1957,9 @@ def drawing_plan(projection, manifest, config):
             if small and has_tune_ratios and name.startswith('lower.'):
                 margins=[.20,.035,.43,.17]
             if role=='balancing.baryon_meson.activity':
-                margins=[.20,.035,.32,.21]; legend=[.23,.80,.98,.91]
+                # The panel-level particle-ratio key is intentionally absent;
+                # keep only enough headroom for the trigger title itself.
+                margins=[.20,.035,.32,.10]; legend=[.23,.80,.98,.91]
             if family=='correlations':
                 margins=[.17,.04,
                          .29 if options.get('x_title') else .13,
