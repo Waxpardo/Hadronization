@@ -19,7 +19,7 @@ This inventory identifies every tracked file. The release includes generated sci
 
 | Path | Caller or reader | Role or output |
 | --- | --- | --- |
-| [docs/atlas.html](../docs/atlas.html) | Researchers using a web browser | Self-contained scientific guide, command reference, worked examples and searchable file dependencies. |
+| [docs/atlas.html](../docs/atlas.html) | Researchers using a web browser | Self-contained scientific guide, command reference, worked examples and an interactive file map ordered by pipeline layer. |
 | [docs/cli-reference.md](../docs/cli-reference.md) | Repository readers | All public commands, parser options and side effects. |
 | [docs/configuration.md](../docs/configuration.md) | Repository readers | Scientific, presentation, runtime and resource settings. |
 | [docs/data-model.md](../docs/data-model.md) | Repository readers | ROOT structures, identities, statuses and retention. |

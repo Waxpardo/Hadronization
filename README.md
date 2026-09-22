@@ -75,7 +75,7 @@ The default correlation presentation shows MONASH identified pairs and heavy-fla
 
 ## Documentation
 
-Open the [pipeline atlas](docs/atlas.html) in a web browser for a searchable guide to the science, commands, files and dependencies. After download, its text and navigation work offline. External source links and data downloads need network access. GitHub displays the HTML source; use its download control to save the page.
+Open the [pipeline atlas](docs/atlas.html) in a web browser for a searchable guide to the science, commands, files and dependencies. Its interactive pipeline map groups every file by layer. Select a file to inspect its logic, inputs, outputs and connections. After download, its text and navigation work offline. External source links and data downloads need network access. GitHub displays the HTML source; use its download control to save the page.
 
 | Guide | Contents |
 | --- | --- |
