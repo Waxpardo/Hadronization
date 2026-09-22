@@ -6,9 +6,13 @@ The sample selects hard charm and beauty production. It is a generator-level, he
 
 ## Repository contents
 
-The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. Bulk raw data, analyzed data, query collections and research result packages are not bundled. See [data access](data/README.md) before attempting the research workflow.
+The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 41 PDFs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
 
-The source inventory records 3,000 accepted files and 300 million successful events. Each tune contributes 100 million events in ten original source blocks. These are manifest counts, not a claim that external files exist at a particular site. The [sample accounting guide](docs/science.md#sample-accounting) explains the 127 discarded job attempts.
+The source inventory records 3,000 accepted files and 300 million successful events. Each tune contributes 100 million events in ten original source blocks. The [data inventory](data/README.md) binds the distributed results and external inputs to checksums. The [sample accounting guide](docs/science.md#sample-accounting) explains the 127 discarded job attempts.
+
+## Use the results
+
+Open the [multiplicity distribution](data/results/figures/multiplicity.composite.pdf) or the other [figure PDFs](data/results/figures). The [data guide](data/README.md) explains how to verify the package, change its presentation and download merged THnSparse files. These operations do not require event generation or merging.
 
 ## Start locally
 

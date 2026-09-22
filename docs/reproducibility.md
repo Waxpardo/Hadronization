@@ -40,7 +40,7 @@ Follow the [workflow](workflow.md) with external inputs from their checksum-boun
 
 For full reduction, preserve accepted site-work and collector-closure records. A collection index alone cannot establish full production closure. A synthetic or partial result must retain its qualification in reports and figures.
 
-A source-only download can support inspection. It cannot supply Git provenance or bulk data. No command in this repository downloads the research input sample.
+A source-only download can support inspection. It cannot supply Git provenance or bulk data. The [merged-data downloader](../data/fetch-merged.py) retrieves the completed sparse ROOT files. It does not download raw, analyzed or query support rows.
 
 ## Synthetic example
 

@@ -1,0 +1,61 @@
+{
+  "access": {
+    "github_merged_inventory": "data/merged-download.json",
+    "github_release": "https://github.com/Waxpardo/Hadronization/releases/tag/hf-run3-v1-20260922",
+    "ssh_host": "login.nikhef.nl",
+    "ssh_requirement": "An authorized individual Nikhef account and custodian-granted read access. No shared credentials."
+  },
+  "campaign": "HF_RUN3_V1",
+  "custodian": {
+    "contact": "https://github.com/Waxpardo/Hadronization/issues",
+    "github_account": "Waxpardo",
+    "nikhef_account": "ipardoza"
+  },
+  "identity_policy": "Physical locators do not redefine scientific content. Git history and release manifest hashes preserve the independent checksum record.",
+  "inventory_pins": {
+    "data/analyzed-inventory.json": "22f0013b42984a6a7bf76556d880fd4de9cf230680ff6ce5a51f2f2be0934ed7",
+    "data/merged-download.json": "cbd21aa6630fe0e249d60ec0bd1ca1efe03eaa63a6dc8ce25f75ef170ba4d016",
+    "data/merged/dictionary.json": "cd8650018a54e82f57fb32777f2e943b92acec095548a0243479c973cdc10e5b",
+    "data/merged/index.json": "160f3c3789395740ec0d0244e3d719a53dbf064c340aecb32670189a40e86dfc",
+    "data/merged/merge-receipt.json": "e70f0831971dcabf6c508ed6ba104ee7ce85d8ee6cb10172abee83c95a275acf",
+    "data/merged/merge-verification.json": "e945a60e90bb76ffff53f50b1fb14968dd55746ea8f831ef178d05f0fd131ad4",
+    "data/raw_manifest.jsonl": "5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f8f247585912e2df247"
+  },
+  "planes": {
+    "analyzed": {
+      "inventory": "data/analyzed-inventory.json",
+      "root_bytes": 158720142481,
+      "root_files": 323
+    },
+    "merged": {
+      "download_inventory": "data/merged-download.json",
+      "inventory": "data/merged/index.json",
+      "inventory_field": "partitions",
+      "root_bytes": 7001982338,
+      "root_files": 3
+    },
+    "query": {
+      "inventory": "data/merged/index.json",
+      "inventory_field": "shards",
+      "root_bytes": 66635305537,
+      "root_files": 323
+    },
+    "raw": {
+      "base_path": "/data/alice/ipardoza/hf/project/deploys/hadronization-clean-20260822/data/raw",
+      "inventory": "data/raw_manifest.jsonl",
+      "root_bytes": 284750292184,
+      "root_files": 3000
+    }
+  },
+  "retention": {
+    "analyzed": "Retain accepted shards and PASS receipts for reconstruction and ancestry checks.",
+    "deletion": "The custodian must review information loss and preserve a verified retained copy before deletion of an active release dependency.",
+    "guarantee": "Custodian retention policy; no institution-wide archival service guarantee or indefinite storage allocation is claimed.",
+    "merged": "Retain original ROOT files, immutable inventories and GitHub release assets while results remain in use.",
+    "query": "Retain every complete workspace referenced by an active collection. Exact reduction needs its support rows.",
+    "raw": "Retain accepted raw files. Merged histograms omit raw information.",
+    "relocation": "Verify new copies against existing SHA-256 pins before publishing a replacement locator. Retain the previous inventory.",
+    "replacement": "Never overwrite an accepted file or an existing release asset with different bytes."
+  },
+  "schema": "hadronization_bulk_storage_contract_v1"
+}

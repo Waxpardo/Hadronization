@@ -2,7 +2,7 @@
 
 [Documentation index](../README.md#documentation)
 
-This inventory identifies every tracked file. Generated files belong to the [data model](data-model.md), not the source inventory. Paths below link to their exact repository contents.
+This inventory identifies every tracked file. The release includes generated scientific products described by the [data model](data-model.md). Paths below link to their exact repository contents.
 
 ## Entry points and metadata
 
@@ -187,3 +187,134 @@ Every fixture path appears below. Each query workspace follows the same seven-fi
 | [tests/fixtures/query_pair_population/positive-source.json](../tests/fixtures/query_pair_population/positive-source.json) | Pair-population tests | PASS receipt for the synthetic analyzed ROOT control. |
 | [tests/fixtures/query_pair_population/positive-source.root](../tests/fixtures/query_pair_population/positive-source.root) | Pair-population tests | Synthetic analyzed rows for pair-completeness checks. |
 | [tests/fixtures/query_pair_population/selected_hard_noncompanion.cpp](../tests/fixtures/query_pair_population/selected_hard_noncompanion.cpp) | Pair-population tests | Creates an invalid selected-hard companion assignment. |
+
+## Distributed scientific results and data access
+
+The package manifest binds every numerical and figure file. These groups identify each tracked artifact and its purpose.
+
+### `data`
+
+Data users read these inventories. The downloader consumes the transfer manifest.
+
+| File | Purpose |
+| --- | --- |
+| [analyzed-inventory.json](../data/analyzed-inventory.json) | All 323 accepted analyzed ROOT files and receipts with their physical identities. |
+| [bulk-storage.json](../data/bulk-storage.json) | Bulk storage locators, checksum inventories, access and retention policy. |
+| [fetch-merged.py](../data/fetch-merged.py) | Download, verify and concatenate byte parts without repeating the sparse merge. |
+| [merged-download.json](../data/merged-download.json) | Complete ROOT and transfer-part identities, tune mapping and GitHub asset locations. |
+
+### `data/merged`
+
+Collection and projection users read these original merge records and the signed-PDG dictionary.
+
+| File | Purpose |
+| --- | --- |
+| [dictionary.json](../data/merged/dictionary.json) | Campaign-wide signed-PDG ordinal dictionary and census binding. |
+| [index.json](../data/merged/index.json) | Original collection identity, sources, query support locators and merged sparse objects. |
+| [merge-receipt.json](../data/merged/merge-receipt.json) | Parent and merged collection hashes plus partition identities. |
+| [merge-verification.json](../data/merged/merge-verification.json) | Recorded full sparse-domain and parent-lineage verification. |
+
+### `data/results`
+
+The package verifier reads the complete relative fileset.
+
+| File | Purpose |
+| --- | --- |
+| [manifest.json](../data/results/manifest.json) | Exact relative fileset, hashes, numerical identity and selected presentation. |
+
+### `data/results/config`
+
+The renderer and package verifier read the selected display settings.
+
+| File | Purpose |
+| --- | --- |
+| [plot.json](../data/results/config/plot.json) | Frozen display configuration for the distributed figures. |
+
+### `data/results/figures`
+
+Readers use the PDFs and canvases. The figure verifier checks the manifest and drawing record.
+
+| File | Purpose |
+| --- | --- |
+| [G9_-4122_eta.pdf](../data/results/figures/G9_-4122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -4122. |
+| [G9_-4122_phi.pdf](../data/results/figures/G9_-4122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -4122. |
+| [G9_-4122_pt.pdf](../data/results/figures/G9_-4122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -4122. |
+| [G9_-421_eta.pdf](../data/results/figures/G9_-421_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -421. |
+| [G9_-421_phi.pdf](../data/results/figures/G9_-421_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -421. |
+| [G9_-421_pt.pdf](../data/results/figures/G9_-421_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -421. |
+| [G9_-5122_eta.pdf](../data/results/figures/G9_-5122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -5122. |
+| [G9_-5122_phi.pdf](../data/results/figures/G9_-5122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -5122. |
+| [G9_-5122_pt.pdf](../data/results/figures/G9_-5122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -5122. |
+| [G9_-5212_eta.pdf](../data/results/figures/G9_-5212_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -5212. |
+| [G9_-5212_phi.pdf](../data/results/figures/G9_-5212_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -5212. |
+| [G9_-5212_pt.pdf](../data/results/figures/G9_-5212_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -5212. |
+| [G9_-521_eta.pdf](../data/results/figures/G9_-521_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -521. |
+| [G9_-521_phi.pdf](../data/results/figures/G9_-521_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -521. |
+| [G9_-521_pt.pdf](../data/results/figures/G9_-521_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -521. |
+| [G9_4122_eta.pdf](../data/results/figures/G9_4122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 4122. |
+| [G9_4122_phi.pdf](../data/results/figures/G9_4122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 4122. |
+| [G9_4122_pt.pdf](../data/results/figures/G9_4122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 4122. |
+| [G9_421_eta.pdf](../data/results/figures/G9_421_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 421. |
+| [G9_421_phi.pdf](../data/results/figures/G9_421_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 421. |
+| [G9_421_pt.pdf](../data/results/figures/G9_421_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 421. |
+| [G9_5122_eta.pdf](../data/results/figures/G9_5122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 5122. |
+| [G9_5122_phi.pdf](../data/results/figures/G9_5122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 5122. |
+| [G9_5122_pt.pdf](../data/results/figures/G9_5122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 5122. |
+| [G9_5212_eta.pdf](../data/results/figures/G9_5212_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 5212. |
+| [G9_5212_phi.pdf](../data/results/figures/G9_5212_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 5212. |
+| [G9_5212_pt.pdf](../data/results/figures/G9_5212_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 5212. |
+| [G9_521_eta.pdf](../data/results/figures/G9_521_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 521. |
+| [G9_521_phi.pdf](../data/results/figures/G9_521_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 521. |
+| [G9_521_pt.pdf](../data/results/figures/G9_521_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 521. |
+| [balancing.activity.beauty.pdf](../data/results/figures/balancing.activity.beauty.pdf) | Rendered balancing activity beauty page. |
+| [balancing.activity.charm.pdf](../data/results/figures/balancing.activity.charm.pdf) | Rendered balancing activity charm page. |
+| [balancing.baryon_meson.activity.pdf](../data/results/figures/balancing.baryon_meson.activity.pdf) | Rendered balancing baryon meson activity page. |
+| [balancing.integrated.beauty.pdf](../data/results/figures/balancing.integrated.beauty.pdf) | Rendered balancing integrated beauty page. |
+| [balancing.integrated.charm.pdf](../data/results/figures/balancing.integrated.charm.pdf) | Rendered balancing integrated charm page. |
+| [canvases.root](../data/results/figures/canvases.root) | All rendered canvases with graphs, errors, labels and layout. |
+| [correlations.beauty.pdf](../data/results/figures/correlations.beauty.pdf) | Rendered correlations beauty page. |
+| [correlations.charm.pdf](../data/results/figures/correlations.charm.pdf) | Rendered correlations charm page. |
+| [drawing-record.tsv.gz](../data/results/figures/drawing-record.tsv.gz) | Compressed exact coordinates, statuses, uncertainties and presentation records. |
+| [manifest.json](../data/results/figures/manifest.json) | Exact PDFs, canvas archive, drawing records, source and runtime bindings. |
+| [multiplicity.composite.pdf](../data/results/figures/multiplicity.composite.pdf) | Rendered multiplicity composite page. |
+| [supplemental.balancing.activity.beauty.extremes.pdf](../data/results/figures/supplemental.balancing.activity.beauty.extremes.pdf) | Rendered supplemental balancing activity beauty extremes page. |
+| [supplemental.balancing.activity.charm.extremes.pdf](../data/results/figures/supplemental.balancing.activity.charm.extremes.pdf) | Rendered supplemental balancing activity charm extremes page. |
+| [supplemental.balancing.baryon_meson.activity.by_tune.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.by_tune.pdf) | Rendered supplemental balancing baryon meson activity by tune page. |
+
+### `data/results/numerical`
+
+The numerical reader and verifier consume these typed values and provenance records.
+
+| File | Purpose |
+| --- | --- |
+| [admission-closure.json](../data/results/numerical/admission-closure.json) | Accepted source, event, block and query-collection closure. |
+| [native-run-receipt.json](../data/results/numerical/native-run-receipt.json) | Persisted native estimator request, run identity and numerical bindings. |
+| [numerics.root](../data/results/numerical/numerics.root) | Typed values, statistical covariance factors, validity masks and provenance. |
+| [package-manifest.json](../data/results/numerical/package-manifest.json) | Numerical package files, hashes and external execution locators. |
+| [report.json](../data/results/numerical/report.json) | Numerical point inventory, statuses, hashes and execution references. |
+| [source-build-ledger.json](../data/results/numerical/source-build-ledger.json) | Original numerical producer source, configuration and build identities. |
+
+### `data/results/numerical/exports`
+
+Table users read these exports. The numerical verifier checks their byte identities.
+
+| File | Purpose |
+| --- | --- |
+| [accounting.csv](../data/results/numerical/exports/accounting.csv) | Generated sample and attempt accounting. |
+| [accounting.tex](../data/results/numerical/exports/accounting.tex) | Formatted sample accounting table. |
+| [missing.csv](../data/results/numerical/exports/missing.csv) | Explicit unavailable numerical and uncertainty states. |
+| [overleaf-check.tex](../data/results/numerical/exports/overleaf-check.tex) | Standalone TeX document for table compilation. |
+| [overleaf-preamble.tex](../data/results/numerical/exports/overleaf-preamble.tex) | Required TeX packages for the exported tables. |
+| [overleaf-tables.tex](../data/results/numerical/exports/overleaf-tables.tex) | Table include list. |
+| [points.csv](../data/results/numerical/exports/points.csv) | Round-trip numerical values and statuses. |
+| [receipt.json](../data/results/numerical/exports/receipt.json) | Exact export hashes and numerical input identity. |
+| [t1.csv](../data/results/numerical/exports/t1.csv) | Species-resolved natural final-heavy counts. |
+| [t1.tex](../data/results/numerical/exports/t1.tex) | Formatted species counts. |
+
+### `tests`
+
+The verification suite exercises the distribution helper.
+
+| File | Purpose |
+| --- | --- |
+| [test_data_release.py](../tests/test_data_release.py) | Checks byte restoration, restart, read-only verification and refusal of corrupt or conflicting files. |

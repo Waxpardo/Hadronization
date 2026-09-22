@@ -966,3 +966,18 @@ Source: [pipeline/query/site_probe.py](../pipeline/query/site_probe.py).
 Successful commands return zero. Argument-parser errors normally return 2. Scientific and file-contract failures normally return 2 outside the Condor boundary. Query transient operating-system failures can return 75. Condor uses 42 for deterministic failure and 75 for classified transient failure.
 
 Compiled C++ executables are implementation interfaces invoked by these Python commands. They do not share an argparse help interface. Their usage and transport formats reside in their source files. Run the public stage commands to preserve provenance and path checks.
+
+## Merged ROOT downloads
+
+### `python3 data/fetch-merged.py`
+
+This helper reads `data/merged-download.json`. It restores complete ROOT bytes from GitHub release assets without invoking the analysis pipeline.
+
+| Option | Default | Effect |
+| --- | --- | --- |
+| `--output DIRECTORY` | `data/work/merged` | Destination for ROOT files and a `.parts` cache |
+| `--local-parts DIRECTORY` | Unset | Read existing transfer parts instead of contacting GitHub |
+| `--verify-only` | False | Check final files without downloading or writing |
+| `-h`, `--help` | Unset | Show help and exit |
+
+The default command contacts GitHub and writes local files. It preserves different existing outputs by refusing the operation. See [download instructions](../data/README.md#download-merged-root) for storage needs and restart behavior.
