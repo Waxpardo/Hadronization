@@ -186,4 +186,3 @@ Every fixture path appears below. Each query workspace follows the same seven-fi
 | [tests/fixtures/query_pair_population/positive-source.json](../tests/fixtures/query_pair_population/positive-source.json) | Pair-population tests | PASS receipt for the synthetic analyzed ROOT control. |
 | [tests/fixtures/query_pair_population/positive-source.root](../tests/fixtures/query_pair_population/positive-source.root) | Pair-population tests | Synthetic analyzed rows for pair-completeness checks. |
 | [tests/fixtures/query_pair_population/selected_hard_noncompanion.cpp](../tests/fixtures/query_pair_population/selected_hard_noncompanion.cpp) | Pair-population tests | Creates an invalid selected-hard companion assignment. |
-
