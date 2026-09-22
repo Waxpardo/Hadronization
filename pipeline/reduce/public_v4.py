@@ -693,7 +693,7 @@ def _verify(args):
 
 def parser():
     top = argparse.ArgumentParser(prog='hadronization reduce',
-        description='A v2.2 MERGED collection to native v4 typed numerics')
+        description='Reduce a merged ROOT collection to typed numerical results')
     sub = top.add_subparsers(dest='command', required=True)
     command = sub.add_parser('run', help='build immutable typed v4 numerics')
     command.add_argument('--collection-index', type=Path, required=True)

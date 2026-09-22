@@ -1,28 +1,29 @@
-# Data plane
+# Data access and inventory
 
-The data plane has four objects:
+[Documentation index](../README.md#documentation)
 
-1. `campaign.json` owns campaign-wide identities, seed/block rules, runtime
-   facts, accepted-source provenance, and current-definition bindings.
-2. `raw_manifest.jsonl` lists the 3,000 accepted raw files in tune/logical-job
-   order. Each `raw_storage_key` is portable and relative to `data/raw/`.
-3. `attempts.csv` records every accepted or discarded submitted attempt and
-   its deterministic seed.
-4. `raw/` holds large untracked ROOT objects addressed by those portable keys.
+This directory contains metadata for the `HF_RUN3_V1` campaign. It does not contain the external research ROOT files or a download client.
 
-`work/` is ignored transient scratch and durable attempt-evidence space. The
-public cleanup command only removes old scratch for attempts explicitly marked
-accepted; it never traverses `raw/` or removes reservation/outcome evidence.
-Neither `raw/` nor `work/` is created by repository verification.
+| File | Contents |
+| --- | --- |
+| [campaign.json](campaign.json) | Collision setup, tune order, source factorization, seed and block rules, provenance hashes |
+| [raw_manifest.jsonl](raw_manifest.jsonl) | One canonical JSON record for each accepted raw source |
+| [attempts.csv](attempts.csv) | Attempt identities, outcomes and evidence classifications |
 
-The accepted analyzed ROOT and receipts are a separate externally pinned input
-plane. The query work manifest records every expected path, SHA-256 and byte
-size and is hashed before a worker opens an analyzed ROOT. The original query
-shards contain both sparse families and exact support; they remain retrievable
-after the one-partition-per-tune physical merge. A collector closure pins the
-original sharded index and independent accepted-attempt custody. The merge
-receipt pins the transformed index/ROOT without rewriting that closure. The
-large analyzed, query, merged and execution planes stay outside ordinary Git.
-Each retained object needs an immutable locator, custodian, SHA/size,
-dependencies and explicit retention period. Local TEST_ONLY fixtures have no
-production acceptance authority.
+The manifest lists 3,000 accepted files containing 300 million successful events. It records 284,750,292,184 raw ROOT bytes. Each tune contributes 100 million successful events. These figures describe the inventory, not a fresh measurement of external storage.
+
+The attempt ledger contains 3,127 attempts, including 127 discarded attempts. It does not supply event-trial counts for every attempt. The numerical accounting export preserves that missing state.
+
+## Obtain external inputs
+
+Obtain the raw files and independent checksum records from their data custodian. The repository supplies no public bulk-data locator or access credential. Preserve each manifest-relative file key under the selected raw root.
+
+An analyzed-input route instead requires ROOT shards and matching PASS receipts. It also requires a separately trusted inventory that binds every receipt and ROOT SHA-256, byte count and source identity. The prepared cluster route expects exactly 323 analyzed pairs and 158,720,142,481 ROOT bytes. Its [workflow](../docs/workflow.md#cluster-query-construction) describes the additional admission records.
+
+A query collection requires the original query workspaces, collection index, expected-source list and independent hashes. A merged collection additionally requires its sparse partitions and merge receipts. Keep original query shards because reduction reads their exact support rows.
+
+## Storage policy
+
+Bulk raw, analyzed and query ROOT stay outside ordinary Git. Keep build caches, logs, attempt directories and credentials outside tracked files. The ignore rules do not replace a storage or retention agreement.
+
+The small ROOT files under [tests/fixtures](../tests/fixtures) contain synthetic data. They cannot substitute for the research sample. See [data structures and retention](../docs/data-model.md).

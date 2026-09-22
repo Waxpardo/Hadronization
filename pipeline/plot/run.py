@@ -2995,23 +2995,23 @@ def cold_inputs(parser):
         help="optional independent manifest pin for verification")
     parser.add_argument("--plot-config", type=Path, default=PLOT_CONFIG)
     parser.add_argument("--work-dir", type=Path, required=True,
-                        help="private renderer/archive build scratch")
+                        help="renderer and archive build scratch")
     parser.add_argument("--output", type=Path, required=True)
 
 def parser():
     top = argparse.ArgumentParser(
         prog="hadronization plot",
-        description="Draw and verify a frozen S numerical ROOT without projection")
+        description="Draw and verify numerical ROOT results without projection")
     sub = top.add_subparsers(dest="command", required=True)
     cold_render_parser = sub.add_parser(
-        "render-cold", help="draw S-verified numerics.root")
+        "render-cold", help="draw verified numerics.root")
     cold_inputs(cold_render_parser)
     cold_verify_parser = sub.add_parser(
         "verify-render-cold", help="reopen every ROOT canvas and verify bytes")
     cold_inputs(cold_verify_parser)
     review_parser = sub.add_parser(
         "verify-review-packet",
-        help="require visible synthetic P1-P8 and representative G9 coverage")
+        help="check synthetic figure and signed-spectrum display coverage")
     cold_inputs(review_parser)
     return top
 

@@ -1,5 +1,9 @@
-# TEST_ONLY ROOT query fixture
+# Synthetic ROOT query fixture
 
-These three immutable small query workspaces represent 30 synthetic successful events per tune (90 total), one original source per block, all ten original blocks per tune, and the five ROOT sparse families plus twelve exact support trees. The source-local sources.source_id values 0–9 intentionally recur in all three shards; global source IDs are 0–29 through the embedded analyzed receipts. The raw inputs were generated only by tests/test_analysis.py's synthetic fixture source. This is not accepted research data and must never be used for publication numerics.
+These three query workspaces contain 30 synthetic successful events per tune, or 90 events in total. Each tune has one source in each of ten original blocks. Each workspace contains five sparse families and twelve exact support trees.
 
-Build one temporary collection locator with hadronization collection create and this directory's expected-sources.json; supply each query manifest's scientific_content_sha256 as an independent test pin. The fixture content and expected-source file are copied byte-for-byte from the external audited run PHASEA_RESET_ANALYSIS_20260912/run-01a09676/test-only-multitune; the external run also preserves analyzed toy roots, control manifests, a mixed-tune regrouping and physically merged proof.
+Shard-local source IDs 0–9 recur in every workspace. Embedded analyzed receipts map them to global source IDs 0–29. `expected-sources.json` defines the complete synthetic domain.
+
+The fixtures exercise collection membership, physical merging and identity checks. Their analysis contract is version 2.1.0. They do not satisfy the current numerical reducer's version 2.2.0 input contract. They are not research data.
+
+Use `tests/fixtures/nonzero_chain_v22/build.py` to construct a current synthetic chain. The [reproducibility guide](../../../docs/reproducibility.md#synthetic-example) gives its prerequisites and commands.

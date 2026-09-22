@@ -189,7 +189,7 @@ def package(arguments):
 def build_parser():
     parser = argparse.ArgumentParser(
         prog="hadronization",
-        description="Authenticated Phase A generation, query, and native numerical pipeline.")
+        description="Generate, analyze, reduce and render heavy-flavour ROOT data.")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("doctor", help="report required and optional capabilities")
     generate_parser = sub.add_parser("generate", help="build/describe nominal generation work")
@@ -207,11 +207,11 @@ def build_parser():
     collection_parser = sub.add_parser("collection", help="create and verify one ROOT collection locator", add_help=False)
     collection_parser.add_argument("arguments", nargs=argparse.REMAINDER)
     reduce_parser = sub.add_parser(
-        "reduce", help="build, verify, and explain A v2.2 native v4 numerics",
+        "reduce", help="build, verify and explain numerical ROOT results",
         add_help=False)
     reduce_parser.add_argument("arguments", nargs=argparse.REMAINDER)
     plot_parser = sub.add_parser(
-        "plot", help="query and export verified numerical plot projections",
+        "plot", help="render and verify figures from numerical ROOT results",
         add_help=False)
     plot_parser.add_argument("arguments", nargs=argparse.REMAINDER)
     package_parser = sub.add_parser("package", help="assemble and verify the exact portable numerical/figure set", add_help=False)

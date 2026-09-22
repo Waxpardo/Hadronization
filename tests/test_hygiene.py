@@ -21,9 +21,9 @@ class LeanTreeContract(unittest.TestCase):
         paths = self.tracked_and_new_paths()
         top = {path.split("/", 1)[0] for path in paths}
         expected = {".gitignore", "CITATION.cff", "README.md", "hadronization",
-                    "setup.sh", "config", "pipeline", "data", "tests"}
+                    "setup.sh", "config", "pipeline", "data", "tests", "docs"}
         self.assertEqual(top, expected)
-        forbidden = {"paper", "evidence", "docs", "docs2", "environment",
+        forbidden = {"paper", "evidence", "docs2", "environment",
                      "Validation", "contracts", "tools", "generation", "analysis",
                      "merging", "extraction", "plotting"}
         self.assertTrue(forbidden.isdisjoint(top))
