@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: >-
   Use this record to identify the software. Cite the exact source commit
   and the manifests of the numerical results used in your analysis.
-title: Heavy-flavour quantum-number balancing in PYTHIA 8 as a function of event activity
+title: Balancing heavy flavor Quantum number compensation in hadronisation of charm and beauty particles in proton-proton collisions
 type: software
 authors:
   - family-names: Pardo Zambrana
