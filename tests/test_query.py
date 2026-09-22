@@ -521,6 +521,28 @@ class RootQueryContract(unittest.TestCase):
                           if schema[key] == "Double_t" else str(int(value)))
             self.assertEqual(digest.hexdigest(), metadata["query_content_digests"]["tree:" + name], name)
 
+    def test_sparse_identity_v2_is_explicit_and_excludes_runtime_flow_edge(self):
+        metadata = json.loads((self.workspace / "metadata.json").read_text())
+        manifest = json.loads((self.workspace / "manifest.json").read_text())
+        self.assertEqual(metadata["schema"], "hadronization_query_metadata_v4")
+        self.assertEqual(manifest["schema"], "hadronization_query_workspace_v3")
+        self.assertEqual(metadata["sparse_digest_schema"], self.query.SPARSE_DIGEST_SCHEMA)
+        self.assertEqual(manifest["sparse_digest_schema"], self.query.SPARSE_DIGEST_SCHEMA)
+        spec = (self.workspace / "query.tsv").read_text()
+        self.assertTrue(spec.startswith("hadronization_root_query_spec_v4\n"))
+        self.assertIn("SPARSE_DIGEST_SCHEMA\t" + self.query.SPARSE_DIGEST_SCHEMA + "\n", spec)
+        import ROOT as rootlib
+        opened = rootlib.TFile.Open(str(self.workspace / "query.root"), "READ")
+        try:
+            histogram = opened.Get("sparse_kinematics")
+            phi = next(histogram.GetAxis(i) for i in range(histogram.GetNdimensions())
+                       if histogram.GetAxis(i).GetName() == "phi")
+            declared = phi.GetXbins().At(phi.GetNbins())
+            runtime_flow_edge = phi.GetBinLowEdge(phi.GetNbins() + 1)
+            self.assertNotEqual(struct.pack(">d", declared), struct.pack(">d", runtime_flow_edge))
+        finally:
+            opened.Close()
+
     def test_rapidity_is_retained_exactly_and_is_not_eta(self):
         from test_analysis import EXPECTED_SCHEMA
         fields = [item.split(":")[0] for item in EXPECTED_SCHEMA["heavy"].split(",")]
@@ -760,6 +782,7 @@ int main(int argc,char** argv){
 #include "TTree.h"
 #include <memory>
 #include <string>
+#include <vector>
 int main(int argc,char** argv){
  if(argc!=4)return 2;TFile input(argv[1],"READ"),output(argv[2],"RECREATE");
  TIter keys(input.GetListOfKeys());while(auto* item=keys()){
@@ -986,8 +1009,20 @@ int main(int argc, char** argv) {
  THnSparseD clean("ranges","ranges",6,bins,low,high);clean.Sumw2();
  const std::vector<std::string> fields={"trigger_pt","associate_pt","trigger_eta","associate_eta","category","dphi"};
  for(int i=0;i<6;++i)clean.GetAxis(i)->SetName(fields[i].c_str());
- const double edges[7]={0,.15,.5,1,2.5,3,4};
- for(int i=0;i<2;++i)clean.GetAxis(i)->Set(6,edges);
+ // Production calls SetBinEdges for every axis. Uniform external THnSparse
+ // axes are not an accepted query-workspace input contract.
+ const double pt_edges[7]={0,.15,.5,1,2.5,3,4};
+ const double eta_edges[5]={-4,-2,0,2,4};
+ const double category_edges[4]={0,1,2,3};
+ const double dphi_edges[5]={-2,-1,0,1,2};
+ for(int i=0;i<2;++i)clean.SetBinEdges(i,pt_edges);
+ for(int i=2;i<4;++i)clean.SetBinEdges(i,eta_edges);
+ clean.SetBinEdges(4,category_edges);clean.SetBinEdges(5,dphi_edges);
+ // The supported-runtime endpoint contract is the production variable-edge
+ // representation plus the same inclusive-upper-endpoint predecessor.
+ if(clean.GetAxis(2)->FindFixBin(-4.)!=1 ||
+    clean.GetAxis(2)->FindFixBin(std::nextafter(4.,0.))!=4 ||
+    clean.GetAxis(2)->FindFixBin(4.)!=5)return 6;
  const std::vector<std::array<double,6>> events={
    {{2.5,.5,-4,4,.5,-1.5}}, // Both minima and eta endpoints included.
    {{std::nextafter(2.5,0.),.5,0,0,1.5,-.5}},
@@ -1069,6 +1104,25 @@ int main(int argc,char** argv) {
       if (mode=="cell") h->SetBinContent(Long64_t{0},h->GetBinContent(Long64_t{0})+1);
       if (mode=="axis") h->GetAxis(7)->SetName("wrong_pt");
       if (mode=="dictionary") h->GetAxis(4)->SetBinLabel(1,"999999");
+      if (mode=="edge") {
+        auto* axis=h->GetAxis(7);std::vector<double> edges(axis->GetNbins()+1);
+        for(int i=0;i<=axis->GetNbins();++i)edges[i]=axis->GetXbins()->At(i);
+        edges[1]=std::nextafter(edges[1],edges[2]);axis->Set(axis->GetNbins(),edges.data());
+      }
+      if (mode=="entries") h->SetEntries(h->GetEntries()+1);
+      if (mode=="coordinate") {
+        std::unique_ptr<THnSparseD> changed(dynamic_cast<THnSparseD*>(h->Clone()));
+        changed->Reset();changed->Sumw2();
+        std::vector<int> coordinates(h->GetNdimensions());
+        for(Long64_t bin=0;bin<h->GetNbins();++bin) {
+          const double value=h->GetBinContent(bin,coordinates.data());
+          const double variance=h->GetBinError2(bin);
+          if(bin==0)coordinates.back()=h->GetAxis(h->GetNdimensions()-1)->GetNbins()+1;
+          const Long64_t target=changed->GetBin(coordinates.data(),true);
+          changed->SetBinContent(target,value);changed->SetBinError2(target,variance);
+        }
+        changed->SetEntries(h->GetEntries());object.reset(changed.release());
+      }
     }
     output.cd();
     if (auto* tree=dynamic_cast<TTree*>(object.get())) {
@@ -1093,7 +1147,8 @@ int main(int argc,char** argv) {
 }
 '''
         self.fixture._compile(mutator, self.base / "query-mutator.cpp", self.base / "query-mutator")
-        for mode in ("sumw2", "cell", "axis", "dictionary", "origin_depth", "pair_dphi", "pair_weight"):
+        for mode in ("sumw2", "cell", "axis", "dictionary", "edge",
+                     "entries", "coordinate", "origin_depth", "pair_dphi", "pair_weight"):
             with self.subTest(mode=mode):
                 directory = self.base / ("mutant-" + mode)
                 shutil.copytree(self.workspace, directory)
@@ -1109,7 +1164,31 @@ int main(int argc,char** argv) {
                 (directory / "manifest.json").write_text(json.dumps(manifest))
                 result = self.cli("verify", "--workspace", directory)
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn("scientific content digest", result.stderr)
+                self.assertTrue(any(fragment in result.stderr for fragment in
+                    ("scientific content digest", "sparse declared", "sparse stored",
+                     "sparse regular/flow")), result.stderr)
+        # Endpoint/flow policy is declared in the exact embedded query spec.
+        # Re-signing its container bytes cannot preserve the canonical identity.
+        directory = self.base / "mutant-endpoint-policy"
+        shutil.copytree(self.workspace, directory)
+        changed_spec = (directory / "query.tsv").read_text().replace(
+            "AXIS\tassociate_eta\tinclusive\t", "AXIS\tassociate_eta\thalfopen\t", 1)
+        self.assertNotEqual(changed_spec, (directory / "query.tsv").read_text())
+        (directory / "query.tsv").write_text(changed_spec)
+        (directory / "query.root").unlink()
+        subprocess.run([str(self.base / "query-mutator"), str(self.workspace / "query.root"),
+                        str(directory / "query.root"), "payload", str(directory / "metadata.json"),
+                        str(directory / "query.tsv")], check=True,
+                       env=self.fixture.environment, capture_output=True)
+        manifest = json.loads((directory / "manifest.json").read_text())
+        for artifact in manifest["artifacts"]:
+            path = directory / artifact["path"]
+            artifact["bytes"], artifact["sha256"] = path.stat().st_size, self.query.reduce.sha_file(path)
+        (directory / "manifest.json").write_text(json.dumps(manifest))
+        result = self.cli("verify", "--workspace", directory)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue(any(fragment in result.stderr for fragment in
+            ("scientific content digest", "serialized scientific/axis config")), result.stderr)
         # Recompute the changed ROOT's internal digest claims and replace both
         # internal/external metadata and query spec. Re-sign every artifact's
         # transport hash. The independently bound scientific manifest must still

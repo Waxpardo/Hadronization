@@ -1,5 +1,6 @@
 """Independent generator-row oracle and physical collection equality check."""
 
+from array import array
 from collections import Counter, defaultdict
 import json
 import math
@@ -282,34 +283,85 @@ def observed_rows(tune, base):
 
 
 def sparse_equality(base):
-    sharded = c.read(base/"SHARDED.json",c.r.sha_file(base/"SHARDED.json"))
-    merged = c.read(base/"merged/index.json",c.r.sha_file(base/"merged/index.json"))
+    # Deliberately do not call collection.read, verify_merge_lineage, or the
+    # production sparse comparator.  This is an independent read of the two
+    # declared indexes and their ROOT objects.
+    sharded = json.loads((base/"SHARDED.json").read_text())
+    merged = json.loads((base/"merged/index.json").read_text())
+    assert sharded["layout"]=="SHARDED" and merged["layout"]=="MERGED"
     assert sharded["scientific_identity_sha256"]==merged["scientific_identity_sha256"]
     ROOT = c._root()
+    families=tuple(sorted(json.loads((ROOT_DIR/"config/query.json").read_text())["sparse"]))
+    block_count=sharded["block_count"]
+
+    def cells(histogram):
+        coordinates=array("i",[0]*histogram.GetNdimensions())
+        for index in range(histogram.GetNbins()):
+            value=histogram.GetBinContent(index,coordinates)
+            variance=histogram.GetBinError2(index)
+            assert math.isfinite(value) and math.isfinite(variance) and variance>=0
+            yield tuple(coordinates),value,variance
+
+    def geometry(histogram):
+        assert histogram and histogram.GetCalculateErrors()
+        result=[]
+        for dimension in range(histogram.GetNdimensions()):
+            axis=histogram.GetAxis(dimension)
+            stored=axis.GetXbins()
+            assert stored.GetSize()==axis.GetNbins()+1
+            result.append((axis.GetName(),axis.GetTitle(),
+                tuple(stored.At(edge) for edge in range(stored.GetSize())),
+                tuple(axis.GetBinLabel(bin_) for bin_ in range(axis.GetNbins()+2))))
+        return tuple(result)
+
     result = {}
-    for family in c.FAMILIES:
+    for family in families:
         for tune,ordinal in sharded["tune_ordinals"].items():
             expected = {}
             entries = 0
+            reference_geometry=None
             for shard in sharded["shards"]:
                 file = ROOT.TFile.Open(shard["query_root"]["path"])
                 hist = file.Get("sparse_"+family)
+                current_geometry=geometry(hist)
+                if reference_geometry is None:reference_geometry=current_geometry
+                assert current_geometry==reference_geometry,(family,tune,"source geometry")
                 if {m["tune"] for m in shard["members"]}=={tune}:
                     entries += hist.GetEntries()
-                for coordinate,value,variance in c._cells(hist):
+                for coordinate,value,variance in cells(hist):
                     if coordinate[0]!=ordinal+1:continue
                     old = expected.get(coordinate,(0.0,0.0))
                     expected[coordinate]=(old[0]+value,old[1]+variance)
                 file.Close()
-            part = next(p for p in merged["partitions"] if p["tune"]==tune)
+            parts=[p for p in merged["partitions"] if p["tune"]==tune]
+            assert len(parts)==1,(family,tune,"partition inventory")
+            part=parts[0]
+            inventory=part["sparse_objects"][family]
+            blocks=[item["block"] for item in inventory]
+            names=[item["name"] for item in inventory]
+            assert blocks==list(range(1,block_count+1)),(family,tune,"block inventory")
+            assert len(names)==len(set(names)),(family,tune,"duplicate object inventory")
+            assert names==[f"sparse_{family}__block_{block:02d}" for block in blocks]
             file = ROOT.TFile.Open(part["root"]["path"])
-            hist = file.Get("sparse_"+family)
-            actual = {coord:(value,variance) for coord,value,variance in c._cells(hist)}
+            declared={item["name"] for objects in part["sparse_objects"].values() for item in objects}
+            keys=[key.GetName() for key in file.GetListOfKeys()]
+            assert len(keys)==len(set(keys)) and set(keys)==declared,(family,tune,"ROOT object inventory")
+            actual={}
+            actual_entries=0
+            for item in inventory:
+                hist=file.Get(item["name"])
+                assert geometry(hist)==reference_geometry,(family,tune,item["block"],"geometry")
+                actual_entries+=hist.GetEntries()
+                for coord,value,variance in cells(hist):
+                    assert coord[0]==ordinal+1 and coord[1]==item["block"], \
+                        (family,tune,item["block"],coord,"coordinate domain")
+                    old=actual.get(coord,(0.0,0.0))
+                    actual[coord]=(old[0]+value,old[1]+variance)
             assert set(expected)==set(actual),(family,tune,"coordinates")
             for coord in expected:
                 assert all(math.isclose(x,y,rel_tol=1e-12,abs_tol=1e-12)
                            for x,y in zip(expected[coord],actual[coord])),(family,tune,coord)
-            assert hist.GetEntries()==entries,(family,tune,"entries")
+            assert actual_entries==entries,(family,tune,"entries")
             result[f"{tune}:{family}"]={"occupied_cells":len(actual),"entries":entries}
             file.Close()
     return result

@@ -154,7 +154,8 @@ Every fixture path appears below. Each query workspace follows the same seven-fi
 | Path | Caller or reader | Role or output |
 | --- | --- | --- |
 | [tests/fixtures/nonzero_chain_v22/build.py](../tests/fixtures/nonzero_chain_v22/build.py) | Explicit synthetic example | Constructs nonzero raw fixtures, analyzed rows, queries and a merged test collection. |
-| [tests/fixtures/nonzero_chain_v22/oracle.py](../tests/fixtures/nonzero_chain_v22/oracle.py) | Explicit synthetic check | Checks synthetic rows and classes. Its sparse-equality reader expects unsplit objects and fails on current block-partitioned merges. |
+| [tests/fixtures/nonzero_chain_v22/mutate_merge.cpp](../tests/fixtures/nonzero_chain_v22/mutate_merge.cpp) | Development suite | Makes isolated sparse coordinate, content, Sumw2 and entry-count mutants for oracle refusal tests. |
+| [tests/fixtures/nonzero_chain_v22/oracle.py](../tests/fixtures/nonzero_chain_v22/oracle.py) | Explicit synthetic check | Checks synthetic rows, classes and the complete block-partitioned sparse merge. |
 | [tests/fixtures/query_multitune/TEST_ONLY.md](../tests/fixtures/query_multitune/TEST_ONLY.md) | Fixture readers | Explains synthetic scope and input-version limits. |
 | [tests/fixtures/query_multitune/expected-sources.json](../tests/fixtures/query_multitune/expected-sources.json) | Collection tests | Exact synthetic global source membership and original blocks. |
 | [tests/fixtures/query_multitune/queries/shard-0000/analysis.json](../tests/fixtures/query_multitune/queries/shard-0000/analysis.json) | Query verifier | Immutable construction-time analysis contract. |

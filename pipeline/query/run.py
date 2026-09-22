@@ -28,6 +28,8 @@ model = load("query_model", "pipeline/query/model.py")
 
 publication = load("query_publication", "pipeline/query/publication.py")
 publish_directory = publication.publish_directory
+SPARSE_DIGEST_SCHEMA = "hadronization_query_sparse_content_v2"
+LEGACY_SPARSE_DIGEST_SCHEMA = "hadronization_query_sparse_content_v1"
 
 
 def payload_sha(value):
@@ -102,7 +104,8 @@ def require_phase_a_layout(layout):
 def layout_spec(analysis, layout, binding, dictionary,
                 content_sha="__QUERY_CONTENT_SHA256__",
                 scientific_binding_sha="__QUERY_SCIENTIFIC_BINDING_SHA256__",
-                execution_attestation_sha="__QUERY_EXECUTION_ATTESTATION_SHA256__"):
+                execution_attestation_sha="__QUERY_EXECUTION_ATTESTATION_SHA256__",
+                sparse_digest_schema=SPARSE_DIGEST_SCHEMA):
     require_phase_a_layout(layout)
     axes = {}
     def uniform(name, bins, low, high, inclusive=False):
@@ -126,13 +129,18 @@ def layout_spec(analysis, layout, binding, dictionary,
     uniform("sign", 3, -1.5, 1.5)
     uniform("origin", 5, 0.5, 5.5)
     uniform("category", 6, -0.5, 5.5)
-    lines = ["hadronization_root_query_spec_v3"]
+    if sparse_digest_schema not in (SPARSE_DIGEST_SCHEMA, None):
+        raise ValueError("query sparse digest schema differs")
+    lines = ["hadronization_root_query_spec_v4" if sparse_digest_schema else
+             "hadronization_root_query_spec_v3"]
     if analysis["version"] == "2.2.0":
         lines.append("ANALYSIS_VERSION\t2.2.0")
     lines += ["CONTENT_SHA256\t" + content_sha,
              "SCIENTIFIC_BINDING_SHA256\t" + scientific_binding_sha,
              "EXECUTION_ATTESTATION_SHA256\t" + execution_attestation_sha,
              "DICTIONARY_SHA256\t" + dictionary["body_sha256"]]
+    if sparse_digest_schema:
+        lines.append("SPARSE_DIGEST_SCHEMA\t" + sparse_digest_schema)
     model.validate_phase_a_profiles(analysis["profiles"], analysis["axes"]["pt"]["edges"])
     objects = {"trees": layout["trees"], "sparse": dict(layout["sparse"])}
     for index, profile in enumerate(analysis["profiles"]):
@@ -467,10 +475,13 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
     reduce.lower_sha(expected_content_sha256, "trusted expected query content")
     reduce.reject_symlink_components(workspace, "query workspace")
     manifest = reduce.json_file(workspace / "manifest.json")
-    reduce.exact_keys(manifest, {"schema", "state", "artifacts", "source_rows",
-                                 "input_root_sha256", "elapsed_seconds",
-                                 "scientific_content_sha256"}, "query manifest")
-    if manifest["schema"] != "hadronization_query_workspace_v2":
+    manifest_fields = {"schema", "state", "artifacts", "source_rows",
+                       "input_root_sha256", "elapsed_seconds", "scientific_content_sha256"}
+    if manifest.get("schema") == "hadronization_query_workspace_v3":
+        manifest_fields.add("sparse_digest_schema")
+    reduce.exact_keys(manifest, manifest_fields, "query manifest")
+    if manifest["schema"] not in {"hadronization_query_workspace_v2",
+                                  "hadronization_query_workspace_v3"}:
         raise ValueError("query manifest schema differs")
     if manifest["scientific_content_sha256"] != expected_content_sha256:
         raise ValueError("query scientific content differs from trusted expected identity")
@@ -502,12 +513,22 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
                                  "scientific_binding_sha256", "execution_attestation",
                                  "execution_attestation_sha256", "source_topology", "admission",
                                  "exactness"}
+    if metadata.get("schema") == "hadronization_query_metadata_v4":
+        metadata_fields.add("sparse_digest_schema")
     if analysis["version"] == "2.2.0" or "pair_population_proof" in metadata:
         metadata_fields.add("pair_population_proof")
     reduce.exact_keys(metadata, metadata_fields, "query metadata")
     parent = metadata["input_receipt"]
     validate_parent(parent)
-    if (metadata["schema"] != "hadronization_query_metadata_v3" or
+    legacy = metadata["schema"] == "hadronization_query_metadata_v3"
+    current = metadata["schema"] == "hadronization_query_metadata_v4"
+    digest_schema = (LEGACY_SPARSE_DIGEST_SCHEMA if legacy else
+                     metadata.get("sparse_digest_schema"))
+    if ((not legacy and not current) or
+            (legacy and manifest["schema"] != "hadronization_query_workspace_v2") or
+            (current and (manifest["schema"] != "hadronization_query_workspace_v3" or
+                          digest_schema != SPARSE_DIGEST_SCHEMA or
+                          manifest.get("sparse_digest_schema") != digest_schema)) or
             metadata["state"] != "NONPUBLICATION_PARTIAL" or manifest["state"] != metadata["state"]):
         raise ValueError("query workspace state/schema differs")
     if (metadata["input_root_sha256"] != manifest["input_root_sha256"] or
@@ -549,7 +570,8 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
         raise ValueError("query independent scientific content binding differs")
     if (workspace / "query.tsv").read_text() != layout_spec(
             analysis, layout, topology, dictionary, content_sha,
-            metadata["scientific_binding_sha256"], metadata["execution_attestation_sha256"]):
+            metadata["scientific_binding_sha256"], metadata["execution_attestation_sha256"],
+            None if legacy else digest_schema):
         raise ValueError("query serialized scientific/axis config differs")
     environment, binary, build_receipt = build_tool(work, prepared_pack)
     if prepared_pack is not None and metadata["query_build"] != build_receipt:
@@ -563,6 +585,12 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
         raise ValueError("query pair population proof was not independently recomputed")
     if "SCIENTIFIC_CONTENT_SHA256\t" + content_sha + "\n" not in output:
         raise ValueError("query recomputed scientific content identity differs")
+    canonical_lines = [line.split("\t", 1)[1] for line in output.splitlines()
+                       if line.startswith("CANONICAL_SCIENTIFIC_CONTENT_SHA256\t")]
+    if (len(canonical_lines) != 1 or
+            (current and canonical_lines[0] != content_sha)):
+        raise ValueError("query canonical scientific content identity differs")
+    reduce.lower_sha(canonical_lines[0], "canonical query scientific content")
     if "METADATA_SHA256\t" + reduce.sha_file(workspace / "metadata.json") + "\n" not in output:
         raise ValueError("query embedded/external metadata identity differs")
     for name in layout["trees"]:
@@ -640,7 +668,8 @@ def build(args):
                                                     prepared=args.prepared_pack is not None)
     environment, binary, build_receipt = build_tool(work, args.prepared_pack)
     metadata = {
-        "schema": "hadronization_query_metadata_v3", "state": "NONPUBLICATION_PARTIAL",
+        "schema": "hadronization_query_metadata_v4", "state": "NONPUBLICATION_PARTIAL",
+        "sparse_digest_schema": SPARSE_DIGEST_SCHEMA,
         "query_content_digests": "__QUERY_CONTENT_DIGESTS__",
         "query_content_sha256": "__QUERY_CONTENT_SHA256__",
         "pair_population_proof": "__PAIR_POPULATION_PROOF__",
@@ -688,7 +717,8 @@ def build(args):
                 reduce.fsync_file(artifact)
             artifacts = [{"path": p.name, "bytes": p.stat().st_size, "sha256": reduce.sha_file(p)}
                          for p in sorted(staging.iterdir())]
-            manifest = {"schema": "hadronization_query_workspace_v2", "state": "NONPUBLICATION_PARTIAL",
+            manifest = {"schema": "hadronization_query_workspace_v3", "state": "NONPUBLICATION_PARTIAL",
+                        "sparse_digest_schema": SPARSE_DIGEST_SCHEMA,
                         "artifacts": artifacts, "source_rows": receipt["rows"],
                         "input_root_sha256": metadata["input_root_sha256"],
                         "scientific_content_sha256": completed_metadata["query_content_sha256"],

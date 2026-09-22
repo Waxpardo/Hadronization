@@ -139,6 +139,16 @@ def _members(metadata):
     return result
 
 
+def _query_digest_schema(metadata):
+    if metadata.get("schema") == "hadronization_query_metadata_v3" and \
+            "sparse_digest_schema" not in metadata:
+        return q.LEGACY_SPARSE_DIGEST_SCHEMA
+    if (metadata.get("schema") == "hadronization_query_metadata_v4" and
+            metadata.get("sparse_digest_schema") == q.SPARSE_DIGEST_SCHEMA):
+        return q.SPARSE_DIGEST_SCHEMA
+    raise ValueError("query sparse digest compatibility contract differs")
+
+
 def scientific_identity(index):
     return {"schema": "hadronization_query_collection_science_v1",
             "analysis_sha256": index["analysis_sha256"],
@@ -185,7 +195,8 @@ def create(workspaces, content_pins, expected_sources, output, work_root, test_o
         identity = (metadata["analysis_sha256"], metadata["layout_sha256"],
                     metadata["dictionary_body_sha256"], binding["campaign"],
                     binding["manifest_sha256"], binding["block_assignment"]["count"],
-                    tuple(sorted(binding["tune_ordinals"].items())))
+                    tuple(sorted(binding["tune_ordinals"].items())),
+                    _query_digest_schema(metadata))
         if common is None:
             common = identity
         elif common != identity:
@@ -229,16 +240,20 @@ def read(path, expected_sha256, verify_roots=True, *, fact_cache=None):
     if [s["ordinal"] for s in index["shards"]] != sorted({s["ordinal"] for s in index["shards"]}):
         raise ValueError("collection shard domain differs")
     _check_members(index, sorted(index["sources"], key=lambda m: m["source_id"]))
+    digest_schemas = set()
     for shard in index["shards"]:
         for key in ("workspace_manifest", "query_root", "metadata"):
             _check_fact(shard[key], fact_cache)
         metadata = r.json_file(Path(shard["metadata"]["path"]))
+        digest_schemas.add(_query_digest_schema(metadata))
         if (_members(metadata) != shard["members"] or
                 metadata["query_content_sha256"] != shard["scientific_content_sha256"] or
                 metadata["dictionary_body_sha256"] != index["dictionary_body_sha256"] or
                 metadata["analysis_sha256"] != index["analysis_sha256"] or
                 metadata["layout_sha256"] != index["layout_sha256"]):
             raise ValueError("query shard metadata/content membership differs")
+    if len(digest_schemas) != 1:
+        raise ValueError("collection mixes legacy and canonical sparse identities")
     if index["layout"] == "MERGED":
         expected = set(index["tune_ordinals"])
         if {p["tune"] for p in index["partitions"]} != expected or len(index["partitions"]) != len(expected):

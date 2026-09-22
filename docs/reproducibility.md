@@ -53,9 +53,11 @@ mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
 export NONZERO_CHAIN_BASE="$PWD/data/work/nonzero-example"
 python3 tests/fixtures/nonzero_chain_v22/build.py
+export NONZERO_CHAIN_REPORT="$NONZERO_CHAIN_BASE/oracle.json"
+python3 tests/fixtures/nonzero_chain_v22/oracle.py
 ```
 
-The builder creates three tune domains with ten original blocks. `NONZERO_CHAIN_SOURCES_PER_BLOCK` accepts 1 or 2 and defaults to 1. The standalone oracle expects unsplit merged sparse objects and cannot read the current block-partitioned merge layout. Use `merge verify` for the physical merge check.
+The builder creates three tune domains with ten original blocks. `NONZERO_CHAIN_SOURCES_PER_BLOCK` accepts 1 or 2 and defaults to 1. The standalone oracle reads the declared block-object inventory. It independently sums the complete sparse domain and Sumw2, then compares them with the source-query domain.
 
 The resulting collection has `TEST_ONLY` state. Its `merged/index.json` and `expected-sources.json` can exercise `reduce run` without production site records. Supply independently recorded hashes for these files and `config/analysis.json`. Do not use `--representative` to claim complete figure coverage.
 

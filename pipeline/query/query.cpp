@@ -40,7 +40,7 @@ struct Layout {
   std::map<int,std::set<int>> associatePdgs;
   std::vector<HadronizationQuery::Profile> profiles;
   std::string text, analysisVersion, contentSha, scientificBindingSha, executionAttestationSha,
-              dictionarySha;
+              dictionarySha, sparseDigestSchema;
 };
 
 std::vector<std::string> Split(const std::string& text) {
@@ -60,8 +60,11 @@ Layout ReadLayout(const std::string& text) {
   Layout layout; layout.text = text;
   std::istringstream input(text);
   std::string line;
-  if (!std::getline(input, line) || line != "hadronization_root_query_spec_v3")
+  if (!std::getline(input, line) ||
+      (line != "hadronization_root_query_spec_v3" && line != "hadronization_root_query_spec_v4"))
     throw std::runtime_error("query spec schema differs");
+  const bool legacySpec=line=="hadronization_root_query_spec_v3";
+  if (legacySpec) layout.sparseDigestSchema="hadronization_query_sparse_content_v1";
   bool ended = false;
   while (std::getline(input, line)) {
     const auto fields = Split(line);
@@ -76,6 +79,10 @@ Layout ReadLayout(const std::string& text) {
       layout.executionAttestationSha=fields[1];
     } else if (fields.size() == 2 && fields[0] == "DICTIONARY_SHA256" && layout.dictionarySha.empty()) {
       layout.dictionarySha=fields[1];
+    } else if (fields.size() == 2 && fields[0] == "SPARSE_DIGEST_SCHEMA" &&
+               layout.sparseDigestSchema.empty() && !legacySpec &&
+               fields[1] == "hadronization_query_sparse_content_v2") {
+      layout.sparseDigestSchema=fields[1];
     } else if (fields.size() == 6 && fields[0] == "PROFILE") {
       layout.profiles.push_back(HadronizationQuery::ReadProfile(
           std::stoi(fields[1]),fields[2],fields[3],fields[4],fields[5]));
@@ -109,9 +116,17 @@ Layout ReadLayout(const std::string& text) {
     } else throw std::runtime_error("unknown query spec record");
   }
   if (!ended || input.peek() != std::istringstream::traits_type::eof() || layout.pdgs.empty() ||
+      layout.sparseDigestSchema != (legacySpec ? "hadronization_query_sparse_content_v1" :
+                                                "hadronization_query_sparse_content_v2") ||
       (layout.analysisVersion=="2.2.0" && (layout.triggerPdgs.empty() ||
        layout.associatePdgs[4].empty() || layout.associatePdgs[5].empty())))
     throw std::runtime_error("query spec ending differs");
+  Axis species;
+  for (std::size_t i=0;i<=layout.pdgs.size();++i)
+    species.edges.push_back(static_cast<double>(i)-0.5);
+  for (const std::string name:{"pdg","trigger_pdg","associate_pdg"})
+    if (!layout.axes.emplace(name,species).second)
+      throw std::runtime_error("query spec declares reserved dictionary axis");
   return layout;
 }
 
@@ -256,9 +271,6 @@ struct Plane {
   std::map<int,int> dictionary;
   explicit Plane(TFile&,Layout requested) : layout(std::move(requested)) {
     for (const int pdg:layout.pdgs) dictionary.emplace(pdg,static_cast<int>(dictionary.size()));
-    Axis species;
-    for (std::size_t i=0;i<=dictionary.size();++i) species.edges.push_back(static_cast<double>(i)-0.5);
-    for (const std::string name:{"pdg","trigger_pdg","associate_pdg"}) layout.axes[name]=species;
     for (const auto& object:layout.sparse) {
       std::vector<int> bins; std::vector<double> low,high;
       for (const auto& name:object.second) {
@@ -506,38 +518,131 @@ std::string TreeDigest(TFile& file,const std::string& name,const std::vector<std
   return digest.FinalHex();
 }
 
-std::string SparseDigest(const THnSparseD& histogram) {
-  Hadronization::Sha256 digest;
-  DigestField(digest,"hadronization_query_sparse_content_v1");
-  DigestField(digest,histogram.GetName());DigestField(digest,histogram.GetTitle());
-  DigestField(digest,std::to_string(histogram.GetNdimensions()));
-  DigestField(digest,DoubleBits(histogram.GetEntries()));
-  DigestField(digest,histogram.GetCalculateErrors()?"Sumw2":"no_Sumw2");
+std::string ExpectedLabel(const Layout& layout,const std::string& axisName,int bin) {
+  if (axisName!="pdg" && axisName!="trigger_pdg" && axisName!="associate_pdg") return "";
+  if (bin<1 || bin>static_cast<int>(layout.pdgs.size())) return "";
+  auto item=layout.pdgs.begin();std::advance(item,bin-1);return std::to_string(*item);
+}
+
+void ValidateSparseLayout(const THnSparseD& histogram,const std::string& family,
+                          const std::vector<std::string>& fields,const Layout& layout) {
+  const std::string objectName="sparse_"+family;
+  if (std::string(histogram.GetName())!=objectName || std::string(histogram.GetTitle())!=objectName ||
+      histogram.GetNdimensions()!=static_cast<int>(fields.size()) || !histogram.GetCalculateErrors() ||
+      !std::isfinite(histogram.GetEntries()))
+    throw std::runtime_error("sparse declared object/shape/Sumw2/entries differs");
   for (int a=0;a<histogram.GetNdimensions();++a) {
-    const auto* axis=histogram.GetAxis(a);
-    DigestField(digest,axis->GetName());DigestField(digest,axis->GetTitle());
-    DigestField(digest,std::to_string(axis->GetNbins()));
-    for (int b=0;b<=axis->GetNbins()+1;++b) {
-      DigestField(digest,DoubleBits(axis->GetBinLowEdge(b)));
-      DigestField(digest,axis->GetBinLabel(b));
-    }
+    const auto* axis=histogram.GetAxis(a);const auto& field=fields.at(a);
+    const auto& declared=layout.axes.at(field);
+    const auto* stored=axis->GetXbins();
+    if (std::string(axis->GetName())!=field || std::string(axis->GetTitle())!=field ||
+        axis->GetNbins()!=static_cast<int>(declared.edges.size()-1) ||
+        stored->GetSize()!=static_cast<int>(declared.edges.size()) ||
+        axis->GetXmin()!=declared.edges.front() || axis->GetXmax()!=declared.edges.back())
+      throw std::runtime_error("sparse declared axis identity differs");
+    for (int edge=0;edge<stored->GetSize();++edge)
+      if (stored->At(edge)!=declared.edges.at(edge))
+        throw std::runtime_error("sparse stored regular edge differs from declared layout");
+    for (int bin=0;bin<=axis->GetNbins()+1;++bin)
+      if (std::string(axis->GetBinLabel(bin))!=ExpectedLabel(layout,field,bin))
+        throw std::runtime_error("sparse regular/flow label differs from declared layout");
   }
-  std::map<std::vector<int>,std::pair<double,double>> cells;
+}
+
+using SparseCells = std::map<std::vector<int>,std::pair<double,double>>;
+
+SparseCells ReadSparseCells(const THnSparseD& histogram) {
+  SparseCells cells;
   for (Long64_t b=0;b<histogram.GetNbins();++b) {
     std::vector<int> coordinates(histogram.GetNdimensions());
     const double value=histogram.GetBinContent(b,coordinates.data());
-    if (!cells.emplace(coordinates,std::make_pair(value,histogram.GetBinError2(b))).second)
-      throw std::runtime_error("duplicate sparse scientific cell");
+    const double variance=histogram.GetBinError2(b);
+    for (int a=0;a<histogram.GetNdimensions();++a)
+      if (coordinates[a]<0 || coordinates[a]>histogram.GetAxis(a)->GetNbins()+1)
+        throw std::runtime_error("sparse scientific coordinate lies outside flow domain");
+    if (!std::isfinite(value) || !std::isfinite(variance) || variance<0 ||
+        !cells.emplace(coordinates,std::make_pair(value,variance)).second)
+      throw std::runtime_error("invalid/duplicate sparse scientific cell");
   }
+  return cells;
+}
+
+void DigestSparseCells(Hadronization::Sha256& digest,const SparseCells& cells) {
   DigestField(digest,std::to_string(cells.size()));
   for (const auto& cell:cells) {
     for (const int coordinate:cell.first) DigestField(digest,std::to_string(coordinate));
     DigestField(digest,DoubleBits(cell.second.first));DigestField(digest,DoubleBits(cell.second.second));
   }
+}
+
+std::string SparseDigestV2(const THnSparseD& histogram,const std::string& family,
+                           const std::vector<std::string>& fields,const Layout& layout) {
+  ValidateSparseLayout(histogram,family,fields,layout);
+  Hadronization::Sha256 digest;
+  DigestField(digest,"hadronization_query_sparse_content_v2");
+  DigestField(digest,histogram.GetName());DigestField(digest,histogram.GetTitle());
+  DigestField(digest,std::to_string(histogram.GetNdimensions()));
+  DigestField(digest,DoubleBits(histogram.GetEntries()));
+  DigestField(digest,"Sumw2");
+  for (int a=0;a<histogram.GetNdimensions();++a) {
+    const auto* axis=histogram.GetAxis(a);const auto& declared=layout.axes.at(fields.at(a));
+    DigestField(digest,axis->GetName());DigestField(digest,axis->GetTitle());
+    DigestField(digest,std::to_string(axis->GetNbins()));
+    DigestField(digest,declared.inclusive?"inclusive_upper_endpoint":"halfopen_upper_endpoint");
+    DigestField(digest,"explicit_underflow_bin_0_and_overflow_bin_n_plus_1");
+    for (const double edge:declared.edges) DigestField(digest,DoubleBits(edge));
+    for (int b=0;b<=axis->GetNbins()+1;++b) DigestField(digest,axis->GetBinLabel(b));
+  }
+  DigestSparseCells(digest,ReadSparseCells(histogram));
   return digest.FinalHex();
 }
 
-std::string ContentDigests(TFile& file,const Layout& layout,const Histograms* derived=nullptr) {
+enum class LegacyFlowEncoding { RuntimeAccessor, Root640PhiOverflow };
+
+double LegacyEdge(const TAxis& axis,int bin,LegacyFlowEncoding encoding) {
+  if (encoding==LegacyFlowEncoding::Root640PhiOverflow && std::string(axis.GetName())=="phi" &&
+      axis.GetNbins()==100 && bin==101 && DoubleBits(axis.GetXbins()->At(100))=="400921fb54442d18") {
+    U64 bits=0x400921fb54442d19ULL;double value=0;std::memcpy(&value,&bits,sizeof(value));return value;
+  }
+  return axis.GetBinLowEdge(bin);
+}
+
+std::string SparseDigestV1(const THnSparseD& histogram,const std::string& family,
+                           const std::vector<std::string>& fields,const Layout& layout,
+                           LegacyFlowEncoding encoding) {
+  ValidateSparseLayout(histogram,family,fields,layout);
+  Hadronization::Sha256 digest;
+  DigestField(digest,"hadronization_query_sparse_content_v1");
+  DigestField(digest,histogram.GetName());DigestField(digest,histogram.GetTitle());
+  DigestField(digest,std::to_string(histogram.GetNdimensions()));
+  DigestField(digest,DoubleBits(histogram.GetEntries()));DigestField(digest,"Sumw2");
+  for (int a=0;a<histogram.GetNdimensions();++a) {
+    const auto* axis=histogram.GetAxis(a);
+    DigestField(digest,axis->GetName());DigestField(digest,axis->GetTitle());
+    DigestField(digest,std::to_string(axis->GetNbins()));
+    for (int b=0;b<=axis->GetNbins()+1;++b) {
+      DigestField(digest,DoubleBits(LegacyEdge(*axis,b,encoding)));
+      DigestField(digest,axis->GetBinLabel(b));
+    }
+  }
+  DigestSparseCells(digest,ReadSparseCells(histogram));return digest.FinalHex();
+}
+
+std::string ContentSha(const std::string& identities) {
+  Hadronization::Sha256 digest;digest.Update(identities);return digest.FinalHex();
+}
+
+std::string SerializeIdentities(const std::map<std::string,std::string>& identities) {
+  std::string result="{";
+  for (const auto& identity:identities) {
+    if (result.size()>1) result+=',';
+    result+='"'+identity.first+"\":\""+identity.second+'"';
+  }
+  return result+'}';
+}
+
+std::string ContentDigestsFor(TFile& file,const Layout& layout,const Histograms* derived,
+                              LegacyFlowEncoding legacyEncoding) {
   const auto validSha=[](const std::string& value) {
     return value.size()==64 && value.find_first_not_of("0123456789abcdef")==std::string::npos;
   };
@@ -553,18 +658,26 @@ std::string ContentDigests(TFile& file,const Layout& layout,const Histograms* de
     const auto* histogram=derived?derived->at(sparse.first).get():
         dynamic_cast<THnSparseD*>(file.Get(("sparse_"+sparse.first).c_str()));
     if (!histogram) throw std::runtime_error("missing scientific sparse object");
-    identities["sparse:"+sparse.first]=SparseDigest(*histogram);
+    identities["sparse:"+sparse.first]=layout.sparseDigestSchema=="hadronization_query_sparse_content_v2"?
+        SparseDigestV2(*histogram,sparse.first,sparse.second,layout):
+        SparseDigestV1(*histogram,sparse.first,sparse.second,layout,legacyEncoding);
   }
-  std::string result="{";
-  for (const auto& identity:identities) {
-    if (result.size()>1) result+=',';
-    result+='"'+identity.first+"\":\""+identity.second+'"';
-  }
-  return result+'}';
+  return SerializeIdentities(identities);
 }
 
-std::string ContentSha(const std::string& identities) {
-  Hadronization::Sha256 digest;digest.Update(identities);return digest.FinalHex();
+std::string ContentDigests(TFile& file,const Layout& layout,const Histograms* derived=nullptr) {
+  const auto runtime=ContentDigestsFor(file,layout,derived,LegacyFlowEncoding::RuntimeAccessor);
+  if (layout.sparseDigestSchema=="hadronization_query_sparse_content_v2" ||
+      ContentSha(runtime)==layout.contentSha) return runtime;
+  const auto root640=ContentDigestsFor(file,layout,derived,LegacyFlowEncoding::Root640PhiOverflow);
+  if (ContentSha(root640)==layout.contentSha) return root640;
+  throw std::runtime_error("legacy sparse identity matches no explicitly supported encoding");
+}
+
+std::string CanonicalContentDigests(TFile& file,const Layout& layout,const Histograms* derived=nullptr) {
+  Layout canonical=layout;
+  canonical.sparseDigestSchema="hadronization_query_sparse_content_v2";
+  return ContentDigestsFor(file,canonical,derived,LegacyFlowEncoding::RuntimeAccessor);
 }
 
 void ReplaceUnique(std::string& text,const std::string& token,const std::string& value) {
@@ -625,6 +738,8 @@ void Verify(const std::string& path,const Layout& layout) {
       metadataText.find("\"query_content_sha256\":\""+sha+"\"")==std::string::npos)
     throw std::runtime_error("query internal scientific content digest differs");
   std::cout<<"SCIENTIFIC_CONTENT_SHA256\t"<<sha<<'\n';
+  std::cout<<"CANONICAL_SCIENTIFIC_CONTENT_SHA256\t"
+           <<ContentSha(CanonicalContentDigests(file,layout))<<'\n';
   Plane plane(file,layout); const auto proof=Populate(file,plane);
   if (layout.analysisVersion=="2.2.0" &&
       metadataText.find("\"pair_population_proof\":"+proof.Json(layout.scientificBindingSha))==std::string::npos &&
@@ -730,9 +845,12 @@ int main(int argc,char** argv) {
     if (argc==4 && std::string(argv[1])=="content") {
       TFile file(argv[3],"READ");
       if (file.IsZombie()) throw std::runtime_error("cannot inspect scientific content");
-      const auto identities=ContentDigests(file,ReadLayout(ReadText(argv[2])));
+      const auto layout=ReadLayout(ReadText(argv[2]));
+      const auto identities=ContentDigests(file,layout);
       std::cout<<"CONTENT_DIGESTS\t"<<identities<<'\n'
-               <<"SCIENTIFIC_CONTENT_SHA256\t"<<ContentSha(identities)<<'\n';return 0;
+               <<"SCIENTIFIC_CONTENT_SHA256\t"<<ContentSha(identities)<<'\n'
+               <<"CANONICAL_SCIENTIFIC_CONTENT_SHA256\t"
+               <<ContentSha(CanonicalContentDigests(file,layout))<<'\n';return 0;
     }
     if (argc==6 && std::string(argv[1])=="scan") {
       const std::string name=(std::string(argv[3])=="NONE" && std::string(argv[4])=="NONE")?

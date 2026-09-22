@@ -68,6 +68,10 @@ A dictionary ordinal is meaningful only with its dictionary digest. Every query 
 
 Sparse contents use weighted additive counts. Sumw2 stores squared-weight accumulation. These stored sums do not replace the block jackknife covariance of nonlinear observables. The query retains both activity definitions simultaneously and has no sparse replica for each pT profile.
 
+New workspaces use sparse-content digest v2, query metadata v4 and workspace manifest v3. The digest binds the declared axis order, names, titles, regular edges, endpoint policy, flow-bin policy, labels, entries, occupied coordinates, contents and Sumw2. Verification first compares each stored variable-edge axis with the declared layout. The digest does not use ROOT-computed underflow or overflow edge values.
+
+Older metadata v3 workspaces keep their recorded v1 scientific identity. Verification accepts only the runtime v1 encoding or the defined ROOT 6.40 phi-overflow encoding, after the same exact semantic checks. It reports a separate v2 canonical comparison identity but does not replace or re-sign the recorded v1 identity. Collections cannot mix v1 and v2 query identities.
+
 ### Sparse axes
 
 The following order is part of [query.json](../config/query.json):
