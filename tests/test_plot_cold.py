@@ -19,6 +19,43 @@ SPEC.loader.exec_module(plot)
 
 
 class ColdDrawingBoundary(unittest.TestCase):
+    def test_spectrum_key_headroom_keeps_data_and_ratio_scale(self):
+        import copy
+        absolute = {'id':'g9.absolute', 'geometry':[0.,.34,1.,.9],
+                    'margins':[.16,.04,0.,.13], 'x_range':[-3.,3.],
+                    'y_range':[.0099,.0101], 'log_y':False,
+                    'series':[{'tune':tune, 'points':[
+                        {'state':'DRAW','y':.01008,'error':.000015,
+                         'bin_high':3.,'display_x':2.9},
+                        {'state':'MISSING_VALUE','y':None,'error':None}]} for tune in
+                              ['MONASH','JUNCTIONS','CLOSEPACKING']]}
+        ratio = {'id':'g9.ratio', 'y_range':[.97,1.04], 'series':[]}
+        page = {'role':'spectra.signed_heavy', 'text_pixels':18,
+                'width':1100, 'height':1200, 'panels':[absolute,ratio]}
+        original = copy.deepcopy(page)
+        plot.reserve_spectrum_tune_key([page])
+        self.assertGreater(absolute['y_range'][1],.0101)
+        self.assertEqual(absolute['y_range'][0],.0099)
+        self.assertEqual(absolute['series'],original['panels'][0]['series'])
+        self.assertEqual(ratio,original['panels'][1])
+
+    def test_spectrum_key_preserves_an_already_clear_frame(self):
+        import copy
+        panel = {'id':'g9.absolute', 'geometry':[0.,.34,1.,.9],
+                 'margins':[.16,.04,0.,.13], 'x_range':[0.,250.],
+                 'y_range':[-.01,.2], 'log_y':False,
+                 'series':[{'tune':tune, 'points':[
+                     {'state':'DRAW','y':.1,'error':.002,
+                      'bin_high':5.,'display_x':2.5},
+                     {'state':'DRAW','y':0.,'error':None,
+                      'bin_high':250.,'display_x':249.}]} for tune in
+                           ['MONASH','JUNCTIONS','CLOSEPACKING']]}
+        page = {'role':'spectra.signed_heavy','text_pixels':18,
+                'width':1100,'height':1200,'panels':[panel]}
+        original = copy.deepcopy(page)
+        plot.reserve_spectrum_tune_key([page])
+        self.assertEqual(page,original)
+
     def test_class_pattern_digest_matches_native_renderer(self):
         config,_=plot.checked_plot_config(ROOT/'config/plot.json')
         digest=plot.sha_bytes(plot.canonical(

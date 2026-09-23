@@ -1581,6 +1581,45 @@ def species_latex_label(pdg, value):
     return compact.get(value, value)
 
 
+def reserve_spectrum_tune_key(pages):
+    """Add display headroom where a spectrum would intersect its tune key."""
+    for page in pages:
+        if page['role'] != 'spectra.signed_heavy':
+            continue
+        panel = next(p for p in page['panels'] if p['id'] == 'g9.absolute')
+        tunes = {s['tune'] for s in panel['series']}
+        if not tunes:
+            continue
+        font = max(page['text_pixels'], math.ceil(8*page['width']/(18*72/2.54)))
+        font += 2 if page['width'] > 1500 else 0
+        width = page['width']*(panel['geometry'][2]-panel['geometry'][0])
+        height = page['height']*(panel['geometry'][3]-panel['geometry'][1])
+        left, right, bottom, top = panel['margins']
+        key_width = font*(.62*max(map(len, tunes))+3.)/width
+        x_fraction = (1-right-key_width-.975*font/width-left)/(1-left-right)
+        xmin, xmax = panel['x_range']
+        key_xmin = xmin+(xmax-xmin)*x_fraction
+        occupied = []
+        for series in panel['series']:
+            for point in series['points']:
+                if point['state'] != 'DRAW' or point['y'] is None:
+                    continue
+                xhigh = point.get('bin_high')
+                if xhigh is None:
+                    xhigh = point['display_x']
+                if xhigh is not None and xhigh >= key_xmin:
+                    occupied.append(point['y']+(point['error'] or 0.))
+        if not occupied:
+            continue
+        fraction = (1.65*len(tunes)+1.3)*font/(height*(1-bottom-top))
+        if fraction >= 1:
+            raise ValueError('spectrum tune key exceeds the frame height')
+        low, high = panel['y_range']
+        required = (low*math.exp(math.log(max(occupied)/low)/(1-fraction))
+                    if panel['log_y'] else low+(max(occupied)-low)/(1-fraction))
+        panel['y_range'][1] = max(high, required)
+
+
 def drawing_plan(projection, manifest, config):
     if not isinstance(projection, SimpleNamespace) or not projection.cold:
         raise ValueError("paper layout requires S-admitted cold numerics")
@@ -2211,6 +2250,7 @@ def drawing_plan(projection, manifest, config):
     synchronize_paired_y_ranges(pages)
     apply_display_limits(pages)
     join_paired_columns(pages)
+    reserve_spectrum_tune_key(pages)
     if getattr(context, 'cold', False):
         apply_cold_page_style(pages,context)
     return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}

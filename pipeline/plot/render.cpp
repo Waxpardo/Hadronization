@@ -129,7 +129,7 @@ int BodyTextPixels(const Page& page) {
 }
 int PanelLegendTextPixels(const Page& page) {
   return page.role.find("correlations.") == 0
-      ? page.textPixels : BodyTextPixels(page);
+      ? BodyTextPixels(page) + 2 : BodyTextPixels(page);
 }
 double CategoryHalfWidth(const Page& page) {
   (void)page;
@@ -148,13 +148,6 @@ double ScientificMarkerSize(const Series& series, bool dense) {
     return series.lineStyle == 1 ? 1.3 : .85;
   }
   return 1.1;
-}
-int TuneLegendColumns(std::size_t count) {
-  return static_cast<int>(std::max<std::size_t>(1,
-      std::min<std::size_t>(3, count)));
-}
-double TuneLegendLeft(std::size_t count) {
-  return .99 - .16 * TuneLegendColumns(count);
 }
 int TuneRank(const std::string& label) {
   if (label == "MONASH") return 0;
@@ -604,7 +597,13 @@ bool RotateCategoryLabels(const Page& page, const Panel& panel) {
 }
 bool SharedXTitle(const Page& page) {
   return page.role.rfind("correlations.", 0) == 0 ||
-         page.role == "balancing.baryon_meson.activity";
+         page.role == "balancing.baryon_meson.activity" ||
+         SpeciesCategoryAxis(page);
+}
+bool SharedStackYTitle(const Page& page, const Panel& panel) {
+  return page.panels.size() == 8 &&
+         page.role.rfind("balancing.", 0) == 0 &&
+         panel.id.rfind("upper.", 0) == 0;
 }
 bool SharedRightAxis(const Panel& panel) {
   return panel.geometry[0] > 0 && panel.margins[0] == 0.;
@@ -916,7 +915,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
                             std::log(panel.xHigh / panel.xLow)
                       : (value - panel.xLow) / (panel.xHigh - panel.xLow);
   };
-  if (!inset && !panel.yTitle.empty()) {
+  if (!inset && !panel.yTitle.empty() && !SharedStackYTitle(page, panel)) {
     result.push_back(TextExpectation(
         panel.yTitle, page.role.find("correlations.") == 0 ? .025 :
             (page.role.find("balancing.") == 0 &&
@@ -1039,6 +1038,83 @@ struct ExpectedLegend {
   double margin;
   std::vector<ExpectedLegendEntry> entries;
 };
+std::vector<std::pair<std::string, const Series*>> PageTuneSamples(const Page& page) {
+  std::vector<std::pair<std::string, const Series*>> result;
+  std::set<std::string> seen;
+  for (const auto& panel : page.panels) for (const auto& series : panel.series)
+    if (seen.insert(series.tune).second) result.emplace_back(series.tune, &series);
+  SortTuneSamples(result);
+  return result;
+}
+const Panel* TuneLegendPanel(const Page& page) {
+  // Pair-sign correlation pages identify their tune in the panel headings.
+  for (const auto& panel : page.panels)
+    if (panel.id.rfind("correlation.balance.", 0) == 0 ||
+        panel.id.rfind("correlation.teaching.", 0) == 0) return nullptr;
+  const Panel* target = nullptr;
+  for (const auto& panel : page.panels) {
+    if (!panel.reusePanel.empty() || panel.series.empty() ||
+        panel.id.rfind("lower.", 0) == 0 || panel.id == "g9.ratio") continue;
+    if (target == nullptr || panel.geometry[3] > target->geometry[3] ||
+        (panel.geometry[3] == target->geometry[3] &&
+         panel.geometry[0] > target->geometry[0])) target = &panel;
+  }
+  return target;
+}
+int TuneLegendTextPixels(const Page& page) {
+  return BodyTextPixels(page) + (page.width > 1500 ? 2 : 0);
+}
+std::array<double, 4> InsideTuneLegendBox(const Page& page, const Panel& panel,
+                                        std::size_t count) {
+  // Keep the reference multiplicity key exactly where it was specified.
+  if (page.role == "multiplicity.composite") return panel.legend;
+  const double pixelWidth = page.width * (panel.geometry[2]-panel.geometry[0]);
+  const double pixelHeight = page.height * (panel.geometry[3]-panel.geometry[1]);
+  const double font = TuneLegendTextPixels(page);
+  const double gapX = .65*font/pixelWidth, gapY = .65*font/pixelHeight;
+  const double left = panel.margins[0]+gapX, right = 1-panel.margins[1]-gapX;
+  const double bottom = panel.margins[2]+gapY, top = 1-panel.margins[3]-gapY;
+  std::size_t longest = 0;
+  for (const auto& tune : PageTuneSamples(page)) longest = std::max(longest, tune.first.size());
+  const double width = font*(.62*longest+3.)/pixelWidth;
+  const double height = 1.65*font*count/pixelHeight;
+  Need(width <= right-left && height <= top-bottom,
+       "tune legend cannot fit inside scientific frame");
+  const auto xNdc = [&](double value) {
+    const double fraction = panel.logX ? std::log(std::max(value,panel.xLow)/panel.xLow)/
+        std::log(panel.xHigh/panel.xLow) : (value-panel.xLow)/(panel.xHigh-panel.xLow);
+    return panel.margins[0]+fraction*(1-panel.margins[0]-panel.margins[1]);
+  };
+  const auto yNdc = [&](double value) {
+    const double fraction = panel.logY ? std::log(std::max(value,panel.yLow)/panel.yLow)/
+        std::log(panel.yHigh/panel.yLow) : (value-panel.yLow)/(panel.yHigh-panel.yLow);
+    return panel.margins[2]+fraction*(1-panel.margins[2]-panel.margins[3]);
+  };
+  std::vector<std::array<double, 4>> occupied;
+  for (const auto& series : panel.series) for (const auto& point : series.points) {
+    if (!Drawable(panel, point)) continue;
+    double x1 = point.x, x2 = point.x;
+    if (series.mode == "categories") { x1 -= CategoryHalfWidth(page); x2 += CategoryHalfWidth(page); }
+    if (series.mode == "histogram" && std::isfinite(point.binLow) && std::isfinite(point.binHigh)) {
+      x1 = point.binLow; x2 = point.binHigh;
+    }
+    const double error = std::isfinite(point.error) ? point.error : 0.;
+    occupied.push_back({xNdc(x1)-gapX/2, yNdc(point.y-error)-gapY/2,
+                        xNdc(x2)+gapX/2, yNdc(point.y+error)+gapY/2});
+  }
+  // Search the top-right frame first. No opaque legend may hide a curve or
+  // its error interval. Only display coordinates enter this layout decision.
+  for (int row = 0; row <= 20; ++row) for (int column = 0; column <= 20; ++column) {
+    const double x = right-width-(right-left-width)*column/20.;
+    const double y = top-height-(top-bottom-height)*row/20.;
+    const std::array<double,4> box{{x,y,x+width,y+height}};
+    const bool clear = std::none_of(occupied.begin(), occupied.end(), [&](const auto& data) {
+      return box[0] < data[2] && box[2] > data[0] && box[1] < data[3] && box[3] > data[1];
+    });
+    if (clear) return box;
+  }
+  throw std::runtime_error("no clear in-frame tune legend position for " + page.filename);
+}
 void VerifyLegendEntry(const TLegendEntry& actual,
                        const ExpectedLegendEntry& expected) {
   Need(std::string(actual.GetLabel()) == expected.label &&
@@ -1098,8 +1174,8 @@ void VerifyLegends(const TList& primitives,
 std::vector<ExpectedLegend> ExpectedPanelLegends(
     const Page& page, const Panel& panel, const std::vector<Page>& pages,
     std::size_t panelIndex) {
-  if (!panel.reusePanel.empty() ||
-      !PanelHasDrawing(page, panel, pages, panelIndex)) return {};
+  if (!panel.reusePanel.empty()) return {};
+  std::vector<ExpectedLegend> result;
   ExpectedLegend legend{panel.legend, 1, double(PanelLegendTextPixels(page)), true,
                         .12, {}};
   const bool sideLegend = panel.margins[1] > .3;
@@ -1113,51 +1189,32 @@ std::vector<ExpectedLegend> ExpectedPanelLegends(
   for (std::size_t seriesIndex = 0; seriesIndex < selected.size(); ++seriesIndex) {
     const Series* series = selected[seriesIndex];
     if (!ExpectedGraphs(page, panel, *series, panelIndex, seriesIndex).empty() &&
-        !series->legendLabel.empty() && labels.insert(series->legendLabel).second) {
+        !series->legendLabel.empty() && series->legendLabel != series->tune &&
+        labels.insert(series->legendLabel).second) {
       legend.entries.push_back({series->legendLabel, "lp", series, 1.4,
                                 series->lineStyle});
     }
   }
-  if (legend.entries.empty()) return {};
-  if (std::all_of(legend.entries.begin(), legend.entries.end(),
-                  [](const auto& entry) { return TuneRank(entry.label) < 3; }))
-    std::stable_sort(legend.entries.begin(), legend.entries.end(),
-        [](const auto& left, const auto& right) {
-          return TuneRank(left.label) < TuneRank(right.label);
-        });
-  return {legend};
+  if (!legend.entries.empty()) result.push_back(std::move(legend));
+  if (TuneLegendPanel(page) == &panel) {
+    const auto tunes = PageTuneSamples(page);
+    if (!tunes.empty()) {
+      ExpectedLegend key{InsideTuneLegendBox(page, panel, tunes.size()), 1,
+                         double(TuneLegendTextPixels(page)), true, .12, {}};
+      for (const auto& tune : tunes)
+        key.entries.push_back({tune.first, "lp", tune.second, 1.4, 1});
+      result.push_back(std::move(key));
+    }
+  }
+  return result;
 }
+
 std::vector<ExpectedLegend> ExpectedCanvasLegends(const Page& page) {
   std::vector<ExpectedLegend> result;
   const int textPixels = BodyTextPixels(page);
-  std::vector<std::pair<std::string, const Series*>> tuneSamples;
-  std::set<std::string> tuneIds;
   std::map<int, const Series*> classSamples;
-  for (const auto& panel : page.panels) for (const auto& series : panel.series) {
-    if (tuneIds.insert(series.tune).second)
-      tuneSamples.emplace_back(series.tune, &series);
+  for (const auto& panel : page.panels) for (const auto& series : panel.series)
     classSamples.emplace(series.lineStyle, &series);
-  }
-  SortTuneSamples(tuneSamples);
-  const bool teachingCorrelation = std::any_of(page.panels.begin(),
-      page.panels.end(), [](const Panel& item) {
-        return item.id.rfind("correlation.balance.", 0) == 0 ||
-               item.id.rfind("correlation.teaching.", 0) == 0;
-      });
-  if ((page.role.find("balancing.") == 0 ||
-       (page.role.find("correlations.") == 0 && !teachingCorrelation)) &&
-      !tuneSamples.empty()) {
-    const bool activity = page.role.find("balancing.activity.")==0;
-    ExpectedLegend legend{{TuneLegendLeft(tuneSamples.size()),
-                          activity ? .909 : .956, .99,
-                          activity ? .950 : .995},
-                          TuneLegendColumns(tuneSamples.size()),
-                          double(textPixels + 2), false, 0, {}};
-    for (const auto& tune : tuneSamples) {
-      legend.entries.push_back({tune.first, "lp", tune.second, 1.4, 1});
-    }
-    result.push_back(std::move(legend));
-  }
   if (page.role.find("balancing.activity.") == 0 && !classSamples.empty()) {
     ExpectedLegend legend{{.05, ClassLegendBottom(classSamples.size()),
                            .99, .897},
@@ -1248,6 +1305,21 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
     if (ratio!=page.panels.end() && !ratio->note.empty())
       result.push_back(TextExpectation(ratio->note,.015,.035,16));
   }
+  double stackBottom=1., stackTop=0., titleX=0.;
+  std::string stackTitle;
+  for (const auto& panel : page.panels) {
+    if (!SharedStackYTitle(page,panel) || panel.yTitle.empty()) continue;
+    Need(stackTitle.empty() || stackTitle==panel.yTitle,
+         "shared y title differs across tune rows");
+    stackTitle=panel.yTitle;
+    const double height=panel.geometry[3]-panel.geometry[1];
+    stackBottom=std::min(stackBottom,panel.geometry[1]+height*panel.margins[2]);
+    stackTop=std::max(stackTop,panel.geometry[3]-height*panel.margins[3]);
+    titleX=panel.geometry[0]+.05*(panel.geometry[2]-panel.geometry[0]);
+  }
+  if (!stackTitle.empty())
+    result.push_back(TextExpectation(stackTitle,titleX,(stackBottom+stackTop)/2,
+                                     BodyTextPixels(page),1,23,90));
   if (SharedXTitle(page)) {
     double low=1., high=0., frameY=1.;
     std::string title;
@@ -1694,7 +1766,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       frame->GetYaxis()->SetTitleSize(.060);
       frame->GetYaxis()->SetTitleOffset(1.05);
     }
-    if (!inset && !panel.yTitle.empty()) {
+    if (!inset && !panel.yTitle.empty() && !SharedStackYTitle(page, panel)) {
       TLatex label; label.SetNDC(); label.SetTextFont(43); label.SetTextSize(textPixels);
       label.SetLineWidth(1);
       label.SetTextAngle(90); label.SetTextAlign(23);
@@ -1773,18 +1845,6 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
               (page.role=="spectra.signed_heavy" ? .18 : (inset ? .14 : .09)),
           panel.xTitle.c_str());
     }
-    const auto& box = panel.legend;
-    legends.emplace_back(std::make_unique<TLegend>(box[0],box[1],box[2],box[3]));
-    TLegend& legend = *legends.back();
-    legend.SetBorderSize(0); legend.SetFillStyle(0); legend.SetTextFont(43);
-    legend.SetTextSize(PanelLegendTextPixels(page)); legend.SetMargin(.12);
-    const bool sideLegend = panel.margins[1] > .3;
-    if (!sideLegend) legend.SetNColumns(
-      panel.id.rfind("correlation.balance.", 0) == 0 ? 2 :
-      page.role.find("kinematics.")==0 ? 3 :
-      page.role == "balancing.baryon_meson.activity" ? 2 : 1);
-    std::set<std::string> legendLabels;
-    std::vector<std::pair<std::string,TGraphErrors*>> legendSamples;
     bool drawn = false;
     for (std::size_t seriesIndex = 0; seriesIndex < selected.size(); ++seriesIndex) {
       const Series* entry = selected[seriesIndex];
@@ -1878,18 +1938,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
         }
         graphs.back()->Draw("P SAME");
       }
-      // A sample retains tune marker identity even when dense bins omit markers.
-      graphs.emplace_back(std::make_unique<TGraphErrors>());
-      Style(*graphs.back(),series,false);
-      graphs.back()->SetMarkerSize(1.4);
-      if (!series.legendLabel.empty() && legendLabels.insert(series.legendLabel).second)
-        legendSamples.emplace_back(series.legendLabel, graphs.back().get());
     }
-    if (std::all_of(legendSamples.begin(), legendSamples.end(),
-                    [](const auto& sample) { return TuneRank(sample.first) < 3; }))
-      SortTuneSamples(legendSamples);
-    for (const auto& sample : legendSamples)
-      legend.AddEntry(sample.second, sample.first.c_str(), "lp");
     if (!drawn) {
       TLatex status;
       status.SetNDC(); status.SetTextFont(43); status.SetTextSize(textPixels);
@@ -1913,7 +1962,23 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
                            lines[i].c_str());
       }
     }
-    if (!inset && drawn && !legendLabels.empty()) legend.Draw();
+    for (const auto& item : ExpectedPanelLegends(page, panel, pages, index)) {
+      const auto& box=item.geometry;
+      legends.emplace_back(std::make_unique<TLegend>(box[0],box[1],box[2],box[3]));
+      auto& legend=*legends.back();
+      legend.SetBorderSize(0); legend.SetFillStyle(0); legend.SetTextFont(43);
+      legend.SetTextSize(item.textSize); legend.SetMargin(item.margin);
+      legend.SetNColumns(item.columns);
+      for (const auto& entry : item.entries) {
+        graphs.emplace_back(std::make_unique<TGraphErrors>());
+        Style(*graphs.back(),*entry.series,false);
+        graphs.back()->SetLineStyle(entry.lineStyle);
+        graphs.back()->SetLineWidth(1);
+        graphs.back()->SetMarkerSize(entry.markerSize);
+        legend.AddEntry(graphs.back().get(),entry.label.c_str(),entry.option.c_str());
+      }
+      legend.Draw();
+    }
     for (const auto& guide : panel.guides) {
       // Receipt guides outside the displayed support stay in the machine record.
       if (guide.x2 < panel.xLow || guide.x1 > panel.xHigh) continue;
@@ -1967,40 +2032,9 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
   if (!page.scientificHeader.empty())
     Text(.015,.015,page.scientificHeader,
          std::max(11,textPixels-4), kGray+2);
-  std::vector<std::pair<std::string,const Series*>> tuneSamples;
-  std::set<std::string> tuneSampleIds;
   std::map<int,const Series*> classSamples;
-  for (const auto& panel : page.panels) for (const auto& series : panel.series) {
-    if (tuneSampleIds.insert(series.tune).second)
-      tuneSamples.emplace_back(series.tune,&series);
+  for (const auto& panel : page.panels) for (const auto& series : panel.series)
     classSamples.emplace(series.lineStyle,&series);
-  }
-  SortTuneSamples(tuneSamples);
-  const bool teachingCorrelation = std::any_of(page.panels.begin(),
-      page.panels.end(), [](const Panel& item) {
-        return item.id.rfind("correlation.balance.", 0) == 0 ||
-               item.id.rfind("correlation.teaching.", 0) == 0;
-      });
-  if ((page.role.find("balancing.") == 0 ||
-       (page.role.find("correlations.") == 0 && !teachingCorrelation)) &&
-      !tuneSamples.empty()) {
-    const bool activity = page.role.find("balancing.activity.")==0;
-    legends.emplace_back(std::make_unique<TLegend>(
-        TuneLegendLeft(tuneSamples.size()), activity ? .909 : .956,
-        .99, activity ? .950 : .995));
-    auto& legend=*legends.back();
-    legend.SetNColumns(TuneLegendColumns(tuneSamples.size()));
-    legend.SetBorderSize(0); legend.SetFillStyle(0);
-    legend.SetTextFont(43); legend.SetTextSize(textPixels+2);
-    for (const auto& tune : tuneSamples) {
-      graphs.emplace_back(std::make_unique<TGraphErrors>());
-      Style(*graphs.back(),*tune.second,false);
-      graphs.back()->SetLineStyle(1); graphs.back()->SetLineWidth(1);
-      graphs.back()->SetMarkerSize(1.4);
-      legend.AddEntry(graphs.back().get(),tune.first.c_str(),"lp");
-    }
-    legend.Draw();
-  }
   if (page.role.find("balancing.activity.")==0 && !classSamples.empty()) {
     legends.emplace_back(std::make_unique<TLegend>(
         .05, ClassLegendBottom(classSamples.size()), .99, .897));
@@ -2026,7 +2060,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     label.SetNDC(); label.SetTextFont(43);
     label.SetLineWidth(1);
     label.SetTextSize(item.size); label.SetTextAlign(item.align);
-    label.SetTextColor(item.color);
+    label.SetTextColor(item.color); label.SetTextAngle(item.angle);
     label.DrawLatex(item.x,item.y,item.text.c_str());
   }
   const std::string savedDash = gStyle->GetLineStyleString(2);

@@ -101,7 +101,7 @@ The field `phase_a_t9_two_sided_quantile` is the literal key for the fixed nine-
 | `layout.facet_dimension` | `associate_family`. Fixed |
 | `layout.grid_columns_maximum` | 3. Positive integer. Layout column limit. |
 | `layout.maximum_panels_per_page` | 8. Positive integer. Controls page splitting. |
-| `layout.shared_legend_reservation` | `page_top`. Fixed |
+| `layout.shared_legend_reservation` | `page_top`. Fixed reservation for the multiplicity-class key. Tune keys appear inside a plot frame. |
 | `layout.text_pixel_size` | 18. Positive integer. ROOT drawing text scale. |
 | `layout.physical_width_cm` | 18. Fixed cm width |
 | `layout.minimum_body_text_pt` | 8. Fixed typographic point minimum |
@@ -114,6 +114,13 @@ The field `phase_a_t9_two_sided_quantile` is the literal key for the fixed nine-
 | `style_identities.species_encoding` | `facet_only`. Fixed |
 | `style_identities.tunes` | MONASH black circle, JUNCTIONS blue square, CLOSEPACKING orange triangle. Fixed IDs, RGB colors, markers and solid tune lines |
 | `style_identities.unity_reference` | Neutral gray, dotted. Fixed reference-only role |
+
+Tune keys use one vertical column in the top-right panel where available.
+The renderer selects a position clear of curves and error bars.
+Signed heavy-hadron spectra gain display headroom if their tune key needs it.
+This adjustment preserves all numerical values and the ratio-panel range.
+Three-row balancing pages have one shared yield title.
+One associate-species title sits beneath the center of both columns.
 
 The supplemental activity pages select the saved 0-1%, 40-50% and 80-90% intervals. Long dashes, dots and dash-dot lines distinguish these classes. The renderer does not substitute another interval when one is absent. The main activity pages retain all requested classes.
 
