@@ -2780,14 +2780,21 @@ def verify_pdf_fonts(path):
 def publication_pdf(path):
     """Embed fonts without rasterizing the scientific drawing."""
     canonical_pdf=canonical_root_pdf(path.read_bytes(),path.name)
+    digest=hashlib.sha256(canonical_pdf).hexdigest()
+    document_uuid='-'.join((digest[:8],digest[8:12],digest[12:16],
+                            digest[16:20],digest[20:32]))
     with tempfile.TemporaryDirectory(prefix='.pdf-export-',dir=str(path.parent)) as tmp:
         source=Path(tmp)/'input.pdf'; output=Path(tmp)/'output.pdf'
         source.write_bytes(canonical_pdf)
         subprocess.run(['gs','-q','-dSAFER','-dBATCH','-dNOPAUSE',
             '-sDEVICE=pdfwrite','-dCompatibilityLevel=1.4',
             '-dEmbedAllFonts=true','-dSubsetFonts=true','-dAutoRotatePages=/None',
-            '-dOmitInfoDate=true','-dOmitID=true','-dOmitXMP=true','-sOutputFile='+str(output),
-            '-c','<</NeverEmbed []>> setdistillerparams','-f',str(source)],
+            '-dOmitID=true','-dOmitXMP=true',
+            '-sDocumentUUID='+document_uuid,
+            '-sOutputFile='+str(output),
+            '-c','<</NeverEmbed []>> setdistillerparams','-f',str(source),
+            '-c','[ /CreationDate (D:20000101000000Z) '
+                 '/ModDate (D:20000101000000Z) /DOCINFO pdfmark'],
             check=True,capture_output=True,text=True)
         verify_pdf_fonts(output)
         # This is a private output stage. Final publication still uses the

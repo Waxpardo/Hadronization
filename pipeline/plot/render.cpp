@@ -3,6 +3,7 @@
 #include "TCanvas.h"
 #include "TColor.h"
 #include "TError.h"
+#include "TExec.h"
 #include "TFile.h"
 #include "TGraphErrors.h"
 #include "TH1F.h"
@@ -14,6 +15,7 @@
 #include "TLine.h"
 #include "TNamed.h"
 #include "TObjString.h"
+#include "TObjArray.h"
 #include "TPad.h"
 #include "TROOT.h"
 #include "TStyle.h"
@@ -1424,6 +1426,52 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
   }
   return result;
 }
+std::set<int> BandColors(const TPad& pad) {
+  std::set<int> colors;
+  TIter next(pad.GetListOfPrimitives());
+  while (auto* object = next()) {
+    if (auto* child = dynamic_cast<TPad*>(object)) {
+      const auto nested = BandColors(*child);
+      colors.insert(nested.begin(), nested.end());
+    } else if (auto* graph = dynamic_cast<TGraphErrors*>(object)) {
+      if (std::string(graph->GetTitle()).rfind("band:", 0) == 0)
+        colors.insert(graph->GetFillColor());
+    }
+  }
+  return colors;
+}
+std::string BandAlphaCommand(const TPad& pad) {
+  std::ostringstream command;
+  for (const int color : BandColors(pad))
+    command << "gROOT->GetColor(" << color << ")->SetAlpha(0.12f);";
+  return command.str();
+}
+void WriteCanvas(TCanvas& canvas, const std::string& name) {
+  // ROOT 6.30 omits unchanged palettes and drops alpha when reading them.
+  // Carry the palette explicitly. The first paint restores only band opacity.
+  TColor::DefinedColors();
+  auto* colors = gROOT->GetListOfColors();
+  TExec alpha("band_alpha", BandAlphaCommand(canvas).c_str());
+  canvas.GetListOfPrimitives()->AddFirst(&alpha);
+  canvas.GetListOfPrimitives()->Add(colors);
+  const auto written = canvas.Write(name.c_str());
+  canvas.GetListOfPrimitives()->Remove(colors);
+  canvas.GetListOfPrimitives()->Remove(&alpha);
+  Need(written > 0, "cannot write named TCanvas");
+}
+void VerifyBandAlpha(const TCanvas& canvas) {
+  const auto* alpha = dynamic_cast<TExec*>(
+      canvas.GetListOfPrimitives()->First());
+  Need(alpha && std::string(alpha->GetName()) == "band_alpha" &&
+       alpha->GetTitle() == BandAlphaCommand(canvas),
+       "canvas band-opacity restoration differs");
+  // Validate the stored paint command without evaluating arbitrary ROOT code.
+  for (const int index : BandColors(canvas)) {
+    auto* color = gROOT->GetColor(index);
+    Need(color != nullptr, "canvas band color is absent");
+    color->SetAlpha(.12f);
+  }
+}
 void VerifyCanvasArchive(const std::filesystem::path& output,
                          const std::filesystem::path& record,
                          const std::vector<Page>& pages) {
@@ -1448,6 +1496,7 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
     const std::string name = CanvasName(page);
     const auto* canvas = dynamic_cast<TCanvas*>(archive.Get(name.c_str()));
     Need(canvas != nullptr, "named TCanvas is absent from archive");
+    VerifyBandAlpha(*canvas);
     const auto* identity = dynamic_cast<TNamed*>(
         canvas->GetListOfPrimitives()->FindObject("drawing_identity"));
     Need(identity != nullptr &&
@@ -1677,7 +1726,8 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
     while (const auto* primitive = canvasIterator()) {
       const std::string className = primitive->IsA()->GetName();
       Need(className == "TPad" || className == "TLatex" ||
-           className == "TLegend" || className == "TNamed",
+           className == "TLegend" || className == "TNamed" ||
+           className == "TExec",
            "TCanvas primitive class differs from drawing record");
       const auto* pad = dynamic_cast<const TPad*>(primitive);
       if (pad != nullptr) {
@@ -1690,6 +1740,9 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
              "TCanvas named primitive set differs from drawing record");
         ++identityCount;
       }
+      if (className == "TExec")
+        Need(primitive == canvas->GetListOfPrimitives()->First(),
+             "unexpected canvas executable primitive");
     }
     Need(observedPads == expectedPads,
          "scientific TPad object set differs from drawing record");
@@ -2067,10 +2120,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
   TNamed identity("drawing_identity", PageIdentity(page).c_str());
   canvas.GetListOfPrimitives()->Add(&identity);
   archive.cd();
-  // ROOT can disable color-table streaming after creating alpha colors.
-  // Every saved canvas must carry its own palette into a fresh process.
-  TColor::DefinedColors(1);
-  Need(canvas.Write(canvasName.c_str()) > 0, "cannot write named TCanvas");
+  WriteCanvas(canvas, canvasName);
   canvas.GetListOfPrimitives()->Remove(&identity);
   gStyle->SetLineStyleString(2, savedDash.c_str());
 }

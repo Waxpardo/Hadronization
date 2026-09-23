@@ -70,9 +70,64 @@ int main() {
             root=Path(tmp); cpp=root/'band.cpp'; binary=root/'band'
             cpp.write_text(source)
             flags=shlex.split(subprocess.check_output(['root-config','--cflags','--libs'],text=True))
-            subprocess.run(['c++','-std=c++17','-I',str(ROOT),str(cpp),'-o',str(binary)]+flags,
-                           check=True,capture_output=True,text=True)
+            built = subprocess.run(['c++','-std=c++17','-I',str(ROOT),str(cpp),'-o',str(binary)]+flags,
+                                   capture_output=True,text=True)
+            self.assertEqual(built.returncode, 0, built.stderr)
             subprocess.run([str(binary)],check=True,capture_output=True,text=True)
+
+    @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
+    def test_each_canvas_restores_band_color_and_alpha_in_a_fresh_process(self):
+        source = r'''#define main render_program_main
+#include "pipeline/plot/render.cpp"
+#undef main
+int main(int argc, char** argv) {
+  gROOT->SetBatch(true);
+  if (argc != 3) return 1;
+  if (std::string(argv[1]) == "write") {
+    TFile file(argv[2], "CREATE");
+    for (int i=0;i<2;++i) {
+      TCanvas canvas(("canvas"+std::to_string(i)).c_str(), "", 400, 400);
+      TGraphErrors graph(2);
+      graph.SetTitle("band:fixture");
+      graph.SetPoint(0,0.,1.); graph.SetPoint(1,1.,1.);
+      graph.SetPointError(0,0.,.2); graph.SetPointError(1,0.,.2);
+      graph.SetFillColorAlpha(TColor::GetColor("#0077BB"), .12);
+      graph.SetFillStyle(1001); graph.Draw("A3");
+      canvas.Update(); file.cd(); WriteCanvas(canvas, canvas.GetName());
+    }
+    file.Close(); return 0;
+  }
+  TFile file(argv[2], "READ");
+  for (int i=0;i<2;++i) {
+    auto* canvas=dynamic_cast<TCanvas*>(file.Get(("canvas"+std::to_string(i)).c_str()));
+    if (!canvas) return 2;
+    // Ordinary collaborator usage must restore opacity without our verifier.
+    canvas->Draw(); canvas->Modified(); canvas->Update();
+    for (const int index : BandColors(*canvas)) {
+      auto* color=gROOT->GetColor(index);
+      if (!color || !StoredFloatClose(color->GetAlpha(),.12) ||
+          !StoredFloatClose(color->GetGreen(),119./255.) ||
+          !StoredFloatClose(color->GetBlue(),187./255.)) return 3;
+    }
+    VerifyBandAlpha(*canvas);
+    auto* alpha=dynamic_cast<TExec*>(canvas->GetListOfPrimitives()->First());
+    alpha->SetTitle("gROOT->GetColor(1)->SetAlpha(0.5f);");
+    try { VerifyBandAlpha(*canvas); return 4; } catch (const std::runtime_error&) {}
+  }
+  return 0;
+}
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); cpp=root/'palette.cpp'; binary=root/'palette'
+            cpp.write_text(source)
+            flags=shlex.split(subprocess.check_output(['root-config','--cflags','--libs'],text=True))
+            built=subprocess.run(['c++','-std=c++17','-I',str(ROOT),str(cpp),'-o',str(binary)]+flags,
+                                 capture_output=True,text=True)
+            self.assertEqual(built.returncode,0,built.stderr)
+            for mode in ('write','read'):
+                result=subprocess.run([str(binary),mode,str(root/'canvases.root')],
+                                      capture_output=True,text=True)
+                self.assertEqual(result.returncode,0,result.stdout+result.stderr)
 
     @unittest.skipUnless(shutil.which('gs') and shutil.which('pdffonts') and
                          shutil.which('root-config'), 'ROOT, Ghostscript and Poppler required')
