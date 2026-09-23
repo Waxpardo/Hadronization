@@ -366,7 +366,7 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
              key['curve']['component'])
             for key in request.expected_point_keys
             if key['curve']['role_id'].startswith('correlations.') and
-               key['curve']['quantity']=='dphi_per_trigger'}
+               key['curve']['quantity']=='dphi_density_per_trigger'}
         for trigger in (421,4122,521,5122):
             for sign in ('OS','SS'):
                 self.assertIn((trigger,None,sign),correlation)
@@ -382,7 +382,7 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
                       key['curve']['associate_pdg'],key['curve']['component'])
                      for key in dplus.expected_point_keys if
                      key['curve']['role_id']=='correlations.charm' and
-                     key['curve']['quantity']=='dphi_per_trigger'}
+                     key['curve']['quantity']=='dphi_density_per_trigger'}
         self.assertIn((411,-411,'OS'),dplus_pairs)
         self.assertIn((411,None,'SS'),dplus_pairs)
         self.assertEqual(value['sources'],source.source_lineage(['MONASH'])[
@@ -404,7 +404,7 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
         for key in full.expected_point_keys:
             curve=key['curve']
             if curve['role_id'] in ('correlations.charm','correlations.beauty') and \
-                    curve['tune_id']!='MONASH' and curve['quantity']=='dphi_per_trigger':
+                    curve['tune_id']!='MONASH' and curve['quantity']=='dphi_density_per_trigger':
                 comparison=dict(curve,quantity='ratio_to_reference_tune',
                                 reference_tune_id='MONASH')
                 self.assertTrue(present(comparison))

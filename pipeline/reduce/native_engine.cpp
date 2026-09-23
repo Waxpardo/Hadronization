@@ -266,6 +266,8 @@ struct Point {
 };
 struct Queries {
   int dphiBins=0,g9PtBins=0;
+  bool density=false,formulaSeen=false;
+  std::vector<std::pair<double,double>> dphiEdges;
   std::string requestSha,scientificRequestSha;
   std::map<std::string,std::string> sourceFamilyDigests;
   std::map<int,HR::ActivityClassSpec> classes;
@@ -306,6 +308,22 @@ Queries ReadQueries(const std::string& path,Data& data) {
       if (activityBins<data.activityBins || query.dphiBins<1 || query.g9PtBins<1)
         throw std::runtime_error("native requested/scanned axis domain differs");
       data.activityBins=activityBins;
+    } else if (fields[0]=="FORMULA") {
+      Need(fields,2);
+      if (query.formulaSeen || !query.points.empty() ||
+          (fields[1]!="projection_formulas_v2" && fields[1]!="projection_formulas_v3"))
+        throw std::runtime_error("native formula contract differs");
+      query.formulaSeen=true;query.density=fields[1]=="projection_formulas_v3";
+    } else if (fields[0]=="DPHI_BIN") {
+      Need(fields,4);
+      const double low=Number(fields[2]),high=Number(fields[3]);
+      if (!query.density || !query.points.empty() ||
+          Integer(fields[1])!=static_cast<int>(query.dphiEdges.size()) ||
+          query.dphiEdges.size()>=static_cast<std::size_t>(query.dphiBins) ||
+          !(high>low) || !std::isfinite(high-low) ||
+          (!query.dphiEdges.empty() && query.dphiEdges.back().second!=low))
+        throw std::runtime_error("native angular bin domain differs");
+      query.dphiEdges.emplace_back(low,high);
     } else if (fields[0]=="FAMILY") {
       Need(fields,3);
       if (!data.tunes.count(fields[1]) || fields[2].size()!=64 ||
@@ -356,6 +374,14 @@ Queries ReadQueries(const std::string& path,Data& data) {
           point.role=="balancing.integrated.charm" ||
           point.role=="balancing.integrated.beauty" ||
           point.role=="balancing.baryon_meson.activity";
+      if (correlation &&
+          ((query.density && query.dphiEdges.size()!=static_cast<std::size_t>(query.dphiBins)) ||
+           point.quantity!=(point.referenceTune.empty()?
+                (query.density?"dphi_density_per_trigger":"dphi_per_trigger"):
+                "ratio_to_reference_tune")))
+        throw std::runtime_error("native correlation formula/axis differs");
+      if (!correlation && point.quantity=="dphi_density_per_trigger")
+        throw std::runtime_error("native density role differs");
       if (correlation || balancing) {
         if (point.profile.empty() ||
             (correlation && (point.axis!="dphi" || point.bin<0 ||
@@ -365,7 +391,7 @@ Queries ReadQueries(const std::string& path,Data& data) {
             (balancing && (point.bin!=-1 || !point.axis.empty())))
           throw std::runtime_error("native correlation/balance point shape differs");
         const bool signSum=correlation && point.associate==0 &&
-            point.quantity=="dphi_per_trigger" &&
+            (point.quantity=="dphi_per_trigger" || point.quantity=="dphi_density_per_trigger") &&
             (point.component=="OS" || point.component=="SS" ||
              point.component=="NET") &&
             point.referencePdg==0 && point.classId==0 &&
@@ -425,6 +451,8 @@ Queries ReadQueries(const std::string& path,Data& data) {
       query.sourceFamilyDigests.size()!=data.tunes.size() ||
       query.requestSha.empty())
     throw std::runtime_error("native point ending/domain differs");
+  if (query.density && query.dphiEdges.size()!=static_cast<std::size_t>(query.dphiBins))
+    throw std::runtime_error("native angular bin domain is incomplete");
   return query;
 }
 
@@ -475,6 +503,8 @@ class Evaluator {
     const auto bounds=Class(tune,omit,point.classId);
     if (!bounds || bounds->empty) return std::nullopt;
     if (point.role.rfind("correlations.",0)==0) {
+      const double width=query_.density?
+          query_.dphiEdges.at(point.bin).second-query_.dphiEdges.at(point.bin).first:1.;
       if (point.associate==0) {
         const double denominator=Trigger(point.profile,tune,omit,*bounds,
                                          point.trigger);
@@ -483,7 +513,7 @@ class Evaluator {
             SignPairValue(point,tune,omit,*bounds,"OS",point.bin)-
             SignPairValue(point,tune,omit,*bounds,"SS",point.bin):
             SignPairValue(point,tune,omit,*bounds,point.component,point.bin));
-        return numerator/denominator;
+        return (numerator/denominator)/width;
       }
       const double os=Pair(point.profile,tune,omit,*bounds,point.trigger,
                            point.associate,-1,point.bin);
@@ -493,7 +523,7 @@ class Evaluator {
       if (denominator==0.0) return std::nullopt;
       const double numerator=point.component=="OS"?os:
           point.component=="SS"?ss:os-ss;
-      return numerator/denominator;
+      return (numerator/denominator)/width;
     }
     const double os=Pair(point.profile,tune,omit,*bounds,point.trigger,
                          point.associate,-1,-1);
@@ -665,7 +695,7 @@ class Evaluator {
     if (point.quantity=="normalized_yield")return {{"accepted_event_exposure",true}};
     if (point.quantity=="normalized_distribution" ||
         point.quantity=="normalized_spectrum")return {{"normalization_total",true}};
-    if (point.quantity=="dphi_per_trigger" ||
+    if (point.quantity=="dphi_per_trigger" || point.quantity=="dphi_density_per_trigger" ||
         point.quantity=="os_minus_ss_per_trigger")return {{"trigger",true}};
     if (point.quantity=="spectrum_ratio_to_reference_tune")
       return {{"source_normalization_total",true},

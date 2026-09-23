@@ -32,7 +32,7 @@ PAPER_ROLE_IDS = (
     "balancing.activity.charm", "balancing.activity.beauty",
     "balancing.baryon_meson.activity", "spectra.signed_heavy",
     "accounting.natural_final_heavy")
-QUANTITIES = {"dphi_per_trigger", "normalized_distribution", "os_minus_ss_per_trigger", "ratio_to_reference_tune", "baryon_meson_reference_ratio", "baryon_meson_ratio_to_reference_tune", "normalized_spectrum", "spectrum_ratio_to_reference_tune", "raw_count", "raw_weighted_sum", "normalized_yield"}
+QUANTITIES = {"dphi_per_trigger", "dphi_density_per_trigger", "normalized_distribution", "os_minus_ss_per_trigger", "ratio_to_reference_tune", "baryon_meson_reference_ratio", "baryon_meson_ratio_to_reference_tune", "normalized_spectrum", "spectrum_ratio_to_reference_tune", "raw_count", "raw_weighted_sum", "normalized_yield"}
 T1_COMPONENTS = ("hadron_count", "charm_plus_anticharm_constituent_count",
                  "beauty_plus_antibeauty_constituent_count")
 COMPONENTS = "OS|SS|OS_MINUS_SS|NONE|" + "|".join(T1_COMPONENTS)
@@ -57,6 +57,7 @@ G9_PT_EDGES = tuple([i / 2 for i in range(101)] +
 
 def expected_point_units(quantity):
     return {"dphi_per_trigger": "per_trigger_per_bin",
+            "dphi_density_per_trigger": "per_trigger_per_radian",
             "normalized_spectrum": "probability_per_bin",
             "raw_count": "count", "raw_weighted_sum": "weighted_count",
             "normalized_yield": "per_event"}.get(quantity, "1")
@@ -165,7 +166,7 @@ SCHEMAS = {
     "Member": dict(source_id="Count", tune_id="Id", logical_id="Count", accepted_attempt="Count", block_id="Count", successful_events="Count", source_root_sha256="Digest", source_scientific_digest="Digest", receipt_sha256="Digest"),
     "TuneCount": dict(tune_id="Id", count="Count"),
     "SourceSelection": dict(campaign_id="Id", campaign_descriptor_sha256="Digest", accepted_manifest_sha256="Digest", accepted_plan_digest="Digest", accepted_map_digest="Digest", members=["Member"], selected_members_sha256="Digest", expected_events_by_tune=["TuneCount"], provenance_parent_ids=["Digest"]),
-    "ProjectionRequest": dict(schema="="+REQUEST_SCHEMA, science_contract=dict(analyzer_schema="Id", structural_registry_sha256="Digest", estimator_policy_id="="+ESTIMATOR, formula_contract_version="=projection_formulas_v2"), sources="SourceSelection", scope=dict(mode="PAPER|EXPLORATORY", roles=["RoleRequest"], ordered_tunes=["Id"], reference_tune=nullable("Id"), ordered_triggers=["PDG"], ordered_associate_pairs=["PairKey"]), profiles=["Profile"], activity="ActivityRequest", classes=["ClassRequest"], axes=["AxisRequest"], observables=["ObservableRequest"], statistics=dict(block_assignment_sha256="Digest", block_ids=["Count"], expected_K="Count", uncertainty="=FINITE_MC_DELETE_ONE", covariance_groups=["CovarianceRequest"]), execution=dict(backend_policy="AUTO|EXACT_ROWS|REQUIRE_NATIVE", permitted_routes=[ROUTE], required_capabilities=["Id"]), completion=dict(require_campaign_complete="Bool", require_all_requested_points="True", permitted_scientific_statuses=[STATUS]), bindings=dict(analysis_config_sha256="Digest", particle_registry_sha256="Digest", activity_definition_sha256="Digest", expected_source_content_sha256="Digest"), presentation_binding=dict(layout_contract_version="Id", plot_config_sha256="Digest")),
+    "ProjectionRequest": dict(schema="="+REQUEST_SCHEMA, science_contract=dict(analyzer_schema="Id", structural_registry_sha256="Digest", estimator_policy_id="="+ESTIMATOR, formula_contract_version="projection_formulas_v2|projection_formulas_v3"), sources="SourceSelection", scope=dict(mode="PAPER|EXPLORATORY", roles=["RoleRequest"], ordered_tunes=["Id"], reference_tune=nullable("Id"), ordered_triggers=["PDG"], ordered_associate_pairs=["PairKey"]), profiles=["Profile"], activity="ActivityRequest", classes=["ClassRequest"], axes=["AxisRequest"], observables=["ObservableRequest"], statistics=dict(block_assignment_sha256="Digest", block_ids=["Count"], expected_K="Count", uncertainty="=FINITE_MC_DELETE_ONE", covariance_groups=["CovarianceRequest"]), execution=dict(backend_policy="AUTO|EXACT_ROWS|REQUIRE_NATIVE", permitted_routes=[ROUTE], required_capabilities=["Id"]), completion=dict(require_campaign_complete="Bool", require_all_requested_points="True", permitted_scientific_statuses=[STATUS]), bindings=dict(analysis_config_sha256="Digest", particle_registry_sha256="Digest", activity_definition_sha256="Digest", expected_source_content_sha256="Digest"), presentation_binding=dict(layout_contract_version="Id", plot_config_sha256="Digest")),
     "ResolvedClass": dict(tune_id="Id", activity_id="Id", class_id="Int", requested="ClassRequest", actual_integer_low="Int", actual_integer_high="Int", event_weight="Hex64", events="Count", empty="Bool", boundary_status="Id", coverage_status="Id", boundary_receipt_sha256="Digest"),
     "AxisSelection": dict(axis_id="Id", predicate="RangePredicate", included_regular_bins=["Count"], include_underflow="Bool", include_overflow="Bool", endpoint_adjustment="NONE|ARCHIVED_INCLUSIVE_HIGH"),
     "PrimitiveRoute": dict(primitive_family="Id", profile_id=nullable("Id"), source_kind="COMPACT_ROOT|QUERY_ROOT|ACCEPTED_ANALYZED_ROOT|TEST_ONLY_SYNTHETIC", route=ROUTE, exactness=EXACTNESS, root_object_names=["Id"], object_content_digests=["Digest"], predicate_sha256="Digest", resolved_axis_selection=["AxisSelection"], diagnostic_readers=[dict(purpose="Id", route=ROUTE, objects=["Id"])], observed_input_cells="Count", observed_input_rows="Count"),
@@ -539,9 +540,27 @@ class ProjectionRequest:
             validate_typed_phase_a_profiles(p["profiles"],
                                             list(map(number, pt_axis["edges"])))
         axes = {a["id"]: a for a in p["axes"]}
+        formula = p['science_contract']['formula_contract_version']
+        if formula == 'projection_formulas_v3':
+            for observable in p['observables']:
+                if (observable['formula_version'] != formula or
+                        observable['output_units'] != expected_point_units(observable['quantity']) or
+                        any(k['curve']['quantity'] != observable['quantity'] or
+                            k['curve']['component'] != observable['component']
+                            for k in observable['joint_point_domain'])):
+                    raise ValueError('observable formula/quantity/units binding differs')
         signed_pairs = scope["ordered_associate_pairs"]
         for point in self.expected_point_keys:
             curve = point["curve"]
+            if curve['role_id'].startswith('correlations.'):
+                absolute = ('dphi_density_per_trigger' if formula == 'projection_formulas_v3'
+                            else 'dphi_per_trigger')
+                if (curve['quantity'] != ('ratio_to_reference_tune' if curve['reference_tune_id'] else absolute) or
+                        curve['axis_id'] != 'dphi' or axes['dphi']['units'] != 'rad' or
+                        len(point['bins']) != 1 or point['bins'][0]['flow'] != 'REGULAR'):
+                    raise ValueError('correlation formula/quantity/axis binding differs')
+            elif curve['quantity'] == 'dphi_density_per_trigger':
+                raise ValueError('density quantity requires a correlation role')
             if curve["role_id"].startswith("correlations.") and curve["associate_pdg"] is None:
                 sector = curve["role_id"].rsplit(".", 1)[1].upper()
                 trigger = curve["trigger_pdg"]
@@ -563,7 +582,7 @@ class ProjectionRequest:
                             conjugates)
                 complete = all(complete_sign(component)
                                for component in components)
-                if (curve["quantity"] != "dphi_per_trigger" or
+                if (curve["quantity"] not in ("dphi_per_trigger", "dphi_density_per_trigger") or
                         curve["reference_tune_id"] is not None or
                         curve["component"] not in
                             ("OS", "SS", "OS_MINUS_SS") or
@@ -881,11 +900,14 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
         raise ValueError("source structural registry differs from current analyzer contract")
     eta = definitions.get("pair_acceptance", presentation["selection_definitions"]["pair_acceptance"])["eta"]["value"]
     selected_states, requested_pairs = _query_model().state_registry(requested_analysis)
+    # Broad query storage includes diagnostic states. Central pair observables
+    # use only the normalized registry's explicitly eligible signed members.
+    requested_pairs = [pair for pair in requested_pairs if pair['central_eligible']]
     if native is not None and any(
             pair["trigger_pdg"] in paper["trigger_pdgs"] and
             pair["associate_pdg"] not in paper["signed_pdgs"]
             for pair in requested_pairs):
-        raise ValueError("inclusive heavy-flavour sign sum requires every registered associate")
+        raise ValueError("inclusive heavy-flavour sign sum requires every eligible associate")
     g9_species = definitions["g9_species_pdgs"]
     dynamic = domains.get("dynamic_species")
     registered_g9={state['pdg'] for state in selected_states
@@ -999,12 +1021,12 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
                         raise ValueError("identified correlation pair is absent")
                     for component in ("OS", "SS", "OS_MINUS_SS"):
                         # A null associate is an explicit, registry-bound sum
-                        # over every signed associate in this flavour sector.
-                        add(tune, "dphi_per_trigger", trigger, None,
+                        # over every eligible signed associate in this flavour sector.
+                        add(tune, "dphi_density_per_trigger", trigger, None,
                             component=component, class_id=0, axis="dphi")
                     if abs(trigger) in (4122, 5122):
                         for component in ("OS", "SS"):
-                            add(tune, "dphi_per_trigger", trigger, -trigger,
+                            add(tune, "dphi_density_per_trigger", trigger, -trigger,
                                 component=component, class_id=0, axis="dphi")
             for pair in pairs:
                 if pair["sign"] != "OS":
@@ -1014,7 +1036,7 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
                     if pair["sector"].lower() != role_id.rsplit(".", 1)[1] or abs(a) != abs(ref):
                         continue
                     for component in ("OS", "SS", "OS_MINUS_SS"):
-                        add(tune, "dphi_per_trigger", t, a, component=component, class_id=0, axis="dphi")
+                        add(tune, "dphi_density_per_trigger", t, a, component=component, class_id=0, axis="dphi")
                         if tune != paper["reference_tune"]:
                             add(tune, "ratio_to_reference_tune", t, a, component=component,
                                 class_id=0, axis="dphi", tune_reference=paper["reference_tune"])
@@ -1061,11 +1083,11 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
     # Explicit exact-row query products remain diagnostic inputs.
     requested_backend = "aligned_sparse" if source_route.get("kind") == "verified_root_query_primitives" else "auto"
     return ProjectionRequest.from_dict(dict(schema=REQUEST_SCHEMA,
-        science_contract=dict(analyzer_schema="hadronization_lossless_analysis_v1", structural_registry_sha256=structural, estimator_policy_id=ESTIMATOR, formula_contract_version="projection_formulas_v2"),
+        science_contract=dict(analyzer_schema="hadronization_lossless_analysis_v1", structural_registry_sha256=structural, estimator_policy_id=ESTIMATOR, formula_contract_version="projection_formulas_v3"),
         sources=requested_sources, scope=dict(mode="PAPER", roles=role_requests, ordered_tunes=tunes,
             reference_tune=paper["reference_tune"], ordered_triggers=paper["trigger_pdgs"], ordered_associate_pairs=pairs),
         profiles=[normalized_profile(profile, eta, structural)], activity=activity_request, classes=classes, axes=axes,
-        observables=[dict(quantity=q, formula_version="projection_formulas_v2", output_units=expected_point_units(q), component=c, joint_point_domain=points) for (q, c), points in sorted(observable_groups.items())],
+        observables=[dict(quantity=q, formula_version="projection_formulas_v3", output_units=expected_point_units(q), component=c, joint_point_domain=points) for (q, c), points in sorted(observable_groups.items())],
         statistics=dict(block_assignment_sha256=block_assignment_sha, block_ids=list(range(1, 11)), expected_K=10, uncertainty="FINITE_MC_DELETE_ONE", covariance_groups=covariance_groups),
         execution=dict(backend_policy={"auto": "AUTO", "exact_rows": "EXACT_ROWS", "aligned_sparse": "REQUIRE_NATIVE"}[requested_backend], permitted_routes=ROUTE.split("|"), required_capabilities=["paper_observables", "joint_covariance"]),
         completion=dict(require_campaign_complete=campaign_complete, require_all_requested_points=True, permitted_scientific_statuses=STATUS.split("|")),
@@ -1669,7 +1691,7 @@ def expected_denominator_parents(key):
     """Declared C++ formula parents, in deterministic emission order."""
     curve = key["curve"]
     quantity = curve["quantity"]
-    if quantity in ("ordered_pair_yield", "os_minus_ss_per_trigger", "dphi_per_trigger"):
+    if quantity in ("ordered_pair_yield", "os_minus_ss_per_trigger", "dphi_per_trigger", "dphi_density_per_trigger"):
         return [("trigger", True)]
     if quantity in ("normalized_distribution", "normalized_spectrum"):
         return [("normalization_total", True)]

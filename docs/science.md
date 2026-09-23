@@ -91,15 +91,19 @@ Each numerical ROOT file records its own selected species. The renderer retains 
 
 Let w_e denote event weight. Let T_t denote the weighted number of eligible triggers of species t in the selected class. Let N_OS and N_SS denote weighted ordered-pair counts with the requested associates. A trigger contributes to T_t even when both pair counts are zero.
 
-For azimuthal bin b, the identified pair observables are
+For azimuthal bin b, let delta_b denote its width in radians. The identified pair observables are bin-averaged densities:
 
-$$C_{OS,b}=N_{OS,b}/T_t,\qquad C_{SS,b}=N_{SS,b}/T_t.$$
+$$C_{OS,b}=\frac{N_{OS,b}}{T_t\,\delta_b},\qquad C_{SS,b}=\frac{N_{SS,b}}{T_t\,\delta_b}.$$
 
 The sign-summed correlation difference is
 
-$$C_{net,b}=(N^{all}_{OS,b}-N^{all}_{SS,b})/T_t.$$
+$$C_{net,b}=\frac{N^{all}_{OS,b}-N^{all}_{SS,b}}{T_t\,\delta_b}.$$
 
 Here, “all” means all structurally eligible registered associates in the selected heavy-flavour sector. It does not mean all generated particles. The default lower correlation panel uses this sign-summed difference. It is not a ratio of OS minus SS to OS plus SS.
+
+Each density uses its own stored bin width. The estimator applies this division to the pooled result and every deletion. Joint covariance therefore includes the width factors on both axes. A sum of densities times their bin widths gives the integrated yield for the same associate domain.
+
+The numerical quantity `dphi_density_per_trigger` has units `per_trigger_per_radian`. Formula contract `projection_formulas_v3` identifies this convention and the eligible central pair domain. The reader retains the earlier `dphi_per_trigger` quantity with units `per_trigger_per_bin`. The renderer labels each convention from the numerical archive and rejects mixed conventions within a panel.
 
 The integrated balancing yield for an opposite-sign species a is
 
@@ -111,7 +115,7 @@ The baryon-to-meson observable divides two balancing yields with the same trigge
 
 A tune comparison divides the complete observable by the corresponding reference-tune observable. MONASH is the default reference. Shared references create covariance between ratios.
 
-The multiplicity distribution divides each weighted activity-bin count by the total event weight. Signed heavy-hadron spectra divide each weighted species-bin count by the selected same-species total. These histograms and correlations report values per bin. They do not divide by bin width.
+The multiplicity distribution divides each weighted activity-bin count by the total event weight. Signed heavy-hadron spectra divide each weighted species-bin count by the selected same-species total. These two histogram families report probabilities per bin. They do not divide by bin width.
 
 Signed spectra select final registered direct-hadronization states with |eta| <= 4 and no fixed pT floor. They include all origins. The pT denominator includes overflow. Eta and phi use inclusive physical endpoints in the last regular bin.
 

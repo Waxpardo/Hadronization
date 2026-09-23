@@ -76,6 +76,12 @@ def native_point_query(request,source,path):
                                   typed.scientific_request_sha256),
         'AXES\t{}\t{}\t{}'.format(len(axes['nch']['edges'])-1,
             len(axes['dphi']['edges'])-1,len(axes['pt']['edges'])-1)]
+    formula=value['science_contract']['formula_contract_version']
+    lines.append('FORMULA\t'+formula)
+    if formula == 'projection_formulas_v3':
+        lines.extend('DPHI_BIN\t{}\t{}\t{}'.format(i,lo,hi)
+                     for i,(lo,hi) in enumerate(zip(axes['dphi']['edges'],
+                                                    axes['dphi']['edges'][1:])))
     for tune in value['scope']['ordered_tunes']:
         family=[member for member in value['sources']['members']
                 if member['tune_id']==tune]
@@ -447,6 +453,7 @@ def verify_native_denominator_stream(path,request,event_moments,block_path=None)
            p.ProjectionRequest.from_dict(request.to_dict() if hasattr(
                request,'to_dict') else request,cold=True))
     counts=dict(rows=0,undefined=0,unstable=0)
+    density=typed.to_dict()['science_contract']['formula_contract_version']=='projection_formulas_v3'
     def decoded(token,status):
         if status not in ('AVAILABLE','UNDEFINED','UNSTABLE_DENOMINATOR'):
             raise ValueError('native denominator status differs')
@@ -489,7 +496,11 @@ def verify_native_denominator_stream(path,request,event_moments,block_path=None)
             numerator=(total('pair_os') if component=='OS' else
                        total('pair_ss') if component=='SS' else
                        total('pair_os')-total('pair_ss'))
-            return numerator/denominator
+            result=numerator/denominator
+            if role.startswith('correlations.') and density:
+                cell=key['bins'][0]
+                result /= p.number(cell['high'])-p.number(cell['low'])
+            return result
         raise ValueError('native denominator parent checker lacks formula: '+name)
     block_stream=Path(block_path).open(encoding='ascii') if block_path else None
     try:
@@ -661,7 +672,9 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
             item['reference_meson_pdg'],
             'OS' if item['sign']==-1 else 'SS',item['sector'].upper())
         for item in model_api.state_registry(analysis)[1]
-        if item['trigger_pdg'] in value['scope']['ordered_triggers']}
+        if item['trigger_pdg'] in value['scope']['ordered_triggers'] and
+        (value['science_contract']['formula_contract_version']=='projection_formulas_v2' or
+         item['central_eligible'])}
     scoped={
         (item['trigger_pdg'],item['associate_pdg']):(
             item['reference_meson_pdg'],item['sign'],item['sector'])

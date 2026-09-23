@@ -63,6 +63,107 @@ class NativeEngineContract(unittest.TestCase):
         query=self.base/'points.tsv';query.write_text('\n'.join(points)+'\n')
         return sha,source,query
 
+    def test_nonuniform_density_deletions_covariance_and_excluded_diagnostics(self):
+        # Independent count oracle: the large diagnostic Sigma_b0 component
+        # stays in primitives but is absent from the bound central member list.
+        sha='a'*64; tunes=('MONASH','JUNCTIONS'); widths=(.25,1.)
+        primitive=['hadronization_native_primitives_v1',
+            'SOURCE\t'+ '\t'.join((sha,'b'*64,'c'*64)),
+            'ACTIVITY_FIELD\ta15_eta4','PROFILE\tinclusive','TRIGGER_SCOPE\t521']
+        primitive += [f'PAIR_SCOPE\t521\t{a}' for a in (-521,521,5122,-5122,5212,-5212)]
+        counts={}
+        for ti,tune in enumerate(tunes):
+            for b in range(1,11):
+                trigger=100+7*b+ti*11
+                primitive += [f'EXPOSURE\t{tune}\t{b}\t500',
+                    f'ACTIVITY\t{tune}\t{b}\t1\t0x1.f4p+8\t0x1.f4p+8',
+                    f'TRIGGER\tinclusive\t{tune}\t{b}\t1\t521\t{float(trigger).hex()}\t{float(trigger).hex()}']
+                for i in range(2):
+                    os=20+b*(i+1)+ti*b*b; ss=3+i+b%3
+                    baryon_os=5+2*b+ti; baryon_ss=1+b%2
+                    counts[tune,b,i]=(trigger,os,ss,baryon_os,baryon_ss)
+                    for a,sign,value in ((-521,-1,os),(521,1,ss),(5122,-1,baryon_os),
+                            (-5122,1,baryon_ss),(5212,-1,10000+b),(-5212,1,2000+b)):
+                        primitive.append(f'PAIR\tinclusive\t{tune}\t{b}\t1\t521\t{a}\t{sign}\t{i}\t{float(value).hex()}\t{float(value).hex()}')
+        source=self.base/'density-primitives.tsv';source.write_text('\n'.join(primitive+['END'])+'\n')
+        points=[]
+        for tune in tunes:
+            for a in (-521,0):
+                for component in ('OS','SS','NET'):
+                    for i in range(2):points.append((tune,'-',a,component,i))
+        for component in ('OS','SS','NET'):
+            for i in range(2):points.append(('JUNCTIONS','MONASH',-521,component,i))
+        def query(density):
+            lines=['hadronization_native_points_v1','BIND\t'+ '\t'.join((sha,'b'*64,'c'*64)),
+                'REQUEST\t'+'e'*64+'\t'+'f'*64,'AXES\t2\t2\t110',
+                'FORMULA\tprojection_formulas_v'+('3' if density else '2')]
+            if density:lines += ['DPHI_BIN\t0\t0x0p+0\t0x1p-2','DPHI_BIN\t1\t0x1p-2\t0x1.4p+0']
+            lines += [f'FAMILY\t{tune}\t'+('d' if tune=='MONASH' else 'c')*64 for tune in tunes]
+            lines += ['CLASS\t0\t1\t0\t100']
+            lines += [f'SIGN_ASSOCIATE\t521\tBEAUTY\t{sign}\t{a}' for sign,values in
+                      (('OS',(-521,5122)),('SS',(521,-5122))) for a in values]
+            for j,(tune,reference,a,component,i) in enumerate(points):
+                quantity='ratio_to_reference_tune' if reference!='-' else ('dphi_density_per_trigger' if density else 'dphi_per_trigger')
+                lines.append(f'POINT\t{j}\tcorrelations.beauty\t{quantity}\t{tune}\t{reference}\tinclusive\t0\t521\t{a}\t0\t{component}\tdphi\t{i}\tTEST_ONLY_DIAGNOSTIC')
+            lines.append(f'POINT\t{len(points)}\tbalancing.integrated.beauty\tos_minus_ss_per_trigger\tMONASH\t-\tinclusive\t0\t521\t-521\t0\tNONE\t-\t-1\tTEST_ONLY_DIAGNOSTIC')
+            return lines+['END']
+        def execute(lines,label):
+            q=self.base/(label+'-query.tsv');q.write_text('\n'.join(lines)+'\n')
+            out=self.base/(label+'-out.tsv')
+            run=subprocess.run([str(self.binary),str(source),sha,str(q),str(out)],capture_output=True,text=True)
+            return run,out
+        outputs=[]
+        for density in (False,True):
+            run,out=execute(query(density),'density' if density else 'per-bin')
+            self.assertEqual((run.returncode,run.stderr),(0,''))
+            rows={int(f[1]):f for f in map(lambda s:s.split('\t'),out.read_text().splitlines()) if f[0]=='R'}
+            factors={(int(f[1]),f[2],int(f[4])):float.fromhex(f[8]) for f in map(lambda s:s.split('\t'),out.read_text().splitlines()) if f[0]=='F'}
+            outputs.append((rows,factors))
+        old,old_f=outputs[0];new,new_f=outputs[1]
+        def value(tune,a,component,i,omit=0):
+            rows=[counts[tune,b,i] for b in range(1,11) if b!=omit]
+            os=sum(r[1]+(r[3] if a==0 else 0) for r in rows)
+            ss=sum(r[2]+(r[4] if a==0 else 0) for r in rows)
+            return Fraction(os if component=='OS' else ss if component=='SS' else os-ss,
+                            sum(r[0] for r in rows))/Fraction(widths[i])
+        for j,(tune,reference,a,component,i) in enumerate(points):
+            center=value(tune,a,component,i)
+            if reference!='-':center /= value(reference,a,component,i)
+            self.assertAlmostEqual(float.fromhex(new[j][3]),float(center),places=13)
+            families=(tune,) if reference=='-' else tunes
+            variance=Fraction(0)
+            for family in families:
+                leaves=[]
+                for b in range(1,11):
+                    numerator=value(tune,a,component,i,b if family==tune else 0)
+                    denominator=value(reference,a,component,i,b if family==reference else 0) if reference!='-' else 1
+                    leaves.append(numerator/denominator)
+                mean=sum(leaves)/10
+                variance += Fraction(9,10)*sum((v-mean)**2 for v in leaves)
+            self.assertAlmostEqual(float.fromhex(new[j][5]),float(variance),places=13)
+            scale=1 if reference!='-' else 1/widths[i]
+            self.assertAlmostEqual(float.fromhex(new[j][3]),float.fromhex(old[j][3])*scale,places=13)
+            for family in families:
+                for b in range(1,11):
+                    self.assertAlmostEqual(new_f[j,family,b],old_f[j,family,b]*scale,places=13)
+        self.assertEqual(new[len(points)],old[len(points)])
+        # Density-integral closure to the independent pooled integrated NET.
+        self.assertAlmostEqual(sum(float.fromhex(new[i][3])*widths[i-4] for i in (4,5)),float.fromhex(new[len(points)][3]),places=13)
+        # Off-diagonal density-density and density-unchanged covariance scale.
+        for i,j,scale in ((4,5,4.),(4,len(points),4.)):
+            before=sum(old_f[i,'MONASH',b]*old_f[j,'MONASH',b] for b in range(1,11))
+            after=sum(new_f[i,'MONASH',b]*new_f[j,'MONASH',b] for b in range(1,11))
+            self.assertNotEqual(before,0.)
+            self.assertAlmostEqual(after,before*scale,places=13)
+        good=query(True)
+        variants=[ [x for x in good if not x.startswith('DPHI_BIN\t1')],
+            [x.replace('DPHI_BIN\t1\t0x1p-2','DPHI_BIN\t1\t0x1p-1') for x in good],
+            [x.replace('DPHI_BIN\t1','DPHI_BIN\t0') for x in good]]
+        for bad in ('0x0p+0','-0x1p+0','nan','inf'):
+            variants.append([x.replace('DPHI_BIN\t0\t0x0p+0\t0x1p-2','DPHI_BIN\t0\t0x0p+0\t'+bad) for x in good])
+        for j,lines in enumerate(variants):
+            run,_=execute(lines,'bad-width-'+str(j));self.assertNotEqual(run.returncode,0)
+
     def test_extended_signed_species_use_pooled_counts_and_joint_deletions(self):
         # Explicit PDGs are an independent oracle for the new channel domain.
         charm=(-431,-4112,-4212,-4222,-4132,-4232)

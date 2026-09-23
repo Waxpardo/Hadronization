@@ -73,6 +73,26 @@ class ProjectionInterfaceContract(unittest.TestCase):
             self.roles, self.selection, self.p.digest(receipt['scientific_identity']), list(tunes), analysis,
             path, self.p.file_digest(path))
 
+    def test_density_identity_and_eligible_central_pair_domain(self):
+        value=self.request().to_dict()
+        self.assertEqual(value['science_contract']['formula_contract_version'],'projection_formulas_v3')
+        pairs=value['scope']['ordered_associate_pairs']
+        self.assertTrue(pairs)
+        self.assertFalse(any(abs(p['associate_pdg']) in (5212,5312,5322) for p in pairs))
+        # Broad diagnostic storage is preserved by the query registry.
+        self.assertTrue(any(abs(p['associate_pdg'])==5212 for p in self.p._query_model().state_registry(self.analysis)[1]))
+        density=[o for o in value['observables'] if o['quantity']=='dphi_density_per_trigger']
+        self.assertTrue(density)
+        self.assertTrue(all(o['output_units']=='per_trigger_per_radian' for o in density))
+        for field,wrong in (('output_units','per_trigger_per_bin'),('formula_version','projection_formulas_v2')):
+            forged=copy.deepcopy(value)
+            next(o for o in forged['observables'] if o['quantity']=='dphi_density_per_trigger')[field]=wrong
+            with self.assertRaisesRegex(ValueError,'formula/quantity/units'):
+                self.p.ProjectionRequest.from_dict(forged,cold=True)
+        forged=copy.deepcopy(value);forged['science_contract']['formula_contract_version']='projection_formulas_v2'
+        with self.assertRaisesRegex(ValueError,'correlation formula'):
+            self.p.ProjectionRequest.from_dict(forged,cold=True)
+
     def test_g9_metadata_binds_selected_final_predicate_normalization_and_flow(self):
         request = self.request().to_dict()
         metadata = self.p.g9_science(request)
@@ -324,7 +344,7 @@ class ProjectionInterfaceContract(unittest.TestCase):
         keys=[k for o in request['observables'] for k in o['joint_point_domain']
               if k['curve']['role_id']=='balancing.integrated.beauty'][:3]
         request['scope']['roles']=[dict(role_id='balancing.integrated.beauty', ordered_panels=[], required_curve_keys=[k['curve'] for k in keys])]
-        request['observables']=[dict(quantity='os_minus_ss_per_trigger', formula_version='projection_formulas_v2',output_units='1',component='NONE',joint_point_domain=keys)]
+        request['observables']=[dict(quantity='os_minus_ss_per_trigger', formula_version=request['science_contract']['formula_contract_version'],output_units='1',component='NONE',joint_point_domain=keys)]
         request['statistics']['covariance_groups']=[dict(id='joint',ordered_point_keys=keys,representation='DENSE',required_cross_groups=['balancing.integrated.beauty'])]
         req=p.ProjectionRequest.from_dict(request)
         def specimen(spec):

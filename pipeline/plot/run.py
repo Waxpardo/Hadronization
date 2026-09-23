@@ -1315,14 +1315,14 @@ def add_publication_captions(pages, context):
         if page['role'].startswith('correlations.'):
             zero=sum(q['state']=='LOG_NONPOSITIVE' for p in panels for z in p['series'] for q in z['points'])
             right=max(row,key=lambda p:p['geometry'][0])
-            explanations=['Lower panels sum stored '+page['role'].split('.')[-1]+' associates',
+            explanations=['Lower panels sum eligible '+page['role'].split('.')[-1]+' associates',
                           'OS/SS refer to heavy-flavour sign']
             if zero:
                 explanations.extend(['Log panels omit '+str(zero)+' zero bins',
                                      'Error bands stop at the displayed floor'])
             if not any(p['id'].startswith('correlation.teaching.') for p in panels):
                 right['annotations'].extend([
-                    {'x':.05,'y':.70,'size':float(font),'text':'Net yield: sum over stored associates'},
+                    {'x':.05,'y':.70,'size':float(font),'text':'Net yield: sum over eligible associates'},
                     {'x':.05,'y':.64,'size':float(font),'text':'R = tune / MONASH; OS/SS: heavy sign'}])
                 for panel in panels:
                     if panel['id'].startswith('correlation.compare.') and panel['y_title']:
