@@ -2846,11 +2846,16 @@ def review_packet_coverage(plan, context, config):
                     require_points(owner,
                         'correlation.compare.'+trigger+'.'+component,
                         compared, 3)
-    for role, triggers, categories in (
-            ('balancing.integrated.charm', (charm_meson,'4122'), 3),
-            ('balancing.integrated.beauty', ('521','5122'), 5)):
+    for role, triggers in (
+            ('balancing.integrated.charm', (charm_meson,'4122')),
+            ('balancing.integrated.beauty', ('521','5122'))):
         owner = canonical[role]
         for trigger in triggers:
+            declared = getattr(context, 'category_orders', {}).get(role, {}).get(trigger)
+            if not declared:
+                failures.append(role+'/'+trigger+' numerical categories absent')
+                continue
+            categories = len(declared)
             upper = require_points(owner, 'upper.'+trigger,
                                    expected_tunes, categories-1)
             require_points(owner, 'lower.'+trigger,

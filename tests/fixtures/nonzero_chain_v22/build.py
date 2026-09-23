@@ -62,13 +62,17 @@ def raw_source():
     end = source.index('    if (resolutionEvents && row == 0)', begin)
     source = source[:begin] + '''    std::vector<int> heavyPdgs;
     if (channel == 0)
-      heavyPdgs = {421,-421,411,-411,4122,-4122,431,-431};
+      heavyPdgs = {421,-421,411,-411,4122,-4122,431,-431,
+                   4112,-4112,4212,-4212,4222,-4222,4132,-4132,4232,-4232};
     else if (channel == 1)
-      heavyPdgs = {4122,-4122,421,-421,411,-411,431,-431};
+      heavyPdgs = {4122,-4122,421,-421,411,-411,431,-431,
+                   4112,-4112,4212,-4212,4222,-4222,4132,-4132,4232,-4232};
     else if (channel == 2)
-      heavyPdgs = {521,-521,511,-511,531,-531,541,-541,5122,-5122};
+      heavyPdgs = {521,-521,511,-511,531,-531,541,-541,5122,-5122,
+                   5112,-5112,5222,-5222,5132,-5132,5232,-5232};
     else
-      heavyPdgs = {5122,-5122,521,-521,511,-511,531,-531,541,-541};
+      heavyPdgs = {5122,-5122,521,-521,511,-511,531,-531,541,-541,
+                   5112,-5112,5222,-5222,5132,-5132,5232,-5232};
     // A second charge-balanced pair varies block-level ratios and MC errors.
     if ((fixtureLogical + row / 4 + fixtureTuneOrdinal) % 3 == 0) {
       heavyPdgs.push_back(beautyEvent ? 521 : 421);

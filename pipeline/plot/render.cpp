@@ -595,10 +595,17 @@ bool CategoricalAxis(const Page& page, const Panel& panel) {
   return page.role.find("balancing.") == 0 && panel.reusePanel.empty();
 }
 bool RotateCategoryLabels(const Page& page, const Panel& panel) {
-  const bool uprightBeautySpecies =
-      page.role == "balancing.integrated.beauty" ||
-      page.role == "balancing.activity.beauty";
+  const bool uprightBeautySpecies = panel.ticks.size() <= 5 &&
+      (page.role == "balancing.integrated.beauty" ||
+       page.role == "balancing.activity.beauty");
   return panel.ticks.size() >= 5 && !uprightBeautySpecies;
+}
+double StatusRailY(const Page& page, const Panel& panel) {
+  const bool extendedSpecies = panel.ticks.size() > 5 &&
+      (page.role.rfind("balancing.integrated.", 0) == 0 ||
+       page.role.rfind("balancing.activity.", 0) == 0);
+  // Keep missing-value markers below the rotated particle labels.
+  return std::max(.03, panel.margins[2] - (extendedSpecies ? .20 : .005));
 }
 std::vector<ExpectedText> StateGlyphTexts(
     const Page& page, const Panel& panel, const std::vector<Page>& pages) {
@@ -890,7 +897,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
   for (double coordinate : StatusRailCoordinates(page, panel, pages)) {
     result.push_back(TextExpectation(
         "#times", panel.margins[0] + frameWidth * xFraction(coordinate),
-        std::max(.03, panel.margins[2] - .005), inset ? 11 : textPixels - 2,
+        StatusRailY(page, panel), inset ? 11 : textPixels - 2,
         kGray + 2, 22));
   }
   result.push_back(TextExpectation(panel.title, panel.margins[0],
@@ -1664,7 +1671,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       status.SetTextSize(inset ? 11 : textPixels - 2);
       status.SetTextColor(kGray + 2); status.SetTextAlign(22);
       status.DrawLatex(panel.margins[0] + frameWidth * xFraction(coordinate),
-                       std::max(.03, panel.margins[2] - .005), "#times");
+                       StatusRailY(page, panel), "#times");
     }
     Text(panel.margins[0], PanelTitleY(page, panel), panel.title,
          inset ? 15 : textPixels + 1);

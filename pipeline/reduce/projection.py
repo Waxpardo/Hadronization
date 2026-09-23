@@ -36,9 +36,11 @@ QUANTITIES = {"dphi_per_trigger", "normalized_distribution", "os_minus_ss_per_tr
 T1_COMPONENTS = ("hadron_count", "charm_plus_anticharm_constituent_count",
                  "beauty_plus_antibeauty_constituent_count")
 COMPONENTS = "OS|SS|OS_MINUS_SS|NONE|" + "|".join(T1_COMPONENTS)
+PAPER_CHARM_ASSOCIATES = (-411, -421, -431, -4122,
+                          -4112, -4212, -4222, -4132, -4232)
 PAPER_BEAUTY_ASSOCIATES = {
-    521: (-521, -511, -531, -541, 5122),
-    5122: (521, 511, 531, 541, -5122),
+    521: (-521, -511, -531, -541, 5122, 5112, 5222, 5132, 5232),
+    5122: (521, 511, 531, 541, -5122, -5112, -5222, -5132, -5232),
 }
 
 
@@ -903,7 +905,18 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
     pairs = [dict(trigger_pdg=p["trigger_pdg"], associate_pdg=p["associate_pdg"],
                   reference_meson_pdg=p["reference_meson_pdg"], sign="OS" if p["sign"] == -1 else "SS", sector=p["sector"].upper())
              for p in requested_pairs if p["associate_pdg"] in paper["signed_pdgs"] and p["trigger_pdg"] in paper["trigger_pdgs"]]
-    pairs.sort(key=canonical)
+    # Put identified charm categories in meson/baryon order in the request.
+    # Cold archives retain their own order; the renderer cannot select species.
+    def pair_order(pair):
+        charm = pair['sector'] == 'CHARM'
+        associate = pair['associate_pdg']
+        if pair['sign'] == 'SS':
+            associate = -associate
+        rank = (PAPER_CHARM_ASSOCIATES.index(associate)
+                if charm and associate in PAPER_CHARM_ASSOCIATES else
+                len(PAPER_CHARM_ASSOCIATES))
+        return pair['trigger_pdg'], rank, canonical(pair)
+    pairs.sort(key=pair_order)
     classes = [dict(id=i, kind="INTEGRATED" if i == 0 else "TUNE_LOCAL_PERCENTILE",
                     percentile_interval=list(map(hex64, interval)), integer_interval=None,
                     boundary_policy_id="pooled_tune_local_integer_percentile_v1")
@@ -1015,16 +1028,15 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
                         if tune != paper["reference_tune"]:
                             add(tune, "baryon_meson_ratio_to_reference_tune", t, a, ref, class_id=c["id"], tune_reference=paper["reference_tune"])
                 elif role_id.endswith("." + pair["sector"].lower()):
-                    # The first integrated-charm paper product is a frozen
-                    # six-channel domain, not every diagnostic charm state in
-                    # the broad pair registry.  Its SS primitives remain the
-                    # registry-derived conjugates used by the C++ estimator.
+                    # Identified balancing categories share one definition
+                    # across integrated and activity-resolved products.
+                    # The C++ estimator obtains SS from each OS conjugate.
                     if (role_id in ("balancing.integrated.beauty", "balancing.activity.beauty") and
                             a not in PAPER_BEAUTY_ASSOCIATES.get(t, ())):
                         continue
                     if (role_id in ("balancing.integrated.charm", "balancing.activity.charm") and
                             (t not in (411, 421, 4122) or
-                             a not in (-411, -421, -4122))):
+                             a not in PAPER_CHARM_ASSOCIATES)):
                         continue
                     for c in classes:
                         if (".integrated." in role_id) != (c["id"] == 0):

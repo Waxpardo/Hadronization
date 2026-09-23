@@ -135,7 +135,8 @@ class ProjectionInterfaceContract(unittest.TestCase):
                       for item in curves(default_keys,role)}
             self.assertEqual(channels,{(trigger,associate)
                 for trigger in (421,4122)
-                for associate in (-411,-421,-4122)})
+                for associate in (-411,-421,-431,-4122,-4112,-4212,
+                                  -4222,-4132,-4232)})
         p8={(item['trigger_pdg'],item['associate_pdg'],
              item['reference_pdg']) for item in curves(
                  default_keys,'balancing.baryon_meson.activity')}
@@ -196,18 +197,61 @@ class ProjectionInterfaceContract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'G9 signed species request differs'):
             self.request(analysis=invalid)
 
-    def test_first_p4_domain_is_exact_six_channels_eighteen_absolute_twelve_ratios(self):
+    def test_extended_balancing_domain_has_exact_species_signs_and_classes(self):
         request = self.request(('MONASH', 'JUNCTIONS', 'CLOSEPACKING'))
-        keys = [k for k in request.expected_point_keys
-                if k['curve']['role_id'] == 'balancing.integrated.charm']
-        absolute = [k for k in keys if k['curve']['reference_tune_id'] is None]
-        ratios = [k for k in keys if k['curve']['reference_tune_id'] == 'MONASH']
-        channels = {(k['curve']['trigger_pdg'], k['curve']['associate_pdg'])
-                    for k in keys}
-        self.assertEqual(channels, {(trigger, associate)
-                         for trigger in (411, 4122)
-                         for associate in (-411, -421, -4122)})
-        self.assertEqual((len(absolute), len(ratios), len(keys)), (18, 12, 30))
+        charm = (-411, -421, -431, -4122, -4112, -4212, -4222, -4132, -4232)
+        beauty = {521: (-521, -511, -531, -541, 5122, 5112, 5222, 5132, 5232),
+                  5122: (521, 511, 531, 541, -5122, -5112, -5222, -5132, -5232)}
+        states = {s['pdg']:s for s in json.loads(
+            (ROOT/'config/study.json').read_text())['selected_states']}
+        scope = request.to_dict()['scope']['ordered_associate_pairs']
+        signs = {(p['trigger_pdg'],p['associate_pdg']):p['sign'] for p in scope}
+        expected = {'charm':{411:charm,4122:charm}, 'beauty':beauty}
+        labels = {pdg:state['name'] for pdg,state in states.items()}
+        order = self.p.category_order(request.to_dict(),labels)
+        for sector, channels in expected.items():
+            for kind, classes in [('integrated',{0}),('activity',{1,2})]:
+                role = 'balancing.'+kind+'.'+sector
+                curves = [k['curve'] for k in request.expected_point_keys
+                          if k['curve']['role_id']==role]
+                self.assertEqual({(c['trigger_pdg'],c['associate_pdg']) for c in curves},
+                    {(t,a) for t,associates in channels.items() for a in associates})
+                for trigger,associates in channels.items():
+                    self.assertEqual(next(r['associate_pdgs'] for r in order
+                        if r['role_id']==role and r['trigger_pdg']==trigger),list(associates))
+                    for associate in associates:
+                        self.assertTrue(states[associate]['pair_analysis_eligible'])
+                        self.assertEqual(signs[trigger,associate],'OS')
+                        self.assertEqual(signs[trigger,-associate],'SS')
+                        selected = [c for c in curves if c['trigger_pdg']==trigger
+                                    and c['associate_pdg']==associate]
+                        self.assertEqual({c['class_id'] for c in selected},classes)
+                        for klass in classes:
+                            rows=[c for c in selected if c['class_id']==klass]
+                            self.assertEqual({(c['tune_id'],c['reference_tune_id']) for c in rows},
+                                {('MONASH',None),('JUNCTIONS',None),('CLOSEPACKING',None),
+                                 ('JUNCTIONS','MONASH'),('CLOSEPACKING','MONASH')})
+                self.assertEqual(len(curves),90*len(classes))
+
+    def test_cold_category_order_preserves_previous_identified_subset(self):
+        request = self.request().to_dict()
+        request['scope']['ordered_associate_pairs'].sort(key=self.p.canonical)
+        for role in request['scope']['roles']:
+            if role['role_id'].startswith('balancing.'):
+                role['required_curve_keys']=[c for c in role['required_curve_keys']
+                    if c['associate_pdg'] in (-411,-421,-4122,-521,-511,-531,-541,
+                                              5122,521,511,531,541,-5122)]
+        labels={p['associate_pdg']:str(p['associate_pdg']) for p in
+                request['scope']['ordered_associate_pairs']}
+        order=self.p.category_order(request,labels)
+        self.assertEqual(next(r['associate_pdgs'] for r in order if
+            r['role_id']=='balancing.integrated.beauty' and r['trigger_pdg']==521),
+            [-521,-511,-531,-541,5122])
+        legacy_charm=list(dict.fromkeys(p['associate_pdg'] for p in
+            request['scope']['ordered_associate_pairs'] if p['trigger_pdg']==411
+            and p['associate_pdg'] in (-411,-421,-4122)))
+        self.assertEqual(next(r['associate_pdgs'] for r in order if
+            r['role_id']=='balancing.integrated.charm' and r['trigger_pdg']==411),legacy_charm)
 
 
     def test_phase_a_release_rejects_relative_and_strict_profiles(self):

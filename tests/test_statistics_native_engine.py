@@ -1,5 +1,6 @@
 """Native C++ diagnostic bridge: source scope and deletion-local class oracle."""
 from pathlib import Path
+from fractions import Fraction
 import math
 import shutil
 import subprocess
@@ -61,6 +62,65 @@ class NativeEngineContract(unittest.TestCase):
         source=self.base/'primitives.tsv';source.write_text('\n'.join(primitive)+'\n')
         query=self.base/'points.tsv';query.write_text('\n'.join(points)+'\n')
         return sha,source,query
+
+    def test_extended_signed_species_use_pooled_counts_and_joint_deletions(self):
+        # Explicit PDGs are an independent oracle for the new channel domain.
+        charm=(-431,-4112,-4212,-4222,-4132,-4232)
+        channels=[(t,a,'charm') for t in (421,4122) for a in charm]
+        channels += [(521,a,'beauty') for a in (5112,5222,5132,5232)]
+        channels += [(5122,a,'beauty') for a in (-5112,-5222,-5132,-5232)]
+        sha='a'*64
+        primitives=['hadronization_native_primitives_v1',
+            'SOURCE\t'+'\t'.join([sha,'b'*64,'c'*64]),
+            'ACTIVITY_FIELD\ta15_eta4','PROFILE\tinclusive']
+        for trigger in (421,4122,521,5122):
+            primitives.append(f'TRIGGER_SCOPE\t{trigger}')
+        for trigger,associate,_ in channels:
+            for signed in (associate,-associate):
+                primitives.append(f'PAIR_SCOPE\t{trigger}\t{signed}')
+        expected=[]
+        for block in range(1,11):
+            primitives += [f'ACTIVITY\tMONASH\t{block}\t1\t{float(200).hex()}\t{float(200).hex()}',
+                           f'EXPOSURE\tMONASH\t{block}\t200']
+            for trigger in (421,4122,521,5122):
+                count=float(100+block).hex()
+                primitives.append(f'TRIGGER\tinclusive\tMONASH\t{block}\t1\t{trigger}\t{count}\t{count}')
+            for index,(trigger,associate,_) in enumerate(channels):
+                for signed,sign,count in [(associate,-1,(index+2)*block+40),
+                                          (-associate,1,block+index+3)]:
+                    value=float(count).hex()
+                    primitives.append(f'PAIR\tinclusive\tMONASH\t{block}\t1\t{trigger}\t{signed}\t{sign}\t0\t{value}\t{value}')
+        query=['hadronization_native_points_v1',
+            'BIND\t'+'\t'.join([sha,'b'*64,'c'*64]),
+            'REQUEST\t'+'e'*64+'\t'+'f'*64,
+            'AXES\t3\t1\t110','FAMILY\tMONASH\t'+'d'*64,
+            'CLASS\t0\t1\t0\t100']
+        for index,(trigger,associate,sector) in enumerate(channels):
+            query.append(f'POINT\t{index}\tbalancing.integrated.{sector}\tos_minus_ss_per_trigger\tMONASH\t-\tinclusive\t0\t{trigger}\t{associate}\t0\tNONE\t-\t-1\tTEST_ONLY_DIAGNOSTIC')
+            numerators=[(index+1)*block+37-index for block in range(1,11)]
+            total=sum(numerators);denominator=sum(100+b for b in range(1,11))
+            leaves=[Fraction(total-n,denominator-100-b)
+                    for b,n in enumerate(numerators,1)]
+            mean=sum(leaves)/10
+            variance=Fraction(9,10)*sum((v-mean)**2 for v in leaves)
+            expected.append((Fraction(total,denominator),variance,leaves))
+        source=self.base/'extended-primitives.tsv'
+        source.write_text('\n'.join(primitives+['END'])+'\n')
+        points=self.base/'extended-points.tsv'
+        points.write_text('\n'.join(query+['END'])+'\n')
+        output=self.base/'extended-result.tsv'
+        run=subprocess.run([str(self.binary),str(source),sha,str(points),str(output)],
+                           capture_output=True,text=True)
+        self.assertEqual((run.returncode,run.stderr),(0,''))
+        rows=[line.split('\t') for line in output.read_text().splitlines()
+              if line.startswith('R\t')]
+        self.assertEqual(len(rows),len(channels))
+        for row,(center,variance,leaves) in zip(rows,expected):
+            self.assertEqual((row[2],row[4]),('AVAILABLE','AVAILABLE'))
+            self.assertAlmostEqual(float.fromhex(row[3]),float(center),places=14)
+            self.assertTrue(math.isclose(float.fromhex(row[10]),float(variance),rel_tol=1e-12))
+            for actual,expected_leaf in zip(row[7].split(';'),leaves):
+                self.assertAlmostEqual(float.fromhex(actual),float(expected_leaf),places=14)
 
     def test_cplusplus_reclassifies_numerator_and_denominator_per_omission(self):
         sha,source,query=self.inputs()

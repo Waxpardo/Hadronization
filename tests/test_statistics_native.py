@@ -398,7 +398,7 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
         full=projection.make_native_request(source,analysis_path,
             projection.file_digest(analysis_path),source.index['tune_ordinals'],
             full_species,selection)
-        self.assertEqual(len(full.expected_point_keys),44699)
+        self.assertEqual(len(full.expected_point_keys),45899)
         curves={projection.canonical(key['curve']) for key in full.expected_point_keys}
         def present(curve):return projection.canonical(curve) in curves
         for key in full.expected_point_keys:

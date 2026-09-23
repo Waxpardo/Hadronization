@@ -68,6 +68,25 @@ Every aggregate activity bin must be nonnegative and the total must be positive.
 
 ## Observables
 
+### Identified balancing species
+
+The default numerical request selects nine associate species per trigger. Integrated and activity-dependent balancing use the same selection.
+
+| Sector | Mesons | Baryons |
+| --- | --- | --- |
+| Charm | D+, D0, Ds+ | Lambda_c+, Sigma_c0, Sigma_c+, Sigma_c++, Xi_c0, Xi_c+ |
+| Beauty | B+, B0, Bs0, Bc+ | Lambda_b0, Sigma_b-, Sigma_b+, Xi_b-, Xi_b0 |
+
+The table names particle families. The trigger's heavy-flavour sign determines the opposite-sign particle or antiparticle. The estimator subtracts its same-sign conjugate.
+
+Each charge state remains a separate category. The figures do not sum Sigma or Xi charge states. The numerical ROOT retains their joint jackknife covariance.
+
+Ds and Xi add strange meson and baryon comparisons. Sigma adds direct heavy-baryon production beyond Lambda. Heavy-hadron decays remain disabled, so Sigma particles do not feed down into the saved Lambda category.
+
+Each numerical ROOT file records its own selected species. The renderer retains that selection. A new [reduction](workflow.md#numerical-reduction) can select these categories from the existing merged query without rebuilding it.
+
+### Definitions
+
 Let w_e denote event weight. Let T_t denote the weighted number of eligible triggers of species t in the selected class. Let N_OS and N_SS denote weighted ordered-pair counts with the requested associates. A trigger contributes to T_t even when both pair counts are zero.
 
 For azimuthal bin b, the identified pair observables are

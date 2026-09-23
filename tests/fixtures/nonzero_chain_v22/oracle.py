@@ -20,6 +20,12 @@ PARENTS = ((421, -4122), (421, 4122), (421, -421), (421, 421),
            (521, 5122), (521, -5122), (521, -521), (521, 521),
            (521, -511), (521, 511), (521, -531), (521, 531),
            (521, -541), (521, 541))
+EXTENDED = {421: (-431,-4112,-4212,-4222,-4132,-4232),
+            4122: (-431,-4112,-4212,-4222,-4132,-4232),
+            521: (5112,5222,5132,5232),
+            5122: (-5112,-5222,-5132,-5232)}
+PARENTS += tuple((trigger,signed) for trigger,associates in EXTENDED.items()
+                 for associate in associates for signed in (associate,-associate))
 BALANCES = {
     "D0_reference_meson": ((421,-421),(421,421)),
     "D0_P8_baryon": ((421,-4122),(421,4122)),
@@ -80,6 +86,8 @@ def pdgs(channel, logical, round_, tune):
         [5122,-5122,521,-521,511,-511,531,-531,541,-541],
     )
     value = rows[channel][:]
+    value += ([4112,-4112,4212,-4212,4222,-4222,4132,-4132,4232,-4232]
+              if channel < 2 else [5112,-5112,5222,-5222,5132,-5132,5232,-5232])
     if (logical + round_ + tune) % 3 == 0:
         parent = 521 if channel >= 2 else 421
         value += [parent, -parent]
