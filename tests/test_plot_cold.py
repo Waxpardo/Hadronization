@@ -153,6 +153,20 @@ int main(int argc, char** argv) {
                 products.append(path.read_bytes())
             self.assertEqual(products[0],products[1])
 
+    def test_export_trailer_identity_preserves_objects_and_refuses_malformed_id(self):
+        prefix=b'%PDF-1.4\n1 0 obj\n<</Title (/ID is ordinary text)>>\nendobj\n'
+        def pdf(identifier):
+            return prefix+b'xref\n0 2\n0000000000 65535 f \n0000000009 00000 n \ntrailer\n<< /Size 2 '+identifier+b' >>\nstartxref\n'+str(len(prefix)).encode()+b'\n%%EOF\n'
+        identity='ab'*16
+        source=pdf(b'/ID [<'+b'01'*16+b'><'+b'23'*16+b'>]')
+        expected=pdf(b'/ID [<'+identity.encode()+b'><'+identity.encode()+b'>]')
+        self.assertEqual(plot.canonical_export_pdf(source,identity),expected)
+        self.assertEqual(plot.canonical_export_pdf(pdf(b''),identity),pdf(b''))
+        self.assertEqual(len(expected),len(source))
+        for malformed in (b'/ID [<01><23>]',b'/ID (bad)',b'/ID [<'+b'zz'*16+b'><'+b'01'*16+b'>]'):
+            with self.assertRaisesRegex(ValueError,'trailer ID'):
+                plot.canonical_export_pdf(pdf(malformed),identity)
+
     def test_spectrum_key_headroom_keeps_data_and_ratio_scale(self):
         import copy
         absolute = {'id':'g9.absolute', 'geometry':[0.,.34,1.,.9],

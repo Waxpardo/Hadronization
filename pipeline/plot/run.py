@@ -2777,6 +2777,28 @@ def verify_pdf_fonts(path):
     return len(rows)
 
 
+def canonical_export_pdf(payload, identity):
+    """Normalize only an optional classic-PDF trailer ID from older exporters."""
+    ending=re.search(rb"startxref\s+(\d+)\s+%%EOF\s*$",payload)
+    if ending is None or re.fullmatch(r'[0-9a-f]{32}',identity) is None:
+        raise ValueError('exported PDF identity framing differs')
+    offset=int(ending.group(1))
+    if payload[offset:offset+5]!=b'xref\n':
+        raise ValueError('exported PDF classic xref differs')
+    marker=payload.find(b'\ntrailer\n',offset)
+    if marker<0:
+        raise ValueError('exported PDF trailer missing')
+    trailer=payload[marker:]
+    pattern=rb'(/ID\s*\[\s*<)[0-9A-Fa-f]{32}(>\s*<)[0-9A-Fa-f]{32}(>\s*\])'
+    fixed,count=re.subn(pattern,lambda m:m[1]+identity.encode()+m[2]+identity.encode()+m[3],trailer)
+    if count>1 or (b'/ID' in trailer and count!=1):
+        raise ValueError('exported PDF trailer ID differs')
+    # The fixed-width replacement preserves every object offset and stream.
+    if len(fixed)!=len(trailer):
+        raise ValueError('exported PDF identity width differs')
+    return payload[:marker]+fixed
+
+
 def publication_pdf(path):
     """Embed fonts without rasterizing the scientific drawing."""
     canonical_pdf=canonical_root_pdf(path.read_bytes(),path.name)
@@ -2796,6 +2818,7 @@ def publication_pdf(path):
             '-c','[ /CreationDate (D:20000101000000Z) '
                  '/ModDate (D:20000101000000Z) /DOCINFO pdfmark'],
             check=True,capture_output=True,text=True)
+        output.write_bytes(canonical_export_pdf(output.read_bytes(),digest[:32]))
         verify_pdf_fonts(output)
         # This is a private output stage. Final publication still uses the
         # existing no-replace directory operation.
