@@ -113,7 +113,9 @@ The field `phase_a_t9_two_sided_quantile` is the literal key for the fixed nine-
 | `style_identities.class_line_patterns` | One solid and eleven distinct dash patterns. Exact ROOT style IDs, dash strings and inclusive role |
 | `style_identities.species_encoding` | `facet_only`. Fixed |
 | `style_identities.tunes` | MONASH black circle, JUNCTIONS blue square, CLOSEPACKING orange triangle. Fixed IDs, RGB colors, markers and solid tune lines |
-| `style_identities.unity_reference` | Neutral gray, dashed. Fixed reference-only role |
+| `style_identities.unity_reference` | Neutral gray, dotted. Fixed reference-only role |
+
+The supplemental activity pages select the saved 0-1%, 40-50% and 80-90% intervals. Long dashes, dots and dash-dot lines distinguish these classes. The renderer does not substitute another interval when one is absent. The main activity pages retain all requested classes.
 
 `p1_inset_geometry` is the literal configuration key for the multiplicity percentile inset. The renderer transforms its normalized rectangle to preserve the intended physical aspect. It is not a scientific axis or a percentile definition.
 

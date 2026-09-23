@@ -116,7 +116,7 @@ struct Page {
 constexpr double kPaperWidthCentimeters = 18.;
 constexpr double kPointsPerCentimeter = 72. / 2.54;
 constexpr const char* kClassPatternDigest =
-    "class_patterns_sha256=642d0b774f5c2956440d0840c105fd6d09b31b1fb792ec523cf89cbb05233bc8";
+    "class_patterns_sha256=862f26b2a3c5d5c88418c6fe61c1a047a35422d8833ebdddf7826b163591fc94";
 constexpr const char* kP1WithheldSeDisclosure =
     "Tune-ratio SE unavailable for unresolved sparse-tail denominators; "
     "see ROOT flags";
@@ -599,7 +599,12 @@ bool SpeciesCategoryAxis(const Page& page) {
          page.role.rfind("balancing.activity.", 0) == 0;
 }
 bool RotateCategoryLabels(const Page& page, const Panel& panel) {
-  return panel.ticks.size() >= 5 && !SpeciesCategoryAxis(page);
+  return panel.ticks.size() >= 5 && !SpeciesCategoryAxis(page) &&
+         page.role.rfind("correlations.", 0) != 0;
+}
+bool SharedXTitle(const Page& page) {
+  return page.role.rfind("correlations.", 0) == 0 ||
+         page.role == "balancing.baryon_meson.activity";
 }
 bool SharedRightAxis(const Panel& panel) {
   return panel.geometry[0] > 0 && panel.margins[0] == 0.;
@@ -610,7 +615,7 @@ double PanelTitleX(const Panel& panel) {
 double JoinedEndLabelOffset(const Page& page, const Panel& panel, double x) {
   if (page.role.rfind("correlations.", 0) != 0) return 0.;
   const double width = (panel.geometry[2]-panel.geometry[0])*page.width;
-  const double clearance = .65*BodyTextPixels(page)/width;
+  const double clearance = 1.35*BodyTextPixels(page)/width;
   if (SharedRightAxis(panel) && SameBinary64(x, panel.xLow)) return clearance;
   if (panel.margins[1] == 0. && panel.geometry[2] < 1. &&
       SameBinary64(x, panel.xHigh)) return -clearance;
@@ -793,6 +798,8 @@ double CategoryLabelY(const Page& page, const Panel& panel) {
       (page.role == "balancing.baryon_meson.activity" ? .015 : .025);
 }
 double PanelTitleY(const Page& page, const Panel& panel) {
+  if (page.role.rfind("correlations.", 0) == 0)
+    return 1 - panel.margins[3] + .035;
   if (page.role.rfind("balancing.integrated.", 0) == 0 &&
       panel.id.rfind("upper.", 0) == 0)
     return 1 - panel.margins[3] + .035;
@@ -820,6 +827,8 @@ YAxisLabelPolicy JoinedYAxisLabelPolicy(const Page& page,
   policy.suppressFirst = !inset && panel.margins[2] == 0. &&
                          !PreserveJoinedLogLabels(page, panel);
   policy.suppressLast = !inset && panel.margins[3] == 0.;
+  if (page.role == "multiplicity.composite" && panel.id == "lower.ratio")
+    policy.suppressLast = false;
   // A panel touching one adjacent panel still owns an independent numerical
   // scale.  Preserve its seam label when ROOT's five-primary-division
   // optimization provides only two anchors; suppressing either would leave
@@ -909,7 +918,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
   };
   if (!inset && !panel.yTitle.empty()) {
     result.push_back(TextExpectation(
-        panel.yTitle, page.role.find("correlations.") == 0 ? .045 :
+        panel.yTitle, page.role.find("correlations.") == 0 ? .025 :
             (page.role.find("balancing.") == 0 &&
              panel.id.rfind("upper.", 0) == 0 ? .05 : .075),
         (panel.margins[2] + 1 - panel.margins[3]) / 2,
@@ -941,7 +950,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
                                        kP1InformationY.at(i),
                                        kP1InformationPixels.at(i)));
   }
-  if (!inset && !panel.xTitle.empty() &&
+  if (!inset && !panel.xTitle.empty() && !SharedXTitle(page) &&
       !(CategoricalAxis(page,panel) && panel.id.rfind("lower.",0)==0)) {
     const bool p1 = page.role == "multiplicity.composite";
     result.push_back(TextExpectation(
@@ -1169,6 +1178,19 @@ std::vector<ExpectedText> ClassKeyTexts(const Page& page) {
 }
 std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
   std::vector<ExpectedText> result;
+  // Paint seam labels on the canvas so an adjacent pad cannot clip them.
+  for (const Panel& panel : page.panels) {
+    const double width=panel.geometry[2]-panel.geometry[0];
+    const double height=panel.geometry[3]-panel.geometry[1];
+    const double x=panel.geometry[0]+width*(panel.margins[0]-.008);
+    if (page.role=="multiplicity.composite" && panel.id=="lower.ratio")
+      result.push_back(TextExpectation("5",x,
+          panel.geometry[3]-height*panel.margins[3],BodyTextPixels(page),1,32));
+    if (page.role.rfind("correlations.",0)==0 && panel.logY &&
+        panel.margins[2]==0. && !SharedRightAxis(panel))
+      result.push_back(TextExpectation("10^{-6}",x,
+          panel.geometry[1],BodyTextPixels(page),1,32));
+  }
   if (page.role.rfind("balancing.",0)==0 ||
       page.role.rfind("correlations.",0)==0) {
     const bool teaching=std::any_of(page.panels.begin(),page.panels.end(),
@@ -1226,9 +1248,31 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
     if (ratio!=page.panels.end() && !ratio->note.empty())
       result.push_back(TextExpectation(ratio->note,.015,.035,16));
   }
+  if (SharedXTitle(page)) {
+    double low=1., high=0., frameY=1.;
+    std::string title;
+    for (const Panel& panel : page.panels) {
+      if (panel.xTitle.empty()) continue;
+      Need(title.empty() || title==panel.xTitle,
+           "shared x title differs across panels");
+      title=panel.xTitle;
+      const double width=panel.geometry[2]-panel.geometry[0];
+      const double height=panel.geometry[3]-panel.geometry[1];
+      low=std::min(low,panel.geometry[0]+width*panel.margins[0]);
+      high=std::max(high,panel.geometry[2]-width*panel.margins[1]);
+      frameY=std::min(frameY,panel.geometry[1]+height*panel.margins[2]);
+    }
+    if (!title.empty()) {
+      const double y=page.role.rfind("correlations.",0)==0 ?
+          frameY-2.8*BodyTextPixels(page)/page.height : CategoricalXTitleY(page);
+      result.push_back(TextExpectation(title,(low+high)/2,y,
+                                       BodyTextPixels(page),1,23));
+    }
+  }
   for (const Panel& panel : page.panels) {
     if (panel.id.rfind("lower.",0)!=0 ||
-        !CategoricalAxis(page,panel) || panel.xTitle.empty()) continue;
+        !CategoricalAxis(page,panel) || panel.xTitle.empty() ||
+        SharedXTitle(page)) continue;
     const double center=panel.geometry[0]+
         (panel.geometry[2]-panel.geometry[0])*
         (panel.margins[0]+1-panel.margins[1])/2;
@@ -1470,7 +1514,7 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
                SameBinary64(divider.GetY1(), panel.yLow) &&
                SameBinary64(divider.GetY2(), panel.yHigh) &&
                divider.GetLineColor() == kGray+1 &&
-               divider.GetLineStyle() == 3 && divider.GetLineWidth() == 1,
+               divider.GetLineStyle() == 7 && divider.GetLineWidth() == 1,
                "categorical boundary divider geometry differs");
         }
       }
@@ -1546,8 +1590,8 @@ void LineStyle(int style) {
   // Multiples of four keep every dash/gap nonzero in small printed legends.
   // Integer style identity still follows the authenticated 1 + class_id rule.
   static const std::array<const char*, 11> patterns = {{
-    "80 8", "4 8", "24 8 4 8", "24 8 4 8 4 8", "12 8", "40 12",
-    "40 8 12 8", "12 8 4 8", "4 16", "24 8 12 8 4 8", "4 20"}};
+    "80 8", "40 12", "24 8 12 8 4 8", "24 8 4 8 4 8", "12 8", "4 8",
+    "40 8 12 8", "12 8 4 8", "4 16", "24 8 4 8", "4 20"}};
   if (style >= 2 && style <= 12) gStyle->SetLineStyleString(style,patterns[style-2]);
   if (style > 12) {
     std::string pattern = "40 12";
@@ -1654,7 +1698,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       TLatex label; label.SetNDC(); label.SetTextFont(43); label.SetTextSize(textPixels);
       label.SetLineWidth(1);
       label.SetTextAngle(90); label.SetTextAlign(23);
-      label.DrawLatex(page.role.find("correlations.")==0 ? .045 :
+      label.DrawLatex(page.role.find("correlations.")==0 ? .025 :
                           (page.role.find("balancing.")==0 &&
                            panel.id.rfind("upper.",0)==0 ? .05 : .075),
                       (panel.margins[2]+1-panel.margins[3])/2,panel.yTitle.c_str());
@@ -1691,7 +1735,8 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
           lines.emplace_back(std::make_unique<TLine>(
               boundary, panel.yLow, boundary, panel.yHigh));
           lines.back()->SetLineColor(kGray+1);
-          lines.back()->SetLineStyle(3);
+          LineStyle(7);
+          lines.back()->SetLineStyle(7);
           lines.back()->SetLineWidth(1);
           lines.back()->Draw();
         }
@@ -1715,7 +1760,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
         Text(P1InformationX, kP1InformationY.at(i), lines[i],
              kP1InformationPixels.at(i));
     }
-    if (!inset && !panel.xTitle.empty() &&
+    if (!inset && !panel.xTitle.empty() && !SharedXTitle(page) &&
         !(CategoricalAxis(page,panel) && panel.id.rfind("lower.",0)==0)) {
       TLatex label; label.SetNDC(); label.SetTextFont(43);
       label.SetLineWidth(1);

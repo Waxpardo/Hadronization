@@ -19,6 +19,52 @@ SPEC.loader.exec_module(plot)
 
 
 class ColdDrawingBoundary(unittest.TestCase):
+    def test_class_pattern_digest_matches_native_renderer(self):
+        config,_=plot.checked_plot_config(ROOT/'config/plot.json')
+        digest=plot.sha_bytes(plot.canonical(
+            config['style_identities']['class_line_patterns']).encode())
+        self.assertIn('class_patterns_sha256='+digest,
+                      (ROOT/'pipeline/plot/render.cpp').read_text())
+
+    def test_density_label_requires_explicit_numerical_units(self):
+        self.assertEqual(plot.correlation_y_title([]),
+                         'Correlation yield (units unavailable)')
+        row = {'quantity':'dphi_per_trigger','units':'per_trigger_per_bin'}
+        self.assertIn('per bin',plot.correlation_y_title([row]))
+        row['quantity']='dphi_density_per_trigger'
+        with self.assertRaisesRegex(ValueError,'units disagree'):
+            plot.correlation_y_title([row])
+        row['units']='per_trigger_per_radian'
+        self.assertIn('d#Delta#varphi',plot.correlation_y_title([row]))
+        self.assertIn('N}_{OS}',plot.correlation_y_title([row],'OS_MINUS_SS'))
+        with self.assertRaisesRegex(ValueError,'mixed numerical units'):
+            plot.correlation_y_title([row,{'quantity':'dphi_per_trigger',
+                                          'units':'per_trigger_per_bin'}])
+
+    def test_display_limits_keep_clipped_points_and_errors(self):
+        import copy
+        panels=[{'id':'lower.ratio','y_range':[-.2,18.], 'log_y':False,
+                 'series':[{'points':[{'y':17.,'error':2.}]}]},
+                {'id':'correlation.teaching.421.identified',
+                 'y_range':[1e-10,.1], 'log_y':True,
+                 'series':[{'points':[{'y':1e-8,'error':1e-9}]}]}]
+        original=copy.deepcopy(panels)
+        plot.apply_display_limits([
+            {'role':'multiplicity.composite','panels':[panels[0]]},
+            {'role':'correlations.charm','panels':[panels[1]]}])
+        self.assertEqual(panels[0]['y_range'],[-.2,5.])
+        self.assertEqual(panels[1]['y_range'],[1e-6,.1])
+        for before,after in zip(original,panels):
+            self.assertEqual(before['series'],after['series'])
+
+    def test_focused_intervals_never_use_nearby_class(self):
+        classes=[{'id':'5','integrated':False,'percentile_interval':[0.,2.]},
+                 {'id':'7','integrated':False,'percentile_interval':[40.,50.]},
+                 {'id':'9','integrated':False,'percentile_interval':[90.,100.]}]
+        self.assertEqual(plot.selected_extreme_class_ids(classes),['7'])
+        self.assertEqual(plot.focused_extreme_pages([],SimpleNamespace(
+            tunes=['MONASH','JUNCTIONS'],classes=classes),.08),[])
+
     def test_species_display_order_groups_content_and_preserves_signed_membership(self):
         charm = ['-411', '-421', '-431', '-4122', '-4112', '-4212',
                  '-4222', '-4132', '-4232']
@@ -371,14 +417,13 @@ class ColdDrawingBoundary(unittest.TestCase):
     def test_focused_extremes_preserve_all_class_canonical_page(self):
         classes = [{"id": "0", "integrated": True,
                     "percentile_interval": [0., 100.]}]
+        intervals = [(0.,1.),(1.,10.)]+[(float(i),float(i+10))
+                                                 for i in range(10,100,10)]
         classes += [{"id": str(index), "integrated": False,
-                     "percentile_interval": [float(index-1)*9.,
-                                             float(index)*9.]}
-                    for index in range(1, 11)]
-        classes.append({"id": "11", "integrated": False,
-                        "percentile_interval": [90., 100.]})
+                     "percentile_interval": list(interval)}
+                    for index,interval in enumerate(intervals,1)]
         self.assertEqual(plot.selected_extreme_class_ids(classes),
-                         ["1", "11"])
+                         ["1", "6", "10"])
         panel = {"id": "upper.411", "series": [
             {"class_id": str(index), "points": [{"state": "DRAW",
              "y": float(index), "error": None}]}
@@ -396,7 +441,7 @@ class ColdDrawingBoundary(unittest.TestCase):
         pages = plot.focused_extreme_pages([canonical], context, .08)
         self.assertEqual(len(pages), 1)
         self.assertEqual([series["class_id"] for series in
-                          pages[0]["panels"][0]["series"]], ["1", "11"])
+                          pages[0]["panels"][0]["series"]], ["1", "6", "10"])
         self.assertEqual(len(canonical["panels"][0]["series"]), 11)
         self.assertIn("supplemental", pages[0]["filename"])
 
@@ -405,18 +450,18 @@ class ColdDrawingBoundary(unittest.TestCase):
             {"id": "0", "integrated": True,
              "percentile_interval": [0., 100.]},
             {"id": "7", "integrated": False,
-             "percentile_interval": [3., 14.]},
+             "percentile_interval": [0., 1.]},
             {"id": "2", "integrated": False,
-             "percentile_interval": [14., 65.]},
+             "percentile_interval": [40., 50.]},
             {"id": "9", "integrated": False,
-             "percentile_interval": [65., 97.]},
+             "percentile_interval": [80., 90.]},
         ]
         self.assertEqual(plot.selected_extreme_class_ids(classes),
-                         ["7", "9"])
+                         ["7", "2", "9"])
         self.assertEqual([plot.activity_emphasis(
             "balancing.activity.charm", class_id, classes)
             for class_id in ("0", "7", "2", "9")],
-            ["NORMAL", "EXTREME", "NORMAL", "EXTREME"])
+            ["NORMAL", "EXTREME", "EXTREME", "EXTREME"])
 
     def test_baryon_meson_axis_names_exact_signed_particle_yields(self):
         labels = {'-4122': '#bar{#it{#Lambda}}_{c}^{-}',
@@ -425,7 +470,7 @@ class ColdDrawingBoundary(unittest.TestCase):
                 {'associate_pdg': '-4122', 'reference_pdg': '-421'}]
         self.assertEqual(plot.exact_particle_ratio_title(
             rows, labels.__getitem__),
-            '#it{Y}(#bar{#it{#Lambda}}_{c}^{-}) / #it{Y}(#bar{#it{D}}^{0})')
+            '#bar{#it{#Lambda}}_{c}^{-} / #bar{#it{D}}^{0}')
         with self.assertRaisesRegex(ValueError, 'mixes particle yield ratios'):
             plot.exact_particle_ratio_title(rows + [{
                 'associate_pdg': '5122', 'reference_pdg': '-521'}],
@@ -562,7 +607,7 @@ class ColdDrawingBoundary(unittest.TestCase):
                          ['lower.shared.charm.421',
                           'lower.shared.beauty.521'])
         self.assertTrue(all(item['x_title'] ==
-            'Multiplicity Percentile Class (%)' for item in page['panels'][-2:]))
+            'Multiplicity Percentile Interval (%)' for item in page['panels'][-2:]))
         self.assertTrue(all(item['y_title'] == 'TUNE/MONASH'
                             for item in page['panels'][-2:]))
         self.assertEqual([item['title'] for item in page['panels'][:6]],

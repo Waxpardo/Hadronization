@@ -236,14 +236,14 @@ def checked_plot_config(path):
             styles["class_line_style_rule"] !=
             "integrated=1;nonintegrated=2+typed_class_ordinal" or
             styles["unity_reference"] != {
-                "color": "neutral_gray", "line": "dashed",
+                "color": "neutral_gray", "line": "dotted",
                 "role": "reference_only"}):
         raise ValueError("plot style identity differs")
     expected_patterns = [
-        (1, "solid"), (2, "80 8"), (3, "4 8"),
-        (4, "24 8 4 8"), (5, "24 8 4 8 4 8"), (6, "12 8"),
-        (7, "40 12"), (8, "40 8 12 8"), (9, "12 8 4 8"),
-        (10, "4 16"), (11, "24 8 12 8 4 8"),
+        (1, "solid"), (2, "80 8"), (3, "40 12"),
+        (4, "24 8 12 8 4 8"), (5, "24 8 4 8 4 8"), (6, "12 8"),
+        (7, "4 8"), (8, "40 8 12 8"), (9, "12 8 4 8"),
+        (10, "4 16"), (11, "24 8 4 8"),
         (12, "4 20")]
     patterns = styles["class_line_patterns"]
     if (not isinstance(patterns, list) or
@@ -433,7 +433,8 @@ def _render_numbers(row):
         "balancing": {"ordered_pair_yield", "os_minus_ss_per_trigger",
                       "baryon_meson_reference_ratio", "ratio_to_reference_tune",
                       "baryon_meson_ratio_to_reference_tune"},
-        "correlations": {"dphi_per_trigger", "ratio_to_reference_tune"},
+        "correlations": {"dphi_per_trigger", "dphi_density_per_trigger",
+                         "ratio_to_reference_tune"},
         "kinematics": {"normalized_distribution", "ratio_to_reference_tune",
                        "normalized_spectrum", "spectrum_ratio_to_reference_tune"},
         "multiplicity": {"normalized_distribution", "ratio_to_reference_tune"},
@@ -630,17 +631,35 @@ def resolved_class_styles(classes, patterns):
 
 
 def selected_extreme_class_ids(classes):
-    """Select display-only endpoints from S's requested percentile intervals."""
-    regular = [item for item in classes if not item['integrated']]
-    if len(regular) < 2:
-        raise ValueError('focused activity view needs two typed classes')
-    high_activity = min(regular, key=lambda item:(
-        item['percentile_interval'][0], item['percentile_interval'][1]))
-    low_activity = max(regular, key=lambda item:(
-        item['percentile_interval'][1], item['percentile_interval'][0]))
-    if high_activity['id'] == low_activity['id']:
-        raise ValueError('focused activity endpoints coincide')
-    return [str(high_activity['id']), str(low_activity['id'])]
+    """Select exact saved intervals; never approximate a missing class."""
+    requested = ((0., 1.), (40., 50.), (80., 90.))
+    regular = {tuple(item['percentile_interval']): str(item['id'])
+               for item in classes if not item['integrated']}
+    return [regular[interval] for interval in requested if interval in regular]
+
+
+def correlation_y_title(rows, component='OS'):
+    """Label stored per-bin yields or densities without changing values."""
+    quantities = {row['quantity'] for row in rows
+                  if row['quantity'] != 'ratio_to_reference_tune'}
+    if not quantities:
+        return 'Correlation yield (units unavailable)'
+    if len(quantities) != 1:
+        raise ValueError('correlation panel has absent or mixed numerical units')
+    quantity = next(iter(quantities))
+    expected_units = {'dphi_per_trigger': 'per_trigger_per_bin',
+                      'dphi_density_per_trigger': 'per_trigger_per_radian'}
+    if quantity not in expected_units or any(
+            row['units'] != expected_units[quantity] for row in rows
+            if row['quantity'] != 'ratio_to_reference_tune'):
+        raise ValueError('correlation quantity and numerical units disagree')
+    numerator = ('(#it{N}_{OS}-#it{N}_{SS})' if component == 'OS_MINUS_SS'
+                 else '#it{N}_{pair}')
+    if quantity == 'dphi_density_per_trigger':
+        return '#frac{1}{#it{N}_{trig}} #frac{d'+numerator+'}{d#Delta#varphi}'
+    if quantity == 'dphi_per_trigger':
+        return numerator+' / #it{N}_{trig} (per bin)'
+    raise ValueError('unknown correlation numerical units')
 
 
 def p1_ratio_uncertainty_note(role, panel_id, points, fallback):
@@ -663,7 +682,7 @@ def exact_particle_ratio_title(rows, label):
     if len(pairs) != 1:
         raise ValueError('baryon/meson panel mixes particle yield ratios')
     associate, reference = next(iter(pairs))
-    return '#it{{Y}}({}) / #it{{Y}}({})'.format(
+    return '{} / {}'.format(
         label(associate), label(reference))
 
 def activity_emphasis(role, class_id, classes):
@@ -780,6 +799,10 @@ def focused_extreme_pages(pages, context, padding):
     if len(context.tunes) < 2:
         return []
     selected = selected_extreme_class_ids(context.classes)
+    if len(selected) != 3:
+        # Other valid class recipes remain renderable. They cannot stand in
+        # for any of these exact three requested display intervals.
+        return []
     by_id = {str(item['id']): item for item in context.classes}
     descriptions = ['{}-{}%'.format(*(
         format(float(value), '.15g') for value in
@@ -804,8 +827,7 @@ def focused_extreme_pages(pages, context, padding):
             continue
         page = copy.deepcopy(source)
         page['filename'] = 'supplemental.'+source['role']+'.extremes.pdf'
-        page['title'] = ('Supplemental current activity extremes: '+
-                         descriptions[0]+' and '+descriptions[1])
+        page['title'] = ('Selected activity intervals: '+', '.join(descriptions))
         for panel in page['panels']:
             panel['series'] = [series for series in panel['series']
                                if series['class_id'] in selected]
@@ -836,7 +858,7 @@ def focused_extreme_pages(pages, context, padding):
                     'x_low':panel['x_range'][0],
                     'x_high':panel['x_range'][1],
                     'y_low':0.,'y_high':0.,'color':'#777777',
-                    'line_style':3,'label':''})
+                    'line_style':7,'label':''})
         result.append(page)
     return result
 
@@ -931,8 +953,7 @@ def tune_separated_baryon_meson_page(pages, tunes):
             panel['id'] = 'upper.{}.{}'.format(tune, suffix)
             panel['geometry'] = [original['geometry'][0], row_bottom,
                                  original['geometry'][2], row_top]
-            panel['title'] = (original['title'].split(': ', 1)[-1]
-                              if tune_index == 0 else '')
+            panel['title'] = original['title'] if tune_index == 0 else ''
             panel['series'] = [series for series in panel['series']
                                if series['tune'] == tune]
             for series in panel['series']:
@@ -947,11 +968,24 @@ def tune_separated_baryon_meson_page(pages, tunes):
         panel['geometry'] = [original['geometry'][0], ratio_bottom,
                              original['geometry'][2], ratio_top]
         panel['title'] = ''
-        panel['x_title'] = 'Multiplicity Percentile Class (%)'
+        panel['x_title'] = 'Multiplicity Percentile Interval (%)'
         panel['y_title'] = 'TUNE/MONASH'
         panel['margins'][3] = 0.
         page['panels'].append(panel)
     return page
+
+def apply_display_limits(pages):
+    """Change frame limits while retaining every saved point and error."""
+    for page in pages:
+        for panel in page['panels']:
+            if (page['role'] == 'multiplicity.composite' and
+                    panel['id'] == 'lower.ratio'):
+                low = panel['y_range'][0]
+                panel['y_range'] = [low if low < 5. else 0., 5.]
+            if (page['role'].startswith('correlations.') and panel['log_y']
+                    and not panel['id'].startswith('correlation.compare.')):
+                panel['y_range'] = [1.e-6, max(panel['y_range'][1], 1.e-5)]
+
 
 def synchronize_paired_y_ranges(pages):
     """Give each left/right row one shared y scale without changing its data."""
@@ -1652,7 +1686,8 @@ def drawing_plan(projection, manifest, config):
             unfiltered = trigger_shown
             if pair_sign_view:
                 trigger_shown = [r for r in trigger_shown
-                    if r['quantity'] == 'dphi_per_trigger' and
+                    if r['quantity'] in ('dphi_per_trigger',
+                                         'dphi_density_per_trigger') and
                     ((r['component'] in ('OS', 'SS') and
                       r['associate_pdg'] == str(-int(r['trigger_pdg']))) or
                      (r['component'] == 'OS_MINUS_SS' and
@@ -1728,10 +1763,11 @@ def drawing_plan(projection, manifest, config):
                             members, label)
                         add(name,[left,.32 if half=='upper' and has_tune_ratios else 0.,right,
                                   .89 if half=='upper' else .32],
-                            title=label(t)+' trigger',
+                            title=(label(t)+' trigger: '+exact_ratio_title
+                                   if half=='upper' else ''),
                             x_title='' if half=='upper' else
-                                'Multiplicity Percentile Class (%)',
-                            y_title=(exact_ratio_title
+                                'Multiplicity Percentile Interval (%)',
+                            y_title=('#it{Y}_{baryon}/#it{Y}_{meson}'
                                      if half=='upper' else 'TUNE/MONASH'),
                             log_y=half=='upper',ratio=half=='lower',legend=False)
         elif role=='multiplicity.composite':
@@ -1781,24 +1817,24 @@ def drawing_plan(projection, manifest, config):
                     add('correlation.teaching.'+trigger+'.identified',
                         [left,.48,right,.97],
                         title=label(trigger)+' trigger (MONASH)',x_title='',
-                        y_title='Per-trigger yield #it{N}_{pair}/#it{N}_{trig}',
+                        y_title=correlation_y_title(shown),
                         log_y=True,legend=True)
                     add('correlation.teaching.'+trigger+'.inclusive',
                         [left,.05,right,.48],title='',
                         x_title='#Delta#varphi (rad)',
-                        y_title='Per-trigger yield (#it{N}_{OS}-#it{N}_{SS})/#it{N}_{trig}',
+                        y_title=correlation_y_title(shown, 'OS_MINUS_SS'),
                         legend=True)
                     continue
                 if teaching_view:
                     add('correlation.balance.'+trigger+'.upper',
                         [left,.45,right,.89],
                         title='MONASH '+label(trigger)+' trigger',
-                        x_title='',y_title='OS, SS / trigger / bin',
+                        x_title='',y_title=correlation_y_title(shown),
                         legend=True)
                     add('correlation.balance.'+trigger+'.lower',
                         [left,.08,right,.45],title='',
                         x_title='#Delta#varphi (rad)',
-                        y_title='OS - SS / trigger / bin',legend=False)
+                        y_title=correlation_y_title(shown, 'OS_MINUS_SS'),legend=False)
                     continue
                 if has_tune_ratios:
                     geometry={
@@ -1824,7 +1860,7 @@ def drawing_plan(projection, manifest, config):
                         x_title='' if component!='OS_MINUS_SS' or
                             has_tune_ratios else
                             '#Delta#varphi (rad)',
-                        y_title=caption+' / trigger / bin',legend=False)
+                        y_title=correlation_y_title(shown, component),legend=False)
                     if compare_range:
                         add('correlation.compare.'+trigger+'.'+component,
                             [left,compare_range[0],right,compare_range[1]],
@@ -1900,7 +1936,7 @@ def drawing_plan(projection, manifest, config):
                 line_style=class_styles.get(cl, 1)
                 if family=='correlations':
                     component=ident['component']
-                    line_style={'OS':1,'SS':2,'OS_MINUS_SS':3}[component]
+                    line_style={'OS':1,'SS':2,'OS_MINUS_SS':7}[component]
                     legend_label=((label(int(ident['trigger_pdg']))+
                                    ' - '+label(-int(ident['trigger_pdg'])
                                    if component=='OS' else
@@ -2047,11 +2083,11 @@ def drawing_plan(projection, manifest, config):
                        if role=='multiplicity.composite' else
                        'STANDARD'}
             if options.get('ratio'):
-                panel['guides'].append({'id':'unity','x_low':xr[0],'x_high':xr[1],'y_low':1.,'y_high':1.,'color':'#777777','line_style':2,'label':''})
+                panel['guides'].append({'id':'unity','x_low':xr[0],'x_high':xr[1],'y_low':1.,'y_high':1.,'color':'#777777','line_style':10,'label':''})
             if signed_linear:
                 panel['guides'].append({'id':'signed_zero','x_low':xr[0],
                     'x_high':xr[1],'y_low':0.,'y_high':0.,
-                    'color':'#777777','line_style':3,'label':''})
+                    'color':'#777777','line_style':7,'label':''})
             page['panels'].append(panel)
         if family == 'correlations' and shown:
             axis_ids = {r['axis'] for r in shown}
@@ -2173,6 +2209,7 @@ def drawing_plan(projection, manifest, config):
             header, base_information, presentation['species_labels']))
     join_ratio_pads(pages)
     synchronize_paired_y_ranges(pages)
+    apply_display_limits(pages)
     join_paired_columns(pages)
     if getattr(context, 'cold', False):
         apply_cold_page_style(pages,context)
@@ -2362,7 +2399,7 @@ def g9_drawing_pages(context, rows, config, header, information, labels):
                 'uncertainty_display':'STANDARD',
                 'guides':([{'id':'unity','x_low':x_low,'x_high':x_high,
                             'y_low':1.,'y_high':1.,'color':'#777777',
-                            'line_style':2,'label':''}] if ratio else []),
+                            'line_style':10,'label':''}] if ratio else []),
                 'ticks':[],
                 'margins':[.16,.04,.28,.08] if ratio else [.16,.04,.06,.13],
                 'legend':[.53,.69,.95,.87] if ratio else

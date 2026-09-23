@@ -45,15 +45,15 @@
     "class_line_patterns": [
       {"root_style": 1, "dash_pattern": "solid", "role": "inclusive"},
       {"root_style": 2, "dash_pattern": "80 8"},
-      {"root_style": 3, "dash_pattern": "4 8"},
-      {"root_style": 4, "dash_pattern": "24 8 4 8"},
+      {"root_style": 3, "dash_pattern": "40 12"},
+      {"root_style": 4, "dash_pattern": "24 8 12 8 4 8"},
       {"root_style": 5, "dash_pattern": "24 8 4 8 4 8"},
       {"root_style": 6, "dash_pattern": "12 8"},
-      {"root_style": 7, "dash_pattern": "40 12"},
+      {"root_style": 7, "dash_pattern": "4 8"},
       {"root_style": 8, "dash_pattern": "40 8 12 8"},
       {"root_style": 9, "dash_pattern": "12 8 4 8"},
       {"root_style": 10, "dash_pattern": "4 16"},
-      {"root_style": 11, "dash_pattern": "24 8 12 8 4 8"},
+      {"root_style": 11, "dash_pattern": "24 8 4 8"},
       {"root_style": 12, "dash_pattern": "4 20"}
     ],
     "species_encoding": "facet_only",
@@ -62,6 +62,6 @@
       {"id": "JUNCTIONS", "color": "#0072B2", "marker": "filled_square", "line": "solid"},
       {"id": "CLOSEPACKING", "color": "#D55E00", "marker": "filled_up_triangle", "line": "solid"}
     ],
-    "unity_reference": {"color": "neutral_gray", "line": "dashed", "role": "reference_only"}
+    "unity_reference": {"color": "neutral_gray", "line": "dotted", "role": "reference_only"}
   }
 }
