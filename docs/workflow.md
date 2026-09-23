@@ -264,7 +264,7 @@ The renderer requires PyROOT, ROOT libraries, a compiler, numerical ROOT and its
 
 The renderer writes PDFs, `canvases.root`, a compressed drawing record and `manifest.json`. It reopens canvases and checks coordinates, errors, statuses, axes, pads, styles, legends and reference lines. The PDF exporter embeds all fonts through Ghostscript. The verifier checks the exported fonts with Poppler. These checks do not replace visual inspection at publication size.
 
-Each figure contains a sample description in its upper panel. It states the generator, collision system, energy, heavy-flavour selection, acceptance and statistical-error method. Activity figures also distinguish the multiplicity threshold from pair cuts. A reserved area keeps these descriptions separate from data. The legend occupies the other column where possible.
+Each figure contains a compact sample description in its upper panel. It states the generator, collision system, energy, hard heavy-flavour processes and applicable acceptance. Activity figures identify N_ch and its particle cuts. The [scientific reference](science.md) gives the complete selections, observable definitions and statistical method. A reserved area separates the sample description from data.
 
 Bands show pointwise statistical standard errors. They do not represent systematic uncertainty or a simultaneous confidence region. Histogram bands stop at nonpositive log bins, unavailable errors and gaps between bin edges. The numerical archive retains these bins and their statuses.
 
@@ -272,7 +272,7 @@ Use the three-class activity views for compact comparisons. They show 0–1%, 40
 
 The multiplicity inset identifies MONASH class boundaries. Other tunes have their own boundaries. The lower-panel limit of five hides some low-multiplicity ratios. An upward indicator and a count disclose this clipping. The saved numerical values remain unchanged.
 
-Correlation views distinguish identified pairs from sums over stored associates. Opposite and same sign refer to heavy-flavour content. Horizontal segments on species axes mark categories; they are not horizontal measurement uncertainties. Equal-width percentile slots can represent unequal percentile intervals.
+Correlation views distinguish identified pairs from sums over eligible associates. Opposite and same sign refer to heavy-flavour content. Horizontal segments on species axes mark categories; they are not horizontal measurement uncertainties. Equal-width percentile slots can represent unequal percentile intervals.
 
 | Product | Presentation |
 | --- | --- |

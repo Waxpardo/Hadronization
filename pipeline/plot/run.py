@@ -656,7 +656,7 @@ def correlation_y_title(rows, component='OS'):
     numerator = ('(#it{N}_{OS}-#it{N}_{SS})' if component == 'OS_MINUS_SS'
                  else '#it{N}_{pair}')
     if quantity == 'dphi_density_per_trigger':
-        return '#frac{1}{#it{N}_{trig}} #frac{d'+numerator+'}{d#Delta#varphi}'
+        return '#frac{1}{#it{N}_{trig}} #frac{d'+numerator+'}{d#Delta#varphi} (rad^{-1})'
     if quantity == 'dphi_per_trigger':
         return numerator+' / #it{N}_{trig} (per bin)'
     raise ValueError('unknown correlation numerical units')
@@ -1189,9 +1189,8 @@ def sample_caption(payload):
     if (physics['hard_processes'] != ['ccbar', 'bbbar'] or
             physics['heavy_hadron_decays'] != 'disabled'):
         raise ValueError('caption heavy-sample definition differs')
-    return ['Heavy-flavour enriched: hard c#bar{c}, b#bar{b}',
-            '#hat{p}_{T} #geq '+
-            format(physics['pthat_min_gev'], '.15g')+' GeV/c; heavy-hadron decays off']
+    return ['Hard c#bar{c}, b#bar{b}; #hat{p}_{T} #geq '+
+            format(physics['pthat_min_gev'], '.15g')+' GeV/c']
 
 
 def scientific_caption_lines(page, context):
@@ -1203,27 +1202,20 @@ def scientific_caption_lines(page, context):
         profile = context.profile_definition
         eta = format(float.fromhex(profile['trigger_eta']['high']), '.15g')
         if profile['trigger_pt']['low'] is None:
-            lines.append('Pairs: no p_{T} minimum; |#eta_{trig,assoc}| #leq '+eta)
+            lines.append('|#eta_{trig,assoc}| #leq '+eta)
         else:
             lines.append('Pairs: p_{T}^{trig} #geq '+format(float.fromhex(profile['trigger_pt']['low']), '.15g')+
                          ', p_{T}^{assoc} #geq '+format(float.fromhex(profile['associate_pt']['low']), '.15g')+' GeV/c')
             lines.append('Pair acceptance: |#eta_{trig,assoc}| #leq '+eta)
-        lines.append('Y = (N_{OS} - N_{SS})/N_{trig}; direct hadrons'
-                     if role.startswith('balancing.') else
-                     'Direct hadrons; no diagonal p_{T} ordering')
     if role=='multiplicity.composite' or '.activity.' in role or role.endswith('.activity'):
         activity=context.activity_selection
-        lines.extend(['Activity: charged light final particles',
+        lines.extend(['N_{ch}: charged light final particles',
             'p_{T} > '+format(float.fromhex(activity['pt']['low']), '.15g')+
             ' GeV/c; |#eta| #leq '+format(float.fromhex(activity['eta_window']), '.15g')])
-        if role != 'multiplicity.composite':
-            lines.append('Tune-local percentiles; 0-1% = most active')
     if role=='spectra.signed_heavy':
         eta=format(float.fromhex(context.g9_science['eta']['high']), '.15g')
-        lines.extend(['Direct heavy hadrons; all origins',
-            'No p_{T} minimum; |#eta| #leq '+eta,
+        lines.extend(['|#eta| #leq '+eta,
             'Normalized probability per bin'])
-    lines.append('Pointwise stat. 1 SE; '+str(len(context.block_ids))+'-block jackknife')
     return lines
 
 
@@ -1235,8 +1227,6 @@ def add_publication_captions(pages, context):
         row=[p for p in panels if p['geometry'][3]==top]
         target=min(row, key=lambda p:p['geometry'][0])
         lines=scientific_caption_lines(page,context)
-        if page['role']=='multiplicity.composite' and any(p['note'] for p in panels if p['id']=='lower.ratio'):
-            lines.append('Some sparse-tail ratio errors unavailable')
         page['scientific_caption']=lines
         for panel in page['panels']: panel['annotations']=[]
         font=max(page['text_pixels'],math.ceil(9*page['width']/(18*72/2.54)))
@@ -1271,9 +1261,9 @@ def add_publication_captions(pages, context):
                         if panel not in row and panel['id'].startswith('correlation.main.'):
                             panel['margins'][3]=max(panel['margins'][3],.18)
                         panel['geometry'][1] *= old_height/page['height']
-                        panel['geometry'][3] *= old_height/page['height']
+                        panel['geometry'][3] = (panel['geometry'][3]*old_height+
+                            (header if panel in row else 0.))/page['height']
                         if panel in row:
-                            panel['geometry'][3] += header/page['height']
                             panel['margins'][3]=(panel['margins'][3]*old_ph+header)/(old_ph+header)
                 for panel in row:
                     ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
@@ -1281,7 +1271,7 @@ def add_publication_captions(pages, context):
                     if panel['margins'][3]>.58:
                         raise ValueError('scientific header leaves too little data area: '+page['filename'])
         ph=page['height']*(target['geometry'][3]-target['geometry'][1])
-        x=target['margins'][0]+.025; y=.97; step=1.25*font/ph
+        x=target['margins'][0]+.025; y=min(.97,1.-1.15*font/ph); step=1.25*font/ph
         if page['role']=='multiplicity.composite':
             font=18;step=1.30*font/ph;x=.37;y=.855
         target['annotations']=[{'x':x,'y':y-i*step,'size':float(font),'text':line}
@@ -1313,23 +1303,11 @@ def add_publication_captions(pages, context):
             target['annotations'].extend({'x':.56,'y':.74-i*.045,'size':float(font-2),'text':text}
                                          for i,text in enumerate(notes))
         if page['role'].startswith('correlations.'):
-            zero=sum(q['state']=='LOG_NONPOSITIVE' for p in panels for z in p['series'] for q in z['points'])
-            right=max(row,key=lambda p:p['geometry'][0])
-            explanations=['Lower panels sum eligible '+page['role'].split('.')[-1]+' associates',
-                          'OS/SS refer to heavy-flavour sign']
-            if zero:
-                explanations.extend(['Log panels omit '+str(zero)+' zero bins',
-                                     'Error bands stop at the displayed floor'])
             if not any(p['id'].startswith('correlation.teaching.') for p in panels):
-                right['annotations'].extend([
-                    {'x':.05,'y':.70,'size':float(font),'text':'Net yield: sum over eligible associates'},
-                    {'x':.05,'y':.64,'size':float(font),'text':'R = tune / MONASH; OS/SS: heavy sign'}])
                 for panel in panels:
                     if panel['id'].startswith('correlation.compare.') and panel['y_title']:
                         panel['y_title']='R_{tune/MONASH}'
             if any(p['id'].startswith('correlation.teaching.') for p in panels):
-                right['annotations'].extend({'x':.05,'y':.97-i*step,'size':float(font),'text':line}
-                                             for i,line in enumerate(explanations))
                 for panel in panels:
                     if panel['id'].endswith('.inclusive'):
                         for z in panel['series']: z['legend_label']=''
@@ -1941,7 +1919,7 @@ def drawing_plan(projection, manifest, config):
                 left=ti/len(triggers); right=(ti+1)/len(triggers)
                 add('upper.'+t,[left,.30 if has_tune_ratios else 0.,right,.89],
                     title=label(t)+' trigger',x_title='',
-                    y_title='Balancing Yield #it{Y}',categorical=True,
+                    y_title='#it{Y} = #frac{#it{N}_{OS} - #it{N}_{SS}}{#it{N}_{trig}}',categorical=True,
                     log_y=True,ratio=False,legend=False)
                 if has_tune_ratios:
                     add('lower.'+t,[left,0.,right,.30],title='',
