@@ -262,7 +262,17 @@ The renderer requires PyROOT, ROOT libraries, a compiler, numerical ROOT and its
   --work-dir "$RUN_ROOT/plot-verify-work" --output "$RUN_ROOT/figures"
 ```
 
-The renderer writes PDFs, `canvases.root`, a compressed drawing record and `manifest.json`. It reopens canvases and checks coordinates, errors, statuses, axes, pads, styles, legends and reference lines. These checks do not replace visual inspection at publication size.
+The renderer writes PDFs, `canvases.root`, a compressed drawing record and `manifest.json`. It reopens canvases and checks coordinates, errors, statuses, axes, pads, styles, legends and reference lines. The PDF exporter embeds all fonts through Ghostscript. The verifier checks the exported fonts with Poppler. These checks do not replace visual inspection at publication size.
+
+Each figure contains a sample description in its upper panel. It states the generator, collision system, energy, heavy-flavour selection, acceptance and statistical-error method. Activity figures also distinguish the multiplicity threshold from pair cuts. A reserved area keeps these descriptions separate from data. The legend occupies the other column where possible.
+
+Bands show pointwise statistical standard errors. They do not represent systematic uncertainty or a simultaneous confidence region. Histogram bands stop at nonpositive log bins, unavailable errors and gaps between bin edges. The numerical archive retains these bins and their statuses.
+
+Use the three-class activity views for compact comparisons. They show 0–1%, 40–50% and 80–90%. The full-class views retain all classes. Use full-width placement for dense figures. Check label sizes after placing each figure in the manuscript.
+
+The multiplicity inset identifies MONASH class boundaries. Other tunes have their own boundaries. The lower-panel limit of five hides some low-multiplicity ratios. An upward indicator and a count disclose this clipping. The saved numerical values remain unchanged.
+
+Correlation views distinguish identified pairs from sums over stored associates. Opposite and same sign refer to heavy-flavour content. Horizontal segments on species axes mark categories; they are not horizontal measurement uncertainties. Equal-width percentile slots can represent unequal percentile intervals.
 
 | Product | Presentation |
 | --- | --- |

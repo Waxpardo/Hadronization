@@ -5,8 +5,11 @@ import json
 import math
 from pathlib import Path
 import subprocess
+import shutil
+import shlex
 import sys
 import tempfile
+import time
 from types import SimpleNamespace
 import unittest
 
@@ -19,6 +22,82 @@ SPEC.loader.exec_module(plot)
 
 
 class ColdDrawingBoundary(unittest.TestCase):
+    @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
+    def test_native_band_gaps_and_unavailable_errors(self):
+        # A known bin topology supplies the oracle independently of the
+        # renderer's serialized drawing-record verifier.
+        source = r'''#define main render_program_main
+#include "pipeline/plot/render.cpp"
+#undef main
+int main() {
+  Page page{}; page.role="correlations.beauty";
+  Panel panel{}; panel.logY=true; panel.xLow=0.; panel.xHigh=43.;
+  panel.yLow=1.e-6; panel.yHigh=10.; panel.uncertaintyDisplay="DENSE_BAND";
+  Series series{}; series.mode="histogram"; series.tune="MONASH";
+  for (int i=0;i<43;++i) {
+    Point q{}; q.bin=i; q.x=i+.5; q.y=1.; q.error=.2;
+    q.binLow=i; q.binHigh=i+1.; q.state="DRAW";
+    series.points.push_back(q);
+  }
+  series.points[3].state="LOG_NONPOSITIVE"; series.points[3].y=0.;
+  series.points[7].error=std::numeric_limits<double>::quiet_NaN();
+  series.points[10].state="MISSING_VALUE";
+  series.points[14].binLow=14.25;
+  const auto graphs=ExpectedGraphs(page,panel,series,0,0);
+  const std::vector<std::pair<double,double>> ranges={{0,3},{4,7},{8,10},{11,14},{14.25,43}};
+  std::size_t bands=0; bool central=false;
+  for (const auto& g:graphs) {
+    if (g.title.rfind("band:",0)==0) {
+      if (bands>=ranges.size() || g.x.front()!=ranges[bands].first ||
+          g.x.back()!=ranges[bands].second || g.x.size()%2) return 1;
+      for (std::size_t i=0;i<g.x.size();i+=2) {
+        if (g.y[i]!=1. || g.ey[i]!=.2 || g.y[i+1]!=1. || g.ey[i+1]!=.2) return 2;
+        if (i && g.x[i]!=g.x[i-1]) return 3;
+      }
+      ++bands;
+    }
+    if (g.title.rfind("points:",0)==0) {
+      central=true;
+      if (g.x.size()!=41 || std::find(g.x.begin(),g.x.end(),7.5)==g.x.end()) return 4;
+    }
+    if (g.title.rfind("dense_markers:",0)==0 &&
+        std::find(g.x.begin(),g.x.end(),10.5)!=g.x.end()) return 5;
+  }
+  return bands==ranges.size() && central ? 0 : 6;
+}
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); cpp=root/'band.cpp'; binary=root/'band'
+            cpp.write_text(source)
+            flags=shlex.split(subprocess.check_output(['root-config','--cflags','--libs'],text=True))
+            subprocess.run(['c++','-std=c++17','-I',str(ROOT),str(cpp),'-o',str(binary)]+flags,
+                           check=True,capture_output=True,text=True)
+            subprocess.run([str(binary)],check=True,capture_output=True,text=True)
+
+    @unittest.skipUnless(shutil.which('gs') and shutil.which('pdffonts') and
+                         shutil.which('root-config'), 'ROOT, Ghostscript and Poppler required')
+    def test_pdf_embedding_rejects_unembedded_and_is_repeatable(self):
+        try:
+            import ROOT as native
+        except ImportError:
+            self.skipTest('PyROOT required')
+        native.gROOT.SetBatch(True)
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); original=root/'original.pdf'
+            canvas=native.TCanvas('font_test','',600,500)
+            latex=native.TLatex(); latex.SetNDC(); latex.DrawLatex(.2,.5,'#Delta#varphi; #Lambda_{b}^{0}')
+            canvas.SaveAs(str(original)); canvas.Close()
+            with self.assertRaisesRegex(ValueError,'unembedded'):
+                plot.verify_pdf_fonts(original)
+            products=[]
+            for name in ('first','second'):
+                if products: time.sleep(1.05)  # Cross the exporter clock quantum.
+                directory=root/name; directory.mkdir(); path=directory/'figure.pdf'
+                path.write_bytes(original.read_bytes()); plot.publication_pdf(path)
+                self.assertGreater(plot.verify_pdf_fonts(path),0)
+                products.append(path.read_bytes())
+            self.assertEqual(products[0],products[1])
+
     def test_spectrum_key_headroom_keeps_data_and_ratio_scale(self):
         import copy
         absolute = {'id':'g9.absolute', 'geometry':[0.,.34,1.,.9],

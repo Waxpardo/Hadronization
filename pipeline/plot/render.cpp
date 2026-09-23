@@ -79,6 +79,7 @@ int Marker(const std::string& name) {
   if (name == "filled_circle") return 20;
   if (name == "filled_square") return 21;
   if (name == "filled_up_triangle") return 22;
+  if (name == "open_circle") return 24;
   throw std::runtime_error("invalid marker identity");
 }
 struct Point {
@@ -97,12 +98,14 @@ struct Guide {
   std::string id, color, label;
   int style;
 };
+struct Annotation { double x, y, size; std::string text; };
 struct Panel {
   std::string id, status, title, xTitle, yTitle, note, reusePanel, reuseTune,
       uncertaintyDisplay;
   bool logY = false, logX = false, categoryDividers = true;
   double xLow = 0, xHigh = 1, yLow = 0, yHigh = 1;
   std::array<double, 4> geometry{}, margins{}, legend{};
+  std::vector<Annotation> annotations;
   std::vector<Series> series;
   std::vector<Guide> guides;
   std::vector<std::pair<double, std::string>> ticks;
@@ -124,7 +127,7 @@ int BodyTextPixels(const Page& page) {
   const double paperWidthPoints =
       kPaperWidthCentimeters * kPointsPerCentimeter;
   return std::max(page.textPixels,
-                  static_cast<int>(std::ceil(8. * page.width /
+                  static_cast<int>(std::ceil(9. * page.width /
                                              paperWidthPoints)));
 }
 int PanelLegendTextPixels(const Page& page) {
@@ -169,7 +172,7 @@ int ClassLegendColumns(std::size_t count) {
 double ClassLegendBottom(std::size_t count) {
   const int columns = ClassLegendColumns(count);
   const int rows = static_cast<int>((count + columns - 1) / columns);
-  return .897 - .026 * rows;
+  return .925 - .034 * rows;
 }
 std::vector<Page> ReadPlan(const std::filesystem::path& path,
                            const std::filesystem::path& record) {
@@ -183,7 +186,7 @@ std::vector<Page> ReadPlan(const std::filesystem::path& path,
   std::string line;
   Need(bool(std::getline(input, line)), "missing plan header");
   const auto header = Fields(line);
-  Need(header.size() == 2 && header[0] == "hadronization_plot_drawing_plan_v8", "plan framing differs");
+  Need(header.size() == 2 && header[0] == "hadronization_plot_drawing_plan_v9", "plan framing differs");
   output << line << '\n';
   bool ended = false;
   while (std::getline(input, line)) {
@@ -242,7 +245,13 @@ std::vector<Page> ReadPlan(const std::filesystem::path& path,
       } else {
         Need(panelIndex.count(panelKey), "unknown panel parent");
         Panel& panel = page.panels.at(panelIndex.at(panelKey));
-        if (f[0] == "SERIES") {
+        if (f[0] == "ANNOTATION") {
+          Need(f.size()==7, "annotation framing differs");
+          const double x=Number(f[3]), y=Number(f[4]), size=Number(f[5]);
+          Need(x>=0 && x<=1 && y>=0 && y<=1 && size>=10 && size<=100,
+               "annotation geometry differs");
+          panel.annotations.push_back({x,y,size,f[6]});
+        } else if (f[0] == "SERIES") {
           Need(f.size() == 13 &&
                (f[12] == "NORMAL" ||
                 (f[12] == "EXTREME" && f[10] == "categories")),
@@ -334,7 +343,7 @@ std::string GraphName(std::size_t panelIndex, std::size_t seriesIndex,
                       const std::string& kind, std::size_t runIndex = 0) {
   std::string result = "scientific_graph_p" + IndexToken(panelIndex) +
                        "_s" + IndexToken(seriesIndex) + "_" + kind;
-  if (kind == "line") result += "_r" + IndexToken(runIndex);
+  if (kind == "line" || kind == "band") result += "_r" + IndexToken(runIndex);
   return result;
 }
 std::string GraphTitle(const Series& series, const std::string& kind) {
@@ -493,16 +502,35 @@ std::vector<ExpectedGraph> ExpectedGraphs(const Page& page,
     }
   }
   if (points.x.empty()) return {};
-  if (!panel.reusePanel.empty()) {
-    if (panel.uncertaintyDisplay != "CENTERS_ONLY")
-      runs.push_back(std::move(points));
-    return runs;
-  }
   std::vector<ExpectedGraph> result;
-  if (series.mode != "points") {
-    result.insert(result.end(), runs.begin(), runs.end());
+  if ((dense || !panel.reusePanel.empty()) &&
+      panel.uncertaintyDisplay != "CENTERS_ONLY") {
+    bool newBand = true;
+    double previousHigh = std::numeric_limits<double>::quiet_NaN();
+    for (const Point& point : series.points) {
+      if (!Drawable(panel, point) || !std::isfinite(point.error) ||
+          !std::isfinite(point.binLow) || !std::isfinite(point.binHigh)) {
+        newBand = true;
+        continue;
+      }
+      if (newBand || !Close(previousHigh, point.binLow)) {
+        const auto number = result.size();
+        result.push_back({GraphName(panelIndex, seriesIndex, "band", number),
+                          GraphTitle(series, "band"), &series, true,
+                          {}, {}, {}, {}});
+        newBand = false;
+      }
+      auto& band = result.back();
+      AddExpectedPoint(band, panel.logX ? std::max(point.binLow, panel.xLow)
+                                       : point.binLow, point.y, 0, point.error);
+      AddExpectedPoint(band, point.binHigh, point.y, 0, point.error);
+      previousHigh = point.binHigh;
+    }
   }
+  if (series.mode != "points")
+    result.insert(result.end(), runs.begin(), runs.end());
   result.push_back(std::move(points));
+  if (!panel.reusePanel.empty()) return result;
   if (dense) {
     ExpectedGraph markers{GraphName(panelIndex, seriesIndex, "dense_markers"),
                           GraphTitle(series, "dense_markers"), &series, false,
@@ -515,8 +543,7 @@ std::vector<ExpectedGraph> ExpectedGraphs(const Page& page,
     const std::size_t stride = std::max<std::size_t>(1, visible.size() / 18);
     for (std::size_t index = 0; index < visible.size(); index += stride) {
       const Point& point = *visible[index];
-      if (std::isfinite(point.x) && std::isfinite(point.y) &&
-          (!panel.logY || point.y > 0))
+      if (Drawable(panel, point))
         AddExpectedPoint(markers, point.x, point.y);
     }
     result.push_back(std::move(markers));
@@ -539,6 +566,16 @@ void VerifyGraph(const TGraphErrors& actual, const ExpectedGraph& expected, bool
          "scientific graph coordinates/errors differ from drawing record");
   }
   const int expectedColor=Color(expected.series->color);
+  if (expected.title.rfind("band:",0)==0) {
+    const auto* fill=gROOT->GetColor(actual.GetFillColor());
+    const auto* base=gROOT->GetColor(expectedColor);
+    Need(fill && base && actual.GetFillStyle()==1001 &&
+         StoredFloatClose(fill->GetAlpha(),.12) &&
+         StoredFloatClose(fill->GetRed(),base->GetRed()) &&
+         StoredFloatClose(fill->GetGreen(),base->GetGreen()) &&
+         StoredFloatClose(fill->GetBlue(),base->GetBlue()),
+         "scientific error-band fill differs");
+  }
   const bool styleMatches=
        actual.GetLineColor() == expectedColor &&
        actual.GetMarkerColor() == expectedColor &&
@@ -725,7 +762,7 @@ std::vector<ExpectedText> InsetClassTexts(const Page& page,
     // at each interval's geometric center. Intervals remain numerics-owned.
     result.push_back(TextExpectation(guide.label, x,
         panel.margins[2] + .20*(1-panel.margins[2]-panel.margins[3]),
-        .039*(panel.geometry[3]-panel.geometry[1])*page.height, 1, 22, 90));
+        .048*(panel.geometry[3]-panel.geometry[1])*page.height, 1, 22, 90));
   }
   return result;
 }
@@ -797,7 +834,11 @@ double CategoryLabelY(const Page& page, const Panel& panel) {
       (page.role == "balancing.baryon_meson.activity" ? .015 : .025);
 }
 double PanelTitleY(const Page& page, const Panel& panel) {
-  if (page.role.rfind("correlations.", 0) == 0)
+  if (panel.id.rfind("correlation.main.",0)==0) {
+    const double ph=page.height*(panel.geometry[3]-panel.geometry[1]);
+    return 1-panel.margins[3]+1.2*BodyTextPixels(page)/ph;
+  }
+  if (panel.margins[3] > .25 || page.role.rfind("correlations.", 0) == 0)
     return 1 - panel.margins[3] + .035;
   if (page.role.rfind("balancing.integrated.", 0) == 0 &&
       panel.id.rfind("upper.", 0) == 0)
@@ -942,7 +983,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
                                    PanelTitleY(page, panel),
                                    inset ? 15 : textPixels + 1));
   if (page.role == "multiplicity.composite" &&
-      panel.id == "upper.distribution") {
+      panel.id == "upper.distribution" && panel.annotations.empty()) {
     const auto lines = P1InformationLines(page);
     for (std::size_t i = 0; i < lines.size(); ++i)
       result.push_back(TextExpectation(lines[i], P1InformationX,
@@ -981,6 +1022,8 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
                                          kGray + 2, 22));
     }
   }
+  for (const auto& item : panel.annotations)
+    result.push_back(TextExpectation(item.text,item.x,item.y,item.size));
   const auto classTexts = InsetClassTexts(page, panel);
   result.insert(result.end(), classTexts.begin(), classTexts.end());
   const auto stateGlyphs = StateGlyphTexts(page, panel, pages);
@@ -1068,6 +1111,16 @@ std::array<double, 4> InsideTuneLegendBox(const Page& page, const Panel& panel,
                                         std::size_t count) {
   // Keep the reference multiplicity key exactly where it was specified.
   if (page.role == "multiplicity.composite") return panel.legend;
+  if (panel.margins[3] > .25) {
+    const double pw=page.width*(panel.geometry[2]-panel.geometry[0]);
+    const double ph=page.height*(panel.geometry[3]-panel.geometry[1]);
+    const double font=TuneLegendTextPixels(page);
+    const double right=1-panel.margins[1]-.025;
+    const double width=font*(.62*12+3.)/pw;
+    const double height=1.65*font*count/ph;
+    const double top=.97;
+    return {right-width,top-height,right,top};
+  }
   const double pixelWidth = page.width * (panel.geometry[2]-panel.geometry[0]);
   const double pixelHeight = page.height * (panel.geometry[3]-panel.geometry[1]);
   const double font = TuneLegendTextPixels(page);
@@ -1091,6 +1144,9 @@ std::array<double, 4> InsideTuneLegendBox(const Page& page, const Panel& panel,
     return panel.margins[2]+fraction*(1-panel.margins[2]-panel.margins[3]);
   };
   std::vector<std::array<double, 4>> occupied;
+  for (const auto& item : panel.annotations)
+    occupied.push_back({item.x,item.y-.3*item.size/pixelHeight,
+                       std::min(right,item.x+.56),item.y+item.size/pixelHeight});
   for (const auto& series : panel.series) for (const auto& point : series.points) {
     if (!Drawable(panel, point)) continue;
     double x1 = point.x, x2 = point.x;
@@ -1217,9 +1273,9 @@ std::vector<ExpectedLegend> ExpectedCanvasLegends(const Page& page) {
     classSamples.emplace(series.lineStyle, &series);
   if (page.role.find("balancing.activity.") == 0 && !classSamples.empty()) {
     ExpectedLegend legend{{.05, ClassLegendBottom(classSamples.size()),
-                           .99, .897},
+                           .99, .925},
                           ClassLegendColumns(classSamples.size()),
-                          double(std::max(18, textPixels - 4)), true, .64, {}};
+                          double(textPixels), true, .64, {}};
     for (const auto& item : classSamples) {
       legend.entries.push_back(
           {item.second->label, "l", item.second,
@@ -1292,7 +1348,8 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
       if (ratio!=page.panels.end() && !ratio->note.empty()) {
         Need(ratio->note==kP1WithheldSeDisclosure,
              "paper P1 withheld-SE disclosure differs");
-        result.push_back(TextExpectation(ratio->note,.015,.015,14,kGray+2));
+        if (page.panels.front().annotations.empty())
+          result.push_back(TextExpectation(ratio->note,.015,.015,14,kGray+2));
       }
       return result;
     }
@@ -1356,7 +1413,7 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
     Need(!page.title.empty(), "G9 visible signed-species title is absent");
     result.push_back(TextExpectation(page.title,.16,.95,22));
     std::size_t start=0,index=0;
-    while (start<page.information.size()) {
+    while (start<page.information.size() && page.panels.front().annotations.empty()) {
       const auto split=page.information.find("; ",start);
       result.push_back(TextExpectation(page.information.substr(start,
           split==std::string::npos ? split : split-start),
@@ -1534,10 +1591,11 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
                          [](unsigned char c) { return std::isspace(c); }),
                          drawOption.end());
         const bool errorGraph = found->second->title.rfind("points:", 0) == 0;
+        const bool band = found->second->title.rfind("band:", 0) == 0;
         const bool markers = found->second->title.rfind("dense_markers:", 0) == 0;
-        const std::string expectedOption = errorGraph ?
+        const std::string expectedOption = band ? "3" : errorGraph ?
             (panel.uncertaintyDisplay == "CENTERS_ONLY" ? "px" :
-             inset || found->second->dense ? "3" : "pz") :
+             inset || found->second->dense ? "px" : "pz") :
             markers ? "p" : "l";
         Need(drawOption == expectedOption,
              "scientific uncertainty drawing option differs from drawing record");
@@ -1826,7 +1884,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     Text(PanelTitleX(panel), PanelTitleY(page, panel), panel.title,
          inset ? 15 : textPixels + 1);
     if (page.role == "multiplicity.composite" &&
-        panel.id == "upper.distribution") {
+        panel.id == "upper.distribution" && panel.annotations.empty()) {
       const auto lines = P1InformationLines(page);
       for (std::size_t i = 0; i < lines.size(); ++i)
         Text(P1InformationX, kP1InformationY.at(i), lines[i],
@@ -1849,94 +1907,30 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     for (std::size_t seriesIndex = 0; seriesIndex < selected.size(); ++seriesIndex) {
       const Series* entry = selected[seriesIndex];
       const Series& series = *entry;
-      const bool categories = series.mode == "categories";
       const bool histogram = series.mode == "histogram";
       const bool dense = histogram && series.points.size() > 40;
-      graphs.emplace_back(std::make_unique<TGraphErrors>());
-      TGraphErrors* errors = graphs.back().get(); Style(*errors,series,dense);
-      errors->SetName(GraphName(index, seriesIndex, "points").c_str());
-      errors->SetTitle(GraphTitle(series, "points").c_str());
-      std::vector<std::unique_ptr<TGraphErrors>> runs;
-      bool breakRun = true;
-      for (const Point& point : series.points) {
-        if (!Drawable(panel, point)) {
-          breakRun = true; continue;
-        }
-        const int i = errors->GetN();
-        errors->SetPoint(i, point.x, point.y);
-        errors->SetPointError(i, 0, std::isfinite(point.error) ? point.error : 0);
-        if (breakRun) {
-          runs.emplace_back(std::make_unique<TGraphErrors>());
-          Style(*runs.back(),series,dense);
-          const std::size_t runIndex = runs.size() - 1;
-          runs.back()->SetName(
-              GraphName(index, seriesIndex, "line", runIndex).c_str());
-          runs.back()->SetTitle(GraphTitle(series, "line").c_str());
-          breakRun = false;
-        }
-        TGraphErrors& line = *runs.back();
-        if (categories) {
-          line.SetPoint(line.GetN(), point.x - CategoryHalfWidth(page), point.y);
-          line.SetPoint(line.GetN(), point.x + CategoryHalfWidth(page), point.y);
-          breakRun=true;
-        } else if (histogram && std::isfinite(point.binLow) &&
-                   std::isfinite(point.binHigh)) {
-          line.SetPoint(line.GetN(),
-                        panel.logX ? std::max(point.binLow, panel.xLow)
-                                   : point.binLow, point.y);
-          line.SetPoint(line.GetN(), point.binHigh, point.y);
-        } else {
-          line.SetPoint(line.GetN(), point.x, point.y);
-        }
-      }
-      if (errors->GetN() == 0) continue;
+      const auto expected = ExpectedGraphs(page, panel, series, index, seriesIndex);
+      if (expected.empty()) continue;
       drawn = true;
-      if (inset) {
-        if (panel.uncertaintyDisplay != "CENTERS_ONLY") {
-          errors->SetMarkerSize(0); errors->SetLineWidth(2);
-          errors->SetFillColorAlpha(Color(series.color), .08);
-          errors->SetFillStyle(1001);
-          errors->Draw("3 SAME");
-        }
-        for (auto& line : runs) {
-          line->SetMarkerSize(0); line->SetLineWidth(2);
-          line->Draw("L SAME"); graphs.push_back(std::move(line));
-        }
-        continue;
-      }
-      if (dense && panel.uncertaintyDisplay != "CENTERS_ONLY") {
-        // A translucent 1-SE envelope preserves all persisted uncertainties
-        // for high-bin-count curves without a vertical-bar forest. The full
-        // TGraphErrors is still archived and checked point by point.
-        errors->SetFillColorAlpha(Color(series.color), .08);
-        errors->SetFillStyle(1001);
-        errors->Draw("3 SAME");
-      }
-      if (panel.uncertaintyDisplay == "CENTERS_ONLY")
-        errors->Draw("PX SAME");
-      if (series.mode != "points") {
-        for (auto& line : runs) {
-          line->Draw("L SAME"); graphs.push_back(std::move(line));
-        }
-      }
-      if (!dense && panel.uncertaintyDisplay != "CENTERS_ONLY")
-        errors->Draw("PZ SAME");
-      if (dense) {
+      for (const auto& item : expected) {
         graphs.emplace_back(std::make_unique<TGraphErrors>());
-        Style(*graphs.back(),series,false);
-        graphs.back()->SetName(
-            GraphName(index, seriesIndex, "dense_markers").c_str());
-        graphs.back()->SetTitle(GraphTitle(series, "dense_markers").c_str());
-        std::vector<Point> visible;
-        for (const auto& point:series.points)
-          if (point.x>=panel.xLow && point.x<=panel.xHigh) visible.push_back(point);
-        const std::size_t stride = std::max<std::size_t>(1, visible.size()/18);
-        for (std::size_t i=0; i<visible.size(); i+=stride) {
-          const auto& point=visible[i];
-          if (Drawable(panel, point))
-            graphs.back()->SetPoint(graphs.back()->GetN(),point.x,point.y);
+        auto& graph = *graphs.back();
+        Style(graph, series, item.dense);
+        graph.SetName(item.name.c_str()); graph.SetTitle(item.title.c_str());
+        for (std::size_t i = 0; i < item.x.size(); ++i) {
+          graph.SetPoint(i, item.x[i], item.y[i]);
+          graph.SetPointError(i, item.ex[i], item.ey[i]);
         }
-        graphs.back()->Draw("P SAME");
+        if (inset) { graph.SetMarkerSize(0); graph.SetLineWidth(2); }
+        if (item.title.rfind("band:", 0) == 0) {
+          graph.SetFillColorAlpha(Color(series.color), .12);
+          graph.SetFillStyle(1001); graph.Draw("3 SAME");
+        } else if (item.title.rfind("points:", 0) == 0) {
+          graph.Draw(panel.uncertaintyDisplay == "CENTERS_ONLY" || dense || inset
+                         ? "PX SAME" : "PZ SAME");
+        } else if (item.title.rfind("dense_markers:", 0) == 0) {
+          graph.Draw("P SAME");
+        } else graph.Draw("L SAME");
       }
     }
     if (!drawn) {
@@ -2006,6 +2000,8 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
         pad.GetListOfPrimitives()->Add(line, "L SAME");
       }
     }
+    for (const auto& item : panel.annotations)
+      Text(item.x,item.y,item.text,static_cast<int>(item.size));
     for (const auto& item : InsetClassTexts(page, panel)) {
       TLatex label; label.SetNDC(); label.SetTextFont(43);
       label.SetLineWidth(1);
@@ -2037,11 +2033,11 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     classSamples.emplace(series.lineStyle,&series);
   if (page.role.find("balancing.activity.")==0 && !classSamples.empty()) {
     legends.emplace_back(std::make_unique<TLegend>(
-        .05, ClassLegendBottom(classSamples.size()), .99, .897));
+        .05, ClassLegendBottom(classSamples.size()), .99, .925));
     auto& legend=*legends.back();
     legend.SetNColumns(ClassLegendColumns(classSamples.size()));
     legend.SetBorderSize(0); legend.SetFillStyle(0);
-    legend.SetTextFont(43); legend.SetTextSize(std::max(18, textPixels-4));
+    legend.SetTextFont(43); legend.SetTextSize(textPixels);
     legend.SetMargin(.64);
     for (const auto& item : classSamples) {
       graphs.emplace_back(std::make_unique<TGraphErrors>());
@@ -2071,6 +2067,9 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
   TNamed identity("drawing_identity", PageIdentity(page).c_str());
   canvas.GetListOfPrimitives()->Add(&identity);
   archive.cd();
+  // ROOT can disable color-table streaming after creating alpha colors.
+  // Every saved canvas must carry its own palette into a fresh process.
+  TColor::DefinedColors(1);
   Need(canvas.Write(canvasName.c_str()) > 0, "cannot write named TCanvas");
   canvas.GetListOfPrimitives()->Remove(&identity);
   gStyle->SetLineStyleString(2, savedDash.c_str());

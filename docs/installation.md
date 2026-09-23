@@ -12,6 +12,8 @@
 | ROOT | Required for analysis, query, merge, numerical archives and rendering. Provide `root-config` and matching PyROOT. |
 | PYTHIA | Version 8.317 for generation. Provide headers, library, XML data and `pythia8-config`. |
 | Bash or zsh | Required to source `setup.sh`. |
+| Ghostscript | Required for PDF export. The `gs` command embeds fonts while preserving vector graphics. |
+| Poppler | Required for PDF verification. The `pdffonts` command checks every exported font. |
 | HTCondor | Required only for scheduler execution. Preparation alone does not submit jobs. |
 | TeX | Optional for compiled tables. Exports use `booktabs`, `longtable`, `pdflscape` and `siunitx`. |
 
@@ -45,6 +47,15 @@ Run the stage-specific environment checks:
 python3 pipeline/generate/runtime.py check --require-root
 python3 -c 'import ROOT; print(ROOT.gROOT.GetVersion())'
 ```
+
+Before rendering, check the PDF tools:
+
+```sh
+gs --version
+pdffonts -v
+```
+
+The renderer records the Ghostscript version in its manifest. A missing tool or an unembedded output font stops publication.
 
 Before generation, require PYTHIA as well:
 

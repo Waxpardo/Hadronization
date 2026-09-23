@@ -127,7 +127,7 @@ This inventory identifies every tracked file. The release includes generated sci
 | [tests/test_generator.py](../tests/test_generator.py) | Development suite | Native particle rules, seed/card materialization and optional producer linkage. |
 | [tests/test_hygiene.py](../tests/test_hygiene.py) | Development suite | Tracked topology, permitted file families, include resolution and output exclusions. |
 | [tests/test_nonzero_chain_fixture.py](../tests/test_nonzero_chain_fixture.py) | Development suite | Explicit fresh destinations for synthetic builder and oracle. |
-| [tests/test_plot_cold.py](../tests/test_plot_cold.py) | Development suite | Numerical-only drawing, signed labels, statuses, axes, inset, page layouts and canvas behavior. |
+| [tests/test_plot_cold.py](../tests/test_plot_cold.py) | Development suite | Numerical-only drawing, signed labels, statuses, axes, inset, layouts, error-band gaps, PDF font embedding and repeatable export. |
 | [tests/test_projection_interface.py](../tests/test_projection_interface.py) | Development suite | Exact point domains, request identity, source routes and independent validity states. |
 | [tests/test_public_v4_cli.py](../tests/test_public_v4_cli.py) | Development suite | External-fixture public numerical round trips, selection changes and immutable outputs. |
 | [tests/test_publication.py](../tests/test_publication.py) | Development suite | No-replace behavior, contention, interruption, unsafe paths and readback failures. |

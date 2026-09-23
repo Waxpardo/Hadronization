@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PLOT_CONFIG = ROOT / "config/plot.json"
 TARGET_CAMPAIGN = ROOT / "data/campaign.json"
 TARGET_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d"
-DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v8"
+DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v9"
 CANVAS_NAME = "canvases.root"
 RECORD_NAME = "drawing-record.tsv.gz"
 # Display order only: mesons first, then Lambda, Sigma and Xi baryons.
@@ -890,7 +890,7 @@ def tune_separated_activity_pages(pages, tunes):
         # two-class extreme pages need only one key row; retaining the
         # eleven-class reservation left a large unused band above the plots.
         class_rows = max(1, (len(class_ids) + 3) // 4)
-        class_legend_bottom = .897 - .026 * class_rows
+        class_legend_bottom = .925 - .034 * class_rows
         ratio_bottom, ratio_top = .08, .22
         science_top = class_legend_bottom - .015
         row_height = (science_top - ratio_top) / len(tunes)
@@ -1177,6 +1177,168 @@ def activity_proxy_caption(selection, threshold, eta_window):
     return ('#it{N}_{ch}: charged-light final-particle activity, heavy flavour excluded; '
             '#it{p}_{T} > '+format(threshold,'.15g')+
             ' GeV/c, |#eta| #leq '+format(eta_window,'.15g'))
+
+def sample_caption(payload):
+    """Read sample facts from the checksum-bound campaign descriptor."""
+    campaign_id = payload['request_echo']['sources']['campaign_id']
+    if campaign_id != 'HF_RUN3_V1' and not synthetic_provenance(payload):
+        return ['Generator-level sample; selection in numerical provenance']
+    if sha_file(TARGET_CAMPAIGN) != TARGET_CAMPAIGN_SHA256:
+        raise ValueError('caption campaign descriptor SHA256 differs')
+    physics = json_file(TARGET_CAMPAIGN, 'caption campaign')['physics']
+    if (physics['hard_processes'] != ['ccbar', 'bbbar'] or
+            physics['heavy_hadron_decays'] != 'disabled'):
+        raise ValueError('caption heavy-sample definition differs')
+    return ['Heavy-flavour enriched: hard c#bar{c}, b#bar{b}',
+            '#hat{p}_{T} #geq '+
+            format(physics['pthat_min_gev'], '.15g')+' GeV/c; heavy-hadron decays off']
+
+
+def scientific_caption_lines(page, context):
+    """Describe persisted selections without selecting or computing an observable."""
+    lines = [context.target_analysis_caption]
+    lines.extend(context.sample_caption)
+    role = page['role']
+    if role.startswith(('balancing.', 'correlations.')):
+        profile = context.profile_definition
+        eta = format(float.fromhex(profile['trigger_eta']['high']), '.15g')
+        if profile['trigger_pt']['low'] is None:
+            lines.append('Pairs: no p_{T} minimum; |#eta_{trig,assoc}| #leq '+eta)
+        else:
+            lines.append('Pairs: p_{T}^{trig} #geq '+format(float.fromhex(profile['trigger_pt']['low']), '.15g')+
+                         ', p_{T}^{assoc} #geq '+format(float.fromhex(profile['associate_pt']['low']), '.15g')+' GeV/c')
+            lines.append('Pair acceptance: |#eta_{trig,assoc}| #leq '+eta)
+        lines.append('Y = (N_{OS} - N_{SS})/N_{trig}; direct hadrons'
+                     if role.startswith('balancing.') else
+                     'Direct hadrons; no diagonal p_{T} ordering')
+    if role=='multiplicity.composite' or '.activity.' in role or role.endswith('.activity'):
+        activity=context.activity_selection
+        lines.extend(['Activity: charged light final particles',
+            'p_{T} > '+format(float.fromhex(activity['pt']['low']), '.15g')+
+            ' GeV/c; |#eta| #leq '+format(float.fromhex(activity['eta_window']), '.15g')])
+        if role != 'multiplicity.composite':
+            lines.append('Tune-local percentiles; 0-1% = most active')
+    if role=='spectra.signed_heavy':
+        eta=format(float.fromhex(context.g9_science['eta']['high']), '.15g')
+        lines.extend(['Direct heavy hadrons; all origins',
+            'No p_{T} minimum; |#eta| #leq '+eta,
+            'Normalized probability per bin'])
+    lines.append('Pointwise stat. 1 SE; '+str(len(context.block_ids))+'-block jackknife')
+    return lines
+
+
+def add_publication_captions(pages, context):
+    """Put the sample key in a reserved panel header, without stretching axes."""
+    for page in pages:
+        panels=[p for p in page['panels'] if not p.get('reuse')]
+        top=max(p['geometry'][3] for p in panels)
+        row=[p for p in panels if p['geometry'][3]==top]
+        target=min(row, key=lambda p:p['geometry'][0])
+        lines=scientific_caption_lines(page,context)
+        if page['role']=='multiplicity.composite' and any(p['note'] for p in panels if p['id']=='lower.ratio'):
+            lines.append('Some sparse-tail ratio errors unavailable')
+        page['scientific_caption']=lines
+        for panel in page['panels']: panel['annotations']=[]
+        font=max(page['text_pixels'],math.ceil(9*page['width']/(18*72/2.54)))
+        if page['role'] != 'multiplicity.composite':
+            if page['role'].startswith('balancing.') and len(panels)<=4:
+                page['height']=max(page['height'],1600)
+            # In stacked tune views, reserve one header and share the remaining
+            # physical plotting height equally between the three tune rows.
+            header=(1.25*len(lines)+2.8)*font
+            if page['role'].startswith('balancing.') and len(panels)>4:
+                page['height']=max(page['height'],2950)
+                science=[p for p in panels if p['id'].startswith('upper.')]
+                spans=sorted({tuple(p['geometry'][1::2]) for p in science},reverse=True)
+                bottom=min(pair[0] for pair in spans)
+                frame=((top-bottom)*page['height']-header)/len(spans)
+                cursor=top
+                for index,span in enumerate(spans):
+                    height=(frame+(header if index==0 else 0))/page['height']
+                    for panel in science:
+                        if tuple(panel['geometry'][1::2])==span:
+                            panel['geometry'][1]=cursor-height
+                            panel['geometry'][3]=cursor
+                            panel['margins'][3]=header/(height*page['height']) if index==0 else 0.
+                    cursor-=height
+            else:
+                if page['role'].startswith('correlations.') and len(panels)>4:
+                    old_height=page['height']
+                    page['height'] += math.ceil(header)
+                    page['header_bottom']=(page['header_bottom']*old_height+header)/page['height']
+                    for panel in panels:
+                        old_ph=old_height*(panel['geometry'][3]-panel['geometry'][1])
+                        if panel not in row and panel['id'].startswith('correlation.main.'):
+                            panel['margins'][3]=max(panel['margins'][3],.18)
+                        panel['geometry'][1] *= old_height/page['height']
+                        panel['geometry'][3] *= old_height/page['height']
+                        if panel in row:
+                            panel['geometry'][3] += header/page['height']
+                            panel['margins'][3]=(panel['margins'][3]*old_ph+header)/(old_ph+header)
+                for panel in row:
+                    ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
+                    panel['margins'][3]=max(panel['margins'][3],header/ph)
+                    if panel['margins'][3]>.58:
+                        raise ValueError('scientific header leaves too little data area: '+page['filename'])
+        ph=page['height']*(target['geometry'][3]-target['geometry'][1])
+        x=target['margins'][0]+.025; y=.97; step=1.25*font/ph
+        if page['role']=='multiplicity.composite':
+            font=18;step=1.30*font/ph;x=.37;y=.855
+        target['annotations']=[{'x':x,'y':y-i*step,'size':float(font),'text':line}
+                               for i,line in enumerate(lines)]
+        for panel in panels:
+            if panel['id'].startswith('correlation.teaching.'):
+                if panel['id'].endswith('.identified'):
+                    panel['legend']=[panel['margins'][0]+.025,.40,.98,.57]
+            if panel['id']=='lower.ratio' and page['role']=='multiplicity.composite':
+                clipped=sum(q['state']=='DRAW' and q['y'] is not None and q['y']>5
+                            for z in panel['series'] for q in z['points'])
+                if clipped:
+                    panel['annotations'].append({'x':.27,'y':.86,'size':18.,
+                        'text':str(clipped)+' lowest-multiplicity ratios exceed 5'})
+                    panel['annotations'].append({'x':panel['margins'][0]+.008,'y':.91,'size':18.,'text':'#uparrow'})
+        if page['role']=='multiplicity.composite':
+            for panel in page['panels']:
+                if panel.get('reuse'):
+                    panel['annotations'].append({'x':.24,'y':.85,'size':12.,'text':'MONASH percentiles'})
+        if page['role']=='spectra.signed_heavy':
+            page['title']=page['title'].removeprefix('G9 ').replace(' (1)','')
+            for panel in panels:
+                panel['x_title']=panel['x_title'].replace(' (1)','')
+                panel['note']=''
+            flags=[q for p in panels for z in p['series'] for q in z['points']]
+            notes=[]
+            if any(q['state']=='DRAW' and q['error'] is None for q in flags): notes.append('? = uncertainty unavailable')
+            if any(q['state'] not in ('DRAW','LOG_NONPOSITIVE') for q in flags): notes.append('Gaps: undefined or unavailable bins')
+            target['annotations'].extend({'x':.56,'y':.74-i*.045,'size':float(font-2),'text':text}
+                                         for i,text in enumerate(notes))
+        if page['role'].startswith('correlations.'):
+            zero=sum(q['state']=='LOG_NONPOSITIVE' for p in panels for z in p['series'] for q in z['points'])
+            right=max(row,key=lambda p:p['geometry'][0])
+            explanations=['Lower panels sum stored '+page['role'].split('.')[-1]+' associates',
+                          'OS/SS refer to heavy-flavour sign']
+            if zero:
+                explanations.extend(['Log panels omit '+str(zero)+' zero bins',
+                                     'Error bands stop at the displayed floor'])
+            if not any(p['id'].startswith('correlation.teaching.') for p in panels):
+                right['annotations'].extend([
+                    {'x':.05,'y':.70,'size':float(font),'text':'Net yield: sum over stored associates'},
+                    {'x':.05,'y':.64,'size':float(font),'text':'R = tune / MONASH; OS/SS: heavy sign'}])
+                for panel in panels:
+                    if panel['id'].startswith('correlation.compare.') and panel['y_title']:
+                        panel['y_title']='R_{tune/MONASH}'
+            if any(p['id'].startswith('correlation.teaching.') for p in panels):
+                right['annotations'].extend({'x':.05,'y':.97-i*step,'size':float(font),'text':line}
+                                             for i,line in enumerate(explanations))
+                for panel in panels:
+                    if panel['id'].endswith('.inclusive'):
+                        for z in panel['series']: z['legend_label']=''
+                        panel['y_title']=panel['y_title'].replace('N}_{OS}', 'N}^{#Sigma}_{OS}').replace('N}_{SS}', 'N}^{#Sigma}_{SS}')
+        # Column identifiers remain independent of particle labels and tune keys.
+        for index,panel in enumerate(sorted(row,key=lambda p:p['geometry'][0])):
+            if panel['title'] and page['role']!='spectra.signed_heavy':
+                panel['title']='('+chr(97+index)+') '+panel['title']
+
 
 def apply_cold_page_style(pages, context):
     """The owner layout applies equally to preview and full science packets."""
@@ -1515,6 +1677,7 @@ def cold_drawing_inputs(payload, config):
         campaign_state=campaign_state,
         synthetic=synthetic,
         target_analysis_caption=target_analysis_caption(payload),
+        sample_caption=sample_caption(payload),
         package_state=payload["package_state"],
         sampled_tunes=[item["tune_id"] for item in
                        request["sources"]["expected_events_by_tune"]])
@@ -1990,10 +2153,11 @@ def drawing_plan(projection, manifest, config):
                     line_style=1+species.index(ident['associate_pdg'])
                     legend_label=label(ident['associate_pdg'])+' / '+label(ident['reference_pdg'])
                 series.append({'key':key,'identity':ident,'tune':tune,'class_id':cl,
-                    'color':({'OS':'#000000','SS':'#0072B2',
+                    'color':({'OS':'#000000','SS':'#000000',
                               'OS_MINUS_SS':'#000000'}[ident['component']]
                              if pair_sign_view else styles[tune]['color']),
-                    'marker':styles[tune]['marker'],'line_style':line_style,'label':legend_label,
+                    'marker':('open_circle' if pair_sign_view and ident['component']=='SS' else styles[tune]['marker']),
+                    'line_style':(7 if pair_sign_view and ident['component']=='SS' else line_style),'label':legend_label,
                     'emphasis':activity_emphasis(role, cl, classes),
                     'legend_label':legend_label if options.get('legend') and (role!='balancing.baryon_meson.activity' or tune==reference_tune) else '',
                     'draw_mode':'histogram' if family in {'correlations','kinematics','multiplicity'} else 'categories' if options.get('categorical') or role=='balancing.baryon_meson.activity' else 'curve','points':points})
@@ -2249,10 +2413,16 @@ def drawing_plan(projection, manifest, config):
     join_ratio_pads(pages)
     synchronize_paired_y_ranges(pages)
     apply_display_limits(pages)
+    for page in pages:
+        if page['role'].startswith('correlations.'):
+            for panel in page['panels']:
+                if panel['geometry'][0]==0:
+                    panel['margins'][0] += .05
     join_paired_columns(pages)
     reserve_spectrum_tune_key(pages)
     if getattr(context, 'cold', False):
         apply_cold_page_style(pages,context)
+        add_publication_captions(pages,context)
     return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}
 
 def g9_drawing_pages(context, rows, config, header, information, labels):
@@ -2461,6 +2631,8 @@ def drawing_payload(plan):
                          [a["title"],a["x_title"],a["y_title"],a["note"]]+a["margins"]+a["legend"]+
                          [int(a["log_x"]),a["uncertainty_display"],
                           int(a["category_dividers"])])
+            for caption in a.get("annotations", []):
+                lines.append(["ANNOTATION"]+prefix+[caption['x'],caption['y'],caption['size'],caption['text']])
             for s in a["series"]:
                 lines.append(["SERIES"]+prefix+[s["key"],s["tune"],s["class_id"] or "-",s["color"],s["marker"],
                                                 s["line_style"],s["label"],s["draw_mode"],s["legend_label"],s["emphasis"]])
@@ -2491,7 +2663,7 @@ def drawing_payload(plan):
 def normalized_drawing_record(payload):
     """Canonicalize numbers reconstructed by C++, never just echo input bytes."""
     numeric = {"PAGE":[10], "PANEL":list(range(5,13))+list(range(17,25)),
-               "POINT":list(range(6,14)), "GUIDE":list(range(4,8)), "TICK":[3]}
+               "ANNOTATION":[3,4,5], "POINT":list(range(6,14)), "GUIDE":list(range(4,8)), "TICK":[3]}
     lines=[]
     for line in payload.decode("ascii").splitlines():
         fields=line.split("\t")
@@ -2577,6 +2749,50 @@ def canonical_root_pdf(payload, filename):
     trailer = re.sub(rb"startxref\s+\d+", b"startxref\n"+str(new_offset).encode("ascii"), trailer)
     output.extend(trailer+b"\n")
     return bytes(output)
+
+
+def pdf_export_runtime():
+    """Check the external vector exporter before creating an output stage."""
+    for executable in ('gs', 'pdffonts'):
+        if shutil.which(executable) is None:
+            raise ValueError('PDF export requires '+executable+' on PATH')
+    version=subprocess.run(['gs','--version'],check=True,capture_output=True,text=True).stdout.strip()
+    if re.fullmatch(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?',version) is None:
+        raise ValueError('Ghostscript version response differs')
+    return {'policy':'vector_pdf_embedded_fonts_v1', 'ghostscript_version':version}
+
+
+def verify_pdf_fonts(path):
+    """Refuse missing or unembedded fonts in the actual exported PDF."""
+    completed=subprocess.run(['pdffonts',str(path)],check=True,
+                             capture_output=True,text=True)
+    rows=completed.stdout.splitlines()[2:]
+    if not rows:
+        raise ValueError('PDF has no inspectable font records: '+path.name)
+    for row in rows:
+        fields=row.split()
+        # The five trailing fields are emb, sub, uni, object ID and generation.
+        if len(fields)<8 or fields[-5]!='yes':
+            raise ValueError('PDF contains an unembedded font: '+path.name)
+    return len(rows)
+
+
+def publication_pdf(path):
+    """Embed fonts without rasterizing the scientific drawing."""
+    canonical_pdf=canonical_root_pdf(path.read_bytes(),path.name)
+    with tempfile.TemporaryDirectory(prefix='.pdf-export-',dir=str(path.parent)) as tmp:
+        source=Path(tmp)/'input.pdf'; output=Path(tmp)/'output.pdf'
+        source.write_bytes(canonical_pdf)
+        subprocess.run(['gs','-q','-dSAFER','-dBATCH','-dNOPAUSE',
+            '-sDEVICE=pdfwrite','-dCompatibilityLevel=1.4',
+            '-dEmbedAllFonts=true','-dSubsetFonts=true','-dAutoRotatePages=/None',
+            '-dOmitInfoDate=true','-dOmitID=true','-dOmitXMP=true','-sOutputFile='+str(output),
+            '-c','<</NeverEmbed []>> setdistillerparams','-f',str(source)],
+            check=True,capture_output=True,text=True)
+        verify_pdf_fonts(output)
+        # This is a private output stage. Final publication still uses the
+        # existing no-replace directory operation.
+        path.write_bytes(output.read_bytes())
 
 
 def canonical_root_archive(path, drawing_record):
@@ -2675,7 +2891,7 @@ def cold_numerics(args):
                         args.expected_value_sha256)
 
 def cold_render_manifest(args, payload, config, config_sha, build, plan,
-                         pages, record):
+                         pages, record, pdf_export):
     files = []
     for path in sorted(list(pages.glob("*.pdf")) +
                        [pages / CANVAS_NAME, pages / RECORD_NAME]):
@@ -2721,6 +2937,7 @@ def cold_render_manifest(args, payload, config, config_sha, build, plan,
                 (("pipeline/reduce/archive_v4.py",) if payload["schema"] ==
                  "hadronization_projection_result_v4" else ()))},
         "renderer_build": build,
+        "pdf_export": pdf_export,
         "drawing_record_sha256": sha_bytes(record),
         "roles": [item["role_id"] for item in
                   payload["request_echo"]["scope"]["roles"]],
@@ -2737,6 +2954,7 @@ def render_cold(args):
     if output.exists():
         raise ValueError("no-overwrite cold plot output collision")
     config, config_sha = checked_plot_config(args.plot_config)
+    pdf_export = pdf_export_runtime()
     payload = cold_numerics(args)
     context, adapter = cold_drawing_inputs(payload, config)
     plan = drawing_plan(context, adapter, config)
@@ -2762,10 +2980,10 @@ def render_cold(args):
         canonical_root_archive(pages / CANVAS_NAME, record)
         verify_canvas_archive(binary, environment, pages, record, args.work_dir)
         for page in pages.glob("*.pdf"):
-            page.write_bytes(canonical_root_pdf(page.read_bytes(), page.name))
+            publication_pdf(page)
         write_payload(pages / RECORD_NAME, deterministic_gzip(record))
         manifest = cold_render_manifest(args, payload, config, config_sha,
-                                        build, plan, pages, record)
+                                        build, plan, pages, record, pdf_export)
         atomic_json(pages / "manifest.json", manifest)
         promote_render_pages(pages, output)
         verify_cold_files(args, payload, config_sha, build, plan,
@@ -2808,8 +3026,15 @@ def verify_cold_files(args, payload, config_sha, build, plan, output,
                          original_build["binary_sha256"]) is None):
         raise ValueError("original renderer execution receipt differs")
     config, _ = checked_plot_config(args.plot_config)
+    pdf_export=manifest.get("pdf_export")
+    if (not isinstance(pdf_export,dict) or set(pdf_export)!={'policy','ghostscript_version'} or
+            pdf_export.get('policy')!='vector_pdf_embedded_fonts_v1' or
+            re.fullmatch(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?',str(pdf_export.get('ghostscript_version'))) is None):
+        raise ValueError('PDF export receipt differs')
+    for path in output.glob('*.pdf'):
+        verify_pdf_fonts(path)
     expected = cold_render_manifest(args, payload, config, config_sha,
-                                    original_build, plan, output, record)
+                                    original_build, plan, output, record, pdf_export)
     if manifest != expected:
         raise ValueError("cold plot manifest/byte identity differs")
     verify_canvas_archive(binary, environment, output, record, args.work_dir)
