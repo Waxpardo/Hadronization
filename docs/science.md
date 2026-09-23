@@ -74,12 +74,14 @@ The default numerical request selects nine associate species per trigger. Integr
 
 | Sector | Mesons | Baryons |
 | --- | --- | --- |
-| Charm | D+, D0, Ds+ | Lambda_c+, Sigma_c0, Sigma_c+, Sigma_c++, Xi_c0, Xi_c+ |
-| Beauty | B+, B0, Bs0, Bc+ | Lambda_b0, Sigma_b-, Sigma_b+, Xi_b-, Xi_b0 |
+| Charm | D0, D+, Ds+ | Lambda_c+, Sigma_c+, Sigma_c0, Sigma_c++, Xi_c+, Xi_c0 |
+| Beauty | B+, B0, Bs0, Bc+ | Lambda_b0, Sigma_b+, Sigma_b-, Xi_b0, Xi_b- |
 
 The table names particle families. The trigger's heavy-flavour sign determines the opposite-sign particle or antiparticle. The estimator subtracts its same-sign conjugate.
 
 Each charge state remains a separate category. The figures do not sum Sigma or Xi charge states. The numerical ROOT retains their joint jackknife covariance.
+
+Figures show mesons before baryons. Baryon groups follow the order Lambda, Sigma, then Xi. Mass sets the order within each group. Short ticks delimit species bins, and labels sit at bin centers.
 
 Ds and Xi add strange meson and baryon comparisons. Sigma adds direct heavy-baryon production beyond Lambda. Heavy-hadron decays remain disabled, so Sigma particles do not feed down into the saved Lambda category.
 

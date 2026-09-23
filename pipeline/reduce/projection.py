@@ -906,7 +906,7 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
                   reference_meson_pdg=p["reference_meson_pdg"], sign="OS" if p["sign"] == -1 else "SS", sector=p["sector"].upper())
              for p in requested_pairs if p["associate_pdg"] in paper["signed_pdgs"] and p["trigger_pdg"] in paper["trigger_pdgs"]]
     # Put identified charm categories in meson/baryon order in the request.
-    # Cold archives retain their own order; the renderer cannot select species.
+    # Cold archives retain their selected set; display may reorder that set.
     def pair_order(pair):
         charm = pair['sector'] == 'CHARM'
         associate = pair['associate_pdg']
