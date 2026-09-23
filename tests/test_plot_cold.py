@@ -19,6 +19,59 @@ SPEC.loader.exec_module(plot)
 
 
 class ColdDrawingBoundary(unittest.TestCase):
+    def test_species_display_order_groups_content_and_preserves_signed_membership(self):
+        charm = ['-411', '-421', '-431', '-4122', '-4112', '-4212',
+                 '-4222', '-4132', '-4232']
+        beauty = ['-521', '-511', '-531', '-541', '5122', '5112',
+                  '5222', '5132', '5232']
+        self.assertEqual(plot.species_display_order(charm),
+                         ['-421','-411','-431','-4122','-4212','-4112',
+                          '-4222','-4232','-4132'])
+        self.assertEqual(plot.species_display_order(beauty),
+                         ['-521','-511','-531','-541','5122','5222',
+                          '5112','5232','5132'])
+        for species in (charm, beauty):
+            opposite = [str(-int(pdg)) for pdg in species]
+            self.assertEqual(plot.species_display_order(opposite),
+                [str(-int(pdg)) for pdg in plot.species_display_order(species)])
+            self.assertCountEqual(plot.species_display_order(species),species)
+        with self.assertRaisesRegex(ValueError, 'baryon-content'):
+            plot.species_display_order(['999999'])
+
+    def test_joined_columns_have_equal_width_and_do_not_change_data(self):
+        import copy
+        panels=[]
+        for index in range(2):
+            panels.append(dict(id=str(index),geometry=[index*.5,.3,(index+1)*.5,.9],
+                margins=[.2,.035,0.,.17],y_range=[.1,10.],log_y=True,
+                y_title='Balancing yield',title='Trigger '+str(index),
+                series=[{'points':[{'semantic_id':str(index),'y':1.,'error':.2}]}]))
+        original=copy.deepcopy(panels)
+        plot.join_paired_columns([{'panels':panels}])
+        left,right=panels
+        self.assertEqual(left['geometry'][2],right['geometry'][0])
+        self.assertEqual((left['margins'][1],right['margins'][0]),(0.,0.))
+        self.assertAlmostEqual((left['geometry'][2]-left['geometry'][0])*
+            (1-left['margins'][0]),(right['geometry'][2]-right['geometry'][0])*
+            (1-right['margins'][1]))
+        self.assertEqual(right['y_title'],'')
+        for actual,before in zip(panels,original):
+            for field in ('series','y_range','log_y','title'):
+                self.assertEqual(actual[field],before[field])
+        right['y_range']=[.1,11.]
+        with self.assertRaisesRegex(ValueError,'share their y axis'):
+            plot.join_paired_columns([{'panels':panels}])
+
+    def test_joined_baryon_ratio_panels_keep_each_signed_identity(self):
+        panels=[dict(geometry=[i*.5,.3,(i+1)*.5,.9],margins=[.2,.035,0.,.17],
+            y_range=[0.,1.],log_y=False,title='trigger '+str(i),
+            y_title='signed ratio '+str(i)) for i in range(2)]
+        plot.join_paired_columns([{'panels':panels}])
+        self.assertEqual(panels[0]['y_title'],'Balancing yield ratio')
+        self.assertEqual(panels[1]['y_title'],'')
+        for i,panel in enumerate(panels):
+            self.assertIn('signed ratio '+str(i),panel['title'])
+
     def test_public_cold_command_imports_reader_from_external_cwd(self):
         with tempfile.TemporaryDirectory(dir=ROOT.parent) as directory:
             external = Path(directory)

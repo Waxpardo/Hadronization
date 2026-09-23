@@ -29,6 +29,12 @@ TARGET_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316
 DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v8"
 CANVAS_NAME = "canvases.root"
 RECORD_NAME = "drawing-record.tsv.gz"
+# Display order only: mesons first, then Lambda, Sigma and Xi baryons.
+# Mass orders states within each group (particle/antiparticle equal).
+# https://pdg.lbl.gov/2025/mcdata/mass_width_2025.mcd
+SPECIES_DISPLAY_ORDER = (421, 411, 431, 521, 511, 531, 541,
+                         4122, 4212, 4112, 4222, 4232, 4132,
+                         5122, 5222, 5112, 5232, 5132)
 P1_WITHHELD_SE_DISCLOSURE = (
     "Tune-ratio SE unavailable for unresolved sparse-tail denominators; "
     "see ROOT flags")
@@ -565,6 +571,13 @@ def checked_category_order(declared, present_species, partial, role, trigger):
                          role+' '+trigger)
     return list(declared)
 
+def species_display_order(species):
+    """Reorder authenticated categories without selecting or combining them."""
+    rank = {pdg: index for index, pdg in enumerate(SPECIES_DISPLAY_ORDER)}
+    if any(abs(int(pdg)) not in rank for pdg in species):
+        raise ValueError('species lacks a baryon-content display order')
+    return sorted(species, key=lambda pdg: (rank[abs(int(pdg))], int(pdg) < 0))
+
 def checked_tune_ratio_layout(tunes, reference_tune, rows, role,
                               partial=False):
     """Bind lower-pad topology to authenticated tune/reference rows."""
@@ -963,6 +976,40 @@ def synchronize_paired_y_ranges(pages):
             for panel in panels:
                 panel['log_y'] = log_y
                 panel['y_range'] = y_range[:]
+
+def join_paired_columns(pages):
+    """Join equal-scale frames and retain one y axis for each paired row."""
+    for page in pages:
+        rows = {}
+        for panel in page['panels']:
+            if not panel.get('reuse'):
+                rows.setdefault(tuple(panel['geometry'][1::2]), []).append(panel)
+        for panels in rows.values():
+            if len(panels) != 2:
+                continue
+            left, right = sorted(panels, key=lambda p: p['geometry'][0])
+            if left['geometry'][2] > right['geometry'][0]:
+                continue
+            if (left['y_range'] != right['y_range'] or
+                    left['log_y'] != right['log_y'] or
+                    left['margins'][2:] != right['margins'][2:]):
+                raise ValueError('paired frames cannot share their y axis')
+            start, end = left['geometry'][0], right['geometry'][2]
+            outer_left = start + (left['geometry'][2]-start)*left['margins'][0]
+            outer_right = end - (end-right['geometry'][0])*right['margins'][1]
+            seam = (outer_left+outer_right)/2
+            left['geometry'][2] = right['geometry'][0] = seam
+            left['margins'][0] = (outer_left-start)/(seam-start)
+            left['margins'][1] = right['margins'][0] = 0.
+            right['margins'][1] = (end-outer_right)/(end-seam)
+            if left['y_title'] != right['y_title']:
+                # Different signed baryon/meson ratios share the same scale.
+                # Preserve each exact identity beside its trigger title.
+                for panel in (left, right):
+                    if panel['title']:
+                        panel['title'] += ': '+panel['y_title']
+                left['y_title'] = 'Balancing yield ratio'
+            right['y_title'] = ''
 
 def typed_panel_status(context, rows):
     """Summarize saved materialization and estimator statuses for a blank pad."""
@@ -1808,8 +1855,11 @@ def drawing_plan(projection, manifest, config):
                     declared, present_species,
                     partial_numerics(context),
                     role, trigger_key)
+                species=species_display_order(species)
             else:
-                species=sorted(present_species,key=lambda p:abs(int(p)))
+                species=(species_display_order(present_species)
+                         if options.get('categorical') else
+                         sorted(present_species,key=lambda p:abs(int(p))))
             for r in members:
                 ident=_series_identity(r);key='|'.join(ident.values())
                 groups.setdefault(key,[]).append(r)
@@ -2123,6 +2173,7 @@ def drawing_plan(projection, manifest, config):
             header, base_information, presentation['species_labels']))
     join_ratio_pads(pages)
     synchronize_paired_y_ranges(pages)
+    join_paired_columns(pages)
     if getattr(context, 'cold', False):
         apply_cold_page_style(pages,context)
     return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}

@@ -594,18 +594,38 @@ bool CategoricalAxis(const Page& page, const Panel& panel) {
   // Identity is the scientific role, independent of hidden upper-pad labels.
   return page.role.find("balancing.") == 0 && panel.reusePanel.empty();
 }
+bool SpeciesCategoryAxis(const Page& page) {
+  return page.role.rfind("balancing.integrated.", 0) == 0 ||
+         page.role.rfind("balancing.activity.", 0) == 0;
+}
 bool RotateCategoryLabels(const Page& page, const Panel& panel) {
-  const bool uprightBeautySpecies = panel.ticks.size() <= 5 &&
-      (page.role == "balancing.integrated.beauty" ||
-       page.role == "balancing.activity.beauty");
-  return panel.ticks.size() >= 5 && !uprightBeautySpecies;
+  return panel.ticks.size() >= 5 && !SpeciesCategoryAxis(page);
+}
+bool SharedRightAxis(const Panel& panel) {
+  return panel.geometry[0] > 0 && panel.margins[0] == 0.;
+}
+double PanelTitleX(const Panel& panel) {
+  return panel.margins[0] + (SharedRightAxis(panel) ? .025 : 0.);
+}
+double JoinedEndLabelOffset(const Page& page, const Panel& panel, double x) {
+  if (page.role.rfind("correlations.", 0) != 0) return 0.;
+  const double width = (panel.geometry[2]-panel.geometry[0])*page.width;
+  const double clearance = .65*BodyTextPixels(page)/width;
+  if (SharedRightAxis(panel) && SameBinary64(x, panel.xLow)) return clearance;
+  if (panel.margins[1] == 0. && panel.geometry[2] < 1. &&
+      SameBinary64(x, panel.xHigh)) return -clearance;
+  return 0.;
 }
 double StatusRailY(const Page& page, const Panel& panel) {
   const bool extendedSpecies = panel.ticks.size() > 5 &&
       (page.role.rfind("balancing.integrated.", 0) == 0 ||
        page.role.rfind("balancing.activity.", 0) == 0);
-  // Keep missing-value markers below the rotated particle labels.
-  return std::max(.03, panel.margins[2] - (extendedSpecies ? .20 : .005));
+  // Keep status markers above the frame edge, clear of particle typography.
+  if (extendedSpecies) {
+    const double height = (panel.geometry[3]-panel.geometry[1])*page.height;
+    return panel.margins[2] + .75*BodyTextPixels(page)/height;
+  }
+  return std::max(.03, panel.margins[2] - .005);
 }
 std::vector<ExpectedText> StateGlyphTexts(
     const Page& page, const Panel& panel, const std::vector<Page>& pages) {
@@ -764,6 +784,11 @@ constexpr double P1InformationX = .50;
 constexpr std::array<double, 5> kP1InformationY = {{.835, .810, .785, .760, .735}};
 constexpr std::array<int, 5> kP1InformationPixels = {{20, 17, 16, 15, 15}};
 double CategoryLabelY(const Page& page, const Panel& panel) {
+  if (SpeciesCategoryAxis(page)) {
+    // Use a common letter baseline, independent of bars and scripts.
+    const double height = (panel.geometry[3]-panel.geometry[1])*page.height;
+    return panel.margins[2] - 1.65*BodyTextPixels(page)/height;
+  }
   return panel.margins[2] -
       (page.role == "balancing.baryon_meson.activity" ? .015 : .025);
 }
@@ -857,8 +882,12 @@ bool AxisLabelSuppressed(const TAxis& axis, int labelNumber) {
   }
   return false;
 }
-double CategoryTickInnerY(const Panel& panel, bool top) {
-  constexpr double fraction = .012;
+double CategoryTickInnerY(const Page& page, const Panel& panel, bool top) {
+  // Keep species separators visible on short ratio panels at print size.
+  const double frameHeight = (panel.geometry[3]-panel.geometry[1])*page.height*
+      (1-panel.margins[2]-panel.margins[3]);
+  const double fraction = SpeciesCategoryAxis(page)
+      ? .23*BodyTextPixels(page)/frameHeight : .012;
   if (panel.logY) {
     const double factor = std::pow(panel.yHigh / panel.yLow, fraction);
     return top ? panel.yHigh / factor : panel.yLow * factor;
@@ -890,9 +919,10 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
   for (const auto& tick : panel.ticks) {
     const bool rotate = RotateCategoryLabels(page, panel);
     result.push_back(TextExpectation(
-        tick.second, panel.margins[0] + frameWidth * xFraction(tick.first),
+        tick.second, panel.margins[0] + frameWidth * xFraction(tick.first) +
+            JoinedEndLabelOffset(page, panel, tick.first),
         CategoryLabelY(page, panel), inset ? 14 : textPixels, 1,
-        rotate ? 32 : 23, rotate ? 90 : 0));
+        SpeciesCategoryAxis(page) ? 21 : rotate ? 32 : 23, rotate ? 90 : 0));
   }
   for (double coordinate : StatusRailCoordinates(page, panel, pages)) {
     result.push_back(TextExpectation(
@@ -900,7 +930,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
         StatusRailY(page, panel), inset ? 11 : textPixels - 2,
         kGray + 2, 22));
   }
-  result.push_back(TextExpectation(panel.title, panel.margins[0],
+  result.push_back(TextExpectation(panel.title, PanelTitleX(panel),
                                    PanelTitleY(page, panel),
                                    inset ? 15 : textPixels + 1));
   if (page.role == "multiplicity.composite" &&
@@ -1332,7 +1362,8 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
            frame->GetXaxis()->GetTitleFont() == (inset ? 42 : 43) &&
            frame->GetYaxis()->GetTitleFont() == (inset ? 42 : 43) &&
            StoredFloatClose(frame->GetXaxis()->GetLabelSize(), expectedXLabelSize) &&
-           StoredFloatClose(frame->GetYaxis()->GetLabelSize(), baseLabelSize) &&
+           StoredFloatClose(frame->GetYaxis()->GetLabelSize(),
+                            SharedRightAxis(panel) ? 0. : baseLabelSize) &&
            StoredFloatClose(frame->GetXaxis()->GetTitleSize(), inset ? .062 : textPixels) &&
            StoredFloatClose(frame->GetYaxis()->GetTitleSize(), inset ? .060 : textPixels) &&
            frame->GetYaxis()->GetNdivisions() % 1000000 ==
@@ -1426,7 +1457,7 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
           Need(SameBinary64(tick.GetX1(), boundaries[index]) &&
                SameBinary64(tick.GetX2(), boundaries[index]) &&
                SameBinary64(tick.GetY1(), top ? panel.yHigh : panel.yLow) &&
-               SameBinary64(tick.GetY2(), CategoryTickInnerY(panel, top)) &&
+               SameBinary64(tick.GetY2(), CategoryTickInnerY(page, panel, top)) &&
                tick.GetLineColor() == kBlack &&
                tick.GetLineStyle() == 1 && tick.GetLineWidth() == 1,
                "categorical boundary tick geometry differs");
@@ -1585,6 +1616,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     }
     frame->GetYaxis()->SetMoreLogLabels(
         !inset && panel.logY && panel.yHigh / panel.yLow < 10.);
+    if (SharedRightAxis(panel)) frame->GetYaxis()->SetLabelSize(0.);
     if (BeautyCorrelationUsesFullTickValues(page, panel))
       frame->GetYaxis()->SetNoExponent(true);
     const auto yLabelPolicy = JoinedYAxisLabelPolicy(page, panel, inset);
@@ -1636,8 +1668,9 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
         label.SetLineWidth(1);
         label.SetTextSize(inset ? 14 : textPixels);
         label.SetTextAngle(rotate ? 90 : 0);
-        label.SetTextAlign(rotate ? 32 : 23);
-        const double x = panel.margins[0] + frameWidth * xFraction(tick.first);
+        label.SetTextAlign(SpeciesCategoryAxis(page) ? 21 : rotate ? 32 : 23);
+        const double x = panel.margins[0] + frameWidth * xFraction(tick.first) +
+            JoinedEndLabelOffset(page, panel, tick.first);
         label.DrawLatex(x, CategoryLabelY(page, panel), tick.second.c_str());
       }
     }
@@ -1647,7 +1680,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
           const bool top = side == 1;
           lines.emplace_back(std::make_unique<TLine>(
               boundary, top ? panel.yHigh : panel.yLow,
-              boundary, CategoryTickInnerY(panel, top)));
+              boundary, CategoryTickInnerY(page, panel, top)));
           lines.back()->SetLineColor(kBlack);
           lines.back()->SetLineStyle(1);
           lines.back()->SetLineWidth(1);
@@ -1673,7 +1706,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       status.DrawLatex(panel.margins[0] + frameWidth * xFraction(coordinate),
                        StatusRailY(page, panel), "#times");
     }
-    Text(panel.margins[0], PanelTitleY(page, panel), panel.title,
+    Text(PanelTitleX(panel), PanelTitleY(page, panel), panel.title,
          inset ? 15 : textPixels + 1);
     if (page.role == "multiplicity.composite" &&
         panel.id == "upper.distribution") {
