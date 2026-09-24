@@ -204,6 +204,27 @@ int main(int argc, char** argv) {
         plot.reserve_spectrum_tune_key([page])
         self.assertEqual(page,original)
 
+    def test_dense_flat_spectrum_has_physical_clearance_for_publication_key(self):
+        # The native legend uses 9-point body text at 18 cm paper width.
+        # A dense flat spectrum cannot provide a spare horizontal gap.
+        for top_margin in (.13, .2321428571428571):
+            panel = {'id':'g9.absolute', 'geometry':[0.,.34,1.,.90],
+                     'margins':[.16,.04,0.,top_margin],
+                     'x_range':[-math.pi,math.pi], 'y_range':[.0097,.0103],
+                     'log_y':False, 'series':[{'tune':tune,'points':[
+                         {'state':'DRAW','y':.01,'error':.0002,
+                          'display_x':-math.pi+(i+.5)*2*math.pi/100,
+                          'bin_high':-math.pi+(i+1)*2*math.pi/100}
+                         for i in range(100)]} for tune in
+                         ('MONASH','JUNCTIONS','CLOSEPACKING')]}
+            page = {'role':'spectra.signed_heavy','text_pixels':18,
+                    'width':1100,'height':1200,'panels':[panel]}
+            plot.reserve_spectrum_tune_key([page])
+            low,high = panel['y_range']
+            clearance = (high-.0102)/(high-low)*672*(1-top_margin)
+            # Three rows, plus native frame and error-envelope separation.
+            self.assertGreaterEqual(clearance, (1.65*3+.975)*20)
+
     def test_class_pattern_digest_matches_native_renderer(self):
         config,_=plot.checked_plot_config(ROOT/'config/plot.json')
         digest=plot.sha_bytes(plot.canonical(

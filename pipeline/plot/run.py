@@ -1279,7 +1279,10 @@ def add_publication_captions(pages, context):
         for panel in panels:
             if panel['id'].startswith('correlation.teaching.'):
                 if panel['id'].endswith('.identified'):
-                    panel['legend']=[panel['margins'][0]+.025,.40,.98,.57]
+                    ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
+                    top=1.-panel['margins'][3]-.03
+                    panel['legend']=[panel['margins'][0]+.025,
+                        top-3.3*(font+2)/ph,.98,top]
             if panel['id']=='lower.ratio' and page['role']=='multiplicity.composite':
                 clipped=sum(q['state']=='DRAW' and q['y'] is not None and q['y']>5
                             for z in panel['series'] for q in z['points'])
@@ -1731,7 +1734,7 @@ def reserve_spectrum_tune_key(pages):
         tunes = {s['tune'] for s in panel['series']}
         if not tunes:
             continue
-        font = max(page['text_pixels'], math.ceil(8*page['width']/(18*72/2.54)))
+        font = max(page['text_pixels'], math.ceil(9*page['width']/(18*72/2.54)))
         font += 2 if page['width'] > 1500 else 0
         width = page['width']*(panel['geometry'][2]-panel['geometry'][0])
         height = page['height']*(panel['geometry'][3]-panel['geometry'][1])
@@ -2397,10 +2400,10 @@ def drawing_plan(projection, manifest, config):
                 if panel['geometry'][0]==0:
                     panel['margins'][0] += .05
     join_paired_columns(pages)
-    reserve_spectrum_tune_key(pages)
     if getattr(context, 'cold', False):
         apply_cold_page_style(pages,context)
         add_publication_captions(pages,context)
+    reserve_spectrum_tune_key(pages)
     return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}
 
 def g9_drawing_pages(context, rows, config, header, information, labels):
