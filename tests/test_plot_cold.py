@@ -77,6 +77,27 @@ int main() {
   shortPanel.margins[3]=3.*34./520.;
   const double baseline=PanelTitleY(shortPage,shortPanel);
   if (baseline+34./520.>=1. || baseline<=1.-shortPanel.margins[3]+34./520.) return 9;
+  Page ratioPage{}; ratioPage.role="balancing.activity.charm";
+  Panel ratioPanel{}; ratioPanel.id="lower.shared.421";
+  ratioPanel.logY=false; ratioPanel.margins={.2,.04,.2,0.};
+  for (const auto& bounds : std::vector<std::pair<double,double>>{
+      {.84177,1.38667},{-.08,2.5},{-.1,38.},{-.2,4.4}}) {
+    ratioPanel.yLow=bounds.first; ratioPanel.yHigh=bounds.second;
+    Double_t low=0.,high=0.,width=0.;Int_t intervals=0;
+    THLimitsFinder::Optimize(bounds.first,bounds.second,
+        YAxisDivisions(ratioPage,ratioPanel,false)%100,low,high,intervals,width);
+    const auto labels=JoinedYAxisLabelPolicy(ratioPage,ratioPanel,false);
+    const int visible=intervals+1-labels.suppressFirst-labels.suppressLast;
+    if (visible<3 || visible>6 || width<=0.) return 10;
+    if (ratioPanel.yLow!=bounds.first || ratioPanel.yHigh!=bounds.second) return 11;
+  }
+  ratioPage.role="multiplicity.composite";
+  ratioPanel.id="lower.ratio";
+  ratioPanel.yLow=-.08;ratioPanel.yHigh=2.5;
+  ratioPage.panels={ratioPanel};
+  const auto boundary=CanvasSupplementTexts(ratioPage);
+  if (boundary.empty() || boundary.front().text!="2.5" ||
+      !JoinedYAxisLabelPolicy(ratioPage,ratioPanel,false).suppressLast) return 12;
   return bands==ranges.size() && central ? 0 : 6;
 }
 '''
@@ -314,7 +335,7 @@ int main(int argc, char** argv) {
         plot.apply_display_limits([
             {'role':'multiplicity.composite','panels':[panels[0]]},
             {'role':'correlations.charm','panels':[panels[1]]}])
-        self.assertEqual(panels[0]['y_range'],[-.08,5.])
+        self.assertEqual(panels[0]['y_range'],[-.08,2.5])
         self.assertEqual(panels[1]['y_range'],[8e-9,.1])
         for before,after in zip(original,panels):
             self.assertEqual(before['series'],after['series'])
@@ -677,6 +698,7 @@ int main(int argc, char** argv) {
             plot._render_numbers(leaked)
 
     def test_focused_extremes_preserve_all_class_canonical_page(self):
+        import copy
         classes = [{"id": "0", "integrated": True,
                     "percentile_interval": [0., 100.]}]
         intervals = [(0.,1.),(1.,10.)]+[(float(i),float(i+10))
@@ -687,14 +709,17 @@ int main(int argc, char** argv) {
         self.assertEqual(plot.selected_extreme_class_ids(classes),
                          ["1", "6", "10"])
         panel = {"id": "upper.411", "series": [
-            {"class_id": str(index), "points": [{"state": "DRAW",
+            {"class_id": str(index), "marker": "filled_circle",
+             "points": [{"state": "DRAW",
              "y": float(index), "error": None}]}
             for index in range(1, 12)],
             "log_y": True, "x_range": [.5, 3.5],
             "y_range": [0.1, 20.], "guides": [], "note": "",
             "status": "AVAILABLE"}
+        lower = copy.deepcopy(panel)
+        lower['id'] = 'lower.shared.411'
         canonical = {"role": "balancing.activity.charm",
-                     "panels": [panel], "title": "all classes"}
+                     "panels": [panel, lower], "title": "all classes"}
         context = SimpleNamespace(
             tunes=["MONASH", "JUNCTIONS", "CLOSEPACKING"],
             classes=classes, package_state="VALIDATED_PARTIAL",
@@ -705,6 +730,13 @@ int main(int argc, char** argv) {
         self.assertEqual([series["class_id"] for series in
                           pages[0]["panels"][0]["series"]], ["1", "6", "10"])
         self.assertEqual(len(canonical["panels"][0]["series"]), 11)
+        self.assertEqual([series['marker'] for series in
+                          pages[0]['panels'][0]['series']],
+                         ['open_diamond', 'open_cross', 'open_down_triangle'])
+        self.assertEqual({series['marker'] for series in
+                          pages[0]['panels'][1]['series']}, {'filled_circle'})
+        self.assertEqual({series['marker'] for series in panel['series']},
+                         {'filled_circle'})
         self.assertIn("supplemental", pages[0]["filename"])
 
     def test_extreme_emphasis_uses_typed_intervals_not_caption(self):

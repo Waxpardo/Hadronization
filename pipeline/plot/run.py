@@ -808,6 +808,8 @@ def focused_extreme_pages(pages, context, padding):
         format(float(value), '.15g') for value in
         by_id[class_id]['percentile_interval']))
                     for class_id in selected]
+    class_markers = dict(zip(selected, (
+        'open_diamond', 'open_cross', 'open_down_triangle')))
     result = []
     for source in pages:
         if source['role'] not in ('balancing.activity.charm',
@@ -831,6 +833,9 @@ def focused_extreme_pages(pages, context, padding):
         for panel in page['panels']:
             panel['series'] = [series for series in panel['series']
                                if series['class_id'] in selected]
+            if panel['id'].startswith('upper.'):
+                for series in panel['series']:
+                    series['marker'] = class_markers[series['class_id']]
             valid = [point for series in panel['series']
                      for point in series['points']
                      if point['state'] == 'DRAW' and point['y'] is not None]
@@ -982,8 +987,8 @@ def apply_display_limits(pages):
                     panel['id'] == 'lower.ratio'):
                 lower=[q['y']-(q.get('error') or 0.)
                        for z in panel['series'] for q in z['points']
-                       if q.get('y') is not None and q['y'] <= 5.]
-                panel['y_range'] = [min([0.]+lower)-.08, 5.]
+                       if q.get('y') is not None and q['y'] <= 2.5]
+                panel['y_range'] = [min([0.]+lower)-.08, 2.5]
             if (page['role'].startswith('correlations.') and panel['log_y']
                     and not panel['id'].startswith('correlation.compare.')):
                 positive=[q['y'] for z in panel['series'] for q in z['points']

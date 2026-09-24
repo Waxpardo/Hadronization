@@ -82,6 +82,9 @@ int Marker(const std::string& name) {
   if (name == "filled_square") return 21;
   if (name == "filled_up_triangle") return 22;
   if (name == "open_circle") return 24;
+  if (name == "open_diamond") return 27;
+  if (name == "open_cross") return 28;
+  if (name == "open_down_triangle") return 32;
   throw std::runtime_error("invalid marker identity");
 }
 struct Point {
@@ -864,14 +867,43 @@ struct YAxisLabelPolicy {
   bool suppressLast = false;
   int optimizedAnchors = -1;
 };
+int YAxisDivisions(const Page& page, const Panel& panel, bool inset) {
+  if (inset) return 503;
+  if (page.role == "multiplicity.composite" && panel.id == "upper.distribution")
+    return 509;
+  const bool ratio = panel.id.rfind("lower.", 0) == 0 ||
+      panel.id == "g9.ratio" || panel.id.rfind("correlation.compare.", 0) == 0 ||
+      page.role == "balancing.baryon_meson.activity";
+  if (!ratio || panel.logY) return 505;
+  // Choose ROOT's least dense rounded scale with approximately five anchors.
+  // Keep the scientific range intact; the choice changes tick density only.
+  int best = 5, bestScore = std::numeric_limits<int>::max();
+  for (int primary = 5; primary <= 10; ++primary) {
+    Double_t low = 0., high = 0., width = 0.;
+    Int_t intervals = 0;
+    THLimitsFinder::Optimize(panel.yLow, panel.yHigh, primary, low, high,
+                             intervals, width);
+    const int anchors = intervals + 1;
+    const int score = std::abs(anchors - 5) + (anchors > 6 ? 20 : 0);
+    if (score < bestScore) { best = primary; bestScore = score; }
+  }
+  return 500 + best;
+}
 YAxisLabelPolicy JoinedYAxisLabelPolicy(const Page& page,
                                         const Panel& panel, bool inset) {
   YAxisLabelPolicy policy;
   policy.suppressFirst = !inset && panel.margins[2] == 0. &&
                          !PreserveJoinedLogLabels(page, panel);
   policy.suppressLast = !inset && panel.margins[3] == 0.;
-  if (page.role == "multiplicity.composite" && panel.id == "lower.ratio")
-    policy.suppressLast = false;
+  if (page.role == "multiplicity.composite" && panel.id == "lower.ratio") {
+    Double_t low = 0., high = 0., width = 0.;
+    Int_t intervals = 0;
+    THLimitsFinder::Optimize(panel.yLow, panel.yHigh,
+                             YAxisDivisions(page, panel, inset) % 100,
+                             low, high, intervals, width);
+    // The canvas owns the upper boundary label, beyond this pad's clip.
+    policy.suppressLast = Close(high, panel.yHigh);
+  }
   // A panel touching one adjacent panel still owns an independent numerical
   // scale.  Preserve its seam label when ROOT's five-primary-division
   // optimization provides only two anchors; suppressing either would leave
@@ -881,7 +913,8 @@ YAxisLabelPolicy JoinedYAxisLabelPolicy(const Page& page,
       policy.suppressFirst != policy.suppressLast) {
     Double_t optimizedLow = 0., optimizedHigh = 0., width = 0.;
     Int_t intervals = 0;
-    THLimitsFinder::Optimize(panel.yLow, panel.yHigh, 5, optimizedLow,
+    THLimitsFinder::Optimize(panel.yLow, panel.yHigh,
+                             YAxisDivisions(page, panel, inset) % 100, optimizedLow,
                              optimizedHigh, intervals, width);
     policy.optimizedAnchors = intervals + 1;
     if (policy.optimizedAnchors -
@@ -1080,6 +1113,7 @@ struct ExpectedLegendEntry {
   const Series* series;
   double markerSize;
   int lineStyle;
+  bool neutralColor = false;
 };
 struct ExpectedLegend {
   std::array<double, 4> geometry;
@@ -1188,7 +1222,7 @@ void VerifyLegendEntry(const TLegendEntry& actual,
        std::string(actual.GetOption()) == expected.option,
        "scientific legend label/option differs from drawing record");
   const auto* sample = dynamic_cast<const TGraphErrors*>(actual.GetObject());
-  const bool neutralLine = expected.option == "l";
+  const bool neutralLine = expected.neutralColor;
   Need(sample != nullptr &&
        sample->GetLineColor() ==
            (neutralLine ? kBlack : Color(expected.series->color)) &&
@@ -1196,7 +1230,7 @@ void VerifyLegendEntry(const TLegendEntry& actual,
            (neutralLine ? kBlack : Color(expected.series->color)) &&
        sample->GetMarkerStyle() == Marker(expected.series->marker) &&
        StoredFloatClose(sample->GetMarkerSize(),
-                        neutralLine ? 0. : expected.markerSize) &&
+                        expected.markerSize) &&
        sample->GetLineStyle() == expected.lineStyle &&
        sample->GetLineWidth() ==
            (neutralLine ? ScientificLineWidth(*expected.series) : 1),
@@ -1339,7 +1373,8 @@ std::vector<ExpectedLegend> ExpectedPanelLegends(
       ExpectedLegend key{InsideTuneLegendBox(page, panel, tunes.size()), 1,
                          double(TuneLegendTextPixels(page)), true, .12, {}};
       for (const auto& tune : tunes)
-        key.entries.push_back({tune.first, "lp", tune.second, 1.4, 1});
+        key.entries.push_back({tune.first, InFrameClassKey(page) ? "l" : "lp",
+                               tune.second, InFrameClassKey(page) ? 0. : 1.4, 1});
       result.push_back(std::move(key));
     }
   }
@@ -1347,7 +1382,9 @@ std::vector<ExpectedLegend> ExpectedPanelLegends(
   if (classKey.first==&panel) {
     ExpectedLegend key{classKey.second,1,double(TuneLegendTextPixels(page)),true,.56,{}};
     for (const auto& item : ClassSamples(page))
-      key.entries.push_back({item.second->label,"l",item.second,0.,item.first});
+      key.entries.push_back({item.second->label,"lp",item.second,
+                              ScientificMarkerSize(*item.second, false),
+                              item.first,true});
     result.push_back(std::move(key));
   }
   return result;
@@ -1368,7 +1405,7 @@ std::vector<ExpectedLegend> ExpectedCanvasLegends(const Page& page) {
     for (const auto& item : classSamples) {
       legend.entries.push_back(
           {item.second->label, "l", item.second,
-           ScientificMarkerSize(*item.second, false), item.second->lineStyle});
+           0., item.second->lineStyle, true});
     }
     result.push_back(std::move(legend));
   }
@@ -1393,9 +1430,12 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
     const double width=panel.geometry[2]-panel.geometry[0];
     const double height=panel.geometry[3]-panel.geometry[1];
     const double x=panel.geometry[0]+width*(panel.margins[0]-.008);
-    if (page.role=="multiplicity.composite" && panel.id=="lower.ratio")
-      result.push_back(TextExpectation("5",x,
+    if (page.role=="multiplicity.composite" && panel.id=="lower.ratio") {
+      std::ostringstream label;
+      label << std::setprecision(6) << panel.yHigh;
+      result.push_back(TextExpectation(label.str(),x,
           panel.geometry[3]-height*panel.margins[3],BodyTextPixels(page),1,32));
+    }
     if (page.role.rfind("correlations.",0)==0 && panel.logY &&
         panel.margins[2]==0. && !SharedRightAxis(panel))
       result.push_back(TextExpectation(LogBoundaryLabel(panel.yLow),x,
@@ -1691,8 +1731,7 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
            StoredFloatClose(frame->GetXaxis()->GetTitleSize(), inset ? .062 : textPixels) &&
            StoredFloatClose(frame->GetYaxis()->GetTitleSize(), inset ? .060 : textPixels) &&
            frame->GetYaxis()->GetNdivisions() % 1000000 ==
-               (page.role == "multiplicity.composite" &&
-                panel.id == "upper.distribution" ? 509 : inset ? 503 : 505) &&
+               YAxisDivisions(page, panel, inset) &&
            frame->GetYaxis()->GetMoreLogLabels() ==
              (!inset && panel.logY && panel.yHigh / panel.yLow < 10.) &&
            frame->GetYaxis()->GetNoExponent() ==
@@ -1945,6 +1984,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     }
     frame->GetYaxis()->SetMoreLogLabels(
         !inset && panel.logY && panel.yHigh / panel.yLow < 10.);
+    frame->GetYaxis()->SetNdivisions(YAxisDivisions(page, panel, inset));
     if (SharedRightAxis(panel)) frame->GetYaxis()->SetLabelSize(0.);
     if (FullYAxisTickValues(page, panel))
       frame->GetYaxis()->SetNoExponent(true);
@@ -2120,9 +2160,9 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
         graphs.emplace_back(std::make_unique<TGraphErrors>());
         Style(*graphs.back(),*entry.series,false);
         graphs.back()->SetLineStyle(entry.lineStyle);
-        graphs.back()->SetLineWidth(entry.option=="l" ? ScientificLineWidth(*entry.series) : 1);
+        graphs.back()->SetLineWidth(entry.neutralColor ? ScientificLineWidth(*entry.series) : 1);
         graphs.back()->SetMarkerSize(entry.markerSize);
-        if (entry.option=="l") {
+        if (entry.neutralColor) {
           graphs.back()->SetLineColor(kBlack);
           graphs.back()->SetMarkerColor(kBlack);
         }
