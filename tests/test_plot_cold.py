@@ -208,6 +208,27 @@ int main(int argc, char** argv) {
         self.assertEqual(absolute['series'],original['panels'][0]['series'])
         self.assertEqual(ratio,original['panels'][1])
 
+    def test_in_frame_spectrum_caption_reserves_space_without_changing_data(self):
+        import copy
+        absolute={'id':'g9.absolute','geometry':[0.,.34,1.,.9],
+            'margins':[.16,.04,0.,.06],'x_range':[-3.,3.],
+            'y_range':[.0099,.0101],'log_y':False,
+            'annotations':[{'x':.2,'y':.8,'size':20.,'text':'Sample'},
+                           {'x':.2,'y':.7,'size':20.,'text':'Acceptance'}],
+            'series':[{'points':[{'state':'DRAW','y':.01008,'error':.000015,
+                'bin_low':-3.,'bin_high':3.,'display_x':0.}]}]}
+        ratio={'id':'g9.ratio','geometry':[0.,0.,1.,.34],
+               'y_range':[.97,1.04],'series':[]}
+        page={'role':'spectra.signed_heavy','text_pixels':18,
+              'width':1100,'height':1200,'panels':[absolute,ratio]}
+        original=copy.deepcopy(page)
+        plot.reserve_annotation_headroom([page])
+        lo,hi=absolute['y_range']
+        envelope=(.010095-lo)/(hi-lo)*.94
+        self.assertLess(envelope,.7)
+        self.assertEqual(absolute['series'],original['panels'][0]['series'])
+        self.assertEqual(ratio,original['panels'][1])
+
     def test_spectrum_key_preserves_an_already_clear_frame(self):
         import copy
         panel = {'id':'g9.absolute', 'geometry':[0.,.34,1.,.9],

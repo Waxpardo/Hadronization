@@ -1222,8 +1222,8 @@ def scientific_caption_lines(page, context):
             ' GeV/c; |#eta| #leq '+format(float.fromhex(activity['eta_window']), '.15g')])
     if role=='spectra.signed_heavy':
         eta=format(float.fromhex(context.g9_science['eta']['high']), '.15g')
-        lines.extend(['|#eta| #leq '+eta,
-            'Normalized probability per bin'])
+        lines[-1] += '; |#eta| #leq '+eta
+        lines.append('Normalized probability per bin')
     if (len(lines)>=3 and lines[-1].startswith('|#eta|')
             and lines[-2].startswith('Hard ')):
         eta_line=lines.pop()
@@ -1243,10 +1243,9 @@ def add_publication_captions(pages, context):
         for panel in page['panels']: panel['annotations']=[]
         font=max(page['text_pixels'],math.ceil(9*page['width']/(18*72/2.54)))
         if page['role'] == 'spectra.signed_heavy':
-            header=(1.25*len(lines)+2.8)*font
             for panel in row:
                 ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
-                panel['margins'][3]=max(panel['margins'][3],header/ph)
+                panel['margins'][3]=1.8*font/ph
         elif page['role'] != 'multiplicity.composite':
             if page['role'].startswith('balancing.'):
                 page['height']=max(page['height'],2950 if len(panels)>4 else 1600)
@@ -1258,27 +1257,39 @@ def add_publication_captions(pages, context):
                 panel['margins'][3]=(3. if panel['id'].startswith('correlation.main.') else 1.8)*font/ph
         ph=page['height']*(target['geometry'][3]-target['geometry'][1])
         x=target['margins'][0]+.025
-        y=1.-target['margins'][3]-1.45*font/ph
+        keyfont=font+(2 if page['width']>1500 else 0)
+        # ROOT centers legend text in each row. Its visible baseline lies
+        # 0.39 font heights below that center with the selected Helvetica font.
+        y=1.-target['margins'][3]-1.865*keyfont/ph
         step=1.30*font/ph
+        if page['role'].startswith('correlations.'):
+            pw=page['width']*(target['geometry'][2]-target['geometry'][0])
+            x=target['margins'][0]+1.55*font/pw
+            y=1.-target['margins'][3]-2.465*(font+2)/ph
+        if page['role']=='spectra.signed_heavy':
+            pw=page['width']*(target['geometry'][2]-target['geometry'][0])
+            x=target['margins'][0]+2.*font/pw
         if page['role'].startswith('balancing.') and page['role']!='balancing.baryon_meson.activity':
             x=target['margins'][0]+.32*(1.-target['margins'][0])
-        if page['role']=='spectra.signed_heavy':
-            y=min(.97,1.-1.15*font/ph)
         if page['role']=='multiplicity.composite':
-            font=18;step=1.30*font/ph;x=.45;y=.81
             target['legend']=[.76,.705,.95,.825]
+            y=.825-(.825-.705)/6.-.39*keyfont/ph
+            font=18;step=1.30*font/ph;x=.45
         target['annotations']=[{'x':x,'y':y-i*step,'size':float(font),'text':line}
                                for i,line in enumerate(lines)]
         for panel in panels:
             if panel['id'].startswith('correlation.teaching.') and panel['id'].endswith('.identified'):
                 ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
-                top=1.-panel['margins'][3]-.03
-                panel['legend']=[1.-panel['margins'][1]-.29,
-                    top-3.3*(font+2)/ph,1.-panel['margins'][1]-.02,top]
+                pw=page['width']*(panel['geometry'][2]-panel['geometry'][0])
+                keyfont=font+2
+                top=1.-panel['margins'][3]-1.25*keyfont/ph
+                right=1.-panel['margins'][1]-1.5*keyfont/pw
+                panel['legend']=[right-4.6*keyfont/pw,
+                    top-3.3*keyfont/ph,right,top]
             if page['role']=='balancing.baryon_meson.activity' and panel in row and panel is not target:
                 ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
                 pw=page['width']*(panel['geometry'][2]-panel['geometry'][0])
-                top=1.-panel['margins'][3]-.03
+                top=1.-panel['margins'][3]-.65*(font+2)/ph
                 panel['legend']=[.035,top-4.95*(font+2)/ph,
                                   .035+(font+2)*10.44/pw,top]
         if page['role']=='multiplicity.composite':
@@ -1758,7 +1769,7 @@ def reserve_spectrum_tune_key(pages):
 def reserve_annotation_headroom(pages):
     """Reserve vertical display space only over the annotated x intervals."""
     for page in pages:
-        if not page['role'].startswith(('balancing.', 'correlations.')):
+        if not page['role'].startswith(('balancing.', 'correlations.', 'spectra.signed_heavy')):
             continue
         panels=[p for p in page['panels'] if not p.get('reuse')]
         top=max(p['geometry'][3] for p in panels)
@@ -1776,11 +1787,12 @@ def reserve_annotation_headroom(pages):
                               1.-right-.02))
             if panel['id'].endswith('.identified') or page['role']=='balancing.baryon_meson.activity' and not panel['annotations']:
                 x,y,x2,_=panel['legend'];boxes.append((x,y-.7*font/ph,x2))
-            elif panel is max(row,key=lambda p:p['geometry'][0]) and page['role'].startswith('balancing.'):
+            elif panel is max(row,key=lambda p:p['geometry'][0]) and page['role'].startswith(('balancing.','correlations.')):
                 keyfont=font+2
-                x2=1.-right-.65*keyfont/pw
+                correlation=page['role'].startswith('correlations.')
+                x2=1.-right-(1.5 if correlation else .65)*keyfont/pw
                 boxes.append((x2-10.44*keyfont/pw,
-                    1.-margin_top-(4.95+1.35)*keyfont/ph,x2))
+                    1.-margin_top-(4.95+(1.95 if correlation else 1.35))*keyfont/ph,x2))
             for x,y,x2 in boxes:
                 fraction=(y-bottom)/(1.-margin_top-bottom)
                 if fraction<=0:

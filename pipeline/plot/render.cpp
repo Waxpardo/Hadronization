@@ -1132,7 +1132,9 @@ std::array<double, 4> InsideTuneLegendBox(const Page& page, const Panel& panel,
   const double pixelWidth = page.width * (panel.geometry[2]-panel.geometry[0]);
   const double pixelHeight = page.height * (panel.geometry[3]-panel.geometry[1]);
   const double font = TuneLegendTextPixels(page);
-  const double gapX = .65*font/pixelWidth, gapY = .65*font/pixelHeight;
+  const bool correlation = page.role.rfind("correlations.",0)==0;
+  const double gapX = (correlation ? 1.5 : .65)*font/pixelWidth;
+  const double gapY = (correlation ? 1.25 : .65)*font/pixelHeight;
   const double left = panel.margins[0]+gapX, right = 1-panel.margins[1]-gapX;
   const double bottom = panel.margins[2]+gapY, top = 1-panel.margins[3]-gapY;
   std::size_t longest = 0;
