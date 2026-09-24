@@ -1250,7 +1250,7 @@ def scientific_caption_lines(page, context):
         if profile['trigger_pt']['low'] is None:
             lines.append('|#eta| #leq '+eta)
         else:
-            lines.append('Pairs: p_{T}^{trig} #geq '+format(float.fromhex(profile['trigger_pt']['low']), '.15g')+
+            lines.append('p_{T}^{trig} #geq '+format(float.fromhex(profile['trigger_pt']['low']), '.15g')+
                          ', p_{T}^{assoc} #geq '+format(float.fromhex(profile['associate_pt']['low']), '.15g')+' GeV/c')
             lines[-1] += '; |#eta| #leq '+eta
     if role=='multiplicity.composite' or '.activity.' in role or role.endswith('.activity'):
