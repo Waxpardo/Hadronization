@@ -27,7 +27,7 @@ Package verification needs the matching renderer runtime: ROOT 6.30.01 and GCC 1
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=4f716d6e77845658d37037349645ae17da83f9913f5ed5f4a530ee8980b45270
+PACKAGE_SHA=e3c0368c3cdd8a94e82a622aeb1a29be76c78f6a4595e4ac623f409eb1546cd3
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification

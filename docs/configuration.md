@@ -117,7 +117,10 @@ The field `phase_a_t9_two_sided_quantile` is the literal key for the fixed nine-
 
 Tune keys use one vertical column in the top-right panel where available.
 The renderer selects a position clear of curves and error bars.
-Signed heavy-hadron spectra gain display headroom if their tune key needs it.
+Scientific captions sit inside the upper plot frames.
+Their first lines align with the corresponding legend entries.
+
+Signed heavy-hadron spectra gain display headroom when their scientific text or tune key needs it.
 This adjustment preserves all numerical values and the ratio-panel range.
 Three-row balancing pages have one shared yield title.
 One associate-species title sits beneath the center of both columns.

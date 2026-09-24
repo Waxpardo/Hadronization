@@ -36,7 +36,7 @@
       "upper": {"MONASH": -0.08, "JUNCTIONS": 0.0, "CLOSEPACKING": 0.08},
       "lower": {"JUNCTIONS": -0.04, "CLOSEPACKING": 0.04}
     },
-    "p1_inset_geometry": [0.15, 0.05, 0.62, 0.48],
+    "p1_inset_geometry": [0.18, 0.05, 0.65, 0.48],
     "correlation_view": "monash_pair_sign",
     "activity_category_dividers": false
   },
