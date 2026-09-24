@@ -837,6 +837,11 @@ double CategoryLabelY(const Page& page, const Panel& panel) {
       (page.role == "balancing.baryon_meson.activity" ? .015 : .025);
 }
 double PanelTitleY(const Page& page, const Panel& panel) {
+  if (page.role=="balancing.baryon_meson.activity" &&
+      panel.id.rfind("upper.",0)==0) {
+    const double ph=page.height*(panel.geometry[3]-panel.geometry[1]);
+    return 1-panel.margins[3]+.55*BodyTextPixels(page)/ph;
+  }
   if (page.role.rfind("correlations.",0)==0) {
     const double ph=page.height*(panel.geometry[3]-panel.geometry[1]);
     return 1-panel.margins[3]+

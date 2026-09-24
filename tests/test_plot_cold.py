@@ -77,6 +77,16 @@ int main() {
   shortPanel.margins[3]=3.*34./520.;
   const double baseline=PanelTitleY(shortPage,shortPanel);
   if (baseline+34./520.>=1. || baseline<=1.-shortPanel.margins[3]+34./520.) return 9;
+  Page speciesRatioPage{};speciesRatioPage.role="balancing.baryon_meson.activity";
+  speciesRatioPage.width=1900;speciesRatioPage.height=1600;speciesRatioPage.textPixels=34;
+  Panel speciesRatioPanel{};speciesRatioPanel.id="upper.beauty.521";
+  speciesRatioPanel.margins[3]=.067;
+  for (double height : {.4,.57,.7}) {
+    speciesRatioPanel.geometry={0.,0.,.54,height};
+    const double clearance=(PanelTitleY(speciesRatioPage,speciesRatioPanel)-
+        (1.-speciesRatioPanel.margins[3]))*1600.*height;
+    if (clearance<.5*34. || clearance>.75*34.) return 15;
+  }
   Page ratioPage{}; ratioPage.role="balancing.activity.charm";
   Panel ratioPanel{}; ratioPanel.id="lower.shared.421";
   ratioPanel.logY=false; ratioPanel.margins={.2,.04,.2,0.};
