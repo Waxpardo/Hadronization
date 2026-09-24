@@ -915,12 +915,13 @@ void VerifyYAxisLabelPolicyFixtures() {
   Need(!policy.suppressFirst && policy.optimizedAnchors == 2,
        "joined upper zero-bearing scale loses its first numeric anchor");
 }
-bool BeautyCorrelationUsesFullTickValues(const Page& page,
-                                         const Panel& panel) {
-  return page.role == "correlations.beauty" &&
+bool FullYAxisTickValues(const Page& page, const Panel& panel) {
+  // A floating multiplier would occupy the spectrum title's frame anchor.
+  return (page.role == "spectra.signed_heavy" && panel.id == "g9.absolute") ||
+        (page.role == "correlations.beauty" &&
          panel.id.rfind("correlation.teaching.", 0) == 0 &&
          panel.id.size() >= 10 &&
-         panel.id.compare(panel.id.size() - 10, 10, ".inclusive") == 0;
+         panel.id.compare(panel.id.size() - 10, 10, ".inclusive") == 0);
 }
 bool AxisLabelSuppressed(const TAxis& axis, int labelNumber) {
   const TList* modified = axis.GetModifiedLabels();
@@ -1237,6 +1238,76 @@ void VerifyLegends(const TList& primitives,
       VerifyLegendEntry(*entries[entryIndex], item.entries[entryIndex]);
   }
 }
+bool InFrameClassKey(const Page& page) {
+  return page.role.rfind("balancing.activity.", 0) == 0 &&
+      page.filename.find(".extremes.pdf") != std::string::npos;
+}
+std::map<int, const Series*> ClassSamples(const Page& page) {
+  std::map<int, const Series*> result;
+  for (const auto& panel : page.panels) for (const auto& series : panel.series)
+    result.emplace(series.lineStyle, &series);
+  return result;
+}
+bool ClassKeyClearsData(const Page& page, const Panel& panel,
+                       const std::array<double,4>& box, double gapX, double gapY) {
+  if (box[0] < panel.margins[0]+gapX ||
+      box[1] < panel.margins[2]+gapY ||
+      box[2] > 1-panel.margins[1]-gapX ||
+      box[3] > 1-panel.margins[3]-gapY) return false;
+  const auto xNdc = [&](double x) {
+    return panel.margins[0]+(x-panel.xLow)/(panel.xHigh-panel.xLow)*
+        (1-panel.margins[0]-panel.margins[1]);
+  };
+  const auto yNdc = [&](double y) {
+    const double f=panel.logY ? std::log(std::max(y,panel.yLow)/panel.yLow)/
+        std::log(panel.yHigh/panel.yLow) : (y-panel.yLow)/(panel.yHigh-panel.yLow);
+    return panel.margins[2]+f*(1-panel.margins[2]-panel.margins[3]);
+  };
+  for (const auto& series : panel.series) for (const auto& point : series.points) {
+    if (!Drawable(panel,point)) continue;
+    const double error=std::isfinite(point.error) ? point.error : 0.;
+    if (box[0] < xNdc(point.x+CategoryHalfWidth(page))+gapX &&
+        box[2] > xNdc(point.x-CategoryHalfWidth(page))-gapX &&
+        box[1] < yNdc(point.y+error)+gapY &&
+        box[3] > yNdc(point.y-error)-gapY) return false;
+  }
+  // Candidate panels are the right-hand tune rows, with no scientific text.
+  return panel.annotations.empty();
+}
+std::pair<const Panel*,std::array<double,4>> ActivityClassKey(const Page& page) {
+  if (!InFrameClassKey(page)) return {nullptr,{}};
+  const Panel* top=TuneLegendPanel(page);
+  Need(top!=nullptr,"activity class key lacks a right-hand panel");
+  const auto samples=ClassSamples(page);
+  Need(samples.size()==3,"selected activity key requires three saved classes");
+  const double font=TuneLegendTextPixels(page);
+  std::size_t longest=0;
+  for (const auto& item : samples) longest=std::max(longest,item.second->label.size());
+  std::vector<const Panel*> candidates;
+  for (const auto& panel : page.panels)
+    if (panel.id.rfind("upper.",0)==0 && panel.geometry[0]==top->geometry[0])
+      candidates.push_back(&panel);
+  std::sort(candidates.begin(),candidates.end(),[](const Panel* a,const Panel* b) {
+    return a->geometry[3]>b->geometry[3];
+  });
+  // First align beside the tune key. The next science row is the fallback.
+  for (const Panel* panel : candidates) {
+    const double pw=page.width*(panel->geometry[2]-panel->geometry[0]);
+    const double ph=page.height*(panel->geometry[3]-panel->geometry[1]);
+    const double gx=.65*font/pw, gy=.65*font/ph;
+    const double width=font*(.55*longest+5.5)/pw;
+    const double height=1.65*font*samples.size()/ph;
+    double right=1-panel->margins[1]-gx, upper=1-panel->margins[3]-gy;
+    if (panel==top) {
+      const auto tune=InsideTuneLegendBox(page,*panel,PageTuneSamples(page).size());
+      right=tune[0]-gx;upper=tune[3];
+    }
+    const std::array<double,4> box{right-width,upper-height,right,upper};
+    if (ClassKeyClearsData(page,*panel,box,gx,gy)) return {panel,box};
+    if (panel!=top) break;
+  }
+  throw std::runtime_error("no clear top or middle activity-class legend for "+page.filename);
+}
 std::vector<ExpectedLegend> ExpectedPanelLegends(
     const Page& page, const Panel& panel, const std::vector<Page>& pages,
     std::size_t panelIndex) {
@@ -1272,6 +1343,13 @@ std::vector<ExpectedLegend> ExpectedPanelLegends(
       result.push_back(std::move(key));
     }
   }
+  const auto classKey=ActivityClassKey(page);
+  if (classKey.first==&panel) {
+    ExpectedLegend key{classKey.second,1,double(TuneLegendTextPixels(page)),true,.56,{}};
+    for (const auto& item : ClassSamples(page))
+      key.entries.push_back({item.second->label,"l",item.second,0.,item.first});
+    result.push_back(std::move(key));
+  }
   return result;
 }
 
@@ -1281,7 +1359,8 @@ std::vector<ExpectedLegend> ExpectedCanvasLegends(const Page& page) {
   std::map<int, const Series*> classSamples;
   for (const auto& panel : page.panels) for (const auto& series : panel.series)
     classSamples.emplace(series.lineStyle, &series);
-  if (page.role.find("balancing.activity.") == 0 && !classSamples.empty()) {
+  if (page.role.find("balancing.activity.") == 0 && !classSamples.empty() &&
+      !InFrameClassKey(page)) {
     ExpectedLegend legend{{.05, ClassLegendBottom(classSamples.size()),
                            .99, .925},
                           ClassLegendColumns(classSamples.size()),
@@ -1429,7 +1508,14 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
   }
   if (page.role=="spectra.signed_heavy") {
     Need(!page.title.empty(), "G9 visible signed-species title is absent");
-    result.push_back(TextExpectation(page.title,.16,.95,22));
+    const auto upper=std::find_if(page.panels.begin(),page.panels.end(),
+        [](const Panel& panel){return panel.id=="g9.absolute";});
+    Need(upper!=page.panels.end(),"spectrum title lacks its absolute frame");
+    const double x=upper->geometry[0]+upper->margins[0]*
+        (upper->geometry[2]-upper->geometry[0]);
+    const double y=upper->geometry[3]-upper->margins[3]*
+        (upper->geometry[3]-upper->geometry[1])+.35*BodyTextPixels(page)/page.height;
+    result.push_back(TextExpectation(page.title,x,y,22));
     std::size_t start=0,index=0;
     while (start<page.information.size() && page.panels.front().annotations.empty()) {
       const auto split=page.information.find("; ",start);
@@ -1610,7 +1696,7 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
            frame->GetYaxis()->GetMoreLogLabels() ==
              (!inset && panel.logY && panel.yHigh / panel.yLow < 10.) &&
            frame->GetYaxis()->GetNoExponent() ==
-             BeautyCorrelationUsesFullTickValues(page, panel) &&
+             FullYAxisTickValues(page, panel) &&
            AxisLabelSuppressed(*frame->GetYaxis(), 1) ==
              yLabelPolicy.suppressFirst &&
            AxisLabelSuppressed(*frame->GetYaxis(), -1) ==
@@ -1860,7 +1946,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     frame->GetYaxis()->SetMoreLogLabels(
         !inset && panel.logY && panel.yHigh / panel.yLow < 10.);
     if (SharedRightAxis(panel)) frame->GetYaxis()->SetLabelSize(0.);
-    if (BeautyCorrelationUsesFullTickValues(page, panel))
+    if (FullYAxisTickValues(page, panel))
       frame->GetYaxis()->SetNoExponent(true);
     const auto yLabelPolicy = JoinedYAxisLabelPolicy(page, panel, inset);
     if (yLabelPolicy.suppressFirst)
@@ -2034,8 +2120,12 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
         graphs.emplace_back(std::make_unique<TGraphErrors>());
         Style(*graphs.back(),*entry.series,false);
         graphs.back()->SetLineStyle(entry.lineStyle);
-        graphs.back()->SetLineWidth(1);
+        graphs.back()->SetLineWidth(entry.option=="l" ? ScientificLineWidth(*entry.series) : 1);
         graphs.back()->SetMarkerSize(entry.markerSize);
+        if (entry.option=="l") {
+          graphs.back()->SetLineColor(kBlack);
+          graphs.back()->SetMarkerColor(kBlack);
+        }
         legend.AddEntry(graphs.back().get(),entry.label.c_str(),entry.option.c_str());
       }
       legend.Draw();
@@ -2098,7 +2188,8 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
   std::map<int,const Series*> classSamples;
   for (const auto& panel : page.panels) for (const auto& series : panel.series)
     classSamples.emplace(series.lineStyle,&series);
-  if (page.role.find("balancing.activity.")==0 && !classSamples.empty()) {
+  if (page.role.find("balancing.activity.")==0 && !classSamples.empty() &&
+      !InFrameClassKey(page)) {
     legends.emplace_back(std::make_unique<TLegend>(
         .05, ClassLegendBottom(classSamples.size()), .99, .925));
     auto& legend=*legends.back();

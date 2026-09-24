@@ -119,9 +119,12 @@ Tune keys use one vertical column in the top-right panel where available.
 The renderer selects a position clear of curves and error bars.
 Scientific captions sit inside the upper plot frames.
 Their first lines align with the corresponding legend entries.
+The three selected activity intervals have a separate line-style key inside a right-hand panel.
+It sits beside the tune key when space permits, or in the next row.
 
 Signed heavy-hadron spectra gain display headroom when their scientific text or tune key needs it.
 This adjustment preserves all numerical values and the ratio-panel range.
+Their titles sit just above the absolute-panel frame.
 Three-row balancing pages have one shared yield title.
 One associate-species title sits beneath the center of both columns.
 
