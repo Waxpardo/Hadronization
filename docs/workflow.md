@@ -224,7 +224,19 @@ mkdir -p "$RUN_ROOT/reduce-work"
 
 The default request covers multiplicity, correlations, balancing, signed spectra and natural-heavy accounting. The center and uncertainty come from the native estimator. The reducer writes `numerics.root`, `report.json`, provenance receipts, exports and `package-manifest.json`.
 
-Add `--charm-trigger 411` to select the coherent D+ recipe. Add `--analysis` with a separately hashed compatible copy to change profiles or percentile classes. Optional rectangular profiles reuse the query bytes. The paper renderer requires an inclusive profile.
+Add `--charm-trigger 411` to select the coherent D+ recipe. Add `--analysis` with a separately hashed compatible copy to change profiles or percentile classes. Optional rectangular profiles reuse the query bytes. Both profiles pass through the same numerical estimator and renderer.
+
+### Compare inclusive and rectangular selections
+
+Keep the shipped analysis configuration unchanged. Create a separate request with the [profile example](configuration.md#analysis-choices), and record its SHA-256.
+
+For the inclusive result, use `--profile-id inclusive`. For the 1.0/0.15 GeV/c result, use `--profile-id pt_1_0p15` with the compatible request and its hash. Run reduction twice with distinct output and scratch directories. Use each numerical package to render and package its own figures.
+
+The rectangular selection requires trigger pT >= 1.0 GeV/c and associate pT >= 0.15 GeV/c. Both endpoints pass. An associate can have larger pT than its trigger. The cuts apply to all pair observables.
+
+The trigger threshold also selects eligible singles for each trigger denominator. A trigger needs no qualifying associate. Multiplicity distributions and standalone spectra keep their separate selections.
+
+The inclusive figures omit an inclusive-pT annotation. The rectangular figures show the numerical thresholds. Their centers, statistical errors and tune ratios come from their own numerical ROOT file.
 
 Producer verification needs the original inputs and source identity:
 
@@ -282,7 +294,7 @@ Correlation views distinguish identified pairs from sums over eligible associate
 | Activity-dependent balancing | Every requested class, tune rows and one shared comparison row |
 | Baryon-to-meson ratios | Class categories, absolute ratios and lower tune/reference ratios |
 | Signed heavy-hadron spectra | Separate pT, eta and phi pages for each signed species |
-| Supporting views | Extreme-class balancing and tune-separated baryon-to-meson ratios |
+| Supporting views | Selected activity intervals, tune-separated Lambda ratios and two-trigger Lambda, Sigma and Xi comparisons |
 | Sample tables | Generated numerical CSV/TeX exports, not plot-derived values |
 
 The multiplicity display ends at the last occupied MONASH bin edge. Other tunes can have farther-tail bins in `numerics.root`. The inset shows positive MONASH support and its class boundaries. Numerical distributions retain the complete activity domain.

@@ -324,6 +324,52 @@ int main(int argc, char** argv) {
         self.assertIn('|#eta| #leq 4',lines)
         self.assertIn('p_{T} > 0.15 GeV/c; |#eta| #leq 1',lines)
 
+    def test_threshold_caption_keeps_pair_and_activity_cuts_distinct(self):
+        context=SimpleNamespace(target_analysis_caption='PYTHIA 8.317',
+            sample_caption=['Hard c and b'], profile_definition={
+                'trigger_eta':{'high':float(4).hex()},
+                'trigger_pt':{'low':float(1).hex()},
+                'associate_pt':{'low':float(.15).hex()}}, activity_selection={
+                'pt':{'low':float(.15).hex()},'eta_window':float(4).hex()})
+        for role in ('correlations.charm', 'balancing.integrated.beauty',
+                     'balancing.activity.charm', 'balancing.baryon_meson.activity'):
+            lines=plot.scientific_caption_lines({'role':role},context)
+            text=' '.join(lines)
+            self.assertIn('p_{T}^{trig} #geq 1',text)
+            self.assertIn('p_{T}^{assoc} #geq 0.15 GeV/c',text)
+            self.assertEqual(text.count('|#eta|'),1)
+            if 'activity' in role:
+                self.assertIn('p_{T} > 0.15 GeV/c',text)
+        context.activity_selection['eta_window']=float(1).hex()
+        lines=plot.scientific_caption_lines({'role':'balancing.activity.charm'},context)
+        self.assertEqual(' '.join(lines).count('|#eta|'),2)
+        context.profile_definition['trigger_pt']['low']=None
+        lines=plot.scientific_caption_lines({'role':'correlations.charm'},context)
+        self.assertNotIn('Pairs:', ' '.join(lines))
+
+    def test_baryon_comparison_views_preserve_signed_rows_and_canonical_page(self):
+        rows = [dict(trigger_pdg=str(t), associate_pdg=str(a),
+                     reference_pdg=str(r), value='0.2') for t,a,r in (
+                         (421,-4122,-421), (4122,-4122,-421),
+                         (421,-4132,-421), (4122,-4132,-421),
+                         (521,5122,-521), (5122,-5122,521),
+                         (521,5132,-521), (5122,-5132,521))]
+        config,_ = plot.checked_plot_config(ROOT/'config/plot.json')
+        presentation = {'trigger_sectors': {'421':'charm','4122':'charm',
+                                            '521':'beauty','5122':'beauty'}}
+        views = plot.baryon_meson_views(rows, presentation,
+                                       config['presets']['paper_default'])
+        self.assertEqual(len(views),5)
+        self.assertEqual(views[0][1], [rows[0],rows[4]])
+        self.assertEqual(views[0][2], [421,521])
+        by_name = {name:(members,triggers) for name,members,triggers in views[1:]}
+        members,triggers = by_name['supplemental.balancing.baryon_meson.activity.beauty.5132.by_trigger.pdf']
+        self.assertEqual(triggers,[521,5122])
+        self.assertEqual(members,[rows[6],rows[7]])
+        for _,members,_ in views:
+            for row in members:
+                self.assertTrue(any(row is original for original in rows))
+
     def test_display_limits_keep_clipped_points_and_errors(self):
         import copy
         panels=[{'id':'lower.ratio','y_range':[-.2,18.], 'log_y':False,
@@ -619,7 +665,7 @@ int main(int argc, char** argv) {
         with self.assertRaisesRegex(ValueError, 'P8 reference'):
             plot.checked_charm_recipe_binding(wrong_p8, d0)
 
-    def test_paper_requires_inclusive_no_floor_no_diagonal_profile(self):
+    def test_paper_profile_is_archived_inclusive_or_independent_minima(self):
         d0, _ = plot.checked_plot_config(ROOT / 'config/plot.json')
         dplus, _ = plot.checked_plot_config(ROOT / 'config/plot-dplus.json')
         cut = {'domain': 'PHYSICAL', 'units': 'GeV', 'low': None,
@@ -637,7 +683,7 @@ int main(int argc, char** argv) {
                        'required_curve_keys': [{
                            'profile_id': 'inclusive'}]}]}}}
         caption = plot.checked_paper_pair_profile(payload, d0, profile)
-        self.assertIn('no final-hadron #it{p}_{T} floor', caption)
+        self.assertIn('No final-hadron #it{p}_{T} floor', caption)
         self.assertNotIn('#geq', caption)
         self.assertIn('eligible singles', caption)
         self.assertEqual(plot.checked_paper_pair_profile(
@@ -646,9 +692,30 @@ int main(int argc, char** argv) {
                 (dict(profile, relative_pt='TRIGGER_GE_ASSOCIATE'),
                  'no-diagonal'),
                 (dict(profile, trigger_pt=dict(cut, low='0x1p-1')),
-                 'fixed pT cut')):
+                 'unsupported pT cut')):
             with self.assertRaisesRegex(ValueError, message):
                 plot.checked_paper_pair_profile(payload, d0, mutation)
+        rectangle = dict(profile, id='pt_1_0p15',
+            minimum_hierarchy='TRIGGER_MIN_GE_ASSOCIATE_MIN',
+            trigger_pt=dict(cut, low=float(1).hex(), low_operator='GE'),
+            associate_pt=dict(cut, low=float(.15).hex(), low_operator='GE'))
+        cut_payload = json.loads(json.dumps(payload))
+        for role in cut_payload['request_echo']['scope']['roles']:
+            role['required_curve_keys'][0]['profile_id']='pt_1_0p15'
+        caption = plot.checked_paper_pair_profile(cut_payload, d0, rectangle)
+        self.assertIn('p_{T}^{trig} #geq 1', caption)
+        self.assertIn('p_{T}^{assoc} #geq 0.15 GeV/c', caption)
+        for mutation in (
+            dict(rectangle, relative_pt='TRIGGER_GT_ASSOCIATE'),
+            dict(rectangle, associate_pt=dict(rectangle['associate_pt'],
+                                              low=float(2).hex())),
+            dict(rectangle, trigger_pt=dict(rectangle['trigger_pt'],
+                                            low_operator='GT')),
+            dict(rectangle, trigger_pt=dict(rectangle['trigger_pt'],
+                                            high=float(10).hex())),
+            dict(rectangle, trigger_pt=dict(rectangle['trigger_pt'], low='inf'))):
+            with self.assertRaises(ValueError):
+                plot.checked_paper_pair_profile(cut_payload, d0, mutation)
         wrong_role = json.loads(json.dumps(payload))
         wrong_role['request_echo']['scope']['roles'][0][
             'required_curve_keys'][0]['profile_id'] = 'trigger_ge_associate'

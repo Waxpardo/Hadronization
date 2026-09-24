@@ -51,6 +51,58 @@ def paper_p8_pair(trigger, associate, reference):
     return (trigger, associate, reference) == (521, 5122, -521)
 
 
+def paper_baryon_meson_channels(analysis, charm):
+    """Select Lambda, Sigma and Xi ratios with one common meson per sector."""
+    states, pairs = _query_model().state_registry(analysis)
+    by_pdg = {state['pdg']: state for state in states}
+    associates = {charm: PAPER_CHARM_ASSOCIATES,
+                  4122: PAPER_CHARM_ASSOCIATES, **PAPER_BEAUTY_ASSOCIATES}
+    channels = []
+    for trigger in (charm, 4122, 521, 5122):
+        for associate in associates[trigger]:
+            if by_pdg[associate]['kind'] != 'baryon':
+                continue
+            matches = [pair for pair in pairs
+                       if pair['trigger_pdg'] == trigger and
+                       pair['associate_pdg'] == associate and
+                       pair['central_eligible'] and pair['sign'] == -1]
+            if len(matches) != 1:
+                raise ValueError('paper baryon ratio lacks an eligible OS pair')
+            channels.append([trigger, associate,
+                             matches[0]['reference_meson_pdg']])
+    return channels
+
+
+def checked_baryon_meson_channels(selection, pairs, states):
+    """Bind an explicit ratio domain to eligible opposite-flavour states."""
+    channels = selection.get('baryon_meson_channels')
+    if channels is None:
+        return {(pair['trigger_pdg'], pair['associate_pdg'],
+                 pair['reference_meson_pdg']) for pair in pairs
+                if pair['trigger_pdg'] in selection['baryon_meson_trigger_pdgs']
+                and paper_p8_pair(pair['trigger_pdg'], pair['associate_pdg'],
+                                  pair['reference_meson_pdg'])}
+    if (not isinstance(channels, list) or not channels or
+            any(not isinstance(row, list) or len(row) != 3 or
+                any(type(pdg) is not int for pdg in row) for row in channels)):
+        raise ValueError('baryon/meson channels require signed integer triples')
+    selected = {tuple(row) for row in channels}
+    if len(selected) != len(channels):
+        raise ValueError('duplicate baryon/meson channel')
+    registry = {state['pdg']: state for state in states}
+    os_pairs = {(pair['trigger_pdg'], pair['associate_pdg']): pair
+                for pair in pairs if pair['sign'] == 'OS'}
+    for trigger, associate, reference in selected:
+        pair = os_pairs.get((trigger, associate))
+        if (trigger not in selection['baryon_meson_trigger_pdgs'] or
+                pair is None or (trigger, reference) not in os_pairs or
+                registry[associate]['kind'] != 'baryon' or
+                registry[reference]['kind'] != 'meson' or
+                reference != pair['reference_meson_pdg']):
+            raise ValueError('baryon/meson channel differs from signed registry')
+    return selected
+
+
 G9_PT_EDGES = tuple([i / 2 for i in range(101)] +
                     [60,75,100,150,250,500,1000,2000,4000,7000])
 
@@ -857,7 +909,9 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
     # against A's normalized analysis model before the point domain is built.
     required_scope = {"profile_id", "activity_id", "reference_tune",
                       "trigger_pdgs", "baryon_meson_trigger_pdgs", "signed_pdgs"}
-    if not isinstance(selection, dict) or set(selection) != required_scope:
+    if (not isinstance(selection, dict) or
+            set(selection) not in (required_scope,
+                                  required_scope | {'baryon_meson_channels'})):
         raise ValueError("explicit numerical scope fields differ")
     paper = selection
     tunes = list(requested_tunes)
@@ -939,6 +993,7 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
                 len(PAPER_CHARM_ASSOCIATES))
         return pair['trigger_pdg'], rank, canonical(pair)
     pairs.sort(key=pair_order)
+    ratio_channels = checked_baryon_meson_channels(paper, pairs, selected_states)
     classes = [dict(id=i, kind="INTEGRATED" if i == 0 else "TUNE_LOCAL_PERCENTILE",
                     percentile_interval=list(map(hex64, interval)), integer_interval=None,
                     boundary_policy_id="pooled_tune_local_integer_percentile_v1")
@@ -1041,7 +1096,7 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
                             add(tune, "ratio_to_reference_tune", t, a, component=component,
                                 class_id=0, axis="dphi", tune_reference=paper["reference_tune"])
                 elif role_id == "balancing.baryon_meson.activity":
-                    if t not in paper["baryon_meson_trigger_pdgs"] or not paper_p8_pair(t, a, ref):
+                    if (t, a, ref) not in ratio_channels:
                         continue
                     for c in classes:
                         if c["id"] == 0:

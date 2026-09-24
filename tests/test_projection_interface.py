@@ -187,6 +187,47 @@ class ProjectionInterfaceContract(unittest.TestCase):
             alternate.expected_point_keys,'balancing.baryon_meson.activity')},
             {(411,-4122,-411),(521,5122,-521)})
 
+    def test_extended_baryon_domain_preserves_existing_points_and_exact_signs(self):
+        self.selection['trigger_pdgs'] = [421, 4122, 521, 5122]
+        self.selection['baryon_meson_trigger_pdgs'] = [421, 521]
+        old = {self.p.canonical(key) for key in self.request().expected_point_keys}
+        self.selection['baryon_meson_trigger_pdgs'] = [421, 4122, 521, 5122]
+        channels = self.p.paper_baryon_meson_channels(self.analysis, 421)
+        self.selection['baryon_meson_channels'] = channels
+        expected = {(trigger, -baryon, -421)
+                    for trigger in (421, 4122)
+                    for baryon in (4122, 4112, 4212, 4222, 4132, 4232)}
+        expected |= {(521, baryon, -521)
+                     for baryon in (5122, 5112, 5222, 5132, 5232)}
+        expected |= {(5122, -baryon, 521)
+                     for baryon in (5122, 5112, 5222, 5132, 5232)}
+        self.assertEqual({tuple(row) for row in channels}, expected)
+        request = self.request()
+        new = {self.p.canonical(key) for key in request.expected_point_keys}
+        self.assertTrue(old < new)
+        added = [json.loads(key)['curve'] for key in new-old]
+        self.assertTrue(all(curve['role_id'] == 'balancing.baryon_meson.activity'
+                            for curve in added))
+        self.assertEqual(len(new-old), 20*2)
+        keys = [key['curve'] for key in request.expected_point_keys
+                if key['curve']['role_id'] == 'balancing.baryon_meson.activity']
+        self.assertEqual({(key['trigger_pdg'],key['associate_pdg'],key['reference_pdg'])
+                          for key in keys}, expected)
+
+    def test_extended_baryon_domain_rejects_sign_reference_and_state_mutants(self):
+        self.selection['trigger_pdgs'] = [421, 4122, 521, 5122]
+        self.selection['baryon_meson_trigger_pdgs'] = [421, 4122, 521, 5122]
+        for channel in ([421,4122,-421], [521,5132,521],
+                        [521,5212,-521], [421,-421,-421],
+                        [5122,-5132,-521], [421,-4132,-431]):
+            with self.subTest(channel=channel):
+                self.selection['baryon_meson_channels'] = [channel]
+                with self.assertRaisesRegex(ValueError, 'signed registry'):
+                    self.request()
+        self.selection['baryon_meson_channels'] = [[421,-4132,-421]]*2
+        with self.assertRaisesRegex(ValueError, 'duplicate'):
+            self.request()
+
     def test_g9_dzero_default_and_dplus_extra_are_registry_derived(self):
         analysis=copy.deepcopy(self.analysis)
         analysis['g9_species_pdgs']=[-5212,-5122,-4122,-521,-421,

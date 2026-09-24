@@ -53,7 +53,7 @@ This JSON value can replace `profiles` in a copy of `analysis.json`:
 
 The unchanged query can support all three profiles. Post-construction compatibility permits changes only to `profiles` and `percentile_intervals`. The charm CLI derives its coherent recipe separately. Other scientific changes need a new compatible data construction and source review.
 
-Class changes affect boundaries, deletions, covariance, labels and plots. The renderer has eleven noninclusive line patterns. A numerical partition beyond its display capacity does not automatically yield readable paper pages. The paper renderer also requires the inclusive pair profile.
+Class changes affect boundaries, deletions, covariance, labels and plots. The renderer has eleven noninclusive line patterns. A numerical partition beyond its display capacity does not automatically yield readable paper pages. The paper renderer accepts inclusive and supported rectangular profiles. It reads each selection from the numerical archive.
 
 ### Fixed analysis fields
 
@@ -96,7 +96,7 @@ The field `phase_a_t9_two_sided_quantile` is the literal key for the fixed nine-
 | `presets.all_registered.selector` | `all_registered`. Fixed selector name |
 | `presets.paper_default.families` | D, LambdaC, B, LambdaB. Display families |
 | `presets.paper_default.trigger_pdgs` | 421, 4122, 521, 5122. Must match numerical charm recipe |
-| `presets.paper_default.baryon_meson_trigger_pdgs` | 421, 521. Must match numerical ratio domain |
+| `presets.paper_default.baryon_meson_trigger_pdgs` | 421, 521. Trigger columns for the canonical Lambda comparison. Additional baryon pages use both saved triggers in each sector |
 | `layout.axis_padding_fraction` | 0.08. Number from 0 to 1. Adds display range padding. |
 | `layout.facet_dimension` | `associate_family`. Fixed |
 | `layout.grid_columns_maximum` | 3. Positive integer. Layout column limit. |
@@ -128,7 +128,7 @@ Their titles sit just above the absolute-panel frame.
 Three-row balancing pages have one shared yield title.
 One associate-species title sits beneath the center of both columns.
 
-The supplemental activity pages select the saved 0-1%, 40-50% and 80-90% intervals. Long dashes, dots and dash-dot lines distinguish these classes. The renderer does not substitute another interval when one is absent. The main activity pages retain all requested classes.
+The supplemental activity pages select the saved 0-1%, 40-50% and 80-90% intervals. Long dashes, dots and short separated dashes distinguish these classes. Multi-class balancing pages omit markers. Tune colors remain unchanged. The renderer does not substitute another interval when one is absent. The main activity pages retain all requested classes.
 
 `p1_inset_geometry` is the literal configuration key for the multiplicity percentile inset. The renderer transforms its normalized rectangle to preserve the intended physical aspect. It is not a scientific axis or a percentile definition.
 

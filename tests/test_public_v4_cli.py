@@ -157,7 +157,13 @@ sys.exit(main(["verify", "--mode", "portable", "--package-dir", sys.argv[2],
             analysis)
         self.assertEqual({key['curve']['role_id'] for key in
             bounded.expected_point_keys}, set(p.PAPER_ROLE_IDS))
-        self.assertTrue(114 < len(bounded.expected_point_keys) < 1000)
+        self.assertTrue(114 < len(bounded.expected_point_keys) < 2000)
+        def ratio_channels(value):
+            return {(key['curve']['trigger_pdg'], key['curve']['associate_pdg'],
+                     key['curve']['reference_pdg']) for key in value.expected_point_keys
+                    if key['curve']['role_id']=='balancing.baryon_meson.activity'}
+        self.assertEqual(ratio_channels(bounded), ratio_channels(request))
+        self.assertEqual(len(ratio_channels(bounded)), 22)
 
     def test_identical_query_bytes_support_pinned_rectangles_and_new_classes(self):
         from pipeline.reduce import archive_v4

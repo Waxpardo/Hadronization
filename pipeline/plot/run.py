@@ -685,6 +685,30 @@ def exact_particle_ratio_title(rows, label):
     return '{} / {}'.format(
         label(associate), label(reference))
 
+
+def baryon_meson_views(rows, presentation, paper):
+    """Group saved ratios by baryon family; never construct ratio values."""
+    canonical = [row for row in rows if
+                 (int(row['trigger_pdg']), int(row['associate_pdg'])) in
+                 ((paper['trigger_pdgs'][0], -4122), (521, 5122))]
+    result = [(None, canonical, paper['baryon_meson_trigger_pdgs'])]
+    families = sorted({(presentation['trigger_sectors'][row['trigger_pdg']],
+                        abs(int(row['associate_pdg']))) for row in rows})
+    for sector, baryon in families:
+        triggers = [pdg for pdg in paper['trigger_pdgs']
+                    if presentation['trigger_sectors'][str(pdg)] == sector]
+        selected = [row for row in rows if
+                    int(row['trigger_pdg']) in triggers and
+                    abs(int(row['associate_pdg'])) == baryon]
+        # Older numerical packages may contain only the meson-trigger view.
+        # A two-trigger comparison needs both saved channels.
+        if {int(row['trigger_pdg']) for row in selected} != set(triggers):
+            continue
+        filename = ('supplemental.balancing.baryon_meson.activity.'+
+                    sector+'.'+str(baryon)+'.by_trigger.pdf')
+        result.append((filename, selected, triggers))
+    return result
+
 def activity_emphasis(role, class_id, classes):
     if (role.startswith('balancing.activity.') and class_id and
             class_id in selected_extreme_class_ids(classes)):
@@ -772,26 +796,43 @@ def checked_charm_recipe_binding(scope, config):
 
 
 def checked_paper_pair_profile(payload, config, profile):
-    """Bind P2-P8 to A/S's archived no-floor, no-diagonal selection."""
+    """Bind every pair figure to one archived inclusive or rectangular profile."""
     if payload['schema'] != 'hadronization_projection_result_v4':
         return ''
-    if (profile['id'] != 'inclusive' or
-            profile['relative_pt'] != 'NONE' or
-            profile['minimum_hierarchy'] != 'NONE'):
-        raise ValueError('S paper requires inclusive no-diagonal pair profile')
-    for field in ('trigger_pt', 'associate_pt'):
-        cut = profile[field]
+    if profile['relative_pt'] != 'NONE':
+        raise ValueError('S paper requires a no-diagonal pair profile')
+    cuts = [profile[field] for field in ('trigger_pt', 'associate_pt')]
+    for cut in cuts:
         if (cut['domain'] != 'PHYSICAL' or cut['units'] != 'GeV' or
-                any(cut[key] is not None for key in
-                    ('low', 'high', 'low_operator', 'high_operator'))):
-            raise ValueError('S pair profile carries a fixed pT cut')
+                cut['high'] is not None or cut['high_operator'] is not None):
+            raise ValueError('S pair profile carries an unsupported pT cut')
+    inclusive = all(cut['low'] is None and cut['low_operator'] is None
+                    for cut in cuts)
+    if inclusive:
+        if profile['id'] != 'inclusive' or profile['minimum_hierarchy'] != 'NONE':
+            raise ValueError('S inclusive pair profile differs')
+        caption = 'No final-hadron #it{p}_{T} floor'
+    else:
+        if (profile['id'] == 'inclusive' or
+                profile['minimum_hierarchy'] not in (
+                    'TRIGGER_MIN_GE_ASSOCIATE_MIN',
+                    'TRIGGER_MIN_GT_ASSOCIATE_MIN') or
+                any(cut['low'] is None or cut['low_operator'] != 'GE'
+                    for cut in cuts)):
+            raise ValueError('S pair profile carries an unsupported pT cut')
+        minima = [float.fromhex(cut['low']) for cut in cuts]
+        strict = profile['minimum_hierarchy'] == 'TRIGGER_MIN_GT_ASSOCIATE_MIN'
+        if (not all(math.isfinite(value) and value >= 0. for value in minima)
+                or minima[0] < minima[1] or strict and minima[0] == minima[1]):
+            raise ValueError('S pair profile minima differ from hierarchy')
+        caption = ('p_{T}^{trig} #geq '+format(minima[0], '.15g')+
+                   ', p_{T}^{assoc} #geq '+format(minima[1], '.15g')+' GeV/c')
     for role in payload['request_echo']['scope']['roles']:
         if role['role_id'].startswith(('balancing.', 'correlations.')) and any(
                 key['profile_id'] != profile['id'] for key in
                 role['required_curve_keys']):
             raise ValueError('S paper role uses a different pair profile')
-    return ('P2-P8: no final-hadron #it{p}_{T} floor; '
-            '#it{N}_{trig}: eligible singles')
+    return caption+'; #it{N}_{trig}: eligible singles'
 
 
 def focused_extreme_pages(pages, context, padding):
@@ -1217,7 +1258,9 @@ def scientific_caption_lines(page, context):
         eta_line='|#eta| #leq '+format(float.fromhex(activity['eta_window']), '.15g')
         if eta_line in lines:
             lines.remove(eta_line)
-        lines.extend(['N_{ch}: charged light final particles',
+        # Share equal eta acceptance once; unequal definitions stay explicit.
+        lines = [line.removesuffix('; '+eta_line) for line in lines]
+        lines.extend(['N_{ch}: charged light-sector particles',
             'p_{T} > '+format(float.fromhex(activity['pt']['low']), '.15g')+
             ' GeV/c; |#eta| #leq '+format(float.fromhex(activity['eta_window']), '.15g')])
     if role=='spectra.signed_heavy':
@@ -1892,7 +1935,15 @@ def drawing_plan(projection, manifest, config):
              'ratio_to_reference_tune':'#it{Y} / #it{Y}_{'+reference_tune+'}',
              'baryon_meson_reference_ratio':'#it{Y}_{assoc} / #it{Y}_{ref}',
              'baryon_meson_ratio_to_reference_tune':'(#it{Y}_{assoc}/#it{Y}_{ref}) / '+reference_tune}
-    for role,rows in sorted(assigned.items()):
+    views = []
+    for role, rows in sorted(assigned.items()):
+        if role == 'balancing.baryon_meson.activity':
+            views.extend((role, subset, filename, triggers)
+                         for filename, subset, triggers in baryon_meson_views(
+                             rows, presentation, config['presets']['paper_default']))
+        else:
+            views.append((role, rows, None, None))
+    for role,rows,view_filename,view_triggers in views:
         family=next(r['family'] for r in manifest['roles'] if r['id']==role)
         if family == 'kinematics':
             continue
@@ -1906,10 +1957,10 @@ def drawing_plan(projection, manifest, config):
             if science_charm and configured_charm not in science_charm:
                 raise ValueError('configured charm meson lacks S-owned '
                                  'science tuples: '+configured_charm)
-        allowed_triggers = {str(value) for value in (
+        allowed_triggers = {str(value) for value in (view_triggers or (
             paper['baryon_meson_trigger_pdgs']
             if role == 'balancing.baryon_meson.activity' else
-            paper['trigger_pdgs'])}
+            paper['trigger_pdgs']))}
         trigger_shown = [r for r in rows if r['trigger_pdg'] in
                          allowed_triggers] if family in ('balancing',
                          'correlations') else rows
@@ -1992,25 +2043,22 @@ def drawing_plan(projection, manifest, config):
         elif role=='balancing.baryon_meson.activity':
             title='Balancing baryon / reference-meson ratio versus activity'
             width,height=1900,1250
-            for sector_index,sector in enumerate(('charm','beauty')):
-                sector_triggers=[t for t in triggers if presentation['trigger_sectors'][t]==sector]
-                halves=('upper','lower') if has_tune_ratios else ('upper',)
-                for half in halves:
-                    for i,t in enumerate(sector_triggers):
-                        left=sector_index*.5+i*.5/max(1,len(sector_triggers))
-                        right=sector_index*.5+(i+1)*.5/max(1,len(sector_triggers))
-                        name='.'.join((half,sector,t)); members=grouped.get(name,[])
-                        exact_ratio_title = exact_particle_ratio_title(
-                            members, label)
-                        add(name,[left,.32 if half=='upper' and has_tune_ratios else 0.,right,
-                                  .89 if half=='upper' else .32],
-                            title=(label(t)+' trigger: '+exact_ratio_title
-                                   if half=='upper' else ''),
-                            x_title='' if half=='upper' else
-                                'Multiplicity Percentile Interval (%)',
-                            y_title=('#it{Y}_{baryon}/#it{Y}_{meson}'
-                                     if half=='upper' else 'TUNE/MONASH'),
-                            log_y=half=='upper',ratio=half=='lower',legend=False)
+            for i,trigger in enumerate(view_triggers):
+                t=str(trigger)
+                sector=presentation['trigger_sectors'][t]
+                left=i/len(view_triggers); right=(i+1)/len(view_triggers)
+                for half in (('upper','lower') if has_tune_ratios else ('upper',)):
+                    name='.'.join((half,sector,t)); members=grouped.get(name,[])
+                    exact_ratio_title = exact_particle_ratio_title(members, label)
+                    add(name,[left,.32 if half=='upper' and has_tune_ratios else 0.,right,
+                              .89 if half=='upper' else .32],
+                        title=(label(t)+' trigger: '+exact_ratio_title
+                               if half=='upper' else ''),
+                        x_title='' if half=='upper' else
+                            'Multiplicity Percentile Interval (%)',
+                        y_title=('#it{Y}_{baryon}/#it{Y}_{meson}'
+                                 if half=='upper' else 'TUNE/MONASH'),
+                        log_y=half=='upper',ratio=half=='lower',legend=False)
         elif role=='multiplicity.composite':
             title=''
             activity=next(item for item in definitions['activities']
@@ -2113,7 +2161,7 @@ def drawing_plan(projection, manifest, config):
         if not recipes:
             add('unavailable',[0.,0.,1.,.88],title='Unavailable',x_title='Bin coordinate',y_title='Value')
         header_bottom=.99 if role=='multiplicity.composite' or pair_sign_view else .89
-        page={'role':role,'family':family,'page_index':1,'page_count':1,'filename':canonical_page_name(role),
+        page={'role':role,'family':family,'page_index':1,'page_count':1,'filename':view_filename or canonical_page_name(role),
               'text_pixels':config['layout']['text_pixel_size'],'title':title,'information':information,
               'scientific_header':header,
               'style_header':'class_patterns_sha256='+class_pattern_digest,

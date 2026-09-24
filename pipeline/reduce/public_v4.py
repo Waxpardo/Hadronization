@@ -187,7 +187,9 @@ def _selection(args, analysis):
         activity_id=args.activity_id or analysis['activities'][0]['id'],
         reference_tune=args.reference_tune,
         trigger_pdgs=[charm, 4122, 521, 5122],
-        baryon_meson_trigger_pdgs=[charm, 521], signed_pdgs=signed)
+        baryon_meson_trigger_pdgs=[charm, 4122, 521, 5122],
+        baryon_meson_channels=p.paper_baryon_meson_channels(analysis, charm),
+        signed_pdgs=signed)
 
 
 def _representative_request(source, args, analysis):
@@ -212,7 +214,8 @@ def _representative_request(source, args, analysis):
             curve['axis_id'], curve['tune_id'], curve['reference_tune_id'],
             curve['trigger_pdg'], curve['class_id'],
             curve['associate_pdg'] if role in (
-                'spectra.signed_heavy', 'accounting.natural_final_heavy')
+                'spectra.signed_heavy', 'accounting.natural_final_heavy',
+                'balancing.baryon_meson.activity')
                 else None)
         bin_index = key['bins'][0]['index'] if key['bins'] else -1
         rank = (order.get(curve['associate_pdg'], len(order)), bin_index,
@@ -296,9 +299,12 @@ def _provenance(source, request, run, ledger, analysis, campaign):
     p.validate(definitions, 'SourceSelectionDefinitions')
     campaign_json = json.loads((ROOT / 'data/campaign.json').read_text())
     limitations = ['RAW_V7_ANCESTRY_LIMITS', 'FINITE_MC_ONLY',
-        'PHASE_A_INCLUSIVE_NO_FINAL_HADRON_PT_FLOOR',
         'G9_ALL_ORIGINS_NO_PT_FLOOR',
         'EVENT_TRIAL_COUNTS_NOT_RECORDED_IN_VERIFIED_INPUTS']
+    limitations.append('PHASE_A_INCLUSIVE_NO_FINAL_HADRON_PT_FLOOR'
+        if all(profile['trigger_pt']['low'] is None and
+               profile['associate_pt']['low'] is None for profile in req['profiles'])
+        else 'PAIR_RECTANGULAR_PT_MINIMA')
     if source.index['state'] == 'TEST_ONLY':
         limitations.append('TEST_ONLY_SYNTHETIC_NO_PHYSICS')
     if ledger['status'] != 'COMMITTED_SOURCE':

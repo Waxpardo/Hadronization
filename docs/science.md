@@ -54,6 +54,8 @@ Nominal activity counts final charged particles without charm or beauty constitu
 
 This threshold belongs to the activity definition. It does not apply to inclusive heavy-particle pairs or signed heavy-hadron spectra. The count is a charged-light final-particle activity measure. It does not implement a separate experimental primary-particle classification with explicit weak-daughter removal.
 
+Heavy-hadron decay suppression also retains short-lived heavy resonances. Their light decay daughters therefore do not enter this activity count. The label "charged primaries" would conceal that sample-specific choice.
+
 The activity axis stores integers from 0 through 4095. Each integer occupies one regular bin. Values outside the supported domain fail the scientific contract rather than silently extending the axis.
 
 ## Multiplicity classes
@@ -111,7 +113,13 @@ $$B_{t,a}=\frac{N(t,a)-N(t,\bar a)}{T_t}.$$
 
 The partner bar denotes the conjugate signed PDG identity. There is no half-weight on the same-sign term. Integration covers the complete supported azimuthal interval. Activity-dependent balancing applies the same formula within each tune-local class.
 
-The baryon-to-meson observable divides two balancing yields with the same trigger. The default signed tuples `(trigger, baryon, reference)` are `(421, -4122, -421)` and `(521, 5122, -521)`. The D+ selection changes the charm tuple to `(411, -4122, -411)`.
+The baryon-to-meson observable divides two balancing yields with the same trigger. The canonical Lambda tuples `(trigger, baryon, reference)` are `(421, -4122, -421)` and `(521, 5122, -521)`. The D+ selection changes the first tuple to `(411, -4122, -411)`.
+
+The numerical request also includes each eligible Sigma and Xi charge state. All charm baryons use the same D0 reference. All beauty baryons use the same charged B reference. This common denominator supports comparisons between baryon species. It does not isolate a strangeness mechanism.
+
+Additional figures compare meson and Lambda triggers in separate columns for each baryon species. The signed registry sets the numerator and reference identities. For example, the Xi_b0 tuples are `(521, 5232, -521)` and `(5122, -5232, 521)`. The latter contains an antibaryon numerator because the Lambda_b trigger contains a beauty quark.
+
+Each ratio cancels its common trigger denominator algebraically. The estimator still requires that denominator to exist. Joint deletion factors preserve the numerator-reference covariance and the covariance between ratios.
 
 A tune comparison divides the complete observable by the corresponding reference-tune observable. MONASH is the default reference. Shared references create covariance between ratios.
 

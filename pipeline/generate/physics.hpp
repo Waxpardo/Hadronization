@@ -489,18 +489,27 @@ inline bool IsDirectPrimaryStatus(int status) {
 // ---------------------------------------------------------------------------
 // Charged-particle multiplicity, NCH_PRIMARY_CHARGED_*_V1.
 //
-// Count charged final particles without a charm or beauty constituent, with
-// finite kinematics and the pT/eta acceptance below. The retained identifier
-// contains "PRIMARY", but this counter measures charged light-sector activity
-// under the generator's configured decay policy.
+// This is a genuine charged-particle multiplicity, not a count of directly
+// produced hadronisation products. It is the hadron-level analogue of the
+// conventional experimental primary-charged-particle definition: a charged
+// particle with proper lifetime c*tau0 > 1 cm that is either produced
+// directly in the collision or descends only from particles with
+// c*tau0 < 1 cm.
 //
-// The tune cards limit decays to tau0 <= 0.01 mm. In addition, the producer
-// disables all heavy-hadron decays, including short-lived strong/EM decays.
-// A pion from a D* decay is therefore absent, even though that pion could
-// enter a conventional primary charged-particle count. The heavy-parent veto
-// does not restore the missing light daughter. This function does not classify
-// decay ancestry. Do not interpret it as an implementation of an experimental
-// primary-particle definition.
+// That lifetime condition is enforced at generation time, not here. All three
+// tune cards set `ParticleDecays:limitTau0 = on` with `tau0Max = 0.01` mm, so
+// every strong and electromagnetic decay proceeds while every weakly decaying
+// light hadron stays final. No light hadron has 0.01 mm < c*tau0 < 10 mm, so
+// for light flavour this card value is exactly equivalent to the conventional
+// 1 cm/c threshold. Consequently `isFinal()` already excludes weak-decay
+// products for these light hadrons and no ancestry traversal is required.
+//
+// Open- and hidden-heavy hadrons are excluded from the count. Their decays are
+// disabled deliberately, so they are final here purely as an artefact of the
+// production policy, and an experiment would instead count their decay
+// daughters. Excluding them also removes the autocorrelation that would
+// otherwise exist between the event-activity classifier and the heavy-flavour
+// observable it classifies. The paper must state this exclusion.
 // ---------------------------------------------------------------------------
 
 inline constexpr double kMultiplicityPtMin = 0.15;
