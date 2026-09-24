@@ -1269,6 +1269,8 @@ def add_publication_captions(pages, context):
         if page['role']=='spectra.signed_heavy':
             pw=page['width']*(target['geometry'][2]-target['geometry'][0])
             x=target['margins'][0]+2.*font/pw
+            # Compensate for the native pixel rounding of spectrum legend rows.
+            y += .035*font/ph
         if page['role'].startswith('balancing.') and page['role']!='balancing.baryon_meson.activity':
             x=target['margins'][0]+.32*(1.-target['margins'][0])
         if page['role']=='multiplicity.composite':
