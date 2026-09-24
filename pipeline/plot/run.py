@@ -30,11 +30,11 @@ DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v9"
 CANVAS_NAME = "canvases.root"
 RECORD_NAME = "drawing-record.tsv.gz"
 # Display order only: mesons first, then Lambda, Sigma and Xi baryons.
-# Mass orders states within each group (particle/antiparticle equal).
+# Particle and antiparticle share an order; primed Xis follow unprimed Xis.
 # https://pdg.lbl.gov/2025/mcdata/mass_width_2025.mcd
 SPECIES_DISPLAY_ORDER = (421, 411, 431, 521, 511, 531, 541,
-                         4122, 4212, 4112, 4222, 4232, 4132,
-                         5122, 5222, 5112, 5232, 5132)
+                         4122, 4212, 4112, 4222, 4232, 4132, 4322, 4312,
+                         5122, 5222, 5212, 5112, 5232, 5132, 5322, 5312)
 P1_WITHHELD_SE_DISCLOSURE = (
     "Tune-ratio SE unavailable for unresolved sparse-tail denominators; "
     "see ROOT flags")

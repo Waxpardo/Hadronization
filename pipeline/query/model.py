@@ -605,6 +605,21 @@ def state_registry(analysis):
     return states, pairs
 
 
+def observable_pairs(analysis, formula_version):
+    """Resolve the numerical pair domain without rewriting input provenance.
+
+    The frozen study eligibility bit describes the original interpretation.
+    Version 4 admits every retained selected state in this generator study.
+    Its caller must also prove pair completeness from the exact retained rows.
+    """
+    states, pairs = state_registry(analysis)
+    if formula_version == 'projection_formulas_v3':
+        pairs = [pair for pair in pairs if pair['central_eligible']]
+    elif formula_version not in ('projection_formulas_v2', 'projection_formulas_v4'):
+        raise ValueError('unknown numerical pair-domain contract')
+    return states, pairs
+
+
 def _freeze(value):
     if isinstance(value, dict):
         return MappingProxyType({key: _freeze(item) for key, item in value.items()})

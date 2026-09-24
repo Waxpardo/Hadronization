@@ -560,9 +560,16 @@ def _compile_support_scan(work_root):
 
 
 def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=False,
-               event_activity_field=None, include_diagnostics=False, work_root=None):
+               event_activity_field=None, include_diagnostics=False, work_root=None,
+               pair_population_registry=None):
     """One compiled exact-support pass for additive T1, exposure and diagnostics."""
     selected_tunes = set(selected_tunes)
+    verify_pairs = pair_population_registry is not None
+    if verify_pairs and (set(pair_population_registry) != {'charm', 'beauty'} or
+            any(not values or len(values) != len(set(values)) or
+                any(type(pdg) is not int or pdg == 0 for pdg in values)
+                for values in pair_population_registry.values())):
+        raise ValueError('all-selected support pair registry differs')
     if not selected_tunes or selected_tunes - set(source.index['tune_ordinals']):
         raise ValueError('T1 requested an absent tune')
     if event_activity_field not in (None, 'a15_eta4', 'a15_eta1'):
@@ -592,6 +599,10 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                 if '\t' in root or '\n' in root or ' ' in root:
                     raise ValueError('support ROOT path cannot enter compiled map')
                 stream.write('SHARD\t' + root + '\n')
+                if verify_pairs:
+                    for sector, name in ((4, 'charm'), (5, 'beauty')):
+                        for pdg in pair_population_registry[name]:
+                            stream.write('ASSOCIATE\t{}\t{}\n'.format(sector, pdg))
                 for local, member in enumerate(shard['members']):
                     for token in (member['tune'],):
                         if not token or any(char.isspace() for char in token):
@@ -599,7 +610,10 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                     stream.write('MEMBER\t{}\t{}\t{}\t{}\n'.format(
                         local, member['tune'], member['block'], member['events']))
         field = 'eta1' if event_activity_field == 'a15_eta1' else 'eta4'
-        completed = subprocess.run([str(binary), str(mapping), field, str(output)],
+        command = [str(binary), str(mapping), field, str(output)]
+        if verify_pairs:
+            command.append('all-selected')
+        completed = subprocess.run(command,
                                    capture_output=True, text=True)
         if completed.returncode or completed.stdout or completed.stderr:
             raise ValueError('compiled exact-support reader failed: ' +
@@ -608,6 +622,7 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
         boundaries = {}
         opened = None
         upper = {}
+        pair_proofs, pair_counts = {}, {}
         seen = set()
         with output.open(encoding='ascii') as stream:
             if stream.readline().rstrip('\n') != 'hadronization_support_scan_v1':
@@ -621,6 +636,20 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                     opened = int(fields[1])
                 elif kind == 'UPPER' and len(fields) == 3:
                     upper[fields[1]] = int(fields[2])
+                elif verify_pairs and kind == 'PAIR_PROOF' and len(fields) == 8:
+                    key = (fields[1], int(fields[2]))
+                    row = dict(zip(('events', 'eligible_triggers', 'zero_partner_triggers',
+                                    'candidate_pairs', 'stored_pairs'), map(int, fields[3:])))
+                    if (key in pair_proofs or min(row.values()) < 0 or
+                            row['candidate_pairs'] != row['stored_pairs'] or
+                            row['zero_partner_triggers'] > row['eligible_triggers']):
+                        raise ValueError('all-selected pair-population proof differs')
+                    pair_proofs[key] = row
+                elif verify_pairs and kind == 'PAIR_COUNT' and len(fields) == 6:
+                    key = (fields[1], *map(int, fields[2:5]))
+                    if key in pair_counts or int(fields[5]) <= 0:
+                        raise ValueError('all-selected pair-population species count differs')
+                    pair_counts[key] = int(fields[5])
                 elif kind == 'MOMENT' and len(fields) == 9:
                     key = (fields[1], int(fields[2]))
                     if key in moments:
@@ -689,6 +718,22 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                     for m in shard['members'] if m['tune'] in selected_tunes}
         if expected != {key for key in moments if key[0] in selected_tunes}:
             raise ValueError('compiled exact-support tune/block exposure differs')
+        if verify_pairs:
+            if (set(pair_proofs) != set(moments) or
+                    any(row['events'] != moments[key].events or row['stored_pairs'] !=
+                        sum(count for group, count in pair_counts.items() if group[:2] == key)
+                        for key, row in pair_proofs.items())):
+                raise ValueError('all-selected pair proof source/species closure differs')
+            pair_proof = dict(schema='hadronization_all_selected_pair_population_v1',
+                state='PASS', collection_index_sha256=source.expected_sha256,
+                registry_sha256=hashlib.sha256(json.dumps(pair_population_registry,
+                    sort_keys=True, separators=(',', ':')).encode('ascii')).hexdigest(),
+                scan_sha256=hashlib.sha256(output.read_bytes()).hexdigest(),
+                blocks=[dict(tune_id=k[0], block_id=k[1], **v)
+                    for k, v in sorted(pair_proofs.items()) if k[0] in selected_tunes],
+                species_counts=[dict(tune_id=k[0], block_id=k[1], trigger_pdg=k[2],
+                    associate_pdg=k[3], count=v) for k, v in sorted(pair_counts.items())
+                    if k[0] in selected_tunes])
         result = {key: row for key, row in result.items() if key[0] in selected_tunes}
         event_totals = {key: row for key, row in event_totals.items() if key[0] in selected_tunes}
         moments = {key: row for key, row in moments.items() if key[0] in selected_tunes}
@@ -703,6 +748,8 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
             value += (moments,)
         if include_diagnostics:
             value += (diagnostics,)
+        if verify_pairs:
+            value += (pair_proof,)
         return value
     finally:
         if temporary is not None:

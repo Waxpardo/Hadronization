@@ -18,6 +18,20 @@ class ReleasedQueryModel(unittest.TestCase):
         self.analysis = json.loads((ROOT / "config/analysis.json").read_text())
         self.edges = self.analysis["axes"]["pt"]["edges"]
 
+    def test_all_selected_pair_scope_preserves_frozen_eligibility(self):
+        states, original = model.state_registry(self.analysis)
+        broad_states, broad = model.observable_pairs(self.analysis, 'projection_formulas_v4')
+        _, earlier = model.observable_pairs(self.analysis, 'projection_formulas_v3')
+        self.assertEqual(broad_states, states)
+        self.assertEqual(broad, original)
+        self.assertEqual(len(broad), 300)
+        excluded = {5212, -5212, 5312, -5312, 5322, -5322}
+        self.assertEqual({s['pdg'] for s in states if not s['pair_analysis_eligible']}, excluded)
+        self.assertFalse(excluded & {p['associate_pdg'] for p in earlier})
+        self.assertTrue(excluded <= {p['associate_pdg'] for p in broad})
+        with self.assertRaisesRegex(ValueError, 'unknown numerical'):
+            model.observable_pairs(self.analysis, 'unbound-policy')
+
     def test_same_query_bytes_admit_inclusive_and_two_aligned_rectangles(self):
         profiles = copy.deepcopy(self.analysis["profiles"])
         profiles.append({"id": "second_rectangle", "trigger_pt": {"operator": ">=", "value": 2.5},

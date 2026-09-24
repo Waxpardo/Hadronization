@@ -132,6 +132,10 @@ Merge receipts bind parent lineage, object counts, cell digests and resulting fi
 
 The merged index still points to original query workspaces. Reduction uses their exact support rows for event moments, origin diagnostics, boundary handling and natural-heavy accounting. Removal of query shards breaks this collection.
 
+The numerical contract `projection_formulas_v4` checks all selected-state pairs against the retained event rows before reduction. This check uses heavy-flavour signs, structural triggers and the exact associate registry. It rejects missing pairs, duplicate pairs and inconsistent cached kinematics. It also counts eligible triggers with no accepted associate. The native run receipt binds the check to the collection digest and reports counts by source block and signed species.
+
+The retained `pair_eligible` field records the input interpretation. It does not exclude selected states from formula contract `projection_formulas_v4`. Archived numerical contracts retain their original species scope.
+
 ## Numerical ROOT
 
 `numerics.root` uses `hadronization_self_contained_typed_root_v4`. It contains a typed value graph named `nodes`, metadata named `v4_metadata` and direct TTrees. The reader compares each direct table with the typed graph. It rejects missing objects, extra objects and duplicate key cycles.

@@ -80,7 +80,7 @@ This inventory identifies every tracked file. The release includes generated sci
 | [pipeline/query/condor.py](../pipeline/query/condor.py) | Condor CLI and generated wrappers | Prepares immutable bundles, runs attempts and collects exact accepted closure. |
 | [pipeline/query/merge.py](../pipeline/query/merge.py) | Merge CLI | Writes bounded sparse objects by original block in one file per tune. |
 | [pipeline/query/merge_sparse.hpp](../pipeline/query/merge_sparse.hpp) | PyROOT merge helper | Native cell addition and serialized-size preflight. |
-| [pipeline/query/model.py](../pipeline/query/model.py) | Query and reduction | Normalizes the scientific request and validates profile, registry and compatibility rules. |
+| [pipeline/query/model.py](../pipeline/query/model.py) | Query and reduction | Normalizes the scientific request and validates profile, signed-pair interpretation and compatibility rules. |
 | [pipeline/query/publication.py](../pipeline/query/publication.py) | Query, bundle and package writers | No-replace publication, Linux reservation fallback and readback checks. |
 | [pipeline/query/query.cpp](../pipeline/query/query.cpp) | Query wrapper | Builds support trees and sparse families and verifies complete pair populations. |
 | [pipeline/query/row_schema.hpp](../pipeline/query/row_schema.hpp) | Native query executable | Exact retained scalar branch types and schema macros. |
@@ -105,7 +105,7 @@ This inventory identifies every tracked file. The release includes generated sci
 | [pipeline/reduce/projection.py](../pipeline/reduce/projection.py) | Reducer and renderer reader | Typed numerical schemas, natural point keys, request construction and result validation. |
 | [pipeline/reduce/public_v4.py](../pipeline/reduce/public_v4.py) | Reduce CLI | Admits complete inputs, runs native reduction and verifies producer or portable packages. |
 | [pipeline/reduce/statistics.hpp](../pipeline/reduce/statistics.hpp) | Native estimator | Pooled ratios, denominator checks, class-boundary resolution and jackknife covariance. |
-| [pipeline/reduce/support_scan.cpp](../pipeline/reduce/support_scan.cpp) | Native primitive reader | One-pass support scan for event moments, origins, closure and natural-heavy counts. |
+| [pipeline/reduce/support_scan.cpp](../pipeline/reduce/support_scan.cpp) | Native primitive reader | One-pass support scan for event moments, origins, closure, natural-heavy counts and complete selected-state pairs. |
 | [pipeline/reduce/typed_nodes.py](../pipeline/reduce/typed_nodes.py) | ROOT archive writer | Encodes a deduplicated typed value graph. |
 
 ## Figures and package

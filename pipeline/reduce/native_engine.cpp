@@ -311,9 +311,10 @@ Queries ReadQueries(const std::string& path,Data& data) {
     } else if (fields[0]=="FORMULA") {
       Need(fields,2);
       if (query.formulaSeen || !query.points.empty() ||
-          (fields[1]!="projection_formulas_v2" && fields[1]!="projection_formulas_v3"))
+          (fields[1]!="projection_formulas_v2" && fields[1]!="projection_formulas_v3" &&
+           fields[1]!="projection_formulas_v4"))
         throw std::runtime_error("native formula contract differs");
-      query.formulaSeen=true;query.density=fields[1]=="projection_formulas_v3";
+      query.formulaSeen=true;query.density=fields[1]!="projection_formulas_v2";
     } else if (fields[0]=="DPHI_BIN") {
       Need(fields,4);
       const double low=Number(fields[2]),high=Number(fields[3]);

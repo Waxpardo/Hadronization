@@ -32,7 +32,7 @@ A structural trigger must be final, selected and directly produced with absolute
 
 Associates use configured signed species in the same heavy-flavour sector. They must satisfy final-state and direct-hadronization conditions. The pair query also applies the registry's structural eligibility. It excludes self-pairs. Associate origins include selected-hard companions, showers, multiple parton interactions, other resolved origins and unresolved origins.
 
-The six signed states with absolute PDG 5212, 5312 or 5322 are ineligible for central pair analysis. The query retains selected heavy kinematics independently of that pair exclusion. The data model also retains natural heavy states for constituent and closure accounting.
+Pair observables include every selected generator state in the signed registry. This includes Sigma_b0 (5212), Xi_b'- (5312), Xi_b'0 (5322) and their antiparticles. These are PYTHIA species identities; inclusion does not assert experimental observation. Before reduction, an exact-row check proves complete selected-state pair coverage. The data model also retains natural heavy states for constituent and closure accounting.
 
 Define q_c = n_c - n_anticharm and q_b = n_b - n_antibeauty. Opposite-sign pairs have a negative product of the relevant heavy-flavour signs. Same-sign pairs have a positive product. Neutral particles participate through heavy valence, not electric charge.
 
@@ -72,18 +72,18 @@ Every aggregate activity bin must be nonnegative and the total must be positive.
 
 ### Identified balancing species
 
-The default numerical request selects nine associate species per trigger. Integrated and activity-dependent balancing use the same selection.
+The identified balancing request selects 11 charm associates and 12 beauty associates per trigger. Integrated and activity-dependent balancing use the same selection.
 
 | Sector | Mesons | Baryons |
 | --- | --- | --- |
-| Charm | D0, D+, Ds+ | Lambda_c+, Sigma_c+, Sigma_c0, Sigma_c++, Xi_c+, Xi_c0 |
-| Beauty | B+, B0, Bs0, Bc+ | Lambda_b0, Sigma_b+, Sigma_b-, Xi_b0, Xi_b- |
+| Charm | D0, D+, Ds+ | Lambda_c+, Sigma_c+, Sigma_c0, Sigma_c++, Xi_c+, Xi_c0, Xi_c'+, Xi_c'0 |
+| Beauty | B+, B0, Bs0, Bc+ | Lambda_b0, Sigma_b+, Sigma_b0, Sigma_b-, Xi_b0, Xi_b-, Xi_b'0, Xi_b'- |
 
 The table names particle families. The trigger's heavy-flavour sign determines the opposite-sign particle or antiparticle. The estimator subtracts its same-sign conjugate.
 
 Each charge state remains a separate category. The figures do not sum Sigma or Xi charge states. The numerical ROOT retains their joint jackknife covariance.
 
-Figures show mesons before baryons. Baryon groups follow the order Lambda, Sigma, then Xi. Mass sets the order within each group. Short ticks delimit species bins, and labels sit at bin centers.
+Figures show mesons before baryons. Baryon groups follow the order Lambda, Sigma, then Xi. Each family follows a fixed species order, with primed Xi states after unprimed Xi states. Short ticks delimit species bins, and labels sit at bin centers.
 
 Ds and Xi add strange meson and baryon comparisons. Sigma adds direct heavy-baryon production beyond Lambda. Heavy-hadron decays remain disabled, so Sigma particles do not feed down into the saved Lambda category.
 
@@ -101,11 +101,11 @@ The sign-summed correlation difference is
 
 $$C_{net,b}=\frac{N^{all}_{OS,b}-N^{all}_{SS,b}}{T_t\,\delta_b}.$$
 
-Here, “all” means all structurally eligible registered associates in the selected heavy-flavour sector. It does not mean all generated particles. The default lower correlation panel uses this sign-summed difference. It is not a ratio of OS minus SS to OS plus SS.
+Here, “all” means all selected registered associates in the selected heavy-flavour sector. It does not mean all generated particles. The default lower correlation panel uses this sign-summed difference. It is not a ratio of OS minus SS to OS plus SS.
 
 Each density uses its own stored bin width. The estimator applies this division to the pooled result and every deletion. Joint covariance therefore includes the width factors on both axes. A sum of densities times their bin widths gives the integrated yield for the same associate domain.
 
-The numerical quantity `dphi_density_per_trigger` has units `per_trigger_per_radian`. Formula contract `projection_formulas_v3` identifies this convention and the eligible central pair domain. The reader retains the earlier `dphi_per_trigger` quantity with units `per_trigger_per_bin`. The renderer labels each convention from the numerical archive and rejects mixed conventions within a panel.
+The numerical quantity `dphi_density_per_trigger` has units `per_trigger_per_radian`. Formula contract `projection_formulas_v4` identifies this convention and the complete selected-state pair domain. Archives with `projection_formulas_v3` retain their narrower pair selection. The reader retains the earlier `dphi_per_trigger` quantity with units `per_trigger_per_bin`. The renderer labels each convention from the numerical archive and rejects mixed conventions within a panel.
 
 The integrated balancing yield for an opposite-sign species a is
 
@@ -115,7 +115,7 @@ The partner bar denotes the conjugate signed PDG identity. There is no half-weig
 
 The baryon-to-meson observable divides two balancing yields with the same trigger. The canonical Lambda tuples `(trigger, baryon, reference)` are `(421, -4122, -421)` and `(521, 5122, -521)`. The D+ selection changes the first tuple to `(411, -4122, -411)`.
 
-The numerical request also includes each eligible Sigma and Xi charge state. All charm baryons use the same D0 reference. All beauty baryons use the same charged B reference. This common denominator supports comparisons between baryon species. It does not isolate a strangeness mechanism.
+The numerical request also includes each selected Sigma and Xi charge state, including primed Xi states. All charm baryons use the same D0 reference. All beauty baryons use the same charged B reference. This common denominator supports comparisons between baryon species. It does not isolate a strangeness mechanism.
 
 Additional figures compare meson and Lambda triggers in separate columns for each baryon species. The signed registry sets the numerator and reference identities. For example, the Xi_b0 tuples are `(521, 5232, -521)` and `(5122, -5232, 521)`. The latter contains an antibaryon numerator because the Lambda_b trigger contains a beauty quark.
 

@@ -37,10 +37,10 @@ T1_COMPONENTS = ("hadron_count", "charm_plus_anticharm_constituent_count",
                  "beauty_plus_antibeauty_constituent_count")
 COMPONENTS = "OS|SS|OS_MINUS_SS|NONE|" + "|".join(T1_COMPONENTS)
 PAPER_CHARM_ASSOCIATES = (-411, -421, -431, -4122,
-                          -4112, -4212, -4222, -4132, -4232)
+                          -4112, -4212, -4222, -4132, -4232, -4312, -4322)
 PAPER_BEAUTY_ASSOCIATES = {
-    521: (-521, -511, -531, -541, 5122, 5112, 5222, 5132, 5232),
-    5122: (521, 511, 531, 541, -5122, -5112, -5222, -5132, -5232),
+    521: (-521, -511, -531, -541, 5122, 5112, 5212, 5222, 5132, 5232, 5312, 5322),
+    5122: (521, 511, 531, 541, -5122, -5112, -5212, -5222, -5132, -5232, -5312, -5322),
 }
 
 
@@ -53,7 +53,7 @@ def paper_p8_pair(trigger, associate, reference):
 
 def paper_baryon_meson_channels(analysis, charm):
     """Select Lambda, Sigma and Xi ratios with one common meson per sector."""
-    states, pairs = _query_model().state_registry(analysis)
+    states, pairs = _query_model().observable_pairs(analysis, 'projection_formulas_v4')
     by_pdg = {state['pdg']: state for state in states}
     associates = {charm: PAPER_CHARM_ASSOCIATES,
                   4122: PAPER_CHARM_ASSOCIATES, **PAPER_BEAUTY_ASSOCIATES}
@@ -65,7 +65,7 @@ def paper_baryon_meson_channels(analysis, charm):
             matches = [pair for pair in pairs
                        if pair['trigger_pdg'] == trigger and
                        pair['associate_pdg'] == associate and
-                       pair['central_eligible'] and pair['sign'] == -1]
+                       pair['sign'] == -1]
             if len(matches) != 1:
                 raise ValueError('paper baryon ratio lacks an eligible OS pair')
             channels.append([trigger, associate,
@@ -218,7 +218,7 @@ SCHEMAS = {
     "Member": dict(source_id="Count", tune_id="Id", logical_id="Count", accepted_attempt="Count", block_id="Count", successful_events="Count", source_root_sha256="Digest", source_scientific_digest="Digest", receipt_sha256="Digest"),
     "TuneCount": dict(tune_id="Id", count="Count"),
     "SourceSelection": dict(campaign_id="Id", campaign_descriptor_sha256="Digest", accepted_manifest_sha256="Digest", accepted_plan_digest="Digest", accepted_map_digest="Digest", members=["Member"], selected_members_sha256="Digest", expected_events_by_tune=["TuneCount"], provenance_parent_ids=["Digest"]),
-    "ProjectionRequest": dict(schema="="+REQUEST_SCHEMA, science_contract=dict(analyzer_schema="Id", structural_registry_sha256="Digest", estimator_policy_id="="+ESTIMATOR, formula_contract_version="projection_formulas_v2|projection_formulas_v3"), sources="SourceSelection", scope=dict(mode="PAPER|EXPLORATORY", roles=["RoleRequest"], ordered_tunes=["Id"], reference_tune=nullable("Id"), ordered_triggers=["PDG"], ordered_associate_pairs=["PairKey"]), profiles=["Profile"], activity="ActivityRequest", classes=["ClassRequest"], axes=["AxisRequest"], observables=["ObservableRequest"], statistics=dict(block_assignment_sha256="Digest", block_ids=["Count"], expected_K="Count", uncertainty="=FINITE_MC_DELETE_ONE", covariance_groups=["CovarianceRequest"]), execution=dict(backend_policy="AUTO|EXACT_ROWS|REQUIRE_NATIVE", permitted_routes=[ROUTE], required_capabilities=["Id"]), completion=dict(require_campaign_complete="Bool", require_all_requested_points="True", permitted_scientific_statuses=[STATUS]), bindings=dict(analysis_config_sha256="Digest", particle_registry_sha256="Digest", activity_definition_sha256="Digest", expected_source_content_sha256="Digest"), presentation_binding=dict(layout_contract_version="Id", plot_config_sha256="Digest")),
+    "ProjectionRequest": dict(schema="="+REQUEST_SCHEMA, science_contract=dict(analyzer_schema="Id", structural_registry_sha256="Digest", estimator_policy_id="="+ESTIMATOR, formula_contract_version="projection_formulas_v2|projection_formulas_v3|projection_formulas_v4"), sources="SourceSelection", scope=dict(mode="PAPER|EXPLORATORY", roles=["RoleRequest"], ordered_tunes=["Id"], reference_tune=nullable("Id"), ordered_triggers=["PDG"], ordered_associate_pairs=["PairKey"]), profiles=["Profile"], activity="ActivityRequest", classes=["ClassRequest"], axes=["AxisRequest"], observables=["ObservableRequest"], statistics=dict(block_assignment_sha256="Digest", block_ids=["Count"], expected_K="Count", uncertainty="=FINITE_MC_DELETE_ONE", covariance_groups=["CovarianceRequest"]), execution=dict(backend_policy="AUTO|EXACT_ROWS|REQUIRE_NATIVE", permitted_routes=[ROUTE], required_capabilities=["Id"]), completion=dict(require_campaign_complete="Bool", require_all_requested_points="True", permitted_scientific_statuses=[STATUS]), bindings=dict(analysis_config_sha256="Digest", particle_registry_sha256="Digest", activity_definition_sha256="Digest", expected_source_content_sha256="Digest"), presentation_binding=dict(layout_contract_version="Id", plot_config_sha256="Digest")),
     "ResolvedClass": dict(tune_id="Id", activity_id="Id", class_id="Int", requested="ClassRequest", actual_integer_low="Int", actual_integer_high="Int", event_weight="Hex64", events="Count", empty="Bool", boundary_status="Id", coverage_status="Id", boundary_receipt_sha256="Digest"),
     "AxisSelection": dict(axis_id="Id", predicate="RangePredicate", included_regular_bins=["Count"], include_underflow="Bool", include_overflow="Bool", endpoint_adjustment="NONE|ARCHIVED_INCLUSIVE_HIGH"),
     "PrimitiveRoute": dict(primitive_family="Id", profile_id=nullable("Id"), source_kind="COMPACT_ROOT|QUERY_ROOT|ACCEPTED_ANALYZED_ROOT|TEST_ONLY_SYNTHETIC", route=ROUTE, exactness=EXACTNESS, root_object_names=["Id"], object_content_digests=["Digest"], predicate_sha256="Digest", resolved_axis_selection=["AxisSelection"], diagnostic_readers=[dict(purpose="Id", route=ROUTE, objects=["Id"])], observed_input_cells="Count", observed_input_rows="Count"),
@@ -593,7 +593,7 @@ class ProjectionRequest:
                                             list(map(number, pt_axis["edges"])))
         axes = {a["id"]: a for a in p["axes"]}
         formula = p['science_contract']['formula_contract_version']
-        if formula == 'projection_formulas_v3':
+        if formula in ('projection_formulas_v3', 'projection_formulas_v4'):
             for observable in p['observables']:
                 if (observable['formula_version'] != formula or
                         observable['output_units'] != expected_point_units(observable['quantity']) or
@@ -605,7 +605,7 @@ class ProjectionRequest:
         for point in self.expected_point_keys:
             curve = point["curve"]
             if curve['role_id'].startswith('correlations.'):
-                absolute = ('dphi_density_per_trigger' if formula == 'projection_formulas_v3'
+                absolute = ('dphi_density_per_trigger' if formula in ('projection_formulas_v3', 'projection_formulas_v4')
                             else 'dphi_per_trigger')
                 if (curve['quantity'] != ('ratio_to_reference_tune' if curve['reference_tune_id'] else absolute) or
                         curve['axis_id'] != 'dphi' or axes['dphi']['units'] != 'rad' or
@@ -953,10 +953,8 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
     if structural != _reducer().analyzer_module().REGISTRIES_DIGEST:
         raise ValueError("source structural registry differs from current analyzer contract")
     eta = definitions.get("pair_acceptance", presentation["selection_definitions"]["pair_acceptance"])["eta"]["value"]
-    selected_states, requested_pairs = _query_model().state_registry(requested_analysis)
-    # Broad query storage includes diagnostic states. Central pair observables
-    # use only the normalized registry's explicitly eligible signed members.
-    requested_pairs = [pair for pair in requested_pairs if pair['central_eligible']]
+    selected_states, requested_pairs = _query_model().observable_pairs(
+        requested_analysis, 'projection_formulas_v4')
     if native is not None and any(
             pair["trigger_pdg"] in paper["trigger_pdgs"] and
             pair["associate_pdg"] not in paper["signed_pdgs"]
@@ -1138,11 +1136,11 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
     # Explicit exact-row query products remain diagnostic inputs.
     requested_backend = "aligned_sparse" if source_route.get("kind") == "verified_root_query_primitives" else "auto"
     return ProjectionRequest.from_dict(dict(schema=REQUEST_SCHEMA,
-        science_contract=dict(analyzer_schema="hadronization_lossless_analysis_v1", structural_registry_sha256=structural, estimator_policy_id=ESTIMATOR, formula_contract_version="projection_formulas_v3"),
+        science_contract=dict(analyzer_schema="hadronization_lossless_analysis_v1", structural_registry_sha256=structural, estimator_policy_id=ESTIMATOR, formula_contract_version="projection_formulas_v4"),
         sources=requested_sources, scope=dict(mode="PAPER", roles=role_requests, ordered_tunes=tunes,
             reference_tune=paper["reference_tune"], ordered_triggers=paper["trigger_pdgs"], ordered_associate_pairs=pairs),
         profiles=[normalized_profile(profile, eta, structural)], activity=activity_request, classes=classes, axes=axes,
-        observables=[dict(quantity=q, formula_version="projection_formulas_v3", output_units=expected_point_units(q), component=c, joint_point_domain=points) for (q, c), points in sorted(observable_groups.items())],
+        observables=[dict(quantity=q, formula_version="projection_formulas_v4", output_units=expected_point_units(q), component=c, joint_point_domain=points) for (q, c), points in sorted(observable_groups.items())],
         statistics=dict(block_assignment_sha256=block_assignment_sha, block_ids=list(range(1, 11)), expected_K=10, uncertainty="FINITE_MC_DELETE_ONE", covariance_groups=covariance_groups),
         execution=dict(backend_policy={"auto": "AUTO", "exact_rows": "EXACT_ROWS", "aligned_sparse": "REQUIRE_NATIVE"}[requested_backend], permitted_routes=ROUTE.split("|"), required_capabilities=["paper_observables", "joint_covariance"]),
         completion=dict(require_campaign_complete=campaign_complete, require_all_requested_points=True, permitted_scientific_statuses=STATUS.split("|")),

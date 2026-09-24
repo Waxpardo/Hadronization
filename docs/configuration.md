@@ -523,7 +523,7 @@ This file binds raw compatibility and the signed-state registry. Its selection, 
 | `scope.uncertainty` | string: `"statistical_only"` |
 | `scope.variation_selection` | boolean: `false` |
 | `selected_states` | array: `50 records` |
-| `selected_states[].pair_analysis_eligible` | boolean: Record-specific value in the linked source |
+| `selected_states[].pair_analysis_eligible` | boolean: Immutable input eligibility flag. Formula contract `projection_formulas_v4` includes all selected states after the exact pair-coverage check. |
 | `selected_states[].charge3` | integer: Record-specific value in the linked source |
 | `selected_states[].id` | string: Record-specific value in the linked source |
 | `selected_states[].kind` | string: Record-specific value in the linked source |

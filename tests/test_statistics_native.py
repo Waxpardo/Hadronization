@@ -189,6 +189,104 @@ class NativeStatisticsContract(unittest.TestCase):
             n.collect_t1(source,['MONASH'],event_activity_field='a15_eta4',
                          include_diagnostics=True)
 
+    def test_all_selected_pair_proof_includes_neutral_sigma_and_primed_xis(self):
+        import ROOT as R
+        from array import array
+        analysis = json.loads((ROOT/'config/analysis.json').read_text())
+        registry = analysis['pair_query_registry']['associate_pdgs']
+        # Construct exact retained rows independently of query/reduction code.
+        particles = [(521, 0, -1), (5212, 0, 1), (-5212, 0, -1),
+                     (5312, 0, 1), (-5312, 0, -1), (5322, 0, 1),
+                     (-5322, 0, -1), (541, 1, -1), (421, 1, 0),
+                     (-4312, -1, 0), (-4322, -1, 0)]
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            for mutant in ('valid', 'missing', 'duplicate', 'wrong_sign', 'wrong_pt'):
+                with self.subTest(mutant=mutant):
+                    root = base/(mutant+'.root')
+                    file = R.TFile(str(root), 'RECREATE')
+                    def tree(name, fields, rows):
+                        out = R.TTree(name, name)
+                        arrays = {key: array(code, [0]) for key, code, leaf in fields}
+                        for key, code, leaf in fields:
+                            out.Branch(key, arrays[key], key+'/'+leaf)
+                        for row in rows:
+                            for key, code, leaf in fields:
+                                arrays[key][0] = row.get(key, 0)
+                            out.Fill()
+                        out.Write()
+                    event_field = [('event_id','Q','l')]
+                    tree('events', event_field + [(key,'d','D') for key in
+                        ('weight','pthat','hard_scale')] + [(key,'i','I') for key in
+                        ('a15_eta1','a15_eta4','process_code','n_mpi')],
+                        [dict(event_id=i,weight=1,pthat=2,hard_scale=2,a15_eta1=1,a15_eta4=1)
+                         for i in range(3)])
+                    heavy=[]
+                    for event, chosen in ((0,particles),(1,particles[:1]),(2,particles[:2])):
+                        for index,(pdg,qc,qb) in enumerate(chosen):
+                            heavy.append(dict(event_id=event,heavy_index=index,pdg=pdg,
+                                qc=qc,qb=qb,nc=max(qc,0),ncbar=max(-qc,0),
+                                nb=max(qb,0),nbbar=max(-qb,0),status=83,final=1,selected=1,
+                                pair_eligible=int(abs(pdg) not in (5212,5312,5322)),
+                                pt=2 if index in (0,8) else .2,
+                                eta=5 if event==2 and index==1 else 0,phi=0))
+                    tree('heavy',event_field+[(key,'i','I') for key in
+                        ('heavy_index','pdg','qc','qb','nc','ncbar','nb','nbbar','status')]+
+                        [(key,'B','b') for key in ('final','selected','pair_eligible')]+
+                        [(key,'d','D') for key in ('pt','eta','phi')],heavy)
+                    triggers=[dict(event_id=event,heavy_index=0,sector=5,rejection_mask=0)
+                              for event in range(3)]
+                    triggers.insert(1,dict(event_id=0,heavy_index=8,sector=4,rejection_mask=0))
+                    tree('triggers',event_field+[(key,'i','I') for key in ('heavy_index','sector')]+
+                         [('rejection_mask','I','i')],triggers)
+                    pair_rows=[]
+                    for trigger,indices in ((0,range(1,8)),(8,(9,10))):
+                        for associate in indices:
+                            a=heavy[associate];t=heavy[trigger]
+                            pair_rows.append(dict(event_id=0,trigger_heavy_index=trigger,
+                                associate_heavy_index=associate,associate_origin=2,
+                                associate_category=0,sign=-1 if
+                                (t['qc']*a['qc']+t['qb']*a['qb'])<0 else 1,
+                                trigger_pt=t['pt'],associate_pt=a['pt'],dphi=0,deta=0,
+                                weight=1,a15_eta1=1,a15_eta4=1))
+                    if mutant=='missing': pair_rows.pop(0)
+                    if mutant=='duplicate': pair_rows.insert(1,dict(pair_rows[0]))
+                    if mutant=='wrong_sign': pair_rows[0]['sign'] *= -1
+                    if mutant=='wrong_pt': pair_rows[0]['associate_pt'] += .1
+                    tree('pairs',event_field+[(key,'i','I') for key in
+                        ('trigger_heavy_index','associate_heavy_index','associate_origin',
+                         'associate_category','sign','a15_eta1','a15_eta4')]+
+                        [(key,'d','D') for key in
+                         ('trigger_pt','associate_pt','dphi','deta','weight')],pair_rows)
+                    tree('closure',event_field+[('coefficient','i','I'),
+                         ('dense_category','i','I'),('visible','B','b')],[])
+                    tree('event_ranges',[('first_id','Q','l'),('count','Q','l'),
+                         ('source_id','I','i')],[dict(first_id=0,count=3,source_id=0)])
+                    file.Close()
+                    source=SimpleNamespace(expected_sha256='a'*64,
+                        index={'tune_ordinals':{'MONASH':0},'shards':[{
+                            'query_root':{'path':str(root)},'members':[{
+                                'tune':'MONASH','block':1,'events':3}]}]})
+                    def scan():
+                        return self.n.collect_t1(source,['MONASH'],
+                            pair_population_registry=registry,work_root=base/mutant)
+                    if mutant!='valid':
+                        with self.assertRaisesRegex(ValueError,
+                                'missing all-selected pair|all-selected pair duplicate/cache/sign'):
+                            scan()
+                    else:
+                        proof=scan()[-1]
+                        self.assertEqual(proof['state'],'PASS')
+                        self.assertEqual(proof['blocks'],[dict(tune_id='MONASH',block_id=1,
+                            events=3,eligible_triggers=4,zero_partner_triggers=2,
+                            candidate_pairs=9,stored_pairs=9)])
+                        observed={(p['trigger_pdg'],p['associate_pdg'])
+                                  for p in proof['species_counts']}
+                        self.assertTrue({(521,pdg) for pdg in
+                            (5212,-5212,5312,-5312,5322,-5322)} <= observed)
+                        self.assertTrue({(421,-4312),(421,-4322)} <= observed)
+                        self.assertNotIn((421,541),observed)
+
     def test_transport_event_exposure_is_bound_to_authenticated_sources(self):
         n = self.n
         members = [{'tune':'MONASH','block':block,'events':3}

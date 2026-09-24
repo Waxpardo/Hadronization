@@ -73,13 +73,14 @@ class ProjectionInterfaceContract(unittest.TestCase):
             self.roles, self.selection, self.p.digest(receipt['scientific_identity']), list(tunes), analysis,
             path, self.p.file_digest(path))
 
-    def test_density_identity_and_eligible_central_pair_domain(self):
+    def test_density_identity_and_all_selected_pair_domain(self):
         value=self.request().to_dict()
-        self.assertEqual(value['science_contract']['formula_contract_version'],'projection_formulas_v3')
+        self.assertEqual(value['science_contract']['formula_contract_version'],'projection_formulas_v4')
         pairs=value['scope']['ordered_associate_pairs']
         self.assertTrue(pairs)
-        self.assertFalse(any(abs(p['associate_pdg']) in (5212,5312,5322) for p in pairs))
-        # Broad diagnostic storage is preserved by the query registry.
+        self.assertTrue({5212,-5212,5312,-5312,5322,-5322} <=
+                        {p['associate_pdg'] for p in pairs})
+        # Frozen input eligibility remains readable without restricting the new scope.
         self.assertTrue(any(abs(p['associate_pdg'])==5212 for p in self.p._query_model().state_registry(self.analysis)[1]))
         density=[o for o in value['observables'] if o['quantity']=='dphi_density_per_trigger']
         self.assertTrue(density)
@@ -156,7 +157,7 @@ class ProjectionInterfaceContract(unittest.TestCase):
             self.assertEqual(channels,{(trigger,associate)
                 for trigger in (421,4122)
                 for associate in (-411,-421,-431,-4122,-4112,-4212,
-                                  -4222,-4132,-4232)})
+                                  -4222,-4132,-4232,-4312,-4322)})
         p8={(item['trigger_pdg'],item['associate_pdg'],
              item['reference_pdg']) for item in curves(
                  default_keys,'balancing.baryon_meson.activity')}
@@ -196,11 +197,11 @@ class ProjectionInterfaceContract(unittest.TestCase):
         self.selection['baryon_meson_channels'] = channels
         expected = {(trigger, -baryon, -421)
                     for trigger in (421, 4122)
-                    for baryon in (4122, 4112, 4212, 4222, 4132, 4232)}
+                    for baryon in (4122, 4112, 4212, 4222, 4132, 4232, 4312, 4322)}
         expected |= {(521, baryon, -521)
-                     for baryon in (5122, 5112, 5222, 5132, 5232)}
+                     for baryon in (5122, 5112, 5212, 5222, 5132, 5232, 5312, 5322)}
         expected |= {(5122, -baryon, 521)
-                     for baryon in (5122, 5112, 5222, 5132, 5232)}
+                     for baryon in (5122, 5112, 5212, 5222, 5132, 5232, 5312, 5322)}
         self.assertEqual({tuple(row) for row in channels}, expected)
         request = self.request()
         new = {self.p.canonical(key) for key in request.expected_point_keys}
@@ -208,7 +209,7 @@ class ProjectionInterfaceContract(unittest.TestCase):
         added = [json.loads(key)['curve'] for key in new-old]
         self.assertTrue(all(curve['role_id'] == 'balancing.baryon_meson.activity'
                             for curve in added))
-        self.assertEqual(len(new-old), 20*2)
+        self.assertEqual(len(new-old), 30*2)
         keys = [key['curve'] for key in request.expected_point_keys
                 if key['curve']['role_id'] == 'balancing.baryon_meson.activity']
         self.assertEqual({(key['trigger_pdg'],key['associate_pdg'],key['reference_pdg'])
@@ -218,7 +219,7 @@ class ProjectionInterfaceContract(unittest.TestCase):
         self.selection['trigger_pdgs'] = [421, 4122, 521, 5122]
         self.selection['baryon_meson_trigger_pdgs'] = [421, 4122, 521, 5122]
         for channel in ([421,4122,-421], [521,5132,521],
-                        [521,5212,-521], [421,-421,-421],
+                        [521,-5212,-521], [421,-421,-421],
                         [5122,-5132,-521], [421,-4132,-431]):
             with self.subTest(channel=channel):
                 self.selection['baryon_meson_channels'] = [channel]
@@ -260,9 +261,9 @@ class ProjectionInterfaceContract(unittest.TestCase):
 
     def test_extended_balancing_domain_has_exact_species_signs_and_classes(self):
         request = self.request(('MONASH', 'JUNCTIONS', 'CLOSEPACKING'))
-        charm = (-411, -421, -431, -4122, -4112, -4212, -4222, -4132, -4232)
-        beauty = {521: (-521, -511, -531, -541, 5122, 5112, 5222, 5132, 5232),
-                  5122: (521, 511, 531, 541, -5122, -5112, -5222, -5132, -5232)}
+        charm = (-411, -421, -431, -4122, -4112, -4212, -4222, -4132, -4232, -4312, -4322)
+        beauty = {521: (-521, -511, -531, -541, 5122, 5112, 5212, 5222, 5132, 5232, 5312, 5322),
+                  5122: (521, 511, 531, 541, -5122, -5112, -5212, -5222, -5132, -5232, -5312, -5322)}
         states = {s['pdg']:s for s in json.loads(
             (ROOT/'config/study.json').read_text())['selected_states']}
         scope = request.to_dict()['scope']['ordered_associate_pairs']
@@ -281,7 +282,7 @@ class ProjectionInterfaceContract(unittest.TestCase):
                     self.assertEqual(next(r['associate_pdgs'] for r in order
                         if r['role_id']==role and r['trigger_pdg']==trigger),list(associates))
                     for associate in associates:
-                        self.assertTrue(states[associate]['pair_analysis_eligible'])
+                        self.assertIn(associate, states)
                         self.assertEqual(signs[trigger,associate],'OS')
                         self.assertEqual(signs[trigger,-associate],'SS')
                         selected = [c for c in curves if c['trigger_pdg']==trigger
@@ -292,7 +293,24 @@ class ProjectionInterfaceContract(unittest.TestCase):
                             self.assertEqual({(c['tune_id'],c['reference_tune_id']) for c in rows},
                                 {('MONASH',None),('JUNCTIONS',None),('CLOSEPACKING',None),
                                  ('JUNCTIONS','MONASH'),('CLOSEPACKING','MONASH')})
-                self.assertEqual(len(curves),90*len(classes))
+                self.assertEqual(len(curves),sum(map(len,channels.values()))*5*len(classes))
+
+    def test_every_saved_sigma_and_xi_has_balancing_and_ratio_channels(self):
+        configured=json.loads((ROOT/'config/plot.json').read_text())['families']
+        required={abs(pdg) for family in ('Sigma','Xi','XiPrime')
+                  for pdg in configured[family]}
+        self.selection['trigger_pdgs']=[421,4122,521,5122]
+        self.selection['baryon_meson_trigger_pdgs']=[421,4122,521,5122]
+        self.selection['baryon_meson_channels']=self.p.paper_baryon_meson_channels(
+            self.analysis,421)
+        request=self.request()
+        for prefix in ('balancing.integrated.', 'balancing.activity.',
+                       'balancing.baryon_meson.'):
+            observed={abs(key['curve']['associate_pdg'])
+                      for key in request.expected_point_keys
+                      if key['curve']['role_id'].startswith(prefix)}
+            self.assertEqual(required & observed,required)
+        self.assertEqual(len(self.selection['baryon_meson_channels']),32)
 
     def test_cold_category_order_preserves_previous_identified_subset(self):
         request = self.request().to_dict()

@@ -78,7 +78,7 @@ def native_point_query(request,source,path):
             len(axes['dphi']['edges'])-1,len(axes['pt']['edges'])-1)]
     formula=value['science_contract']['formula_contract_version']
     lines.append('FORMULA\t'+formula)
-    if formula == 'projection_formulas_v3':
+    if formula in ('projection_formulas_v3', 'projection_formulas_v4'):
         lines.extend('DPHI_BIN\t{}\t{}\t{}'.format(i,lo,hi)
                      for i,(lo,hi) in enumerate(zip(axes['dphi']['edges'],
                                                     axes['dphi']['edges'][1:])))
@@ -453,7 +453,7 @@ def verify_native_denominator_stream(path,request,event_moments,block_path=None)
            p.ProjectionRequest.from_dict(request.to_dict() if hasattr(
                request,'to_dict') else request,cold=True))
     counts=dict(rows=0,undefined=0,unstable=0)
-    density=typed.to_dict()['science_contract']['formula_contract_version']=='projection_formulas_v3'
+    density=typed.to_dict()['science_contract']['formula_contract_version'] in ('projection_formulas_v3', 'projection_formulas_v4')
     def decoded(token,status):
         if status not in ('AVAILABLE','UNDEFINED','UNSTABLE_DENOMINATOR'):
             raise ValueError('native denominator status differs')
@@ -613,6 +613,11 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
     if construction_sha!=source.index['analysis_sha256']:
         raise ValueError('query construction normalized model differs')
     compatibility=model_api.compatible_interpretation(construction,analysis)
+    request_value = (request.to_dict() if hasattr(request, 'to_dict') else request)
+    prove_all_selected = (request is None or request_value['science_contract'][
+        'formula_contract_version'] == 'projection_formulas_v4')
+    pair_registry = (analysis['pair_query_registry']['associate_pdgs']
+                     if prove_all_selected else None)
     support_prepared=None;pre_support_seconds=0.0
     if request is None:
         if selected_tunes is None or selection is None:
@@ -629,7 +634,7 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         support_prepared=n.collect_t1(source,selected_tunes,None,
             row_upper_bounds=True,event_activity_field=selected_activity[
                 'physical_field'],include_diagnostics=True,
-            work_root=work/'support-scan')
+            work_root=work/'support-scan',pair_population_registry=pair_registry)
         pre_support_seconds=time.perf_counter()-before_support
         species=sorted({key[2] for key in support_prepared[0]})
         request=p.make_native_request(source,analysis_path,analysis_sha256,
@@ -671,10 +676,9 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         (item['trigger_pdg'],item['associate_pdg']):(
             item['reference_meson_pdg'],
             'OS' if item['sign']==-1 else 'SS',item['sector'].upper())
-        for item in model_api.state_registry(analysis)[1]
-        if item['trigger_pdg'] in value['scope']['ordered_triggers'] and
-        (value['science_contract']['formula_contract_version']=='projection_formulas_v2' or
-         item['central_eligible'])}
+        for item in model_api.observable_pairs(
+            analysis, value['science_contract']['formula_contract_version'])[1]
+        if item['trigger_pdg'] in value['scope']['ordered_triggers']}
     scoped={
         (item['trigger_pdg'],item['associate_pdg']):(
             item['reference_meson_pdg'],item['sign'],item['sector'])
@@ -691,12 +695,12 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         activity['physical_field'],value['scope']['ordered_triggers'],pairs,tunes)
     sparse_primitives_done=time.perf_counter()
     if support_prepared is None:
-        t1,events,support_opens,support_upper,event_moments,raw_diagnostics=n.collect_t1(
+        support_prepared=n.collect_t1(
             source,tunes,None,row_upper_bounds=True,
             event_activity_field=activity['physical_field'],include_diagnostics=True,
-            work_root=work/'support-scan')
-    else:
-        t1,events,support_opens,support_upper,event_moments,raw_diagnostics=support_prepared
+            work_root=work/'support-scan',pair_population_registry=pair_registry)
+    t1,events,support_opens,support_upper,event_moments,raw_diagnostics=support_prepared[:6]
+    all_selected_proof=support_prepared[6] if prove_all_selected else None
     support_done=time.perf_counter()
     selected_t1={curve['associate_pdg'] for curve in
         roles['accounting.natural_final_heavy']['required_curve_keys']}
@@ -762,6 +766,7 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
             ('available_errors','withheld_errors')},
         sparse_scan_metrics=dict(primitives=vars(primitives.metrics),g9=vars(g9_cells.metrics)),
         support_root_opens=support_opens,support_row_upper_bounds=support_upper,
+        all_selected_pair_population_proof=all_selected_proof,
         event_block_moments=[dict(tune_id=tune,block_id=block,**moment.report())
             for (tune,block),moment in sorted(event_moments.items())],
         raw_origin_closure_diagnostics=[dict(tune_id=tune,block_id=block,
