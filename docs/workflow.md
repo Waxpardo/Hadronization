@@ -270,7 +270,7 @@ Bands show pointwise statistical standard errors. They do not represent systemat
 
 Use the three-class activity views for compact comparisons. They show 0–1%, 40–50% and 80–90%. The full-class views retain all classes. Use full-width placement for dense figures. Check label sizes after placing each figure in the manuscript.
 
-The multiplicity inset identifies MONASH class boundaries. Other tunes have their own boundaries. The lower-panel limit of five hides some low-multiplicity ratios. An upward indicator and a count disclose this clipping. The saved numerical values remain unchanged.
+The multiplicity inset identifies MONASH class boundaries. Other tunes have their own boundaries. The lower-panel limit of five hides some low-multiplicity ratios. The saved numerical values remain unchanged.
 
 Correlation views distinguish identified pairs from sums over eligible associates. Opposite and same sign refer to heavy-flavour content. Horizontal segments on species axes mark categories; they are not horizontal measurement uncertainties. Equal-width percentile slots can represent unequal percentile intervals.
 

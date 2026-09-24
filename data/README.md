@@ -27,13 +27,13 @@ Package verification needs the matching renderer runtime: ROOT 6.30.01 and GCC 1
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=e3c0368c3cdd8a94e82a622aeb1a29be76c78f6a4595e4ac623f409eb1546cd3
+PACKAGE_SHA=8e618d9bcfd2c7134d8ee60b694bb01e85dbe02f73910555fe17d20b452d3c33
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification
 ```
 
-The checked-out Git revision supplies the trusted manifest bytes. Compare that revision with the release tag before verification. The verifier checks every packaged file against the manifest.
+The checked-out Git revision supplies the trusted manifest bytes. Record the checked-out commit before verification. The verifier checks every packaged file against the manifest.
 
 To change the presentation, copy `config/plot.json` and edit its display settings. Use the example below with a new output directory. The numerical ROOT and its statistical results remain unchanged.
 

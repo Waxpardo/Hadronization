@@ -71,7 +71,7 @@ The [science guide](docs/science.md) gives exact definitions and limitations. Th
 
 The renderer produces multiplicity, charm and beauty correlation, integrated balancing, activity-dependent balancing and baryon-to-meson ratio pages. It also produces signed heavy-hadron pT, eta and phi spectra, supporting views and ROOT canvases. Numerical packages include accounting tables, CSV and TeX exports, missing-value records and manifests.
 
-The default correlation presentation shows MONASH identified pairs and heavy-flavour sign sums. Its caption discloses omitted uncertainty bars. Use `config/plot-all-tune.json` for correlation comparisons across tunes. The [workflow](docs/workflow.md#figures-and-tables) describes presentation choices and display limits.
+The default correlation presentation shows MONASH identified pairs and heavy-flavour sign sums. Use `config/plot-all-tune.json` for correlation comparisons across tunes. The [workflow](docs/workflow.md#figures-and-tables) describes presentation choices and display limits.
 
 ## Documentation
 
