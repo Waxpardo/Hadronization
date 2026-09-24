@@ -243,7 +243,7 @@ def checked_plot_config(path):
         (1, "solid"), (2, "80 8"), (3, "40 12"),
         (4, "24 8 12 8 4 8"), (5, "24 8 4 8 4 8"), (6, "12 8"),
         (7, "4 8"), (8, "40 8 12 8"), (9, "12 8 4 8"),
-        (10, "4 16"), (11, "24 8 4 8"),
+        (10, "4 16"), (11, "8 16"),
         (12, "4 20")]
     patterns = styles["class_line_patterns"]
     if (not isinstance(patterns, list) or
@@ -808,8 +808,6 @@ def focused_extreme_pages(pages, context, padding):
         format(float(value), '.15g') for value in
         by_id[class_id]['percentile_interval']))
                     for class_id in selected]
-    class_markers = dict(zip(selected, (
-        'open_diamond', 'open_cross', 'open_down_triangle')))
     result = []
     for source in pages:
         if source['role'] not in ('balancing.activity.charm',
@@ -833,9 +831,6 @@ def focused_extreme_pages(pages, context, padding):
         for panel in page['panels']:
             panel['series'] = [series for series in panel['series']
                                if series['class_id'] in selected]
-            if panel['id'].startswith('upper.'):
-                for series in panel['series']:
-                    series['marker'] = class_markers[series['class_id']]
             valid = [point for series in panel['series']
                      for point in series['points']
                      if point['state'] == 'DRAW' and point['y'] is not None]
@@ -2436,6 +2431,7 @@ def drawing_plan(projection, manifest, config):
                   config['style_identities']['tunes']]
     pages = tune_separated_activity_pages(pages, tune_order)
     pages.extend(tune_separated_activity_pages(focused, tune_order))
+    activity_lines_without_markers(pages)
     pages.append(tune_separated_baryon_meson_page(pages, tune_order))
     maximum=config['layout']['maximum_panels_per_page']
     if maximum < 6:
@@ -2470,6 +2466,15 @@ def drawing_plan(projection, manifest, config):
     reserve_annotation_headroom(pages)
     synchronize_paired_y_ranges(pages)
     return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}
+
+def activity_lines_without_markers(pages):
+    """Use line patterns for classes and colour for tunes on activity pages."""
+    for page in pages:
+        if page['role'].startswith('balancing.activity.'):
+            for panel in page['panels']:
+                for series in panel['series']:
+                    series['marker'] = 'none'
+
 
 def g9_drawing_pages(context, rows, config, header, information, labels):
     """Lay out saved signed-species spectra; every number comes from S rows."""

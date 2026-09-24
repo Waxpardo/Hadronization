@@ -730,14 +730,33 @@ int main(int argc, char** argv) {
         self.assertEqual([series["class_id"] for series in
                           pages[0]["panels"][0]["series"]], ["1", "6", "10"])
         self.assertEqual(len(canonical["panels"][0]["series"]), 11)
-        self.assertEqual([series['marker'] for series in
-                          pages[0]['panels'][0]['series']],
-                         ['open_diamond', 'open_cross', 'open_down_triangle'])
+        self.assertEqual({series['marker'] for series in
+                          pages[0]['panels'][0]['series']}, {'filled_circle'})
         self.assertEqual({series['marker'] for series in
                           pages[0]['panels'][1]['series']}, {'filled_circle'})
         self.assertEqual({series['marker'] for series in panel['series']},
                          {'filled_circle'})
         self.assertIn("supplemental", pages[0]["filename"])
+
+    def test_activity_marker_removal_preserves_values_and_other_roles(self):
+        import copy
+        point = {'y': .2, 'error': .03, 'state': 'DRAW'}
+        series = {'marker': 'filled_circle', 'line_style': 2,
+                  'color': '#000000', 'points': [point]}
+        activity = {'role': 'balancing.activity.charm', 'panels': [
+            {'id': panel_id, 'series': [copy.deepcopy(series)]}
+            for panel_id in ('upper.MONASH', 'lower.shared')]}
+        integrated = copy.deepcopy(activity)
+        integrated['role'] = 'balancing.integrated.charm'
+        pages = [activity, integrated]
+        before = copy.deepcopy(pages)
+        plot.activity_lines_without_markers(pages)
+        for panel in activity['panels']:
+            self.assertEqual(panel['series'][0]['marker'], 'none')
+        self.assertEqual(integrated, before[1])
+        for panel in activity['panels']:
+            panel['series'][0]['marker'] = 'filled_circle'
+        self.assertEqual(pages, before)
 
     def test_extreme_emphasis_uses_typed_intervals_not_caption(self):
         classes = [

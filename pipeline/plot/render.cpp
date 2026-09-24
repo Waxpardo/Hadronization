@@ -82,9 +82,7 @@ int Marker(const std::string& name) {
   if (name == "filled_square") return 21;
   if (name == "filled_up_triangle") return 22;
   if (name == "open_circle") return 24;
-  if (name == "open_diamond") return 27;
-  if (name == "open_cross") return 28;
-  if (name == "open_down_triangle") return 32;
+  if (name == "none") return 20;
   throw std::runtime_error("invalid marker identity");
 }
 struct Point {
@@ -124,7 +122,7 @@ struct Page {
 constexpr double kPaperWidthCentimeters = 18.;
 constexpr double kPointsPerCentimeter = 72. / 2.54;
 constexpr const char* kClassPatternDigest =
-    "class_patterns_sha256=862f26b2a3c5d5c88418c6fe61c1a047a35422d8833ebdddf7826b163591fc94";
+    "class_patterns_sha256=5a9c2d0dee533ae26e1ef1e2e1ea5873976e50696def2d94caf7b3a223df89b0";
 constexpr const char* kP1WithheldSeDisclosure =
     "Tune-ratio SE unavailable for unresolved sparse-tail denominators; "
     "see ROOT flags";
@@ -150,7 +148,7 @@ int ScientificLineWidth(const Series& series) {
   return ActivityEndpoint(series) ? 2 : 1;
 }
 double ScientificMarkerSize(const Series& series, bool dense) {
-  if (dense) return 0;
+  if (dense || series.marker == "none") return 0;
   if (series.mode == "categories") {
     if (ActivityEndpoint(series)) return 1.5;
     return series.lineStyle == 1 ? 1.3 : .85;
@@ -1373,8 +1371,8 @@ std::vector<ExpectedLegend> ExpectedPanelLegends(
       ExpectedLegend key{InsideTuneLegendBox(page, panel, tunes.size()), 1,
                          double(TuneLegendTextPixels(page)), true, .12, {}};
       for (const auto& tune : tunes)
-        key.entries.push_back({tune.first, InFrameClassKey(page) ? "l" : "lp",
-                               tune.second, InFrameClassKey(page) ? 0. : 1.4, 1});
+        key.entries.push_back({tune.first, tune.second->marker == "none" ? "l" : "lp",
+                               tune.second, tune.second->marker == "none" ? 0. : 1.4, 1});
       result.push_back(std::move(key));
     }
   }
@@ -1382,8 +1380,7 @@ std::vector<ExpectedLegend> ExpectedPanelLegends(
   if (classKey.first==&panel) {
     ExpectedLegend key{classKey.second,1,double(TuneLegendTextPixels(page)),true,.56,{}};
     for (const auto& item : ClassSamples(page))
-      key.entries.push_back({item.second->label,"lp",item.second,
-                              ScientificMarkerSize(*item.second, false),
+      key.entries.push_back({item.second->label,"l",item.second,0.,
                               item.first,true});
     result.push_back(std::move(key));
   }
@@ -1915,7 +1912,7 @@ void LineStyle(int style) {
   // Integer style identity still follows the authenticated 1 + class_id rule.
   static const std::array<const char*, 11> patterns = {{
     "80 8", "40 12", "24 8 12 8 4 8", "24 8 4 8 4 8", "12 8", "4 8",
-    "40 8 12 8", "12 8 4 8", "4 16", "24 8 4 8", "4 20"}};
+    "40 8 12 8", "12 8 4 8", "4 16", "8 16", "4 20"}};
   if (style >= 2 && style <= 12) gStyle->SetLineStyleString(style,patterns[style-2]);
   if (style > 12) {
     std::string pattern = "40 12";

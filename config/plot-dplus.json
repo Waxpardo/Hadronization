@@ -53,7 +53,7 @@
       {"root_style": 8, "dash_pattern": "40 8 12 8"},
       {"root_style": 9, "dash_pattern": "12 8 4 8"},
       {"root_style": 10, "dash_pattern": "4 16"},
-      {"root_style": 11, "dash_pattern": "24 8 4 8"},
+      {"root_style": 11, "dash_pattern": "8 16"},
       {"root_style": 12, "dash_pattern": "4 20"}
     ],
     "species_encoding": "facet_only",
