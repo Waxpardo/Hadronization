@@ -12001,36 +12001,36 @@
       "source_id": 2999
     }
   ],
-  "block_primitive_path": "/scratch/condor_execute/dir_416127/reduce-work/v4-native-d1oso69p/native-block-primitives.tsv",
-  "block_primitive_sha256": "46cdd871a23ba3cd8c0d039d316862b0a562ba6101f445d8ee2e78990b8b0ff2",
+  "block_primitive_path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-528ad01/reduce-work/v4-native-f8d86ibp/native-block-primitives.tsv",
+  "block_primitive_sha256": "7691530aeec3af9918ae7b9829bc30a82710cb492a95c64f5813f9cae90edeea",
   "build": {
-    "binary_sha256": "0c9ceb43224aedbd6a0a93c1fd55d2e6c94ad1d7bdc54da0a5c021222bdddb63",
-    "build_identity_sha256": "7aaf09c1de1f305953b2d4a65b0fe8c512b7f0bb4fa153f0275b27741cbd1ac3",
-    "compiler_id": "/cvmfs/alice.cern.ch/el9-x86_64/Packages/GCC-Toolchain/v14.2.0-alice2-2/bin/c++",
-    "compiler_version": "c++ (GCC) 14.2.0",
-    "source_sha256": "0fd65b2a71213ef2c53ba3ebfec463192ffe241b84636c4574ef8508403e1200",
+    "binary_sha256": "f88b546c70bb739876942d5968e9003429405c0c4f2fa5060b93c04ac7ee0347",
+    "build_identity_sha256": "ad01f503bc751fb8f98b78a0ec17a280916a6360182033c876b82198953a387c",
+    "compiler_id": "/cvmfs/alice.cern.ch/el9-x86_64/Packages/GCC-Toolchain/v14.2.0-alice2-2/bin/g++",
+    "compiler_version": "g++ (GCC) 14.2.0",
+    "source_sha256": "210e0ce99183402052b4ca1fdda0c33d9ae0dab8370a3d94813a47f35c6539fb",
     "statistics_sha256": "004ced94c73c112313b176366b524449749b2c06471a5c107013c927f5490484"
   },
-  "checked_block_primitive_rows": 650900,
+  "checked_block_primitive_rows": 667700,
   "checked_boundary_rows": 396,
-  "checked_denominator_rows": 57832,
-  "checked_factor_rows": 650900,
-  "checked_points": 47850,
+  "checked_denominator_rows": 59032,
+  "checked_factor_rows": 667700,
+  "checked_points": 49050,
   "checked_status_counts": {
-    "available_errors": 36868,
-    "withheld_errors": 10982
+    "available_errors": 38062,
+    "withheld_errors": 10988
   },
   "collection_index_sha256": "160f3c3789395740ec0d0244e3d719a53dbf064c340aecb32670189a40e86dfc",
   "collection_scientific_identity_sha256": "bd7931236150587b0ca670661272468ed91e4cb5953d3f1039a2e97c67ccf9c8",
   "construction_analysis_sha256": "e959e00f8f8c7ced7aa6ec07dbe0e2b19b5bc30aab6ec4defb1df31319085ff8",
-  "denominator_path": "/scratch/condor_execute/dir_416127/reduce-work/v4-native-d1oso69p/native-denominator-parents.tsv",
-  "denominator_sha256": "e25fc472371903ea5ca1f7089cde6c403893d38050c329f63e43b8fa46f71acf",
+  "denominator_path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-528ad01/reduce-work/v4-native-f8d86ibp/native-denominator-parents.tsv",
+  "denominator_sha256": "c35d5560da3d5f2dcedd9f6e7f3dc64b1d00694e88e9039c767814fb949426d7",
   "denominator_status_counts": {
     "undefined": 0,
     "unstable": 7748
   },
-  "diagnostic_path": "/scratch/condor_execute/dir_416127/reduce-work/v4-native-d1oso69p/native-diagnostic.tsv",
-  "diagnostic_sha256": "105daecf3553271fc2abc28ce1468234966350dbaae2f5a7031e48757bc00482",
+  "diagnostic_path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-528ad01/reduce-work/v4-native-f8d86ibp/native-diagnostic.tsv",
+  "diagnostic_sha256": "482960f80b327b2c3c1f24e9f18250505b8391ef451e47d50a412b199aea03af",
   "event_block_moments": [
     {
       "activity_counts": [
@@ -56193,18 +56193,18 @@
   },
   "lineage_selected_members_sha256": "fc541d9564ddb2541b5cf759d34537b91a8c1aa0aa5b41039e611d0b843d5de8",
   "point_transport": {
-    "path": "/scratch/condor_execute/dir_416127/reduce-work/v4-native-d1oso69p/native-points.tsv",
-    "points": 47850,
-    "request_sha256": "ea5786a5e7b90b30b8e6951ecc11c46390e65f0b6de5633d15ac91ece0c09612",
-    "scientific_request_sha256": "2607b1e601798645fd48a18779cb99b161f5a5ac298207956b3e35a5411bc51d",
-    "sha256": "1bdd11ff00b1112c18ac3a0bc3d5f5266e762bf68f8f6fa8056e65090a93bf0e"
+    "path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-528ad01/reduce-work/v4-native-f8d86ibp/native-points.tsv",
+    "points": 49050,
+    "request_sha256": "389b49fccee58bc4a1f04f8b149582aecde21a8257727826776b6ba49d9edad5",
+    "scientific_request_sha256": "ed137290d384dacaef87f46950bbfa601f1d46d209f9ae0853f81ac42210a3fc",
+    "sha256": "d165a9b910e7b1049b8d77248ae0fd8280e0575c994cc24eb1227b94e190ac37"
   },
   "primitive_transport": {
-    "bytes": 530963513,
-    "path": "/scratch/condor_execute/dir_416127/reduce-work/v4-native-d1oso69p/native-primitives.tsv",
-    "records": 6072993
+    "bytes": 514799300,
+    "path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-528ad01/reduce-work/v4-native-f8d86ibp/native-primitives.tsv",
+    "records": 5891858
   },
-  "primitive_transport_sha256": "14a9ab8760b60868529f6b823f5c43f14f64165a81e925c1a292ba3da0b11b8c",
+  "primitive_transport_sha256": "f552f2619a88c5f8a10052600fc1b9c2545b7bab5acdec9a0f10d979e396942c",
   "raw_origin_closure_diagnostics": [
     {
       "beauty_constituent_weighted_sum": "0x1.5260300000000p+21",
@@ -62000,12 +62000,12 @@
       "tune_id": "MONASH"
     }
   ],
-  "request_file_sha256": "1c4be075d44db7685d62a0bf45f5ad139c33349cdce79e37b1928ecf08280793",
-  "request_path": "/scratch/condor_execute/dir_416127/reduce-work/v4-native-d1oso69p/native-request.json",
-  "request_sha256": "ea5786a5e7b90b30b8e6951ecc11c46390e65f0b6de5633d15ac91ece0c09612",
+  "request_file_sha256": "2603d6789e44d9970513c2b97f846e477de6d8b071e24ea0f3bdbfe20ca1c710",
+  "request_path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-528ad01/reduce-work/v4-native-f8d86ibp/native-request.json",
+  "request_sha256": "389b49fccee58bc4a1f04f8b149582aecde21a8257727826776b6ba49d9edad5",
   "schema": "hadronization_native_diagnostic_run_v1",
-  "scientific_request_sha256": "2607b1e601798645fd48a18779cb99b161f5a5ac298207956b3e35a5411bc51d",
-  "scratch_transport_bytes": 750451354,
+  "scientific_request_sha256": "ed137290d384dacaef87f46950bbfa601f1d46d209f9ae0853f81ac42210a3fc",
+  "scratch_transport_bytes": 740473424,
   "sparse_scan_metrics": {
     "g9": {
       "family_passes": 3,
@@ -62031,12 +62031,12 @@
   },
   "unresolved_block_primitive_rows": 0,
   "wall_seconds": {
-    "admission": 1137.8062091239844,
-    "engine": 158.81438710301882,
-    "g9": 7552.882589471992,
-    "request_support": 1082.1851330769714,
-    "sparse_primitives": 5784.161470168037,
-    "support": 1.6129924915730953e-06,
-    "total": 14633.664657480025
+    "admission": 1124.887697004946,
+    "engine": 133.15582434402313,
+    "g9": 5556.885684908018,
+    "request_support": 1079.99351324304,
+    "sparse_primitives": 4322.4651694380445,
+    "support": 1.4320248737931252e-06,
+    "total": 11137.394377127057
   }
 }

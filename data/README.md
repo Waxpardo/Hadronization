@@ -6,7 +6,7 @@ The `HF_RUN3_V1` result contains 300 million successful events from 3,000 accept
 
 ## Included results
 
-The [collaboration package](results/manifest.json) contains the numerical ROOT, 41 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 47,850 points with separate value and uncertainty statuses. Missing values remain explicit.
+The [collaboration package](results/manifest.json) contains the numerical ROOT, 41 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 49,050 points with separate value and uncertainty statuses. Missing values remain explicit.
 
 | Product | Location | Use |
 | --- | --- | --- |
@@ -27,7 +27,7 @@ Package verification needs the matching renderer runtime: ROOT 6.30.01 and GCC 1
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=ef463b06837362178009fcdb0995426e16c385ba1f1dd2e81aa81afb21cf0194
+PACKAGE_SHA=4f716d6e77845658d37037349645ae17da83f9913f5ed5f4a530ee8980b45270
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification
@@ -41,8 +41,8 @@ To change the presentation, copy `config/plot.json` and edit its display setting
 cp config/plot.json data/work/custom-plot.json
 ./hadronization plot render-cold \
   --numerics-root data/results/numerical/numerics.root \
-  --expected-root-sha256 39142e8ce4ab7242479d1ea0a808500f527a296401f3008fcb0eea9dd3dbe153 \
-  --expected-value-sha256 380e2c071566ad7f4a4caaf6cf843010afd8ed71c4b5c0b6b35aa9d6bd77d457 \
+  --expected-root-sha256 e9962a266ce5c033f72f68ec65dfbea1aa9e140911094d5fec37e298b076818b \
+  --expected-value-sha256 d6c2b76aa44432caf55b734854558fdfda5ffb0339ca8b397e5298472d3b1143 \
   --plot-config data/work/custom-plot.json \
   --work-dir data/work/custom-render --output data/work/custom-figures
 ```
