@@ -287,7 +287,7 @@ Correlation views distinguish identified pairs from sums over eligible associate
 
 The multiplicity display ends at the last occupied MONASH bin edge. Other tunes can have farther-tail bins in `numerics.root`. The inset shows positive MONASH support and its class boundaries. Numerical distributions retain the complete activity domain.
 
-The default correlation view omits uncertainty bars and says so in the page caption. Its OS and SS colors identify pair sign within MONASH. The alternative `config/plot-all-tune.json` uses tune colors and comparison panels. Neither presentation changes the numerical uncertainties.
+The default correlation view shows MONASH identified pairs with statistical bands. Solid and dotted lines distinguish opposite and same heavy-flavour signs. The alternative `config/plot-all-tune.json` uses tune colors and comparison panels. Neither presentation changes the numerical uncertainties.
 
 For tune comparisons, MONASH uses black circles, JUNCTIONS blue squares and CLOSEPACKING orange triangles. Inclusive multiplicity uses a solid line. Other classes use distinct configured line patterns. Undefined values and withheld errors retain explicit statuses.
 

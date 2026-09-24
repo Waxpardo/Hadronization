@@ -2770,13 +2770,24 @@ def canonical_export_pdf(payload, identity):
     if marker<0:
         raise ValueError('exported PDF trailer missing')
     trailer=payload[marker:]
-    pattern=rb'(/ID\s*\[\s*<)[0-9A-Fa-f]{32}(>\s*<)[0-9A-Fa-f]{32}(>\s*\])'
-    fixed,count=re.subn(pattern,lambda m:m[1]+identity.encode()+m[2]+identity.encode()+m[3],trailer)
-    if count>1 or (b'/ID' in trailer and count!=1):
+    # Ghostscript can encode a 16-byte ID as hex or an escaped literal string.
+    token=rb'(?:<[0-9A-Fa-f]{32}>|\((?:\\(?:[0-7]{1,3}|[nrtbf()\\])|[^\\()\r\n])*\))'
+    pattern=rb'/ID\s*\[\s*('+token+rb')\s*('+token+rb')\s*\]'
+    def replace_id(match):
+        for value in match.groups():
+            if value.startswith(b'('):
+                body=value[1:-1]
+                decoded=re.sub(rb'\\([0-7]{1,3}|[nrtbf()\\])',
+                    lambda m: bytes([int(m[1],8) & 255]) if m[1][:1] in b'01234567'
+                    else {b'n':b'\n',b'r':b'\r',b't':b'\t',b'b':b'\b',b'f':b'\f',
+                          b'(':b'(',b')':b')',b'\\':b'\\'}[m[1]],body)
+                if len(decoded)!=16:
+                    raise ValueError('exported PDF trailer ID length differs')
+        return b'/ID [<'+identity.encode()+b'><'+identity.encode()+b'>]'
+    fixed,count=re.subn(pattern,replace_id,trailer)
+    if count>1 or b'/ID' in re.sub(pattern,b'',trailer):
         raise ValueError('exported PDF trailer ID differs')
-    # The fixed-width replacement preserves every object offset and stream.
-    if len(fixed)!=len(trailer):
-        raise ValueError('exported PDF identity width differs')
+    # Only trailer bytes change. Object offsets and startxref stay unchanged.
     return payload[:marker]+fixed
 
 

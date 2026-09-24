@@ -163,7 +163,14 @@ int main(int argc, char** argv) {
         self.assertEqual(plot.canonical_export_pdf(source,identity),expected)
         self.assertEqual(plot.canonical_export_pdf(pdf(b''),identity),pdf(b''))
         self.assertEqual(len(expected),len(source))
-        for malformed in (b'/ID [<01><23>]',b'/ID (bad)',b'/ID [<'+b'zz'*16+b'><'+b'01'*16+b'>]'):
+        for value in (b'(abcdefghijklmnop)',rb'(abc\050\051\134\n\r\t\b\fghijk)',
+                      b'('+b'\\377'*16+b')'):
+            self.assertEqual(plot.canonical_export_pdf(pdf(b'/ID ['+value+value+b']'),identity),expected)
+            self.assertEqual(plot.canonical_export_pdf(pdf(b'/ID ['+value+b'<'+b'01'*16+b'>]'),identity),expected)
+        for malformed in (b'/ID [<01><23>]',b'/ID (bad)',b'/ID [<'+b'zz'*16+b'><'+b'01'*16+b'>]',
+                          b'/ID [(short)(short)]',b'/ID [(abcdefghijklmnop)(unterminated]',
+                          b'/ID [(abcdefghijklmnop)(abcdefghijklmnop)(abcdefghijklmnop)]',
+                          b'/ID [(abcdefghijklmnop)(abcdefghijklmnop)] /ID (bad)'):
             with self.assertRaisesRegex(ValueError,'trailer ID'):
                 plot.canonical_export_pdf(pdf(malformed),identity)
 
