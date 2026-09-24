@@ -836,9 +836,10 @@ double CategoryLabelY(const Page& page, const Panel& panel) {
       (page.role == "balancing.baryon_meson.activity" ? .015 : .025);
 }
 double PanelTitleY(const Page& page, const Panel& panel) {
-  if (panel.id.rfind("correlation.main.",0)==0) {
+  if (page.role.rfind("correlations.",0)==0) {
     const double ph=page.height*(panel.geometry[3]-panel.geometry[1]);
-    return 1-panel.margins[3]+1.2*BodyTextPixels(page)/ph;
+    return 1-panel.margins[3]+
+        (panel.id.rfind("correlation.main.",0)==0 ? 1.25 : .35)*BodyTextPixels(page)/ph;
   }
   if (panel.margins[3] > .25 || page.role.rfind("correlations.", 0) == 0)
     return 1 - panel.margins[3] + .035;
@@ -946,6 +947,12 @@ double CategoryTickInnerY(const Page& page, const Panel& panel, bool top) {
   const double delta = (panel.yHigh - panel.yLow) * fraction;
   return top ? panel.yHigh - delta : panel.yLow + delta;
 }
+double YTitleX(const Page& page, const Panel& panel) {
+  const double base=page.role.find("correlations.")==0 ? .025 :
+      (page.role.find("balancing.")==0 && panel.id.rfind("upper.",0)==0 ? .05 : .075);
+  const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
+  return std::max(.012,base-.3*BodyTextPixels(page)/width);
+}
 std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
                                              const Panel& panel,
                                              const std::vector<Page>& pages,
@@ -960,9 +967,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
   };
   if (!inset && !panel.yTitle.empty() && !SharedStackYTitle(page, panel)) {
     result.push_back(TextExpectation(
-        panel.yTitle, page.role.find("correlations.") == 0 ? .025 :
-            (page.role.find("balancing.") == 0 &&
-             panel.id.rfind("upper.", 0) == 0 ? .05 : .075),
+        panel.yTitle, YTitleX(page, panel),
         (panel.margins[2] + 1 - panel.margins[3]) / 2,
         textPixels, 1, 23, 90));
   }
@@ -1112,7 +1117,8 @@ int TuneLegendTextPixels(const Page& page) {
 std::array<double, 4> InsideTuneLegendBox(const Page& page, const Panel& panel,
                                         std::size_t count) {
   // Keep the reference multiplicity key exactly where it was specified.
-  if (page.role == "multiplicity.composite") return panel.legend;
+  if (page.role == "multiplicity.composite" ||
+      page.role == "balancing.baryon_meson.activity") return panel.legend;
   if (panel.margins[3] > .25) {
     const double pw=page.width*(panel.geometry[2]-panel.geometry[0]);
     const double ph=page.height*(panel.geometry[3]-panel.geometry[1]);
@@ -1291,6 +1297,14 @@ std::vector<ExpectedText> ClassKeyTexts(const Page& page) {
   (void)page;
   return {};
 }
+std::string LogBoundaryLabel(double value) {
+  const int exponent=static_cast<int>(std::floor(std::log10(value)+1.e-12));
+  const double coefficient=value/std::pow(10.,exponent);
+  if (std::abs(coefficient-1.)<1.e-10) return "10^{"+std::to_string(exponent)+"}";
+  std::ostringstream text;
+  text << std::setprecision(4) << coefficient << "#times10^{" << exponent << "}";
+  return text.str();
+}
 std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
   std::vector<ExpectedText> result;
   // Paint seam labels on the canvas so an adjacent pad cannot clip them.
@@ -1303,7 +1317,7 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
           panel.geometry[3]-height*panel.margins[3],BodyTextPixels(page),1,32));
     if (page.role.rfind("correlations.",0)==0 && panel.logY &&
         panel.margins[2]==0. && !SharedRightAxis(panel))
-      result.push_back(TextExpectation("10^{-6}",x,
+      result.push_back(TextExpectation(LogBoundaryLabel(panel.yLow),x,
           panel.geometry[1],BodyTextPixels(page),1,32));
   }
   if (page.role.rfind("balancing.",0)==0 ||
@@ -1374,7 +1388,7 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
     const double height=panel.geometry[3]-panel.geometry[1];
     stackBottom=std::min(stackBottom,panel.geometry[1]+height*panel.margins[2]);
     stackTop=std::max(stackTop,panel.geometry[3]-height*panel.margins[3]);
-    titleX=panel.geometry[0]+.05*(panel.geometry[2]-panel.geometry[0]);
+    titleX=panel.geometry[0]+YTitleX(page,panel)*(panel.geometry[2]-panel.geometry[0]);
   }
   if (!stackTitle.empty())
     result.push_back(TextExpectation(stackTitle,titleX,(stackBottom+stackTop)/2,
@@ -1881,9 +1895,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       TLatex label; label.SetNDC(); label.SetTextFont(43); label.SetTextSize(textPixels);
       label.SetLineWidth(1);
       label.SetTextAngle(90); label.SetTextAlign(23);
-      label.DrawLatex(page.role.find("correlations.")==0 ? .025 :
-                          (page.role.find("balancing.")==0 &&
-                           panel.id.rfind("upper.",0)==0 ? .05 : .075),
+      label.DrawLatex(YTitleX(page, panel),
                       (panel.margins[2]+1-panel.margins[3])/2,panel.yTitle.c_str());
     }
     if (!panel.ticks.empty()) {

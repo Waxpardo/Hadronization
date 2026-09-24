@@ -210,7 +210,7 @@ def checked_plot_config(path):
             layout["text_pixel_size"] < 1 or
             layout["physical_width_cm"] != 18.0 or
             layout["minimum_body_text_pt"] != 8.0 or
-            layout["p1_inset_geometry"] != [.15, .05, .62, .48] or
+            layout["p1_inset_geometry"] != [.18, .05, .65, .48] or
             type(layout["activity_category_dividers"]) is not bool or
             layout["correlation_view"] not in
                 ("monash_pair_sign", "monash_balance", "all_tune_ratio") or
@@ -980,11 +980,16 @@ def apply_display_limits(pages):
         for panel in page['panels']:
             if (page['role'] == 'multiplicity.composite' and
                     panel['id'] == 'lower.ratio'):
-                low = panel['y_range'][0]
-                panel['y_range'] = [low if low < 5. else 0., 5.]
+                lower=[q['y']-(q.get('error') or 0.)
+                       for z in panel['series'] for q in z['points']
+                       if q.get('y') is not None and q['y'] <= 5.]
+                panel['y_range'] = [min([0.]+lower)-.08, 5.]
             if (page['role'].startswith('correlations.') and panel['log_y']
                     and not panel['id'].startswith('correlation.compare.')):
-                panel['y_range'] = [1.e-6, max(panel['y_range'][1], 1.e-5)]
+                positive=[q['y'] for z in panel['series'] for q in z['points']
+                          if q.get('y') is not None and q['y']>0.]
+                floor=min(1.e-5, min(positive)*.8) if positive else 1.e-5
+                panel['y_range'] = [floor, max(panel['y_range'][1], floor*10.)]
 
 
 def synchronize_paired_y_ranges(pages):
@@ -1202,13 +1207,16 @@ def scientific_caption_lines(page, context):
         profile = context.profile_definition
         eta = format(float.fromhex(profile['trigger_eta']['high']), '.15g')
         if profile['trigger_pt']['low'] is None:
-            lines.append('|#eta_{trig,assoc}| #leq '+eta)
+            lines.append('|#eta| #leq '+eta)
         else:
             lines.append('Pairs: p_{T}^{trig} #geq '+format(float.fromhex(profile['trigger_pt']['low']), '.15g')+
                          ', p_{T}^{assoc} #geq '+format(float.fromhex(profile['associate_pt']['low']), '.15g')+' GeV/c')
-            lines.append('Pair acceptance: |#eta_{trig,assoc}| #leq '+eta)
+            lines[-1] += '; |#eta| #leq '+eta
     if role=='multiplicity.composite' or '.activity.' in role or role.endswith('.activity'):
         activity=context.activity_selection
+        eta_line='|#eta| #leq '+format(float.fromhex(activity['eta_window']), '.15g')
+        if eta_line in lines:
+            lines.remove(eta_line)
         lines.extend(['N_{ch}: charged light final particles',
             'p_{T} > '+format(float.fromhex(activity['pt']['low']), '.15g')+
             ' GeV/c; |#eta| #leq '+format(float.fromhex(activity['eta_window']), '.15g')])
@@ -1216,11 +1224,15 @@ def scientific_caption_lines(page, context):
         eta=format(float.fromhex(context.g9_science['eta']['high']), '.15g')
         lines.extend(['|#eta| #leq '+eta,
             'Normalized probability per bin'])
+    if (len(lines)>=3 and lines[-1].startswith('|#eta|')
+            and lines[-2].startswith('Hard ')):
+        eta_line=lines.pop()
+        lines[-1] += '; '+eta_line
     return lines
 
 
 def add_publication_captions(pages, context):
-    """Put the sample key in a reserved panel header, without stretching axes."""
+    """Place sample text inside frames and retain separate column titles."""
     for page in pages:
         panels=[p for p in page['panels'] if not p.get('reuse')]
         top=max(p['geometry'][3] for p in panels)
@@ -1230,70 +1242,49 @@ def add_publication_captions(pages, context):
         page['scientific_caption']=lines
         for panel in page['panels']: panel['annotations']=[]
         font=max(page['text_pixels'],math.ceil(9*page['width']/(18*72/2.54)))
-        if page['role'] != 'multiplicity.composite':
-            if page['role'].startswith('balancing.') and len(panels)<=4:
-                page['height']=max(page['height'],1600)
-            # In stacked tune views, reserve one header and share the remaining
-            # physical plotting height equally between the three tune rows.
+        if page['role'] == 'spectra.signed_heavy':
             header=(1.25*len(lines)+2.8)*font
-            if page['role'].startswith('balancing.') and len(panels)>4:
-                page['height']=max(page['height'],2950)
-                science=[p for p in panels if p['id'].startswith('upper.')]
-                spans=sorted({tuple(p['geometry'][1::2]) for p in science},reverse=True)
-                bottom=min(pair[0] for pair in spans)
-                frame=((top-bottom)*page['height']-header)/len(spans)
-                cursor=top
-                for index,span in enumerate(spans):
-                    height=(frame+(header if index==0 else 0))/page['height']
-                    for panel in science:
-                        if tuple(panel['geometry'][1::2])==span:
-                            panel['geometry'][1]=cursor-height
-                            panel['geometry'][3]=cursor
-                            panel['margins'][3]=header/(height*page['height']) if index==0 else 0.
-                    cursor-=height
-            else:
-                if page['role'].startswith('correlations.') and len(panels)>4:
-                    old_height=page['height']
-                    page['height'] += math.ceil(header)
-                    page['header_bottom']=(page['header_bottom']*old_height+header)/page['height']
-                    for panel in panels:
-                        old_ph=old_height*(panel['geometry'][3]-panel['geometry'][1])
-                        if panel not in row and panel['id'].startswith('correlation.main.'):
-                            panel['margins'][3]=max(panel['margins'][3],.18)
-                        panel['geometry'][1] *= old_height/page['height']
-                        panel['geometry'][3] = (panel['geometry'][3]*old_height+
-                            (header if panel in row else 0.))/page['height']
-                        if panel in row:
-                            panel['margins'][3]=(panel['margins'][3]*old_ph+header)/(old_ph+header)
-                for panel in row:
-                    ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
-                    panel['margins'][3]=max(panel['margins'][3],header/ph)
-                    if panel['margins'][3]>.58:
-                        raise ValueError('scientific header leaves too little data area: '+page['filename'])
+            for panel in row:
+                ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
+                panel['margins'][3]=max(panel['margins'][3],header/ph)
+        elif page['role'] != 'multiplicity.composite':
+            if page['role'].startswith('balancing.'):
+                page['height']=max(page['height'],2950 if len(panels)>4 else 1600)
+            # Reserve only the column title above the frame. Scientific text
+            # is inside the data panel at the selected reference position.
+            titled=[p for p in panels if p in row or p['id'].startswith('correlation.main.')]
+            for panel in titled:
+                ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
+                panel['margins'][3]=(3. if panel['id'].startswith('correlation.main.') else 1.8)*font/ph
         ph=page['height']*(target['geometry'][3]-target['geometry'][1])
-        x=target['margins'][0]+.025; y=min(.97,1.-1.15*font/ph); step=1.25*font/ph
+        x=target['margins'][0]+.025
+        y=1.-target['margins'][3]-1.45*font/ph
+        step=1.30*font/ph
+        if page['role'].startswith('balancing.') and page['role']!='balancing.baryon_meson.activity':
+            x=target['margins'][0]+.32*(1.-target['margins'][0])
+        if page['role']=='spectra.signed_heavy':
+            y=min(.97,1.-1.15*font/ph)
         if page['role']=='multiplicity.composite':
-            font=18;step=1.30*font/ph;x=.37;y=.855
+            font=18;step=1.30*font/ph;x=.45;y=.81
+            target['legend']=[.76,.705,.95,.825]
         target['annotations']=[{'x':x,'y':y-i*step,'size':float(font),'text':line}
                                for i,line in enumerate(lines)]
         for panel in panels:
-            if panel['id'].startswith('correlation.teaching.'):
-                if panel['id'].endswith('.identified'):
-                    ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
-                    top=1.-panel['margins'][3]-.03
-                    panel['legend']=[panel['margins'][0]+.025,
-                        top-3.3*(font+2)/ph,.98,top]
-            if panel['id']=='lower.ratio' and page['role']=='multiplicity.composite':
-                clipped=sum(q['state']=='DRAW' and q['y'] is not None and q['y']>5
-                            for z in panel['series'] for q in z['points'])
-                if clipped:
-                    panel['annotations'].append({'x':.27,'y':.86,'size':18.,
-                        'text':str(clipped)+' lowest-multiplicity ratios exceed 5'})
-                    panel['annotations'].append({'x':panel['margins'][0]+.008,'y':.91,'size':18.,'text':'#uparrow'})
+            if panel['id'].startswith('correlation.teaching.') and panel['id'].endswith('.identified'):
+                ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
+                top=1.-panel['margins'][3]-.03
+                panel['legend']=[1.-panel['margins'][1]-.29,
+                    top-3.3*(font+2)/ph,1.-panel['margins'][1]-.02,top]
+            if page['role']=='balancing.baryon_meson.activity' and panel in row and panel is not target:
+                ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
+                pw=page['width']*(panel['geometry'][2]-panel['geometry'][0])
+                top=1.-panel['margins'][3]-.03
+                panel['legend']=[.035,top-4.95*(font+2)/ph,
+                                  .035+(font+2)*10.44/pw,top]
         if page['role']=='multiplicity.composite':
             for panel in page['panels']:
                 if panel.get('reuse'):
-                    panel['annotations'].append({'x':.24,'y':.85,'size':12.,'text':'MONASH percentiles'})
+                    panel['annotations'].append({'x':.24,'y':.85,'size':12.,'text':'MONASH percentile intervals'})
         if page['role']=='spectra.signed_heavy':
             page['title']=page['title'].removeprefix('G9 ').replace(' (1)','')
             for panel in panels:
@@ -1762,6 +1753,59 @@ def reserve_spectrum_tune_key(pages):
         required = (low*math.exp(math.log(max(occupied)/low)/(1-fraction))
                     if panel['log_y'] else low+(max(occupied)-low)/(1-fraction))
         panel['y_range'][1] = max(high, required)
+
+
+def reserve_annotation_headroom(pages):
+    """Reserve vertical display space only over the annotated x intervals."""
+    for page in pages:
+        if not page['role'].startswith(('balancing.', 'correlations.')):
+            continue
+        panels=[p for p in page['panels'] if not p.get('reuse')]
+        top=max(p['geometry'][3] for p in panels)
+        row=[p for p in panels if p['geometry'][3]==top]
+        required=max(p['y_range'][1] for p in row)
+        for panel in row:
+            pw=page['width']*(panel['geometry'][2]-panel['geometry'][0])
+            ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
+            font=max(page['text_pixels'],math.ceil(9*page['width']/(18*72/2.54)))
+            left,right,bottom,margin_top=panel['margins']
+            boxes=[]
+            if panel['annotations']:
+                boxes.append((min(a['x'] for a in panel['annotations']),
+                              min(a['y'] for a in panel['annotations'])-.7*font/ph,
+                              1.-right-.02))
+            if panel['id'].endswith('.identified') or page['role']=='balancing.baryon_meson.activity' and not panel['annotations']:
+                x,y,x2,_=panel['legend'];boxes.append((x,y-.7*font/ph,x2))
+            elif panel is max(row,key=lambda p:p['geometry'][0]) and page['role'].startswith('balancing.'):
+                keyfont=font+2
+                x2=1.-right-.65*keyfont/pw
+                boxes.append((x2-10.44*keyfont/pw,
+                    1.-margin_top-(4.95+1.35)*keyfont/ph,x2))
+            for x,y,x2 in boxes:
+                fraction=(y-bottom)/(1.-margin_top-bottom)
+                if fraction<=0:
+                    raise ValueError('annotation exceeds frame height: '+page['filename'])
+                xmin,xmax=panel['x_range']
+                lo=xmin+(x-left)/(1.-left-right)*(xmax-xmin)
+                hi=xmin+(x2-left)/(1.-left-right)*(xmax-xmin)
+                values=[]
+                for series in panel['series']:
+                    for q in series['points']:
+                        if q['state']!='DRAW' or q['y'] is None:continue
+                        qlo=q.get('bin_low');qhi=q.get('bin_high')
+                        if qlo is None:qlo=q['display_x']-.45
+                        if qhi is None:qhi=q['display_x']+.45
+                        if qlo<=hi and qhi>=lo:
+                            values.append(q['y']+(q['error'] or 0.))
+                if not values:continue
+                low=panel['y_range'][0];peak=max(values)
+                high=(low*math.exp(math.log(peak/low)/fraction)
+                      if panel['log_y'] and peak>low else low+(peak-low)/fraction)
+                required=max(required,high)
+        # Keep equal scientific scales across columns and stacked tune rows.
+        for panel in panels:
+            if panel in row or (page['role'].startswith('balancing.') and panel['id'].startswith('upper.')):
+                panel['y_range'][1]=required
 
 
 def drawing_plan(projection, manifest, config):
@@ -2404,6 +2448,8 @@ def drawing_plan(projection, manifest, config):
         apply_cold_page_style(pages,context)
         add_publication_captions(pages,context)
     reserve_spectrum_tune_key(pages)
+    reserve_annotation_headroom(pages)
+    synchronize_paired_y_ranges(pages)
     return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}
 
 def g9_drawing_pages(context, rows, config, header, information, labels):

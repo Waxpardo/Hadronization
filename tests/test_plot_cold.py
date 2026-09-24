@@ -63,6 +63,20 @@ int main() {
     if (g.title.rfind("dense_markers:",0)==0 &&
         std::find(g.x.begin(),g.x.end(),10.5)!=g.x.end()) return 5;
   }
+  if (LogBoundaryLabel(1.e-5)!="10^{-5}" ||
+      LogBoundaryLabel(8.e-9)!="8#times10^{-9}") return 7;
+  panel.id="correlation.teaching.521.identified";
+  panel.yLow=1.e-5;panel.margins[0]=.2;
+  page.panels={panel};
+  const auto text=CanvasSupplementTexts(page);
+  if (text.empty() || text.front().text!="10^{-5}") return 8;
+  Page shortPage{};shortPage.role="correlations.charm";
+  shortPage.width=1900;shortPage.height=2600;shortPage.textPixels=34;
+  Panel shortPanel{};shortPanel.id="correlation.main.421.SS";
+  shortPanel.geometry={0.,.4,.55,.6};
+  shortPanel.margins[3]=3.*34./520.;
+  const double baseline=PanelTitleY(shortPage,shortPanel);
+  if (baseline+34./520.>=1. || baseline<=1.-shortPanel.margins[3]+34./520.) return 9;
   return bands==ranges.size() && central ? 0 : 6;
 }
 '''
@@ -254,6 +268,20 @@ int main(int argc, char** argv) {
             plot.correlation_y_title([row,{'quantity':'dphi_per_trigger',
                                           'units':'per_trigger_per_bin'}])
 
+    def test_compact_caption_deduplicates_only_equal_eta_acceptance(self):
+        context=SimpleNamespace(target_analysis_caption='PYTHIA 8.317',
+            sample_caption=['Hard c and b'], profile_definition={
+                'trigger_eta':{'high':float(4).hex()},
+                'trigger_pt':{'low':None}}, activity_selection={
+                'pt':{'low':float(.15).hex()},'eta_window':float(4).hex()})
+        lines=plot.scientific_caption_lines({'role':'balancing.activity.charm'},context)
+        self.assertEqual(sum(line.count('|#eta|') for line in lines),1)
+        self.assertIn('p_{T} > 0.15 GeV/c; |#eta| #leq 4',lines)
+        context.activity_selection['eta_window']=float(1).hex()
+        lines=plot.scientific_caption_lines({'role':'balancing.activity.charm'},context)
+        self.assertIn('|#eta| #leq 4',lines)
+        self.assertIn('p_{T} > 0.15 GeV/c; |#eta| #leq 1',lines)
+
     def test_display_limits_keep_clipped_points_and_errors(self):
         import copy
         panels=[{'id':'lower.ratio','y_range':[-.2,18.], 'log_y':False,
@@ -265,8 +293,8 @@ int main(int argc, char** argv) {
         plot.apply_display_limits([
             {'role':'multiplicity.composite','panels':[panels[0]]},
             {'role':'correlations.charm','panels':[panels[1]]}])
-        self.assertEqual(panels[0]['y_range'],[-.2,5.])
-        self.assertEqual(panels[1]['y_range'],[1e-6,.1])
+        self.assertEqual(panels[0]['y_range'],[-.08,5.])
+        self.assertEqual(panels[1]['y_range'],[8e-9,.1])
         for before,after in zip(original,panels):
             self.assertEqual(before['series'],after['series'])
 
@@ -349,7 +377,7 @@ int main(int argc, char** argv) {
     def test_p1_owner_inset_is_large_lower_left(self):
         config, _ = plot.checked_plot_config(ROOT / "config/plot.json")
         self.assertEqual(config["layout"]["p1_inset_geometry"],
-                         [.15, .05, .62, .48])
+                         [.18, .05, .65, .48])
         self.assertEqual(config['layout']['correlation_view'],
                          'monash_pair_sign')
         self.assertEqual(config['presets']['paper_default']['trigger_pdgs'][0],

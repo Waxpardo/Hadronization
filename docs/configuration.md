@@ -106,7 +106,7 @@ The field `phase_a_t9_two_sided_quantile` is the literal key for the fixed nine-
 | `layout.physical_width_cm` | 18. Fixed cm width |
 | `layout.minimum_body_text_pt` | 8. Fixed typographic point minimum |
 | `layout.categorical_tune_dodge` | Upper: -0.08, 0, 0.08. Lower: -0.04, 0.04. Fixed compatibility map. Current scientific category positions coincide. |
-| `layout.p1_inset_geometry` | `[0.15,0.05,0.62,0.48]`. Fixed normalized rectangle for the multiplicity inset |
+| `layout.p1_inset_geometry` | `[0.18,0.05,0.65,0.48]`. Fixed normalized rectangle for the multiplicity inset |
 | `layout.correlation_view` | `monash_pair_sign`. Also accepts `monash_balance` and `all_tune_ratio` |
 | `layout.activity_category_dividers` | false. Boolean. Adds vertical category dividers when true. |
 | `style_identities.class_line_style_rule` | Integrated style 1, others by class order. Fixed mapping |
