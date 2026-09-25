@@ -6,7 +6,14 @@ The `HF_RUN3_V1` result contains 300 million successful events from 3,000 accept
 
 ## Included results
 
-The [collaboration package](results/manifest.json) contains the numerical ROOT, 41 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 49,050 points with separate value and uncertainty statuses. Missing values remain explicit.
+The [collaboration package](results/manifest.json) contains the numerical ROOT, 57 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 51,300 points with separate value and uncertainty statuses. The table preserves missing states. The [cut-selection package](results-pt-1-0p15/manifest.json) contains the same output types for trigger pT >= 1.0 and associate pT >= 0.15 GeV/c. Both endpoints pass; no event-wise pT ordering applies.
+
+| Selection | Complete package | All-tune correlation companion |
+| --- | --- | --- |
+| Inclusive pair pT | [results](results) | [figures-all-tune](figures-all-tune) |
+| Trigger 1.0 / associate 0.15 GeV/c | [results-pt-1-0p15](results-pt-1-0p15) | [figures-all-tune-pt-1-0p15](figures-all-tune-pt-1-0p15) |
+
+Each presentation contains 57 PDFs and a ROOT canvas archive. The 16 additional baryon/reference pages compare meson and Lambda triggers for every selected Lambda, Sigma and Xi state. The profiles share the activity distribution and standalone spectra because pair-pT thresholds do not define those quantities.
 
 | Product | Location | Use |
 | --- | --- | --- |
@@ -27,10 +34,19 @@ Package verification needs the matching renderer runtime: ROOT 6.30.01 and GCC 1
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=8e618d9bcfd2c7134d8ee60b694bb01e85dbe02f73910555fe17d20b452d3c33
+PACKAGE_SHA=7af2aa3e61e23df43c612d6cdb251d395e528c1aaff9313bbb8964323f5bbcdf
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification
+```
+
+For the cut-selection package, use a separate verification directory:
+
+```sh
+./hadronization package verify \
+  --package data/results-pt-1-0p15 \
+  --manifest-sha256 aa3117a90998eef81456bcbaffa94f3ef3050d6f04388b2bb75e262efa6ae597 \
+  --work-dir data/work/cut-release-verification
 ```
 
 The checked-out Git revision supplies the trusted manifest bytes. Record the checked-out commit before verification. The verifier checks every packaged file against the manifest.
@@ -41,11 +57,25 @@ To change the presentation, copy `config/plot.json` and edit its display setting
 cp config/plot.json data/work/custom-plot.json
 ./hadronization plot render-cold \
   --numerics-root data/results/numerical/numerics.root \
-  --expected-root-sha256 e9962a266ce5c033f72f68ec65dfbea1aa9e140911094d5fec37e298b076818b \
-  --expected-value-sha256 d6c2b76aa44432caf55b734854558fdfda5ffb0339ca8b397e5298472d3b1143 \
+  --expected-root-sha256 f5bd463c068399fb5816b512b517aea42c044d35304bcc588a4e63a4e7b90afa \
+  --expected-value-sha256 8f8df2a5cde62f3e176b5b35b41bd17a6845182ecda7b2036b4905fd82a8845b \
   --plot-config data/work/custom-plot.json \
   --work-dir data/work/custom-render --output data/work/custom-figures
 ```
+
+To verify an all-tune companion, use the matching numerical ROOT and the companion manifest hash. The inclusive example is:
+
+```sh
+./hadronization plot verify-render-cold \
+  --numerics-root data/results/numerical/numerics.root \
+  --expected-root-sha256 f5bd463c068399fb5816b512b517aea42c044d35304bcc588a4e63a4e7b90afa \
+  --expected-value-sha256 8f8df2a5cde62f3e176b5b35b41bd17a6845182ecda7b2036b4905fd82a8845b \
+  --expected-manifest-sha256 48a7e1310ab20720e46af46b3b648630d3bca46c04bc6c107de2d61a5fc3f241 \
+  --plot-config config/plot-all-tune.json \
+  --work-dir data/work/all-tune-verification --output data/figures-all-tune
+```
+
+For the cut companion, change the numerical directory, output directory, scratch directory and all three hashes. Read those hashes from the matching package and figure manifests in the checked-out revision. Do not combine figures and numerical files from different profiles.
 
 ## Download merged ROOT
 

@@ -1,4 +1,8 @@
 # Preserve the physical bytes bound by result manifests on every checkout.
 /data/results/** -text
+/data/results-pt-1-0p15/** -text
+/data/figures-all-tune/** -text
+/data/figures-all-tune-pt-1-0p15/** -text
 # CSV exports use the standard CRLF record ending.
 /data/results/numerical/exports/*.csv whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+/data/results-pt-1-0p15/numerical/exports/*.csv whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

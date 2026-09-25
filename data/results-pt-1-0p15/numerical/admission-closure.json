@@ -1,0 +1,37 @@
+{
+  "accepted_manifest_sha256": "5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f8f247585912e2df247",
+  "acquisition_manifest_sha256": "e4a36a57a08399cad4f09e283f060ad04c8711e7dbc587f0021a1f140d447654",
+  "campaign": "HF_RUN3_V1",
+  "campaign_descriptor_sha256": "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d",
+  "campaign_sha256": "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d",
+  "collection_index_sha256": "160f3c3789395740ec0d0244e3d719a53dbf064c340aecb32670189a40e86dfc",
+  "collection_scientific_identity_sha256": "bd7931236150587b0ca670661272468ed91e4cb5953d3f1039a2e97c67ccf9c8",
+  "collector_closure_sha256": "599d96ba6a786bd1f3bb68f76e341221aad836bf8b5e632ef6d6bce7bb6acb84",
+  "domain_complete": true,
+  "event_count": 300000000,
+  "expected_sources_sha256": "f7c1e9eadad30eeda3e8fddb1e356da7e080135b8fc635fe4e86478cdcbeab22",
+  "external_pins_sha256": "0e5cc5793dbfa594d3c52aaaac62afb06df8513f749c2c2eec0d7cd958fc60d6",
+  "index_state": "EXTERNAL_ACCEPTANCE_REQUIRED",
+  "natural_members_sha256": "3dbc10baaff06e29b199a57f9220b2bd01b1d8ee44b64d00f2d07132560c0e36",
+  "per_tune_source_event_counts": [
+    {
+      "events": 100000000,
+      "sources": 1000,
+      "tune": "MONASH"
+    },
+    {
+      "events": 100000000,
+      "sources": 1000,
+      "tune": "JUNCTIONS"
+    },
+    {
+      "events": 100000000,
+      "sources": 1000,
+      "tune": "CLOSEPACKING"
+    }
+  ],
+  "qualification": "FULL_ACCEPTED_DOMAIN_CLOSED",
+  "schema": "hadronization_query_collection_admission_closure_v1",
+  "source_count": 3000,
+  "work_sha256": "00a550c5e466a2250e72ffded362cd19eb5db323c8cf5d2103f375d32d9546e2"
+}

@@ -7,6 +7,7 @@
 | File | Consumer and role | Change policy |
 | --- | --- | --- |
 | [analysis.json](../config/analysis.json) | Query construction and numerical reduction | Change supported profiles or percentiles in a separately hashed copy |
+| [analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) | Optional pair-pT comparison | Adds `pt_1_0p15` to the inclusive configuration; select it with `--profile-id` |
 | [query.json](../config/query.json) | Query builder, verifier and collection reader | Fixed schema, not a free-form layout selector |
 | [plot.json](../config/plot.json) | Default renderer presentation | Change only supported display fields |
 | [plot-dplus.json](../config/plot-dplus.json) | D+ presentation | Pair with `reduce run --charm-trigger 411` |
@@ -38,6 +39,8 @@ The tables below distinguish user choices from fixed metadata. A fixed field has
 | CLI `--tunes` | List of tune strings, default collection domain | Full research reduction requires the complete three-tune domain. |
 
 Both rectangle minima must be exact regular-bin lower edges in the query pT axis. Do not select 7000 as a lower edge because it is the final upper edge. Overflow above that edge remains included.
+
+The supplied `analysis-pt-1-0p15.json` adds a rectangular profile to the inclusive request. Its minima are 1.0 GeV/c for triggers and 0.15 GeV/c for associates. All other fields match `analysis.json`. Select `pt_1_0p15` explicitly; the default profile remains inclusive.
 
 This JSON value can replace `profiles` in a copy of `analysis.json`:
 

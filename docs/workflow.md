@@ -228,7 +228,7 @@ Add `--charm-trigger 411` to select the coherent D+ recipe. Add `--analysis` wit
 
 ### Compare inclusive and rectangular selections
 
-Keep the shipped analysis configuration unchanged. Create a separate request with the [profile example](configuration.md#analysis-choices), and record its SHA-256.
+Keep the default analysis configuration unchanged. Use [analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) for the supplied comparison. Its SHA-256 is `4ffc605233dab2bae9e9d77c6515dff5cc7d63f04045c5e95cd0561c80597ec4`. Other supported profiles follow the [configuration example](configuration.md#analysis-choices).
 
 For the inclusive result, use `--profile-id inclusive`. For the 1.0/0.15 GeV/c result, use `--profile-id pt_1_0p15` with the compatible request and its hash. Run reduction twice with distinct output and scratch directories. Use each numerical package to render and package its own figures.
 
@@ -282,7 +282,7 @@ Bands show pointwise statistical standard errors. They do not represent systemat
 
 Use the three-class activity views for compact comparisons. They show 0–1%, 40–50% and 80–90%. The full-class views retain all classes. Use full-width placement for dense figures. Check label sizes after placing each figure in the manuscript.
 
-The multiplicity inset identifies MONASH class boundaries. Other tunes have their own boundaries. The lower-panel limit of five hides some low-multiplicity ratios. The saved numerical values remain unchanged.
+The multiplicity inset identifies MONASH class boundaries. Other tunes have their own boundaries. The lower-panel limit of 2.5 hides ratios above that display range. The saved numerical values remain unchanged.
 
 Correlation views distinguish identified pairs from sums over eligible associates. Opposite and same sign refer to heavy-flavour content. Horizontal segments on species axes mark categories; they are not horizontal measurement uncertainties. Equal-width percentile slots can represent unequal percentile intervals.
 
@@ -301,7 +301,9 @@ The multiplicity display ends at the last occupied MONASH bin edge. Other tunes 
 
 The default correlation view shows MONASH identified pairs with statistical bands. Solid and dotted lines distinguish opposite and same heavy-flavour signs. The alternative `config/plot-all-tune.json` uses tune colors and comparison panels. Neither presentation changes the numerical uncertainties.
 
-For tune comparisons, MONASH uses black circles, JUNCTIONS blue squares and CLOSEPACKING orange triangles. Inclusive multiplicity uses a solid line. Other classes use distinct configured line patterns. Undefined values and withheld errors retain explicit statuses.
+When tunes share a panel, MONASH uses black circles, JUNCTIONS blue squares and CLOSEPACKING orange triangles. Pages with separate tune rows and several activity classes omit markers. Their colors identify tunes, and line patterns identify classes. The inclusive class uses a solid line.
+
+The three-class view uses long dashes for 0–1%, dots for 40–50%, and short separated dashes for 80–90%. Its line-style key appears inside a right-hand panel. Undefined values and withheld errors retain explicit statuses.
 
 Use `config/plot-dplus.json` with D+ numerical results. Keep the selected configuration with the figures. A mismatched charm recipe fails before rendering.
 

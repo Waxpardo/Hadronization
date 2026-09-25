@@ -1,0 +1,99 @@
+{
+  "admission_closure_path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-expanded-7979ec2-pt_1_0p15/numerical/admission-closure.json",
+  "admission_closure_sha256": "4686bc3ca17dcbce019d9632e03a6390dd90e05c1b5a368aaab8e8e39bd291ea",
+  "analysis_sha256": "4ffc605233dab2bae9e9d77c6515dff5cc7d63f04045c5e95cd0561c80597ec4",
+  "campaign_state": "FULL_ACCEPTED_CAMPAIGN",
+  "class_boundary_deletions": 396,
+  "collection_index_sha256": "160f3c3789395740ec0d0244e3d719a53dbf064c340aecb32670189a40e86dfc",
+  "covariance_groups": 1,
+  "exports": {
+    "files": {
+      "accounting.csv": "dfad5ed47bf041b652a08f6e32d1e1a1ba62d8f1bb43b1153a45550fb67bae97",
+      "accounting.tex": "69e4017aa5f0cd654e575d0475322c5b368b5e6badd66e637194e6a5a0f223ef",
+      "missing.csv": "38b92b72e7e0566ca79102848fd731851b7ab26d8e49873572d43b7559a5da5e",
+      "overleaf-check.tex": "12c09cb93ef395d74cc353479f9ec1ef88f003a39f03b34042b2b09ab1e41d34",
+      "overleaf-preamble.tex": "b493cca93ecc6b47b74731863ba9da2c2e3e30b7be2ee0c974700a2362374da0",
+      "overleaf-tables.tex": "612408fc7bdbaacbb3a34c43984e96c297faed6b121b526b73cf090527abff19",
+      "points.csv": "8ea38bef59054ab1836f3897c874e1aa2f13834212b4ae77c63872f45092df18",
+      "t1.csv": "0a3d3a9356fbe42e2594b21883395a31749d35f494d0c0c5b273f02e58b71832",
+      "t1.tex": "a67771dbfaae09cd63f4eff320372286dd51750c02d4037d76c8a92caa332f4e"
+    },
+    "numerical_root_sha256": "4973a2b482f24098a944680c28b144a66d96856dc097fe36bc276cbc0fb1f346",
+    "schema": "hadronization_v4_root_exports_v1",
+    "value_sha256": "71f4b5fdce4416ef8a8fae98e25ab1e91cf20c2e07c35ea70b2f4dd7b23a7d0f"
+  },
+  "merge_lineage_sha256": "e70f0831971dcabf6c508ed6ba104ee7ce85d8ee6cb10172abee83c95a275acf",
+  "merge_verification_sha256": "e945a60e90bb76ffff53f50b1fb14968dd55746ea8f831ef178d05f0fd131ad4",
+  "native_run_receipt_path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-expanded-7979ec2-pt_1_0p15/numerical/native-run-receipt.json",
+  "native_run_receipt_sha256": "40ced5d96d9e0575ef8f68807da6e4ceae2edd1e38763723bb731900fa15e414",
+  "point_status_counts": [
+    {
+      "center_status": "AVAILABLE",
+      "count": 28594,
+      "uncertainty_status": "AVAILABLE"
+    },
+    {
+      "center_status": "AVAILABLE",
+      "count": 11620,
+      "uncertainty_status": "AVAILABLE_ZERO_DISPERSION"
+    },
+    {
+      "center_status": "AVAILABLE",
+      "count": 2700,
+      "uncertainty_status": "WITHHELD_UNCERTAINTY"
+    },
+    {
+      "center_status": "UNDEFINED",
+      "count": 7758,
+      "uncertainty_status": "WITHHELD_UNCERTAINTY"
+    },
+    {
+      "center_status": "UNSTABLE_DENOMINATOR",
+      "count": 628,
+      "uncertainty_status": "WITHHELD_UNCERTAINTY"
+    }
+  ],
+  "points": 51300,
+  "request_sha256": "d5f6025d4600dd0a16598d5cf756adff837e8d4328436d635c355b8a616273dc",
+  "root": {
+    "direct_tables": {
+      "bindings": 1,
+      "block_components": 1642460,
+      "block_values": 699200,
+      "campaign_attempt_evidence": 2,
+      "campaign_trials": 3,
+      "campaign_tunes": 3,
+      "class_boundaries": 36,
+      "class_boundary_deletions": 396,
+      "collection_members": 972,
+      "covariance_factors": 1539000,
+      "covariance_points": 51300,
+      "denominator_deletions": 649120,
+      "denominator_parents": 64912,
+      "diagnostic_activity": 9667,
+      "diagnostic_closure": 489,
+      "diagnostic_n_mpi": 1119,
+      "diagnostic_origin": 270,
+      "diagnostic_process": 120,
+      "event_moments": 30,
+      "g9_science": 1,
+      "materialization": 51300,
+      "points": 51300,
+      "selected_tune_exposure": 3,
+      "support_diagnostics": 30
+    },
+    "path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-expanded-7979ec2-pt_1_0p15/numerical/numerics.root",
+    "root_bytes": 85357721,
+    "root_sha256": "4973a2b482f24098a944680c28b144a66d96856dc097fe36bc276cbc0fb1f346",
+    "schema": "hadronization_self_contained_typed_root_v4",
+    "value_sha256": "71f4b5fdce4416ef8a8fae98e25ab1e91cf20c2e07c35ea70b2f4dd7b23a7d0f"
+  },
+  "schema": "hadronization_public_v4_numerical_report_v1",
+  "science_content_sha256": "f1209d2b7a49afdc5d7af514617e3558dbb6d9a009da76844b09045a8d84ae31",
+  "scientific_request_sha256": "017083052c2f1f363ac2499cae5a51287728d36dcaee0dc358d197eebf516bb9",
+  "source_ledger_path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-expanded-7979ec2-pt_1_0p15/numerical/source-build-ledger.json",
+  "source_ledger_sha256": "ffbf69bc2aa99473e01f816df116414a7c6e32a4cb77629b3fe443baa8dd9521",
+  "source_ledger_status": "COMMITTED_SOURCE",
+  "source_state": "EXTERNAL_ACCEPTANCE_REQUIRED",
+  "support_diagnostic_receipts": 30
+}

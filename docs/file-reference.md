@@ -33,6 +33,7 @@ This inventory identifies every tracked file. The release includes generated sci
 | Path | Caller or reader | Role or output |
 | --- | --- | --- |
 | [config/analysis.json](../config/analysis.json) | Query model and reducer | Downstream selections, axes, registry references, classes and statistical policy. |
+| [config/analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) | Numerical reduction | Adds endpoint-inclusive trigger 1.0 and associate 0.15 GeV/c minima; other fields match the default analysis. |
 | [config/plot-all-tune.json](../config/plot-all-tune.json) | Renderer | All-tune correlation presentation with comparison panels. |
 | [config/plot-dplus.json](../config/plot-dplus.json) | Renderer | Presentation for the explicit D+ numerical recipe. |
 | [config/plot.json](../config/plot.json) | Renderer | D0 default figure selection, layout and identities. |
@@ -217,7 +218,7 @@ Collection and projection users read these original merge records and the signed
 
 ### `data/results`
 
-The package verifier reads the complete relative fileset.
+The numerical and figure verifiers check these files against their matching manifests.
 
 | File | Purpose |
 | --- | --- |
@@ -225,7 +226,7 @@ The package verifier reads the complete relative fileset.
 
 ### `data/results/config`
 
-The renderer and package verifier read the selected display settings.
+The numerical and figure verifiers check these files against their matching manifests.
 
 | File | Purpose |
 | --- | --- |
@@ -233,7 +234,7 @@ The renderer and package verifier read the selected display settings.
 
 ### `data/results/figures`
 
-Readers use the PDFs and canvases. The figure verifier checks the manifest and drawing record.
+The numerical and figure verifiers check these files against their matching manifests.
 
 | File | Purpose |
 | --- | --- |
@@ -280,11 +281,27 @@ Readers use the PDFs and canvases. The figure verifier checks the manifest and d
 | [multiplicity.composite.pdf](../data/results/figures/multiplicity.composite.pdf) | Rendered multiplicity composite page. |
 | [supplemental.balancing.activity.beauty.extremes.pdf](../data/results/figures/supplemental.balancing.activity.beauty.extremes.pdf) | Rendered supplemental balancing activity beauty extremes page. |
 | [supplemental.balancing.activity.charm.extremes.pdf](../data/results/figures/supplemental.balancing.activity.charm.extremes.pdf) | Rendered supplemental balancing activity charm extremes page. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5112.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.beauty.5112.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5112, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5122.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.beauty.5122.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5122, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5132.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.beauty.5132.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5132, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5212.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.beauty.5212.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5212, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5222.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.beauty.5222.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5222, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5232.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.beauty.5232.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5232, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5312.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.beauty.5312.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5312, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5322.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.beauty.5322.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5322, with meson and Lambda trigger columns. |
 | [supplemental.balancing.baryon_meson.activity.by_tune.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.by_tune.pdf) | Rendered supplemental balancing baryon meson activity by tune page. |
+| [supplemental.balancing.baryon_meson.activity.charm.4112.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.charm.4112.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4112, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4122.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.charm.4122.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4122, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4132.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.charm.4132.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4132, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4212.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.charm.4212.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4212, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4222.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.charm.4222.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4222, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4232.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.charm.4232.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4232, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4312.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.charm.4312.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4312, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4322.by_trigger.pdf](../data/results/figures/supplemental.balancing.baryon_meson.activity.charm.4322.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4322, with meson and Lambda trigger columns. |
 
 ### `data/results/numerical`
 
-The numerical reader and verifier consume these typed values and provenance records.
+The numerical and figure verifiers check these files against their matching manifests.
 
 | File | Purpose |
 | --- | --- |
@@ -297,7 +314,7 @@ The numerical reader and verifier consume these typed values and provenance reco
 
 ### `data/results/numerical/exports`
 
-Table users read these exports. The numerical verifier checks their byte identities.
+The numerical and figure verifiers check these files against their matching manifests.
 
 | File | Purpose |
 | --- | --- |
@@ -311,6 +328,253 @@ Table users read these exports. The numerical verifier checks their byte identit
 | [receipt.json](../data/results/numerical/exports/receipt.json) | Exact export hashes and numerical input identity. |
 | [t1.csv](../data/results/numerical/exports/t1.csv) | Species-resolved natural final-heavy counts. |
 | [t1.tex](../data/results/numerical/exports/t1.tex) | Formatted species counts. |
+
+### `data/results-pt-1-0p15`
+
+The numerical and figure verifiers check these files against their matching manifests.
+
+| File | Purpose |
+| --- | --- |
+| [manifest.json](../data/results-pt-1-0p15/manifest.json) | Exact relative fileset, hashes, numerical identity and selected presentation. |
+
+### `data/results-pt-1-0p15/config`
+
+The numerical and figure verifiers check these files against their matching manifests.
+
+| File | Purpose |
+| --- | --- |
+| [plot.json](../data/results-pt-1-0p15/config/plot.json) | Frozen display configuration for the distributed figures. |
+
+### `data/results-pt-1-0p15/figures`
+
+The numerical and figure verifiers check these files against their matching manifests.
+
+| File | Purpose |
+| --- | --- |
+| [G9_-4122_eta.pdf](../data/results-pt-1-0p15/figures/G9_-4122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -4122. |
+| [G9_-4122_phi.pdf](../data/results-pt-1-0p15/figures/G9_-4122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -4122. |
+| [G9_-4122_pt.pdf](../data/results-pt-1-0p15/figures/G9_-4122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -4122. |
+| [G9_-421_eta.pdf](../data/results-pt-1-0p15/figures/G9_-421_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -421. |
+| [G9_-421_phi.pdf](../data/results-pt-1-0p15/figures/G9_-421_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -421. |
+| [G9_-421_pt.pdf](../data/results-pt-1-0p15/figures/G9_-421_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -421. |
+| [G9_-5122_eta.pdf](../data/results-pt-1-0p15/figures/G9_-5122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -5122. |
+| [G9_-5122_phi.pdf](../data/results-pt-1-0p15/figures/G9_-5122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -5122. |
+| [G9_-5122_pt.pdf](../data/results-pt-1-0p15/figures/G9_-5122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -5122. |
+| [G9_-5212_eta.pdf](../data/results-pt-1-0p15/figures/G9_-5212_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -5212. |
+| [G9_-5212_phi.pdf](../data/results-pt-1-0p15/figures/G9_-5212_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -5212. |
+| [G9_-5212_pt.pdf](../data/results-pt-1-0p15/figures/G9_-5212_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -5212. |
+| [G9_-521_eta.pdf](../data/results-pt-1-0p15/figures/G9_-521_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -521. |
+| [G9_-521_phi.pdf](../data/results-pt-1-0p15/figures/G9_-521_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -521. |
+| [G9_-521_pt.pdf](../data/results-pt-1-0p15/figures/G9_-521_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -521. |
+| [G9_4122_eta.pdf](../data/results-pt-1-0p15/figures/G9_4122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 4122. |
+| [G9_4122_phi.pdf](../data/results-pt-1-0p15/figures/G9_4122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 4122. |
+| [G9_4122_pt.pdf](../data/results-pt-1-0p15/figures/G9_4122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 4122. |
+| [G9_421_eta.pdf](../data/results-pt-1-0p15/figures/G9_421_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 421. |
+| [G9_421_phi.pdf](../data/results-pt-1-0p15/figures/G9_421_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 421. |
+| [G9_421_pt.pdf](../data/results-pt-1-0p15/figures/G9_421_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 421. |
+| [G9_5122_eta.pdf](../data/results-pt-1-0p15/figures/G9_5122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 5122. |
+| [G9_5122_phi.pdf](../data/results-pt-1-0p15/figures/G9_5122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 5122. |
+| [G9_5122_pt.pdf](../data/results-pt-1-0p15/figures/G9_5122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 5122. |
+| [G9_5212_eta.pdf](../data/results-pt-1-0p15/figures/G9_5212_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 5212. |
+| [G9_5212_phi.pdf](../data/results-pt-1-0p15/figures/G9_5212_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 5212. |
+| [G9_5212_pt.pdf](../data/results-pt-1-0p15/figures/G9_5212_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 5212. |
+| [G9_521_eta.pdf](../data/results-pt-1-0p15/figures/G9_521_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 521. |
+| [G9_521_phi.pdf](../data/results-pt-1-0p15/figures/G9_521_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 521. |
+| [G9_521_pt.pdf](../data/results-pt-1-0p15/figures/G9_521_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 521. |
+| [balancing.activity.beauty.pdf](../data/results-pt-1-0p15/figures/balancing.activity.beauty.pdf) | Rendered balancing activity beauty page. |
+| [balancing.activity.charm.pdf](../data/results-pt-1-0p15/figures/balancing.activity.charm.pdf) | Rendered balancing activity charm page. |
+| [balancing.baryon_meson.activity.pdf](../data/results-pt-1-0p15/figures/balancing.baryon_meson.activity.pdf) | Rendered balancing baryon meson activity page. |
+| [balancing.integrated.beauty.pdf](../data/results-pt-1-0p15/figures/balancing.integrated.beauty.pdf) | Rendered balancing integrated beauty page. |
+| [balancing.integrated.charm.pdf](../data/results-pt-1-0p15/figures/balancing.integrated.charm.pdf) | Rendered balancing integrated charm page. |
+| [canvases.root](../data/results-pt-1-0p15/figures/canvases.root) | All rendered canvases with graphs, errors, labels and layout. |
+| [correlations.beauty.pdf](../data/results-pt-1-0p15/figures/correlations.beauty.pdf) | Rendered correlations beauty page. |
+| [correlations.charm.pdf](../data/results-pt-1-0p15/figures/correlations.charm.pdf) | Rendered correlations charm page. |
+| [drawing-record.tsv.gz](../data/results-pt-1-0p15/figures/drawing-record.tsv.gz) | Compressed exact coordinates, statuses, uncertainties and presentation records. |
+| [manifest.json](../data/results-pt-1-0p15/figures/manifest.json) | Exact PDFs, canvas archive, drawing records, source and runtime bindings. |
+| [multiplicity.composite.pdf](../data/results-pt-1-0p15/figures/multiplicity.composite.pdf) | Rendered multiplicity composite page. |
+| [supplemental.balancing.activity.beauty.extremes.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.activity.beauty.extremes.pdf) | Rendered supplemental balancing activity beauty extremes page. |
+| [supplemental.balancing.activity.charm.extremes.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.activity.charm.extremes.pdf) | Rendered supplemental balancing activity charm extremes page. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5112.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.beauty.5112.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5112, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5122.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.beauty.5122.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5122, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5132.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.beauty.5132.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5132, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5212.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.beauty.5212.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5212, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5222.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.beauty.5222.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5222, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5232.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.beauty.5232.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5232, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5312.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.beauty.5312.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5312, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5322.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.beauty.5322.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5322, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.by_tune.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.by_tune.pdf) | Rendered supplemental balancing baryon meson activity by tune page. |
+| [supplemental.balancing.baryon_meson.activity.charm.4112.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.charm.4112.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4112, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4122.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.charm.4122.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4122, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4132.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.charm.4132.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4132, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4212.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.charm.4212.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4212, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4222.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.charm.4222.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4222, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4232.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.charm.4232.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4232, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4312.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.charm.4312.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4312, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4322.by_trigger.pdf](../data/results-pt-1-0p15/figures/supplemental.balancing.baryon_meson.activity.charm.4322.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4322, with meson and Lambda trigger columns. |
+
+### `data/results-pt-1-0p15/numerical`
+
+The numerical and figure verifiers check these files against their matching manifests.
+
+| File | Purpose |
+| --- | --- |
+| [admission-closure.json](../data/results-pt-1-0p15/numerical/admission-closure.json) | Accepted source, event, block and query-collection closure. |
+| [native-run-receipt.json](../data/results-pt-1-0p15/numerical/native-run-receipt.json) | Persisted native estimator request, run identity and numerical bindings. |
+| [numerics.root](../data/results-pt-1-0p15/numerical/numerics.root) | Typed values, statistical covariance factors, validity masks and provenance. |
+| [package-manifest.json](../data/results-pt-1-0p15/numerical/package-manifest.json) | Numerical package files, hashes and external execution locators. |
+| [report.json](../data/results-pt-1-0p15/numerical/report.json) | Numerical point inventory, statuses, hashes and execution references. |
+| [source-build-ledger.json](../data/results-pt-1-0p15/numerical/source-build-ledger.json) | Original numerical producer source, configuration and build identities. |
+
+### `data/results-pt-1-0p15/numerical/exports`
+
+The numerical and figure verifiers check these files against their matching manifests.
+
+| File | Purpose |
+| --- | --- |
+| [accounting.csv](../data/results-pt-1-0p15/numerical/exports/accounting.csv) | Generated sample and attempt accounting. |
+| [accounting.tex](../data/results-pt-1-0p15/numerical/exports/accounting.tex) | Formatted sample accounting table. |
+| [missing.csv](../data/results-pt-1-0p15/numerical/exports/missing.csv) | Explicit unavailable numerical and uncertainty states. |
+| [overleaf-check.tex](../data/results-pt-1-0p15/numerical/exports/overleaf-check.tex) | Standalone TeX document for table compilation. |
+| [overleaf-preamble.tex](../data/results-pt-1-0p15/numerical/exports/overleaf-preamble.tex) | Required TeX packages for the exported tables. |
+| [overleaf-tables.tex](../data/results-pt-1-0p15/numerical/exports/overleaf-tables.tex) | Table include list. |
+| [points.csv](../data/results-pt-1-0p15/numerical/exports/points.csv) | Round-trip numerical values and statuses. |
+| [receipt.json](../data/results-pt-1-0p15/numerical/exports/receipt.json) | Exact export hashes and numerical input identity. |
+| [t1.csv](../data/results-pt-1-0p15/numerical/exports/t1.csv) | Species-resolved natural final-heavy counts. |
+| [t1.tex](../data/results-pt-1-0p15/numerical/exports/t1.tex) | Formatted species counts. |
+
+### `data/figures-all-tune`
+
+The numerical and figure verifiers check these files against their matching manifests.
+
+| File | Purpose |
+| --- | --- |
+| [G9_-4122_eta.pdf](../data/figures-all-tune/G9_-4122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -4122. |
+| [G9_-4122_phi.pdf](../data/figures-all-tune/G9_-4122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -4122. |
+| [G9_-4122_pt.pdf](../data/figures-all-tune/G9_-4122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -4122. |
+| [G9_-421_eta.pdf](../data/figures-all-tune/G9_-421_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -421. |
+| [G9_-421_phi.pdf](../data/figures-all-tune/G9_-421_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -421. |
+| [G9_-421_pt.pdf](../data/figures-all-tune/G9_-421_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -421. |
+| [G9_-5122_eta.pdf](../data/figures-all-tune/G9_-5122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -5122. |
+| [G9_-5122_phi.pdf](../data/figures-all-tune/G9_-5122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -5122. |
+| [G9_-5122_pt.pdf](../data/figures-all-tune/G9_-5122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -5122. |
+| [G9_-5212_eta.pdf](../data/figures-all-tune/G9_-5212_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -5212. |
+| [G9_-5212_phi.pdf](../data/figures-all-tune/G9_-5212_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -5212. |
+| [G9_-5212_pt.pdf](../data/figures-all-tune/G9_-5212_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -5212. |
+| [G9_-521_eta.pdf](../data/figures-all-tune/G9_-521_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -521. |
+| [G9_-521_phi.pdf](../data/figures-all-tune/G9_-521_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -521. |
+| [G9_-521_pt.pdf](../data/figures-all-tune/G9_-521_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -521. |
+| [G9_4122_eta.pdf](../data/figures-all-tune/G9_4122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 4122. |
+| [G9_4122_phi.pdf](../data/figures-all-tune/G9_4122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 4122. |
+| [G9_4122_pt.pdf](../data/figures-all-tune/G9_4122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 4122. |
+| [G9_421_eta.pdf](../data/figures-all-tune/G9_421_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 421. |
+| [G9_421_phi.pdf](../data/figures-all-tune/G9_421_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 421. |
+| [G9_421_pt.pdf](../data/figures-all-tune/G9_421_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 421. |
+| [G9_5122_eta.pdf](../data/figures-all-tune/G9_5122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 5122. |
+| [G9_5122_phi.pdf](../data/figures-all-tune/G9_5122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 5122. |
+| [G9_5122_pt.pdf](../data/figures-all-tune/G9_5122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 5122. |
+| [G9_5212_eta.pdf](../data/figures-all-tune/G9_5212_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 5212. |
+| [G9_5212_phi.pdf](../data/figures-all-tune/G9_5212_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 5212. |
+| [G9_5212_pt.pdf](../data/figures-all-tune/G9_5212_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 5212. |
+| [G9_521_eta.pdf](../data/figures-all-tune/G9_521_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 521. |
+| [G9_521_phi.pdf](../data/figures-all-tune/G9_521_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 521. |
+| [G9_521_pt.pdf](../data/figures-all-tune/G9_521_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 521. |
+| [balancing.activity.beauty.pdf](../data/figures-all-tune/balancing.activity.beauty.pdf) | Rendered balancing activity beauty page. |
+| [balancing.activity.charm.pdf](../data/figures-all-tune/balancing.activity.charm.pdf) | Rendered balancing activity charm page. |
+| [balancing.baryon_meson.activity.pdf](../data/figures-all-tune/balancing.baryon_meson.activity.pdf) | Rendered balancing baryon meson activity page. |
+| [balancing.integrated.beauty.pdf](../data/figures-all-tune/balancing.integrated.beauty.pdf) | Rendered balancing integrated beauty page. |
+| [balancing.integrated.charm.pdf](../data/figures-all-tune/balancing.integrated.charm.pdf) | Rendered balancing integrated charm page. |
+| [canvases.root](../data/figures-all-tune/canvases.root) | All rendered canvases with graphs, errors, labels and layout. |
+| [correlations.beauty.pdf](../data/figures-all-tune/correlations.beauty.pdf) | All-tune beauty angular densities and tune/reference comparisons. |
+| [correlations.charm.pdf](../data/figures-all-tune/correlations.charm.pdf) | All-tune charm angular densities and tune/reference comparisons. |
+| [drawing-record.tsv.gz](../data/figures-all-tune/drawing-record.tsv.gz) | Compressed exact coordinates, statuses, uncertainties and presentation records. |
+| [manifest.json](../data/figures-all-tune/manifest.json) | Exact PDFs, canvas archive, drawing records, source and runtime bindings. |
+| [multiplicity.composite.pdf](../data/figures-all-tune/multiplicity.composite.pdf) | Rendered multiplicity composite page. |
+| [supplemental.balancing.activity.beauty.extremes.pdf](../data/figures-all-tune/supplemental.balancing.activity.beauty.extremes.pdf) | Rendered supplemental balancing activity beauty extremes page. |
+| [supplemental.balancing.activity.charm.extremes.pdf](../data/figures-all-tune/supplemental.balancing.activity.charm.extremes.pdf) | Rendered supplemental balancing activity charm extremes page. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5112.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.beauty.5112.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5112, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5122.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.beauty.5122.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5122, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5132.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.beauty.5132.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5132, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5212.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.beauty.5212.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5212, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5222.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.beauty.5222.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5222, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5232.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.beauty.5232.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5232, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5312.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.beauty.5312.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5312, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5322.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.beauty.5322.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5322, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.by_tune.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.by_tune.pdf) | Rendered supplemental balancing baryon meson activity by tune page. |
+| [supplemental.balancing.baryon_meson.activity.charm.4112.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.charm.4112.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4112, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4122.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.charm.4122.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4122, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4132.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.charm.4132.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4132, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4212.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.charm.4212.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4212, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4222.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.charm.4222.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4222, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4232.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.charm.4232.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4232, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4312.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.charm.4312.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4312, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4322.by_trigger.pdf](../data/figures-all-tune/supplemental.balancing.baryon_meson.activity.charm.4322.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4322, with meson and Lambda trigger columns. |
+
+### `data/figures-all-tune-pt-1-0p15`
+
+The numerical and figure verifiers check these files against their matching manifests.
+
+| File | Purpose |
+| --- | --- |
+| [G9_-4122_eta.pdf](../data/figures-all-tune-pt-1-0p15/G9_-4122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -4122. |
+| [G9_-4122_phi.pdf](../data/figures-all-tune-pt-1-0p15/G9_-4122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -4122. |
+| [G9_-4122_pt.pdf](../data/figures-all-tune-pt-1-0p15/G9_-4122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -4122. |
+| [G9_-421_eta.pdf](../data/figures-all-tune-pt-1-0p15/G9_-421_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -421. |
+| [G9_-421_phi.pdf](../data/figures-all-tune-pt-1-0p15/G9_-421_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -421. |
+| [G9_-421_pt.pdf](../data/figures-all-tune-pt-1-0p15/G9_-421_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -421. |
+| [G9_-5122_eta.pdf](../data/figures-all-tune-pt-1-0p15/G9_-5122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -5122. |
+| [G9_-5122_phi.pdf](../data/figures-all-tune-pt-1-0p15/G9_-5122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -5122. |
+| [G9_-5122_pt.pdf](../data/figures-all-tune-pt-1-0p15/G9_-5122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -5122. |
+| [G9_-5212_eta.pdf](../data/figures-all-tune-pt-1-0p15/G9_-5212_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -5212. |
+| [G9_-5212_phi.pdf](../data/figures-all-tune-pt-1-0p15/G9_-5212_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -5212. |
+| [G9_-5212_pt.pdf](../data/figures-all-tune-pt-1-0p15/G9_-5212_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -5212. |
+| [G9_-521_eta.pdf](../data/figures-all-tune-pt-1-0p15/G9_-521_eta.pdf) | Signed heavy-hadron eta spectrum for PDG -521. |
+| [G9_-521_phi.pdf](../data/figures-all-tune-pt-1-0p15/G9_-521_phi.pdf) | Signed heavy-hadron phi spectrum for PDG -521. |
+| [G9_-521_pt.pdf](../data/figures-all-tune-pt-1-0p15/G9_-521_pt.pdf) | Signed heavy-hadron pt spectrum for PDG -521. |
+| [G9_4122_eta.pdf](../data/figures-all-tune-pt-1-0p15/G9_4122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 4122. |
+| [G9_4122_phi.pdf](../data/figures-all-tune-pt-1-0p15/G9_4122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 4122. |
+| [G9_4122_pt.pdf](../data/figures-all-tune-pt-1-0p15/G9_4122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 4122. |
+| [G9_421_eta.pdf](../data/figures-all-tune-pt-1-0p15/G9_421_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 421. |
+| [G9_421_phi.pdf](../data/figures-all-tune-pt-1-0p15/G9_421_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 421. |
+| [G9_421_pt.pdf](../data/figures-all-tune-pt-1-0p15/G9_421_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 421. |
+| [G9_5122_eta.pdf](../data/figures-all-tune-pt-1-0p15/G9_5122_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 5122. |
+| [G9_5122_phi.pdf](../data/figures-all-tune-pt-1-0p15/G9_5122_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 5122. |
+| [G9_5122_pt.pdf](../data/figures-all-tune-pt-1-0p15/G9_5122_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 5122. |
+| [G9_5212_eta.pdf](../data/figures-all-tune-pt-1-0p15/G9_5212_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 5212. |
+| [G9_5212_phi.pdf](../data/figures-all-tune-pt-1-0p15/G9_5212_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 5212. |
+| [G9_5212_pt.pdf](../data/figures-all-tune-pt-1-0p15/G9_5212_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 5212. |
+| [G9_521_eta.pdf](../data/figures-all-tune-pt-1-0p15/G9_521_eta.pdf) | Signed heavy-hadron eta spectrum for PDG 521. |
+| [G9_521_phi.pdf](../data/figures-all-tune-pt-1-0p15/G9_521_phi.pdf) | Signed heavy-hadron phi spectrum for PDG 521. |
+| [G9_521_pt.pdf](../data/figures-all-tune-pt-1-0p15/G9_521_pt.pdf) | Signed heavy-hadron pt spectrum for PDG 521. |
+| [balancing.activity.beauty.pdf](../data/figures-all-tune-pt-1-0p15/balancing.activity.beauty.pdf) | Rendered balancing activity beauty page. |
+| [balancing.activity.charm.pdf](../data/figures-all-tune-pt-1-0p15/balancing.activity.charm.pdf) | Rendered balancing activity charm page. |
+| [balancing.baryon_meson.activity.pdf](../data/figures-all-tune-pt-1-0p15/balancing.baryon_meson.activity.pdf) | Rendered balancing baryon meson activity page. |
+| [balancing.integrated.beauty.pdf](../data/figures-all-tune-pt-1-0p15/balancing.integrated.beauty.pdf) | Rendered balancing integrated beauty page. |
+| [balancing.integrated.charm.pdf](../data/figures-all-tune-pt-1-0p15/balancing.integrated.charm.pdf) | Rendered balancing integrated charm page. |
+| [canvases.root](../data/figures-all-tune-pt-1-0p15/canvases.root) | All rendered canvases with graphs, errors, labels and layout. |
+| [correlations.beauty.pdf](../data/figures-all-tune-pt-1-0p15/correlations.beauty.pdf) | All-tune beauty angular densities and tune/reference comparisons. |
+| [correlations.charm.pdf](../data/figures-all-tune-pt-1-0p15/correlations.charm.pdf) | All-tune charm angular densities and tune/reference comparisons. |
+| [drawing-record.tsv.gz](../data/figures-all-tune-pt-1-0p15/drawing-record.tsv.gz) | Compressed exact coordinates, statuses, uncertainties and presentation records. |
+| [manifest.json](../data/figures-all-tune-pt-1-0p15/manifest.json) | Exact PDFs, canvas archive, drawing records, source and runtime bindings. |
+| [multiplicity.composite.pdf](../data/figures-all-tune-pt-1-0p15/multiplicity.composite.pdf) | Rendered multiplicity composite page. |
+| [supplemental.balancing.activity.beauty.extremes.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.activity.beauty.extremes.pdf) | Rendered supplemental balancing activity beauty extremes page. |
+| [supplemental.balancing.activity.charm.extremes.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.activity.charm.extremes.pdf) | Rendered supplemental balancing activity charm extremes page. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5112.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.beauty.5112.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5112, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5122.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.beauty.5122.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5122, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5132.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.beauty.5132.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5132, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5212.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.beauty.5212.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5212, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5222.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.beauty.5222.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5222, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5232.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.beauty.5232.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5232, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5312.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.beauty.5312.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5312, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.beauty.5322.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.beauty.5322.by_trigger.pdf) | Beauty baryon/reference ratio for absolute PDG 5322, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.by_tune.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.by_tune.pdf) | Rendered supplemental balancing baryon meson activity by tune page. |
+| [supplemental.balancing.baryon_meson.activity.charm.4112.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.charm.4112.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4112, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4122.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.charm.4122.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4122, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4132.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.charm.4132.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4132, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4212.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.charm.4212.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4212, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4222.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.charm.4222.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4222, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4232.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.charm.4232.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4232, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4312.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.charm.4312.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4312, with meson and Lambda trigger columns. |
+| [supplemental.balancing.baryon_meson.activity.charm.4322.by_trigger.pdf](../data/figures-all-tune-pt-1-0p15/supplemental.balancing.baryon_meson.activity.charm.4322.by_trigger.pdf) | Charm baryon/reference ratio for absolute PDG 4322, with meson and Lambda trigger columns. |
 
 ### `tests`
 

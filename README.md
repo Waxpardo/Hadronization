@@ -6,11 +6,13 @@ The sample selects hard charm and beauty production. It is a generator-level, he
 
 ## Repository contents
 
-The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 41 PDFs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
+The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 57 PDFs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
 
 The source inventory records 3,000 accepted files and 300 million successful events. Each tune contributes 100 million events in ten original source blocks. The [data inventory](data/README.md) binds the distributed results and external inputs to checksums. The [sample accounting guide](docs/science.md#sample-accounting) explains the 127 discarded job attempts.
 
 ## Use the results
+
+Two complete result selections are available: [inclusive pair pT](data/results/manifest.json) and [trigger 1.0 / associate 0.15 GeV/c minima](data/results-pt-1-0p15/manifest.json). Both use the same accepted events. Their pair selections and dedicated trigger denominators differ.
 
 Open the [multiplicity distribution](data/results/figures/multiplicity.composite.pdf) or the other [figure PDFs](data/results/figures). The [data guide](data/README.md) explains how to verify the package, change its presentation and download merged THnSparse files. These operations do not require event generation or merging.
 
@@ -71,7 +73,7 @@ The [science guide](docs/science.md) gives exact definitions and limitations. Th
 
 The renderer produces multiplicity, charm and beauty correlation, integrated balancing, activity-dependent balancing and baryon-to-meson ratio pages. It also produces signed heavy-hadron pT, eta and phi spectra, supporting views and ROOT canvases. Numerical packages include accounting tables, CSV and TeX exports, missing-value records and manifests.
 
-The default correlation presentation shows MONASH identified pairs and heavy-flavour sign sums. Use `config/plot-all-tune.json` for correlation comparisons across tunes. The [workflow](docs/workflow.md#figures-and-tables) describes presentation choices and display limits.
+The default correlation presentation shows MONASH identified pairs and heavy-flavour sign sums. The [inclusive](data/figures-all-tune) and [cut-selection](data/figures-all-tune-pt-1-0p15) companions show correlation comparisons across tunes. Use `config/plot-all-tune.json` to reproduce that presentation. The [workflow](docs/workflow.md#figures-and-tables) describes presentation choices and display limits.
 
 ## Documentation
 
