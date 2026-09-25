@@ -91,7 +91,8 @@ int main() {
   Panel ratioPanel{}; ratioPanel.id="lower.shared.421";
   ratioPanel.logY=false; ratioPanel.margins={.2,.04,.2,0.};
   for (const auto& bounds : std::vector<std::pair<double,double>>{
-      {.84177,1.38667},{-.08,2.5},{-.1,38.},{-.2,4.4}}) {
+      {.84177,1.38667},{-.08,2.5},{-.1,38.},{-.2,4.4},
+      {-9.985178551920804,149.29991045093084}}) {
     ratioPanel.yLow=bounds.first; ratioPanel.yHigh=bounds.second;
     Double_t low=0.,high=0.,width=0.;Int_t intervals=0;
     THLimitsFinder::Optimize(bounds.first,bounds.second,

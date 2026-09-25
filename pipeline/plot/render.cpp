@@ -907,6 +907,23 @@ YAxisLabelPolicy JoinedYAxisLabelPolicy(const Page& page,
     // The canvas owns the upper boundary label, beyond this pad's clip.
     policy.suppressLast = Close(high, panel.yHigh);
   }
+  const bool ratio = panel.id.rfind("lower.", 0) == 0 ||
+      panel.id == "g9.ratio" || panel.id.rfind("correlation.compare.", 0) == 0 ||
+      page.role == "balancing.baryon_meson.activity";
+  if (!inset && !panel.logY && ratio) {
+    Double_t low = 0., high = 0., width = 0.;
+    Int_t intervals = 0;
+    THLimitsFinder::Optimize(panel.yLow, panel.yHigh,
+                             YAxisDivisions(page, panel, inset) % 100,
+                             low, high, intervals, width);
+    // Rounded interior anchors do not touch the adjacent panel. Keep them.
+    // Suppress only a label within five percent of the joined boundary.
+    const double clearance = .05 * (panel.yHigh - panel.yLow);
+    policy.suppressFirst = policy.suppressFirst &&
+        low - panel.yLow <= clearance;
+    policy.suppressLast = policy.suppressLast &&
+        panel.yHigh - high <= clearance;
+  }
   // A panel touching one adjacent panel still owns an independent numerical
   // scale.  Preserve its seam label when ROOT's five-primary-division
   // optimization provides only two anchors; suppressing either would leave
