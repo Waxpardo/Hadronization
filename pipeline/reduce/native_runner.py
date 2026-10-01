@@ -46,7 +46,7 @@ def require_full_campaign_input(source,value):
         raise ValueError('full paper result requires the authenticated complete MERGED three-tune A collection')
 
 
-def native_point_query(request,source,path):
+def native_point_query(request,source,path,analysis=None):
     """Serialize the exact requested natural domain, never a plot subset."""
     value=request.to_dict() if hasattr(request,'to_dict') else request
     typed=p.ProjectionRequest.from_dict(value,cold=True)
@@ -96,6 +96,13 @@ def native_point_query(request,source,path):
         lines.append('SIGN_ASSOCIATE\t{}\t{}\t{}\t{}'.format(
             pair['trigger_pdg'],pair['sector'],pair['sign'],
             pair['associate_pdg']))
+    if analysis is not None and analysis.get('version') == '2.3.0':
+        admitted=model_api.family.checked_family_map(
+            ROOT/analysis['associate_family_map']['path'],
+            analysis['associate_family_map']['sha256'])
+        for destination,members in admitted.members_by_destination.items():
+            lines.append('ASSOCIATE_GROUP\t{}\t{}'.format(
+                destination,'\t'.join(map(str,members))))
     for index,key in enumerate(typed.expected_point_keys):
         curve=key['curve'];role=curve['role_id']
         if role not in p.PAPER_ROLE_IDS:
@@ -685,7 +692,14 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         for item in value['scope']['ordered_associate_pairs']}
     if scoped != registered:
         raise ValueError('native signed associate domain differs from A registry')
-    pairs=set(scoped)
+    if analysis.get('version') == '2.3.0':
+        fine_registry={
+            (item['trigger_pdg'],item['associate_pdg'])
+            for item in model_api.fine_pairs(analysis)[1]
+            if item['trigger_pdg'] in value['scope']['ordered_triggers']}
+        pairs=fine_registry
+    else:
+        pairs=set(scoped)
     roles={item['role_id']:item for item in value['scope']['roles']}
     g9=p.g9_science(value)
     axes={axis['id']:axis for axis in value['axes']}
@@ -714,7 +728,7 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
     primitive_receipt=n.write_native_transport(source,primitives,g9_cells,t1,
                                                events,primitive_path,support_upper,tunes)
     query_path=work/'native-points.tsv'
-    query_receipt=native_point_query(typed,source,query_path)
+    query_receipt=native_point_query(typed,source,query_path,analysis)
     binary,build=compile_engine(work/'build')
     output=work/'native-diagnostic.tsv'
     block_output=work/'native-block-primitives.tsv'

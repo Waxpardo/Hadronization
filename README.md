@@ -61,7 +61,7 @@ The native estimator computes pooled results and delete-one-source-block jackkni
 
 - Optional rectangular minima require `trigger_min >= associate_min`. Both particle cuts include their endpoints.
 
-- Charged-light activity counts final charged particles without heavy constituents, with pT > 0.15 GeV/c and |eta| <= 4.
+- The human-facing activity label is **Charged primaries (study definition)**. It counts final charged particles without charm or beauty constituents, with pT > 0.15 GeV/c and |eta| <= 4; it is not an ALICE-equivalence claim.
 
 - Multiplicity classes use tune-local percentiles. Reduction recomputes class boundaries for each block deletion.
 

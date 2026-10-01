@@ -65,7 +65,7 @@ class NativeCollection:
                     'eligible_triggers','zero_partner_triggers','candidate_pairs',
                     'stored_pairs','by_tune_sector_sign'}
             if (hashlib.sha256(analysis_bytes).hexdigest()!=self.index['analysis_sha256'] or
-                    analysis.get('version')!='2.2.0' or
+                    analysis.get('version') not in {'2.2.0','2.3.0'} or
                     metadata.get('analysis_sha256')!=self.index['analysis_sha256'] or
                     type(proof) is not dict or set(proof)!=fields or
                     proof['schema']!='hadronization_pair_population_proof_v1' or
@@ -78,7 +78,7 @@ class NativeCollection:
                     any(type(proof[key]) is not int or proof[key]<0 for key in
                         ('events','eligible_triggers','zero_partner_triggers',
                          'candidate_pairs','stored_pairs'))):
-                raise ValueError('A v2.2 mandatory pair-population proof is absent or unbound')
+                raise ValueError('A mandatory pair-population proof is absent or unbound')
             groups=proof['by_tune_sector_sign']
             if (type(groups) is not list or
                     any(type(row) is not dict or set(row)!=

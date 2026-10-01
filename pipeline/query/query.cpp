@@ -69,7 +69,8 @@ Layout ReadLayout(const std::string& text) {
   while (std::getline(input, line)) {
     const auto fields = Split(line);
     if (fields == std::vector<std::string>{"END"}) { ended = true; break; }
-    if (fields.size() == 2 && fields[0] == "ANALYSIS_VERSION" && layout.analysisVersion.empty() && fields[1]=="2.2.0") {
+    if (fields.size() == 2 && fields[0] == "ANALYSIS_VERSION" && layout.analysisVersion.empty() &&
+        (fields[1]=="2.2.0" || fields[1]=="2.3.0")) {
       layout.analysisVersion=fields[1];
     } else if (fields.size() == 2 && fields[0] == "CONTENT_SHA256" && layout.contentSha.empty()) {
       layout.contentSha=fields[1];
@@ -118,7 +119,7 @@ Layout ReadLayout(const std::string& text) {
   if (!ended || input.peek() != std::istringstream::traits_type::eof() || layout.pdgs.empty() ||
       layout.sparseDigestSchema != (legacySpec ? "hadronization_query_sparse_content_v1" :
                                                 "hadronization_query_sparse_content_v2") ||
-      (layout.analysisVersion=="2.2.0" && (layout.triggerPdgs.empty() ||
+      ((layout.analysisVersion=="2.2.0" || layout.analysisVersion=="2.3.0") && (layout.triggerPdgs.empty() ||
        layout.associatePdgs[4].empty() || layout.associatePdgs[5].empty())))
     throw std::runtime_error("query spec ending differs");
   Axis species;
@@ -361,25 +362,27 @@ PairProof Populate(TFile& file,Plane& plane) {
       if (!triggers.I("rejection_mask")) {
         const int triggerIndex=triggers.I("heavy_index"),sector=triggers.I("sector");
         const auto& trigger=particles.at(triggerIndex);
-        if (plane.layout.analysisVersion=="2.2.0" && ((sector!=4 && sector!=5) || !acceptedTriggers.insert(triggerIndex).second ||
+        const bool completePairs=plane.layout.analysisVersion=="2.2.0" || plane.layout.analysisVersion=="2.3.0";
+        if (completePairs && ((sector!=4 && sector!=5) || !acceptedTriggers.insert(triggerIndex).second ||
             !trigger.final || !trigger.selected || trigger.status<81 || trigger.status>89 ||
             (sector==4 ? std::abs(trigger.qc) : std::abs(trigger.qb))!=1 ||
             !plane.layout.triggerPdgs.count(trigger.pdg)))
           throw std::runtime_error("accepted trigger structural key differs event="+std::to_string(event));
         const auto found=originMap.find({triggerIndex,sector});
-        if (plane.layout.analysisVersion=="2.2.0" && found==originMap.end()) throw std::runtime_error("missing mandatory trigger provenance event="+std::to_string(event));
-        if (plane.layout.analysisVersion=="2.2.0") CheckOrigin(found->second,event,triggerIndex,sector);
-        if (plane.layout.analysisVersion=="2.2.0" && found->second.origin!=1)
+        if (completePairs && found==originMap.end()) throw std::runtime_error("missing mandatory trigger provenance event="+std::to_string(event));
+        if (completePairs) CheckOrigin(found->second,event,triggerIndex,sector);
+        if (completePairs && found->second.origin!=1)
           throw std::runtime_error("accepted trigger hard-root provenance differs event="+std::to_string(event));
         auto values=base; ParticleValues(values,trigger,"trigger_");
         plane.Fill("triggers",values,weight);
-        if (plane.layout.analysisVersion=="2.2.0" && std::abs(trigger.eta)<=4.0) {
+        if (completePairs && std::abs(trigger.eta)<=4.0) {
           ++proof.eligibleTriggers;
           U64 partners=0;
           for (const auto& item:particles) {
             const auto& associate=item.second;
             if (item.first==triggerIndex || !associate.final || !associate.selected ||
-                !associate.pairEligible || associate.status<81 || associate.status>89 ||
+                (plane.layout.analysisVersion=="2.2.0" && !associate.pairEligible) ||
+                associate.status<81 || associate.status>89 ||
                 std::abs(associate.eta)>4.0 ||
                 !plane.layout.associatePdgs.at(sector).count(associate.pdg) ||
                 (sector==4 ? associate.qc : associate.qb)==0) continue;
@@ -393,6 +396,19 @@ PairProof Populate(TFile& file,Plane& plane) {
               throw std::runtime_error("duplicate candidate pair key event="+std::to_string(event));
             ++proof.candidates; ++partners;
             ++proof.byTuneSectorSign[{source.tune,sector,sign}];
+            if (plane.layout.analysisVersion=="2.3.0") {
+              constexpr double pi=3.14159265358979323846;
+              auto pairValues=base;
+              ParticleValues(pairValues,trigger,"trigger_");
+              ParticleValues(pairValues,associate,"associate_");
+              pairValues["sign"]=sign;
+              pairValues["dphi"]=std::fmod(trigger.phi-associate.phi+2.5*pi,2.0*pi)-0.5*pi;
+              pairValues["deta"]=trigger.eta-associate.eta;
+              pairValues["origin"]=origin->second.origin;
+              pairValues["category"]=associate.category;
+              plane.Fill("pairs",pairValues,weight);
+              ++proof.stored;
+            }
           }
           if (!partners) ++proof.zeroPartnerTriggers;
         }
@@ -419,7 +435,7 @@ PairProof Populate(TFile& file,Plane& plane) {
             pairs.I("a15_eta1")!=events.I("a15_eta1") || pairs.I("a15_eta4")!=events.I("a15_eta4"))
           throw std::runtime_error("in-domain pair cached authority differs event="+std::to_string(event)+
                                    " trigger="+std::to_string(triggerIndex)+" associate="+std::to_string(associateIndex));
-        ++proof.stored;
+        if (plane.layout.analysisVersion=="2.2.0") ++proof.stored;
       } else if (acceptedTriggers.count(triggerIndex) && triggerIndex!=associateIndex &&
                  std::abs(trigger.eta)<=4.0 && std::abs(associate.eta)<=4.0 &&
                  associate.final && associate.selected && associate.pairEligible &&
@@ -433,10 +449,10 @@ PairProof Populate(TFile& file,Plane& plane) {
         throw std::runtime_error("exact pair cache differs");
       values["sign"]=pairs.I("sign"); values["dphi"]=pairs.D("dphi"); values["deta"]=pairs.D("deta");
       values["origin"]=pairs.I("associate_origin"); values["category"]=pairs.I("associate_category");
-      plane.Fill("pairs",values,weight);
+      if (plane.layout.analysisVersion!="2.3.0") plane.Fill("pairs",values,weight);
       havePair=pairs.Next();
     }
-    if (observedPairs.size()!=expectedPairs.size())
+    if (plane.layout.analysisVersion=="2.2.0" && observedPairs.size()!=expectedPairs.size())
       for (const auto& candidate:expectedPairs)
         if (!observedPairs.count(candidate.first))
           throw std::runtime_error("missing in-domain pair event="+std::to_string(event)+
@@ -741,7 +757,7 @@ void Verify(const std::string& path,const Layout& layout) {
   std::cout<<"CANONICAL_SCIENTIFIC_CONTENT_SHA256\t"
            <<ContentSha(CanonicalContentDigests(file,layout))<<'\n';
   Plane plane(file,layout); const auto proof=Populate(file,plane);
-  if (layout.analysisVersion=="2.2.0" &&
+  if ((layout.analysisVersion=="2.2.0" || layout.analysisVersion=="2.3.0") &&
       metadataText.find("\"pair_population_proof\":"+proof.Json(layout.scientificBindingSha))==std::string::npos &&
       metadataText.find("\"pair_population_proof\":"+proof.CanonicalJson(layout.scientificBindingSha))==std::string::npos)
     throw std::runtime_error("query pair population proof differs from exact rows");

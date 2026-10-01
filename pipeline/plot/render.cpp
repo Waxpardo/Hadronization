@@ -782,13 +782,13 @@ std::vector<std::string> P1InformationLines(const Page& page) {
        "P1 charged-light selection cannot be split into lines");
   const std::string population = page.information.substr(0, selectionSplit);
   Need(population ==
-           "#it{N}_{ch}: charged-light final-particle activity, heavy flavour excluded",
-       "P1 charged-light population caption differs");
+           "#it{N}_{ch}: Charged primaries (study definition), heavy flavour excluded",
+       "P1 charged-primary population caption differs");
   return {"#bf{" + page.title.substr(0, titleSplit) + "}",
           page.title.substr(titleSplit + 2),
           selection.substr(0, etaSplit) + ", " +
               selection.substr(etaSplit + 2),
-          "charged-light final particles",
+          "Charged primaries (study definition)",
           "heavy flavour excluded"};
 }
 std::vector<std::string> StatusNoteLines(const std::string& note) {

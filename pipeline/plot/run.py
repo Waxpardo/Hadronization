@@ -1220,7 +1220,7 @@ def activity_proxy_caption(selection, threshold, eta_window):
             selection['exclude_heavy_constituents'] and
             selection['pt']['low_operator']=='GT'):
         raise ValueError('P1 typed charged-final activity differs')
-    return ('#it{N}_{ch}: charged-light final-particle activity, heavy flavour excluded; '
+    return ('#it{N}_{ch}: Charged primaries (study definition), heavy flavour excluded; '
             '#it{p}_{T} > '+format(threshold,'.15g')+
             ' GeV/c, |#eta| #leq '+format(eta_window,'.15g'))
 
@@ -1260,7 +1260,7 @@ def scientific_caption_lines(page, context):
             lines.remove(eta_line)
         # Share equal eta acceptance once; unequal definitions stay explicit.
         lines = [line.removesuffix('; '+eta_line) for line in lines]
-        lines.extend(['N_{ch}: charged light-sector particles',
+        lines.extend(['N_{ch}: Charged primaries (study definition)',
             'p_{T} > '+format(float.fromhex(activity['pt']['low']), '.15g')+
             ' GeV/c; |#eta| #leq '+format(float.fromhex(activity['eta_window']), '.15g')])
     if role=='spectra.signed_heavy':

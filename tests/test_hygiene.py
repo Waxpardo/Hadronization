@@ -83,7 +83,9 @@ class LeanTreeContract(unittest.TestCase):
 
     def test_only_target_layout_exceptions_exist(self):
         expected_config = {
-            "config/study.json", "config/analysis.json", "config/query.json",
+            "config/study.json", "config/analysis.json", "config/analysis-family.json",
+            "config/analysis-pt-1-0p15.json", "config/associate-family-map.json",
+            "config/query.json",
             "config/plot.json", "config/plot-dplus.json", "config/plot-all-tune.json",
             "config/site.example.conf",
             "config/tunes/monash.cmnd", "config/tunes/junctions.cmnd",
@@ -111,6 +113,7 @@ class LeanTreeContract(unittest.TestCase):
              "pipeline/reduce/native.py", "pipeline/reduce/support_scan.cpp",
              "pipeline/reduce/native_engine.cpp", "pipeline/reduce/native_runner.py",
              "pipeline/reduce/native_v4.py", "pipeline/reduce/native_v4_result.py",
+             "pipeline/reduce/family.py", "pipeline/reduce/family_products.py",
              "pipeline/reduce/projection.py", "pipeline/reduce/public_v4.py",
              "pipeline/reduce/statistics.hpp", "pipeline/reduce/typed_nodes.py"})
         self.assertEqual(

@@ -48,9 +48,11 @@ CURRENT_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef231
 CURRENT_SOURCE_MANIFEST_SHA256 = "5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f8f247585912e2df247"
 TRANSIENT_ERRNOS = r.TRANSIENT_ERRNOS
 SOURCE_FILES = (
-    "hadronization", "config/analysis.json", "config/query.json", "config/study.json",
+    "hadronization", "config/analysis.json", "config/analysis-family.json",
+    "config/associate-family-map.json", "config/query.json", "config/study.json",
     "pipeline/analyze/run.py", "pipeline/generate/runtime.py", "pipeline/generate/sha256.hpp",
     "pipeline/query/model.py", "pipeline/query/support.py", "pipeline/query/run.py",
+    "pipeline/reduce/family.py",
     "pipeline/query/publication.py",
     "pipeline/query/collection.py", "pipeline/query/merge.py",
     "pipeline/query/condor.py", "pipeline/query/query.cpp", "pipeline/query/selection.hpp",

@@ -63,6 +63,48 @@ class NativeEngineContract(unittest.TestCase):
         query=self.base/'points.tsv';query.write_text('\n'.join(points)+'\n')
         return sha,source,query
 
+    def test_saved_state_group_is_summed_before_normalization_and_deletions(self):
+        sha='a'*64
+        primitive=['hadronization_native_primitives_v1',
+            'SOURCE\t'+'\t'.join([sha,'b'*64,'c'*64]),
+            'ACTIVITY_FIELD\ta15_eta4','PROFILE\tinclusive',
+            'TRIGGER_SCOPE\t421']
+        primitive += [f'PAIR_SCOPE\t421\t{pdg}' for pdg in (-431,-433,431,433)]
+        for block in range(1,11):
+            primitive += [
+                f'ACTIVITY\tMONASH\t{block}\t1\t0x1p+0\t0x1p+0',
+                f'TRIGGER\tinclusive\tMONASH\t{block}\t1\t421\t0x1.9p+6\t0x1.9p+6',
+                f'PAIR\tinclusive\tMONASH\t{block}\t1\t421\t-431\t-1\t0\t0x1p+1\t0x1p+1',
+                f'PAIR\tinclusive\tMONASH\t{block}\t1\t421\t-433\t-1\t0\t0x1.8p+1\t0x1.8p+1',
+                f'PAIR\tinclusive\tMONASH\t{block}\t1\t421\t431\t1\t0\t0x1p+0\t0x1p+0',
+                f'PAIR\tinclusive\tMONASH\t{block}\t1\t421\t433\t1\t0\t0x1p+0\t0x1p+0',
+                f'EXPOSURE\tMONASH\t{block}\t1']
+        source=self.base/'family-primitives.tsv'
+        source.write_text('\n'.join(primitive+['END'])+'\n')
+        query=self.base/'family-points.tsv'
+        query.write_text('\n'.join([
+            'hadronization_native_points_v1',
+            'BIND\t'+'\t'.join([sha,'b'*64,'c'*64]),
+            'REQUEST\t'+'e'*64+'\t'+'f'*64,
+            'AXES\t2\t1\t110','FORMULA\tprojection_formulas_v4',
+            'DPHI_BIN\t0\t0x0p+0\t0x1p+0',
+            'FAMILY\tMONASH\t'+'d'*64,'CLASS\t0\t1\t0\t100',
+            'SIGN_ASSOCIATE\t421\tCHARM\tOS\t-431',
+            'SIGN_ASSOCIATE\t421\tCHARM\tSS\t431',
+            'ASSOCIATE_GROUP\t-431\t-431\t-433',
+            'ASSOCIATE_GROUP\t431\t431\t433',
+            'POINT\t0\tbalancing.integrated.charm\tos_minus_ss_per_trigger\tMONASH\t-\tinclusive\t0\t421\t-431\t0\tNONE\t-\t-1\tTEST_ONLY_DIAGNOSTIC',
+            'END'])+'\n')
+        output=self.base/'family-results.tsv'
+        run=subprocess.run([str(self.binary),str(source),sha,str(query),str(output)],
+                           capture_output=True,text=True)
+        self.assertEqual((run.returncode,run.stderr),(0,''))
+        row=next(line.split('\t') for line in output.read_text().splitlines()
+                 if line.startswith('R\t'))
+        # Independent oracle: ((2+3)-(1+1))/100 = 0.03.
+        self.assertAlmostEqual(float.fromhex(row[3]),float(Fraction(3,100)),15)
+        self.assertEqual(row[4],'AVAILABLE_ZERO_DISPERSION')
+
     def test_nonuniform_density_deletions_covariance_and_excluded_diagnostics(self):
         # Independent count oracle: the large diagnostic Sigma_b0 component
         # stays in primitives but is absent from the bound central member list.

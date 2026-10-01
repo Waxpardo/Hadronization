@@ -133,8 +133,8 @@ def layout_spec(analysis, layout, binding, dictionary,
         raise ValueError("query sparse digest schema differs")
     lines = ["hadronization_root_query_spec_v4" if sparse_digest_schema else
              "hadronization_root_query_spec_v3"]
-    if analysis["version"] == "2.2.0":
-        lines.append("ANALYSIS_VERSION\t2.2.0")
+    if analysis["version"] in {"2.2.0", "2.3.0"}:
+        lines.append("ANALYSIS_VERSION\t" + analysis["version"])
     lines += ["CONTENT_SHA256\t" + content_sha,
              "SCIENTIFIC_BINDING_SHA256\t" + scientific_binding_sha,
              "EXECUTION_ATTESTATION_SHA256\t" + execution_attestation_sha,
@@ -145,7 +145,7 @@ def layout_spec(analysis, layout, binding, dictionary,
     objects = {"trees": layout["trees"], "sparse": dict(layout["sparse"])}
     for index, profile in enumerate(analysis["profiles"]):
         lines.append("\t".join(["PROFILE", str(index), profile["id"]] + model.profile_tokens(profile)))
-    if analysis["version"] == "2.2.0":
+    if analysis["version"] in {"2.2.0", "2.3.0"}:
         lines.extend("TRIGGER\t{}".format(pdg) for pdg in analysis["pair_query_registry"]["trigger_pdgs"])
         for sector, name in ((4, "charm"), (5, "beauty")):
             lines.extend("ASSOCIATE\t{}\t{}".format(sector, pdg)
@@ -515,7 +515,7 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
                                  "exactness"}
     if metadata.get("schema") == "hadronization_query_metadata_v4":
         metadata_fields.add("sparse_digest_schema")
-    if analysis["version"] == "2.2.0" or "pair_population_proof" in metadata:
+    if analysis["version"] in {"2.2.0", "2.3.0"} or "pair_population_proof" in metadata:
         metadata_fields.add("pair_population_proof")
     reduce.exact_keys(metadata, metadata_fields, "query metadata")
     parent = metadata["input_receipt"]
@@ -540,7 +540,7 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
         reduce.exact_keys(proof, {"schema", "state", "scientific_binding_sha256", "events",
                                   "eligible_triggers", "zero_partner_triggers", "candidate_pairs",
                                   "stored_pairs", "by_tune_sector_sign"}, "pair population proof")
-    if analysis["version"] == "2.2.0" and (proof is None or
+    if analysis["version"] in {"2.2.0", "2.3.0"} and (proof is None or
             proof["schema"] != "hadronization_pair_population_proof_v1" or
             proof["state"] != "PASS" or
             proof["scientific_binding_sha256"] != metadata["scientific_binding_sha256"] or
@@ -581,7 +581,7 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
         raise ValueError("query verifier completion is absent")
     proof_lines = [line.split("\t", 1)[1] for line in output.splitlines()
                    if line.startswith("PAIR_POPULATION_PROOF\t")]
-    if analysis["version"] == "2.2.0" and (len(proof_lines) != 1 or json.loads(proof_lines[0]) != proof):
+    if analysis["version"] in {"2.2.0", "2.3.0"} and (len(proof_lines) != 1 or json.loads(proof_lines[0]) != proof):
         raise ValueError("query pair population proof was not independently recomputed")
     if "SCIENTIFIC_CONTENT_SHA256\t" + content_sha + "\n" not in output:
         raise ValueError("query recomputed scientific content identity differs")

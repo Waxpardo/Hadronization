@@ -48,13 +48,19 @@ The model accepts equal minima. A pair with associate pT above trigger pT can pa
 
 The azimuthal coordinate is trigger phi minus associate phi. The implementation wraps it into [-pi/2, 3pi/2). The query uses 100 equal bins. The lower endpoint is inclusive and the upper endpoint is exclusive.
 
-## Charged-light activity
+## Charged primaries (study definition)
 
-Nominal activity counts final charged particles without charm or beauty constituents. It requires finite kinematics, pT > 0.15 GeV/c and |eta| <= 4. The corresponding event field is `a15_eta4`. The alternate `a15_eta1` field uses |eta| <= 1.
+The public table and plot label is **Charged primaries**. In this study that label means final charged particles without charm or beauty constituents, finite kinematics, pT > 0.15 GeV/c and |eta| <= 4. The corresponding unchanged event field is `a15_eta4`; `a15_eta1` uses |eta| <= 1. This is the study's generator-level definition and is not a claim of equivalence to an experimental primary-particle definition.
 
-This threshold belongs to the activity definition. It does not apply to inclusive heavy-particle pairs or signed heavy-hadron spectra. The count is a charged-light final-particle activity measure. It does not implement a separate experimental primary-particle classification with explicit weak-daughter removal.
+This threshold belongs to the activity definition. It does not apply to inclusive heavy-particle pairs or signed heavy-hadron spectra. No retained value is recounted or relabelled at the technical-identity level.
 
-Heavy-hadron decay suppression also retains short-lived heavy resonances. Their light decay daughters therefore do not enter this activity count. The label "charged primaries" would conceal that sample-specific choice.
+All heavy-hadron decays were disabled, including strong and electromagnetic decays. The runtime also used `ParticleDecays:limitTau0 = on` and `ParticleDecays:tau0Max = 0.01 mm`. Light strong/electromagnetic resonance daughters and charged leptons can contribute, while heavy-hadron daughters are absent. The predicate is therefore not a stored-event ancestry veto, and the study qualifier must accompany the public label.
+
+## Saved-state associate families
+
+The grouped observable sums additive OS and SS pair primitives for saved generator states at their saved kinematics. It then recomputes the pooled center, every K=10 delete-one value, covariance, validity mask and grouped meson reference. Trigger denominators are carried once. Ratios, normalized spectra and errors are never added after estimation.
+
+The accepted map has 74 signed members and 42 signed destinations. Particle and antiparticle groups remain separate. Sigma states remain separate from Lambda families. Xi_c-prime and Xi_b-prime saved states belong to their accepted ground-family destinations; the eight signed Xi-star states 4314, 4324, 5314, 5324 and conjugates remain fine-state data and are refused as grouped members. Unit endpoint probability refers only to the pinned PYTHIA 8.317 model. It is not a measured physical branching fraction or a post-decay ground-state distribution.
 
 The activity axis stores integers from 0 through 4095. Each integer occupies one regular bin. Values outside the supported domain fail the scientific contract rather than silently extending the axis.
 

@@ -1265,7 +1265,7 @@ int main(int argc, char** argv) {
                    'exclude_heavy_constituents':True,
                    'pt':{'low_operator':'GT'}}
         caption=plot.activity_proxy_caption(selection,0.15,4.0)
-        self.assertIn('charged-light final-particle activity',caption)
+        self.assertIn('Charged primaries (study definition)',caption)
         self.assertIn('heavy flavour excluded',caption)
         self.assertIn('#it{p}_{T} > 0.15 GeV/c',caption)
         self.assertIn('|#eta| #leq 4',caption)

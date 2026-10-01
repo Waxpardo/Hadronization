@@ -272,6 +272,7 @@ struct Queries {
   std::map<std::string,std::string> sourceFamilyDigests;
   std::map<int,HR::ActivityClassSpec> classes;
   std::map<std::tuple<int,std::string,std::string>,std::vector<int>> signAssociates;
+  std::map<int,std::vector<int>> associateGroups;
   std::vector<Point> points;
 };
 Queries ReadQueries(const std::string& path,Data& data) {
@@ -349,6 +350,20 @@ Queries ReadQueries(const std::string& path,Data& data) {
       if (std::find(members.begin(),members.end(),associate)!=members.end())
         throw std::runtime_error("native signed associate duplicates");
       members.push_back(associate);
+    } else if (fields[0]=="ASSOCIATE_GROUP") {
+      if (fields.size()<3) throw std::runtime_error("native associate group is empty");
+      const int destination=Integer(fields[1]);
+      auto& members=query.associateGroups[destination];
+      if (!members.empty()) throw std::runtime_error("native associate group duplicates");
+      for (std::size_t i=2;i<fields.size();++i) {
+        const int member=Integer(fields[i]);
+        if ((member>0)!=(destination>0) ||
+            std::find(members.begin(),members.end(),member)!=members.end())
+          throw std::runtime_error("native associate group sign/member differs");
+        members.push_back(member);
+      }
+      if (std::find(members.begin(),members.end(),destination)==members.end())
+        throw std::runtime_error("native associate group lacks destination anchor");
     } else if (fields[0]=="POINT") {
       Need(fields,15);
       Point point;
@@ -397,9 +412,15 @@ Queries ReadQueries(const std::string& path,Data& data) {
              point.component=="NET") &&
             point.referencePdg==0 && point.classId==0 &&
             point.referenceTune.empty();
+        const auto scoped=[&](int associate) {
+          const auto found=query.associateGroups.find(associate);
+          if (found==query.associateGroups.end())
+            return data.pairScope.count({point.trigger,associate})!=0U;
+          return std::all_of(found->second.begin(),found->second.end(),[&](int member) {
+            return data.pairScope.count({point.trigger,member})!=0U; });
+        };
         if (!data.triggerScope.count(point.trigger) ||
-            (!signSum && (!data.pairScope.count({point.trigger,point.associate}) ||
-                          !data.pairScope.count({point.trigger,-point.associate}))))
+            (!signSum && (!scoped(point.associate) || !scoped(-point.associate))))
           throw std::runtime_error("native point OS/SS pair is outside scanned scope");
         if (point.associate==0 && !signSum)
           throw std::runtime_error("native aggregate correlation identity differs");
@@ -417,8 +438,7 @@ Queries ReadQueries(const std::string& path,Data& data) {
               throw std::runtime_error("native sign-summed conjugate differs");
         }
         if (point.role=="balancing.baryon_meson.activity" &&
-            (!data.pairScope.count({point.trigger,point.referencePdg}) ||
-             !data.pairScope.count({point.trigger,-point.referencePdg})))
+            (!scoped(point.referencePdg) || !scoped(-point.referencePdg)))
           throw std::runtime_error("native P8 meson pair is outside scanned scope");
       } else if (point.role=="multiplicity.composite") {
         if (!point.profile.empty() || point.classId!=0 || point.axis!="nch" ||
@@ -859,9 +879,18 @@ class Evaluator {
   Weighted PairBlock(const Point& point,const std::string& tune,int block,
                      const HR::ActivityClassBoundary& boundary,int associate,
                      int sign,int bin) const {
-    const auto found=pairGroups_.find({point.profile,tune,block,point.trigger,
-                                      associate,sign,bin});
-    return found==pairGroups_.end()?Weighted{}:GroupSum(found->second,boundary);
+    std::vector<double> values,squares;
+    const auto group=query_.associateGroups.find(associate);
+    const std::vector<int> singleton{associate};
+    const auto& members=group==query_.associateGroups.end()?singleton:group->second;
+    for (int member:members) {
+      const auto found=pairGroups_.find({point.profile,tune,block,point.trigger,
+                                        member,sign,bin});
+      if (found==pairGroups_.end())continue;
+      const auto cell=GroupSum(found->second,boundary);
+      values.push_back(cell.value);squares.push_back(cell.sumw2);
+    }
+    return {HR::Sum(values),HR::Sum(squares)};
   }
   const std::vector<int>& SignMembers(const Point& point,
                                       const std::string& component) const {
@@ -1027,11 +1056,15 @@ class Evaluator {
               const HR::ActivityClassBoundary& bounds,int trigger,int associate,
               int sign,int selectedBin) const {
     std::vector<double> values;
-    for (int block=1;block<=10;++block) if (block!=omit) {
-      const auto group=pairGroups_.find({profile,tune,block,trigger,associate,
-                                         sign,selectedBin});
-      if (group!=pairGroups_.end()) AddInClass(group->second,bounds,values);
-    }
+    const auto grouped=query_.associateGroups.find(associate);
+    const std::vector<int> singleton{associate};
+    const auto& members=grouped==query_.associateGroups.end()?singleton:grouped->second;
+    for (int block=1;block<=10;++block) if (block!=omit)
+      for (int member:members) {
+        const auto group=pairGroups_.find({profile,tune,block,trigger,member,
+                                           sign,selectedBin});
+        if (group!=pairGroups_.end()) AddInClass(group->second,bounds,values);
+      }
     return HR::Sum(values);
   }
   double G9(const std::string& tune,int omit,int pdg,

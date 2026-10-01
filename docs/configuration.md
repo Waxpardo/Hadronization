@@ -62,7 +62,8 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 
 | Field group | Meaning and consumer |
 | --- | --- |
-| `schema`, `version` | Downstream request contract. Public numerical reduction requires version 2.2.0. |
+| `schema`, `version` | Downstream request contract. Version 2.2.0 is the historical fine-state route; version 2.3.0 binds the accepted saved-state family support. |
+| `associate_family_map` | Version 2.3.0-only exact map path, SHA-256 and 74-member/42-destination coverage. |
 | `paper_defaults` | Charm choice, selectable identities and signed baryon/reference tuple |
 | `base_study`, `lossless_input` | Exact raw-study, analyzed-schema and structural-registry SHA-256 bindings |
 | `axes` | Sparse coordinates and numerical output domains |
@@ -75,6 +76,8 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 | `g9_species_pdgs` | Signed heavy-hadron spectrum identities. The literal key names that spectrum domain. |
 | `estimator_policy` | Pooled center, ten-block jackknife, denominator resolution and status rules |
 | `compact_domain_registries`, `compact_storage` | Bound compatibility descriptors. They do not select another production science engine. |
+
+`config/analysis-family.json` is the bounded version 2.3.0 construction model. It expands only the associate support needed by the accepted map, keeps the inclusive pT and eta selections, and binds `config/associate-family-map.json` by SHA-256. The original `config/analysis.json` remains the unchanged version 2.2.0 construction model for accepted historical products.
 
 The nominal activity ID is `charged_light_sector_activity_a15_v1_eta4`. The alternate ID ends in `eta1`. Their physical fields are `a15_eta4` and `a15_eta1` respectively. Their `raw_definition_id` is an input metadata identifier, not an additional experimental-primary selection.
 

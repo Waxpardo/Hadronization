@@ -376,22 +376,25 @@ def run(args):
         raise FileExistsError(output)
     if ANALYSIS.is_symlink():
         raise ValueError('public v4 shipped analysis is symlinked')
-    analysis = _json(args.analysis, args.analysis_sha, 'v2.2 requested analysis')
+    analysis = _json(args.analysis, args.analysis_sha, 'requested analysis')
     from pipeline.query import model as model_api
     checked, normalized_sha = model_api.checked_analysis(Path(args.analysis))
     if normalized_sha != args.analysis_sha or checked != analysis or analysis[
-            'version'] != '2.2.0':
-        raise ValueError('public v4 route requires normalized A v2.2 analysis')
+            'version'] not in {'2.2.0','2.3.0'}:
+        raise ValueError('public v4 route requires a normalized A analysis')
     if ((args.merge_verification is None) !=
             (args.merge_verification_sha is None)):
         raise ValueError('merge verification path and independently pinned SHA must be paired')
     source = native.NativeCollection(
         args.collection_index,args.collection_index_sha,collection_api,
         verify_roots=args.merge_verification is None)
-    if source.index['analysis_sha256'] != p.file_digest(ANALYSIS):
-        raise ValueError('A collection/shipped construction analysis binding differs')
-    construction, _ = model_api.checked_analysis(ANALYSIS)
-    model_api.compatible_interpretation(construction, analysis)
+    if analysis['version'] == '2.2.0':
+        if source.index['analysis_sha256'] != p.file_digest(ANALYSIS):
+            raise ValueError('A collection/shipped construction analysis binding differs')
+        construction, _ = model_api.checked_analysis(ANALYSIS)
+        model_api.compatible_interpretation(construction, analysis)
+    elif source.index['analysis_sha256'] != args.analysis_sha:
+        raise ValueError('family collection/analysis binding differs')
     closure = native_v4.admission_closure(source, args.expected_sources,
         args.expected_sources_sha, work_path=args.site_work,
         expected_work_sha256=args.site_work_sha,

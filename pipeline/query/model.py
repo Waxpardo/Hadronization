@@ -5,6 +5,7 @@ import math
 import re
 import hashlib
 import json
+import sys
 from pathlib import Path
 import importlib.util
 from dataclasses import dataclass
@@ -13,6 +14,11 @@ from types import MappingProxyType
 _support_spec = importlib.util.spec_from_file_location("query_support", Path(__file__).with_name("support.py"))
 support = importlib.util.module_from_spec(_support_spec)
 _support_spec.loader.exec_module(support)
+_family_spec = importlib.util.spec_from_file_location(
+    "query_family", Path(__file__).parents[1] / "reduce" / "family.py")
+family = importlib.util.module_from_spec(_family_spec)
+sys.modules[_family_spec.name] = family
+_family_spec.loader.exec_module(family)
 
 
 def validate_profiles(profiles):
@@ -206,9 +212,9 @@ def checked_analysis(path):
             raise ValueError("untrusted historical analysis identity")
         raise ValueError("historical analysis request is not a released Phase-A model")
     version = payload.get("version")
-    if version not in {"2.0.0", "2.1.0", "2.2.0"}:
+    if version not in {"2.0.0", "2.1.0", "2.2.0", "2.3.0"}:
         raise ValueError("analysis request version differs")
-    d0_default = version in {"2.1.0", "2.2.0"}
+    d0_default = version in {"2.1.0", "2.2.0", "2.3.0"}
     expected = {
         "schema", "version", "base_study", "lossless_input", "axes",
         "profiles", "pair_acceptance", "activities", "percentile_intervals",
@@ -218,6 +224,8 @@ def checked_analysis(path):
     }
     if d0_default:
         expected.add("paper_defaults")
+    if version == "2.3.0":
+        expected.add("associate_family_map")
     support.exact_keys(payload, expected, "analysis request")
     if payload["schema"] != "hadronization_downstream_analysis_request_v2":
         raise ValueError("analysis request schema differs")
@@ -243,6 +251,19 @@ def checked_analysis(path):
             "schema": "hadronization_study_v1",
             "sha256": "d3eac08d732dd5d9642b650ac69cb3512bf3245ae450387e57ace7690a8ef4f5"}:
         raise ValueError("analysis request base-study binding differs")
+    if version == "2.3.0":
+        binding = payload["associate_family_map"]
+        support.exact_keys(binding, {"schema", "path", "sha256",
+                                    "signed_members", "signed_destinations"},
+                           "analysis associate-family binding")
+        map_path = support.ROOT / binding["path"]
+        admitted = family.checked_family_map(map_path, binding["sha256"])
+        if binding != {"schema": family.MAP_SCHEMA,
+                       "path": "config/associate-family-map.json",
+                       "sha256": family.MAP_SHA256,
+                       "signed_members": 74, "signed_destinations": 42} or \
+                len(admitted.members) != 74 or len(admitted.destinations) != 42:
+            raise ValueError("analysis associate-family binding differs")
     study = support.ROOT / "config/study.json"
     if support.sha_file(study) != payload["base_study"]["sha256"]:
         raise ValueError("accepted base-study bytes differ")
@@ -355,9 +376,10 @@ def checked_analysis(path):
             not isinstance(references, dict) or
             set(references) != {str(value) for value in triggers} or
             any(type(value) is not int for value in references.values()) or
-            query["expected_count"] != 300 or
-            query["central_eligibility_source"] !=
-            "lossless structural selected-state registry"):
+            query["expected_count"] != (444 if version == "2.3.0" else 300) or
+            query["central_eligibility_source"] != (
+                "accepted saved-state family support registry" if version == "2.3.0"
+                else "lossless structural selected-state registry")):
         raise ValueError("analysis pair-query registry differs")
     if d0_default:
         for pdg in (421, -421, 411, -411):
@@ -384,7 +406,7 @@ def checked_analysis(path):
         raise ValueError("selected charm correlations differ")
     expected_recipes = [
         "G1_activity_eta1_eta4",
-        ("G9_direct_primary_selected_no_pt_floor_eta4" if version == "2.2.0"
+        ("G9_direct_primary_selected_no_pt_floor_eta4" if version in {"2.2.0", "2.3.0"}
          else "G9_direct_primary_selected_strict_pt0p15_eta4"),
         "T1_all_final_heavy_no_acceptance", "ordered_pair_scalars",
         "configured_dphi_correlations", "origin_integrated",
@@ -526,7 +548,7 @@ def checked_analysis(path):
 
 def select_charm_meson_recipe(analysis, meson_pdg, include_alternate_g9=False):
     """Derive one coherent D0/D+ analysis request before hashing or projection."""
-    if (analysis.get("version") not in {"2.1.0", "2.2.0"} or type(meson_pdg) is not int or
+    if (analysis.get("version") not in {"2.1.0", "2.2.0", "2.3.0"} or type(meson_pdg) is not int or
             meson_pdg not in (421, 411) or type(include_alternate_g9) is not bool):
         raise ValueError("unsupported Phase-A charm-meson recipe")
     selected = copy.deepcopy(analysis)
@@ -583,6 +605,22 @@ def state_registry(analysis):
     states = study["selected_states"]
     by_pdg = {item["pdg"]: item for item in states}
     query = analysis["pair_query_registry"]
+    if analysis.get("version") == "2.3.0":
+        admitted = family.checked_family_map(
+            support.ROOT / analysis["associate_family_map"]["path"],
+            analysis["associate_family_map"]["sha256"])
+        for member, destination in admitted.destination_by_member.items():
+            if member in by_pdg:
+                continue
+            endpoint = by_pdg.get(destination)
+            if endpoint is None:
+                raise ValueError("family endpoint is absent from structural states")
+            state = copy.deepcopy(endpoint)
+            state["pdg"] = member
+            state["pair_analysis_eligible"] = False
+            state["label"] = "saved state {} -> {}".format(member, destination)
+            states.append(state)
+            by_pdg[member] = state
     pairs = []
     for trigger in query["trigger_pdgs"]:
         if trigger not in by_pdg or not by_pdg[trigger]["pair_analysis_eligible"]:
@@ -600,9 +638,14 @@ def state_registry(analysis):
                           "reference_meson_pdg": int(query["reference_meson_by_trigger"][str(trigger)]),
                           "central_eligible": bool(state["pair_analysis_eligible"]),
                           "sector": sector})
-    if len(pairs) != query["expected_count"] or len(pairs) != 300:
-        raise ValueError("expanded pair registry is not the required 300 queries")
+    if len(pairs) != query["expected_count"]:
+        raise ValueError("expanded pair registry count differs")
     return states, pairs
+
+
+def fine_pairs(analysis):
+    """Return the complete retained/query support domain before grouping."""
+    return state_registry(analysis)
 
 
 def observable_pairs(analysis, formula_version):
@@ -613,6 +656,12 @@ def observable_pairs(analysis, formula_version):
     Its caller must also prove pair completeness from the exact retained rows.
     """
     states, pairs = state_registry(analysis)
+    if analysis.get("version") == "2.3.0":
+        admitted = family.checked_family_map(
+            support.ROOT / analysis["associate_family_map"]["path"],
+            analysis["associate_family_map"]["sha256"])
+        pairs = [pair for pair in pairs
+                 if pair["associate_pdg"] in admitted.members_by_destination]
     if formula_version == 'projection_formulas_v3':
         pairs = [pair for pair in pairs if pair['central_eligible']]
     elif formula_version not in ('projection_formulas_v2', 'projection_formulas_v4'):

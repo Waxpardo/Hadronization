@@ -33,6 +33,7 @@ This inventory identifies every tracked file. The release includes generated sci
 | Path | Caller or reader | Role or output |
 | --- | --- | --- |
 | [config/analysis.json](../config/analysis.json) | Query model and reducer | Downstream selections, axes, registry references, classes and statistical policy. |
+| [config/analysis-family.json](../config/analysis-family.json) | Query model and reducer | Bounded version 2.3 family-support construction bound to the accepted map. |
 | [config/analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) | Numerical reduction | Adds endpoint-inclusive trigger 1.0 and associate 0.15 GeV/c minima; other fields match the default analysis. |
 | [config/plot-all-tune.json](../config/plot-all-tune.json) | Renderer | All-tune correlation presentation with comparison panels. |
 | [config/plot-dplus.json](../config/plot-dplus.json) | Renderer | Presentation for the explicit D+ numerical recipe. |
@@ -85,6 +86,9 @@ This inventory identifies every tracked file. The release includes generated sci
 | [pipeline/query/publication.py](../pipeline/query/publication.py) | Query, bundle and package writers | No-replace publication, Linux reservation fallback and readback checks. |
 | [pipeline/query/query.cpp](../pipeline/query/query.cpp) | Query wrapper | Builds support trees and sparse families and verifies complete pair populations. |
 | [pipeline/query/row_schema.hpp](../pipeline/query/row_schema.hpp) | Native query executable | Exact retained scalar branch types and schema macros. |
+| [config/associate-family-map.json](../config/associate-family-map.json) | Query and reducer | Accepted 74-member saved-state family map with inventory and model caveats. |
+| [pipeline/reduce/family.py](../pipeline/reduce/family.py) | Normalized model and reducer | Fail-closed map validation and additive primitive grouping. |
+| [pipeline/reduce/family_products.py](../pipeline/reduce/family_products.py) | Numerical serializer | Consolidated signed-species ROOT files, derived family ROOT and common manifest. |
 | [pipeline/query/run.py](../pipeline/query/run.py) | Query CLI and collection modules | Build packs, dictionary census, query construction and exact verification. |
 | [pipeline/query/selection.hpp](../pipeline/query/selection.hpp) | Query and sparse readers | Common endpoint-inclusive kinematic predicates. |
 | [pipeline/query/site_probe.py](../pipeline/query/site_probe.py) | Execute-node canary | Measures runtime, input readability, ClassAds and storage publication semantics. |

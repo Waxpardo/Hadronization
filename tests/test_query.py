@@ -422,6 +422,26 @@ class RootQueryContract(unittest.TestCase):
         self.assertIn(expected["expected_error"] + str(target["event_id"]), result.stderr)
         self.assertIn("trigger=" + str(target["trigger_heavy_index"]), result.stderr)
         self.assertIn("associate=" + str(target["associate_heavy_index"]), result.stderr)
+        # The accepted family-support query reconstructs the same pair from
+        # retained heavy/trigger/origin rows. The legacy cache is checked when
+        # present but is no longer a completeness authority.
+        family_analysis = json.loads((ROOT / "config/analysis-family.json").read_text())
+        family_spec = self.base / "reconstructed-family-pair.tsv"
+        family_spec.write_text(self.query.layout_spec(family_analysis,
+            json.loads((ROOT / "config/query.json").read_text()), receipt["binding"],
+            self.query.read_dictionary(fixture / "dictionary.json"),
+            scientific_binding_sha="3" * 64, execution_attestation_sha="4" * 64))
+        family_metadata = self.base / "reconstructed-family-pair.json"
+        family_metadata.write_bytes(metadata.read_bytes())
+        reconstructed = subprocess.run([str(binary), "build", str(family_spec),
+            str(modified), str(self.base / "reconstructed-family-pair.root"),
+            str(family_metadata)], text=True, capture_output=True, env=environment)
+        self.assertEqual(reconstructed.returncode, 0, reconstructed.stderr)
+        reconstructed_proof = json.loads(
+            family_metadata.read_text())["pair_population_proof"]
+        self.assertEqual(reconstructed_proof["candidate_pairs"],
+                         reconstructed_proof["stored_pairs"])
+        self.assertGreater(reconstructed_proof["candidate_pairs"], 0)
         self.assertEqual(hashlib.sha256((fixture / "selected_hard_noncompanion.cpp").read_bytes()).hexdigest(),
                          expected["selected_hard_noncompanion_mutator_sha256"])
         noncompanion_tool = self.base / "selected-hard-noncompanion"
