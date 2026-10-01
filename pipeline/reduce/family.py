@@ -10,8 +10,11 @@ import json
 from pathlib import Path
 
 
-MAP_SCHEMA = "architect_accepted_saved_state_group_map_v1"
-MAP_SHA256 = "f7aa4c13a88be93c0dc53b505d4f75d04a679ebfb94c90f022116ae1e87a5466"
+MAP_SCHEMA = "hadronization_public_saved_state_family_map_v1"
+MAP_SHA256 = "9b441d5a6426999e7bd00f2f7935a32f5f97adc28b968c927e880e0249834d82"
+ACCEPTED_FULL_MAP_SHA256 = "f7aa4c13a88be93c0dc53b505d4f75d04a679ebfb94c90f022116ae1e87a5466"
+SEMANTIC_GROUPS_SHA256 = "fea9ade870fc827d262a50d1bb8919f1a5a86e293d6f6dac6e18dad3b31714f4"
+FINE_STATE_IDENTITIES_SHA256 = "dd0a48d12adb9a33dc1e4924e09c4b2e953d164edce0055e38b773ed54925110"
 PARTICLE_DATA_SHA256 = "330ba4e7f5a081235b5055f7b312fe6f5c9fe9c95411a845cba7a3e82e67ecca"
 DEFERRED_XI = frozenset({-5324, -5314, -4324, -4314, 4314, 4324, 5314, 5324})
 
@@ -32,7 +35,9 @@ class FamilyMap:
     members_by_destination: dict
     family_by_destination: dict
     deferred_members: frozenset
-    inventory_pdgs: frozenset
+    accepted_full_map_sha256: str
+    semantic_groups_sha256: str
+    fine_state_identities: dict
 
     @property
     def destinations(self):
@@ -50,27 +55,47 @@ def checked_family_map(path, expected_sha256=MAP_SHA256, *, accepted=True):
     if actual != expected_sha256 or (accepted and expected_sha256 != MAP_SHA256):
         raise ValueError("accepted family-map SHA256 differs")
     value = json.loads(path.read_text(encoding="utf-8"))
-    required = {"candidate_map_sha256", "counts", "groups", "inventory",
-                "kinematic_basis", "limitations", "pair_pt", "schema",
-                "source_particle_data", "standalone_spectra", "status",
-                "supersedes_ruling_sha256", "triggers", "unit_basis"}
+    required = {"accepted_full_map_sha256", "basis", "counts",
+                "deferred_signed_pdgs", "fine_state_identities",
+                "fine_state_identities_sha256", "groups", "limitations", "schema",
+                "semantic_groups_sha256", "source_model", "version"}
     if set(value) != required or value["schema"] != MAP_SCHEMA or \
-            value["status"] != "ACCEPTED_FOR_BOUNDED_IMPLEMENTATION_NOT_PRODUCTION":
-        raise ValueError("accepted family-map schema/status differs")
-    if value["source_particle_data"].get("sha256") != PARTICLE_DATA_SHA256 or \
-            value["unit_basis"] != (
-                "Exact unit endpoint probability in pinned PYTHIA 8.317 model, "
-                "not measured physical BR=1") or \
-            value["kinematic_basis"] != "sum_saved_state_associate_primitives_at_saved_kinematics" or \
-            value["pair_pt"] != "inclusive" or value["triggers"] != "unchanged" or \
-            value["standalone_spectra"] != "unchanged_fine_species":
+            value["version"] != "1.0.0":
+        raise ValueError("public family-map schema/version differs")
+    if value["accepted_full_map_sha256"] != ACCEPTED_FULL_MAP_SHA256 or \
+            value["semantic_groups_sha256"] != SEMANTIC_GROUPS_SHA256 or \
+            value["source_model"] != {
+                "generator": "PYTHIA 8.317",
+                "particle_data_sha256": PARTICLE_DATA_SHA256} or \
+            value["basis"] != {
+                "unit_endpoint": "Exact unit endpoint probability in the pinned generator model; not a measured physical branching fraction",
+                "kinematics": "sum saved-state associate primitives at saved kinematics",
+                "pair_pt": "inclusive", "triggers": "unchanged",
+                "standalone_spectra": "unchanged fine species"}:
         raise ValueError("accepted family-map model/table basis differs")
-    if value["counts"] != {
-            "additional_signed_members": 32, "anchors": 42,
-            "catalog_signed_states": 219,
-            "deferred_signed_xi_excitation_members": 8,
-            "grouped_signed_members": 74, "other_excluded_states": 137}:
+    if value["counts"] != {"signed_members": 74,
+            "signed_destinations": 42,
+            "deferred_signed_xi_excitation_members": 8}:
         raise ValueError("accepted family-map counts differ")
+    semantic = hashlib.sha256(json.dumps(value["groups"], sort_keys=True,
+        separators=(",", ":"), ensure_ascii=True).encode("ascii")).hexdigest()
+    if semantic != SEMANTIC_GROUPS_SHA256:
+        raise ValueError("public family-map semantic groups differ")
+    identities = value["fine_state_identities"]
+    identity_digest = hashlib.sha256(json.dumps(identities, sort_keys=True,
+        separators=(",", ":"), ensure_ascii=True).encode("ascii")).hexdigest()
+    if (identity_digest != FINE_STATE_IDENTITIES_SHA256 or
+            value["fine_state_identities_sha256"] != identity_digest or
+            not isinstance(identities, list) or len(identities) != 24 or
+            any(type(row) is not dict or set(row) != {"pdg", "id", "name", "spin2j1"}
+                or type(row["pdg"]) is not int or type(row["spin2j1"]) is not int
+                or row["spin2j1"] <= 0 or not isinstance(row["id"], str)
+                or not row["id"] or not isinstance(row["name"], str) or not row["name"]
+                for row in identities) or
+            len({row["pdg"] for row in identities}) != len(identities) or
+            len({row["id"] for row in identities}) != len(identities) or
+            len({row["name"] for row in identities}) != len(identities)):
+        raise ValueError("public fine-state catalog identities differ")
 
     destination_by_member = {}
     members_by_destination = {}
@@ -104,31 +129,18 @@ def checked_family_map(path, expected_sha256=MAP_SHA256, *, accepted=True):
                     family_by_destination[destination] != family_by_destination[-destination]:
                 raise ValueError("family charge-conjugate coverage differs")
 
-    inventory = value["inventory"]
-    inventory_pdgs = [row.get("pdg") for row in inventory]
-    if len(inventory_pdgs) != 219 or len(set(inventory_pdgs)) != 219 or \
-            any(type(pdg) is not int or pdg == 0 for pdg in inventory_pdgs):
-        raise ValueError("family inventory coverage differs")
-    accepted = set()
-    deferred = set()
-    for row in inventory:
-        disposition = row.get("disposition")
-        if disposition in {"ACCEPT_ANCHOR", "ACCEPT_PINNED_MODEL_UNIT_SAVED_STATE"}:
-            accepted.add(row["pdg"])
-            if row.get("destination_pdg") != destination_by_member.get(row["pdg"]):
-                raise ValueError("family inventory endpoint differs")
-        elif disposition == "DEFER_UNPLOTTED_XI_EXCITATION_TO_PHASE_B":
-            deferred.add(row["pdg"])
-            if row.get("destination_pdg") is not None:
-                raise ValueError("deferred state was assigned a family endpoint")
-    if accepted != set(destination_by_member) or deferred != set(DEFERRED_XI):
-        raise ValueError("accepted/deferred family inventory differs")
+    deferred = value["deferred_signed_pdgs"]
+    if not isinstance(deferred, list) or set(deferred) != set(DEFERRED_XI) or \
+            len(deferred) != len(DEFERRED_XI):
+        raise ValueError("deferred family domain differs")
     if any(abs(member) in {4114, 4214, 4224} and
            abs(destination_by_member[member]) == 4122 for member in destination_by_member):
         raise ValueError("forbidden Sigma-to-Lambda family membership")
     return FamilyMap(actual, PARTICLE_DATA_SHA256, destination_by_member,
                      members_by_destination, family_by_destination,
-                     frozenset(deferred), frozenset(inventory_pdgs))
+                     frozenset(deferred), ACCEPTED_FULL_MAP_SHA256,
+                     SEMANTIC_GROUPS_SHA256,
+                     {row["pdg"]: row for row in identities})
 
 
 def group_additive_rows(rows, family_map):

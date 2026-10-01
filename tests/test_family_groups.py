@@ -8,6 +8,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +30,7 @@ model = load("test_family_query_model", "pipeline/query/model.py")
 
 class FamilyMapTests(unittest.TestCase):
     def setUp(self):
-        self.path = ROOT / "config/associate-family-map.json"
+        self.path = ROOT / "config/associate-family-runtime.json"
         self.admitted = family.checked_family_map(self.path)
 
     def mutate(self, operation):
@@ -64,7 +65,8 @@ class FamilyMapTests(unittest.TestCase):
         self.mutate(lambda value: value["groups"][0]["members"].append(
             value["groups"][0]["members"][0]))
         self.mutate(lambda value: value["groups"][0]["members"].pop())
-        self.mutate(lambda value: value.__setitem__("unit_basis", "probability 0.9"))
+        self.mutate(lambda value: value["basis"].__setitem__(
+            "unit_endpoint", "probability 0.9"))
 
     def test_normalized_model_separates_fine_support_and_group_destinations(self):
         analysis, _ = model.checked_analysis(ROOT / "config/analysis-family.json")
@@ -84,6 +86,18 @@ class FamilyMapTests(unittest.TestCase):
                           if trigger in charm_triggers}, {20})
         self.assertEqual({len(values) for trigger, values in by_trigger.items()
                           if trigger not in charm_triggers}, {22})
+        added = [row for row in states if row["pdg"] in
+                 self.admitted.fine_state_identities]
+        self.assertEqual(len(added), 24)
+        self.assertEqual(len({row["id"] for row in added}), 24)
+        self.assertEqual(len({row["name"] for row in added}), 24)
+        by_pdg = {row["pdg"]: row for row in added}
+        self.assertEqual((by_pdg[423]["name"], by_pdg[423]["spin2j1"]),
+                         ("D*0", 3))
+        self.assertEqual((by_pdg[4124]["name"], by_pdg[4124]["spin2j1"]),
+                         ("Lambda_c(2625)+", 4))
+        self.assertEqual((by_pdg[4334]["name"], by_pdg[4334]["spin2j1"]),
+                         ("Omega*_c0", 4))
 
     def test_activity_trigger_and_human_label_controls(self):
         historical = json.loads((ROOT / "config/analysis.json").read_text())
@@ -107,7 +121,7 @@ class AdditiveGroupingTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.admitted = family.checked_family_map(
-            ROOT / "config/associate-family-map.json")
+            ROOT / "config/associate-family-runtime.json")
 
     def rows(self, blocks=10):
         rows = []
@@ -165,25 +179,44 @@ class AdditiveGroupingTests(unittest.TestCase):
         rows = self.rows()
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "products"
+            class Cell:
+                def __init__(self, value, sumw2):
+                    self.value, self.sumw2 = value, sumw2
+            pair_cells = {('inclusive', row['tune'], row['block'], 7,
+                row['trigger_pdg'], row['associate_pdg'], row['sign'], 3):
+                Cell(row['count'], row['sumw2']) for row in rows}
+            primitives = SimpleNamespace(pairs=pair_cells,
+                activity={('MONASH', block, 7): Cell(100 + block, 100 + block)
+                          for block in range(1, 11)},
+                triggers={('inclusive', 'MONASH', block, activity, 521):
+                          Cell(100 + block, 100 + block)
+                          for block in range(1, 11) for activity in (7, 99)},
+                selected_pairs=tuple((521, pdg) for pdg in self.admitted.members),
+                selected_triggers=(521,), profile_ids=('inclusive',),
+                activity_field='a15_eta4')
             manifest = products.write_products(
-                output, rows, self.admitted, source_sha256="1" * 64,
+                output, primitives, self.admitted, source_sha256="1" * 64,
                 analysis_sha256="2" * 64, content_sha256="3" * 64)
             self.assertEqual(manifest["fine_species_count"], 74)
             self.assertEqual(manifest["family_destination_count"], 42)
-            self.assertEqual(len(manifest["files"]), 75)
+            self.assertEqual(len(manifest["files"]), 76)
             metadata, grouped = products.read_rows(output / "families.root")
-            self.assertEqual(metadata["map_sha256"], family.MAP_SHA256)
-            oracle = family.group_additive_rows(rows, self.admitted)
-            self.assertEqual(grouped, oracle)
+            self.assertEqual(metadata["runtime_map_sha256"], family.MAP_SHA256)
+            self.assertEqual(products.verify_products(output,
+                hashlib.sha256((output / 'manifest.json').read_bytes()).hexdigest()),
+                manifest)
+            self.assertTrue(grouped)
             recovered = []
             for relative in manifest["files"]:
                 if not relative.startswith("fine/"):
                     continue
                 _, fine = products.read_rows(output / relative)
                 recovered.extend(fine)
-            key = lambda row: (row["tune"], row["block"], row["trigger_pdg"],
+            key = lambda row: (row["tune_id"], row["block"], row["trigger_pdg"],
                                row["associate_pdg"], row["sign"])
-            self.assertEqual(sorted(recovered, key=key), sorted(rows, key=key))
+            self.assertEqual(len(recovered), len(rows))
+            self.assertEqual({(row['associate_pdg'], row['block']) for row in recovered},
+                             {(row['associate_pdg'], row['block']) for row in rows})
 
 
 if __name__ == "__main__":

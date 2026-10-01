@@ -254,13 +254,17 @@ def checked_analysis(path):
     if version == "2.3.0":
         binding = payload["associate_family_map"]
         support.exact_keys(binding, {"schema", "path", "sha256",
-                                    "signed_members", "signed_destinations"},
+                                    "accepted_full_map_sha256",
+                                    "semantic_groups_sha256", "signed_members",
+                                    "signed_destinations"},
                            "analysis associate-family binding")
         map_path = support.ROOT / binding["path"]
         admitted = family.checked_family_map(map_path, binding["sha256"])
         if binding != {"schema": family.MAP_SCHEMA,
-                       "path": "config/associate-family-map.json",
+                       "path": "config/associate-family-runtime.json",
                        "sha256": family.MAP_SHA256,
+                       "accepted_full_map_sha256": family.ACCEPTED_FULL_MAP_SHA256,
+                       "semantic_groups_sha256": family.SEMANTIC_GROUPS_SHA256,
                        "signed_members": 74, "signed_destinations": 42} or \
                 len(admitted.members) != 74 or len(admitted.destinations) != 42:
             raise ValueError("analysis associate-family binding differs")
@@ -618,7 +622,13 @@ def state_registry(analysis):
             state = copy.deepcopy(endpoint)
             state["pdg"] = member
             state["pair_analysis_eligible"] = False
-            state["label"] = "saved state {} -> {}".format(member, destination)
+            identity = admitted.fine_state_identities.get(member)
+            if identity is None:
+                raise ValueError("added family state lacks pinned catalog identity")
+            state["id"] = identity["id"]
+            state["name"] = identity["name"]
+            state["spin2j1"] = identity["spin2j1"]
+            state["label"] = identity["name"]
             states.append(state)
             by_pdg[member] = state
     pairs = []

@@ -28,6 +28,7 @@ def _load(name,path):
 
 p=_load('native_runner_projection','pipeline/reduce/projection.py')
 n=_load('native_runner_primitives','pipeline/reduce/native.py')
+family_products=_load('native_runner_family_products','pipeline/reduce/family_products.py')
 
 def sha(path):
     return p.file_digest(path)
@@ -46,7 +47,51 @@ def require_full_campaign_input(source,value):
         raise ValueError('full paper result requires the authenticated complete MERGED three-tune A collection')
 
 
-def native_point_query(request,source,path,analysis=None):
+def verify_reconstructed_pair_cells(primitives, proof):
+    """Bind the independent retained-row oracle to the scientific sparse cells."""
+    if tuple(primitives.profile_ids) != ('inclusive',):
+        raise ValueError('family reconstructed support requires the inclusive profile')
+    reconstructed = proof.pop('cells')
+    selected_pairs = set(primitives.selected_pairs)
+    oracle = {(row['tune_id'], row['block_id'], row['activity_bin'],
+               row['trigger_pdg'], row['associate_pdg'], row['sign'],
+               row['dphi_bin']): row for row in reconstructed
+              if (row['trigger_pdg'], row['associate_pdg']) in selected_pairs}
+    sparse = {key[1:]: cell for key, cell in primitives.pairs.items()
+              if key[0] == 'inclusive'}
+    if set(oracle) != set(sparse):
+        missing = sorted(set(oracle) - set(sparse))[:3]
+        extra = sorted(set(sparse) - set(oracle))[:3]
+        raise ValueError('family reconstructed/sparse pair key domain differs: '
+                         'missing={} extra={}'.format(missing, extra))
+    epsilon = 2.220446049250313e-16
+    for key, expected in oracle.items():
+        actual = sparse[key]
+        sumw_tolerance = 64.0 * epsilon * max(1.0, expected['sumabsw'])
+        sumw2_tolerance = (64.0 * epsilon * max(1.0, expected['sumw2']) *
+                           max(1, expected['count']))
+        if (abs(actual.value - expected['sumw']) > sumw_tolerance or
+                abs(actual.sumw2 - expected['sumw2']) > sumw2_tolerance):
+            raise ValueError('family reconstructed/sparse pair population differs '
+                             'at {}'.format(key))
+    proof['scientific_sparse_reconciliation'] = {
+        'state': 'PASS',
+        'natural_key': ['tune_id', 'block_id', 'activity_bin', 'trigger_pdg',
+                        'associate_pdg', 'sign', 'dphi_bin'],
+        'full_reconstructed_occupied_cells': len(reconstructed),
+        'full_reconstructed_candidate_pairs': sum(
+            row['count'] for row in reconstructed),
+        'scope_pair_count': len(selected_pairs),
+        'occupied_cells': len(oracle),
+        'candidate_pairs': sum(row['count'] for row in oracle.values()),
+        'oracle_sha256': hashlib.sha256(json.dumps(
+            [dict(key=list(key), **oracle[key]) for key in sorted(oracle)],
+            sort_keys=True, separators=(',', ':'), ensure_ascii=True,
+            allow_nan=False).encode('ascii')).hexdigest(),
+    }
+
+
+def native_point_query(request,source,path,analysis=None,model_api=None):
     """Serialize the exact requested natural domain, never a plot subset."""
     value=request.to_dict() if hasattr(request,'to_dict') else request
     typed=p.ProjectionRequest.from_dict(value,cold=True)
@@ -97,6 +142,8 @@ def native_point_query(request,source,path,analysis=None):
             pair['trigger_pdg'],pair['sector'],pair['sign'],
             pair['associate_pdg']))
     if analysis is not None and analysis.get('version') == '2.3.0':
+        if model_api is None:
+            raise ValueError('family point query requires the normalized model')
         admitted=model_api.family.checked_family_map(
             ROOT/analysis['associate_family_map']['path'],
             analysis['associate_family_map']['sha256'])
@@ -641,7 +688,8 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         support_prepared=n.collect_t1(source,selected_tunes,None,
             row_upper_bounds=True,event_activity_field=selected_activity[
                 'physical_field'],include_diagnostics=True,
-            work_root=work/'support-scan',pair_population_registry=pair_registry)
+            work_root=work/'support-scan',pair_population_registry=pair_registry,
+            analysis_version=construction['version'])
         pre_support_seconds=time.perf_counter()-before_support
         species=sorted({key[2] for key in support_prepared[0]})
         request=p.make_native_request(source,analysis_path,analysis_sha256,
@@ -712,9 +760,30 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         support_prepared=n.collect_t1(
             source,tunes,None,row_upper_bounds=True,
             event_activity_field=activity['physical_field'],include_diagnostics=True,
-            work_root=work/'support-scan',pair_population_registry=pair_registry)
+            work_root=work/'support-scan',pair_population_registry=pair_registry,
+            analysis_version=construction['version'])
     t1,events,support_opens,support_upper,event_moments,raw_diagnostics=support_prepared[:6]
     all_selected_proof=support_prepared[6] if prove_all_selected else None
+    if prove_all_selected and construction['version'] == '2.3.0':
+        verify_reconstructed_pair_cells(primitives, all_selected_proof)
+    family_product_receipt = None
+    if analysis['version'] == '2.3.0':
+        admitted_family_map = model_api.family.checked_family_map(
+            ROOT / analysis['associate_family_map']['path'],
+            analysis['associate_family_map']['sha256'])
+        product_path = work / 'family-products'
+        product_manifest = family_products.write_products(
+            product_path, primitives, admitted_family_map,
+            source_sha256=index_sha256, analysis_sha256=analysis_sha256,
+            content_sha256=source.index['scientific_identity_sha256'])
+        product_manifest_sha = sha(product_path / 'manifest.json')
+        family_products.verify_products(product_path, product_manifest_sha)
+        family_product_receipt = dict(path=str(product_path),
+            manifest_sha256=product_manifest_sha,
+            manifest_content_sha256=product_manifest['manifest_content_sha256'],
+            files=len(product_manifest['files']),
+            fine_species_count=product_manifest['fine_species_count'],
+            family_destination_count=product_manifest['family_destination_count'])
     support_done=time.perf_counter()
     selected_t1={curve['associate_pdg'] for curve in
         roles['accounting.natural_final_heavy']['required_curve_keys']}
@@ -728,7 +797,7 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
     primitive_receipt=n.write_native_transport(source,primitives,g9_cells,t1,
                                                events,primitive_path,support_upper,tunes)
     query_path=work/'native-points.tsv'
-    query_receipt=native_point_query(typed,source,query_path,analysis)
+    query_receipt=native_point_query(typed,source,query_path,analysis,model_api)
     binary,build=compile_engine(work/'build')
     output=work/'native-diagnostic.tsv'
     block_output=work/'native-block-primitives.tsv'
@@ -751,6 +820,11 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
     finished=time.perf_counter()
     scratch_bytes=sum(path.stat().st_size for path in
         (primitive_path,query_path,output,block_output,denominator_output))
+    resolved_analysis=Path(analysis_path).resolve()
+    try:
+        interpretation_analysis_path=str(resolved_analysis.relative_to(ROOT))
+    except ValueError:
+        interpretation_analysis_path=None
     return dict(schema='hadronization_native_diagnostic_run_v1',
         collection_index_sha256=index_sha256,
         collection_scientific_identity_sha256=source.index['scientific_identity_sha256'],
@@ -759,6 +833,7 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         request_sha256=typed.request_sha256,
         scientific_request_sha256=typed.scientific_request_sha256,
         interpretation_analysis_sha256=analysis_sha256,
+        interpretation_analysis_path=interpretation_analysis_path,
         construction_analysis_sha256=source.index['analysis_sha256'],
         interpretation_compatibility=compatibility,
         request_path=str(request_path),request_file_sha256=sha(request_path),
@@ -781,6 +856,7 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         sparse_scan_metrics=dict(primitives=vars(primitives.metrics),g9=vars(g9_cells.metrics)),
         support_root_opens=support_opens,support_row_upper_bounds=support_upper,
         all_selected_pair_population_proof=all_selected_proof,
+        family_products=family_product_receipt,
         event_block_moments=[dict(tune_id=tune,block_id=block,**moment.report())
             for (tune,block),moment in sorted(event_moments.items())],
         raw_origin_closure_diagnostics=[dict(tune_id=tune,block_id=block,

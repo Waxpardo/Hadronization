@@ -158,6 +158,9 @@ sys.exit(main(["verify", "--mode", "portable", "--package-dir", sys.argv[2],
         self.assertEqual({key['curve']['role_id'] for key in
             bounded.expected_point_keys}, set(p.PAPER_ROLE_IDS))
         self.assertTrue(114 < len(bounded.expected_point_keys) < 2000)
+        self.assertEqual({key['bins'][0]['index'] for key in
+            bounded.expected_point_keys if key['curve']['role_id'] ==
+            'multiplicity.composite'}, set(range(32)))
         def ratio_channels(value):
             return {(key['curve']['trigger_pdg'], key['curve']['associate_pdg'],
                      key['curve']['reference_pdg']) for key in value.expected_point_keys

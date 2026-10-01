@@ -380,8 +380,9 @@ PairProof Populate(TFile& file,Plane& plane) {
           U64 partners=0;
           for (const auto& item:particles) {
             const auto& associate=item.second;
-            if (item.first==triggerIndex || !associate.final || !associate.selected ||
-                (plane.layout.analysisVersion=="2.2.0" && !associate.pairEligible) ||
+            if (item.first==triggerIndex || !associate.final ||
+                (plane.layout.analysisVersion=="2.2.0" &&
+                 (!associate.selected || !associate.pairEligible)) ||
                 associate.status<81 || associate.status>89 ||
                 std::abs(associate.eta)>4.0 ||
                 !plane.layout.associatePdgs.at(sector).count(associate.pdg) ||

@@ -13,7 +13,7 @@ import tempfile
 from types import SimpleNamespace
 
 from pipeline.query import collection as collection_api
-from . import accounting, archive, archive_v4, native, native_runner
+from . import accounting, archive, archive_v4, family_products, native, native_runner
 from . import native_v4, native_v4_result, projection as p
 
 
@@ -50,6 +50,10 @@ def _package_manifest(output, report, *, collection_index, expected_sources,
              'native-run-receipt.json', 'source-build-ledger.json']
     names += ['exports/' + name for name in sorted(report['exports']['files'])]
     names += ['exports/receipt.json']
+    if report.get('family_products') is not None:
+        names += ['family-products/manifest.json']
+        names += ['family-products/' + name for name in sorted(
+            report['family_products']['files'])]
     files = {name: {'sha256': p.file_digest(output / name),
                     'bytes': (output / name).stat().st_size} for name in names}
     attestations = [
@@ -206,6 +210,12 @@ def _representative_request(source, args, analysis):
     for key in full.expected_point_keys:
         curve = key['curve']
         role = curve['role_id']
+        bin_index = key['bins'][0]['index'] if key['bins'] else -1
+        # Keep a compact, contiguous P1 support rather than one isolated bin.
+        # Thirty-two unit bins cover the bounded synthetic renderer fixture and
+        # remain small enough for the representative covariance packet.
+        if role == 'multiplicity.composite' and bin_index >= 32:
+            continue
         if role in ('spectra.signed_heavy',
                     'accounting.natural_final_heavy') and curve[
                         'associate_pdg'] not in (args.charm_trigger, 521):
@@ -216,8 +226,8 @@ def _representative_request(source, args, analysis):
             curve['associate_pdg'] if role in (
                 'spectra.signed_heavy', 'accounting.natural_final_heavy',
                 'balancing.baryon_meson.activity')
-                else None)
-        bin_index = key['bins'][0]['index'] if key['bins'] else -1
+                else None,
+            bin_index if role == 'multiplicity.composite' else None)
         rank = (order.get(curve['associate_pdg'], len(order)), bin_index,
                 p.canonical(key))
         if bucket not in chosen or rank < chosen[bucket][0]:
@@ -263,7 +273,12 @@ def _provenance(source, request, run, ledger, analysis, campaign):
         raise ValueError('public v4 request/source lineage differs')
     files = {row['path']: row['sha256'] for row in ledger[
         'tracked_source_files']}
-    if (files['config/analysis.json'] != source.index['analysis_sha256'] or
+    analysis_source_path = run.get('interpretation_analysis_path')
+    if ((analysis_source_path is not None and
+            files.get(analysis_source_path) != run['interpretation_analysis_sha256']) or
+            (analysis['version'] == '2.3.0' and
+             analysis_source_path != 'config/analysis-family.json') or
+            source.index['analysis_sha256'] != run['construction_analysis_sha256'] or
             req['bindings']['analysis_config_sha256'] != run[
                 'interpretation_analysis_sha256'] or
             files['pipeline/reduce/native_engine.cpp'] != run['build'][
@@ -446,6 +461,21 @@ def run(args):
             args.collection_index_sha, args.analysis, args.analysis_sha, request,
             run_dir,source=source)
     _verify_source_snapshot(snapshot)
+    packaged_family_products = None
+    if receipt.get('family_products') is not None:
+        source_products = Path(receipt['family_products']['path'])
+        product_destination = output / 'family-products'
+        shutil.copytree(source_products, product_destination, copy_function=shutil.copy2)
+        family_manifest_sha = receipt['family_products']['manifest_sha256']
+        family_manifest = family_products.verify_products(
+            product_destination, family_manifest_sha)
+        packaged_family_products = dict(
+            manifest_sha256=family_manifest_sha,
+            manifest_content_sha256=family_manifest['manifest_content_sha256'],
+            fine_species_count=family_manifest['fine_species_count'],
+            family_destination_count=family_manifest['family_destination_count'],
+            files=family_manifest['files'])
+        receipt['family_products']['path'] = 'family-products'
     native_receipt_path = output / 'native-run-receipt.json'
     _write(native_receipt_path, receipt)
     request = p.ProjectionRequest.from_dict(json.loads(Path(receipt[
@@ -513,6 +543,7 @@ def run(args):
         support_diagnostic_receipts=len(cold['support_diagnostic_receipts']),
         class_boundary_deletions=len(cold['class_boundary_deletions']),
         covariance_groups=len(cold['covariance']),
+        family_products=packaged_family_products,
         science_content_sha256=cold['science_content_sha256'])
     report_sha = _write(output / 'report.json', report)
     package_sha = _write(output / 'package-manifest.json',
@@ -627,14 +658,27 @@ def _verify(args):
             raise ValueError('producer execution collection closure differs')
     if not portable and root != Path(report['root']['path']).absolute():
         raise ValueError('public v4 report/ROOT path differs')
+    family_files = (
+        {'family-products/manifest.json'} |
+        {'family-products/' + name for name in report['family_products']['files']}
+    ) if report.get('family_products') is not None else set()
     if portable and (manifest['science_content_sha256'] != report['science_content_sha256'] or
                      manifest['root_sha256'] != report['root']['root_sha256'] or
                      set(files) != {'report.json', 'numerics.root',
                                     'admission-closure.json', 'native-run-receipt.json',
                                     'source-build-ledger.json'} |
                                     {'exports/' + name for name in report['exports']['files']} |
-                                    {'exports/receipt.json'}):
+                                    {'exports/receipt.json'} | family_files):
         raise ValueError('portable package manifest/science domain differs')
+    if report.get('family_products') is not None:
+        family_root = package / 'family-products' if portable else Path(
+            report['root']['path']).parent / 'family-products'
+        verified_family = family_products.verify_products(
+            family_root, report['family_products']['manifest_sha256'])
+        if (verified_family['files'] != report['family_products']['files'] or
+                native_receipt.get('family_products', {}).get('manifest_sha256') !=
+                report['family_products']['manifest_sha256']):
+            raise ValueError('public v4 family products/report binding differs')
     value = archive_v4.read(root, report['root']['root_sha256'],
                             report['root']['value_sha256'])
     if (value['science_content_sha256'] != report['science_content_sha256']

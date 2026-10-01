@@ -561,10 +561,12 @@ def _compile_support_scan(work_root):
 
 def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=False,
                event_activity_field=None, include_diagnostics=False, work_root=None,
-               pair_population_registry=None):
+               pair_population_registry=None, analysis_version='2.2.0'):
     """One compiled exact-support pass for additive T1, exposure and diagnostics."""
     selected_tunes = set(selected_tunes)
     verify_pairs = pair_population_registry is not None
+    if analysis_version not in ('2.2.0', '2.3.0'):
+        raise ValueError('support analysis version differs')
     if verify_pairs and (set(pair_population_registry) != {'charm', 'beauty'} or
             any(not values or len(values) != len(set(values)) or
                 any(type(pdg) is not int or pdg == 0 for pdg in values)
@@ -612,7 +614,8 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
         field = 'eta1' if event_activity_field == 'a15_eta1' else 'eta4'
         command = [str(binary), str(mapping), field, str(output)]
         if verify_pairs:
-            command.append('all-selected')
+            command.append('family-reconstructed' if analysis_version == '2.3.0'
+                           else 'all-selected')
         completed = subprocess.run(command,
                                    capture_output=True, text=True)
         if completed.returncode or completed.stdout or completed.stderr:
@@ -622,7 +625,7 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
         boundaries = {}
         opened = None
         upper = {}
-        pair_proofs, pair_counts = {}, {}
+        pair_proofs, pair_counts, pair_cells = {}, {}, {}
         seen = set()
         with output.open(encoding='ascii') as stream:
             if stream.readline().rstrip('\n') != 'hadronization_support_scan_v1':
@@ -650,6 +653,15 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                     if key in pair_counts or int(fields[5]) <= 0:
                         raise ValueError('all-selected pair-population species count differs')
                     pair_counts[key] = int(fields[5])
+                elif verify_pairs and kind == 'PAIR_CELL' and len(fields) == 12:
+                    key = (fields[1], *map(int, fields[2:8]))
+                    value = dict(count=int(fields[8]), sumw=float.fromhex(fields[9]),
+                        sumw2=float.fromhex(fields[10]), sumabsw=float.fromhex(fields[11]))
+                    if (key in pair_cells or value['count'] <= 0 or value['sumw2'] < 0 or
+                            value['sumabsw'] < 0 or not all(math.isfinite(value[name])
+                                for name in ('sumw', 'sumw2', 'sumabsw'))):
+                        raise ValueError('family reconstructed pair cell differs')
+                    pair_cells[key] = value
                 elif kind == 'MOMENT' and len(fields) == 9:
                     key = (fields[1], int(fields[2]))
                     if key in moments:
@@ -726,6 +738,8 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                 raise ValueError('all-selected pair proof source/species closure differs')
             pair_proof = dict(schema='hadronization_all_selected_pair_population_v1',
                 state='PASS', collection_index_sha256=source.expected_sha256,
+                reconstruction=('retained-heavy-trigger-origin-v1'
+                    if analysis_version == '2.3.0' else 'legacy-cache-complete-v1'),
                 registry_sha256=hashlib.sha256(json.dumps(pair_population_registry,
                     sort_keys=True, separators=(',', ':')).encode('ascii')).hexdigest(),
                 scan_sha256=hashlib.sha256(output.read_bytes()).hexdigest(),
@@ -733,7 +747,10 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                     for k, v in sorted(pair_proofs.items()) if k[0] in selected_tunes],
                 species_counts=[dict(tune_id=k[0], block_id=k[1], trigger_pdg=k[2],
                     associate_pdg=k[3], count=v) for k, v in sorted(pair_counts.items())
-                    if k[0] in selected_tunes])
+                    if k[0] in selected_tunes],
+                cells=[dict(tune_id=k[0], block_id=k[1], activity_bin=k[2],
+                    trigger_pdg=k[3], associate_pdg=k[4], sign=k[5], dphi_bin=k[6],
+                    **v) for k, v in sorted(pair_cells.items()) if k[0] in selected_tunes])
         result = {key: row for key, row in result.items() if key[0] in selected_tunes}
         event_totals = {key: row for key, row in event_totals.items() if key[0] in selected_tunes}
         moments = {key: row for key, row in moments.items() if key[0] in selected_tunes}

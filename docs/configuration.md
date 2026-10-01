@@ -77,7 +77,7 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 | `estimator_policy` | Pooled center, ten-block jackknife, denominator resolution and status rules |
 | `compact_domain_registries`, `compact_storage` | Bound compatibility descriptors. They do not select another production science engine. |
 
-`config/analysis-family.json` is the bounded version 2.3.0 construction model. It expands only the associate support needed by the accepted map, keeps the inclusive pT and eta selections, and binds `config/associate-family-map.json` by SHA-256. The original `config/analysis.json` remains the unchanged version 2.2.0 construction model for accepted historical products.
+`config/analysis-family.json` is the bounded version 2.3.0 construction model. It expands only the associate support needed by the accepted map, keeps the inclusive pT and eta selections, and binds the public runtime contract `config/associate-family-runtime.json` by SHA-256. That compact contract carries the accepted full-map SHA and an exact semantic-groups digest without private review paths or status metadata. The original `config/analysis.json` remains the unchanged version 2.2.0 construction model for accepted historical products.
 
 The nominal activity ID is `charged_light_sector_activity_a15_v1_eta4`. The alternate ID ends in `eta1`. Their physical fields are `a15_eta4` and `a15_eta1` respectively. Their `raw_definition_id` is an input metadata identifier, not an additional experimental-primary selection.
 

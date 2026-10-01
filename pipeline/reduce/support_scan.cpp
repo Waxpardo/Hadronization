@@ -28,11 +28,15 @@ struct Shard {std::string path; std::map<unsigned, Member> members;
   std::map<int,std::set<int>> associates;};
 struct Range {std::uint64_t first, end; unsigned local; std::uint64_t observed=0;};
 struct Event {ULong64_t event_id; Double_t weight,pthat,hard_scale; Int_t a15_eta1,a15_eta4,process_code,n_mpi;};
-struct Heavy {ULong64_t event_id; Int_t pdg,status,nc,ncbar,nb,nbbar,index,qc,qb; UChar_t final,selected; Double_t pt,eta,phi;};
+struct Heavy {ULong64_t event_id; Int_t pdg,status,nc,ncbar,nb,nbbar,index,qc,qb,category; UChar_t final,selected,pair_eligible; Double_t pt,eta,phi;};
+struct Origin {ULong64_t event_id; Int_t index,sector,origin,resolution,matched,rejected,depth;};
 struct Pair {ULong64_t event_id; Int_t associate_origin,associate_category,sign,trigger,associate;
   Double_t pt_trigger,pt_associate,dphi,deta,weight; Int_t a15_eta1,a15_eta4;};
 struct Trigger {ULong64_t event_id; Int_t index,sector; UInt_t rejection;};
 struct PairProof {std::uint64_t events=0,triggers=0,zero=0,candidates=0,stored=0;};
+struct PairCell {std::uint64_t count=0;double sumw=0,sumw2=0,sumabsw=0;
+  void add(double weight){++count;sumw+=weight;sumw2+=weight*weight;sumabsw+=std::abs(weight);}}
+;
 struct Closure {ULong64_t event_id; Int_t coefficient,dense_category; UChar_t visible;};
 struct RangeRow {ULong64_t first_id,count; UInt_t source_id;};
 struct T1 {std::uint64_t hadrons=0,charm=0,beauty=0; double weighted[3]={},correction[3]={};
@@ -93,13 +97,15 @@ std::vector<Shard> Inputs(const std::string& path){
   if(shards.empty())throw std::runtime_error("support map has no shards");
   return shards;
 }
-void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,bool verifyPairs){
+void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
+          bool verifyPairs,bool familyReconstructed){
   std::map<Key,Moments> moments;std::map<HeavyKey,T1> t1;std::map<Key,Diag> diagnostics;
   std::map<OriginKey,Group> origins;std::map<ClosureKey,Group> closures;
   std::vector<Boundary> boundaries;
   std::map<std::string,std::uint64_t> upper;
   std::map<Key,PairProof> pairProofs;
   std::map<std::tuple<std::string,unsigned,int,int>,std::uint64_t> pairCounts;
+  std::map<std::tuple<std::string,unsigned,int,int,int,int,int>,PairCell> pairCells;
   std::uint64_t opened=0;
   for(const auto& shard:shards){
     if(verifyPairs&&(shard.associates.size()!=2||shard.associates.at(4).empty()||
@@ -140,12 +146,17 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,b
     if(verifyPairs){
       Bind(heavy,"heavy_index","Int_t",&h.index);
       Bind(heavy,"qc","Int_t",&h.qc);Bind(heavy,"qb","Int_t",&h.qb);
+      if(familyReconstructed){
+        Bind(heavy,"category","Int_t",&h.category);
+        Bind(heavy,"pair_eligible","UChar_t",&h.pair_eligible);
+      }
     }
     Pair pair{};Bind(pairs,"event_id","ULong64_t",&pair.event_id);
     Bind(pairs,"associate_origin","Int_t",&pair.associate_origin);
     Bind(pairs,"associate_category","Int_t",&pair.associate_category);
     Bind(pairs,"sign","Int_t",&pair.sign);
-    TTree* triggers=verifyPairs?Tree(file,"triggers"):nullptr;Trigger trigger{};
+    TTree* triggers=verifyPairs?Tree(file,"triggers"):nullptr;
+    TTree* originTree=familyReconstructed?Tree(file,"origins"):nullptr;Trigger trigger{};Origin origin{};
     if(verifyPairs){
       Bind(triggers,"event_id","ULong64_t",&trigger.event_id);
       Bind(triggers,"heavy_index","Int_t",&trigger.index);
@@ -159,18 +170,29 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,b
       Bind(pairs,"weight","Double_t",&pair.weight);
       Bind(pairs,"a15_eta1","Int_t",&pair.a15_eta1);
       Bind(pairs,"a15_eta4","Int_t",&pair.a15_eta4);
+      if(familyReconstructed){
+        Bind(originTree,"event_id","ULong64_t",&origin.event_id);
+        Bind(originTree,"heavy_index","Int_t",&origin.index);
+        Bind(originTree,"sector","Int_t",&origin.sector);
+        Bind(originTree,"origin","Int_t",&origin.origin);
+        Bind(originTree,"resolution","Int_t",&origin.resolution);
+        Bind(originTree,"matched_hard","Int_t",&origin.matched);
+        Bind(originTree,"rejected_hard","Int_t",&origin.rejected);
+        Bind(originTree,"depth","Int_t",&origin.depth);
+      }
     }
     Closure cl{};Bind(closure,"event_id","ULong64_t",&cl.event_id);
     Bind(closure,"coefficient","Int_t",&cl.coefficient);
     Bind(closure,"dense_category","Int_t",&cl.dense_category);
     Bind(closure,"visible","UChar_t",&cl.visible);
-    Long64_t hi=0,pi=0,ci=0,ti=0;
+    Long64_t hi=0,pi=0,ci=0,ti=0,oi=0;
     auto next_h=[&](){if(hi<heavy->GetEntries()){heavy->GetEntry(hi++);return true;}return false;};
     auto next_p=[&](){if(pi<pairs->GetEntries()){pairs->GetEntry(pi++);return true;}return false;};
     auto next_c=[&](){if(ci<closure->GetEntries()){closure->GetEntry(ci++);return true;}return false;};
     auto next_t=[&](){if(triggers&&ti<triggers->GetEntries()){triggers->GetEntry(ti++);return true;}return false;};
+    auto next_o=[&](){if(originTree&&oi<originTree->GetEntries()){originTree->GetEntry(oi++);return true;}return false;};
     bool has_h=next_h(),has_p=next_p(),has_c=next_c();
-    bool has_t=next_t();
+    bool has_t=next_t(),has_o=next_o();
     std::size_t range_at=0;ULong64_t previous=0;bool first=true;
     for(Long64_t i=0;i<events->GetEntries();++i){events->GetEntry(i);
       if((!first&&ev.event_id<=previous)||!std::isfinite(ev.weight))
@@ -183,7 +205,8 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,b
       const auto& member=shard.members.at(range.local);Key key{member.tune,member.block};
       moments[key].add(ev,eta1);
       if((has_p&&pair.event_id<ev.event_id)||(has_c&&cl.event_id<ev.event_id)||
-         (has_h&&h.event_id<ev.event_id)||(has_t&&trigger.event_id<ev.event_id))
+         (has_h&&h.event_id<ev.event_id)||(has_t&&trigger.event_id<ev.event_id)||
+         (has_o&&origin.event_id<ev.event_id))
         throw std::runtime_error("orphan/out-of-order support row");
       while(has_c&&cl.event_id==ev.event_id){
         auto& group=closures[{member.tune,member.block,cl.dense_category,
@@ -209,7 +232,27 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,b
       }
       std::map<std::pair<int,int>,int> expectedPairs;
       std::set<int> acceptedTriggers;
+      std::map<int,int> triggerSectors;
+      std::map<std::pair<int,int>,Origin> originMap;
       if(verifyPairs){
+        while(familyReconstructed&&has_o&&origin.event_id==ev.event_id){
+          const bool selected=origin.origin==1&&origin.resolution==1&&origin.matched>=0&&
+            origin.rejected==-1&&origin.depth>=1;
+          const bool resolved=origin.origin>=2&&origin.origin<=4&&origin.resolution==1&&
+            origin.matched==-1&&origin.rejected==-1&&origin.depth>=1;
+          const bool unresolved=origin.origin==0&&origin.resolution>=2&&origin.resolution<=6&&
+            origin.matched==-1&&origin.depth>=-1&&
+            ((origin.resolution==5&&origin.rejected>=0)||
+             (origin.resolution>=2&&origin.resolution<=4&&origin.rejected==-1)||
+             origin.resolution==6);
+          const bool inactive=origin.origin==0&&origin.resolution==0&&
+            origin.matched==-1&&origin.rejected==-1&&origin.depth==-1;
+          if((origin.sector!=4&&origin.sector!=5)||
+             (!selected&&!resolved&&!unresolved&&!inactive)||
+             !originMap.emplace(std::make_pair(origin.index,origin.sector),origin).second)
+            throw std::runtime_error("family support origin decision differs");
+          has_o=next_o();
+        }
         auto& proof=pairProofs[key];++proof.events;
         while(has_t&&trigger.event_id==ev.event_id){
           if(!trigger.rejection){
@@ -219,17 +262,36 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,b
                t.status<81||t.status>89||std::abs(charge)!=1||
                !acceptedTriggers.insert(trigger.index).second)
               throw std::runtime_error("all-selected trigger identity differs");
+            triggerSectors.emplace(trigger.index,trigger.sector);
+            const auto triggerOrigin=originMap.find({trigger.index,trigger.sector});
+            if(familyReconstructed&&(triggerOrigin==originMap.end()||
+                                     triggerOrigin->second.origin!=1))
+              throw std::runtime_error("family support trigger provenance differs");
             if(std::abs(t.eta)<=4.){
               ++proof.triggers;std::uint64_t partners=0;
               for(const auto& [index,a]:particles){
                 const int aq=trigger.sector==4?a.qc:a.qb;
-                if(index==trigger.index||!a.final||!a.selected||a.status<81||
+                if(index==trigger.index||!a.final||
+                   (!familyReconstructed&&!a.selected)||a.status<81||
                    a.status>89||std::abs(a.eta)>4.||aq==0||
                    !shard.associates.at(trigger.sector).count(a.pdg))continue;
+                const auto associateOrigin=originMap.find({index,trigger.sector});
+                const bool mandatoryOrigin=associateOrigin!=originMap.end()&&
+                  !((associateOrigin->second.origin==0&&
+                     associateOrigin->second.resolution==0));
+                if(familyReconstructed&&!mandatoryOrigin)
+                  throw std::runtime_error("family support associate provenance differs");
                 if(!expectedPairs.emplace(std::make_pair(trigger.index,index),
                     charge*aq<0?-1:1).second)
                   throw std::runtime_error("duplicate all-selected candidate");
                 ++proof.candidates;++partners;
+                constexpr double piValue=3.14159265358979323846;
+                const double dphi=std::fmod(t.phi-a.phi+2.5*piValue,2.*piValue)-.5*piValue;
+                const int dphiBin=std::min(99,std::max(0,static_cast<int>(
+                  std::floor(100.*(dphi+.5*piValue)/(2.*piValue)))));
+                pairCells[{member.tune,member.block,eta1?ev.a15_eta1:ev.a15_eta4,
+                  t.pdg,a.pdg,charge*aq<0?-1:1,dphiBin}].add(ev.weight);
+                ++pairCounts[{member.tune,member.block,t.pdg,a.pdg}];
               }
               if(!partners)++proof.zero;
             }
@@ -249,17 +311,18 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,b
             if(!observedPairs.insert(identity).second||pair.sign!=expected->second||
                pair.pt_trigger!=t.pt||pair.pt_associate!=a.pt||pair.dphi!=dphi||
                pair.deta!=t.eta-a.eta||pair.weight!=ev.weight||
-               pair.a15_eta1!=ev.a15_eta1||pair.a15_eta4!=ev.a15_eta4)
+               pair.a15_eta1!=ev.a15_eta1||pair.a15_eta4!=ev.a15_eta4||
+               (familyReconstructed&&pair.associate_category!=a.category))
               throw std::runtime_error("all-selected pair duplicate/cache/sign mismatch: event="+
                 std::to_string(ev.event_id)+" associate="+std::to_string(a.pdg));
-            ++pairProofs[key].stored;++pairCounts[{member.tune,member.block,t.pdg,a.pdg}];
+            if(!familyReconstructed)++pairProofs[key].stored;
           }
         }
         auto& group=origins[{member.tune,member.block,pair.associate_origin,
                              pair.associate_category,pair.sign}];
         ++group.rows;group.weighted+=ev.weight;has_p=next_p();
       }
-      if(verifyPairs&&observedPairs.size()!=expectedPairs.size())
+      if(verifyPairs&&!familyReconstructed&&observedPairs.size()!=expectedPairs.size())
         for(const auto& [identity,sign]:expectedPairs){
           (void)sign;
           if(!observedPairs.count(identity))
@@ -267,11 +330,14 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,b
               " trigger="+std::to_string(particles.at(identity.first).pdg)+
               " associate="+std::to_string(particles.at(identity.second).pdg));
         }
+      if(verifyPairs&&familyReconstructed)pairProofs[key].stored+=expectedPairs.size();
     }
-    if(has_h||has_p||has_c||has_t)throw std::runtime_error("support rows remain after final event");
+    if(has_h||has_p||has_c||has_t||has_o)throw std::runtime_error("support rows remain after final event");
     for(const auto& range:intervals)if(range.observed!=range.end-range.first)
       throw std::runtime_error("support source exposure differs");
   }
+  if(familyReconstructed){upper["pairs"]=0;for(const auto& [key,p]:pairProofs){
+    (void)key;upper["pairs"]+=p.candidates;}}
   std::ofstream out(output);if(!out)throw std::runtime_error("support output cannot create");
   out<<std::hexfloat;
   out<<"hadronization_support_scan_v1\n";
@@ -281,6 +347,10 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,b
     <<p.events<<'\t'<<p.triggers<<'\t'<<p.zero<<'\t'<<p.candidates<<'\t'<<p.stored<<'\n';
   for(const auto& [key,count]:pairCounts)out<<"PAIR_COUNT\t"<<std::get<0>(key)<<'\t'
     <<std::get<1>(key)<<'\t'<<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'<<count<<'\n';
+  for(const auto& [key,cell]:pairCells)out<<"PAIR_CELL\t"<<std::get<0>(key)<<'\t'
+    <<std::get<1>(key)<<'\t'<<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'
+    <<std::get<4>(key)<<'\t'<<std::get<5>(key)<<'\t'<<std::get<6>(key)<<'\t'
+    <<cell.count<<'\t'<<cell.sumw<<'\t'<<cell.sumw2<<'\t'<<cell.sumabsw<<'\n';
   for(const auto& [key,m]:moments){
     out<<"MOMENT\t"<<key.first<<'\t'<<key.second<<'\t'<<m.events<<'\t'
        <<m.sumw<<'\t'<<m.sumw2<<'\t'<<m.sumabsw<<'\t'<<m.pthat<<'\t'<<m.hard_scale<<'\n';
@@ -307,10 +377,13 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,b
 } // namespace
 
 int main(int argc,char** argv){
-  try{if(argc!=4&&argc!=5)throw std::runtime_error("usage: support-scan map eta1|eta4 output [all-selected]");
+  try{if(argc!=4&&argc!=5)throw std::runtime_error("usage: support-scan map eta1|eta4 output [all-selected|family-reconstructed]");
     const std::string field=argv[2];if(field!="eta1"&&field!="eta4")
       throw std::runtime_error("support activity field differs");
-    if(argc==5&&std::string(argv[4])!="all-selected")throw std::runtime_error("support pair policy differs");
-    Scan(Inputs(argv[1]),field=="eta1",argv[3],argc==5);return 0;
+    const std::string policy=argc==5?argv[4]:"";
+    if(!policy.empty()&&policy!="all-selected"&&policy!="family-reconstructed")
+      throw std::runtime_error("support pair policy differs");
+    Scan(Inputs(argv[1]),field=="eta1",argv[3],!policy.empty(),
+         policy=="family-reconstructed");return 0;
   }catch(const std::exception& error){std::cerr<<"ERROR: "<<error.what()<<'\n';return 2;}
 }

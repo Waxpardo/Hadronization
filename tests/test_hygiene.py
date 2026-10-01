@@ -84,7 +84,7 @@ class LeanTreeContract(unittest.TestCase):
     def test_only_target_layout_exceptions_exist(self):
         expected_config = {
             "config/study.json", "config/analysis.json", "config/analysis-family.json",
-            "config/analysis-pt-1-0p15.json", "config/associate-family-map.json",
+            "config/analysis-pt-1-0p15.json", "config/associate-family-runtime.json",
             "config/query.json",
             "config/plot.json", "config/plot-dplus.json", "config/plot-all-tune.json",
             "config/site.example.conf",

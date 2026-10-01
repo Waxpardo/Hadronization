@@ -517,6 +517,90 @@ class RootQueryContract(unittest.TestCase):
         self.assertNotEqual(malformed_result.returncode, 0)
         self.assertIn(expected["malformed_provenance_error"], malformed_result.stderr)
 
+    def test_v23_reconstructs_unselected_vector_and_baryon_excitations(self):
+        from array import array
+        fixture = ROOT / "tests/fixtures/query_pair_population"
+        expected = json.loads((fixture / "expected.json").read_text())
+        mutator_source = fixture / "materialize_unselected_family.cpp"
+        self.assertEqual(hashlib.sha256(mutator_source.read_bytes()).hexdigest(),
+                         expected["unselected_family_mutator_sha256"])
+        tool = self.base / "materialize-unselected-family"
+        self.fixture._compile(mutator_source.read_text(),
+                              self.base / "materialize-unselected-family.cpp", tool)
+        mutated = self.base / "unselected-family-source.root"
+        subprocess.run([str(tool), str(fixture / "positive-source.root"), str(mutated)],
+                       check=True, env=self.fixture.environment, capture_output=True)
+        import ROOT as rootlib
+        opened = rootlib.TFile.Open(str(mutated), "READ")
+        try:
+            case = expected["unselected_family"]
+            observed = {int(row.heavy_index): (int(row.pdg), ord(row.selected),
+                ord(row.pair_eligible)) for row in opened.Get("heavy")
+                if int(row.event_id) == case["event_id"] and int(row.heavy_index) in
+                {case["vector"]["heavy_index"], case["baryon"]["heavy_index"]}}
+            self.assertEqual(observed, {
+                case["vector"]["heavy_index"]: (case["vector"]["pdg"], 0, 0),
+                case["baryon"]["heavy_index"]: (case["baryon"]["pdg"], 0, 0)})
+        finally:
+            opened.Close()
+        analysis = json.loads((ROOT / "config/analysis-family.json").read_text())
+        receipt = json.loads((fixture / "positive-source.json").read_text())
+        dictionary_value = json.loads((fixture / "dictionary.json").read_text())
+        dictionary_value["body"]["pdgs"] = sorted(set(
+            dictionary_value["body"]["pdgs"]) | set(self.query.configured_pdgs(analysis)))
+        dictionary_value["body_sha256"] = self.query.payload_sha(dictionary_value["body"])
+        family_dictionary = self.base / "unselected-family-dictionary.json"
+        family_dictionary.write_text(json.dumps(dictionary_value, sort_keys=True,
+                                                 separators=(",", ":")))
+        spec = self.base / "unselected-family.tsv"
+        spec.write_text(self.query.layout_spec(analysis,
+            json.loads((ROOT / "config/query.json").read_text()), receipt["binding"],
+            self.query.read_dictionary(family_dictionary),
+            scientific_binding_sha="5" * 64, execution_attestation_sha="6" * 64))
+        metadata = self.base / "unselected-family.json"
+        metadata.write_text('{"query_content_digests":"__QUERY_CONTENT_DIGESTS__",'
+            '"query_content_sha256":"__QUERY_CONTENT_SHA256__",'
+            '"pair_population_proof":"__PAIR_POPULATION_PROOF__"}')
+        environment, binary, _ = self.query.build_tool(self.work)
+        output = self.base / "unselected-family.root"
+        result = subprocess.run([str(binary), "build", str(spec), str(mutated),
+            str(output), str(metadata)], text=True, capture_output=True, env=environment)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        proof = json.loads(metadata.read_text())["pair_population_proof"]
+        baseline_metadata = self.base / "unselected-family-baseline.json"
+        baseline_metadata.write_text('{"query_content_digests":"__QUERY_CONTENT_DIGESTS__",'
+            '"query_content_sha256":"__QUERY_CONTENT_SHA256__",'
+            '"pair_population_proof":"__PAIR_POPULATION_PROOF__"}')
+        baseline_spec = self.base / "unselected-family-baseline.tsv"
+        baseline_spec.write_text(self.query.layout_spec(analysis,
+            json.loads((ROOT / "config/query.json").read_text()), receipt["binding"],
+            self.query.read_dictionary(family_dictionary),
+            scientific_binding_sha="7" * 64, execution_attestation_sha="8" * 64))
+        baseline = subprocess.run([str(binary), "build", str(baseline_spec),
+            str(fixture / "positive-source.root"),
+            str(self.base / "unselected-family-baseline.root"), str(baseline_metadata)],
+            text=True, capture_output=True, env=environment)
+        self.assertEqual(baseline.returncode, 0, baseline.stderr)
+        baseline_proof = json.loads(baseline_metadata.read_text())["pair_population_proof"]
+        self.assertEqual(proof["candidate_pairs"], baseline_proof["candidate_pairs"] +
+                         case["expected_new_pairs"])
+        self.assertEqual(proof["candidate_pairs"], proof["stored_pairs"])
+        opened = rootlib.TFile.Open(str(output), "READ")
+        try:
+            sparse = opened.Get("sparse_pairs")
+            axes = {sparse.GetAxis(i).GetName(): i for i in range(sparse.GetNdimensions())}
+            coordinates = array('i', [0] * sparse.GetNdimensions())
+            signed = set()
+            for ordinal in range(sparse.GetNbins()):
+                sparse.GetBinContent(ordinal, coordinates)
+                label = sparse.GetAxis(axes["associate_pdg"]).GetBinLabel(
+                    coordinates[axes["associate_pdg"]])
+                if label:
+                    signed.add(int(label))
+            self.assertTrue({423, 4334}.issubset(signed))
+        finally:
+            opened.Close()
+
     def test_every_tree_digest_matches_independent_original_row_encoding(self):
         from test_analysis import EXPECTED_SCHEMA
         metadata = json.loads((self.workspace / "metadata.json").read_text())

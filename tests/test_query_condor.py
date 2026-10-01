@@ -175,6 +175,8 @@ class QueryCondorPreparation(unittest.TestCase):
                 "durable_bulk_root": str(self.base / "bulk"),
                 "durable_control_root": str(self.base / "control"),
                 "expected_sources_sha256": condor.r.sha_file(source_path),
+                "analysis_path": "config/analysis.json",
+                "analysis_sha256": "c" * 64,
                 "input_file_count": 6, "input_root_bytes": 3,
                 "campaign_id": "TEST_ONLY", "block_count": 2,
                 "tune_ordinals": {tune: i for i, tune in
@@ -228,6 +230,7 @@ class QueryCondorPreparation(unittest.TestCase):
                 "input_file_count": 6, "input_root_bytes": 3,
                 "campaign_id": binding["campaign"],
                 "source_manifest_sha256": binding["manifest_sha256"],
+                "analysis_path": "config/analysis.json",
                 "analysis_sha256": metadata["analysis_sha256"],
                 "layout_sha256": metadata["layout_sha256"],
                 "block_count": 10, "tune_ordinals": binding["tune_ordinals"],
@@ -315,6 +318,7 @@ class QueryCondorPreparation(unittest.TestCase):
                     "input_file_count": 2, "input_root_bytes": root.stat().st_size,
                     "campaign_id": binding["campaign"],
                     "source_manifest_sha256": binding["manifest_sha256"],
+                    "analysis_path": "config/analysis.json",
                     "analysis_sha256": metadata["analysis_sha256"],
                     "layout_sha256": metadata["layout_sha256"],
                     "block_count": binding["block_assignment"]["count"],
@@ -399,9 +403,14 @@ class QueryCondorPreparation(unittest.TestCase):
     def test_inert_dag_has_exact_domain_retry_budget_and_frozen_bootstrap(self):
         dictionary = FIXTURE / "dictionary.json"
         bundle = self.base / "bundle"
+        selected_analysis = ROOT / "config/analysis-family.json"
         condor.prepare(self.acquisition, condor.r.sha_file(self.acquisition),
-                       dictionary, condor.r.sha_file(dictionary), bundle)
+                       dictionary, condor.r.sha_file(dictionary), bundle,
+                       analysis_path=selected_analysis,
+                       expected_analysis_sha=condor.r.sha_file(selected_analysis))
         work = condor.r.json_file(bundle / "work.json")
+        self.assertEqual(work["analysis_path"], "config/analysis-family.json")
+        self.assertEqual(work["analysis_sha256"], condor.r.sha_file(selected_analysis))
         self.assertEqual(work["state"], "INERT_SITE_BINDING_REQUIRED")
         self.assertEqual(work["expected_source_count"], 3000)
         self.assertEqual(work["expected_event_count"], 300000000)
@@ -414,6 +423,8 @@ class QueryCondorPreparation(unittest.TestCase):
         self.assertIn("MAXJOBS query 4", dag)
         self.assertIn("RETRY q0322 2 UNLESS-EXIT 42", dag)
         self.assertIn("__MEASURED_MEMORY_MB__", (bundle / "worker.sub").read_text())
+        with tarfile.open(bundle / "source.tar.gz", "r:gz") as archive:
+            self.assertIn("config/associate-family-runtime.json", archive.getnames())
         admission = json.loads((bundle / "SITE_ADMISSION_TEMPLATE.json").read_text())
         self.assertEqual(admission["decision"], "PENDING")
         self.assertEqual(admission["execute_node_canary"], "PENDING")
@@ -547,6 +558,8 @@ class QueryCondorPreparation(unittest.TestCase):
                 "prepared_pack_tar_sha256": "b" * 64,
                 "input_root": str(input_root),
                 "durable_bulk_root": str(bulk), "durable_control_root": str(control),
+                "analysis_path": "config/analysis.json",
+                "analysis_sha256": "c" * 64,
                 "input_file_count": 2, "input_root_bytes": 1,
                 "campaign_id": "TEST_ONLY", "block_count": 1,
                 "tune_ordinals": {"TEST": 0},

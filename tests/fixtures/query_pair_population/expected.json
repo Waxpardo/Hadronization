@@ -24,9 +24,9 @@
     "associate_matched_hard": 11,
     "associate_pdg": 431,
     "event_id": 844424930131968,
-    "sign": 1,
     "same_root_opposite_sign_trigger_heavy_index": 21,
     "same_root_opposite_sign_trigger_pdg": -421,
+    "sign": 1,
     "trigger_heavy_index": 20,
     "trigger_matched_hard": 10,
     "trigger_pdg": 421
@@ -43,5 +43,18 @@
     "sign": 1,
     "trigger_heavy_index": 20,
     "trigger_pdg": 421
-  }
+  },
+  "unselected_family": {
+    "baryon": {
+      "heavy_index": 32,
+      "pdg": 4334
+    },
+    "event_id": 844424930131968,
+    "expected_new_pairs": 4,
+    "vector": {
+      "heavy_index": 30,
+      "pdg": 423
+    }
+  },
+  "unselected_family_mutator_sha256": "0d4740878d87c36fb517fe1f1b1d82466d5057ea4ae56ac702f48f5f34caa8a7"
 }

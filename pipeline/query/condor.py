@@ -49,7 +49,7 @@ CURRENT_SOURCE_MANIFEST_SHA256 = "5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f
 TRANSIENT_ERRNOS = r.TRANSIENT_ERRNOS
 SOURCE_FILES = (
     "hadronization", "config/analysis.json", "config/analysis-family.json",
-    "config/associate-family-map.json", "config/query.json", "config/study.json",
+    "config/associate-family-runtime.json", "config/query.json", "config/study.json",
     "pipeline/analyze/run.py", "pipeline/generate/runtime.py", "pipeline/generate/sha256.hpp",
     "pipeline/query/model.py", "pipeline/query/support.py", "pipeline/query/run.py",
     "pipeline/reduce/family.py",
@@ -252,7 +252,19 @@ def _normalized_domain(campaign_path, source_manifest_path, acquisition):
 
 
 def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
-            *, test_only=False, campaign_path=None, source_manifest_path=None):
+            *, analysis_path=None, expected_analysis_sha=None, test_only=False,
+            campaign_path=None, source_manifest_path=None):
+    analysis_path = Path(analysis_path or ROOT / "config/analysis.json").resolve()
+    allowed_analyses = {(ROOT / name).resolve(): name for name in
+                        ("config/analysis.json", "config/analysis-family.json")}
+    if analysis_path not in allowed_analyses:
+        raise ValueError("Condor analysis must be one shipped normalized request")
+    actual_analysis_sha = r.sha_file(analysis_path)
+    if expected_analysis_sha is not None:
+        r.lower_sha(expected_analysis_sha, "selected Condor analysis pin")
+        if actual_analysis_sha != expected_analysis_sha:
+            raise ValueError("selected Condor analysis differs from expected pin")
+    q.model.checked_analysis(analysis_path)
     if test_only:
         if r.sha_file(acquisition) != acquisition_sha:
             raise ValueError("TEST_ONLY file-domain manifest differs")
@@ -292,7 +304,8 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
                 "source_manifest_sha256": domain["source_manifest_sha256"],
                 "block_count": domain["block_count"],
                 "tune_ordinals": domain["tune_ordinals"],
-                "analysis_sha256": r.sha_file(ROOT / "config/analysis.json"),
+                "analysis_path": allowed_analyses[analysis_path],
+                "analysis_sha256": actual_analysis_sha,
                 "layout_sha256": r.sha_file(ROOT / "config/query.json"),
                 "source_tar_sha256": r.sha_file(stage / "source.tar.gz"),
                 "source_files_sha256": r.sha_file(stage / "source-files.json"),
@@ -598,6 +611,11 @@ def _work(path, expected_sha):
     work = r.json_file(path)
     if work.get("schema") != WORK_SCHEMA or not isinstance(work.get("work"), list):
         raise ValueError("work schema differs")
+    if (work.get("analysis_path") not in
+            ("config/analysis.json", "config/analysis-family.json") or
+            not isinstance(work.get("analysis_sha256"), str)):
+        raise ValueError("work selected analysis binding differs")
+    r.lower_sha(work["analysis_sha256"], "work selected analysis")
     ordinals = [x["ordinal"] for x in work["work"]]
     if ordinals != list(range(len(ordinals))):
         raise ValueError("work ordinal domain differs")
@@ -631,7 +649,8 @@ def preflight(work_path, work_sha, source_tar, pack_tar=None, full_input_hash=Fa
     report = {"schema": "hadronization_condor_readonly_preflight_v1", "work_sha256": work_sha,
               "source_tar_ok": r.sha_file(source_tar) == work["source_tar_sha256"],
               "state": work["state"], "input_pairs": len(work["work"]),
-              "site_checks": {}}
+              "analysis_path": work["analysis_path"],
+              "analysis_sha256": work["analysis_sha256"], "site_checks": {}}
     if pack_tar is not None and work["state"] == "SITE_BOUND":
         report["prepared_pack_ok"] = r.sha_file(pack_tar) == work["prepared_pack_tar_sha256"]
     if work["state"] == "SITE_BOUND":
@@ -837,11 +856,14 @@ def worker(work_path, expected_work_sha, ordinal, attempt, source_tar, source_fa
         source_dir.mkdir(); pack_dir.mkdir()
         _extract_frozen(source_tar, source_facts, source_dir)
         _extract_pack(pack_tar, pack_dir)
+        selected_analysis = source_dir / work["analysis_path"]
+        if r.sha_file(selected_analysis) != work["analysis_sha256"]:
+            raise ValueError("frozen selected analysis differs from work binding")
         command = [sys.executable, "-B", str(source_dir / "hadronization"), "query", "build",
                    "--input", str(root), "--receipt", str(receipt),
                    "--accepted-receipt-sha256", item["receipt"]["sha256"],
                    "--dictionary", str(Path("dictionary.json").absolute()),
-                   "--analysis", str(source_dir / "config/analysis.json"),
+                   "--analysis", str(selected_analysis),
                    "--layout", str(source_dir / "config/query.json"),
                    "--prepared-pack", str(pack_dir), "--output", str(scratch / "query"),
                    "--work-root", str(scratch / "work")]
@@ -1158,6 +1180,8 @@ def main():
     prepare_parser.add_argument("--expected-acquisition-sha256", required=True)
     prepare_parser.add_argument("--dictionary", type=Path, required=True)
     prepare_parser.add_argument("--expected-dictionary-sha256", required=True)
+    prepare_parser.add_argument("--analysis", type=Path, required=True)
+    prepare_parser.add_argument("--expected-analysis-sha256", required=True)
     prepare_parser.add_argument("--output", type=Path, required=True)
     bind_parser = commands.add_parser("bind-site", help="bind an admitted immutable site bundle")
     for option in ("bundle", "pack", "admission", "output"):
@@ -1216,7 +1240,9 @@ def main():
     try:
         if args.command == "prepare":
             path = prepare(args.acquisition, args.expected_acquisition_sha256,
-                           args.dictionary, args.expected_dictionary_sha256, args.output)
+                           args.dictionary, args.expected_dictionary_sha256, args.output,
+                           analysis_path=args.analysis,
+                           expected_analysis_sha=args.expected_analysis_sha256)
             print("INERT_CONDOR_BUNDLE="+str(path.parent)+" SHA256="+r.sha_file(path))
         elif args.command == "bind-site":
             path = bind_site(args.bundle, args.expected_bundle_sha256,
