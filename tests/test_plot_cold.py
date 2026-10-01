@@ -109,6 +109,27 @@ int main() {
   const auto boundary=CanvasSupplementTexts(ratioPage);
   if (boundary.empty() || boundary.front().text!="2.5" ||
       !JoinedYAxisLabelPolicy(ratioPage,ratioPanel,false).suppressLast) return 12;
+  // A short panel must not clip a title with bars, primes and neutral signs.
+  // Its page anchor stays fixed when ownership moves out of the small pad.
+  gROOT->SetBatch(true);
+  Page titled{}; titled.role="balancing.activity.beauty";
+  titled.width=1900; titled.height=2850; titled.textPixels=34;
+  Panel small{}; small.id="upper.MONASH.5122";
+  small.geometry={.54,.55,1.,.75}; small.margins={0.,.04,0.,.15};
+  small.title="(b) #it{#Lambda}_{b}^{0} trigger: #bar{#it{#Xi}}_{b}^{'0}";
+  titled.panels={small};
+  const auto titles=CanvasPanelTitleTexts(titled);
+  if (titles.size()!=1 || titles[0].text!=small.title ||
+      std::abs(titles[0].x-(.54+.46*.025))>1.e-12 ||
+      std::abs(titles[0].y-(.55+.20*.94))>1.e-12 ||
+      titles[0].size!=BodyTextPixels(titled)+1) return 16;
+  TCanvas titleCanvas("title_bounds","title_bounds",1900,2850);
+  VerifyCanvasTitleBounds(titleCanvas,titled);
+  titled.panels[0].geometry={.54,.98,1.,1.};
+  bool refused=false;
+  try { VerifyCanvasTitleBounds(titleCanvas,titled); }
+  catch (const std::exception&) { refused=true; }
+  if (!refused) return 17;
   return bands==ranges.size() && central ? 0 : 6;
 }
 '''
@@ -120,6 +141,71 @@ int main() {
                                    capture_output=True,text=True)
             self.assertEqual(built.returncode, 0, built.stderr)
             subprocess.run([str(binary)],check=True,capture_output=True,text=True)
+
+    @unittest.skipUnless(shutil.which('root-config') and shutil.which('pdftoppm'),
+                         'ROOT and Poppler required')
+    def test_panel_title_glyphs_render_above_short_pad_boundary(self):
+        # The visible oracle is independent of the renderer's text inventory:
+        # the bar/prime/superscript must put raster ink above the panel top.
+        source = r'''#define main render_program_main
+#include "pipeline/plot/render.cpp"
+#undef main
+int main(int argc, char** argv) {
+  if (argc != 2) return 1;
+  gROOT->SetBatch(true); gStyle->SetOptStat(0); gErrorIgnoreLevel=kWarning;
+  const std::filesystem::path output(argv[1]);
+  std::filesystem::create_directory(output);
+  std::filesystem::current_path(output);
+  Page page{}; page.filename="title.pdf";
+  page.role="balancing.activity.beauty";
+  page.width=600; page.height=600; page.textPixels=34;
+  Panel panel{}; panel.id="upper.MONASH.5122";
+  panel.geometry={.1,.4,.9,.6}; panel.margins={.12,.04,.12,.15};
+  panel.xLow=0.; panel.xHigh=1.; panel.yLow=0.; panel.yHigh=1.;
+  panel.title="(b) #it{#Lambda}_{b}^{0}: #bar{#it{#Xi}}_{b}^{'0}";
+  page.panels={panel};
+  std::vector<Page> pages={page};
+  TFile archive("canvases.root","CREATE");
+  DrawPage(page,".",pages,archive); archive.Close();
+  return 0;
+}
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); cpp=root/'title.cpp'; binary=root/'title'
+            cpp.write_text(source)
+            flags=shlex.split(subprocess.check_output(
+                ['root-config','--cflags','--libs'],text=True))
+            built=subprocess.run(
+                ['c++','-std=c++17','-I',str(ROOT),str(cpp),'-o',str(binary)]+flags,
+                capture_output=True,text=True)
+            self.assertEqual(built.returncode,0,built.stderr)
+            subprocess.run([str(binary),str(root/'out')],check=True,
+                           capture_output=True,text=True)
+            subprocess.run(['pdftoppm','-gray','-singlefile','-scale-to-x','1200',
+                            '-scale-to-y','-1',str(root/'out/title.pdf'),
+                            str(root/'title')],check=True,capture_output=True)
+            payload=(root/'title.pgm').read_bytes()
+            magic,width,height,maxval,pixels=payload.split(maxsplit=4)
+            self.assertEqual((magic,int(width),int(maxval)),(b'P5',1200,255))
+            height=int(height); width=int(width)
+            # ROOT places the square canvas at the bottom of its default PDF
+            # sheet.  Panel top is y=0.6 NDC within that canvas.  Ink in the
+            # preceding 3.5% band can only come from uncut title glyphs.
+            panel_top=height-round(.6*width)
+            y0=panel_top-round(.035*width); y1=panel_top-2
+            x0=round(.10*width); x1=round(.78*width)
+            dark=sum(pixels[y*width+x] < 245
+                     for y in range(y0,y1) for x in range(x0,x1))
+            occupied=[y for y in range(height)
+                      if any(pixels[y*width+x] < 245 for x in range(x0,x1))]
+            runs=[]
+            for y in occupied:
+                if not runs or y > runs[-1][-1]+1: runs.append([y])
+                else: runs[-1].append(y)
+            self.assertGreater(
+                dark,30,
+                f'title glyphs were clipped at panel top; image={width}x{height}; '
+                f'occupied row runs={[(r[0],r[-1]) for r in runs]}')
 
     @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
     def test_each_canvas_restores_band_color_and_alpha_in_a_fresh_process(self):

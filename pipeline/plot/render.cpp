@@ -1040,9 +1040,6 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
         StatusRailY(page, panel), inset ? 11 : textPixels - 2,
         kGray + 2, 22));
   }
-  result.push_back(TextExpectation(panel.title, PanelTitleX(panel),
-                                   PanelTitleY(page, panel),
-                                   inset ? 15 : textPixels + 1));
   if (page.role == "multiplicity.composite" &&
       panel.id == "upper.distribution" && panel.annotations.empty()) {
     const auto lines = P1InformationLines(page);
@@ -1434,6 +1431,40 @@ std::vector<ExpectedText> ClassKeyTexts(const Page& page) {
   (void)page;
   return {};
 }
+std::vector<ExpectedText> CanvasPanelTitleTexts(const Page& page) {
+  // A title can extend above its TPad even when the page has ample space.
+  // Preserve its physical anchor and font, but paint on the parent canvas
+  // so neutral superscripts, overbars and primed states are not clipped.
+  std::vector<ExpectedText> result;
+  for (const auto& panel : page.panels) {
+    if (panel.title.empty()) continue;
+    const double width = panel.geometry[2] - panel.geometry[0];
+    const double height = panel.geometry[3] - panel.geometry[1];
+    result.push_back(TextExpectation(panel.title,
+        panel.geometry[0] + width * PanelTitleX(panel),
+        panel.geometry[1] + height * PanelTitleY(page, panel),
+        panel.reusePanel.empty() ? BodyTextPixels(page) + 1 : 15));
+  }
+  return result;
+}
+void VerifyCanvasTitleBounds(TCanvas& canvas, const Page& page) {
+  canvas.cd();
+  const double width = std::abs(canvas.XtoPixel(canvas.GetX2()) -
+                                canvas.XtoPixel(canvas.GetX1()));
+  const double height = std::abs(canvas.YtoPixel(canvas.GetY2()) -
+                                 canvas.YtoPixel(canvas.GetY1()));
+  for (const auto& title : CanvasPanelTitleTexts(page)) {
+    TLatex text;
+    text.SetTextFont(43); text.SetTextSize(title.size);
+    text.SetTitle(title.text.c_str());
+    UInt_t w = 0, h = 0;
+    text.GetBoundingBox(w, h);
+    Need(title.x * width >= 2 && title.y * height >= 2 &&
+         (1-title.x) * width >= w + 2 &&
+         (1-title.y) * height >= h + 2,
+         ("panel title exceeds the parent canvas: " + title.text).c_str());
+  }
+}
 std::string LogBoundaryLabel(double value) {
   const int exponent=static_cast<int>(std::floor(std::log10(value)+1.e-12));
   const double coefficient=value/std::pow(10.,exponent);
@@ -1655,7 +1686,7 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
        "canvas archive drawing record differs");
   for (const auto& page : pages) {
     const std::string name = CanvasName(page);
-    const auto* canvas = dynamic_cast<TCanvas*>(archive.Get(name.c_str()));
+    auto* canvas = dynamic_cast<TCanvas*>(archive.Get(name.c_str()));
     Need(canvas != nullptr, "named TCanvas is absent from archive");
     VerifyBandAlpha(*canvas);
     const auto* identity = dynamic_cast<TNamed*>(
@@ -1916,9 +1947,12 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
           .015,.015,std::max(11, BodyTextPixels(page)-4), kGray+2));
     const auto classKey = ClassKeyTexts(page);
     canvasTexts.insert(canvasTexts.end(), classKey.begin(), classKey.end());
+    const auto titles = CanvasPanelTitleTexts(page);
+    canvasTexts.insert(canvasTexts.end(), titles.begin(), titles.end());
     const auto supplements = CanvasSupplementTexts(page);
     canvasTexts.insert(canvasTexts.end(), supplements.begin(), supplements.end());
     VerifyTexts(*canvas->GetListOfPrimitives(), canvasTexts);
+    VerifyCanvasTitleBounds(*canvas, page);
     VerifyLegends(*canvas->GetListOfPrimitives(), ExpectedCanvasLegends(page));
   }
 }
@@ -2093,8 +2127,6 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       status.DrawLatex(panel.margins[0] + frameWidth * xFraction(coordinate),
                        StatusRailY(page, panel), "#times");
     }
-    Text(PanelTitleX(panel), PanelTitleY(page, panel), panel.title,
-         inset ? 15 : textPixels + 1);
     if (page.role == "multiplicity.composite" &&
         panel.id == "upper.distribution" && panel.annotations.empty()) {
       const auto lines = P1InformationLines(page);
@@ -2267,6 +2299,8 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     legend.Draw();
   }
   for (const auto& item : ClassKeyTexts(page))
+    Text(item.x, item.y, item.text, static_cast<int>(item.size));
+  for (const auto& item : CanvasPanelTitleTexts(page))
     Text(item.x, item.y, item.text, static_cast<int>(item.size));
   for (const auto& item : CanvasSupplementTexts(page)) {
     TLatex label;
