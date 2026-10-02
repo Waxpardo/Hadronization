@@ -60,6 +60,7 @@ SOURCE_FILES = (
     "pipeline/query/collection.py", "pipeline/query/merge.py",
     "pipeline/query/condor.py", "pipeline/query/query.cpp", "pipeline/query/selection.hpp",
     "pipeline/query/row_schema.hpp", "pipeline/query/sparse.hpp",
+    "pipeline/query/merge_sparse.hpp",
 )
 BOOTSTRAP = '''#!/usr/bin/env python3
 """Start the hash-frozen query program from a transferred source tar."""

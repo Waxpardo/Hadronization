@@ -1,7 +1,6 @@
 """Merge original blocks into bounded THnSparse objects in one ROOT file per tune."""
 
 import argparse
-from array import array
 import hashlib
 from pathlib import Path
 import sys
@@ -22,26 +21,15 @@ def _digest(hist):
 
 
 def _native():
-    ROOT = c._root()
-    if not hasattr(ROOT, "PhaseAMerge"):
-        if not ROOT.gInterpreter.Declare(Path(__file__).with_name("merge_sparse.hpp").read_text()):
-            raise ValueError("cannot compile native block merge helper")
-    return ROOT.PhaseAMerge
+    return c._native_merge()
 
 
 def _empty_like(hist, name):
-    ROOT = c._root()
-    axes = [hist.GetAxis(i) for i in range(hist.GetNdimensions())]
-    result = ROOT.THnSparseD(name, name, len(axes),
-        array("i", [a.GetNbins() for a in axes]),
-        array("d", [a.GetXmin() for a in axes]),
-        array("d", [a.GetXmax() for a in axes]), 16384)
-    ROOT.SetOwnership(result, True)
-    for i, axis in enumerate(axes):
-        axis.Copy(result.GetAxis(i))
-        result.GetAxis(i).SetRange(0, 0)
-    result.Sumw2()
-    return result
+    return c._empty_like(hist, name)
+
+
+def _component_name(family, block, part):
+    return "sparse_%s__block_%02d__part_%03d" % (family, block, part)
 
 
 def _write_component(target, hist):
@@ -85,10 +73,34 @@ def merge(index_path, expected_sha256, output):
             try:
                 for family in c.FAMILIES:
                     objects[family] = []
-                    family_digest = hashlib.sha256()
                     merged = None
                     baseline = None
                     entries = [0] * index["block_count"]
+                    sources = [[] for _ in range(index["block_count"])]
+                    serial = [0] * index["block_count"]
+
+                    def flush(block):
+                        i = block - 1
+                        if not sources[i]:
+                            return
+                        hist = merged[i]
+                        if hist.GetNbins() > entries[i]:
+                            raise ValueError("sparse occupied cells exceed admitted fills")
+                        hist.SetEntries(entries[i])
+                        digest = _digest(hist)
+                        print("MERGE_COMPONENT tune=%s family=%s block=%d part=%d cells=%d" %
+                              (tune, family, block, serial[i], hist.GetNbins()), flush=True)
+                        size = _write_component(target, hist)
+                        objects[family].append({"name": hist.GetName(), "block": block,
+                                                "part": serial[i],
+                                                "source_ordinals": sources[i],
+                                                "entries": entries[i],
+                                                "cell_digest": digest,
+                                                "serialized_bytes": size})
+                        serial[i] += 1
+                        entries[i] = 0
+                        sources[i] = []
+                        merged[i] = _empty_like(hist, _component_name(family, block, serial[i]))
                     print("MERGE_FAMILY tune=%s family=%s" % (tune, family), flush=True)
                     for shard in index["shards"]:
                         if not any(m["tune"] == tune for m in shard["members"]):
@@ -103,36 +115,44 @@ def merge(index_path, expected_sha256, output):
                                 raise ValueError("merge geometry/dictionary differs")
                             baseline = signature
                             if merged is None:
-                                merged = [_empty_like(hist, "sparse_%s__block_%02d" % (family, block))
+                                merged = [_empty_like(hist, _component_name(family, block, 0))
                                           for block in range(1, index["block_count"] + 1)]
-                            native.Accumulate(hist, merged, ordinal)
                             counts = native.Entries(source, family,
                                 [m["tune_ordinal"] for m in shard["members"]],
                                 [m["block"] for m in shard["members"]], ordinal, index["block_count"],
                                 "associate_status" in layout["sparse"]["pairs"])
-                            entries = [old + int(new) for old, new in zip(entries, counts)]
+                            if any(count > c.MAX_COMPONENT_FILLS for count in counts):
+                                raise ValueError("single source exceeds sparse component fill bound")
+                            if any(old + count > c.MAX_COMPONENT_FILLS
+                                   for old, count in zip(entries, counts)):
+                                for block in range(1, index["block_count"] + 1):
+                                    flush(block)
+                            native.Accumulate(hist, merged, ordinal)
+                            for block, count in enumerate(counts, 1):
+                                if any(m["tune_ordinal"] == ordinal and m["block"] == block
+                                       for m in shard["members"]):
+                                    entries[block-1] += int(count)
+                                    sources[block-1].append(shard["ordinal"])
                             del hist
                         finally:
                             source.Close()
                     if merged is None:
                         raise ValueError("tune has no sparse contribution")
-                    for block, hist in enumerate(merged, 1):
-                        hist.SetEntries(entries[block-1])
-                        digest = hashlib.sha256()
-                        for coordinates, value, variance in c._cells(hist):
-                            line = (c.r.canonical([coordinates, value.hex(), variance.hex()]) + "\n").encode("ascii")
-                            digest.update(line)
-                            family_digest.update(line)
-                        print("MERGE_COMPONENT tune=%s family=%s block=%d cells=%d" %
-                              (tune, family, block, hist.GetNbins()), flush=True)
-                        size = _write_component(target, hist)
-                        objects[family].append({"name": hist.GetName(), "block": block,
-                                                "cell_digest": digest.hexdigest(),
-                                                "serialized_bytes": size})
-                    del hist, merged
-                    family_digests[family] = family_digest.hexdigest()
+                    for block in range(1, index["block_count"] + 1):
+                        flush(block)
+                    objects[family].sort(key=lambda obj: (obj["block"], obj["part"]))
+                    del merged
             finally:
                 target.Close()
+            source = ROOT.TFile.Open(str(root_path), "READ")
+            if not source or source.IsZombie():
+                raise ValueError("cannot reopen merged sparse ROOT")
+            try:
+                for family in c.FAMILIES:
+                    family_digests[family] = c.cell_digest(c.family_cells(
+                        source, family, {"sparse_objects": objects}))
+            finally:
+                source.Close()
             part = {"tune": tune, "families": list(c.FAMILIES),
                     "root": c._fact(root_path), "cell_digests": family_digests,
                     "sparse_objects": objects}

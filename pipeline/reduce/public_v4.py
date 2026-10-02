@@ -199,6 +199,15 @@ def _selection(args, analysis):
 def _representative_request(source, args, analysis):
     """Bound a TEST_ONLY page-style domain without changing any formula."""
     tunes = args.tunes or list(source.index['tune_ordinals'])
+    # The reference activity classes must lie inside the P1 points sent to the
+    # renderer. A fixed 32-bin crop works for tiny fixtures but truncates real
+    # accepted multiplicity support and rightly fails the cold plot contract.
+    reference_high = 32
+    def reference_activity(cell, axes):
+        nonlocal reference_high
+        if cell.value and cell.coordinates[2] >= 1:
+            reference_high = max(reference_high, cell.coordinates[2])
+    source.scan(('activity',), [args.reference_tune], reference_activity)
     t1, _, _ = native.collect_t1(source, tunes)
     full = p.make_native_request(source, getattr(args, 'analysis', ANALYSIS), args.analysis_sha,
         tunes, sorted({key[2] for key in t1}), _selection(args, analysis))
@@ -211,10 +220,9 @@ def _representative_request(source, args, analysis):
         curve = key['curve']
         role = curve['role_id']
         bin_index = key['bins'][0]['index'] if key['bins'] else -1
-        # Keep a compact, contiguous P1 support rather than one isolated bin.
-        # Thirty-two unit bins cover the bounded synthetic renderer fixture and
-        # remain small enough for the representative covariance packet.
-        if role == 'multiplicity.composite' and bin_index >= 32:
+        # Keep contiguous P1 support through the highest occupied reference
+        # activity, with the original 32-bin minimum for small fixtures.
+        if role == 'multiplicity.composite' and bin_index >= reference_high:
             continue
         if role in ('spectra.signed_heavy',
                     'accounting.natural_final_heavy') and curve[

@@ -25,18 +25,25 @@ inline int SerializedSize(THnSparseD* hist, int limit) {
     hist->Streamer(buffer);
     return buffer.Length();
 }
-inline void Accumulate(THnSparseD* source, const std::vector<THnSparseD*>& blocks, int tune) {
+inline void AccumulateSelected(THnSparseD* source, const std::vector<THnSparseD*>& blocks,
+        int tune, const std::vector<int>& allowed) {
+    if (!allowed.empty() && allowed.size() != blocks.size())
+        throw std::runtime_error("sparse component selected-block geometry differs");
     std::vector<int> coord(source->GetNdimensions());
     for (Long64_t bin=0; bin<source->GetNbins(); ++bin) {
         const double value=source->GetBinContent(bin, coord.data());
         if (coord[0] != tune+1) continue;
         if (coord[1] < 1 || coord[1] > int(blocks.size()))
             throw std::runtime_error("sparse block outside original domain");
+        if (!allowed.empty() && !allowed[coord[1]-1]) continue;
         auto* target=blocks.at(coord[1]-1);
         const auto out=target->GetBin(coord.data(), true);
         target->SetBinContent(out, target->GetBinContent(out)+value);
         target->SetBinError2(out, target->GetBinError2(out)+source->GetBinError2(bin));
     }
+}
+inline void Accumulate(THnSparseD* source, const std::vector<THnSparseD*>& blocks, int tune) {
+    AccumulateSelected(source, blocks, tune, {});
 }
 inline std::vector<Long64_t> Entries(TFile* file, const std::string& family,
         const std::vector<int>& tunes, const std::vector<int>& blocks, int tune, int count,

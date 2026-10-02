@@ -54,7 +54,7 @@ The public table and plot label is **Charged primaries**. In this study that lab
 
 This threshold belongs to the activity definition. It does not apply to inclusive heavy-particle pairs or signed heavy-hadron spectra. No retained value is recounted or relabelled at the technical-identity level.
 
-All heavy-hadron decays were disabled, including strong and electromagnetic decays. The runtime also used `ParticleDecays:limitTau0 = on` and `ParticleDecays:tau0Max = 0.01 mm`. Light strong/electromagnetic resonance daughters and charged leptons can contribute, while heavy-hadron daughters are absent. The predicate is therefore not a stored-event ancestry veto, and the study qualifier must accompany the public label.
+All heavy-hadron decays were disabled, including strong and electromagnetic decays. The runtime also used `ParticleDecays:limitTau0 = on` and `ParticleDecays:tau0Max = 0.01 mm`. Light strong/electromagnetic resonance daughters and charged leptons can contribute, while heavy-hadron daughters are absent. The predicate is therefore not a stored-event ancestry veto. Plots and tables use the compact label **Charged primaries**; this methods section specifies its full generator-level definition and limitations.
 
 ## Saved-state associate families
 

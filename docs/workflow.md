@@ -191,7 +191,7 @@ A collection index binds workspace locations to source identities and independen
 
 Use the collector's collection index when following the cluster route. A manually created collection alone does not establish full site acceptance. `collection admit` checks the independent expected-source, site, collector and merge records.
 
-The merge writes one ROOT file per tune. Each file contains separate sparse objects for every original block and family. It refuses an object above its serialization limit. It compares every occupied cell and Sumw2 against the original shards.
+The merge writes one ROOT file per tune. Each family retains ten original statistical blocks, with bounded physical components within a block when needed. It refuses an object above its serialization limit and reconstructs each component from its named source shards during verification. The numerical reader sums the components before estimating block-level observables.
 
 To inspect a merged all-heavy collection, hash its `index.json` independently and run:
 

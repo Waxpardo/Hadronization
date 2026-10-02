@@ -347,9 +347,15 @@ def sparse_equality(base):
             inventory=part["sparse_objects"][family]
             blocks=[item["block"] for item in inventory]
             names=[item["name"] for item in inventory]
-            assert blocks==list(range(1,block_count+1)),(family,tune,"block inventory")
+            assert sorted(set(blocks))==list(range(1,block_count+1)),(family,tune,"block inventory")
             assert len(names)==len(set(names)),(family,tune,"duplicate object inventory")
-            assert names==[f"sparse_{family}__block_{block:02d}" for block in blocks]
+            assert names==[f"sparse_{family}__block_{item['block']:02d}__part_{item['part']:03d}"
+                           for item in inventory],(family,tune,"component identity")
+            assert [(item["block"],item["part"]) for item in inventory]==sorted(
+                (item["block"],item["part"]) for item in inventory), (family,tune,"component order")
+            for block in range(1,block_count+1):
+                assert [item["part"] for item in inventory if item["block"]==block]==list(
+                    range(sum(item["block"]==block for item in inventory))), (family,tune,"part inventory")
             file = ROOT.TFile.Open(part["root"]["path"])
             declared={item["name"] for objects in part["sparse_objects"].values() for item in objects}
             keys=[key.GetName() for key in file.GetListOfKeys()]

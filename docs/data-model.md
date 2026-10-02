@@ -128,7 +128,7 @@ The index contains `analysis_sha256`, `layout_sha256`, `dictionary_body_sha256`,
 
 Each shard record binds query ROOT, metadata and workspace manifest to its source members and content identity. Duplicate natural or global source identities fail. The expected-source check refuses missing or foreign sources.
 
-A merged collection contains one `tune-NN.root` file per tune. Each family has one object per original block, named `sparse_FAMILY__block_NN`. The implementation limits each serialized sparse object to 512 MiB. It never combines all blocks into one oversized object.
+A merged collection contains one `tune-NN.root` file per tune. Each family retains the ten original statistical blocks. A block may occupy several physical objects, named `sparse_FAMILY__block_NN__part_NNN`, when its accepted fills exceed the component limit. The index records each component's source shards, entry count, occupied-cell digest and serialized size. The reader adds the components within the original block; they are not extra statistical blocks. No serialized sparse object may exceed 512 MiB.
 
 Merge receipts bind parent lineage, object counts, cell digests and resulting files. Exhaustive comparison checks the occupied domain, contents and Sumw2. It allows 1e-12 absolute or relative tolerance for summation order. It does not allow missing cells.
 

@@ -319,7 +319,9 @@ class QueryCollectionContract(unittest.TestCase):
                 auto* hist = file.Get<THnSparseD>(name);
                 if (!hist || hist->GetNbins() == 0) throw std::runtime_error("empty sparse test input");
                 const Long64_t occupied = 0;
+                const auto entries = hist->GetEntries();
                 hist->SetBinContent(occupied, hist->GetBinContent(occupied) + 1.0);
+                hist->SetEntries(entries);
                 hist->Write(name, TObject::kOverwrite);
             }
         ''')
@@ -328,7 +330,9 @@ class QueryCollectionContract(unittest.TestCase):
         obj = part["sparse_objects"]["pairs"][0]
         ROOT.mutate_test_merge_cell(str(root_path), obj["name"])
         file = ROOT.TFile.Open(str(root_path), "READ")
-        obj["cell_digest"] = m._digest(c.read_sparse(file, obj["name"]))
+        altered = c.read_sparse(file, obj["name"])
+        obj["cell_digest"] = m._digest(altered)
+        obj["entries"] = int(altered.GetEntries())
         obj["serialized_bytes"] = file.GetKey(obj["name"]).GetObjlen()
         changed_digest = c.cell_digest(c.family_cells(file, "pairs", part))
         file.Close()
@@ -348,7 +352,7 @@ class QueryCollectionContract(unittest.TestCase):
         receipt["partitions"] = child["partitions"]
         receipt_path = self.base / "changed-cell-receipt.json"
         c.r.atomic_json(receipt_path, receipt, exclusive=True)
-        with self.assertRaisesRegex(ValueError, "merged sparse cell/Sumw2"):
+        with self.assertRaisesRegex(ValueError, "merged sparse .*cell/Sumw2"):
             c.verify_merge_lineage(child_path, child_sha, receipt_path,
                                    c.r.sha_file(receipt_path))
         receipt["expected_sources_sha256"] = "0" * 64
@@ -388,17 +392,33 @@ class QueryCollectionContract(unittest.TestCase):
                 self.assertTrue(all(0 < obj["serialized_bytes"] <= c.MAX_SPARSE_OBJECT_BYTES for obj in objects))
 
     def test_component_manifest_missing_duplicate_or_foreign_block_refuses(self):
-        for kind in ("missing", "duplicate", "foreign", "oversized"):
+        for kind in ("missing", "duplicate", "foreign", "oversized", "mislabelled_source"):
             child = copy.deepcopy(self.merged)
             objects = child["partitions"][0]["sparse_objects"]["pairs"]
             if kind == "missing": objects.pop()
             if kind == "duplicate": objects.append(objects[0])
             if kind == "foreign": objects[0]["block"] = 2
             if kind == "oversized": objects[0]["serialized_bytes"] = c.MAX_SPARSE_OBJECT_BYTES+1
+            if kind == "mislabelled_source": objects[0]["source_ordinals"] = [1]
             path = self.base / (kind+"-component.json")
             c.r.atomic_json(path, child, exclusive=True)
             with self.assertRaisesRegex(ValueError, "component"):
                 c.read(path, c.r.sha_file(path))
+
+    def test_component_manifest_permutation_preserves_source_proof(self):
+        child = copy.deepcopy(self.merged)
+        child["partitions"][0]["sparse_objects"]["pairs"].reverse()
+        path = self.base / "permuted-components.json"
+        c.r.atomic_json(path, child, exclusive=True)
+        index_sha = c.r.sha_file(path)
+        c.read(path, index_sha)
+        receipt = c.r.json_file(self.merged_path.parent / "merge-receipt.json")
+        receipt["merged_index_sha256"] = index_sha
+        receipt["partitions"] = child["partitions"]
+        receipt_path = self.base / "permuted-components-receipt.json"
+        c.r.atomic_json(receipt_path, receipt, exclusive=True)
+        c.verify_merge_lineage(path, index_sha, receipt_path,
+                               c.r.sha_file(receipt_path))
 
     def test_full_dimension_synthetic_object_exceeds_limit_but_blocks_roundtrip(self):
         ROOT = c._root()

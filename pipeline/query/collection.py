@@ -41,6 +41,14 @@ def _root():
     return ROOT
 
 
+def _native_merge():
+    ROOT = _root()
+    if not hasattr(ROOT, "PhaseAMerge"):
+        if not ROOT.gInterpreter.Declare(Path(__file__).with_name("merge_sparse.hpp").read_text()):
+            raise ValueError("cannot compile native block merge helper")
+    return ROOT.PhaseAMerge
+
+
 def read_sparse(file, name):
     """Give the returned THnSparse a Python owner for its native allocation.
 
@@ -56,9 +64,25 @@ def read_sparse(file, name):
     return histogram
 
 
+def _empty_like(hist, name):
+    ROOT = _root()
+    axes = [hist.GetAxis(i) for i in range(hist.GetNdimensions())]
+    result = ROOT.THnSparseD(name, name, len(axes),
+        array("i", [a.GetNbins() for a in axes]),
+        array("d", [a.GetXmin() for a in axes]),
+        array("d", [a.GetXmax() for a in axes]), 16384)
+    ROOT.SetOwnership(result, True)
+    for i, axis in enumerate(axes):
+        axis.Copy(result.GetAxis(i))
+        result.GetAxis(i).SetRange(0, 0)
+    result.Sumw2()
+    return result
+
+
 # ROOT 6.30 uses 30-bit object byte counts and a signed 32-bit buffer size.
 # Keep each independently streamed object below half the stricter limit.
 MAX_SPARSE_OBJECT_BYTES = 512 * 1024 * 1024
+MAX_COMPONENT_FILLS = 2_800_000
 
 
 def layout_for_index(index):
@@ -77,7 +101,9 @@ def layout_for_index(index):
 def family_objects(family, partition=None):
     """Resolve one logical family; old five-object files remain readable."""
     if partition is not None and "sparse_objects" in partition:
-        return partition["sparse_objects"][family]
+        objects = partition["sparse_objects"][family]
+        return (sorted(objects, key=lambda obj: (obj["block"], obj["part"]))
+                if objects and "part" in objects[0] else objects)
     return [{"name": "sparse_" + family, "block": None}]
 
 
@@ -285,17 +311,49 @@ def read(path, expected_sha256, verify_roots=True, *, fact_cache=None):
                 r.exact_keys(part["sparse_objects"], set(FAMILIES), "sparse object families")
                 for family in FAMILIES:
                     objects = part["sparse_objects"][family]
-                    if (not isinstance(objects, list) or
-                            [obj.get("block") for obj in objects] != list(range(1, index["block_count"] + 1))):
+                    if not isinstance(objects, list) or not objects:
+                        raise ValueError("sparse component block coverage differs")
+                    partitioned = "part" in objects[0]
+                    if partitioned:
+                        wanted = {(shard["ordinal"], member["block"])
+                                  for shard in index["shards"] for member in shard["members"]
+                                  if member["tune"] == part["tune"]}
+                        assigned = []
+                        part_ids = [[] for _ in range(index["block_count"])]
+                    elif [obj.get("block") for obj in objects] != list(
+                            range(1, index["block_count"] + 1)):
                         raise ValueError("sparse component block coverage differs")
                     for obj in objects:
-                        r.exact_keys(obj, {"name", "block", "cell_digest", "serialized_bytes"}, "sparse component")
+                        keys = {"name", "block", "cell_digest", "serialized_bytes"}
+                        if partitioned:
+                            keys |= {"part", "source_ordinals", "entries"}
+                        r.exact_keys(obj, keys, "sparse component")
                         if (type(obj["block"]) is not int or
-                                obj["name"] != "sparse_%s__block_%02d" % (family, obj["block"]) or
+                                not 1 <= obj["block"] <= index["block_count"] or
                                 type(obj["serialized_bytes"]) is not int or
                                 not 0 < obj["serialized_bytes"] <= MAX_SPARSE_OBJECT_BYTES):
                             raise ValueError("sparse component name/serialization bound differs")
+                        if partitioned:
+                            block = obj["block"]
+                            if (type(obj["part"]) is not int or obj["part"] < 0 or
+                                    obj["name"] != "sparse_%s__block_%02d__part_%03d" %
+                                    (family, block, obj["part"]) or
+                                    type(obj["entries"]) is not int or
+                                    not 0 <= obj["entries"] <= MAX_COMPONENT_FILLS or
+                                    not isinstance(obj["source_ordinals"], list) or
+                                    not obj["source_ordinals"] or
+                                    any(type(source) is not int for source in obj["source_ordinals"]) or
+                                    obj["source_ordinals"] != sorted(set(obj["source_ordinals"]))):
+                                raise ValueError("sparse component identity/fill bound differs")
+                            part_ids[block-1].append(obj["part"])
+                            assigned.extend((shard, block) for shard in obj["source_ordinals"])
+                        elif obj["name"] != "sparse_%s__block_%02d" % (family, obj["block"]):
+                            raise ValueError("sparse component name differs")
                         r.lower_sha(obj["cell_digest"], "sparse component digest")
+                    if partitioned and (set(assigned) != wanted or len(assigned) != len(wanted) or
+                            any(sorted(parts) != list(range(len(parts))) for parts in part_ids) or
+                            any(not parts for parts in part_ids)):
+                        raise ValueError("sparse component source/block coverage differs")
     elif index["partitions"]:
         raise ValueError("sharded index cannot contain merged partitions")
     if verify_roots:
@@ -460,6 +518,13 @@ def _sparse_content_equal(sharded, merged):
     Object-add can change binary64 reduction order.  A 1e-12 relative/absolute
     tolerance bounds that arithmetic only; it never permits missing cells.
     """
+    styles = ["part" in objects[0] for partition in merged["partitions"]
+              for objects in partition.get("sparse_objects", {}).values()]
+    if any(styles) and not all(styles):
+        raise ValueError("merged sparse component layout mixes physical versions")
+    if styles and all(styles):
+        _partitioned_content_equal(sharded, merged)
+        return
     ROOT = _root()
     for family in FAMILIES:
         for tune, ordinal in sorted(sharded["tune_ordinals"].items(), key=lambda x: x[1]):
@@ -495,6 +560,61 @@ def _sparse_content_equal(sharded, merged):
                     raise ValueError("merged sparse cell/Sumw2 differs from shards")
 
 
+def _partitioned_content_equal(sharded, merged):
+    """Rebuild each bounded physical component from exactly its named sources.
+
+    Each source is read once per family/part, with original block identities
+    unchanged. This catches re-pinned source-label swaps as well as lost cells.
+    """
+    ROOT = _root()
+    native = _native_merge()
+    layout = layout_for_index(sharded)
+    shards = {shard["ordinal"]: shard for shard in sharded["shards"]}
+    for partition in merged["partitions"]:
+        tune = partition["tune"]
+        ordinal = sharded["tune_ordinals"][tune]
+        for family in FAMILIES:
+            groups = {}
+            for obj in partition["sparse_objects"][family]:
+                groups.setdefault(obj["part"], {})[obj["block"]] = obj
+            for part, by_block in sorted(groups.items()):
+                source_ordinals = sorted({source for obj in by_block.values()
+                                          for source in obj["source_ordinals"]})
+                expected = None
+                entry_counts = [0] * sharded["block_count"]
+                for source_ordinal in source_ordinals:
+                    shard = shards[source_ordinal]
+                    file = ROOT.TFile.Open(shard["query_root"]["path"], "READ")
+                    if not file or file.IsZombie():
+                        raise ValueError("merge parent sparse ROOT cannot open")
+                    try:
+                        hist = read_sparse(file, "sparse_" + family)
+                        if expected is None:
+                            expected = [_empty_like(hist, "verify_%s_%s_%d_%02d" %
+                                        (tune, family, part, block))
+                                        for block in range(1, sharded["block_count"] + 1)]
+                        allowed = [int(block in by_block and
+                                       source_ordinal in by_block[block]["source_ordinals"])
+                                   for block in range(1, sharded["block_count"] + 1)]
+                        native.AccumulateSelected(hist, expected, ordinal, allowed)
+                        counts = native.Entries(file, family,
+                            [m["tune_ordinal"] for m in shard["members"]],
+                            [m["block"] for m in shard["members"]], ordinal,
+                            sharded["block_count"],
+                            "associate_status" in layout["sparse"]["pairs"])
+                        entry_counts = [old + int(count) if include else old
+                                        for old, count, include in zip(entry_counts, counts, allowed)]
+                    finally:
+                        file.Close()
+                if expected is None:
+                    raise ValueError("sparse component lacks an admitted source")
+                for block, obj in by_block.items():
+                    if (entry_counts[block-1] != obj["entries"] or
+                            cell_digest(_cells(expected[block-1])) != obj["cell_digest"]):
+                        raise ValueError("merged sparse component source/cell/Sumw2 differs")
+                del expected
+
+
 def _merge_lineage_contract(index_path, expected_index_sha256, receipt_path,
                             expected_receipt_sha256, *, verify_roots,
                             fact_cache=None):
@@ -528,10 +648,13 @@ def _merge_lineage_contract(index_path, expected_index_sha256, receipt_path,
 
 def _merge_verification_value(receipt, child, expected_index_sha256,
                               expected_receipt_sha256):
+    partitioned = any("part" in objects[0] for part in child["partitions"]
+                      for objects in part.get("sparse_objects", {}).values())
     return {
         "schema": MERGE_VERIFICATION_SCHEMA,
         "status": "PASS_EXHAUSTIVE_SOURCE_TO_MERGED_CONTENT",
-        "method": "EXACT_OCCUPIED_DOMAIN_BINARY64_FSUM_V1",
+        "method": ("EXACT_COMPONENT_SOURCE_REBUILD_V1" if partitioned else
+                   "EXACT_OCCUPIED_DOMAIN_BINARY64_FSUM_V1"),
         "relative_tolerance": (1e-12).hex(),
         "absolute_tolerance": (1e-12).hex(),
         "parent_index_sha256": receipt["parent_index_sha256"],
@@ -547,7 +670,7 @@ def _merge_verification_value(receipt, child, expected_index_sha256,
             "SPARSE_GEOMETRY_AND_COMPONENT_DIGESTS",
             "EXACT_OCCUPIED_CELL_DOMAIN",
             "CELL_YIELD_AND_SUMW2",
-        ],
+        ] + (["PER_COMPONENT_EXACT_SOURCE_AND_BLOCK_REBUILD"] if partitioned else []),
     }
 
 
@@ -761,6 +884,9 @@ def _verify_sparse_roots(index):
                         if (file.GetKey(obj["name"]).GetObjlen() != obj["serialized_bytes"] or
                                 component_digest.hexdigest() != obj["cell_digest"]):
                             raise ValueError("merged sparse component readback differs")
+                        if "entries" in obj and (int(hist.GetEntries()) != obj["entries"] or
+                                                 hist.GetNbins() > obj["entries"]):
+                            raise ValueError("merged sparse component entry count differs")
                 if partition is not None and digest.hexdigest() != partition["cell_digests"][family]:
                     raise ValueError("merged sparse readback digest differs")
         finally:
