@@ -49,10 +49,11 @@ CURRENT_SOURCE_MANIFEST_SHA256 = "5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f
 TRANSIENT_ERRNOS = r.TRANSIENT_ERRNOS
 SOURCE_FILES = (
     "hadronization", "config/analysis.json", "config/analysis-family.json",
-    "config/analysis-all-heavy.json", "config/heavy-catalog.json",
+    "config/analysis-all-heavy.json", "config/analysis-all-origin.json",
+    "config/heavy-catalog.json",
     "config/associate-family-runtime.json", "config/associate-family-runtime-all-heavy.json",
     "config/query.json",
-    "config/query-all-heavy.json", "config/study.json",
+    "config/query-all-heavy.json", "config/query-all-origin.json", "config/study.json",
     "pipeline/analyze/run.py", "pipeline/generate/runtime.py", "pipeline/generate/sha256.hpp",
     "pipeline/query/model.py", "pipeline/query/support.py", "pipeline/query/run.py",
     "pipeline/reduce/family.py",
@@ -261,10 +262,10 @@ def _normalized_domain(campaign_path, source_manifest_path, acquisition):
 def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
             *, analysis_path=None, expected_analysis_sha=None, test_only=False,
             campaign_path=None, source_manifest_path=None):
-    analysis_path = Path(analysis_path or ROOT / "config/analysis.json").resolve()
+    analysis_path = Path(analysis_path or ROOT / "config/analysis-all-origin.json").resolve()
     allowed_analyses = {(ROOT / name).resolve(): name for name in
                         ("config/analysis.json", "config/analysis-family.json",
-                         "config/analysis-all-heavy.json")}
+                         "config/analysis-all-heavy.json", "config/analysis-all-origin.json")}
     if analysis_path not in allowed_analyses:
         raise ValueError("Condor analysis must be one shipped normalized request")
     actual_analysis_sha = r.sha_file(analysis_path)
@@ -273,7 +274,9 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
         if actual_analysis_sha != expected_analysis_sha:
             raise ValueError("selected Condor analysis differs from expected pin")
     q.model.checked_analysis(analysis_path)
-    layout_name = ("query-all-heavy.json" if allowed_analyses[analysis_path] ==
+    layout_name = ("query-all-origin.json" if allowed_analyses[analysis_path] ==
+                   "config/analysis-all-origin.json" else
+                   "query-all-heavy.json" if allowed_analyses[analysis_path] ==
                    "config/analysis-all-heavy.json" else "query.json")
     if test_only:
         if r.sha_file(acquisition) != acquisition_sha:
@@ -623,7 +626,7 @@ def _work(path, expected_sha):
         raise ValueError("work schema differs")
     if (work.get("analysis_path") not in
                         ("config/analysis.json", "config/analysis-family.json",
-                         "config/analysis-all-heavy.json") or
+                         "config/analysis-all-heavy.json", "config/analysis-all-origin.json") or
             not isinstance(work.get("analysis_sha256"), str)):
         raise ValueError("work selected analysis binding differs")
     r.lower_sha(work["analysis_sha256"], "work selected analysis")
@@ -870,7 +873,9 @@ def worker(work_path, expected_work_sha, ordinal, attempt, source_tar, source_fa
         selected_analysis = source_dir / work["analysis_path"]
         if r.sha_file(selected_analysis) != work["analysis_sha256"]:
             raise ValueError("frozen selected analysis differs from work binding")
-        layout_name = ("query-all-heavy.json" if work["analysis_path"] ==
+        layout_name = ("query-all-origin.json" if work["analysis_path"] ==
+                       "config/analysis-all-origin.json" else
+                       "query-all-heavy.json" if work["analysis_path"] ==
                        "config/analysis-all-heavy.json" else "query.json")
         selected_layout = source_dir / "config" / layout_name
         if r.sha_file(selected_layout) != work["layout_sha256"]:

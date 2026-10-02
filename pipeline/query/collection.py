@@ -87,11 +87,12 @@ MAX_COMPONENT_FILLS = 2_800_000
 
 def layout_for_index(index):
     """Resolve a collection's pinned geometry without rewriting older indexes."""
-    for name in ("query.json", "query-all-heavy.json"):
+    for name in ("query.json", "query-all-heavy.json", "query-all-origin.json"):
         path = ROOT_DIR / "config" / name
         if r.sha_file(path) == index["layout_sha256"]:
             layout = r.json_file(path)
-            q.require_phase_a_layout(layout)
+            if layout != r.json_file(path):
+                raise ValueError("collection layout differs from its pinned canonical geometry")
             if set(layout["sparse"]) != set(FAMILIES) or set(layout["trees"]) != set(TREES):
                 raise ValueError("collection object families differ from the reader")
             return layout
@@ -182,7 +183,7 @@ def _query_digest_schema(metadata):
     if metadata.get("schema") == "hadronization_query_metadata_v3" and \
             "sparse_digest_schema" not in metadata:
         return q.LEGACY_SPARSE_DIGEST_SCHEMA
-    if (metadata.get("schema") == "hadronization_query_metadata_v4" and
+    if (metadata.get("schema") in ("hadronization_query_metadata_v4", "hadronization_query_metadata_v5") and
             metadata.get("sparse_digest_schema") == q.SPARSE_DIGEST_SCHEMA):
         return q.SPARSE_DIGEST_SCHEMA
     raise ValueError("query sparse digest compatibility contract differs")
@@ -601,7 +602,8 @@ def _partitioned_content_equal(sharded, merged):
                             [m["tune_ordinal"] for m in shard["members"]],
                             [m["block"] for m in shard["members"]], ordinal,
                             sharded["block_count"],
-                            "associate_status" in layout["sparse"]["pairs"])
+                            "associate_status" in layout["sparse"]["pairs"],
+                            "trigger_selection" in layout["sparse"]["triggers"])
                         entry_counts = [old + int(count) if include else old
                                         for old, count, include in zip(entry_counts, counts, allowed)]
                     finally:

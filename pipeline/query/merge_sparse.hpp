@@ -18,7 +18,7 @@ inline char* RefuseGrowth(char*, size_t, size_t) {
 }
 inline int SerializedSize(THnSparseD* hist, int limit) {
     if (limit <= 0 || limit > 512*1024*1024 || hist->GetChunkSize() > 16384 ||
-        hist->GetNdimensions() > 16)
+        hist->GetNdimensions() > 24)
         throw std::runtime_error("unsupported sparse serialization bound/geometry");
     TBufferFile buffer(TBuffer::kWrite, limit);
     buffer.SetReAllocFunc(RefuseGrowth);
@@ -47,7 +47,7 @@ inline void Accumulate(THnSparseD* source, const std::vector<THnSparseD*>& block
 }
 inline std::vector<Long64_t> Entries(TFile* file, const std::string& family,
         const std::vector<int>& tunes, const std::vector<int>& blocks, int tune, int count,
-        bool allHeavy) {
+        bool allHeavy, bool allOrigin = false) {
     struct Range {ULong64_t first,end;UInt_t source;};
     std::vector<Range> ranges;
     TTreeReader rr("event_ranges",file);
@@ -55,7 +55,7 @@ inline std::vector<Long64_t> Entries(TFile* file, const std::string& family,
     TTreeReaderValue<UInt_t> source(rr,"source_id");
     while(rr.Next()) ranges.push_back({*first,*first+*size,*source});
     std::vector<Long64_t> result(count,0);
-    if (family=="pairs" && allHeavy) {
+    if ((family=="pairs" && allHeavy) || (family=="triggers" && allOrigin)) {
         // The old pair cache is narrower than the constructed broad sparse.
         // Count actual broad fills independently from exact event/particle rows.
         TTreeReader events("events",file), heavy("heavy",file), triggers("triggers",file);
@@ -78,11 +78,11 @@ inline std::vector<Long64_t> Entries(TFile* file, const std::string& family,
                 haveHeavy=heavy.Next();
             }
             while(haveTrigger && *triggerEvent==*eventId) {
-                if(!*rejection &&
+                if((allOrigin || !*rejection) &&
                    std::find(associates.begin(),associates.end(),*triggerIndex)!=associates.end() &&
                    tunes.at(at->source)==tune)
                     result.at(blocks.at(at->source)-1)+=
-                        static_cast<Long64_t>(associates.size()-1);
+                        family=="pairs" ? static_cast<Long64_t>(associates.size()-1) : 1;
                 haveTrigger=triggers.Next();
             }
         }

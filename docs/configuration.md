@@ -62,9 +62,10 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 
 | Field group | Meaning and consumer |
 | --- | --- |
-| `schema`, `version` | Downstream request contract. Version 2.2.0 is the historical route, 2.3.0 binds the earlier saved-state family support, and 2.4.0 constructs all-heavy fine content. |
-| `associate_family_map` | Pinned downstream saved-state grouping recipe. Version 2.4.0 defaults to 82 signed members and 42 destinations; compatible configured subsets are supported. |
-| `retained_heavy_catalog` | Version 2.4.0 signed-PDG, constituent-content and charge catalog; independent of the family member list. |
+| `schema`, `version` | Downstream request contract. Version 2.2.0 is the historical route, 2.3.0 binds saved-state family support, 2.4.0 has the older broad fine content, and 2.5.0 retains the complete catalog with all-origin trigger selection. |
+| `associate_family_map` | Pinned downstream saved-state grouping recipe. Version 2.5.0 defaults to the approved 74 signed members and 42 destinations; compatible subsets of this approved domain are supported. |
+| `retained_heavy_catalog` | Versions 2.4.0 and 2.5.0 signed-PDG, constituent-content and charge catalog; independent of the family member list. |
+| `trigger_selection` | Version 2.5.0 default and supported offline trigger-origin selectors. The shipped paper default is `all_origins`; `historical_hard_root` is an explicit control. |
 | `paper_defaults` | Charm choice, selectable identities and signed baryon/reference tuple |
 | `base_study`, `lossless_input` | Exact raw-study, analyzed-schema and structural-registry SHA-256 bindings |
 | `axes` | Sparse coordinates and numerical output domains |
@@ -80,11 +81,11 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 
 `config/analysis-family.json` is the bounded version 2.3.0 construction model. It expands only the associate support needed by the accepted map, keeps the inclusive pT and eta selections, and binds the public runtime contract `config/associate-family-runtime.json` by SHA-256. That compact contract carries the accepted full-map SHA and an exact semantic-groups digest without private review paths or status metadata. The original `config/analysis.json` remains the unchanged version 2.2.0 construction model for accepted historical products.
 
-For new all-heavy construction, use [analysis-all-heavy.json](../config/analysis-all-heavy.json) with [query-all-heavy.json](../config/query-all-heavy.json). The former binds the complete [signed heavy catalog](../config/heavy-catalog.json) and the default [82-member family map](../config/associate-family-runtime-all-heavy.json). The catalog and pair-query registry control retained fine identities and pair support; the family map controls only derived observables. The existing trigger, activity, inclusive-pT and numerical-estimator definitions are unchanged. A new catalog or query-axis contract requires rebuilding the query.
+For new construction, use [analysis-all-origin.json](../config/analysis-all-origin.json) with [query-all-origin.json](../config/query-all-origin.json). The former binds the complete [signed heavy catalog](../config/heavy-catalog.json) and the approved [74-member family map](../config/associate-family-runtime.json). The catalog controls fine storage and generic pairs, independently of the narrower paper pair registry and family map. `trigger_selection.default` is `all_origins`; a separately pinned [historical control](../config/analysis-hard-root-control.json) selects the retained selected-hard predicate during offline reduction. The trigger identities, activity, inclusive-pT and numerical-estimator definitions are unchanged. A new catalog or query-axis contract requires rebuilding the query. Version 2.4 construction and its 82-member map remain readable historical contracts.
 
-To change the version 2.4 grouped result, copy `analysis-all-heavy.json` and change only `associate_family_map`. Keep `pair_query_registry` unchanged: it describes the already constructed fine pair domain. Set the map binding to `{"schema":"hadronization_saved_state_grouping_recipe_v2","path":"/absolute/path/to/recipe.json","sha256":"<SHA-256 of recipe bytes>"}` and pass the separately hashed analysis copy to `reduce run`. The [Xi-star-only example](../config/grouping-xi-star-only.example.json) has 38 signed destinations and 58 signed members: it excludes the Omega groups and selects Xi-star members without implicitly adding ground or prime Xi states. Its SHA-256 is `25b44adcb4e7b5869c892a6bf2128421310d53f6b6b5ba5fad5d70ba95e9e2eb`. The earlier 74-member release map can likewise replace only `associate_family_map` in an all-heavy analysis copy. In each case, the immutable fine THnSparse and shared trigger/activity content are reused; grouped ROOT, numerical results and plots are newly derived.
+To select a compatible subset of the approved 74-member paper domain, copy `analysis-all-origin.json` and change only `associate_family_map`. Keep `pair_query_registry` unchanged. Set the map binding to `{"schema":"hadronization_saved_state_grouping_recipe_v2","path":"/absolute/path/to/recipe.json","sha256":"<SHA-256 of recipe bytes>"}` and pass the separately hashed analysis copy to `reduce run`. The immutable fine THnSparse and shared trigger/activity content are reused; grouped ROOT, numerical results and plots are newly derived. A recipe that adds an unapproved paper member, including a deferred Xi-star state, is rejected; its species remains independently accessible through `hadronization fine`. The included [Xi-star-only example](../config/grouping-xi-star-only.example.json) belongs to the older version 2.4 interpretation and is not a version 2.5 paper default.
 
-From the repository root, this creates a request for the included subset without editing the construction configuration:
+For an existing version 2.4 collection only, the following creates the included Xi-star subset request without editing its construction configuration:
 
 ```sh
 python3.14 - <<'PY'
@@ -105,7 +106,7 @@ print('analysis SHA-256:', hashlib.sha256(request.read_bytes()).hexdigest())
 PY
 ```
 
-Pass `analysis-xi-star-only.json` and the printed digest as `--analysis` and `--analysis-sha` to the [reduction command](workflow.md#numerical-reduction), with the same collection and source pins. A changed recipe needs its own new digest and output directory.
+Pass `analysis-xi-star-only.json` and the printed digest as `--analysis` and `--analysis-sha` to the [reduction command](workflow.md#numerical-reduction), with the matching version 2.4 collection and source pins. A changed recipe needs its own new digest and output directory.
 
 The recipe pins the authenticated catalog and PYTHIA 8.317 unit-endpoint evidence, identifies each signed destination and lists its included signed members explicitly. The validator permits disjoint subsets of the approved unit-endpoint groups, including a group without its ground-state destination as a member. It rejects unknown, overlapping, duplicate or unconjugated members and altered endpoint evidence. The destination is a label for the grouped result, not an implicit contribution. Unlisted species remain in the fine collection. A subset yield must be described as that subset, not as the complete family yield. Missing input cannot be treated as a zero observation. The recipe bytes and checksum travel with the grouped and portable numerical products.
 

@@ -18,7 +18,7 @@ from . import native_v4, native_v4_result, projection as p
 
 
 ROOT = Path(__file__).resolve().parents[2]
-ANALYSIS = ROOT / 'config/analysis.json'
+ANALYSIS = ROOT / 'config/analysis-all-origin.json'
 PACKAGE_SCHEMA = 'hadronization_public_v4_portable_package_v1'
 
 
@@ -288,6 +288,10 @@ def _provenance(source, request, run, ledger, analysis, campaign):
              analysis_source_path != 'config/analysis-family.json') or
             (analysis['version'] == '2.4.0' and
              analysis_source_path not in (None, 'config/analysis-all-heavy.json')) or
+            (analysis['version'] == '2.5.0' and
+             analysis_source_path not in
+                (None, 'config/analysis-all-origin.json',
+                 'config/analysis-hard-root-control.json')) or
             source.index['analysis_sha256'] != run['construction_analysis_sha256'] or
             req['bindings']['analysis_config_sha256'] != run[
                 'interpretation_analysis_sha256'] or
@@ -362,7 +366,7 @@ def _provenance(source, request, run, ledger, analysis, campaign):
             source.index['scientific_identity_sha256'],
             req['sources']['selected_members_sha256']] +
             ([analysis['associate_family_map']['sha256']]
-             if analysis['version'] == '2.4.0' else [])),
+             if analysis['version'] in ('2.4.0','2.5.0') else [])),
         campaign_accounting=campaign)
 
 
@@ -407,7 +411,7 @@ def run(args):
     from pipeline.query import model as model_api
     checked, normalized_sha = model_api.checked_analysis(Path(args.analysis))
     if normalized_sha != args.analysis_sha or checked != analysis or analysis[
-            'version'] not in {'2.2.0','2.3.0','2.4.0'}:
+            'version'] not in {'2.2.0','2.3.0','2.4.0','2.5.0'}:
         raise ValueError('public v4 route requires a normalized A analysis')
     if ((args.merge_verification is None) !=
             (args.merge_verification_sha is None)):
@@ -567,7 +571,7 @@ def run(args):
         covariance_groups=len(cold['covariance']),
         family_products=packaged_family_products,
         grouping_recipe_sha256=(analysis['associate_family_map']['sha256']
-            if analysis['version'] == '2.4.0' else None),
+            if analysis['version'] in ('2.4.0','2.5.0') else None),
         science_content_sha256=cold['science_content_sha256'])
     report_sha = _write(output / 'report.json', report)
     package_sha = _write(output / 'package-manifest.json',
@@ -707,7 +711,8 @@ def _verify(args):
                     'family_products'].get('grouping_recipe_id') or
                 report.get('grouping_recipe_sha256') != (
                     verified_family['runtime_map_sha256'] if
-                    verified_family['schema'] == family_products.GROUPED_SCHEMA
+                    verified_family['schema'] in (family_products.GROUPED_SCHEMA,
+                                                  family_products.ALL_HEAVY_SCHEMA)
                     else None) or
                 native_receipt.get('family_products', {}).get('manifest_sha256') !=
                 report['family_products']['manifest_sha256']):

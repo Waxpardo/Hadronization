@@ -40,7 +40,7 @@ def _integer(value):
     return ord(value) if isinstance(value, str) and len(value) == 1 else int(value)
 
 
-def _exact_rows(index, catalog):
+def _exact_rows(index, catalog, trigger_pdgs=None):
     """Count accepted exact support by tune, original block and signed state."""
     ROOT = collection._root()
     observed = {}
@@ -97,6 +97,9 @@ def _exact_rows(index, catalog):
                              ("nc", "ncbar", "nb", "nbbar")) != tuple(
                                  state[key] for key in ("nc", "ncbar", "nb", "nbbar")):
                         raise ValueError("fine exact constituent content differs")
+                    if _integer(heavy.final) and (not all(math.isfinite(float(getattr(heavy, field)))
+                            for field in ("pt", "eta", "phi")) or float(heavy.pt) < 0):
+                        raise ValueError("fine final heavy kinematics are nonfinite or negative")
                     stage = (tune, block, pdg, int(heavy.status),
                              _integer(heavy.selected), _integer(heavy.pair_eligible))
                     identity = int(heavy.heavy_index)
@@ -113,39 +116,49 @@ def _exact_rows(index, catalog):
                         heavy.GetEntry(cursor)
                 if have and int(heavy.event_id) < event_id:
                     raise ValueError("fine exact heavy rows are out of event order")
+                cached = {}
                 while have_trigger and int(triggers.event_id) == event_id:
-                    if not int(triggers.rejection_mask):
-                        identity = int(triggers.heavy_index)
-                        sector = "nc" if int(triggers.sector) == 4 else "nb"
-                        if int(triggers.sector) not in (4, 5) or identity not in particles:
-                            raise ValueError("fine exact trigger sector or identity differs")
-                        pdg, status, is_final, eta = particles[identity]
-                        if not is_final or not 81 <= status <= 89:
-                            raise ValueError("fine exact accepted trigger stage differs")
-                        if abs(eta) > 4.0:
-                            trigger_cursor += 1
-                            have_trigger = trigger_cursor < triggers.GetEntries()
-                            if have_trigger:
-                                triggers.GetEntry(trigger_cursor)
-                            continue
-                        trigger_charge = catalog[pdg][sector] - catalog[pdg][sector + "bar"]
-                        if abs(trigger_charge) != 1:
-                            raise ValueError("fine exact accepted trigger flavour differs")
-                        for associate_id, (associate_pdg, associate_status,
-                                           associate_final, associate_eta) in particles.items():
-                            if (associate_id == identity or not associate_final or
-                                    abs(associate_eta) > 4.0):
-                                continue
-                            associate_charge = (catalog[associate_pdg][sector] -
-                                                catalog[associate_pdg][sector + "bar"])
-                            product = trigger_charge * associate_charge
-                            sign = 0 if product == 0 else (-1 if product < 0 else 1)
-                            key = (tune, block, pdg, associate_pdg, associate_status, sign)
-                            _add(expected_pairs, key, weight, row=True)
+                    identity = int(triggers.heavy_index)
+                    sector_id = int(triggers.sector)
+                    if sector_id not in (4, 5) or identity not in particles or identity in cached:
+                        raise ValueError("fine exact trigger sector or identity differs")
+                    cached[identity] = (sector_id, int(triggers.rejection_mask))
                     trigger_cursor += 1
                     have_trigger = trigger_cursor < triggers.GetEntries()
                     if have_trigger:
                         triggers.GetEntry(trigger_cursor)
+                candidate_ids = (sorted(cached) if trigger_pdgs is None else
+                                 [identity for identity, row in sorted(particles.items())
+                                  if row[0] in trigger_pdgs])
+                if trigger_pdgs is not None and set(candidate_ids) != set(cached):
+                    raise ValueError("fine exact all-origin trigger candidate coverage differs")
+                for identity in candidate_ids:
+                    pdg, status, is_final, eta = particles[identity]
+                    sector_id, mask = cached[identity]
+                    if trigger_pdgs is None:
+                        if mask:
+                            continue
+                        if not is_final or not 81 <= status <= 89:
+                            raise ValueError("fine exact accepted trigger stage differs")
+                    elif not is_final:
+                        continue
+                    if abs(eta) > 4.0:
+                        continue
+                    sector = "nc" if sector_id == 4 else "nb"
+                    trigger_charge = catalog[pdg][sector] - catalog[pdg][sector + "bar"]
+                    if abs(trigger_charge) != 1:
+                        raise ValueError("fine exact accepted trigger flavour differs")
+                    for associate_id, (associate_pdg, associate_status,
+                                       associate_final, associate_eta) in particles.items():
+                        if (associate_id == identity or not associate_final or
+                                abs(associate_eta) > 4.0):
+                            continue
+                        associate_charge = (catalog[associate_pdg][sector] -
+                                            catalog[associate_pdg][sector + "bar"])
+                        product = trigger_charge * associate_charge
+                        sign = 0 if product == 0 else (-1 if product < 0 else 1)
+                        key = (tune, block, pdg, associate_pdg, associate_status, sign)
+                        _add(expected_pairs, key, weight, row=True)
                 if have_trigger and int(triggers.event_id) < event_id:
                     raise ValueError("fine exact trigger rows are out of event order")
             if have:
@@ -207,7 +220,8 @@ def _fine_cells(source, catalog, requested_pdg=None):
 
 def build_inventory(index_path, index_sha256, *, requested_pdg=None):
     model = collection.q.model
-    analysis, analysis_sha = model.checked_analysis(ROOT_DIR / "config/analysis-all-heavy.json")
+    analysis_path = ROOT_DIR / "config/analysis-all-origin.json"
+    analysis, analysis_sha = model.checked_analysis(analysis_path)
     binding = analysis["retained_heavy_catalog"]
     catalog_data = model.checked_heavy_catalog(ROOT_DIR / binding["path"], binding["sha256"])
     catalog = {item["pdg"]: item for item in catalog_data["states"]}
@@ -219,7 +233,8 @@ def build_inventory(index_path, index_sha256, *, requested_pdg=None):
     source = native.NativeCollection(index_path, index_sha256, collection)
     if source.index["analysis_sha256"] != analysis_sha:
         raise ValueError("fine collection is not the all-heavy analysis")
-    observed, final, expected_pairs = _exact_rows(source.index, catalog)
+    observed, final, expected_pairs = _exact_rows(
+        source.index, catalog, set(analysis["pair_query_registry"]["trigger_pdgs"]))
     fine, pairs, exported = _fine_cells(source, catalog, requested_pdg)
     if set(final) != set(fine):
         missing = sorted(set(final) - set(fine))[:8]
@@ -260,6 +275,12 @@ def build_inventory(index_path, index_sha256, *, requested_pdg=None):
                        "paper_grouped_pair_rows": paper_pair_rows,
                        "paper_group_member": pdg in paper_members,
                        "fine_occupied_cells": cells,
+                       "kinematic_exclusion_rows": 0,
+                       "generic_pair_coverage": ("retained" if pair_rows else
+                            "no_accepted_pair" if final_rows else "not_final"),
+                       "paper_group_coverage": ("outside_approved_family" if pdg not in paper_members else
+                            "retained" if paper_pair_rows else "no_admissible_pair"),
+                       "missing_information": False,
                        "coverage": ("unobserved" if not any_rows else
                                     "history_only" if not final_rows else
                                     "retained_final")})

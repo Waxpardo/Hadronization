@@ -35,15 +35,18 @@ This inventory identifies every tracked file. The release includes generated sci
 | [config/analysis.json](../config/analysis.json) | Query model and reducer | Downstream selections, axes, registry references, classes and statistical policy. |
 | [config/analysis-family.json](../config/analysis-family.json) | Query model and reducer | Bounded version 2.3 family-support construction bound to the accepted map. |
 | [config/analysis-all-heavy.json](../config/analysis-all-heavy.json) | Query model and reducer | Version 2.4 broad fine-species construction and downstream family recipe. |
+| [config/analysis-all-origin.json](../config/analysis-all-origin.json) | Query model and reducer | Version 2.5 complete fine-species construction, all-origin paper triggers and approved 74-member grouping. |
+| [config/analysis-hard-root-control.json](../config/analysis-hard-root-control.json) | Reducer | Offline selected-hard trigger control for a version 2.5 collection. |
 | [config/analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) | Numerical reduction | Adds endpoint-inclusive trigger 1.0 and associate 0.15 GeV/c minima; other fields match the default analysis. |
 | [config/associate-family-runtime-all-heavy.json](../config/associate-family-runtime-all-heavy.json) | Reducer | Pinned 82-member saved-state grouping with separate fine identities. |
-| [config/grouping-xi-star-only.example.json](../config/grouping-xi-star-only.example.json) | Reducer | Independently selectable 58-member, 38-destination grouping example on the same fine all-heavy collection. |
+| [config/grouping-xi-star-only.example.json](../config/grouping-xi-star-only.example.json) | Reducer | Historical version 2.4 grouping example; Xi-star is deferred from the version 2.5 paper recipe. |
 | [config/heavy-catalog.json](../config/heavy-catalog.json) | Query model and fine reader | Complete signed generator-heavy catalog and valence/charge identities. |
 | [config/plot-all-tune.json](../config/plot-all-tune.json) | Renderer | All-tune correlation presentation with comparison panels. |
 | [config/plot-dplus.json](../config/plot-dplus.json) | Renderer | Presentation for the explicit D+ numerical recipe. |
 | [config/plot.json](../config/plot.json) | Renderer | D0 default figure selection, layout and identities. |
 | [config/query.json](../config/query.json) | Query builder and verifier | Exact support-tree columns and sparse-axis families. |
 | [config/query-all-heavy.json](../config/query-all-heavy.json) | Query builder and verifier | Version 2.4 final-state and pair-stage sparse axes for broad retention. |
+| [config/query-all-origin.json](../config/query-all-origin.json) | Query builder and verifier | Version 2.5 signed fine-species, trigger-origin and generic-pair sparse axes. |
 | [config/site.example.conf](../config/site.example.conf) | User copying site settings | Example runtime, storage and submission paths. |
 | [config/study.json](../config/study.json) | Generator contract and raw validators | Checksum-bound raw compatibility and signed selected-state registry. |
 | [config/tunes/close_packing.cmnd](../config/tunes/close_packing.cmnd) | Generator | Complete CLOSEPACKING PYTHIA command card. |

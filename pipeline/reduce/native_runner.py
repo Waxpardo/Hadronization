@@ -141,7 +141,7 @@ def native_point_query(request,source,path,analysis=None,model_api=None):
         lines.append('SIGN_ASSOCIATE\t{}\t{}\t{}\t{}'.format(
             pair['trigger_pdg'],pair['sector'],pair['sign'],
             pair['associate_pdg']))
-    if analysis is not None and analysis.get('version') in ('2.3.0','2.4.0'):
+    if analysis is not None and analysis.get('version') in ('2.3.0','2.4.0','2.5.0'):
         if model_api is None:
             raise ValueError('family point query requires the normalized model')
         admitted=model_api.family.checked_family_map(
@@ -689,7 +689,9 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
             row_upper_bounds=True,event_activity_field=selected_activity[
                 'physical_field'],include_diagnostics=True,
             work_root=work/'support-scan',pair_population_registry=pair_registry,
-            analysis_version=construction['version'])
+            analysis_version=construction['version'],
+            trigger_selection=(analysis['trigger_selection']['default']
+                               if analysis['version']=='2.5.0' else 'historical_hard_root'))
         pre_support_seconds=time.perf_counter()-before_support
         species=sorted({key[2] for key in support_prepared[0]})
         request=p.make_native_request(source,analysis_path,analysis_sha256,
@@ -740,7 +742,7 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         for item in value['scope']['ordered_associate_pairs']}
     if scoped != registered:
         raise ValueError('native signed associate domain differs from A registry')
-    if analysis.get('version') in ('2.3.0','2.4.0'):
+    if analysis.get('version') in ('2.3.0','2.4.0','2.5.0'):
         fine_registry={
             (item['trigger_pdg'],item['associate_pdg'])
             for item in model_api.fine_pairs(analysis)[1]
@@ -761,13 +763,15 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
             source,tunes,None,row_upper_bounds=True,
             event_activity_field=activity['physical_field'],include_diagnostics=True,
             work_root=work/'support-scan',pair_population_registry=pair_registry,
-            analysis_version=construction['version'])
+            analysis_version=construction['version'],
+            trigger_selection=(analysis['trigger_selection']['default']
+                               if analysis['version']=='2.5.0' else 'historical_hard_root'))
     t1,events,support_opens,support_upper,event_moments,raw_diagnostics=support_prepared[:6]
     all_selected_proof=support_prepared[6] if prove_all_selected else None
-    if prove_all_selected and construction['version'] in ('2.3.0','2.4.0'):
+    if prove_all_selected and construction['version'] in ('2.3.0','2.4.0','2.5.0'):
         verify_reconstructed_pair_cells(primitives, all_selected_proof)
     family_product_receipt = None
-    if analysis['version'] in ('2.3.0','2.4.0'):
+    if analysis['version'] in ('2.3.0','2.4.0','2.5.0'):
         admitted_family_map = model_api.family.checked_family_map(
             ROOT / analysis['associate_family_map']['path'],
             analysis['associate_family_map']['sha256'])
@@ -776,7 +780,14 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
             product_path, primitives, admitted_family_map,
             source_sha256=index_sha256, analysis_sha256=analysis_sha256,
             content_sha256=source.index['scientific_identity_sha256'],
-            analysis_version=analysis['version'])
+            analysis_version=analysis['version'],
+            trigger_selection=(analysis['trigger_selection']['default']
+                               if analysis['version']=='2.5.0' else 'historical_hard_root'),
+            catalog_pdgs=([state['pdg'] for state in
+                model_api.checked_heavy_catalog(
+                    ROOT / analysis['retained_heavy_catalog']['path'],
+                    analysis['retained_heavy_catalog']['sha256'])['states']]
+                if analysis['version']=='2.5.0' else None))
         product_manifest_sha = sha(product_path / 'manifest.json')
         family_products.verify_products(product_path, product_manifest_sha)
         family_product_receipt = dict(path=str(product_path),

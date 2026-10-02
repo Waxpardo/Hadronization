@@ -64,14 +64,16 @@ class NativeCollection:
             fields={'schema','state','scientific_binding_sha256','events',
                     'eligible_triggers','zero_partner_triggers','candidate_pairs',
                     'stored_pairs','by_tune_sector_sign'}
-            broad = analysis.get('version') == '2.4.0'
+            all_origin = analysis.get('version') == '2.5.0'
+            broad = analysis.get('version') in ('2.4.0', '2.5.0')
             if broad:
                 fields |= {'paper_candidate_pairs','inapplicable_sign_pairs'}
             if (hashlib.sha256(analysis_bytes).hexdigest()!=self.index['analysis_sha256'] or
-                    analysis.get('version') not in {'2.2.0','2.3.0','2.4.0'} or
+                    analysis.get('version') not in {'2.2.0','2.3.0','2.4.0','2.5.0'} or
                     metadata.get('analysis_sha256')!=self.index['analysis_sha256'] or
                     type(proof) is not dict or set(proof)!=fields or
-                    proof['schema']!=('hadronization_pair_population_proof_v2' if broad
+                    proof['schema']!=('hadronization_pair_population_proof_v3' if all_origin
+                                      else 'hadronization_pair_population_proof_v2' if broad
                                       else 'hadronization_pair_population_proof_v1') or
                     proof['state']!='PASS' or
                     proof['scientific_binding_sha256']!=metadata.get(
@@ -296,6 +298,10 @@ def collect_primitives(source, model, analysis, profile_ids, activity_field,
     pairs = set(tuple(pair) for pair in selected_pairs)
     if not triggers or not pairs:
         raise ValueError('native primitive request is empty')
+    mode = (analysis['trigger_selection']['default']
+            if analysis['version'] == '2.5.0' else 'historical_hard_root')
+    if mode not in ('all_origins', 'historical_hard_root'):
+        raise ValueError('unknown trigger-selection mode')
     activity = {}
     trigger_values = {}
     pair_values = {}
@@ -334,6 +340,21 @@ def collect_primitives(source, model, analysis, profile_ids, activity_field,
         if cell.family == 'activity':
             add(activity,prefix,cell)
             return
+        if analysis['version'] == '2.5.0':
+            if not {'trigger_selection','trigger_origin','trigger_status'} <= set(names):
+                raise ValueError('all-origin trigger-selection axes are absent')
+            selection_axis = axes[names['trigger_selection']]
+            selection_coord = coords[names['trigger_selection']]
+            if not physical(selection_axis,selection_coord):
+                raise ValueError('trigger-selection coordinate is outside declared domain')
+            old_eligible = round(selection_axis.GetBinCenter(selection_coord))
+            if old_eligible not in (0,1):
+                raise ValueError('trigger-selection coordinate differs')
+            if mode == 'historical_hard_root' and old_eligible != 1:
+                return
+            for axis_name in ('trigger_origin','trigger_status'):
+                if not physical(axes[names[axis_name]],coords[names[axis_name]]):
+                    raise ValueError('trigger origin/status coordinate is outside declared domain')
         if cell.family == 'triggers':
             trigger = signed(axes[names['trigger_pdg']],coords[names['trigger_pdg']])
             if trigger not in triggers:
@@ -349,7 +370,7 @@ def collect_primitives(source, model, analysis, profile_ids, activity_field,
             associate = signed(axes[names['associate_pdg']],coords[names['associate_pdg']])
             if (trigger,associate) not in pairs:
                 return
-            if analysis['version'] == '2.4.0':
+            if analysis['version'] in ('2.4.0', '2.5.0'):
                 status_axis = axes[names['associate_status']]
                 status_coordinate = coords[names['associate_status']]
                 if not physical(status_axis,status_coordinate):
@@ -576,12 +597,16 @@ def _compile_support_scan(work_root):
 
 def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=False,
                event_activity_field=None, include_diagnostics=False, work_root=None,
-               pair_population_registry=None, analysis_version='2.2.0'):
+               pair_population_registry=None, analysis_version='2.2.0',
+               trigger_selection='historical_hard_root'):
     """One compiled exact-support pass for additive T1, exposure and diagnostics."""
     selected_tunes = set(selected_tunes)
     verify_pairs = pair_population_registry is not None
-    if analysis_version not in ('2.2.0', '2.3.0', '2.4.0'):
+    if analysis_version not in ('2.2.0', '2.3.0', '2.4.0', '2.5.0'):
         raise ValueError('support analysis version differs')
+    if trigger_selection not in ('all_origins', 'historical_hard_root') or \
+            (analysis_version != '2.5.0' and trigger_selection != 'historical_hard_root'):
+        raise ValueError('support trigger-selection mode differs')
     if verify_pairs and (set(pair_population_registry) != {'charm', 'beauty'} or
             any(not values or len(values) != len(set(values)) or
                 any(type(pdg) is not int or pdg == 0 for pdg in values)
@@ -629,7 +654,10 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
         field = 'eta1' if event_activity_field == 'a15_eta1' else 'eta4'
         command = [str(binary), str(mapping), field, str(output)]
         if verify_pairs:
-            command.append('family-reconstructed' if analysis_version in ('2.3.0','2.4.0')
+            command.append(('family-all-origins' if trigger_selection == 'all_origins'
+                            else 'family-historical-hard-root')
+                           if analysis_version == '2.5.0' else
+                           'family-reconstructed' if analysis_version in ('2.3.0','2.4.0')
                            else 'all-selected')
         completed = subprocess.run(command,
                                    capture_output=True, text=True)
@@ -754,7 +782,9 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
             pair_proof = dict(schema='hadronization_all_selected_pair_population_v1',
                 state='PASS', collection_index_sha256=source.expected_sha256,
                 reconstruction=('retained-heavy-trigger-origin-v1'
-                    if analysis_version in ('2.3.0','2.4.0') else 'legacy-cache-complete-v1'),
+                    if analysis_version in ('2.3.0','2.4.0') else
+                    'exact-heavy-origin-all-trigger-v1' if analysis_version == '2.5.0'
+                    else 'legacy-cache-complete-v1'),
                 registry_sha256=hashlib.sha256(json.dumps(pair_population_registry,
                     sort_keys=True, separators=(',', ':')).encode('ascii')).hexdigest(),
                 scan_sha256=hashlib.sha256(output.read_bytes()).hexdigest(),

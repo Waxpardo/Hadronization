@@ -16,6 +16,7 @@ _family_spec.loader.exec_module(_family)
 
 SCHEMA = "hadronization_family_products_manifest_v2"
 GROUPED_SCHEMA = "hadronization_family_products_manifest_v3"
+ALL_HEAVY_SCHEMA = "hadronization_family_products_manifest_v4"
 PAIR_FIELDS = ("block", "activity_bin", "trigger_pdg", "associate_pdg",
                "sign", "dphi_bin", "count", "sumw2")
 TRIGGER_FIELDS = ("block", "activity_bin", "trigger_pdg", "count", "sumw2")
@@ -130,12 +131,23 @@ def _shared_rows(primitives):
 
 
 def write_products(output, primitives, family_map, *, source_sha256,
-                   analysis_sha256, content_sha256, analysis_version="2.3.0"):
+                   analysis_sha256, content_sha256, analysis_version="2.3.0",
+                   trigger_selection="historical_hard_root", catalog_pdgs=None):
     """Write portable fine, family, and shared-denominator products once."""
     if any(len(value) != 64 for value in
            (source_sha256, analysis_sha256, content_sha256)):
         raise ValueError("family product binding digest differs")
-    configurable = analysis_version == "2.4.0"
+    configurable = analysis_version in ("2.4.0", "2.5.0")
+    all_heavy = analysis_version == "2.5.0"
+    if all_heavy:
+        from pipeline.query import model as query_model
+        catalog = query_model.checked_heavy_catalog(
+            query_model.support.ROOT / "config/heavy-catalog.json",
+            _family.CATALOG_SHA256)
+        expected_catalog = [state["pdg"] for state in catalog["states"]]
+        if (catalog_pdgs != expected_catalog or
+                trigger_selection not in ("all_origins", "historical_hard_root")):
+            raise ValueError("complete fine catalog or trigger selection differs")
     fine_domain = {associate for _, associate in primitives.selected_pairs}
     if (len(primitives.selected_pairs) != len(set(primitives.selected_pairs)) or
             (not set(family_map.members) <= fine_domain if configurable else
@@ -145,8 +157,8 @@ def write_products(output, primitives, family_map, *, source_sha256,
         raise ValueError("fine product declared pair domain differs")
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
-    fine_dir = output / "fine"
-    fine_dir.mkdir()
+    if not all_heavy:
+        (output / "fine").mkdir()
     fine_rows = _pair_rows(primitives)
     grouped_rows = _group_rows(fine_rows, family_map)
     activity_rows, trigger_rows = _shared_rows(primitives)
@@ -154,7 +166,8 @@ def write_products(output, primitives, family_map, *, source_sha256,
                    family=family_map.family_by_destination[destination],
                    members=list(family_map.members_by_destination[destination]))
               for destination in family_map.destinations]
-    common = dict(schema=GROUPED_SCHEMA if configurable else SCHEMA,
+    common = dict(schema=ALL_HEAVY_SCHEMA if all_heavy else
+                  GROUPED_SCHEMA if configurable else SCHEMA,
         runtime_map_sha256=family_map.sha256,
         accepted_full_map_sha256=family_map.accepted_full_map_sha256,
         semantic_groups_sha256=family_map.semantic_groups_sha256,
@@ -165,10 +178,21 @@ def write_products(output, primitives, family_map, *, source_sha256,
         fine_state_identities=[family_map.fine_state_identities[pdg]
             for pdg in sorted(family_map.fine_state_identities)],
         denominator_scope="shared trigger/activity primitives stored once, including zero-partner trigger domains")
+    if all_heavy:
+        common["trigger_selection"] = trigger_selection
+        common["fine_authority"] = dict(
+            collection_index_sha256=source_sha256,
+            catalog_sha256=_family.CATALOG_SHA256,
+            signed_catalog_states=expected_catalog,
+            sparse_families=["kinematics", "pairs"],
+            storage="merged query THnSparse by signed PDG; paper-fine primitives are a selected derivative")
     files = {}
     if configurable:
         common["grouping_recipe_id"] = family_map.recipe_id
-        common["heavy_catalog_sha256"] = family_map.catalog_sha256
+        # The historical 74-member recipe predates the complete heavy catalog.
+        # The broad fine collection has its own independently pinned catalog.
+        common["heavy_catalog_sha256"] = (_family.CATALOG_SHA256 if all_heavy else
+                                           family_map.catalog_sha256)
         if (not family_map.recipe_bytes or hashlib.sha256(
                 family_map.recipe_bytes).hexdigest() != family_map.sha256):
             raise ValueError("grouping recipe bytes differ from pinned map")
@@ -186,13 +210,23 @@ def write_products(output, primitives, family_map, *, source_sha256,
         by_species[row["associate_pdg"]].append(row)
     pair_tree = lambda rows: [("pair_primitives", ("profile_id", "tune_id"),
         PAIR_FIELDS[:6], PAIR_FIELDS[6:], rows)]
-    for pdg in sorted(by_species):
-        relative = "fine/pdg-{}.root".format(str(pdg).replace("-", "m"))
-        _write_root(output / relative, pair_tree(by_species[pdg]),
-                    dict(independent, product="FINE_SIGNED_SPECIES", pdg=pdg))
+    if all_heavy:
+        relative = "paper-fine.root"
+        _write_root(output / relative, pair_tree(fine_rows),
+                    dict(independent, product="PAPER_FINE_PAIR_PRIMITIVES",
+                         signed_species=sorted(by_species),
+                         trigger_selection=trigger_selection))
         files[relative] = {"sha256": _sha(output / relative),
                            "bytes": (output / relative).stat().st_size,
-                           "rows": len(by_species[pdg])}
+                           "rows": len(fine_rows)}
+    else:
+        for pdg in sorted(by_species):
+            relative = "fine/pdg-{}.root".format(str(pdg).replace("-", "m"))
+            _write_root(output / relative, pair_tree(by_species[pdg]),
+                        dict(independent, product="FINE_SIGNED_SPECIES", pdg=pdg))
+            files[relative] = {"sha256": _sha(output / relative),
+                               "bytes": (output / relative).stat().st_size,
+                               "rows": len(by_species[pdg])}
     _write_root(output / "families.root", pair_tree(grouped_rows),
                 dict(common, product="DERIVED_SAVED_STATE_FAMILIES",
                      destinations=list(family_map.destinations)))
@@ -212,6 +246,9 @@ def write_products(output, primitives, family_map, *, source_sha256,
     manifest = dict(common, fine_species_count=len(by_species),
                     family_destination_count=len(family_map.destinations),
                     files=files)
+    if all_heavy:
+        manifest["fine_catalog_species_count"] = len(expected_catalog)
+        manifest["paper_pair_species_count"] = len(by_species)
     manifest["manifest_content_sha256"] = hashlib.sha256(
         _canonical(manifest).encode("ascii")).hexdigest()
     descriptor, temporary = tempfile.mkstemp(prefix=".manifest.", suffix=".tmp",
@@ -271,9 +308,26 @@ def verify_products(output, expected_manifest_sha256):
     if hashlib.sha256(_canonical(manifest).encode("ascii")).hexdigest() != digest:
         raise ValueError("family product manifest content binding differs")
     manifest["manifest_content_sha256"] = digest
-    if manifest.get("schema") not in (SCHEMA, GROUPED_SCHEMA):
+    if manifest.get("schema") not in (SCHEMA, GROUPED_SCHEMA, ALL_HEAVY_SCHEMA):
         raise ValueError("family product manifest schema differs")
-    configurable = manifest["schema"] == GROUPED_SCHEMA
+    all_heavy = manifest["schema"] == ALL_HEAVY_SCHEMA
+    configurable = manifest["schema"] in (GROUPED_SCHEMA, ALL_HEAVY_SCHEMA)
+    if all_heavy:
+        from pipeline.query import model as query_model
+        authority = manifest.get("fine_authority")
+        if (not isinstance(authority, dict) or
+                authority.get("collection_index_sha256") != manifest["source_sha256"] or
+                authority.get("catalog_sha256") != _family.CATALOG_SHA256 or
+                authority.get("sparse_families") != ["kinematics", "pairs"] or
+                authority.get("signed_catalog_states") != [state["pdg"] for state in
+                    query_model.checked_heavy_catalog(
+                        _family.ROOT / "config/heavy-catalog.json",
+                        _family.CATALOG_SHA256)["states"]] or
+                manifest.get("fine_catalog_species_count") != len(authority["signed_catalog_states"]) or
+                manifest.get("paper_pair_species_count") != manifest.get("fine_species_count") or
+                manifest.get("trigger_selection") not in
+                    ("all_origins", "historical_hard_root")):
+            raise ValueError("complete fine THnSparse authority differs")
     if configurable:
         recipe_fact = manifest["files"].get("grouping-recipe.json")
         if (not isinstance(recipe_fact, dict) or
@@ -303,6 +357,8 @@ def verify_products(output, expected_manifest_sha256):
                    "denominator_scope")
     if configurable:
         common_keys += ("grouping_recipe_id", "heavy_catalog_sha256")
+    if all_heavy:
+        common_keys += ("trigger_selection", "fine_authority")
     independent = {key: manifest[key] for key in
                    ("source_sha256", "content_sha256", "profiles", "activity_field")}
     if configurable:
@@ -316,7 +372,8 @@ def verify_products(output, expected_manifest_sha256):
             continue
         metadata, trees = _read_root(path)
         expected = (independent if configurable and
-                    (relative.startswith("fine/") or relative == "shared.root")
+                    (relative.startswith("fine/") or relative == "shared.root" or
+                     relative == "paper-fine.root")
                     else {key: manifest[key] for key in common_keys})
         if any(metadata.get(key) != value for key, value in expected.items()):
             raise ValueError("family product embedded metadata differs")
@@ -331,10 +388,20 @@ def verify_products(output, expected_manifest_sha256):
                 raise ValueError("duplicate fine species product")
             fine_pdgs.add(pdg)
             fine_rows.extend(rows)
+        if relative == "paper-fine.root":
+            rows = trees.get("pair_primitives", [])
+            if (not all_heavy or metadata.get("product") != "PAPER_FINE_PAIR_PRIMITIVES" or
+                    metadata.get("trigger_selection") != manifest["trigger_selection"] or
+                    metadata.get("signed_species") != manifest["signed_fine_species"] or
+                    len(rows) != fact["rows"]):
+                raise ValueError("paper fine primitive product differs")
+            fine_pdgs.update(metadata["signed_species"])
+            fine_rows.extend(rows)
     if (fine_pdgs != set(manifest["signed_fine_species"]) or
             {name for name in manifest["files"] if name.startswith("fine/")} !=
-            {"fine/pdg-{}.root".format(str(pdg).replace("-", "m"))
-             for pdg in manifest["signed_fine_species"]}):
+            (set() if all_heavy else
+             {"fine/pdg-{}.root".format(str(pdg).replace("-", "m"))
+              for pdg in manifest["signed_fine_species"]})):
         raise ValueError("fine species declared coverage differs")
     fine_keys = [(row["profile_id"], row["tune_id"], row["block"],
                   row["activity_bin"], row["trigger_pdg"], row["associate_pdg"],

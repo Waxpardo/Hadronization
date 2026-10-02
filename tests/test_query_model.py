@@ -19,6 +19,24 @@ class ReleasedQueryModel(unittest.TestCase):
         self.analysis = json.loads((ROOT / "config/analysis.json").read_text())
         self.edges = self.analysis["axes"]["pt"]["edges"]
 
+    def test_complete_fine_catalog_is_independent_of_approved_paper_group(self):
+        analysis, _ = model.checked_analysis(ROOT / "config/analysis-all-origin.json")
+        catalog = model.checked_heavy_catalog(
+            ROOT / analysis["retained_heavy_catalog"]["path"],
+            analysis["retained_heavy_catalog"]["sha256"])
+        paper = {pdg for values in analysis["pair_query_registry"]["associate_pdgs"].values()
+                 for pdg in values}
+        self.assertEqual(analysis["trigger_selection"], {
+            "default": "all_origins", "supported": ["all_origins", "historical_hard_root"]})
+        self.assertEqual(len(catalog["states"]), 219)
+        self.assertEqual(len(paper), 74)
+        for deferred in (413, -413, 4314, -4314, 4324, -4324, 443, 4422):
+            self.assertIn(deferred, {state["pdg"] for state in catalog["states"]})
+            self.assertNotIn(deferred, paper)
+        control, _ = model.checked_analysis(ROOT / "config/analysis-hard-root-control.json")
+        self.assertEqual(control["trigger_selection"]["default"], "historical_hard_root")
+        self.assertEqual(control["pair_query_registry"], analysis["pair_query_registry"])
+
     def test_all_selected_pair_scope_preserves_frozen_eligibility(self):
         states, original = model.state_registry(self.analysis)
         broad_states, broad = model.observable_pairs(self.analysis, 'projection_formulas_v4')

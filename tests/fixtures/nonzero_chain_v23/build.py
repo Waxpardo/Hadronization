@@ -19,8 +19,10 @@ from test_analysis import AnalysisShardContract, fixture_source, sha256
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 EVENTS = 120
 SOURCES_PER_BLOCK = int(os.environ.get("FAMILY_CHAIN_SOURCES_PER_BLOCK", "1"))
-ALL_HEAVY = os.environ.get("FAMILY_CHAIN_ALL_HEAVY") == "1"
-ANALYSIS = ROOT / ("config/analysis-all-heavy.json" if ALL_HEAVY else
+ALL_ORIGIN = os.environ.get("FAMILY_CHAIN_ALL_ORIGIN") == "1"
+ALL_HEAVY = ALL_ORIGIN or os.environ.get("FAMILY_CHAIN_ALL_HEAVY") == "1"
+ANALYSIS = ROOT / ("config/analysis-all-origin.json" if ALL_ORIGIN else
+                   "config/analysis-all-heavy.json" if ALL_HEAVY else
                    "config/analysis-family.json")
 
 
@@ -153,6 +155,9 @@ def raw_source():
         if (slot == 2 || slot == 4 || slot == 6 || slot == 9)
           out = true;
       }
+      // One registered trigger has no in-acceptance associate; its
+      // denominator must survive with a zero pair numerator.
+      if (fixtureLogical == 9 && row == 119 && slot != 0) out = true;
       const double eta = out ? 4.25 :
           ((static_cast<int>(slot) + fixtureLogical + row / 4) % 5 - 2) * 0.7;
       const double px = pt * std::cos(phi), py = pt * std::sin(phi);
@@ -189,7 +194,7 @@ def raw_source():
         # historical fixture or coalescing their independent fine bins.
         assert source.count("423,-423,4334,-4334,") == 2
         source = source.replace("423,-423,4334,-4334,",
-                                "423,-423,4312,-4312,4314,-4314,4324,-4324,4334,-4334,")
+                                "423,-423,413,-413,4312,-4312,4314,-4314,4324,-4324,4334,-4334,")
         source = replace_once(source,
             "-4334, -423, -413, 413, 423, 443, 4334,",
             "-5324, -5314, -4334, -4324, -4314, -4312, -423, -413, "
@@ -231,6 +236,18 @@ def raw_source():
         assert source.count("531,-531,541,-541,") == 2
         source = source.replace("531,-531,541,-541,",
                                 "531,-531,541,-541,5314,-5314,5324,-5324,5522,-5522,")
+    if ALL_ORIGIN:
+        source = replace_once(source, '    // Actual four-vectors drive the analysis\' kinematics cross-checks.',
+            '''    // Keep one final registered hadron outside the direct-status interval.
+    if (fixtureLogical == 8 && row == 119 && channel == 0) {
+      for (std::size_t slot = 0; slot < heavyPdgs.size(); ++slot)
+        if (heavyPdgs[slot] == 411) {
+          integerVectors["heavyStatus"].at(slot) = 92;
+          integerVectors["heavyStatusAbs"].at(slot) = 92;
+          break;
+        }
+    }
+    // Actual four-vectors drive the analysis' kinematics cross-checks.''')
     return source
 
 

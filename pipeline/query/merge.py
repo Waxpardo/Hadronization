@@ -120,7 +120,8 @@ def merge(index_path, expected_sha256, output):
                             counts = native.Entries(source, family,
                                 [m["tune_ordinal"] for m in shard["members"]],
                                 [m["block"] for m in shard["members"]], ordinal, index["block_count"],
-                                "associate_status" in layout["sparse"]["pairs"])
+                                "associate_status" in layout["sparse"]["pairs"],
+                                "trigger_selection" in layout["sparse"]["triggers"])
                             if any(count > c.MAX_COMPONENT_FILLS for count in counts):
                                 raise ValueError("single source exceeds sparse component fill bound")
                             if any(old + count > c.MAX_COMPONENT_FILLS

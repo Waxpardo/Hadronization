@@ -105,7 +105,7 @@ The query stores five sparse families and exact support rows. Its pair-populatio
 
 `query prepare-pack` creates a fixed binary pack for repeated execution. Supply `--prepared-pack` to census, build, verify or scan to use that pack. A pack mismatch fails without a worker-side rebuild.
 
-For an all-heavy construction, add `--analysis config/analysis-all-heavy.json` to both census and build. Add `--layout config/query-all-heavy.json` to build. Use the same complete campaign dictionary and accepted input receipts; the catalog does not replace the observed-source census. The all-heavy version retains final signed heavy species separately, and the full family map applies only after fine storage. Existing query workspaces retain their original version and should not be relabeled.
+For current construction, add `--analysis config/analysis-all-origin.json` to both census and build. Add `--layout config/query-all-origin.json` to build. Use the same campaign-stable 219-state catalog dictionary and accepted input receipts; the catalog does not replace the observed-source census. Every final heavy species receives its own signed-PDG bin. The approved 74-member family map applies only downstream. Existing query workspaces retain their original version and must not be relabeled.
 
 ## Cluster query construction
 
@@ -125,12 +125,12 @@ Prepare an inert bundle:
   --expected-acquisition-sha256 "${ACQUISITION_SHA256:?}" \
   --dictionary "${DICTIONARY:?}" \
   --expected-dictionary-sha256 "${DICTIONARY_SHA256:?}" \
-  --analysis config/analysis-all-heavy.json \
+  --analysis config/analysis-all-origin.json \
   --expected-analysis-sha256 "${ANALYSIS_SHA256:?}" \
   --output "$RUN_ROOT/condor-inert"
 ```
 
-The bundle contains source, dictionary and construction-analysis pins, expected sources, worker scripts, DAG files, build instructions and site templates. Use `config/analysis-all-heavy.json` for new all-heavy construction and its matching full reduction; historical analysis versions retain their distinct checksum identities. Preparation does not submit jobs. Build its Linux binary pack once on the specified runtime. Preserve the pack receipt and tar SHA-256.
+The bundle contains source, dictionary and construction-analysis pins, expected sources, worker scripts, DAG files, build instructions and site templates. Use `config/analysis-all-origin.json` for new construction and its matching full reduction; historical versions retain their distinct checksum identities. Preparation does not submit jobs. Build its Linux binary pack once on the specified runtime. Preserve the pack receipt and tar SHA-256.
 
 Run the generated preflight canary on an actual execute node before admitting the site. It checks the OS, architecture, libraries, ClassAds, input readability and destination write/readback behavior. The probe creates small files and collision-check directories. It is not read-only.
 
@@ -227,7 +227,7 @@ mkdir -p "$RUN_ROOT/reduce-work"
   --collection-index-sha "${MERGED_INDEX_SHA256:?}" \
   --expected-sources "${EXPECTED_SOURCES:?}" \
   --expected-sources-sha "${EXPECTED_SOURCES_SHA256:?}" \
-  --analysis config/analysis-all-heavy.json --analysis-sha "${ANALYSIS_SHA256:?}" \
+  --analysis config/analysis-all-origin.json --analysis-sha "${ANALYSIS_SHA256:?}" \
   --site-work "${SITE_WORK:?}" --site-work-sha "${SITE_WORK_SHA256:?}" \
   --collector-closure "${COLLECTOR_CLOSURE:?}" \
   --collector-closure-sha "${COLLECTOR_CLOSURE_SHA256:?}" \
@@ -240,7 +240,7 @@ The default request covers multiplicity, correlations, balancing, signed spectra
 
 Add `--charm-trigger 411` to select the coherent D+ recipe. Add `--analysis` with a separately hashed compatible copy to change profiles or percentile classes. Optional rectangular profiles reuse the query bytes. Both profiles pass through the same numerical estimator and renderer.
 
-For an all-heavy collection, pass `--analysis config/analysis-all-heavy.json` and the SHA-256 of that file to `reduce run`. The reducer projects the configured family members from the broad fine query, sums block-level OS and SS primitives, then applies each shared trigger denominator once. It saves signed-species and derived-family ROOT products separately and recomputes pooled values and K=10 covariance. A separately hashed version 2.4 analysis copy can select another compatible [grouping recipe](configuration.md#fixed-analysis-fields); the recipe does not change the pair-query registry or the fine THnSparse. To use the included Xi-star-only example, copy `config/analysis-all-heavy.json`, replace only `associate_family_map` with the schema, absolute example path and checksum shown in the configuration guide, then supply the copy through `--analysis` and its own SHA-256 through `--analysis-sha`. Keep the unchanged collection index and expected-source pins. The package includes the exact grouping recipe and checksum, so portable verification does not need the original recipe path.
+For a version 2.5 collection, pass `--analysis config/analysis-all-origin.json` and its SHA-256 to `reduce run`. The reducer projects the approved family members from the broad fine query, sums block-level OS and SS primitives, and applies each shared trigger denominator once. The merged query ROOT files remain the independent fine-species authority. Separate `paper-fine.root`, `families.root` and `shared.root` contain downstream additive primitives; pooled values and K=10 covariance are recomputed. A separately hashed compatible analysis copy can select another [grouping recipe](configuration.md#fixed-analysis-fields) without changing fine THnSparse content. The package includes the exact grouping recipe and checksum for portable verification. Version 2.4 products retain their 82-member family interpretation and cannot be relabeled as version 2.5.
 
 ### Compare inclusive and rectangular selections
 

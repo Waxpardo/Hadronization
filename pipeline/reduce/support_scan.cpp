@@ -98,7 +98,7 @@ std::vector<Shard> Inputs(const std::string& path){
   return shards;
 }
 void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
-          bool verifyPairs,bool familyReconstructed){
+          bool verifyPairs,bool familyReconstructed,const std::string& triggerMode){
   std::map<Key,Moments> moments;std::map<HeavyKey,T1> t1;std::map<Key,Diag> diagnostics;
   std::map<OriginKey,Group> origins;std::map<ClosureKey,Group> closures;
   std::vector<Boundary> boundaries;
@@ -254,7 +254,65 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
           has_o=next_o();
         }
         auto& proof=pairProofs[key];++proof.events;
-        while(has_t&&trigger.event_id==ev.event_id){
+        if(!triggerMode.empty()){
+          std::map<int,Trigger> cached;
+          while(has_t&&trigger.event_id==ev.event_id){
+            if(!cached.emplace(trigger.index,trigger).second)
+              throw std::runtime_error("duplicate exact trigger candidate");
+            has_t=next_t();
+          }
+          std::size_t candidates=0;
+          for(const auto& [index,t]:particles){
+            const int absolute=std::abs(t.pdg);
+            const int sector=(absolute==411||absolute==421||absolute==4122)?4:
+                (absolute==511||absolute==521||absolute==5122)?5:0;
+            if(!sector)continue;
+            ++candidates;
+            const auto found=originMap.find({index,sector});
+            if(found==originMap.end())throw std::runtime_error("trigger origin absent from exact support");
+            const auto& to=found->second;
+            const int charge=sector==4?t.qc:t.qb;
+            unsigned mask=(!t.final?1U:0U)|
+              (!t.selected||t.status<81||t.status>89?2U:0U)|
+              (to.origin!=1||to.resolution!=1||to.matched<0||to.rejected!=-1?4U:0U)|
+              (std::abs(charge)!=1?8U:0U);
+            const auto cachedRow=cached.find(index);
+            if(cachedRow==cached.end()||cachedRow->second.sector!=sector||
+               cachedRow->second.rejection!=mask)
+              throw std::runtime_error("historical trigger cache differs from exact support");
+            if(!t.final||std::abs(t.eta)>4.||t.pt<0||
+               (triggerMode=="historical_hard_root"&&mask!=0))continue;
+            ++pairProofs[key].triggers;
+            std::uint64_t partners=0;
+            for(const auto& [associateIndex,a]:particles){
+              const int aq=sector==4?a.qc:a.qb;
+              if(associateIndex==index||!a.final||a.status<81||a.status>89||
+                 std::abs(a.eta)>4.||aq==0||
+                 !shard.associates.at(sector).count(a.pdg))continue;
+              const auto ao=originMap.find({associateIndex,sector});
+              if(ao==originMap.end()||ao->second.resolution==0)
+                throw std::runtime_error("associate origin absent from exact support");
+              const int sign=charge*aq<0?-1:1;
+              if(!expectedPairs.emplace(std::make_pair(index,associateIndex),sign).second)
+                throw std::runtime_error("duplicate all-origin exact pair");
+              ++pairProofs[key].candidates;++partners;
+              constexpr double piValue=3.14159265358979323846;
+              const double dphi=std::fmod(t.phi-a.phi+2.5*piValue,2.*piValue)-.5*piValue;
+              const int dphiBin=std::min(99,std::max(0,static_cast<int>(
+                std::floor(100.*(dphi+.5*piValue)/(2.*piValue)))));
+              pairCells[{member.tune,member.block,eta1?ev.a15_eta1:ev.a15_eta4,
+                t.pdg,a.pdg,sign,dphiBin}].add(ev.weight);
+              ++pairCounts[{member.tune,member.block,t.pdg,a.pdg}];
+              auto& group=origins[{member.tune,member.block,
+                ao->second.origin==0?5:ao->second.origin,a.category,sign}];
+              ++group.rows;group.weighted+=ev.weight;
+            }
+            if(!partners)++pairProofs[key].zero;
+          }
+          if(candidates!=cached.size())
+            throw std::runtime_error("exact trigger candidate coverage differs");
+        }
+        while(triggerMode.empty()&&has_t&&trigger.event_id==ev.event_id){
           if(!trigger.rejection){
             const auto& t=particles.at(trigger.index);
             const int charge=trigger.sector==4?t.qc:t.qb;
@@ -318,9 +376,12 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
             if(!familyReconstructed)++pairProofs[key].stored;
           }
         }
-        auto& group=origins[{member.tune,member.block,pair.associate_origin,
-                             pair.associate_category,pair.sign}];
-        ++group.rows;group.weighted+=ev.weight;has_p=next_p();
+        if(triggerMode.empty()){
+          auto& group=origins[{member.tune,member.block,pair.associate_origin,
+                               pair.associate_category,pair.sign}];
+          ++group.rows;group.weighted+=ev.weight;
+        }
+        has_p=next_p();
       }
       if(verifyPairs&&!familyReconstructed&&observedPairs.size()!=expectedPairs.size())
         for(const auto& [identity,sign]:expectedPairs){
@@ -377,13 +438,16 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
 } // namespace
 
 int main(int argc,char** argv){
-  try{if(argc!=4&&argc!=5)throw std::runtime_error("usage: support-scan map eta1|eta4 output [all-selected|family-reconstructed]");
+  try{if(argc!=4&&argc!=5)throw std::runtime_error("usage: support-scan map eta1|eta4 output [all-selected|family-reconstructed|family-all-origins|family-historical-hard-root]");
     const std::string field=argv[2];if(field!="eta1"&&field!="eta4")
       throw std::runtime_error("support activity field differs");
     const std::string policy=argc==5?argv[4]:"";
-    if(!policy.empty()&&policy!="all-selected"&&policy!="family-reconstructed")
+    if(!policy.empty()&&policy!="all-selected"&&policy!="family-reconstructed"&&
+       policy!="family-all-origins"&&policy!="family-historical-hard-root")
       throw std::runtime_error("support pair policy differs");
+    const std::string triggerMode=policy=="family-all-origins"?"all_origins":
+        policy=="family-historical-hard-root"?"historical_hard_root":"";
     Scan(Inputs(argv[1]),field=="eta1",argv[3],!policy.empty(),
-         policy=="family-reconstructed");return 0;
+         policy=="family-reconstructed"||!triggerMode.empty(),triggerMode);return 0;
   }catch(const std::exception& error){std::cerr<<"ERROR: "<<error.what()<<'\n';return 2;}
 }

@@ -222,8 +222,8 @@ Construct and publish one verified query workspace.
 | `--input` | Path, **required** | Analyzed ROOT input. Match receipt ordering. |
 | `--receipt` | Path, **required** | Matching analyzed JSON receipt. |
 | `--output` | Path, **required** | Destination. Construction normally requires a new path. |
-| `--analysis` | Path, `config/analysis.json` | Downstream analysis JSON. |
-| `--layout` | Path, selected by analysis by default | Exact repository query layout; version 2.4.0 uses `config/query-all-heavy.json`. |
+| `--analysis` | Path, `config/analysis-all-origin.json` | Construction analysis JSON. |
+| `--layout` | Path, selected by analysis by default | Exact repository query layout; version 2.5.0 uses `config/query-all-origin.json`. |
 | `--dictionary` | Path, **required** | Campaign-wide signed-PDG dictionary. |
 | `--accepted-receipt-sha256` | string, `none` | Independent accepted parent-receipt SHA-256. |
 | `--prepared-pack` | Path, `none` | Verified fixed query binary pack. No build fallback. |
@@ -386,13 +386,13 @@ Source: [pipeline/query/merge.py](../pipeline/query/merge.py).
 
 ### `./hadronization fine`
 
-Audit all signed heavy identities in a merged all-heavy collection and optionally export the occupied cells of one signed species. This command reads the sparse and exact support through the checked collection reader; it does not change the collection.
+Audit all signed heavy identities in a merged version 2.5 collection and optionally export the occupied cells of one signed species. This command reads the sparse and exact support through the checked collection reader; it does not change the collection.
 
 **Side effects:** Writes one new JSON inventory.
 
 | Option or argument | Type and default | Meaning |
 | --- | --- | --- |
-| `--index` | Path, **required** | Merged all-heavy collection index. |
+| `--index` | Path, **required** | Merged version 2.5 collection index. |
 | `--index-sha256` | string, **required** | Independent SHA-256 pin for that index. |
 | `--pdg` | signed integer, none | Include every occupied fine kinematic cell for this signed species. |
 | `--output` | Path, **required** | New inventory JSON path. |
@@ -413,7 +413,7 @@ Prepare an inert pinned source and scheduler bundle.
 | `--expected-acquisition-sha256` | string, **required** | Independent SHA-256 pin for acquisition. |
 | `--dictionary` | Path, **required** | Campaign-wide signed-PDG dictionary. |
 | `--expected-dictionary-sha256` | string, **required** | Independent SHA-256 pin for dictionary. |
-| `--analysis` | Path, **required** | Construction analysis frozen into the worker bundle; use `config/analysis-all-heavy.json` for new all-heavy construction. |
+| `--analysis` | Path, **required** | Construction analysis frozen into the worker bundle; use `config/analysis-all-origin.json` for new construction. |
 | `--expected-analysis-sha256` | string, **required** | Independent SHA-256 pin for the selected analysis file. |
 | `--output` | Path, **required** | Destination. Construction normally requires a new path. |
 

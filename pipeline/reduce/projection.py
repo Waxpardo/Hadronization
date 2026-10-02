@@ -18,6 +18,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 REQUEST_SCHEMA = "hadronization_projection_request_v2"
+REQUEST_SCHEMA_ALL_ORIGIN = "hadronization_projection_request_v3"
 RESULT_SCHEMA = "hadronization_projection_result_v2"
 RESULT_SCHEMA_G9 = "hadronization_projection_result_v3_g9_science"
 RESULT_SCHEMA_NATIVE = "hadronization_projection_result_v4"
@@ -66,7 +67,7 @@ def paper_baryon_meson_channels(analysis, charm):
                        if pair['trigger_pdg'] == trigger and
                        pair['associate_pdg'] == associate and
                        pair['sign'] == -1]
-            if analysis.get('version') in ('2.3.0', '2.4.0') and not matches:
+            if analysis.get('version') in ('2.3.0', '2.4.0', '2.5.0') and not matches:
                 # Primed Xi saved states are members of their ground-family
                 # destinations in the accepted grouped presentation.
                 continue
@@ -375,6 +376,11 @@ SCHEMAS["ProjectionResultV4"]["class_boundary_deletions"] = ["ClassBoundaryDelet
 SCHEMAS["ProjectionResultV4"]["provenance"] = "ProvenanceV4"
 SCHEMAS["ProjectionResultV4"]["artifact_binding"] = "CollectionBindingV4"
 SCHEMAS["ProjectionResultV4"]["admission_closure"] = "AdmissionClosureV4"
+SCHEMAS["ProjectionRequestAllOrigin"] = copy.deepcopy(SCHEMAS["ProjectionRequest"])
+SCHEMAS["ProjectionRequestAllOrigin"]["schema"] = "=" + REQUEST_SCHEMA_ALL_ORIGIN
+SCHEMAS["ProjectionRequestAllOrigin"]["science_contract"]["trigger_selection"] = (
+    "ALL_ORIGINS|HISTORICAL_HARD_ROOT")
+SCHEMAS["ProjectionResultV4"]["request_echo"] = "ProjectionRequestAny"
 
 
 def g9_science_legacy(request):
@@ -433,6 +439,11 @@ def validate_g9_science(request, resolved, *, legacy=False):
 
 
 def validate(value, spec, path="projection"):
+    if spec == "ProjectionRequestAny":
+        validate(value, "ProjectionRequestAllOrigin" if isinstance(value, dict) and
+                 value.get("schema") == REQUEST_SCHEMA_ALL_ORIGIN else
+                 "ProjectionRequest", path)
+        return
     if isinstance(spec, tuple):
         if value is not None:
             validate(value, spec[1], path)
@@ -535,7 +546,10 @@ class ProjectionRequest:
         p = self.to_dict()
         if canonical(p) != self.serialized:
             raise ValueError("projection request serialization is not canonical")
-        validate(p, "ProjectionRequest")
+        validate(p, "ProjectionRequestAny")
+        mode = p["science_contract"].get("trigger_selection")
+        if (p["schema"] == REQUEST_SCHEMA_ALL_ORIGIN) != (mode is not None):
+            raise ValueError("trigger-selection request version differs")
         scope, statistics = p["scope"], p["statistics"]
         for key in ("ordered_tunes", "ordered_triggers", "ordered_associate_pairs", "roles"):
             unique(scope[key], "request " + key)
@@ -1139,8 +1153,17 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
     # A paper request backed by query primitives must prove native reads.
     # Explicit exact-row query products remain diagnostic inputs.
     requested_backend = "aligned_sparse" if source_route.get("kind") == "verified_root_query_primitives" else "auto"
-    return ProjectionRequest.from_dict(dict(schema=REQUEST_SCHEMA,
-        science_contract=dict(analyzer_schema="hadronization_lossless_analysis_v1", structural_registry_sha256=structural, estimator_policy_id=ESTIMATOR, formula_contract_version="projection_formulas_v4"),
+    all_origin_request = definitions.get("version") == "2.5.0"
+    science_contract = dict(analyzer_schema="hadronization_lossless_analysis_v1",
+        structural_registry_sha256=structural, estimator_policy_id=ESTIMATOR,
+        formula_contract_version="projection_formulas_v4")
+    if all_origin_request:
+        science_contract["trigger_selection"] = (
+            "ALL_ORIGINS" if definitions["trigger_selection"]["default"] == "all_origins"
+            else "HISTORICAL_HARD_ROOT")
+    return ProjectionRequest.from_dict(dict(schema=(REQUEST_SCHEMA_ALL_ORIGIN
+        if all_origin_request else REQUEST_SCHEMA),
+        science_contract=science_contract,
         sources=requested_sources, scope=dict(mode="PAPER", roles=role_requests, ordered_tunes=tunes,
             reference_tune=paper["reference_tune"], ordered_triggers=paper["trigger_pdgs"], ordered_associate_pairs=pairs),
         profiles=[normalized_profile(profile, eta, structural)], activity=activity_request, classes=classes, axes=axes,

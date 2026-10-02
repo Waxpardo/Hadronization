@@ -489,20 +489,11 @@ inline bool IsDirectPrimaryStatus(int status) {
 // ---------------------------------------------------------------------------
 // Charged-particle multiplicity, NCH_PRIMARY_CHARGED_*_V1.
 //
-// This is a genuine charged-particle multiplicity, not a count of directly
-// produced hadronisation products. It is the hadron-level analogue of the
-// conventional experimental primary-charged-particle definition: a charged
-// particle with proper lifetime c*tau0 > 1 cm that is either produced
-// directly in the collision or descends only from particles with
-// c*tau0 < 1 cm.
-//
-// That lifetime condition is enforced at generation time, not here. All three
-// tune cards set `ParticleDecays:limitTau0 = on` with `tau0Max = 0.01` mm, so
-// every strong and electromagnetic decay proceeds while every weakly decaying
-// light hadron stays final. No light hadron has 0.01 mm < c*tau0 < 10 mm, so
-// for light flavour this card value is exactly equivalent to the conventional
-// 1 cm/c threshold. Consequently `isFinal()` already excludes weak-decay
-// products for these light hadrons and no ancestry traversal is required.
+// This is the generator-level charged-light final-particle count specified by
+// the study contract. The decay cards determine which particles are final;
+// this function does not impose an experimental lifetime or ancestry-based
+// primary-particle selection. The label "Charged primaries" is the study's
+// published shorthand and must be defined by the explicit generator rule.
 //
 // Open- and hidden-heavy hadrons are excluded from the count. Their decays are
 // disabled deliberately, so they are final here purely as an artefact of the
