@@ -84,11 +84,13 @@ class LeanTreeContract(unittest.TestCase):
     def test_only_target_layout_exceptions_exist(self):
         expected_config = {
             "config/study.json", "config/analysis.json", "config/analysis-family.json",
-            "config/analysis-all-heavy.json", "config/heavy-catalog.json",
+            "config/analysis-all-heavy.json", "config/analysis-all-origin.json",
+            "config/analysis-hard-root-control.json", "config/heavy-catalog.json",
             "config/analysis-pt-1-0p15.json", "config/associate-family-runtime.json",
             "config/associate-family-runtime-all-heavy.json",
             "config/grouping-xi-star-only.example.json",
             "config/query.json", "config/query-all-heavy.json",
+            "config/query-all-origin.json",
             "config/plot.json", "config/plot-dplus.json", "config/plot-all-tune.json",
             "config/site.example.conf",
             "config/tunes/monash.cmnd", "config/tunes/junctions.cmnd",

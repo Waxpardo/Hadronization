@@ -335,6 +335,11 @@ class RootQueryContract(unittest.TestCase):
 
     @classmethod
     def cli(cls, *args):
+        # This fixture exercises the archived version 2.2 query. Current
+        # construction defaults to version 2.5, so bind the historical model
+        # explicitly instead of allowing a default change to reinterpret it.
+        if args and args[0] in ("census", "build") and "--analysis" not in args:
+            args = args + ("--analysis", ROOT / "config/analysis.json")
         if args and args[0] in ("verify", "scan", "project") and "--expected-content-sha256" not in args:
             # Captured immediately after trusted build, independent of mutated workspaces.
             args = args + ("--expected-content-sha256", cls.trusted_content_sha256)
@@ -739,6 +744,7 @@ int main(int argc,char** argv){
             "--input", str(self.fixture.shard), "--receipt", str(self.fixture.receipt),
             "--accepted-receipt-sha256", receipt_sha,
             "--expected-source-count", str(len(receipt_payload["binding"]["source_ids"])),
+            "--analysis", str(ROOT / "config/analysis.json"),
             "--output", str(prepared_dictionary), "--prepared-pack", str(self.prepared_pack),
             "--work-root", str(self.work)], text=True, capture_output=True, env=environment)
         self.assertEqual(census_result.returncode, 0, census_result.stderr)
@@ -748,6 +754,7 @@ int main(int argc,char** argv){
             sys.executable, "-B", str(ROOT / "hadronization"), "query", "build",
             "--input", str(self.fixture.shard), "--receipt", str(self.fixture.receipt),
             "--accepted-receipt-sha256", receipt_sha, "--dictionary", str(self.dictionary),
+            "--analysis", str(ROOT / "config/analysis.json"),
             "--output", str(output), "--prepared-pack", str(self.prepared_pack),
             "--work-root", str(self.work)], text=True, capture_output=True, env=environment)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -757,6 +764,7 @@ int main(int argc,char** argv){
             sys.executable, "-B", str(ROOT / "hadronization"), "query", "build",
             "--input", str(self.fixture.shard), "--receipt", str(self.fixture.receipt),
             "--accepted-receipt-sha256", receipt_sha, "--dictionary", str(self.dictionary),
+            "--analysis", str(ROOT / "config/analysis.json"),
             "--output", str(self.base / "query-missing-pack"), "--prepared-pack", str(missing),
             "--work-root", str(self.work)], text=True, capture_output=True, env=environment)
         self.assertNotEqual(refused.returncode, 0)
@@ -778,6 +786,7 @@ int main(int argc,char** argv){
             sys.executable, "-B", str(ROOT / "hadronization"), "query", "build",
             "--input", str(self.fixture.shard), "--receipt", str(self.fixture.receipt),
             "--accepted-receipt-sha256", receipt_sha,
+            "--analysis", str(ROOT / "config/analysis.json"),
             "--dictionary", str(self.dictionary), "--prepared-pack", str(self.prepared_pack),
             "--output", str(success_output), "--work-root", str(success_work),
         ]
