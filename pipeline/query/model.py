@@ -200,6 +200,58 @@ def authenticated_routes(analysis, routes, activity_sparse, observations):
     return result
 
 
+def checked_heavy_catalog(path, expected_sha256):
+    """Read the pinned generator catalog, including states absent from a campaign."""
+    path = Path(path).resolve()
+    support.regular_file(path, "heavy catalog")
+    if support.sha_file(path) != expected_sha256:
+        raise ValueError("heavy catalog file digest differs")
+    catalog = support.json_file(path)
+    support.exact_keys(catalog, {"schema", "generator", "particle_data_sha256",
+                                 "states_sha256", "states"},
+                       "heavy catalog")
+    if (catalog["schema"] != "hadronization_heavy_catalog_v1" or
+            catalog["generator"] != "PYTHIA 8.317" or
+            catalog["particle_data_sha256"] !=
+                "330ba4e7f5a081235b5055f7b312fe6f5c9fe9c95411a845cba7a3e82e67ecca" or
+            not isinstance(catalog["states"], list) or not catalog["states"]):
+        raise ValueError("heavy catalog provenance/domain differs")
+    fields = {"pdg", "name", "charge3", "nc", "ncbar", "nb", "nbbar"}
+    states = catalog["states"]
+    states_sha = hashlib.sha256(json.dumps(
+        states, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode("ascii")).hexdigest()
+    if (catalog["states_sha256"] != states_sha or
+            states_sha != "f9bba3619ffe015346c4d43fe1e56f739371be4e5f9f2c7b82e9139a8458fe7d"):
+        raise ValueError("heavy catalog pinned signed-state inventory differs")
+    by_pdg = {}
+    for state in states:
+        support.exact_keys(state, fields, "heavy catalog state")
+        if (type(state["pdg"]) is not int or state["pdg"] == 0 or
+                not isinstance(state["name"], str) or not state["name"] or
+                any(type(state[key]) is not int or state[key] < 0
+                    for key in ("nc", "ncbar", "nb", "nbbar")) or
+                sum(state[key] for key in ("nc", "ncbar", "nb", "nbbar")) == 0 or
+                type(state["charge3"]) is not int or
+                state["pdg"] in by_pdg):
+            raise ValueError("heavy catalog state is malformed or duplicated")
+        by_pdg[state["pdg"]] = state
+    if [state["pdg"] for state in states] != sorted(by_pdg):
+        raise ValueError("heavy catalog signed identity order differs")
+    for pdg, state in by_pdg.items():
+        conjugate = by_pdg.get(-pdg)
+        if conjugate is None:
+            if (state["charge3"] or state["nc"] != state["ncbar"] or
+                    state["nb"] != state["nbbar"]):
+                raise ValueError("non-self-conjugate heavy state lacks signed partner")
+        elif (state["charge3"] != -conjugate["charge3"] or
+              any(state[left] != conjugate[right] for left, right in
+                  (("nc", "ncbar"), ("ncbar", "nc"),
+                   ("nb", "nbbar"), ("nbbar", "nb")))):
+            raise ValueError("heavy catalog conjugation differs")
+    return catalog
+
+
 def checked_analysis(path):
     path = path.resolve()
     support.regular_file(path, "analysis request")
@@ -212,9 +264,9 @@ def checked_analysis(path):
             raise ValueError("untrusted historical analysis identity")
         raise ValueError("historical analysis request is not a released Phase-A model")
     version = payload.get("version")
-    if version not in {"2.0.0", "2.1.0", "2.2.0", "2.3.0"}:
+    if version not in {"2.0.0", "2.1.0", "2.2.0", "2.3.0", "2.4.0"}:
         raise ValueError("analysis request version differs")
-    d0_default = version in {"2.1.0", "2.2.0", "2.3.0"}
+    d0_default = version in {"2.1.0", "2.2.0", "2.3.0", "2.4.0"}
     expected = {
         "schema", "version", "base_study", "lossless_input", "axes",
         "profiles", "pair_acceptance", "activities", "percentile_intervals",
@@ -224,8 +276,10 @@ def checked_analysis(path):
     }
     if d0_default:
         expected.add("paper_defaults")
-    if version == "2.3.0":
+    if version in {"2.3.0", "2.4.0"}:
         expected.add("associate_family_map")
+    if version == "2.4.0":
+        expected.add("retained_heavy_catalog")
     support.exact_keys(payload, expected, "analysis request")
     if payload["schema"] != "hadronization_downstream_analysis_request_v2":
         raise ValueError("analysis request schema differs")
@@ -251,23 +305,47 @@ def checked_analysis(path):
             "schema": "hadronization_study_v1",
             "sha256": "d3eac08d732dd5d9642b650ac69cb3512bf3245ae450387e57ace7690a8ef4f5"}:
         raise ValueError("analysis request base-study binding differs")
-    if version == "2.3.0":
+    if version in {"2.3.0", "2.4.0"}:
         binding = payload["associate_family_map"]
-        support.exact_keys(binding, {"schema", "path", "sha256",
-                                    "accepted_full_map_sha256",
-                                    "semantic_groups_sha256", "signed_members",
-                                    "signed_destinations"},
-                           "analysis associate-family binding")
+        release_fields = {"schema", "path", "sha256",
+                          "accepted_full_map_sha256", "semantic_groups_sha256",
+                          "signed_members", "signed_destinations"}
+        custom_fields = {"schema", "path", "sha256"}
+        if (not isinstance(binding, dict) or
+                set(binding) not in ((release_fields, custom_fields)
+                                     if version == "2.4.0" else (release_fields,)) or
+                not isinstance(binding.get("path"), str) or
+                not binding["path"]):
+            raise ValueError("analysis associate-family binding fields differ")
         map_path = support.ROOT / binding["path"]
         admitted = family.checked_family_map(map_path, binding["sha256"])
-        if binding != {"schema": family.MAP_SCHEMA,
-                       "path": "config/associate-family-runtime.json",
-                       "sha256": family.MAP_SHA256,
-                       "accepted_full_map_sha256": family.ACCEPTED_FULL_MAP_SHA256,
-                       "semantic_groups_sha256": family.SEMANTIC_GROUPS_SHA256,
-                       "signed_members": 74, "signed_destinations": 42} or \
-                len(admitted.members) != 74 or len(admitted.destinations) != 42:
+        all_heavy = (version == "2.4.0" and
+                     binding["sha256"] == family.ALL_HEAVY_MAP_SHA256)
+        if set(binding) == custom_fields:
+            if (binding["schema"] != family.GROUP_RECIPE_SCHEMA or
+                    admitted.catalog_sha256 != family.CATALOG_SHA256):
+                raise ValueError("analysis configurable grouping recipe differs")
+        elif binding != {"schema": family.MAP_SCHEMA,
+                       "path": ("config/associate-family-runtime-all-heavy.json"
+                                if all_heavy else "config/associate-family-runtime.json"),
+                       "sha256": (family.ALL_HEAVY_MAP_SHA256 if all_heavy else family.MAP_SHA256),
+                       "accepted_full_map_sha256": (family.ALL_HEAVY_FULL_MAP_SHA256
+                                                    if all_heavy else family.ACCEPTED_FULL_MAP_SHA256),
+                       "semantic_groups_sha256": (family.ALL_HEAVY_GROUPS_SHA256
+                                                   if all_heavy else family.SEMANTIC_GROUPS_SHA256),
+                       "signed_members": len(admitted.members),
+                       "signed_destinations": len(admitted.destinations)} or \
+                (not all_heavy and len(admitted.members) != 74):
             raise ValueError("analysis associate-family binding differs")
+    if version == "2.4.0":
+        binding = payload["retained_heavy_catalog"]
+        support.exact_keys(binding, {"schema", "path", "sha256", "selection"},
+                           "retained heavy catalog binding")
+        if binding["schema"] != "hadronization_heavy_catalog_binding_v1" or \
+                binding["path"] != "config/heavy-catalog.json" or \
+                binding["selection"] != ("all final heavy hadrons; paper family map is downstream-only"):
+            raise ValueError("retained heavy catalog binding differs")
+        checked_heavy_catalog(support.ROOT / binding["path"], binding["sha256"])
     study = support.ROOT / "config/study.json"
     if support.sha_file(study) != payload["base_study"]["sha256"]:
         raise ValueError("accepted base-study bytes differ")
@@ -380,11 +458,19 @@ def checked_analysis(path):
             not isinstance(references, dict) or
             set(references) != {str(value) for value in triggers} or
             any(type(value) is not int for value in references.values()) or
-            query["expected_count"] != (444 if version == "2.3.0" else 300) or
+            query["expected_count"] != (sum(len(associates[sector]) for sector in
+                ("charm",)*6 + ("beauty",)*6) if version == "2.4.0" else
+                444 if version == "2.3.0" else 300) or
             query["central_eligibility_source"] != (
-                "accepted saved-state family support registry" if version == "2.3.0"
+                "accepted saved-state family support registry" if version in {"2.3.0", "2.4.0"}
                 else "lossless structural selected-state registry")):
         raise ValueError("analysis pair-query registry differs")
+    if version == "2.4.0":
+        approved = family.checked_family_map(
+            support.ROOT / "config/associate-family-runtime-all-heavy.json",
+            family.ALL_HEAVY_MAP_SHA256)
+        if (set(associates["charm"]) | set(associates["beauty"])) != set(approved.members):
+            raise ValueError("all-heavy retained pair registry differs from approved support")
     if d0_default:
         for pdg in (421, -421, 411, -411):
             if pdg not in triggers or pdg not in associates["charm"]:
@@ -410,7 +496,7 @@ def checked_analysis(path):
         raise ValueError("selected charm correlations differ")
     expected_recipes = [
         "G1_activity_eta1_eta4",
-        ("G9_direct_primary_selected_no_pt_floor_eta4" if version in {"2.2.0", "2.3.0"}
+        ("G9_direct_primary_selected_no_pt_floor_eta4" if version in {"2.2.0", "2.3.0", "2.4.0"}
          else "G9_direct_primary_selected_strict_pt0p15_eta4"),
         "T1_all_final_heavy_no_acceptance", "ordered_pair_scalars",
         "configured_dphi_correlations", "origin_integrated",
@@ -552,7 +638,7 @@ def checked_analysis(path):
 
 def select_charm_meson_recipe(analysis, meson_pdg, include_alternate_g9=False):
     """Derive one coherent D0/D+ analysis request before hashing or projection."""
-    if (analysis.get("version") not in {"2.1.0", "2.2.0", "2.3.0"} or type(meson_pdg) is not int or
+    if (analysis.get("version") not in {"2.1.0", "2.2.0", "2.3.0", "2.4.0"} or type(meson_pdg) is not int or
             meson_pdg not in (421, 411) or type(include_alternate_g9) is not bool):
         raise ValueError("unsupported Phase-A charm-meson recipe")
     selected = copy.deepcopy(analysis)
@@ -577,14 +663,28 @@ def compatible_interpretation(construction, requested):
 
     The query keeps its original whole-file analysis digest.  Only supported
     post-query profiles and the tune-local percentile recipe are interpretive.
-    Every other normalized field remains construction content or provenance.
+    An all-heavy query also permits a separately pinned family projection from
+    its complete fine catalog; no catalog, trigger or axis change is allowed.
     """
     if not isinstance(construction, Mapping) or not isinstance(requested, Mapping):
         raise ValueError("query/request normalized model is absent")
     if set(construction) != set(requested):
         raise ValueError("query/request normalized model fields differ")
+    all_heavy = construction.get("version") == requested.get("version") == "2.4.0"
+    interpretive = {"profiles", "percentile_intervals"}
+    if all_heavy:
+        interpretive.add("associate_family_map")
+        catalog = checked_heavy_catalog(
+            support.ROOT / construction["retained_heavy_catalog"]["path"],
+            construction["retained_heavy_catalog"]["sha256"])
+        retained = {state["pdg"] for state in catalog["states"]}
+        admitted = family.checked_family_map(
+            support.ROOT / requested["associate_family_map"]["path"],
+            requested["associate_family_map"]["sha256"])
+        if not set(admitted.members) <= retained:
+            raise ValueError("requested family recipe exceeds fine heavy catalog")
     for field in construction:
-        if field in {"profiles", "percentile_intervals"}:
+        if field in interpretive:
             continue
         if construction[field] != requested[field]:
             raise ValueError("requested analysis changes unretained query content: " + field)
@@ -596,11 +696,13 @@ def compatible_interpretation(construction, requested):
     return {"schema": "hadronization_query_interpretation_compatibility_v1",
             "construction_content_sha256": hashlib.sha256(
                 json.dumps({key: construction[key] for key in construction
-                            if key not in {"profiles", "percentile_intervals"}},
+                            if key not in interpretive},
                            sort_keys=True, separators=(",", ":"),
                            ensure_ascii=True).encode("ascii")).hexdigest(),
             "profile_ids": [profile["id"] for profile in requested["profiles"]],
-            "percentile_intervals": requested["percentile_intervals"]}
+            "percentile_intervals": requested["percentile_intervals"],
+            **({"family_map_sha256": requested["associate_family_map"]["sha256"]}
+               if all_heavy else {})}
 
 
 def state_registry(analysis):
@@ -609,10 +711,15 @@ def state_registry(analysis):
     states = study["selected_states"]
     by_pdg = {item["pdg"]: item for item in states}
     query = analysis["pair_query_registry"]
-    if analysis.get("version") == "2.3.0":
-        admitted = family.checked_family_map(
-            support.ROOT / analysis["associate_family_map"]["path"],
-            analysis["associate_family_map"]["sha256"])
+    if analysis.get("version") in {"2.3.0", "2.4.0"}:
+        if analysis["version"] == "2.4.0":
+            admitted = family.checked_family_map(
+                support.ROOT / "config/associate-family-runtime-all-heavy.json",
+                family.ALL_HEAVY_MAP_SHA256)
+        else:
+            admitted = family.checked_family_map(
+                support.ROOT / analysis["associate_family_map"]["path"],
+                analysis["associate_family_map"]["sha256"])
         for member, destination in admitted.destination_by_member.items():
             if member in by_pdg:
                 continue
@@ -666,7 +773,7 @@ def observable_pairs(analysis, formula_version):
     Its caller must also prove pair completeness from the exact retained rows.
     """
     states, pairs = state_registry(analysis)
-    if analysis.get("version") == "2.3.0":
+    if analysis.get("version") in {"2.3.0", "2.4.0"}:
         admitted = family.checked_family_map(
             support.ROOT / analysis["associate_family_map"]["path"],
             analysis["associate_family_map"]["sha256"])

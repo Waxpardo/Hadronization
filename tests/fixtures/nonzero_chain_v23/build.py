@@ -19,6 +19,9 @@ from test_analysis import AnalysisShardContract, fixture_source, sha256
 TUNES = ("MONASH", "JUNCTIONS", "CLOSEPACKING")
 EVENTS = 120
 SOURCES_PER_BLOCK = int(os.environ.get("FAMILY_CHAIN_SOURCES_PER_BLOCK", "1"))
+ALL_HEAVY = os.environ.get("FAMILY_CHAIN_ALL_HEAVY") == "1"
+ANALYSIS = ROOT / ("config/analysis-all-heavy.json" if ALL_HEAVY else
+                   "config/analysis-family.json")
 
 
 def claim_fresh_base():
@@ -181,6 +184,53 @@ def raw_source():
     source = replace_once(source, 'mu["failed_attempts"] = 0; mu["tree_entries"] = 3;', 'mu["failed_attempts"] = 0; mu["tree_entries"] = 120;')
     source = replace_once(source, 'md["sum_weights"] = 3.0; md["sum_weights2"] = 3.0;', 'md["sum_weights"] = 120.0; md["sum_weights2"] = 120.0;')
     source = replace_once(source, 'md["pythia_weight_sum"] = 3.0;', 'md["pythia_weight_sum"] = 120.0;')
+    if ALL_HEAVY:
+        # Exercise all signed Xi-star grouping endpoints without changing the
+        # historical fixture or coalescing their independent fine bins.
+        assert source.count("423,-423,4334,-4334,") == 2
+        source = source.replace("423,-423,4334,-4334,",
+                                "423,-423,4312,-4312,4314,-4314,4324,-4324,4334,-4334,")
+        source = replace_once(source,
+            "-4334, -423, -413, 413, 423, 443, 4334,",
+            "-5324, -5314, -4334, -4324, -4314, -4312, -423, -413, "
+            "413, 423, 443, 4312, 4314, 4324, 4334, 5314, 5324,")
+        source = replace_once(source,
+            'else if (pdg == 4334) particleName = "Omega*_c0";',
+            'else if (pdg == 4312) particleName = "Xi\'_c0";\n'
+            '    else if (pdg == -4312) particleName = "Xi\'_cbar0";\n'
+            '    else if (pdg == 4314) particleName = "Xi*_c0";\n'
+            '    else if (pdg == -4314) particleName = "Xi*_cbar0";\n'
+            '    else if (pdg == 4324) particleName = "Xi*_c+";\n'
+            '    else if (pdg == -4324) particleName = "Xi*_cbar-";\n'
+            '    else if (pdg == 5314) particleName = "Xi*_b-";\n'
+            '    else if (pdg == -5314) particleName = "Xi*_bbar+";\n'
+            '    else if (pdg == 5324) particleName = "Xi*_b0";\n'
+            '    else if (pdg == -5324) particleName = "Xi*_bbar0";\n'
+            '    else if (pdg == 4334) particleName = "Omega*_c0";')
+        source = source.replace("std::abs(heavyPdg) == 4334 ? 4",
+                                "(std::abs(heavyPdg) == 4334 || std::abs(heavyPdg) == 4314 || "
+                                "std::abs(heavyPdg) == 4324 || std::abs(heavyPdg) == 5314 || "
+                                "std::abs(heavyPdg) == 5324) ? 4")
+        source = source.replace("std::abs(pdg) == 4334 ? 4",
+                                "(std::abs(pdg) == 4334 || std::abs(pdg) == 4314 || "
+                                "std::abs(pdg) == 4324 || std::abs(pdg) == 5314 || "
+                                "std::abs(pdg) == 5324) ? 4")
+        for name in ("heavyPdg", "pdg"):
+            original = f"((std::abs({name}) == 4422) ?"
+            extended = (f"(std::abs({name}) == 4324 ? ({name} > 0 ? 3 : -3) : "
+                        f"(std::abs({name}) == 5314 ? ({name} > 0 ? -3 : 3) : "
+                        f"((std::abs({name}) == 4422) ?")
+            assert source.count(original) == 1
+            source = source.replace(original, extended)
+            suffix = f"({name} > 0 ? 3 : -3) : 0));"
+            assert source.count(suffix) == 1
+            source = source.replace(suffix, suffix[:-1] + "));")
+        assert source.count("4314,-4314,4324,-4324,4334,-4334,") == 2
+        source = source.replace("4314,-4314,4324,-4324,4334,-4334,",
+                                "4314,-4314,4324,-4324,4334,-4334,443,4422,-4422,")
+        assert source.count("531,-531,541,-541,") == 2
+        source = source.replace("531,-531,541,-541,",
+                                "531,-531,541,-541,5314,-5314,5324,-5324,5522,-5522,")
     return source
 
 
@@ -264,7 +314,7 @@ def main():
         census = [ROOT / "hadronization", "query", "census"]
         for raw, receipt in zip(qroots, receipts):
             census += ["--input", raw, "--receipt", receipt]
-        census += ["--analysis", ROOT / "config/analysis-family.json", "--expected-source-count", 30 * SOURCES_PER_BLOCK,
+        census += ["--analysis", ANALYSIS, "--expected-source-count", 30 * SOURCES_PER_BLOCK,
                    "--output", BASE / "dictionary.json",
                    "--work-root", qwork]
         command(census, F.environment, BASE / "census.log")
@@ -275,7 +325,7 @@ def main():
             workspaces.append(workspace)
             command([ROOT / "hadronization", "query", "build", "--input", raw,
                      "--receipt", receipt, "--output", workspace,
-                     "--dictionary", BASE / "dictionary.json", "--analysis", ROOT / "config/analysis-family.json", "--work-root", qwork],
+                     "--dictionary", BASE / "dictionary.json", "--analysis", ANALYSIS, "--work-root", qwork],
                     F.environment, BASE / f"query-build-{i:04d}.log")
             pin = json.loads((workspace / "manifest.json").read_text())["scientific_content_sha256"]
             pins.append(pin)
@@ -315,7 +365,7 @@ def main():
                 F.environment, BASE / "merge-verify.log")
         reduce_work = BASE / "reduce-work"
         reduce_work.mkdir()
-        analysis_path = ROOT / "config/analysis-family.json"
+        analysis_path = ANALYSIS
         numerical = BASE / "numerical"
         command([ROOT / "hadronization", "reduce", "run",
                  "--collection-index", merged, "--collection-index-sha", merged_sha,

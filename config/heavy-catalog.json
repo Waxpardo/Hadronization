@@ -1,0 +1,1979 @@
+{
+  "schema": "hadronization_heavy_catalog_v1",
+  "generator": "PYTHIA 8.317",
+  "particle_data_sha256": "330ba4e7f5a081235b5055f7b312fe6f5c9fe9c95411a845cba7a3e82e67ecca",
+  "states_sha256": "f9bba3619ffe015346c4d43fe1e56f739371be4e5f9f2c7b82e9139a8458fe7d",
+  "states": [
+    {
+      "pdg": -20543,
+      "name": "B*_1c-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -20533,
+      "name": "B*_1sbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -20523,
+      "name": "B*_1-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -20513,
+      "name": "B*_1bar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -20433,
+      "name": "D*_1s-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -20423,
+      "name": "D*_1bar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -20413,
+      "name": "D*_1-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -14122,
+      "name": "Lambda_c(2593)bar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10543,
+      "name": "B_1c-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10541,
+      "name": "B*_0c-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10533,
+      "name": "B_1sbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10531,
+      "name": "B*_0sbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10523,
+      "name": "B_1-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10521,
+      "name": "B*_0-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10513,
+      "name": "B_1bar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10511,
+      "name": "B*_0bar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10433,
+      "name": "D_1s-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10431,
+      "name": "D*_0s-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10423,
+      "name": "D_1bar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10421,
+      "name": "D*_0bar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10413,
+      "name": "D_1-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -10411,
+      "name": "D*_0-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -5554,
+      "name": "Omega*_bbbbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 3
+    },
+    {
+      "pdg": -5544,
+      "name": "Omega*_bbcbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 2
+    },
+    {
+      "pdg": -5542,
+      "name": "Omega_bbcbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 2
+    },
+    {
+      "pdg": -5534,
+      "name": "Omega*_bbbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 2
+    },
+    {
+      "pdg": -5532,
+      "name": "Omega_bbbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 2
+    },
+    {
+      "pdg": -5524,
+      "name": "Xi*_bbbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 2
+    },
+    {
+      "pdg": -5522,
+      "name": "Xi_bbbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 2
+    },
+    {
+      "pdg": -5514,
+      "name": "Xi*_bbbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 2
+    },
+    {
+      "pdg": -5512,
+      "name": "Xi_bbbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 2
+    },
+    {
+      "pdg": -5444,
+      "name": "Omega*_bccbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 2,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5442,
+      "name": "Omega_bccbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 2,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5434,
+      "name": "Omega*_bcbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5432,
+      "name": "Omega'_bcbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5424,
+      "name": "Xi*_bcbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5422,
+      "name": "Xi'_bcbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5414,
+      "name": "Xi*_bcbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5412,
+      "name": "Xi'_bcbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5342,
+      "name": "Omega_bcbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5334,
+      "name": "Omega*_bbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5332,
+      "name": "Omega_bbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5324,
+      "name": "Xi*_bbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5322,
+      "name": "Xi'_bbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5314,
+      "name": "Xi*_bbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5312,
+      "name": "Xi'_bbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5242,
+      "name": "Xi_bcbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5232,
+      "name": "Xi_bbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5224,
+      "name": "Sigma*_bbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5222,
+      "name": "Sigma_bbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5214,
+      "name": "Sigma*_bbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5212,
+      "name": "Sigma_bbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5142,
+      "name": "Xi_bcbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5132,
+      "name": "Xi_bbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5122,
+      "name": "Lambda_bbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5114,
+      "name": "Sigma*_bbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -5112,
+      "name": "Sigma_bbar+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": -4444,
+      "name": "Omega*_cccbar--",
+      "charge3": -6,
+      "nc": 0,
+      "ncbar": 3,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4434,
+      "name": "Omega*_ccbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 2,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4432,
+      "name": "Omega_ccbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 2,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4424,
+      "name": "Xi*_ccbar--",
+      "charge3": -6,
+      "nc": 0,
+      "ncbar": 2,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4422,
+      "name": "Xi_ccbar--",
+      "charge3": -6,
+      "nc": 0,
+      "ncbar": 2,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4414,
+      "name": "Xi*_ccbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 2,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4412,
+      "name": "Xi_ccbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 2,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4334,
+      "name": "Omega*_cbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4332,
+      "name": "Omega_cbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4324,
+      "name": "Xi*_cbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4322,
+      "name": "Xi'_cbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4314,
+      "name": "Xi*_cbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4312,
+      "name": "Xi'_cbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4232,
+      "name": "Xi_cbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4224,
+      "name": "Sigma*_cbar--",
+      "charge3": -6,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4222,
+      "name": "Sigma_cbar--",
+      "charge3": -6,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4214,
+      "name": "Sigma*_cbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4212,
+      "name": "Sigma_cbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4132,
+      "name": "Xi_cbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4124,
+      "name": "Lambda_c(2625)bar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4122,
+      "name": "Lambda_cbar-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4114,
+      "name": "Sigma*_cbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -4112,
+      "name": "Sigma_cbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -545,
+      "name": "B*_2c-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -543,
+      "name": "B*_c-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -541,
+      "name": "B_c-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -535,
+      "name": "B*_2sbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -533,
+      "name": "B*_sbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -531,
+      "name": "B_sbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -525,
+      "name": "B*_2-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -523,
+      "name": "B*-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -521,
+      "name": "B-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -515,
+      "name": "B*_2bar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -513,
+      "name": "B*bar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -511,
+      "name": "Bbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": -435,
+      "name": "D*_2s(2573)-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -433,
+      "name": "D*_s-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -431,
+      "name": "D_s-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -425,
+      "name": "D*_2(2460)bar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -423,
+      "name": "D*bar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -421,
+      "name": "Dbar0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -415,
+      "name": "D*_2(2460)-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -413,
+      "name": "D*-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": -411,
+      "name": "D-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 411,
+      "name": "D+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 413,
+      "name": "D*+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 415,
+      "name": "D*_2(2460)+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 421,
+      "name": "D0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 423,
+      "name": "D*0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 425,
+      "name": "D*_2(2460)0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 431,
+      "name": "D_s+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 433,
+      "name": "D*_s+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 435,
+      "name": "D*_2s(2573)+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 441,
+      "name": "eta_c",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 443,
+      "name": "J/psi",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 445,
+      "name": "chi_2c",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 511,
+      "name": "B0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 513,
+      "name": "B*0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 515,
+      "name": "B*_20",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 521,
+      "name": "B+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 523,
+      "name": "B*+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 525,
+      "name": "B*_2+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 531,
+      "name": "B_s0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 533,
+      "name": "B*_s0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 535,
+      "name": "B*_2s0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 541,
+      "name": "B_c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 543,
+      "name": "B*_c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 545,
+      "name": "B*_2c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 551,
+      "name": "eta_b",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 1
+    },
+    {
+      "pdg": 553,
+      "name": "Upsilon",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 1
+    },
+    {
+      "pdg": 555,
+      "name": "chi_2b",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 1
+    },
+    {
+      "pdg": 4112,
+      "name": "Sigma_c0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4114,
+      "name": "Sigma*_c0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4122,
+      "name": "Lambda_c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4124,
+      "name": "Lambda_c(2625)+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4132,
+      "name": "Xi_c0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4212,
+      "name": "Sigma_c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4214,
+      "name": "Sigma*_c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4222,
+      "name": "Sigma_c++",
+      "charge3": 6,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4224,
+      "name": "Sigma*_c++",
+      "charge3": 6,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4232,
+      "name": "Xi_c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4312,
+      "name": "Xi'_c0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4314,
+      "name": "Xi*_c0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4322,
+      "name": "Xi'_c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4324,
+      "name": "Xi*_c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4332,
+      "name": "Omega_c0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4334,
+      "name": "Omega*_c0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4412,
+      "name": "Xi_cc+",
+      "charge3": 3,
+      "nc": 2,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4414,
+      "name": "Xi*_cc+",
+      "charge3": 3,
+      "nc": 2,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4422,
+      "name": "Xi_cc++",
+      "charge3": 6,
+      "nc": 2,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4424,
+      "name": "Xi*_cc++",
+      "charge3": 6,
+      "nc": 2,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4432,
+      "name": "Omega_cc+",
+      "charge3": 3,
+      "nc": 2,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4434,
+      "name": "Omega*_cc+",
+      "charge3": 3,
+      "nc": 2,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 4444,
+      "name": "Omega*_ccc++",
+      "charge3": 6,
+      "nc": 3,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5112,
+      "name": "Sigma_b-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5114,
+      "name": "Sigma*_b-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5122,
+      "name": "Lambda_b0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5132,
+      "name": "Xi_b-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5142,
+      "name": "Xi_bc0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5212,
+      "name": "Sigma_b0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5214,
+      "name": "Sigma*_b0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5222,
+      "name": "Sigma_b+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5224,
+      "name": "Sigma*_b+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5232,
+      "name": "Xi_b0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5242,
+      "name": "Xi_bc+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5312,
+      "name": "Xi'_b-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5314,
+      "name": "Xi*_b-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5322,
+      "name": "Xi'_b0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5324,
+      "name": "Xi*_b0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5332,
+      "name": "Omega_b-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5334,
+      "name": "Omega*_b-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5342,
+      "name": "Omega_bc0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5412,
+      "name": "Xi'_bc0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5414,
+      "name": "Xi*_bc0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5422,
+      "name": "Xi'_bc+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5424,
+      "name": "Xi*_bc+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5432,
+      "name": "Omega'_bc0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5434,
+      "name": "Omega*_bc0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5442,
+      "name": "Omega_bcc+",
+      "charge3": 3,
+      "nc": 2,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5444,
+      "name": "Omega*_bcc+",
+      "charge3": 3,
+      "nc": 2,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5512,
+      "name": "Xi_bb-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 2,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5514,
+      "name": "Xi*_bb-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 2,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5522,
+      "name": "Xi_bb0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 2,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5524,
+      "name": "Xi*_bb0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 2,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5532,
+      "name": "Omega_bb-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 2,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5534,
+      "name": "Omega*_bb-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 2,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5542,
+      "name": "Omega_bbc0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 2,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5544,
+      "name": "Omega*_bbc0",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 2,
+      "nbbar": 0
+    },
+    {
+      "pdg": 5554,
+      "name": "Omega*_bbb-",
+      "charge3": -3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 3,
+      "nbbar": 0
+    },
+    {
+      "pdg": 10411,
+      "name": "D*_0+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 10413,
+      "name": "D_1+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 10421,
+      "name": "D*_00",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 10423,
+      "name": "D_10",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 10431,
+      "name": "D*_0s+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 10433,
+      "name": "D_1s+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 10441,
+      "name": "chi_0c",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 10443,
+      "name": "h_1c",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 10511,
+      "name": "B*_00",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 10513,
+      "name": "B_10",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 10521,
+      "name": "B*_0+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 10523,
+      "name": "B_1+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 10531,
+      "name": "B*_0s0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 10533,
+      "name": "B_1s0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 10541,
+      "name": "B*_0c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 10543,
+      "name": "B_1c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 10551,
+      "name": "chi_0b",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 1
+    },
+    {
+      "pdg": 10553,
+      "name": "h_1b",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 1
+    },
+    {
+      "pdg": 14122,
+      "name": "Lambda_c(2593)+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 20413,
+      "name": "D*_1+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 20423,
+      "name": "D*_10",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 20433,
+      "name": "D*_1s+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 20443,
+      "name": "chi_1c",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 20513,
+      "name": "B*_10",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 20523,
+      "name": "B*_1+",
+      "charge3": 3,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 20533,
+      "name": "B*_1s0",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 20543,
+      "name": "B*_1c+",
+      "charge3": 3,
+      "nc": 1,
+      "ncbar": 0,
+      "nb": 0,
+      "nbbar": 1
+    },
+    {
+      "pdg": 20553,
+      "name": "chi_1b",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 1
+    },
+    {
+      "pdg": 30443,
+      "name": "psi(3770)",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 100441,
+      "name": "eta_c(2S)",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 100443,
+      "name": "psi(2S)",
+      "charge3": 0,
+      "nc": 1,
+      "ncbar": 1,
+      "nb": 0,
+      "nbbar": 0
+    },
+    {
+      "pdg": 100553,
+      "name": "Upsilon(2S)",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 1
+    },
+    {
+      "pdg": 200553,
+      "name": "Upsilon(3S)",
+      "charge3": 0,
+      "nc": 0,
+      "ncbar": 0,
+      "nb": 1,
+      "nbbar": 1
+    }
+  ]
+}

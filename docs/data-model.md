@@ -86,6 +86,8 @@ The following order is part of [query.json](../config/query.json):
 
 - `sparse_closure`: `tune`, `block`, `a15_eta4`, `a15_eta1`, `trigger_pdg`, `associate_pdg`, `trigger_pt`, `associate_pt`, `trigger_eta`, `associate_eta`, `dphi`, `category`.
 
+The version 2.4 [all-heavy layout](../config/query-all-heavy.json) keeps the activity, trigger and closure axes. Its `sparse_kinematics` adds `status`, `selected` and `pair_eligible` between `pdg` and `pt`. Its `sparse_pairs` adds `associate_status` between `associate_pdg` and `sign`. The signed-PDG dictionary spans the complete authenticated heavy catalog; a state with no observed rows has a labeled but empty bin. Final heavy rows fill kinematics regardless of the paper-selection flags. Nonfinal history remains in exact support and never fills the final-particle sparse. Broad pairs use the existing accepted trigger set and every final heavy associate in acceptance. Sign 0 means that the trigger-sector heavy-flavour sign is inapplicable, rather than OS or SS. The original exact trees and source-to-block mapping remain in the query shards.
+
 Tune and block axes retain source membership. Species axes use the common signed-PDG dictionary. Kinematic axes use the normalized analysis model. Physical inclusive high endpoints occupy the final regular bin. The pT overflow remains distinct.
 
 ### Exact support rows
@@ -135,6 +137,8 @@ The merged index still points to original query workspaces. Reduction uses their
 The numerical contract `projection_formulas_v4` checks all selected-state pairs against the retained event rows before reduction. This check uses heavy-flavour signs, structural triggers and the exact associate registry. It rejects missing pairs, duplicate pairs and inconsistent cached kinematics. It also counts eligible triggers with no accepted associate. The native run receipt binds the check to the collection digest and reports counts by source block and signed species.
 
 The retained `pair_eligible` field records the input interpretation. It does not exclude selected states from formula contract `projection_formulas_v4`. Archived numerical contracts retain their original species scope.
+
+For an all-heavy collection, `./hadronization fine` reads the merged fine sparse and the exact support trees through the checked collection reader. It writes an inventory for every catalog identity and, optionally, every occupied cell for one signed PDG. The reader independently reconstructs final-species and accepted-trigger pair totals from exact rows by tune and original block and compares weighted sums and squared-weight sums with the sparse, including flow bins. The inventory distinguishes unobserved catalog states, history-only states and states with retained final rows; it also reports direct-spectrum and grouped-pair eligibility separately. Fine sparse content remains in the merged query ROOT files. Derived family and numerical ROOT files are separate outputs; no family sum overwrites a signed-PDG bin.
 
 ## Numerical ROOT
 

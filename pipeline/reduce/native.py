@@ -64,11 +64,15 @@ class NativeCollection:
             fields={'schema','state','scientific_binding_sha256','events',
                     'eligible_triggers','zero_partner_triggers','candidate_pairs',
                     'stored_pairs','by_tune_sector_sign'}
+            broad = analysis.get('version') == '2.4.0'
+            if broad:
+                fields |= {'paper_candidate_pairs','inapplicable_sign_pairs'}
             if (hashlib.sha256(analysis_bytes).hexdigest()!=self.index['analysis_sha256'] or
-                    analysis.get('version') not in {'2.2.0','2.3.0'} or
+                    analysis.get('version') not in {'2.2.0','2.3.0','2.4.0'} or
                     metadata.get('analysis_sha256')!=self.index['analysis_sha256'] or
                     type(proof) is not dict or set(proof)!=fields or
-                    proof['schema']!='hadronization_pair_population_proof_v1' or
+                    proof['schema']!=('hadronization_pair_population_proof_v2' if broad
+                                      else 'hadronization_pair_population_proof_v1') or
                     proof['state']!='PASS' or
                     proof['scientific_binding_sha256']!=metadata.get(
                         'scientific_binding_sha256') or
@@ -84,11 +88,14 @@ class NativeCollection:
                     any(type(row) is not dict or set(row)!=
                         {'tune_ordinal','sector','sign','count'} or
                         any(type(row[key]) is not int for key in row) or
-                        row['sign'] not in (-1,1) or row['count']<0
+                        row['sign'] not in ((-1,0,1) if broad else (-1,1)) or row['count']<0
                         for row in groups) or
                     len({(row['tune_ordinal'],row['sector'],row['sign'])
                          for row in groups})!=len(groups) or
-                    sum(row['count'] for row in groups)!=proof['candidate_pairs']):
+                    sum(row['count'] for row in groups)!=proof['candidate_pairs'] or
+                    (broad and (sum(row['count'] for row in groups if row['sign']==0)!=
+                         proof['inapplicable_sign_pairs'] or
+                         not 0<=proof['paper_candidate_pairs']<=proof['candidate_pairs']))):
                 raise ValueError('A v2.2 pair-population sector/sign proof differs')
             body=json.dumps(proof,sort_keys=True,separators=(',',':'),
                             ensure_ascii=True).encode('ascii')
@@ -342,6 +349,14 @@ def collect_primitives(source, model, analysis, profile_ids, activity_field,
             associate = signed(axes[names['associate_pdg']],coords[names['associate_pdg']])
             if (trigger,associate) not in pairs:
                 return
+            if analysis['version'] == '2.4.0':
+                status_axis = axes[names['associate_status']]
+                status_coordinate = coords[names['associate_status']]
+                if not physical(status_axis,status_coordinate):
+                    raise ValueError('fine pair status is outside declared stage domain')
+                status = round(status_axis.GetBinCenter(status_coordinate))
+                if status < 81 or status > 89:
+                    return
             sign = round(axes[names['sign']].GetBinCenter(coords[names['sign']]))
             if sign not in (-1,1):
                 raise ValueError('native pair sign coordinate differs')
@@ -565,7 +580,7 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
     """One compiled exact-support pass for additive T1, exposure and diagnostics."""
     selected_tunes = set(selected_tunes)
     verify_pairs = pair_population_registry is not None
-    if analysis_version not in ('2.2.0', '2.3.0'):
+    if analysis_version not in ('2.2.0', '2.3.0', '2.4.0'):
         raise ValueError('support analysis version differs')
     if verify_pairs and (set(pair_population_registry) != {'charm', 'beauty'} or
             any(not values or len(values) != len(set(values)) or
@@ -614,7 +629,7 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
         field = 'eta1' if event_activity_field == 'a15_eta1' else 'eta4'
         command = [str(binary), str(mapping), field, str(output)]
         if verify_pairs:
-            command.append('family-reconstructed' if analysis_version == '2.3.0'
+            command.append('family-reconstructed' if analysis_version in ('2.3.0','2.4.0')
                            else 'all-selected')
         completed = subprocess.run(command,
                                    capture_output=True, text=True)
@@ -739,7 +754,7 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
             pair_proof = dict(schema='hadronization_all_selected_pair_population_v1',
                 state='PASS', collection_index_sha256=source.expected_sha256,
                 reconstruction=('retained-heavy-trigger-origin-v1'
-                    if analysis_version == '2.3.0' else 'legacy-cache-complete-v1'),
+                    if analysis_version in ('2.3.0','2.4.0') else 'legacy-cache-complete-v1'),
                 registry_sha256=hashlib.sha256(json.dumps(pair_population_registry,
                     sort_keys=True, separators=(',', ':')).encode('ascii')).hexdigest(),
                 scan_sha256=hashlib.sha256(output.read_bytes()).hexdigest(),
@@ -813,6 +828,15 @@ def collect_g9(source, species_pdgs, eta_edges, phi_edges,
         pdg = int(pdg_label)
         if pdg not in species:
             return
+        if 'status' in names:
+            status_axis=axes[names['status']]
+            status_coord=coord[names['status']]
+            if not 1 <= status_coord <= status_axis.GetNbins():
+                raise ValueError('fine kinematic status is outside declared stage domain')
+            status=round(status_axis.GetBinCenter(status_coord))
+            if (status < 81 or status > 89 or
+                    round(axes[names['selected']].GetBinCenter(coord[names['selected']])) != 1):
+                return
         pt_axis = axes[names['pt']]
         pt_coord = coord[names['pt']]
         if pt_coord == 0:

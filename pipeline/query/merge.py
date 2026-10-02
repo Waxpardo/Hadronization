@@ -69,7 +69,7 @@ def merge(index_path, expected_sha256, output):
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix="."+output.name+".stage-", dir=str(output.parent)))
     ROOT = c._root()
-    layout = c.r.json_file(c.ROOT_DIR / "config/query.json")
+    layout = c.layout_for_index(index)
     started = time.monotonic()
     partitions = []
     native = _native()
@@ -108,7 +108,8 @@ def merge(index_path, expected_sha256, output):
                             native.Accumulate(hist, merged, ordinal)
                             counts = native.Entries(source, family,
                                 [m["tune_ordinal"] for m in shard["members"]],
-                                [m["block"] for m in shard["members"]], ordinal, index["block_count"])
+                                [m["block"] for m in shard["members"]], ordinal, index["block_count"],
+                                "associate_status" in layout["sparse"]["pairs"])
                             entries = [old + int(new) for old, new in zip(entries, counts)]
                             del hist
                         finally:

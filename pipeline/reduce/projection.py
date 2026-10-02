@@ -66,7 +66,7 @@ def paper_baryon_meson_channels(analysis, charm):
                        if pair['trigger_pdg'] == trigger and
                        pair['associate_pdg'] == associate and
                        pair['sign'] == -1]
-            if analysis.get('version') == '2.3.0' and not matches:
+            if analysis.get('version') in ('2.3.0', '2.4.0') and not matches:
                 # Primed Xi saved states are members of their ground-family
                 # destinations in the accepted grouped presentation.
                 continue

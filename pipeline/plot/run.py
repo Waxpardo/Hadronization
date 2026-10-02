@@ -29,12 +29,13 @@ TARGET_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316
 DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v9"
 CANVAS_NAME = "canvases.root"
 RECORD_NAME = "drawing-record.tsv.gz"
-# Display order only: mesons first, then Lambda, Sigma and Xi baryons.
+# Display order only: mesons first, then Lambda, Sigma, Xi and Omega baryons.
 # Particle and antiparticle share an order; primed Xis follow unprimed Xis.
 # https://pdg.lbl.gov/2025/mcdata/mass_width_2025.mcd
 SPECIES_DISPLAY_ORDER = (421, 411, 431, 521, 511, 531, 541,
                          4122, 4212, 4112, 4222, 4232, 4132, 4322, 4312,
-                         5122, 5222, 5212, 5112, 5232, 5132, 5322, 5312)
+                         4332, 5122, 5222, 5212, 5112, 5232, 5132, 5322,
+                         5312, 5332)
 P1_WITHHELD_SE_DISCLOSURE = (
     "Tune-ratio SE unavailable for unresolved sparse-tail denominators; "
     "see ROOT flags")
@@ -1220,7 +1221,7 @@ def activity_proxy_caption(selection, threshold, eta_window):
             selection['exclude_heavy_constituents'] and
             selection['pt']['low_operator']=='GT'):
         raise ValueError('P1 typed charged-final activity differs')
-    return ('#it{N}_{ch}: Charged primaries (study definition), heavy flavour excluded; '
+    return ('#it{N}_{ch}: Charged primaries, heavy flavour excluded; '
             '#it{p}_{T} > '+format(threshold,'.15g')+
             ' GeV/c, |#eta| #leq '+format(eta_window,'.15g'))
 
@@ -1260,7 +1261,7 @@ def scientific_caption_lines(page, context):
             lines.remove(eta_line)
         # Share equal eta acceptance once; unequal definitions stay explicit.
         lines = [line.removesuffix('; '+eta_line) for line in lines]
-        lines.extend(['N_{ch}: Charged primaries (study definition)',
+        lines.extend(['N_{ch}: Charged primaries',
             'p_{T} > '+format(float.fromhex(activity['pt']['low']), '.15g')+
             ' GeV/c; |#eta| #leq '+format(float.fromhex(activity['eta_window']), '.15g')])
     if role=='spectra.signed_heavy':

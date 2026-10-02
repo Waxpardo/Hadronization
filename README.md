@@ -51,6 +51,8 @@ flowchart LR
 
 Query files retain exact support rows and block-resolved THnSparse histograms. The physical merge stores sparse objects by tune and original block. Reduction still reads support rows from the query shards. Keep those shards with the merged collection.
 
+The version 2.4 all-heavy construction retains each catalogued final heavy species in its own signed-PDG bins before applying a pinned saved-state grouping recipe. An independent fine inventory checks filled species and pair content against exact accepted rows. The default recipe has 82 signed members and 42 destinations; valid subsets can be selected for reduction without rebuilding fine content. Family sums and their covariance are separate ROOT products. The [workflow](docs/workflow.md#build-a-reusable-query) explains construction, [fine-species export](docs/workflow.md#collection-and-physical-merge) and [grouping configuration](docs/configuration.md#fixed-analysis-fields); result packages retain their recorded construction and grouping versions.
+
 The native estimator computes pooled results and delete-one-source-block jackknife covariance. `numerics.root` stores values, uncertainties, covariance factors, statuses and provenance. The renderer reads these numerical results without recomputing observables.
 
 ## Main choices
@@ -61,7 +63,7 @@ The native estimator computes pooled results and delete-one-source-block jackkni
 
 - Optional rectangular minima require `trigger_min >= associate_min`. Both particle cuts include their endpoints.
 
-- The human-facing activity label is **Charged primaries (study definition)**. It counts final charged particles without charm or beauty constituents, with pT > 0.15 GeV/c and |eta| <= 4; it is not an ALICE-equivalence claim.
+- The human-facing activity label is **Charged primaries**. It counts final charged particles without charm or beauty constituents, with pT > 0.15 GeV/c and |eta| <= 4; it is not an ALICE-equivalence claim.
 
 - Multiplicity classes use tune-local percentiles. Reduction recomputes class boundaries for each block deletion.
 

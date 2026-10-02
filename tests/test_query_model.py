@@ -1,6 +1,7 @@
 """One axis-aware released selection model for every public query route."""
 
 import copy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -191,6 +192,32 @@ class ReleasedQueryModel(unittest.TestCase):
             changed['profiles'][-1]['associate_pt']['value'] = associate
             with self.subTest(minima=(trigger, associate)), self.assertRaises(ValueError):
                 model.compatible_interpretation(self.analysis, changed)
+
+    def test_all_heavy_catalog_covers_signed_states_and_refuses_mutants(self):
+        analysis, _ = model.checked_analysis(ROOT / "config/analysis-all-heavy.json")
+        binding = analysis["retained_heavy_catalog"]
+        catalog_path = ROOT / binding["path"]
+        catalog = model.checked_heavy_catalog(catalog_path, binding["sha256"])
+        states = {state["pdg"]: state for state in catalog["states"]}
+        for pdg in (423, 4312, 4314, 4324, 5314, 5324, 541, 443, 4422, 5522):
+            self.assertIn(pdg, states)
+        self.assertNotIn(-443, states)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "catalog.json"
+            for mutate in (
+                    lambda value: value["states"].pop(),
+                    lambda value: value["states"].append(
+                        copy.deepcopy(value["states"][0])),
+                    lambda value: next(row for row in value["states"]
+                                       if row["pdg"] == -4324).__setitem__("charge3", 3),
+                    lambda value: next(row for row in value["states"]
+                                       if row["pdg"] == 443).__setitem__("nc", 2)):
+                changed = copy.deepcopy(catalog)
+                mutate(changed)
+                path.write_text(json.dumps(changed, sort_keys=True))
+                digest = hashlib.sha256(path.read_bytes()).hexdigest()
+                with self.assertRaises(ValueError):
+                    model.checked_heavy_catalog(path, digest)
 
 
 if __name__ == "__main__":

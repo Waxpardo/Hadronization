@@ -278,6 +278,8 @@ def _provenance(source, request, run, ledger, analysis, campaign):
             files.get(analysis_source_path) != run['interpretation_analysis_sha256']) or
             (analysis['version'] == '2.3.0' and
              analysis_source_path != 'config/analysis-family.json') or
+            (analysis['version'] == '2.4.0' and
+             analysis_source_path not in (None, 'config/analysis-all-heavy.json')) or
             source.index['analysis_sha256'] != run['construction_analysis_sha256'] or
             req['bindings']['analysis_config_sha256'] != run[
                 'interpretation_analysis_sha256'] or
@@ -350,7 +352,9 @@ def _provenance(source, request, run, ledger, analysis, campaign):
         parent_artifact_digests=sorted([ledger['ledger_sha256'],
             source.expected_sha256,
             source.index['scientific_identity_sha256'],
-            req['sources']['selected_members_sha256']]),
+            req['sources']['selected_members_sha256']] +
+            ([analysis['associate_family_map']['sha256']]
+             if analysis['version'] == '2.4.0' else [])),
         campaign_accounting=campaign)
 
 
@@ -395,7 +399,7 @@ def run(args):
     from pipeline.query import model as model_api
     checked, normalized_sha = model_api.checked_analysis(Path(args.analysis))
     if normalized_sha != args.analysis_sha or checked != analysis or analysis[
-            'version'] not in {'2.2.0','2.3.0'}:
+            'version'] not in {'2.2.0','2.3.0','2.4.0'}:
         raise ValueError('public v4 route requires a normalized A analysis')
     if ((args.merge_verification is None) !=
             (args.merge_verification_sha is None)):
@@ -408,8 +412,16 @@ def run(args):
             raise ValueError('A collection/shipped construction analysis binding differs')
         construction, _ = model_api.checked_analysis(ANALYSIS)
         model_api.compatible_interpretation(construction, analysis)
-    elif source.index['analysis_sha256'] != args.analysis_sha:
-        raise ValueError('family collection/analysis binding differs')
+    else:
+        construction_path = Path(source.index['shards'][0][
+            'workspace_manifest']['path']).parent / 'analysis.json'
+        if p.file_digest(construction_path) != source.index['analysis_sha256']:
+            raise ValueError('family collection/construction analysis binding differs')
+        construction, construction_sha = model_api.checked_analysis(
+            construction_path)
+        if construction_sha != source.index['analysis_sha256']:
+            raise ValueError('family construction analysis model differs')
+        model_api.compatible_interpretation(construction, analysis)
     closure = native_v4.admission_closure(source, args.expected_sources,
         args.expected_sources_sha, work_path=args.site_work,
         expected_work_sha256=args.site_work_sha,
@@ -474,6 +486,8 @@ def run(args):
             manifest_content_sha256=family_manifest['manifest_content_sha256'],
             fine_species_count=family_manifest['fine_species_count'],
             family_destination_count=family_manifest['family_destination_count'],
+            grouping_recipe_sha256=family_manifest['runtime_map_sha256'],
+            grouping_recipe_id=family_manifest.get('grouping_recipe_id'),
             files=family_manifest['files'])
         receipt['family_products']['path'] = 'family-products'
     native_receipt_path = output / 'native-run-receipt.json'
@@ -544,6 +558,8 @@ def run(args):
         class_boundary_deletions=len(cold['class_boundary_deletions']),
         covariance_groups=len(cold['covariance']),
         family_products=packaged_family_products,
+        grouping_recipe_sha256=(analysis['associate_family_map']['sha256']
+            if analysis['version'] == '2.4.0' else None),
         science_content_sha256=cold['science_content_sha256'])
     report_sha = _write(output / 'report.json', report)
     package_sha = _write(output / 'package-manifest.json',
@@ -676,11 +692,24 @@ def _verify(args):
         verified_family = family_products.verify_products(
             family_root, report['family_products']['manifest_sha256'])
         if (verified_family['files'] != report['family_products']['files'] or
+                verified_family['runtime_map_sha256'] != report[
+                    'family_products'].get('grouping_recipe_sha256',
+                        verified_family['runtime_map_sha256']) or
+                verified_family.get('grouping_recipe_id') != report[
+                    'family_products'].get('grouping_recipe_id') or
+                report.get('grouping_recipe_sha256') != (
+                    verified_family['runtime_map_sha256'] if
+                    verified_family['schema'] == family_products.GROUPED_SCHEMA
+                    else None) or
                 native_receipt.get('family_products', {}).get('manifest_sha256') !=
                 report['family_products']['manifest_sha256']):
             raise ValueError('public v4 family products/report binding differs')
     value = archive_v4.read(root, report['root']['root_sha256'],
                             report['root']['value_sha256'])
+    if report.get('grouping_recipe_sha256') is not None and report[
+            'grouping_recipe_sha256'] not in value['provenance'][
+                'parent_artifact_digests']:
+        raise ValueError('numerical ROOT lacks grouping recipe provenance')
     if (value['science_content_sha256'] != report['science_content_sha256']
             or len(value['points']) != report['points']
             or value['campaign_state'] != report['campaign_state']

@@ -15,6 +15,7 @@ sys.modules[_family_spec.name] = _family
 _family_spec.loader.exec_module(_family)
 
 SCHEMA = "hadronization_family_products_manifest_v2"
+GROUPED_SCHEMA = "hadronization_family_products_manifest_v3"
 PAIR_FIELDS = ("block", "activity_bin", "trigger_pdg", "associate_pdg",
                "sign", "dphi_bin", "count", "sumw2")
 TRIGGER_FIELDS = ("block", "activity_bin", "trigger_pdg", "count", "sumw2")
@@ -50,14 +51,16 @@ def _publish_temp(temporary, path):
 def _write_root(path, trees, metadata):
     import ROOT
     ROOT.gROOT.SetBatch(True)
-    path = Path(path)
+    path = Path(path).absolute()
     if path.exists() or path.is_symlink():
         raise FileExistsError(path)
-    descriptor, temporary = tempfile.mkstemp(prefix="." + path.name + ".",
-                                              suffix=".tmp", dir=path.parent)
+    temporary = str(path.parent / ("." + path.name + ".tmp"))
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     os.close(descriptor)
+    original_directory = Path.cwd()
     try:
-        output = ROOT.TFile.Open(temporary, "RECREATE")
+        os.chdir(path.parent)
+        output = ROOT.TFile.Open(Path(temporary).name + "?reproducible", "RECREATE")
         if not output or output.IsZombie():
             raise ValueError("family ROOT output cannot be created")
         for tree_name, string_fields, integer_fields, real_fields, rows in trees:
@@ -84,6 +87,7 @@ def _write_root(path, trees, metadata):
             os.fsync(stream.fileno())
         _publish_temp(temporary, path)
     finally:
+        os.chdir(original_directory)
         if os.path.exists(temporary):
             os.unlink(temporary)
 
@@ -101,7 +105,7 @@ def _group_rows(fine_rows, family_map):
     for row in fine_rows:
         destination = family_map.destination_by_member.get(row["associate_pdg"])
         if destination is None:
-            raise ValueError("fine primitive is outside the public family map")
+            continue
         key = (row["profile_id"], row["tune_id"], row["block"],
                row["activity_bin"], row["trigger_pdg"], destination,
                row["sign"], row["dphi_bin"])
@@ -126,14 +130,16 @@ def _shared_rows(primitives):
 
 
 def write_products(output, primitives, family_map, *, source_sha256,
-                   analysis_sha256, content_sha256):
+                   analysis_sha256, content_sha256, analysis_version="2.3.0"):
     """Write portable fine, family, and shared-denominator products once."""
     if any(len(value) != 64 for value in
            (source_sha256, analysis_sha256, content_sha256)):
         raise ValueError("family product binding digest differs")
+    configurable = analysis_version == "2.4.0"
+    fine_domain = {associate for _, associate in primitives.selected_pairs}
     if (len(primitives.selected_pairs) != len(set(primitives.selected_pairs)) or
-            {associate for _, associate in primitives.selected_pairs} !=
-            set(family_map.members) or
+            (not set(family_map.members) <= fine_domain if configurable else
+             fine_domain != set(family_map.members)) or
             {trigger for trigger, _ in primitives.selected_pairs} !=
             set(primitives.selected_triggers)):
         raise ValueError("fine product declared pair domain differs")
@@ -148,18 +154,34 @@ def write_products(output, primitives, family_map, *, source_sha256,
                    family=family_map.family_by_destination[destination],
                    members=list(family_map.members_by_destination[destination]))
               for destination in family_map.destinations]
-    common = dict(schema=SCHEMA, runtime_map_sha256=family_map.sha256,
+    common = dict(schema=GROUPED_SCHEMA if configurable else SCHEMA,
+        runtime_map_sha256=family_map.sha256,
         accepted_full_map_sha256=family_map.accepted_full_map_sha256,
         semantic_groups_sha256=family_map.semantic_groups_sha256,
         source_sha256=source_sha256, analysis_sha256=analysis_sha256,
         content_sha256=content_sha256, block_count=10,
         profiles=list(primitives.profile_ids), activity_field=primitives.activity_field,
-        signed_fine_species=list(family_map.members), groups=groups,
+        signed_fine_species=sorted(fine_domain), groups=groups,
         fine_state_identities=[family_map.fine_state_identities[pdg]
             for pdg in sorted(family_map.fine_state_identities)],
         denominator_scope="shared trigger/activity primitives stored once, including zero-partner trigger domains")
     files = {}
-    by_species = {pdg: [] for pdg in family_map.members}
+    if configurable:
+        common["grouping_recipe_id"] = family_map.recipe_id
+        common["heavy_catalog_sha256"] = family_map.catalog_sha256
+        if (not family_map.recipe_bytes or hashlib.sha256(
+                family_map.recipe_bytes).hexdigest() != family_map.sha256):
+            raise ValueError("grouping recipe bytes differ from pinned map")
+        recipe_path = output / "grouping-recipe.json"
+        with recipe_path.open("xb") as stream:
+            stream.write(family_map.recipe_bytes)
+        files["grouping-recipe.json"] = {"sha256": family_map.sha256,
+                                         "bytes": len(family_map.recipe_bytes)}
+    independent = (dict(schema="hadronization_fine_pair_primitives_v1",
+        source_sha256=source_sha256, content_sha256=content_sha256,
+        profiles=list(primitives.profile_ids), activity_field=primitives.activity_field)
+        if configurable else common)
+    by_species = {pdg: [] for pdg in fine_domain}
     for row in fine_rows:
         by_species[row["associate_pdg"]].append(row)
     pair_tree = lambda rows: [("pair_primitives", ("profile_id", "tune_id"),
@@ -167,7 +189,7 @@ def write_products(output, primitives, family_map, *, source_sha256,
     for pdg in sorted(by_species):
         relative = "fine/pdg-{}.root".format(str(pdg).replace("-", "m"))
         _write_root(output / relative, pair_tree(by_species[pdg]),
-                    dict(common, product="FINE_SIGNED_SPECIES", pdg=pdg))
+                    dict(independent, product="FINE_SIGNED_SPECIES", pdg=pdg))
         files[relative] = {"sha256": _sha(output / relative),
                            "bytes": (output / relative).stat().st_size,
                            "rows": len(by_species[pdg])}
@@ -183,7 +205,7 @@ def write_products(output, primitives, family_map, *, source_sha256,
         ("trigger_primitives", ("profile_id", "tune_id"), TRIGGER_FIELDS[:3],
          TRIGGER_FIELDS[3:], trigger_rows)]
     _write_root(output / "shared.root", shared_trees,
-                dict(common, product="SHARED_ACTIVITY_AND_TRIGGER_PRIMITIVES"))
+                dict(independent, product="SHARED_ACTIVITY_AND_TRIGGER_PRIMITIVES"))
     files["shared.root"] = {"sha256": _sha(output / "shared.root"),
         "bytes": (output / "shared.root").stat().st_size,
         "activity_rows": len(activity_rows), "trigger_rows": len(trigger_rows)}
@@ -249,8 +271,24 @@ def verify_products(output, expected_manifest_sha256):
     if hashlib.sha256(_canonical(manifest).encode("ascii")).hexdigest() != digest:
         raise ValueError("family product manifest content binding differs")
     manifest["manifest_content_sha256"] = digest
-    if manifest.get("schema") != SCHEMA:
+    if manifest.get("schema") not in (SCHEMA, GROUPED_SCHEMA):
         raise ValueError("family product manifest schema differs")
+    configurable = manifest["schema"] == GROUPED_SCHEMA
+    if configurable:
+        recipe_fact = manifest["files"].get("grouping-recipe.json")
+        if (not isinstance(recipe_fact, dict) or
+                recipe_fact.get("sha256") != manifest.get("runtime_map_sha256")):
+            raise ValueError("grouping recipe file/pin differs")
+        admitted = _family.checked_family_map(output / "grouping-recipe.json",
+                                               manifest["runtime_map_sha256"])
+        admitted_groups = [dict(destination_pdg=destination,
+                                family=admitted.family_by_destination[destination],
+                                members=list(admitted.members_by_destination[destination]))
+                           for destination in admitted.destinations]
+        if (admitted_groups != manifest.get("groups") or
+                admitted.recipe_id != manifest.get("grouping_recipe_id") or
+                manifest.get("heavy_catalog_sha256") != _family.CATALOG_SHA256):
+            raise ValueError("grouping recipe/manifest model differs")
     expected_files = set(manifest["files"]) | {"manifest.json"}
     actual_files = {path.relative_to(output).as_posix() for path in output.rglob("*")
                     if path.is_file()}
@@ -263,13 +301,24 @@ def verify_products(output, expected_manifest_sha256):
                    "content_sha256", "block_count", "profiles", "activity_field",
                    "signed_fine_species", "groups", "fine_state_identities",
                    "denominator_scope")
+    if configurable:
+        common_keys += ("grouping_recipe_id", "heavy_catalog_sha256")
+    independent = {key: manifest[key] for key in
+                   ("source_sha256", "content_sha256", "profiles", "activity_field")}
+    if configurable:
+        independent["schema"] = "hadronization_fine_pair_primitives_v1"
     for relative, fact in manifest["files"].items():
         path = output / relative
         if path.is_symlink() or not path.is_file() or _sha(path) != fact["sha256"] or \
                 path.stat().st_size != fact["bytes"]:
             raise ValueError("family product file fact differs: " + relative)
+        if relative == "grouping-recipe.json":
+            continue
         metadata, trees = _read_root(path)
-        if any(metadata.get(key) != manifest.get(key) for key in common_keys):
+        expected = (independent if configurable and
+                    (relative.startswith("fine/") or relative == "shared.root")
+                    else {key: manifest[key] for key in common_keys})
+        if any(metadata.get(key) != value for key, value in expected.items()):
             raise ValueError("family product embedded metadata differs")
         if relative.startswith("fine/"):
             rows = trees.get("pair_primitives", [])
@@ -293,11 +342,17 @@ def verify_products(output, expected_manifest_sha256):
     if len(fine_keys) != len(set(fine_keys)):
         raise ValueError("duplicate fine primitive natural key")
     family_metadata, family_trees = _read_root(output / "families.root")
+    if (family_metadata.get("product") != "DERIVED_SAVED_STATE_FAMILIES" or
+            family_metadata.get("destinations") !=
+            [group["destination_pdg"] for group in manifest["groups"]]):
+        raise ValueError("derived family product identity differs")
     family_rows = family_trees.get("pair_primitives", [])
     destination = {member: group["destination_pdg"] for group in manifest["groups"]
                    for member in group["members"]}
     grouped = {}
     for row in fine_rows:
+        if row["associate_pdg"] not in destination:
+            continue
         key = (row["profile_id"], row["tune_id"], row["block"], row["activity_bin"],
                row["trigger_pdg"], destination[row["associate_pdg"]], row["sign"],
                row["dphi_bin"])

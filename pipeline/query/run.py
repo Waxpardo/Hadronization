@@ -37,6 +37,10 @@ def payload_sha(value):
 
 
 def configured_pdgs(analysis):
+    if analysis["version"] == "2.4.0":
+        binding = analysis["retained_heavy_catalog"]
+        catalog = model.checked_heavy_catalog(ROOT / binding["path"], binding["sha256"])
+        return [state["pdg"] for state in catalog["states"]]
     registry = analysis["pair_query_registry"]
     values = set(registry["trigger_pdgs"])
     for pdgs in registry["associate_pdgs"].values():
@@ -93,9 +97,13 @@ def execution_attestation(metadata):
     }
 
 
-def require_phase_a_layout(layout):
+def require_phase_a_layout(layout, analysis=None):
     """Require the complete repository-owned Phase-A object/column contract."""
-    canonical = reduce.json_file(ROOT / "config/query.json")
+    name = ("query-all-heavy.json" if analysis is not None and
+            analysis["version"] == "2.4.0" else "query.json")
+    canonical = reduce.json_file(ROOT / "config" / name)
+    if analysis is None and layout != canonical:
+        canonical = reduce.json_file(ROOT / "config/query-all-heavy.json")
     if layout != canonical:
         raise ValueError("query layout differs from the complete canonical Phase-A layout")
     return canonical
@@ -106,7 +114,7 @@ def layout_spec(analysis, layout, binding, dictionary,
                 scientific_binding_sha="__QUERY_SCIENTIFIC_BINDING_SHA256__",
                 execution_attestation_sha="__QUERY_EXECUTION_ATTESTATION_SHA256__",
                 sparse_digest_schema=SPARSE_DIGEST_SCHEMA):
-    require_phase_a_layout(layout)
+    require_phase_a_layout(layout, analysis)
     axes = {}
     def uniform(name, bins, low, high, inclusive=False):
         edges = [low + (high-low)*i/bins for i in range(bins+1)]
@@ -127,13 +135,20 @@ def layout_spec(analysis, layout, binding, dictionary,
     eta = analysis["axes"]["eta"]
     uniform("deta", 2*eta["bins"], eta["low"]-eta["high"], eta["high"]-eta["low"], True)
     uniform("sign", 3, -1.5, 1.5)
-    uniform("origin", 5, 0.5, 5.5)
+    if analysis["version"] == "2.4.0":
+        uniform("origin", 7, -1.5, 5.5)
+        uniform("status", 401, -200.5, 200.5)
+        uniform("associate_status", 401, -200.5, 200.5)
+        uniform("selected", 2, -0.5, 1.5)
+        uniform("pair_eligible", 2, -0.5, 1.5)
+    else:
+        uniform("origin", 5, 0.5, 5.5)
     uniform("category", 6, -0.5, 5.5)
     if sparse_digest_schema not in (SPARSE_DIGEST_SCHEMA, None):
         raise ValueError("query sparse digest schema differs")
     lines = ["hadronization_root_query_spec_v4" if sparse_digest_schema else
              "hadronization_root_query_spec_v3"]
-    if analysis["version"] in {"2.2.0", "2.3.0"}:
+    if analysis["version"] in {"2.2.0", "2.3.0", "2.4.0"}:
         lines.append("ANALYSIS_VERSION\t" + analysis["version"])
     lines += ["CONTENT_SHA256\t" + content_sha,
              "SCIENTIFIC_BINDING_SHA256\t" + scientific_binding_sha,
@@ -145,11 +160,18 @@ def layout_spec(analysis, layout, binding, dictionary,
     objects = {"trees": layout["trees"], "sparse": dict(layout["sparse"])}
     for index, profile in enumerate(analysis["profiles"]):
         lines.append("\t".join(["PROFILE", str(index), profile["id"]] + model.profile_tokens(profile)))
-    if analysis["version"] in {"2.2.0", "2.3.0"}:
+    if analysis["version"] in {"2.2.0", "2.3.0", "2.4.0"}:
         lines.extend("TRIGGER\t{}".format(pdg) for pdg in analysis["pair_query_registry"]["trigger_pdgs"])
         for sector, name in ((4, "charm"), (5, "beauty")):
             lines.extend("ASSOCIATE\t{}\t{}".format(sector, pdg)
                          for pdg in analysis["pair_query_registry"]["associate_pdgs"][name])
+    if analysis["version"] == "2.4.0":
+        binding = analysis["retained_heavy_catalog"]
+        catalog = model.checked_heavy_catalog(ROOT / binding["path"], binding["sha256"])
+        lines.append("HEAVY_CATALOG_SHA256\t" + binding["sha256"])
+        for state in catalog["states"]:
+            lines.append("RETAIN\t{}\t{}\t{}\t{}\t{}".format(
+                *(state[key] for key in ("pdg", "nc", "ncbar", "nb", "nbbar"))))
     for key, token in (("trees", "TREE"), ("sparse", "SPARSE")):
         for name, fields in sorted(objects[key].items()):
             lines.append("\t".join([token, name] + fields))
@@ -384,6 +406,8 @@ def census(args):
     if sources != list(range(args.expected_source_count)):
         raise ValueError("census source membership is not the exact expected campaign domain")
     configured = configured_pdgs(analysis)
+    if analysis["version"] == "2.4.0" and not observed <= set(configured):
+        raise ValueError("accepted heavy identity is absent from the authenticated generator catalog")
     body = {"schema": "hadronization_campaign_pdg_dictionary_body_v1",
             "pdgs": sorted(observed | set(configured))}
     payload = {"schema": "hadronization_campaign_pdg_dictionary_v1",
@@ -502,7 +526,7 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
             raise ValueError("query artifact identity differs")
     analysis, archived_analysis_sha = model.checked_analysis(workspace / "analysis.json")
     layout = reduce.json_file(workspace / "layout.json")
-    require_phase_a_layout(layout)
+    require_phase_a_layout(layout, analysis)
     dictionary = read_dictionary(workspace / "dictionary.json")
     metadata = reduce.json_file(workspace / "metadata.json")
     metadata_fields = {"schema", "state", "query_content_digests",
@@ -515,7 +539,7 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
                                  "exactness"}
     if metadata.get("schema") == "hadronization_query_metadata_v4":
         metadata_fields.add("sparse_digest_schema")
-    if analysis["version"] in {"2.2.0", "2.3.0"} or "pair_population_proof" in metadata:
+    if analysis["version"] in {"2.2.0", "2.3.0", "2.4.0"} or "pair_population_proof" in metadata:
         metadata_fields.add("pair_population_proof")
     reduce.exact_keys(metadata, metadata_fields, "query metadata")
     parent = metadata["input_receipt"]
@@ -537,11 +561,16 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
         raise ValueError("query parent source identity/counts differ")
     proof = metadata.get("pair_population_proof")
     if proof is not None:
-        reduce.exact_keys(proof, {"schema", "state", "scientific_binding_sha256", "events",
+        fields = {"schema", "state", "scientific_binding_sha256", "events",
                                   "eligible_triggers", "zero_partner_triggers", "candidate_pairs",
-                                  "stored_pairs", "by_tune_sector_sign"}, "pair population proof")
-    if analysis["version"] in {"2.2.0", "2.3.0"} and (proof is None or
-            proof["schema"] != "hadronization_pair_population_proof_v1" or
+                                  "stored_pairs", "by_tune_sector_sign"}
+        if analysis["version"] == "2.4.0":
+            fields |= {"paper_candidate_pairs", "inapplicable_sign_pairs"}
+        reduce.exact_keys(proof, fields, "pair population proof")
+    if analysis["version"] in {"2.2.0", "2.3.0", "2.4.0"} and (proof is None or
+            proof["schema"] != ("hadronization_pair_population_proof_v2"
+                                 if analysis["version"] == "2.4.0" else
+                                 "hadronization_pair_population_proof_v1") or
             proof["state"] != "PASS" or
             proof["scientific_binding_sha256"] != metadata["scientific_binding_sha256"] or
             proof["events"] != sum(row["manifest_row"]["successful_events"] for row in parent["sources"]) or
@@ -549,6 +578,13 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
             any(type(proof[key]) is not int or proof[key] < 0 for key in
                 ("events", "eligible_triggers", "zero_partner_triggers", "candidate_pairs", "stored_pairs"))):
         raise ValueError("query pair population proof binding/counts differ")
+    if analysis["version"] == "2.4.0" and (
+            dictionary["body"]["pdgs"] != configured_pdgs(analysis) or
+            any(type(proof[key]) is not int or not 0 <= proof[key] <= proof["candidate_pairs"]
+                for key in ("paper_candidate_pairs", "inapplicable_sign_pairs")) or
+            sum(row["count"] for row in proof["by_tune_sector_sign"]
+                if row["sign"] == 0) != proof["inapplicable_sign_pairs"]):
+        raise ValueError("all-heavy dictionary/sign-applicability proof differs")
     if (metadata.get("source_topology") != "shard_local_rows_with_admitted_global_binding" or
             metadata["analysis_sha256"] != archived_analysis_sha or
             metadata["layout_sha256"] != reduce.sha_file(workspace / "layout.json") or
@@ -581,7 +617,7 @@ def verify(workspace, work, expected_content_sha256, prepared_pack=None):
         raise ValueError("query verifier completion is absent")
     proof_lines = [line.split("\t", 1)[1] for line in output.splitlines()
                    if line.startswith("PAIR_POPULATION_PROOF\t")]
-    if analysis["version"] in {"2.2.0", "2.3.0"} and (len(proof_lines) != 1 or json.loads(proof_lines[0]) != proof):
+    if analysis["version"] in {"2.2.0", "2.3.0", "2.4.0"} and (len(proof_lines) != 1 or json.loads(proof_lines[0]) != proof):
         raise ValueError("query pair population proof was not independently recomputed")
     if "SCIENTIFIC_CONTENT_SHA256\t" + content_sha + "\n" not in output:
         raise ValueError("query recomputed scientific content identity differs")
@@ -655,11 +691,15 @@ def build(args):
     attempts = prepare_query_attempt_root(output, work)
     analysis, analysis_sha = model.checked_analysis(args.analysis)
     model.validate_phase_a_profiles(analysis["profiles"], analysis["axes"]["pt"]["edges"])
-    layout = reduce.json_file(args.layout)
-    require_phase_a_layout(layout)
+    layout_path = args.layout or ROOT / "config" / (
+        "query-all-heavy.json" if analysis["version"] == "2.4.0" else "query.json")
+    layout = reduce.json_file(layout_path)
+    require_phase_a_layout(layout, analysis)
     dictionary = read_dictionary(args.dictionary)
     if not set(configured_pdgs(analysis)).issubset(dictionary["body"]["pdgs"]):
         raise ValueError("campaign PDG dictionary omits configured identities")
+    if analysis["version"] == "2.4.0" and dictionary["body"]["pdgs"] != configured_pdgs(analysis):
+        raise ValueError("all-heavy campaign dictionary differs from catalog")
     if output.exists():
         raise ValueError("query output already exists; use verify, never overwrite")
     started = time.monotonic()
@@ -673,7 +713,7 @@ def build(args):
         "query_content_digests": "__QUERY_CONTENT_DIGESTS__",
         "query_content_sha256": "__QUERY_CONTENT_SHA256__",
         "pair_population_proof": "__PAIR_POPULATION_PROOF__",
-        "analysis_sha256": analysis_sha, "layout_sha256": reduce.sha_file(args.layout),
+        "analysis_sha256": analysis_sha, "layout_sha256": reduce.sha_file(layout_path),
         "dictionary_sha256": reduce.sha_file(args.dictionary),
         "dictionary_body_sha256": dictionary["body_sha256"],
         "input_root_sha256": physical["root_sha256"],
@@ -704,7 +744,7 @@ def build(args):
         try:
             (staging / "query.tsv").write_text(spec, encoding="ascii")
             shutil.copyfile(str(args.analysis), str(staging / "analysis.json"))
-            shutil.copyfile(str(args.layout), str(staging / "layout.json"))
+            shutil.copyfile(str(layout_path), str(staging / "layout.json"))
             shutil.copyfile(str(args.dictionary), str(staging / "dictionary.json"))
             reduce.atomic_json(staging / "metadata.json", metadata, exclusive=True)
             transcript = execute(binary, ["build", staging / "query.tsv", source,
@@ -752,7 +792,8 @@ def main():
     create.add_argument("--receipt", required=True, type=Path)
     create.add_argument("--output", required=True, type=Path)
     create.add_argument("--analysis", type=Path, default=ROOT / "config/analysis.json")
-    create.add_argument("--layout", type=Path, default=ROOT / "config/query.json")
+    create.add_argument("--layout", type=Path,
+                        help="canonical layout for the chosen analysis (selected automatically by default)")
     create.add_argument("--dictionary", required=True, type=Path,
                         help="campaign-wide census dictionary used unchanged by every shard")
     create.add_argument("--accepted-receipt-sha256",

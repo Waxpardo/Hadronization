@@ -61,6 +61,19 @@ def read_sparse(file, name):
 MAX_SPARSE_OBJECT_BYTES = 512 * 1024 * 1024
 
 
+def layout_for_index(index):
+    """Resolve a collection's pinned geometry without rewriting older indexes."""
+    for name in ("query.json", "query-all-heavy.json"):
+        path = ROOT_DIR / "config" / name
+        if r.sha_file(path) == index["layout_sha256"]:
+            layout = r.json_file(path)
+            q.require_phase_a_layout(layout)
+            if set(layout["sparse"]) != set(FAMILIES) or set(layout["trees"]) != set(TREES):
+                raise ValueError("collection object families differ from the reader")
+            return layout
+    raise ValueError("collection layout has no canonical checked geometry")
+
+
 def family_objects(family, partition=None):
     """Resolve one logical family; old five-object files remain readable."""
     if partition is not None and "sparse_objects" in partition:
@@ -701,8 +714,7 @@ def _cells(histogram):
 
 def _verify_sparse_roots(index):
     ROOT = _root()
-    layout = r.json_file(ROOT_DIR / "config/query.json")
-    q.require_phase_a_layout(layout)
+    layout = layout_for_index(index)
     baseline = {}
     source_map = {(m["tune_ordinal"], m["block"]) for m in index["sources"]}
     paths = [(s["query_root"]["path"], {(m["tune_ordinal"], m["block"]) for m in s["members"]}, True, None)

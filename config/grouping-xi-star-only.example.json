@@ -1,0 +1,311 @@
+{
+  "basis": {
+    "kinematics": "sum saved-state associate primitives at saved kinematics",
+    "pair_pt": "inclusive",
+    "standalone_spectra": "unchanged fine species",
+    "triggers": "unchanged",
+    "unit_endpoint": "Exact unit endpoint probability in the pinned generator model; not a measured physical branching fraction"
+  },
+  "endpoint_evidence": {
+    "approved_full_map_sha256": "95a205e53baafca8d443a056f16b76026ce640cd14e298bfa62d220c774862e3",
+    "approved_runtime_map_sha256": "f2823dfee8fb11f7d84f2217ccc668df3dbbf8f0f69f61541ca418e105f3ba6f",
+    "generator": "PYTHIA 8.317",
+    "particle_data_sha256": "330ba4e7f5a081235b5055f7b312fe6f5c9fe9c95411a845cba7a3e82e67ecca"
+  },
+  "groups": [
+    {
+      "destination_pdg": -5232,
+      "family": "Xi_b",
+      "members": [
+        -5324
+      ]
+    },
+    {
+      "destination_pdg": -5222,
+      "family": "Sigma_b",
+      "members": [
+        -5222
+      ]
+    },
+    {
+      "destination_pdg": -5212,
+      "family": "Sigma_b",
+      "members": [
+        -5212
+      ]
+    },
+    {
+      "destination_pdg": -5132,
+      "family": "Xi_b",
+      "members": [
+        -5314
+      ]
+    },
+    {
+      "destination_pdg": -5122,
+      "family": "Lambda_b",
+      "members": [
+        -5122
+      ]
+    },
+    {
+      "destination_pdg": -5112,
+      "family": "Sigma_b",
+      "members": [
+        -5112
+      ]
+    },
+    {
+      "destination_pdg": -4232,
+      "family": "Xi_c",
+      "members": [
+        -4324
+      ]
+    },
+    {
+      "destination_pdg": -4222,
+      "family": "Sigma_c",
+      "members": [
+        -4222
+      ]
+    },
+    {
+      "destination_pdg": -4212,
+      "family": "Sigma_c",
+      "members": [
+        -4212
+      ]
+    },
+    {
+      "destination_pdg": -4132,
+      "family": "Xi_c",
+      "members": [
+        -4314
+      ]
+    },
+    {
+      "destination_pdg": -4122,
+      "family": "Lambda_c",
+      "members": [
+        -14122,
+        -4124,
+        -4122
+      ]
+    },
+    {
+      "destination_pdg": -4112,
+      "family": "Sigma_c",
+      "members": [
+        -4112
+      ]
+    },
+    {
+      "destination_pdg": -541,
+      "family": "Bc",
+      "members": [
+        -543,
+        -541
+      ]
+    },
+    {
+      "destination_pdg": -531,
+      "family": "Bs",
+      "members": [
+        -533,
+        -531
+      ]
+    },
+    {
+      "destination_pdg": -521,
+      "family": "B",
+      "members": [
+        -523,
+        -521
+      ]
+    },
+    {
+      "destination_pdg": -511,
+      "family": "B",
+      "members": [
+        -513,
+        -511
+      ]
+    },
+    {
+      "destination_pdg": -431,
+      "family": "Ds",
+      "members": [
+        -20433,
+        -10431,
+        -433,
+        -431
+      ]
+    },
+    {
+      "destination_pdg": -421,
+      "family": "D",
+      "members": [
+        -423,
+        -421
+      ]
+    },
+    {
+      "destination_pdg": -411,
+      "family": "D",
+      "members": [
+        -411
+      ]
+    },
+    {
+      "destination_pdg": 411,
+      "family": "D",
+      "members": [
+        411
+      ]
+    },
+    {
+      "destination_pdg": 421,
+      "family": "D",
+      "members": [
+        421,
+        423
+      ]
+    },
+    {
+      "destination_pdg": 431,
+      "family": "Ds",
+      "members": [
+        431,
+        433,
+        10431,
+        20433
+      ]
+    },
+    {
+      "destination_pdg": 511,
+      "family": "B",
+      "members": [
+        511,
+        513
+      ]
+    },
+    {
+      "destination_pdg": 521,
+      "family": "B",
+      "members": [
+        521,
+        523
+      ]
+    },
+    {
+      "destination_pdg": 531,
+      "family": "Bs",
+      "members": [
+        531,
+        533
+      ]
+    },
+    {
+      "destination_pdg": 541,
+      "family": "Bc",
+      "members": [
+        541,
+        543
+      ]
+    },
+    {
+      "destination_pdg": 4112,
+      "family": "Sigma_c",
+      "members": [
+        4112
+      ]
+    },
+    {
+      "destination_pdg": 4122,
+      "family": "Lambda_c",
+      "members": [
+        4122,
+        4124,
+        14122
+      ]
+    },
+    {
+      "destination_pdg": 4132,
+      "family": "Xi_c",
+      "members": [
+        4314
+      ]
+    },
+    {
+      "destination_pdg": 4212,
+      "family": "Sigma_c",
+      "members": [
+        4212
+      ]
+    },
+    {
+      "destination_pdg": 4222,
+      "family": "Sigma_c",
+      "members": [
+        4222
+      ]
+    },
+    {
+      "destination_pdg": 4232,
+      "family": "Xi_c",
+      "members": [
+        4324
+      ]
+    },
+    {
+      "destination_pdg": 5112,
+      "family": "Sigma_b",
+      "members": [
+        5112
+      ]
+    },
+    {
+      "destination_pdg": 5122,
+      "family": "Lambda_b",
+      "members": [
+        5122
+      ]
+    },
+    {
+      "destination_pdg": 5132,
+      "family": "Xi_b",
+      "members": [
+        5314
+      ]
+    },
+    {
+      "destination_pdg": 5212,
+      "family": "Sigma_b",
+      "members": [
+        5212
+      ]
+    },
+    {
+      "destination_pdg": 5222,
+      "family": "Sigma_b",
+      "members": [
+        5222
+      ]
+    },
+    {
+      "destination_pdg": 5232,
+      "family": "Xi_b",
+      "members": [
+        5324
+      ]
+    }
+  ],
+  "id": "xi-star-only-without-omega",
+  "schema": "hadronization_saved_state_grouping_recipe_v2",
+  "source_catalog": {
+    "sha256": "2d358f9e0a724602cf467c7d67df5e33d083f3d18196d60202fc450e5aba9433",
+    "states_sha256": "f9bba3619ffe015346c4d43fe1e56f739371be4e5f9f2c7b82e9139a8458fe7d"
+  },
+  "unlisted_species": "retained in fine THnSparse; excluded from this grouped result",
+  "version": "2.0.0"
+}

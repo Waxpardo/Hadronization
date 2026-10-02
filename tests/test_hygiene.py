@@ -84,8 +84,11 @@ class LeanTreeContract(unittest.TestCase):
     def test_only_target_layout_exceptions_exist(self):
         expected_config = {
             "config/study.json", "config/analysis.json", "config/analysis-family.json",
+            "config/analysis-all-heavy.json", "config/heavy-catalog.json",
             "config/analysis-pt-1-0p15.json", "config/associate-family-runtime.json",
-            "config/query.json",
+            "config/associate-family-runtime-all-heavy.json",
+            "config/grouping-xi-star-only.example.json",
+            "config/query.json", "config/query-all-heavy.json",
             "config/plot.json", "config/plot-dplus.json", "config/plot-all-tune.json",
             "config/site.example.conf",
             "config/tunes/monash.cmnd", "config/tunes/junctions.cmnd",
@@ -99,6 +102,7 @@ class LeanTreeContract(unittest.TestCase):
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/query/")},
             {"pipeline/query/collection.py",
+             "pipeline/query/fine.py",
              "pipeline/query/condor.py", "pipeline/query/merge.py",
              "pipeline/query/merge_sparse.hpp",
              "pipeline/query/model.py", "pipeline/query/query.cpp",

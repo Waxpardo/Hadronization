@@ -493,15 +493,15 @@ int main(int argc, char** argv) {
 
     def test_species_display_order_groups_content_and_preserves_signed_membership(self):
         charm = ['-411', '-421', '-431', '-4122', '-4112', '-4212',
-                 '-4222', '-4132', '-4232']
+                 '-4222', '-4132', '-4232', '-4332']
         beauty = ['-521', '-511', '-531', '-541', '5122', '5112',
-                  '5222', '5132', '5232']
+                  '5222', '5132', '5232', '5332']
         self.assertEqual(plot.species_display_order(charm),
                          ['-421','-411','-431','-4122','-4212','-4112',
-                          '-4222','-4232','-4132'])
+                          '-4222','-4232','-4132','-4332'])
         self.assertEqual(plot.species_display_order(beauty),
                          ['-521','-511','-531','-541','5122','5222',
-                          '5112','5232','5132'])
+                          '5112','5232','5132','5332'])
         for species in (charm, beauty):
             opposite = [str(-int(pdg)) for pdg in species]
             self.assertEqual(plot.species_display_order(opposite),
@@ -1265,7 +1265,8 @@ int main(int argc, char** argv) {
                    'exclude_heavy_constituents':True,
                    'pt':{'low_operator':'GT'}}
         caption=plot.activity_proxy_caption(selection,0.15,4.0)
-        self.assertIn('Charged primaries (study definition)',caption)
+        self.assertIn('Charged primaries',caption)
+        self.assertNotIn('(study definition)',caption)
         self.assertIn('heavy flavour excluded',caption)
         self.assertIn('#it{p}_{T} > 0.15 GeV/c',caption)
         self.assertIn('|#eta| #leq 4',caption)

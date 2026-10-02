@@ -49,7 +49,10 @@ CURRENT_SOURCE_MANIFEST_SHA256 = "5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f
 TRANSIENT_ERRNOS = r.TRANSIENT_ERRNOS
 SOURCE_FILES = (
     "hadronization", "config/analysis.json", "config/analysis-family.json",
-    "config/associate-family-runtime.json", "config/query.json", "config/study.json",
+    "config/analysis-all-heavy.json", "config/heavy-catalog.json",
+    "config/associate-family-runtime.json", "config/associate-family-runtime-all-heavy.json",
+    "config/query.json",
+    "config/query-all-heavy.json", "config/study.json",
     "pipeline/analyze/run.py", "pipeline/generate/runtime.py", "pipeline/generate/sha256.hpp",
     "pipeline/query/model.py", "pipeline/query/support.py", "pipeline/query/run.py",
     "pipeline/reduce/family.py",
@@ -256,7 +259,8 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
             campaign_path=None, source_manifest_path=None):
     analysis_path = Path(analysis_path or ROOT / "config/analysis.json").resolve()
     allowed_analyses = {(ROOT / name).resolve(): name for name in
-                        ("config/analysis.json", "config/analysis-family.json")}
+                        ("config/analysis.json", "config/analysis-family.json",
+                         "config/analysis-all-heavy.json")}
     if analysis_path not in allowed_analyses:
         raise ValueError("Condor analysis must be one shipped normalized request")
     actual_analysis_sha = r.sha_file(analysis_path)
@@ -265,6 +269,8 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
         if actual_analysis_sha != expected_analysis_sha:
             raise ValueError("selected Condor analysis differs from expected pin")
     q.model.checked_analysis(analysis_path)
+    layout_name = ("query-all-heavy.json" if allowed_analyses[analysis_path] ==
+                   "config/analysis-all-heavy.json" else "query.json")
     if test_only:
         if r.sha_file(acquisition) != acquisition_sha:
             raise ValueError("TEST_ONLY file-domain manifest differs")
@@ -306,7 +312,7 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
                 "tune_ordinals": domain["tune_ordinals"],
                 "analysis_path": allowed_analyses[analysis_path],
                 "analysis_sha256": actual_analysis_sha,
-                "layout_sha256": r.sha_file(ROOT / "config/query.json"),
+                "layout_sha256": r.sha_file(ROOT / "config" / layout_name),
                 "source_tar_sha256": r.sha_file(stage / "source.tar.gz"),
                 "source_files_sha256": r.sha_file(stage / "source-files.json"),
                 "dictionary_sha256": dictionary_sha,
@@ -612,7 +618,8 @@ def _work(path, expected_sha):
     if work.get("schema") != WORK_SCHEMA or not isinstance(work.get("work"), list):
         raise ValueError("work schema differs")
     if (work.get("analysis_path") not in
-            ("config/analysis.json", "config/analysis-family.json") or
+                        ("config/analysis.json", "config/analysis-family.json",
+                         "config/analysis-all-heavy.json") or
             not isinstance(work.get("analysis_sha256"), str)):
         raise ValueError("work selected analysis binding differs")
     r.lower_sha(work["analysis_sha256"], "work selected analysis")
@@ -859,12 +866,17 @@ def worker(work_path, expected_work_sha, ordinal, attempt, source_tar, source_fa
         selected_analysis = source_dir / work["analysis_path"]
         if r.sha_file(selected_analysis) != work["analysis_sha256"]:
             raise ValueError("frozen selected analysis differs from work binding")
+        layout_name = ("query-all-heavy.json" if work["analysis_path"] ==
+                       "config/analysis-all-heavy.json" else "query.json")
+        selected_layout = source_dir / "config" / layout_name
+        if r.sha_file(selected_layout) != work["layout_sha256"]:
+            raise ValueError("frozen selected query layout differs from work binding")
         command = [sys.executable, "-B", str(source_dir / "hadronization"), "query", "build",
                    "--input", str(root), "--receipt", str(receipt),
                    "--accepted-receipt-sha256", item["receipt"]["sha256"],
                    "--dictionary", str(Path("dictionary.json").absolute()),
                    "--analysis", str(selected_analysis),
-                   "--layout", str(source_dir / "config/query.json"),
+                   "--layout", str(selected_layout),
                    "--prepared-pack", str(pack_dir), "--output", str(scratch / "query"),
                    "--work-root", str(scratch / "work")]
         result = subprocess.run(command, text=True, capture_output=True)

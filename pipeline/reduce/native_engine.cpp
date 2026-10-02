@@ -362,8 +362,6 @@ Queries ReadQueries(const std::string& path,Data& data) {
           throw std::runtime_error("native associate group sign/member differs");
         members.push_back(member);
       }
-      if (std::find(members.begin(),members.end(),destination)==members.end())
-        throw std::runtime_error("native associate group lacks destination anchor");
     } else if (fields[0]=="POINT") {
       Need(fields,15);
       Point point;

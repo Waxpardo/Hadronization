@@ -112,7 +112,9 @@ class FamilyMapTests(unittest.TestCase):
         renderer = (ROOT / "pipeline/plot/render.cpp").read_text()
         docs = (ROOT / "docs/science.md").read_text()
         for text in (plot_source, renderer, docs):
-            self.assertIn("Charged primaries (study definition)", text)
+            self.assertIn("Charged primaries", text)
+        self.assertNotIn("(study definition)", plot_source)
+        self.assertNotIn("(study definition)", renderer)
         self.assertIn("not a claim of equivalence", docs)
         self.assertIn("ParticleDecays:tau0Max = 0.01 mm", docs)
 
@@ -217,6 +219,173 @@ class AdditiveGroupingTests(unittest.TestCase):
             self.assertEqual(len(recovered), len(rows))
             self.assertEqual({(row['associate_pdg'], row['block']) for row in recovered},
                              {(row['associate_pdg'], row['block']) for row in rows})
+
+
+class AllHeavyFamilyAmendmentTests(unittest.TestCase):
+    def test_xi_ground_prime_and_star_recipes_use_explicit_members(self):
+        source = json.loads((ROOT / "config/grouping-xi-star-only.example.json").read_text())
+        full = family.checked_family_map(
+            ROOT / "config/associate-family-runtime-all-heavy.json",
+            family.ALL_HEAVY_MAP_SHA256)
+        xi = {4132: (4132, 4312, 4314),
+              4232: (4232, 4322, 4324),
+              5132: (5132, 5312, 5314),
+              5232: (5232, 5322, 5324)}
+        xi.update({-destination: tuple(-pdg for pdg in members)
+                   for destination, members in tuple(xi.items())})
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "recipe.json"
+            for depth in (1, 2, 3):
+                recipe = copy.deepcopy(source)
+                recipe["id"] = f"xi-first-{depth}-states"
+                for group in recipe["groups"]:
+                    destination = group["destination_pdg"]
+                    if destination in xi:
+                        group["members"] = list(xi[destination][:depth])
+                path.write_text(json.dumps(recipe, sort_keys=True))
+                admitted = family.checked_family_map(
+                    path, hashlib.sha256(path.read_bytes()).hexdigest())
+                rows = []
+                for destination, possible in xi.items():
+                    self.assertEqual(set(admitted.members_by_destination[destination]),
+                                     set(possible[:depth]))
+                    self.assertTrue(set(admitted.members_by_destination[destination])
+                                    <= set(full.members_by_destination[destination]))
+                    for block in range(1, 11):
+                        for ordinal, member in enumerate(possible[:depth], 1):
+                            rows.append(dict(tune="MONASH", block=block,
+                                trigger_pdg=421 if abs(destination) < 5000 else 521,
+                                associate_pdg=member,
+                                sign=-1 if member < 0 else 1,
+                                count=float(ordinal * block),
+                                sumw2=float((ordinal * block) ** 2),
+                                trigger_count=float(100 + block)))
+                grouped = family.group_additive_rows(rows, admitted)
+                for destination in xi:
+                    actual = [row for row in grouped
+                              if row["associate_pdg"] == destination]
+                    self.assertEqual(len(actual), 10)
+                    self.assertEqual([row["count"] for row in actual],
+                                     [float(block * sum(range(1, depth + 1)))
+                                      for block in range(1, 11)])
+
+    def test_configurable_subset_uses_unchanged_fine_pair_domain(self):
+        recipe_path = ROOT / "config/grouping-xi-star-only.example.json"
+        recipe = family.checked_family_map(
+            recipe_path, hashlib.sha256(recipe_path.read_bytes()).hexdigest())
+        approved = family.checked_family_map(
+            ROOT / "config/associate-family-runtime-all-heavy.json",
+            family.ALL_HEAVY_MAP_SHA256)
+        self.assertEqual((len(recipe.destinations), len(recipe.members)), (38, 58))
+        self.assertEqual(recipe.members_by_destination[4132], (4314,))
+        self.assertEqual(recipe.members_by_destination[-4132], (-4314,))
+        self.assertNotIn(4132, recipe.members_by_destination[4132])
+        self.assertIn(4132, approved.members_by_destination[4132])
+        construction, _ = model.checked_analysis(
+            ROOT / "config/analysis-all-heavy.json")
+        requested = copy.deepcopy(construction)
+        requested["associate_family_map"] = {
+            "schema": family.GROUP_RECIPE_SCHEMA,
+            "path": str(recipe_path), "sha256": recipe.sha256}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "analysis.json"
+            path.write_text(json.dumps(requested, sort_keys=True))
+            checked, _ = model.checked_analysis(path)
+        model.compatible_interpretation(construction, checked)
+        self.assertEqual(model.fine_pairs(construction), model.fine_pairs(checked))
+        self.assertEqual(len(model.observable_pairs(checked,
+            "projection_formulas_v4")[1]), 228)
+
+    def test_configurable_recipe_rejects_unknown_duplicate_cross_family_and_conjugation(self):
+        source = json.loads((ROOT / "config/grouping-xi-star-only.example.json").read_text())
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "recipe.json"
+            def rejects(change):
+                value = copy.deepcopy(source)
+                change(value)
+                path.write_text(json.dumps(value, sort_keys=True))
+                with self.assertRaises(ValueError):
+                    family.checked_family_map(path,
+                        hashlib.sha256(path.read_bytes()).hexdigest())
+            rejects(lambda value: value["groups"][0]["members"].append(999999))
+            rejects(lambda value: value["groups"][0]["members"].append(
+                value["groups"][0]["members"][0]))
+            rejects(lambda value: value["groups"][0]["members"].append(421))
+            rejects(lambda value: value["groups"][0]["members"].pop())
+            rejects(lambda value: value["groups"][0].__setitem__("family", "Lambda_c"))
+            rejects(lambda value: value["source_catalog"].__setitem__(
+                "sha256", "0" * 64))
+
+    def test_signed_xi_star_endpoints_and_additive_shared_denominator(self):
+        admitted = family.checked_family_map(
+            ROOT / "config/associate-family-runtime-all-heavy.json",
+            family.ALL_HEAVY_MAP_SHA256)
+        legacy = family.checked_family_map(
+            ROOT / "config/associate-family-runtime.json")
+        endpoints = {4314: 4132, 4324: 4232, 5314: 5132, 5324: 5232}
+        endpoints.update({-member: -destination
+                          for member, destination in tuple(endpoints.items())})
+        self.assertEqual({member: admitted.destination_by_member[member]
+                          for member in endpoints}, endpoints)
+        self.assertEqual(set(admitted.members) - set(legacy.members), set(endpoints))
+        self.assertEqual({member: admitted.destination_by_member[member]
+                          for member in legacy.members}, legacy.destination_by_member)
+        self.assertEqual(len(admitted.destinations), len(legacy.destinations))
+        rows = []
+        for block in range(1, 11):
+            for destination, members in admitted.members_by_destination.items():
+                for ordinal, member in enumerate(members):
+                    rows.append(dict(tune="MONASH", block=block,
+                                     trigger_pdg=421 if abs(destination) < 5000 else 521,
+                                     associate_pdg=member,
+                                     sign=-1 if member < 0 else 1,
+                                     count=float(block + ordinal),
+                                     sumw2=float((block + ordinal) ** 2),
+                                     trigger_count=float(100 + block)))
+        grouped = family.group_additive_rows(rows, admitted)
+        for destination in {4132, -4132, 4232, -4232,
+                            5132, -5132, 5232, -5232}:
+            members = set(admitted.members_by_destination[destination])
+            original = [row for row in rows if row["associate_pdg"] in members]
+            result = [row for row in grouped if row["associate_pdg"] == destination]
+            self.assertEqual(len(result), 10)
+            self.assertEqual(sum(row["count"] for row in result),
+                             sum(row["count"] for row in original))
+            self.assertEqual(sum(row["trigger_count"] for row in result),
+                             sum(100 + block for block in range(1, 11)))
+
+    def test_query_catalog_does_not_depend_on_family_membership(self):
+        analysis, _ = model.checked_analysis(ROOT / "config/analysis-all-heavy.json")
+        catalog = model.checked_heavy_catalog(
+            ROOT / analysis["retained_heavy_catalog"]["path"],
+            analysis["retained_heavy_catalog"]["sha256"])
+        members = set(family.checked_family_map(
+            ROOT / "config/associate-family-runtime-all-heavy.json",
+            family.ALL_HEAVY_MAP_SHA256).members)
+        catalog_pdgs = {row["pdg"] for row in catalog["states"]}
+        self.assertTrue(members < catalog_pdgs)
+        self.assertIn(443, catalog_pdgs - members)
+        self.assertIn(4422, catalog_pdgs - members)
+        self.assertIn(5522, catalog_pdgs - members)
+
+    def test_legacy_family_projection_reuses_all_heavy_construction(self):
+        construction, _ = model.checked_analysis(
+            ROOT / "config/analysis-all-heavy.json")
+        older = json.loads((ROOT / "config/analysis-family.json").read_text())
+        requested = copy.deepcopy(construction)
+        requested["associate_family_map"] = older["associate_family_map"]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "requested.json"
+            path.write_text(json.dumps(requested, sort_keys=True))
+            checked, _ = model.checked_analysis(path)
+        receipt = model.compatible_interpretation(construction, checked)
+        self.assertEqual(receipt["family_map_sha256"], family.MAP_SHA256)
+        self.assertEqual(construction["retained_heavy_catalog"],
+                         checked["retained_heavy_catalog"])
+        mutated = copy.deepcopy(checked)
+        mutated["pair_query_registry"]["trigger_pdgs"][0] = 999
+        with self.assertRaisesRegex(ValueError, "unretained query content"):
+            model.compatible_interpretation(construction, mutated)
 
 
 if __name__ == "__main__":

@@ -34,11 +34,16 @@ This inventory identifies every tracked file. The release includes generated sci
 | --- | --- | --- |
 | [config/analysis.json](../config/analysis.json) | Query model and reducer | Downstream selections, axes, registry references, classes and statistical policy. |
 | [config/analysis-family.json](../config/analysis-family.json) | Query model and reducer | Bounded version 2.3 family-support construction bound to the accepted map. |
+| [config/analysis-all-heavy.json](../config/analysis-all-heavy.json) | Query model and reducer | Version 2.4 broad fine-species construction and downstream family recipe. |
 | [config/analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) | Numerical reduction | Adds endpoint-inclusive trigger 1.0 and associate 0.15 GeV/c minima; other fields match the default analysis. |
+| [config/associate-family-runtime-all-heavy.json](../config/associate-family-runtime-all-heavy.json) | Reducer | Pinned 82-member saved-state grouping with separate fine identities. |
+| [config/grouping-xi-star-only.example.json](../config/grouping-xi-star-only.example.json) | Reducer | Independently selectable 58-member, 38-destination grouping example on the same fine all-heavy collection. |
+| [config/heavy-catalog.json](../config/heavy-catalog.json) | Query model and fine reader | Complete signed generator-heavy catalog and valence/charge identities. |
 | [config/plot-all-tune.json](../config/plot-all-tune.json) | Renderer | All-tune correlation presentation with comparison panels. |
 | [config/plot-dplus.json](../config/plot-dplus.json) | Renderer | Presentation for the explicit D+ numerical recipe. |
 | [config/plot.json](../config/plot.json) | Renderer | D0 default figure selection, layout and identities. |
 | [config/query.json](../config/query.json) | Query builder and verifier | Exact support-tree columns and sparse-axis families. |
+| [config/query-all-heavy.json](../config/query-all-heavy.json) | Query builder and verifier | Version 2.4 final-state and pair-stage sparse axes for broad retention. |
 | [config/site.example.conf](../config/site.example.conf) | User copying site settings | Example runtime, storage and submission paths. |
 | [config/study.json](../config/study.json) | Generator contract and raw validators | Checksum-bound raw compatibility and signed selected-state registry. |
 | [config/tunes/close_packing.cmnd](../config/tunes/close_packing.cmnd) | Generator | Complete CLOSEPACKING PYTHIA command card. |
@@ -80,6 +85,7 @@ This inventory identifies every tracked file. The release includes generated sci
 | --- | --- | --- |
 | [pipeline/query/collection.py](../pipeline/query/collection.py) | Collection CLI, merge and reduction | Checked collection locator, source admission, sparse iteration and exact support access. |
 | [pipeline/query/condor.py](../pipeline/query/condor.py) | Condor CLI and generated wrappers | Prepares immutable bundles, runs attempts and collects exact accepted closure. |
+| [pipeline/query/fine.py](../pipeline/query/fine.py) | `hadronization fine` | Independently checks exact final and pair rows against all-heavy sparse content and exports one signed species. |
 | [pipeline/query/merge.py](../pipeline/query/merge.py) | Merge CLI | Writes bounded sparse objects by original block in one file per tune. |
 | [pipeline/query/merge_sparse.hpp](../pipeline/query/merge_sparse.hpp) | PyROOT merge helper | Native cell addition and serialized-size preflight. |
 | [pipeline/query/model.py](../pipeline/query/model.py) | Query and reduction | Normalizes the scientific request and validates profile, signed-pair interpretation and compatibility rules. |
@@ -126,9 +132,11 @@ This inventory identifies every tracked file. The release includes generated sci
 | Path | Caller or reader | Role or output |
 | --- | --- | --- |
 | [tests/helpers.py](../tests/helpers.py) | Test modules | Repository-relative imports and shared source references. |
+| [tests/test_all_heavy_fine.py](../tests/test_all_heavy_fine.py) | Development suite | Exact final/history distinction, broad pair support and unknown-state refusal. |
 | [tests/test_analysis.py](../tests/test_analysis.py) | Development suite | Analyzed schema, planning, identity, regrouping, publication and row corruption. |
 | [tests/test_campaign.py](../tests/test_campaign.py) | Development suite | Canonical manifest and attempt joins, domain ordering and definition hashes. |
 | [tests/test_cli.py](../tests/test_cli.py) | Development suite | Public dispatch, environment setup, cleanup confinement and cold imports. |
+| [tests/test_family_groups.py](../tests/test_family_groups.py) | Development suite | Signed saved-state membership, additive block grouping, shared denominators and ROOT products. |
 | [tests/test_generator.py](../tests/test_generator.py) | Development suite | Native particle rules, seed/card materialization and optional producer linkage. |
 | [tests/test_hygiene.py](../tests/test_hygiene.py) | Development suite | Tracked topology, permitted file families, include resolution and output exclusions. |
 | [tests/test_nonzero_chain_fixture.py](../tests/test_nonzero_chain_fixture.py) | Development suite | Explicit fresh destinations for synthetic builder and oracle. |
@@ -162,6 +170,9 @@ Every fixture path appears below. Each query workspace follows the same seven-fi
 | [tests/fixtures/nonzero_chain_v22/build.py](../tests/fixtures/nonzero_chain_v22/build.py) | Explicit synthetic example | Constructs nonzero raw fixtures, analyzed rows, queries and a merged test collection. |
 | [tests/fixtures/nonzero_chain_v22/mutate_merge.cpp](../tests/fixtures/nonzero_chain_v22/mutate_merge.cpp) | Development suite | Makes isolated sparse coordinate, content, Sumw2 and entry-count mutants for oracle refusal tests. |
 | [tests/fixtures/nonzero_chain_v22/oracle.py](../tests/fixtures/nonzero_chain_v22/oracle.py) | Explicit synthetic check | Checks synthetic rows, classes and the complete block-partitioned sparse merge. |
+| [tests/fixtures/nonzero_chain_v23/build.py](../tests/fixtures/nonzero_chain_v23/build.py) | Explicit synthetic example | Builds three-tune saved-state or all-heavy chains, including rare signed species. |
+| [tests/fixtures/nonzero_chain_v23/mutate_merge.cpp](../tests/fixtures/nonzero_chain_v23/mutate_merge.cpp) | Development suite | Creates isolated saved-state sparse merge mutants. |
+| [tests/fixtures/nonzero_chain_v23/oracle.py](../tests/fixtures/nonzero_chain_v23/oracle.py) | Explicit synthetic check | Compares saved-state support and grouped numerical products with independent rows. |
 | [tests/fixtures/query_multitune/TEST_ONLY.md](../tests/fixtures/query_multitune/TEST_ONLY.md) | Fixture readers | Explains synthetic scope and input-version limits. |
 | [tests/fixtures/query_multitune/expected-sources.json](../tests/fixtures/query_multitune/expected-sources.json) | Collection tests | Exact synthetic global source membership and original blocks. |
 | [tests/fixtures/query_multitune/queries/shard-0000/analysis.json](../tests/fixtures/query_multitune/queries/shard-0000/analysis.json) | Query verifier | Immutable construction-time analysis contract. |
@@ -189,6 +200,7 @@ Every fixture path appears below. Each query workspace follows the same seven-fi
 | [tests/fixtures/query_pair_population/dictionary.json](../tests/fixtures/query_pair_population/dictionary.json) | Query verifier | Shared signed-PDG census and digest. |
 | [tests/fixtures/query_pair_population/expected.json](../tests/fixtures/query_pair_population/expected.json) | Pair-population tests | Pins mutators and controls and defines expected signs and refusal messages. |
 | [tests/fixtures/query_pair_population/make_positive_ss_unresolved.cpp](../tests/fixtures/query_pair_population/make_positive_ss_unresolved.cpp) | Pair-population tests | Creates a same-sign unresolved-origin control pair. |
+| [tests/fixtures/query_pair_population/materialize_unselected_family.cpp](../tests/fixtures/query_pair_population/materialize_unselected_family.cpp) | Pair-population tests | Adds a retained family state outside the selected structural registry. |
 | [tests/fixtures/query_pair_population/omit_pair.cpp](../tests/fixtures/query_pair_population/omit_pair.cpp) | Pair-population tests | Removes a required in-domain pair. |
 | [tests/fixtures/query_pair_population/positive-source.json](../tests/fixtures/query_pair_population/positive-source.json) | Pair-population tests | PASS receipt for the synthetic analyzed ROOT control. |
 | [tests/fixtures/query_pair_population/positive-source.root](../tests/fixtures/query_pair_population/positive-source.root) | Pair-population tests | Synthetic analyzed rows for pair-completeness checks. |

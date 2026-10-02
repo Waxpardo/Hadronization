@@ -20,6 +20,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <numeric>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -38,9 +39,10 @@ struct Layout {
   std::set<int> pdgs;
   std::set<int> triggerPdgs;
   std::map<int,std::set<int>> associatePdgs;
+  std::map<int,std::array<int,4>> retainedHeavy;
   std::vector<HadronizationQuery::Profile> profiles;
   std::string text, analysisVersion, contentSha, scientificBindingSha, executionAttestationSha,
-              dictionarySha, sparseDigestSchema;
+              dictionarySha, sparseDigestSchema, heavyCatalogSha;
 };
 
 std::vector<std::string> Split(const std::string& text) {
@@ -70,7 +72,7 @@ Layout ReadLayout(const std::string& text) {
     const auto fields = Split(line);
     if (fields == std::vector<std::string>{"END"}) { ended = true; break; }
     if (fields.size() == 2 && fields[0] == "ANALYSIS_VERSION" && layout.analysisVersion.empty() &&
-        (fields[1]=="2.2.0" || fields[1]=="2.3.0")) {
+        (fields[1]=="2.2.0" || fields[1]=="2.3.0" || fields[1]=="2.4.0")) {
       layout.analysisVersion=fields[1];
     } else if (fields.size() == 2 && fields[0] == "CONTENT_SHA256" && layout.contentSha.empty()) {
       layout.contentSha=fields[1];
@@ -109,6 +111,17 @@ Layout ReadLayout(const std::string& text) {
       const int sector=std::stoi(fields[1]),pdg=std::stoi(fields[2]);
       if ((sector!=4 && sector!=5) || pdg==0 || !layout.associatePdgs[sector].insert(pdg).second)
         throw std::runtime_error("duplicate/invalid associate PDG in query spec");
+    } else if (fields.size() == 2 && fields[0] == "HEAVY_CATALOG_SHA256" &&
+               layout.heavyCatalogSha.empty()) {
+      layout.heavyCatalogSha=fields[1];
+    } else if (fields.size() == 6 && fields[0] == "RETAIN") {
+      const int pdg=std::stoi(fields[1]);
+      std::array<int,4> content{};
+      for (int i=0;i<4;++i) content[i]=std::stoi(fields[i+2]);
+      if (pdg==0 || std::any_of(content.begin(),content.end(),[](int n){return n<0;}) ||
+          std::accumulate(content.begin(),content.end(),0)==0 ||
+          !layout.retainedHeavy.emplace(pdg,content).second)
+        throw std::runtime_error("duplicate/invalid retained heavy identity");
     } else if (fields.size() == 2 && fields[0] == "PDG") {
       std::size_t consumed=0; const int pdg=std::stoi(fields[1],&consumed);
       if (consumed!=fields[1].size() || std::to_string(pdg)!=fields[1] || pdg==0 ||
@@ -119,9 +132,17 @@ Layout ReadLayout(const std::string& text) {
   if (!ended || input.peek() != std::istringstream::traits_type::eof() || layout.pdgs.empty() ||
       layout.sparseDigestSchema != (legacySpec ? "hadronization_query_sparse_content_v1" :
                                                 "hadronization_query_sparse_content_v2") ||
-      ((layout.analysisVersion=="2.2.0" || layout.analysisVersion=="2.3.0") && (layout.triggerPdgs.empty() ||
+      ((layout.analysisVersion=="2.2.0" || layout.analysisVersion=="2.3.0" ||
+        layout.analysisVersion=="2.4.0") && (layout.triggerPdgs.empty() ||
        layout.associatePdgs[4].empty() || layout.associatePdgs[5].empty())))
     throw std::runtime_error("query spec ending differs");
+  if (layout.analysisVersion=="2.4.0") {
+    if (layout.heavyCatalogSha.size()!=64 || layout.retainedHeavy.size()!=layout.pdgs.size() ||
+        !std::all_of(layout.pdgs.begin(),layout.pdgs.end(),[&](int pdg){
+          return layout.retainedHeavy.count(pdg)!=0;
+        })) throw std::runtime_error("all-heavy catalog/dictionary domain differs");
+  } else if (!layout.heavyCatalogSha.empty() || !layout.retainedHeavy.empty())
+    throw std::runtime_error("historical query declares foreign all-heavy retention");
   Axis species;
   for (std::size_t i=0;i<=layout.pdgs.size();++i)
     species.edges.push_back(static_cast<double>(i)-0.5);
@@ -208,6 +229,7 @@ struct Ownership {
 
 struct Particle {
   int pdg=0,status=0,final=0,selected=0,pairEligible=0,qc=0,qb=0,category=0;
+  int nc=0,ncbar=0,nb=0,nbbar=0;
   double pt=0,eta=0,phi=0;
 };
 struct OriginDecision { int origin=0,resolution=0,matched=-1,rejected=-1,depth=-1; };
@@ -222,16 +244,31 @@ void CheckOrigin(const OriginDecision& o,U64 event,int index,int sector) {
                              " heavy="+std::to_string(index)+" sector="+std::to_string(sector));
 }
 
+void CheckInapplicableOrigin(const OriginDecision& o,U64 event,int index,int sector) {
+  if (o.origin!=0 || o.resolution!=0 || o.matched!=-1 ||
+      o.rejected!=-1 || o.depth!=-1)
+    throw std::runtime_error("non-applicable pair provenance differs event="+
+                             std::to_string(event)+" heavy="+std::to_string(index)+
+                             " sector="+std::to_string(sector));
+}
+
 struct PairProof {
   U64 events=0,eligibleTriggers=0,zeroPartnerTriggers=0,candidates=0,stored=0;
+  U64 paperCandidates=0,inapplicableSignPairs=0;
+  bool broadRetention=false;
   std::map<std::tuple<int,int,int>,U64> byTuneSectorSign;
   std::string Json(const std::string& binding) const {
     std::ostringstream out;
-    out<<"{\"schema\":\"hadronization_pair_population_proof_v1\",\"state\":\"PASS\","
+    out<<"{\"schema\":\"hadronization_pair_population_proof_"<<(broadRetention?"v2":"v1")
+       <<"\",\"state\":\"PASS\","
        <<"\"scientific_binding_sha256\":\""<<binding<<"\",\"events\":"<<events
        <<",\"eligible_triggers\":"<<eligibleTriggers
        <<",\"zero_partner_triggers\":"<<zeroPartnerTriggers
-       <<",\"candidate_pairs\":"<<candidates<<",\"stored_pairs\":"<<stored<<",\"by_tune_sector_sign\":[";
+       <<",\"candidate_pairs\":"<<candidates<<",\"stored_pairs\":"<<stored;
+    if (broadRetention)
+      out<<",\"paper_candidate_pairs\":"<<paperCandidates
+         <<",\"inapplicable_sign_pairs\":"<<inapplicableSignPairs;
+    out<<",\"by_tune_sector_sign\":[";
     bool first=true;
     for (const auto& item:byTuneSectorSign) {
       if (!first) out<<',';
@@ -255,10 +292,16 @@ struct PairProof {
          <<",\"sign\":"<<std::get<2>(item.first)
          <<",\"tune_ordinal\":"<<std::get<0>(item.first)<<'}';
     }
-    out<<"],\"candidate_pairs\":"<<candidates
+    out<<"],\"candidate_pairs\":"<<candidates;
+    if (broadRetention)
+      out<<",\"inapplicable_sign_pairs\":"<<inapplicableSignPairs;
+    out
        <<",\"eligible_triggers\":"<<eligibleTriggers
        <<",\"events\":"<<events
-       <<",\"schema\":\"hadronization_pair_population_proof_v1\""
+       ;
+    if (broadRetention)
+      out<<",\"paper_candidate_pairs\":"<<paperCandidates;
+    out<<",\"schema\":\"hadronization_pair_population_proof_"<<(broadRetention?"v2":"v1")<<"\""
        <<",\"scientific_binding_sha256\":\""<<binding
        <<"\",\"state\":\"PASS\",\"stored_pairs\":"<<stored
        <<",\"zero_partner_triggers\":"<<zeroPartnerTriggers<<'}';
@@ -323,6 +366,7 @@ PairProof Populate(TFile& file,Plane& plane) {
   bool haveHeavy=heavy.Next(),haveTrigger=triggers.Next(),havePair=pairs.Next(),
        haveClosure=closure.Next(),haveOrigin=origins.Next();
   PairProof proof;
+  proof.broadRetention=plane.layout.analysisVersion=="2.4.0";
   U64 previous=0; bool first=true;
   while (events.Next()) {
     const U64 event=events.U("event_id");
@@ -338,11 +382,30 @@ PairProof Populate(TFile& file,Plane& plane) {
     while (haveHeavy && heavy.U("event_id")==event) {
       Particle particle{heavy.I("pdg"),heavy.I("status"),heavy.I("final"),
           heavy.I("selected"),heavy.I("pair_eligible"),heavy.I("qc"),heavy.I("qb"),
-          heavy.I("category"),heavy.D("pt"),heavy.D("eta"),heavy.D("phi")};
+          heavy.I("category"),heavy.I("nc"),heavy.I("ncbar"),heavy.I("nb"),
+          heavy.I("nbbar"),heavy.D("pt"),heavy.D("eta"),heavy.D("phi")};
       plane.RequirePdg(particle.pdg);
+      if (plane.layout.analysisVersion=="2.4.0") {
+        const auto expected=plane.layout.retainedHeavy.at(particle.pdg);
+        if (expected!=std::array<int,4>{particle.nc,particle.ncbar,particle.nb,particle.nbbar} ||
+            particle.qc!=particle.nc-particle.ncbar ||
+            particle.qb!=particle.nb-particle.nbbar || particle.final<0 ||
+            particle.final>1 || particle.selected<0 || particle.selected>1 ||
+            particle.pairEligible<0 || particle.pairEligible>1)
+          throw std::runtime_error("heavy catalog/constituent/stage content differs");
+      }
       if (!particles.emplace(heavy.I("heavy_index"),particle).second) throw std::runtime_error("duplicate heavy key");
-      if (heavy.I("final") && heavy.I("selected") && heavy.I("status")>=81 && heavy.I("status")<=89) {
-        auto values=base; ParticleValues(values,particle,""); plane.Fill("kinematics",values,weight);
+      if (plane.layout.analysisVersion=="2.4.0" ? particle.final :
+          (particle.final && particle.selected && particle.status>=81 && particle.status<=89)) {
+        auto values=base; ParticleValues(values,particle,"");
+        if (plane.layout.analysisVersion=="2.4.0") {
+          if (particle.status < -200 || particle.status > 200)
+            throw std::runtime_error("final heavy status is outside fine sparse stage axis");
+          values["status"]=particle.status;
+          values["selected"]=particle.selected;
+          values["pair_eligible"]=particle.pairEligible;
+        }
+        plane.Fill("kinematics",values,weight);
       }
       haveHeavy=heavy.Next();
     }
@@ -362,7 +425,8 @@ PairProof Populate(TFile& file,Plane& plane) {
       if (!triggers.I("rejection_mask")) {
         const int triggerIndex=triggers.I("heavy_index"),sector=triggers.I("sector");
         const auto& trigger=particles.at(triggerIndex);
-        const bool completePairs=plane.layout.analysisVersion=="2.2.0" || plane.layout.analysisVersion=="2.3.0";
+        const bool completePairs=plane.layout.analysisVersion=="2.2.0" ||
+            plane.layout.analysisVersion=="2.3.0" || plane.layout.analysisVersion=="2.4.0";
         if (completePairs && ((sector!=4 && sector!=5) || !acceptedTriggers.insert(triggerIndex).second ||
             !trigger.final || !trigger.selected || trigger.status<81 || trigger.status>89 ||
             (sector==4 ? std::abs(trigger.qc) : std::abs(trigger.qb))!=1 ||
@@ -383,29 +447,41 @@ PairProof Populate(TFile& file,Plane& plane) {
             if (item.first==triggerIndex || !associate.final ||
                 (plane.layout.analysisVersion=="2.2.0" &&
                  (!associate.selected || !associate.pairEligible)) ||
-                associate.status<81 || associate.status>89 ||
                 std::abs(associate.eta)>4.0 ||
-                !plane.layout.associatePdgs.at(sector).count(associate.pdg) ||
-                (sector==4 ? associate.qc : associate.qb)==0) continue;
+                (plane.layout.analysisVersion!="2.4.0" &&
+                 (associate.status<81 || associate.status>89 ||
+                  !plane.layout.associatePdgs.at(sector).count(associate.pdg) ||
+                  (sector==4 ? associate.qc : associate.qb)==0))) continue;
             const auto origin=originMap.find({item.first,sector});
             if (origin==originMap.end())
               throw std::runtime_error("missing mandatory associate provenance event="+std::to_string(event)+
                                        " heavy="+std::to_string(item.first));
-            CheckOrigin(origin->second,event,item.first,sector);
-            const int sign=(sector==4 ? trigger.qc*associate.qc : trigger.qb*associate.qb)<0?-1:1;
+            const int flavour=(sector==4 ? trigger.qc*associate.qc : trigger.qb*associate.qb);
+            const int sign=flavour==0?0:(flavour<0?-1:1);
+            if (sign==0) CheckInapplicableOrigin(origin->second,event,item.first,sector);
+            else CheckOrigin(origin->second,event,item.first,sector);
             if (!expectedPairs.emplace(std::make_pair(triggerIndex,item.first),sign).second)
               throw std::runtime_error("duplicate candidate pair key event="+std::to_string(event));
             ++proof.candidates; ++partners;
+            if (proof.broadRetention) {
+              if (sign==0) ++proof.inapplicableSignPairs;
+              if (sign!=0 && associate.status>=81 && associate.status<=89 &&
+                  plane.layout.associatePdgs.at(sector).count(associate.pdg))
+                ++proof.paperCandidates;
+            }
             ++proof.byTuneSectorSign[{source.tune,sector,sign}];
-            if (plane.layout.analysisVersion=="2.3.0") {
+            if (plane.layout.analysisVersion=="2.3.0" ||
+                plane.layout.analysisVersion=="2.4.0") {
               constexpr double pi=3.14159265358979323846;
               auto pairValues=base;
               ParticleValues(pairValues,trigger,"trigger_");
               ParticleValues(pairValues,associate,"associate_");
+              if (plane.layout.analysisVersion=="2.4.0")
+                pairValues["associate_status"]=associate.status;
               pairValues["sign"]=sign;
               pairValues["dphi"]=std::fmod(trigger.phi-associate.phi+2.5*pi,2.0*pi)-0.5*pi;
               pairValues["deta"]=trigger.eta-associate.eta;
-              pairValues["origin"]=origin->second.origin;
+              pairValues["origin"]=sign==0?-1:origin->second.origin;
               pairValues["category"]=associate.category;
               plane.Fill("pairs",pairValues,weight);
               ++proof.stored;
@@ -450,7 +526,8 @@ PairProof Populate(TFile& file,Plane& plane) {
         throw std::runtime_error("exact pair cache differs");
       values["sign"]=pairs.I("sign"); values["dphi"]=pairs.D("dphi"); values["deta"]=pairs.D("deta");
       values["origin"]=pairs.I("associate_origin"); values["category"]=pairs.I("associate_category");
-      if (plane.layout.analysisVersion!="2.3.0") plane.Fill("pairs",values,weight);
+      if (plane.layout.analysisVersion!="2.3.0" &&
+          plane.layout.analysisVersion!="2.4.0") plane.Fill("pairs",values,weight);
       havePair=pairs.Next();
     }
     if (plane.layout.analysisVersion=="2.2.0" && observedPairs.size()!=expectedPairs.size())
@@ -758,7 +835,8 @@ void Verify(const std::string& path,const Layout& layout) {
   std::cout<<"CANONICAL_SCIENTIFIC_CONTENT_SHA256\t"
            <<ContentSha(CanonicalContentDigests(file,layout))<<'\n';
   Plane plane(file,layout); const auto proof=Populate(file,plane);
-  if ((layout.analysisVersion=="2.2.0" || layout.analysisVersion=="2.3.0") &&
+  if ((layout.analysisVersion=="2.2.0" || layout.analysisVersion=="2.3.0" ||
+       layout.analysisVersion=="2.4.0") &&
       metadataText.find("\"pair_population_proof\":"+proof.Json(layout.scientificBindingSha))==std::string::npos &&
       metadataText.find("\"pair_population_proof\":"+proof.CanonicalJson(layout.scientificBindingSha))==std::string::npos)
     throw std::runtime_error("query pair population proof differs from exact rows");

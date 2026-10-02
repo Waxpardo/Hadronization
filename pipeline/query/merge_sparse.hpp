@@ -18,7 +18,7 @@ inline char* RefuseGrowth(char*, size_t, size_t) {
 }
 inline int SerializedSize(THnSparseD* hist, int limit) {
     if (limit <= 0 || limit > 512*1024*1024 || hist->GetChunkSize() > 16384 ||
-        hist->GetNdimensions() > 15)
+        hist->GetNdimensions() > 16)
         throw std::runtime_error("unsupported sparse serialization bound/geometry");
     TBufferFile buffer(TBuffer::kWrite, limit);
     buffer.SetReAllocFunc(RefuseGrowth);
@@ -39,13 +39,50 @@ inline void Accumulate(THnSparseD* source, const std::vector<THnSparseD*>& block
     }
 }
 inline std::vector<Long64_t> Entries(TFile* file, const std::string& family,
-        const std::vector<int>& tunes, const std::vector<int>& blocks, int tune, int count) {
+        const std::vector<int>& tunes, const std::vector<int>& blocks, int tune, int count,
+        bool allHeavy) {
     struct Range {ULong64_t first,end;UInt_t source;};
     std::vector<Range> ranges;
     TTreeReader rr("event_ranges",file);
     TTreeReaderValue<ULong64_t> first(rr,"first_id"), size(rr,"count");
     TTreeReaderValue<UInt_t> source(rr,"source_id");
     while(rr.Next()) ranges.push_back({*first,*first+*size,*source});
+    std::vector<Long64_t> result(count,0);
+    if (family=="pairs" && allHeavy) {
+        // The old pair cache is narrower than the constructed broad sparse.
+        // Count actual broad fills independently from exact event/particle rows.
+        TTreeReader events("events",file), heavy("heavy",file), triggers("triggers",file);
+        TTreeReaderValue<ULong64_t> eventId(events,"event_id"),
+            heavyEvent(heavy,"event_id"), triggerEvent(triggers,"event_id");
+        TTreeReaderValue<Int_t> heavyIndex(heavy,"heavy_index"),
+            triggerIndex(triggers,"heavy_index");
+        TTreeReaderValue<UChar_t> final(heavy,"final");
+        TTreeReaderValue<UInt_t> rejection(triggers,"rejection_mask");
+        TTreeReaderValue<Double_t> eta(heavy,"eta");
+        bool haveHeavy=heavy.Next(),haveTrigger=triggers.Next();
+        while(events.Next()) {
+            auto at=std::upper_bound(ranges.begin(),ranges.end(),*eventId,
+                [](ULong64_t id,const Range& range){return id<range.first;});
+            if(at==ranges.begin() || *eventId >= (--at)->end)
+                throw std::runtime_error("broad pair event has no source range");
+            std::vector<int> associates;
+            while(haveHeavy && *heavyEvent==*eventId) {
+                if(*final && std::abs(*eta)<=4.0) associates.push_back(*heavyIndex);
+                haveHeavy=heavy.Next();
+            }
+            while(haveTrigger && *triggerEvent==*eventId) {
+                if(!*rejection &&
+                   std::find(associates.begin(),associates.end(),*triggerIndex)!=associates.end() &&
+                   tunes.at(at->source)==tune)
+                    result.at(blocks.at(at->source)-1)+=
+                        static_cast<Long64_t>(associates.size()-1);
+                haveTrigger=triggers.Next();
+            }
+        }
+        if(haveHeavy || haveTrigger)
+            throw std::runtime_error("broad pair count has trailing exact rows");
+        return result;
+    }
     const auto tree=family=="activity" ? "events" : family=="kinematics" ? "heavy" : family.c_str();
     TTreeReader rows(tree,file);
     TTreeReaderValue<ULong64_t> event(rows,"event_id");
@@ -58,10 +95,9 @@ inline std::vector<Long64_t> Entries(TFile* file, const std::string& family,
         selected.reset(new TTreeReaderValue<UChar_t>(rows,"selected"));
         status.reset(new TTreeReaderValue<Int_t>(rows,"status"));
     }
-    std::vector<Long64_t> result(count,0);
     while(rows.Next()) {
         if(rejected && **rejected != 0) continue;
-        if(final && !(**final && **selected && **status>=81 && **status<=89)) continue;
+        if(final && !(**final && (allHeavy || (**selected && **status>=81 && **status<=89)))) continue;
         auto at=std::upper_bound(ranges.begin(),ranges.end(),*event,
             [](ULong64_t id,const Range& range){return id<range.first;});
         if(at==ranges.begin() || *event >= (--at)->end)
