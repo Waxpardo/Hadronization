@@ -64,6 +64,7 @@ SOURCE_FILES = (
 )
 BOOTSTRAP = '''#!/usr/bin/env python3
 """Start the hash-frozen query program from a transferred source tar."""
+import errno
 import hashlib
 import json
 import os
@@ -73,7 +74,9 @@ import sys
 import tarfile
 import tempfile
 
-TRANSIENT_ERRNOS = set(__TRANSIENT_ERRNOS__)
+# Resolve the names on the execute node. Their integers differ across hosts.
+TRANSIENT_ERRNO_NAMES = ("EAGAIN", "ESTALE", "ETIMEDOUT", "ECONNRESET", "EIO")
+TRANSIENT_ERRNOS = {getattr(errno, name) for name in TRANSIENT_ERRNO_NAMES}
 
 def option(name):
     return Path(sys.argv[sys.argv.index(name) + 1])
@@ -130,7 +133,7 @@ except OSError as error:
 except (ValueError, KeyError, IndexError, tarfile.TarError) as error:
     print("BOOTSTRAP ERROR: " + str(error), file=sys.stderr)
     sys.exit(42)
-'''.replace("__TRANSIENT_ERRNOS__", repr(sorted(TRANSIENT_ERRNOS)))
+'''
 
 
 class TransientError(Exception):

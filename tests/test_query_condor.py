@@ -675,32 +675,53 @@ class QueryCondorPreparation(unittest.TestCase):
         custom.mkdir()
         (custom / "sitecustomize.py").write_text(
             "import errno,os,pathlib\n"
+            "linux={'EIO':5,'EAGAIN':11,'ECONNRESET':104,'ETIMEDOUT':110,'ESTALE':116}\n"
+            "for name,number in linux.items(): setattr(errno,name,number)\n"
             "original=pathlib.Path.read_bytes\n"
             "def injected(self):\n"
-            " if self.name=='work.json' and os.environ.get('TEST_ONLY_BOOTSTRAP_EIO')=='1':\n"
-            "  raise OSError(errno.EIO,'TEST_ONLY startup read fault')\n"
+            " name=os.environ.get('TEST_ONLY_BOOTSTRAP_LINUX_ERRNO')\n"
+            " if self.name=='work.json' and name:\n"
+            "  raise OSError(linux[name],'TEST_ONLY Linux '+name+' startup read fault')\n"
             " return original(self)\n"
             "pathlib.Path.read_bytes=injected\n")
         environment = os.environ.copy()
         environment["PYTHONPATH"] = str(custom)
-        environment["TEST_ONLY_BOOTSTRAP_EIO"] = "1"
         command = [sys.executable, "-B", str(bundle / "worker.py"), "worker",
                    "--work", str(bundle / "work.json"), "--expected-work-sha256", work_sha,
                    "--ordinal", "0", "--attempt", "0", "--source-tar", str(bundle / "source.tar.gz"),
                    "--pack-tar", str(bundle / "query-pack.tar.gz")]
-        attempts = []
-        for attempt in range(int(retry[1]) + 1):
-            command[command.index("--attempt")+1] = str(attempt)
-            observed = subprocess.run(command, env=environment, text=True, capture_output=True)
-            attempts.append(observed.returncode)
-            self.assertIn("TEST_ONLY startup read fault", observed.stderr)
-        self.assertEqual(attempts, [75, 75, 75])
+        for name in ("EIO", "EAGAIN", "ECONNRESET", "ETIMEDOUT", "ESTALE"):
+            attempts = []
+            environment["TEST_ONLY_BOOTSTRAP_LINUX_ERRNO"] = name
+            for attempt in range(int(retry[1]) + 1 if name == "EIO" else 1):
+                command[command.index("--attempt")+1] = str(attempt)
+                observed = subprocess.run(command, env=environment, text=True,
+                                          capture_output=True)
+                attempts.append(observed.returncode)
+                self.assertIn("TEST_ONLY Linux "+name+" startup read fault", observed.stderr)
+            self.assertEqual(attempts, [75] * len(attempts), name)
         self.assertFalse(any((self.base / "bulk").glob("**/attempt.json")))
-        environment.pop("TEST_ONLY_BOOTSTRAP_EIO")
+        environment.pop("TEST_ONLY_BOOTSTRAP_LINUX_ERRNO")
         command[command.index("--expected-work-sha256")+1] = "a" * 64
         fatal = subprocess.run(command, env=environment, text=True, capture_output=True)
         self.assertEqual(fatal.returncode, 42)
         self.assertIn("externally pinned work manifest differs", fatal.stderr)
+
+        unsafe_tar = self.base / "unsafe-source.tar.gz"
+        with tarfile.open(unsafe_tar, "w:gz") as archive:
+            member = tarfile.TarInfo("../outside-source")
+            member.size = 0
+            archive.addfile(member)
+        unsafe_work = json.loads((bundle / "work.json").read_text())
+        unsafe_work["source_tar_sha256"] = condor.r.sha_file(unsafe_tar)
+        unsafe_work_path = self.base / "unsafe-work.json"
+        unsafe_work_path.write_text(json.dumps(unsafe_work))
+        command[command.index("--work")+1] = str(unsafe_work_path)
+        command[command.index("--expected-work-sha256")+1] = condor.r.sha_file(unsafe_work_path)
+        command[command.index("--source-tar")+1] = str(unsafe_tar)
+        rejected = subprocess.run(command, env=environment, text=True, capture_output=True)
+        self.assertEqual(rejected.returncode, 42)
+        self.assertIn("unsafe frozen source member", rejected.stderr)
 
     def test_query_child_transient_errno_is_not_relabelled_as_science_failure(self):
         q = condor.q
