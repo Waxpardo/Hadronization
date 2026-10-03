@@ -3095,8 +3095,8 @@ def render_cold(args):
     if output.exists():
         raise ValueError("no-overwrite cold plot output collision")
     config, config_sha = checked_plot_config(args.plot_config)
-    pdf_export = pdf_export_runtime()
     payload = cold_numerics(args)
+    pdf_export = pdf_export_runtime()
     context, adapter = cold_drawing_inputs(payload, config)
     plan = drawing_plan(context, adapter, config)
     record_expected = drawing_payload(plan)
