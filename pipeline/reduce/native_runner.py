@@ -952,6 +952,12 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
     primitive_path=work/'native-primitives.tsv'
     primitive_receipt=n.write_native_transport(source,primitives,g9_cells,t1,
                                                events,primitive_path,support_upper,tunes)
+    # The native engine loads the transport into its own maps. The exact fine
+    # Python maps have already been reconciled, exported, and serialized; keep
+    # only their metrics so both implementations are never resident together.
+    sparse_scan_metrics=dict(primitives=vars(primitives.metrics),
+                             g9=vars(g9_cells.metrics))
+    del primitives, g9_cells
     query_path=work/'native-points.tsv'
     query_receipt=native_point_query(typed,source,query_path,analysis,model_api)
     binary,build=compile_engine(work/'build')
@@ -1009,7 +1015,7 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         checked_boundary_rows=checked['boundaries'],
         checked_status_counts={key:checked[key] for key in
             ('available_errors','withheld_errors')},
-        sparse_scan_metrics=dict(primitives=vars(primitives.metrics),g9=vars(g9_cells.metrics)),
+        sparse_scan_metrics=sparse_scan_metrics,
         support_root_opens=support_opens,support_row_upper_bounds=support_upper,
         all_selected_pair_population_proof=all_selected_proof,
         family_products=family_product_receipt,
