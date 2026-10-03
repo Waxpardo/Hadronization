@@ -35,11 +35,11 @@ This inventory identifies every tracked file. The release includes generated sci
 | [config/analysis.json](../config/analysis.json) | Query model and reducer | Downstream selections, axes, registry references, classes and statistical policy. |
 | [config/analysis-family.json](../config/analysis-family.json) | Query model and reducer | Bounded version 2.3 family-support construction bound to the accepted map. |
 | [config/analysis-all-heavy.json](../config/analysis-all-heavy.json) | Query model and reducer | Version 2.4 broad fine-species construction and downstream family recipe. |
-| [config/analysis-all-origin.json](../config/analysis-all-origin.json) | Query model and reducer | Version 2.5 complete fine-species construction, all-origin paper triggers and approved 74-member grouping. |
+| [config/analysis-all-origin.json](../config/analysis-all-origin.json) | Query model and reducer | Version 2.5 complete fine-species construction, all-origin paper triggers and approved 82-member grouping. |
 | [config/analysis-hard-root-control.json](../config/analysis-hard-root-control.json) | Reducer | Offline selected-hard trigger control for a version 2.5 collection. |
 | [config/analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) | Numerical reduction | Adds endpoint-inclusive trigger 1.0 and associate 0.15 GeV/c minima; other fields match the default analysis. |
 | [config/associate-family-runtime-all-heavy.json](../config/associate-family-runtime-all-heavy.json) | Reducer | Pinned 82-member saved-state grouping with separate fine identities. |
-| [config/grouping-xi-star-only.example.json](../config/grouping-xi-star-only.example.json) | Reducer | Historical version 2.4 grouping example; Xi-star is deferred from the version 2.5 paper recipe. |
+| [config/grouping-xi-star-only.example.json](../config/grouping-xi-star-only.example.json) | Reducer | Supported Xi-star subset interpretation of the current 82-member family map. |
 | [config/heavy-catalog.json](../config/heavy-catalog.json) | Query model and fine reader | Complete signed generator-heavy catalog and valence/charge identities. |
 | [config/plot-all-tune.json](../config/plot-all-tune.json) | Renderer | All-tune correlation presentation with comparison panels. |
 | [config/plot-dplus.json](../config/plot-dplus.json) | Renderer | Presentation for the explicit D+ numerical recipe. |
@@ -95,7 +95,7 @@ This inventory identifies every tracked file. The release includes generated sci
 | [pipeline/query/publication.py](../pipeline/query/publication.py) | Query, bundle and package writers | No-replace publication, Linux reservation fallback and readback checks. |
 | [pipeline/query/query.cpp](../pipeline/query/query.cpp) | Query wrapper | Builds support trees and sparse families and verifies complete pair populations. |
 | [pipeline/query/row_schema.hpp](../pipeline/query/row_schema.hpp) | Native query executable | Exact retained scalar branch types and schema macros. |
-| [config/associate-family-runtime.json](../config/associate-family-runtime.json) | Query and reducer | Public 74-member runtime family contract, accepted full-map provenance, semantic digest, and model caveats. |
+| [config/associate-family-runtime.json](../config/associate-family-runtime.json) | Historical query and reducer | Version 2.3 public 74-member runtime family contract, retained for its recorded products. |
 | [pipeline/reduce/family.py](../pipeline/reduce/family.py) | Normalized model and reducer | Fail-closed map validation and additive primitive grouping. |
 | [pipeline/reduce/family_products.py](../pipeline/reduce/family_products.py) | Numerical serializer | Consolidated signed-species ROOT files, derived family ROOT and common manifest. |
 | [pipeline/query/run.py](../pipeline/query/run.py) | Query CLI and collection modules | Build packs, dictionary census, query construction and exact verification. |

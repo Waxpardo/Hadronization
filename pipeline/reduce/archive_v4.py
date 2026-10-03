@@ -79,6 +79,21 @@ FIELDS={
  'materialization':dict(point='u',status='s',reason_codes='s'),
  'g9_science':dict(metadata_json='s',metadata_sha256='s')}
 
+def _fields(value):
+    schemas={item['schema'] for item in value['support_diagnostic_receipts']}
+    if len(schemas)!=1:
+        raise ValueError('mixed support diagnostic receipt versions')
+    if schemas=={'hadronization_observed_support_diagnostics_v1'}:
+        return FIELDS
+    if schemas!={'hadronization_observed_support_diagnostics_v2'}:
+        raise ValueError('unknown support diagnostic receipt version')
+    fields={name:dict(columns) for name,columns in FIELDS.items()}
+    fields['support_diagnostics']['origin_pair_population_scope']='s'
+    fields['support_diagnostics']['closure_population_scope']='s'
+    fields['diagnostic_origin']['population_scope']='s'
+    fields['diagnostic_closure']['population_scope']='s'
+    return fields
+
 
 def _num(token):
     return 0. if token is None else float.fromhex(token)
@@ -135,6 +150,10 @@ def _rows(value,name):
             common=dict(tune=item['tune_id'],block=item['block_id'])
             if name=='support_diagnostics':
                 yield dict(common,event_moments_sha256=item['event_moments_sha256'],
+                    **({key:item[key] for key in ('origin_pair_population_scope',
+                       'closure_population_scope')}
+                       if item['schema']=='hadronization_observed_support_diagnostics_v2'
+                       else {}),
                     **{key:_num(item[key]) if key.endswith('_sum') else item[key]
                         for key in ('natural_final_hadrons',
                             'natural_final_weighted_sum','charm_constituents',
@@ -154,11 +173,17 @@ def _rows(value,name):
                 for row in item['origin_pairs']:
                     yield dict(common,origin=row['origin'],category=row['category'],
                         sign=row['sign'],rows=row['rows'],
+                        **({'population_scope':item['origin_pair_population_scope']}
+                           if item['schema']=='hadronization_observed_support_diagnostics_v2'
+                           else {}),
                         weighted_sum=_num(row['weighted_sum']))
             elif name=='diagnostic_closure':
                 for row in item['closure_terms']:
                     yield dict(common,category=row['category'],
                         visible=row['visible'],coefficient=row['coefficient'],
+                        **({'population_scope':item['closure_population_scope']}
+                           if item['schema']=='hadronization_observed_support_diagnostics_v2'
+                           else {}),
                         rows=row['rows'],weighted_sum=_num(row['weighted_sum']))
     elif name in ('block_values','block_components','denominator_parents',
                   'denominator_deletions'):
@@ -381,7 +406,7 @@ def write(value,output):
                 member_files_sha256=value['artifact_binding'][
                     'member_files_sha256'])
             ROOT.TObjString(p.canonical(metadata)).Write('v4_metadata')
-            for name,fields in FIELDS.items():
+            for name,fields in _fields(value).items():
                 tree,holders=_tree(ROOT,name,fields)
                 for row in _rows(value,name):_fill(tree,holders,row)
                 tree.Write()
@@ -397,7 +422,7 @@ def write(value,output):
     return dict(schema=SCHEMA,path=str(output),root_sha256=root_sha,
                 root_bytes=output.stat().st_size,value_sha256=p.digest(value),
                 direct_tables={name:sum(1 for _ in _rows(value,name))
-                               for name in FIELDS})
+                               for name in _fields(value)})
 
 
 def read(path,expected_root_sha256,expected_value_sha256):
@@ -438,7 +463,7 @@ def read(path,expected_root_sha256,expected_value_sha256):
                 meta['member_files_sha256']!=value['artifact_binding'][
                     'member_files_sha256']:
             raise ValueError('v4 ROOT metadata/DAG binding differs')
-        for name,fields in FIELDS.items():
+        for name,fields in _fields(value).items():
             tree=file.Get(name)
             if not tree or {str(b.GetName()) for b in tree.GetListOfBranches()}!=set(fields):
                 raise ValueError('v4 ROOT direct branch domain differs: '+name)

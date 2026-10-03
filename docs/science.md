@@ -30,7 +30,9 @@ The default displayed triggers are D0 (421), Lambda_c+ (4122), B+ (521) and Lamb
 
 A paper trigger is a final hadron of one of the registered signed trigger identities, with finite nonnegative pT and |eta| <= 4. The default selection includes all production origins; its selected-hard ancestry and direct-state predicate are retained as a separately selectable historical control. Both modes retain trigger denominators even when no associate qualifies.
 
-The complete fine-species query retains every catalogued final heavy hadron independently in its kinematic sparse, including excited, hidden-heavy, multiply-heavy and mixed charm–beauty states. It retains pairs between registered triggers and every final heavy associate within |eta| <= 4, excluding self-pairs. It does not extend the trigger set. Exact support retains nonfinal event-record history separately; those copies do not add to final-particle yields. Associate origins include selected-hard companions, showers, multiple parton interactions, other resolved origins and unresolved origins when the heavy-flavour sign applies.
+The complete fine-species query retains every catalogued final heavy hadron independently in its kinematic sparse, including excited, hidden-heavy, multiply-heavy and mixed charm–beauty states. It retains pairs between registered triggers and every final heavy associate within |eta| <= 4, excluding self-pairs. It does not extend the trigger set. Exact support retains nonfinal event-record history separately; those copies do not add to final-particle yields. Associate origins include selected-hard associates, showers, multiple parton interactions, other resolved origins and unresolved origins when the heavy-flavour sign applies.
+
+The selected-hard associate category describes the associate's own origin; it does not assert a shared root with the trigger. The version 2.5 diagnostic receipt labels pair-origin counts by the selected trigger population. Its closure rows retain the separate historical analyzed-closure population and do not measure closure for every all-origin trigger. Matched and rejected root indices remain event-local exact-support fields.
 
 The published pair observables select the configured signed family members from that broader retained domain. This includes Sigma_b0 (5212), Xi_b'- (5312), Xi_b'0 (5322) and their antiparticles. These are PYTHIA species identities; inclusion does not assert experimental observation. A catalog label alone does not establish that a species occurred: the fine inventory reports observed, final, direct-selection and pair counts by signed identity, tune and original block. The query and independent exact-row reader check filled weighted content, including sparse flow bins.
 
@@ -60,7 +62,7 @@ All heavy-hadron decays were disabled, including strong and electromagnetic deca
 
 The grouped observable sums additive OS and SS pair primitives for saved generator states at their saved kinematics. It then recomputes the pooled center, every K=10 delete-one value, covariance, validity mask and grouped meson reference. Trigger denominators are carried once. Ratios, normalized spectra and errors are never added after estimation.
 
-The approved default map has 74 signed members. Particle and antiparticle groups remain separate, as do Sigma and Lambda families. Xi-prime belongs to its approved Xi-family destination; Xi-star identities remain separate in fine storage and are deferred from the default family sum. A separately pinned downstream recipe can be evaluated without rebuilding the fine THnSparse, but such an alternative is a distinct interpretation and does not change the default paper definition. Membership follows the configured PYTHIA 8.317 decay endpoints; unit endpoint probability in that configuration is not a measured physical branching fraction. States outside a recipe remain in the fine collection and do not enter that grouped observable. The older version 2.4 configuration used an 82-member map, including Xi-star states; its products retain that explicit identity.
+The approved default map has 82 signed members. Particle and antiparticle groups remain separate, as do Sigma and Lambda families. Xi-prime and Xi-star saved states contribute to their signed approved Xi-family destinations while remaining separate in fine storage. A separately pinned downstream recipe can be evaluated without rebuilding the fine THnSparse, but such an alternative is a distinct interpretation and does not change the default paper definition. Membership follows the configured PYTHIA 8.317 decay endpoints; unit endpoint probability in that configuration is not a measured physical branching fraction. States outside a recipe remain in the fine collection and do not enter that grouped observable. Version 2.4 products retain their original trigger-selection identity and cannot be reinterpreted as all-origin results.
 
 The activity axis stores integers from 0 through 4095. Each integer occupies one regular bin. Values outside the supported domain fail the scientific contract rather than silently extending the axis.
 
@@ -78,7 +80,7 @@ Every aggregate activity bin must be nonnegative and the total must be positive.
 
 ### Identified balancing species
 
-The default grouping request has 10 charm and 11 beauty signed associate destinations for each heavy-flavour sign. Integrated and activity-dependent balancing use the same destinations. Their membership is specified by [the pinned default recipe](../config/associate-family-runtime.json); its 74 signed members and all other catalogued species remain independently addressable in fine storage.
+The default grouping request has 10 charm and 11 beauty signed associate destinations for each heavy-flavour sign. Integrated and activity-dependent balancing use the same destinations. Their membership is specified by [the pinned default recipe](../config/associate-family-runtime-all-heavy.json); its 82 signed members and all other catalogued species remain independently addressable in fine storage.
 
 | Sector | Mesons | Baryons |
 | --- | --- | --- |
@@ -87,7 +89,7 @@ The default grouping request has 10 charm and 11 beauty signed associate destina
 
 The table names particle families. The trigger's heavy-flavour sign determines the opposite-sign particle or antiparticle. The estimator subtracts its same-sign conjugate.
 
-Each charge state remains a separate category. Saved excited states join only their approved signed destination; Xi-prime joins the corresponding Xi charge state, while Xi-star remains separate in the default recipe. Distinct Sigma or Xi charges are not summed together. The numerical ROOT retains their joint jackknife covariance.
+Each charge state remains a separate category. Saved excited states join only their approved signed destination; Xi-prime and Xi-star join the corresponding Xi charge state in the default recipe. Their fine signed identities remain separate. Distinct Sigma or Xi charges are not summed together. The numerical ROOT retains their joint jackknife covariance.
 
 Figures show mesons before baryons. Baryon groups follow the order Lambda, Sigma, Xi, then Omega. Each family follows a fixed destination order. Short ticks delimit species bins, and labels sit at bin centers.
 

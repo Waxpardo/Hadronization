@@ -42,8 +42,15 @@ def support_diagnostic_receipts(run_receipt,moment_receipts):
     for receipt in moment_receipts:
         key=receipt['tune_id'],receipt['block_id']
         event= moments[key];diagnostic=raw[key]
-        body=dict(schema='hadronization_observed_support_diagnostics_v1',
+        scoped='closure_population_scope' in diagnostic
+        if scoped != ('origin_pair_population_scope' in diagnostic):
+            raise ValueError('native diagnostic population scopes differ')
+        body=dict(schema=('hadronization_observed_support_diagnostics_v2' if scoped
+                          else 'hadronization_observed_support_diagnostics_v1'),
             tune_id=key[0],block_id=key[1],
+            **({name:diagnostic[name] for name in (
+                'origin_pair_population_scope','closure_population_scope')}
+               if scoped else {}),
             event_moments_sha256=receipt['content_sha256'],
             activity_counts=[dict(activity_bin=activity,events=count)
                 for activity,count in event['activity_counts']],
@@ -60,7 +67,7 @@ def support_diagnostic_receipts(run_receipt,moment_receipts):
                 'strict_selected_final_weighted_sum',
                 'origin_pairs','closure_terms')})
         result.append(dict(body,content_sha256=p.digest(body)))
-    p.validate(result,['SupportDiagnosticReceiptV4'])
+    p.validate(result,['SupportDiagnosticReceiptAny'])
     return result
 
 

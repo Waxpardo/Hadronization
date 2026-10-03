@@ -49,43 +49,67 @@ def require_full_campaign_input(source,value):
 
 def verify_reconstructed_pair_cells(primitives, proof):
     """Bind the independent retained-row oracle to the scientific sparse cells."""
-    if tuple(primitives.profile_ids) != ('inclusive',):
-        raise ValueError('family reconstructed support requires the inclusive profile')
     reconstructed = proof.pop('cells')
+    profile_pairs = proof.pop('profile_pair_cells')
+    profile_triggers = proof.pop('profile_trigger_cells')
     selected_pairs = set(primitives.selected_pairs)
-    oracle = {(row['tune_id'], row['block_id'], row['activity_bin'],
-               row['trigger_pdg'], row['associate_pdg'], row['sign'],
-               row['dphi_bin']): row for row in reconstructed
-              if (row['trigger_pdg'], row['associate_pdg']) in selected_pairs}
-    sparse = {key[1:]: cell for key, cell in primitives.pairs.items()
-              if key[0] == 'inclusive'}
-    if set(oracle) != set(sparse):
-        missing = sorted(set(oracle) - set(sparse))[:3]
-        extra = sorted(set(sparse) - set(oracle))[:3]
-        raise ValueError('family reconstructed/sparse pair key domain differs: '
-                         'missing={} extra={}'.format(missing, extra))
-    epsilon = 2.220446049250313e-16
-    for key, expected in oracle.items():
-        actual = sparse[key]
-        sumw_tolerance = 64.0 * epsilon * max(1.0, expected['sumabsw'])
-        sumw2_tolerance = (64.0 * epsilon * max(1.0, expected['sumw2']) *
-                           max(1, expected['count']))
-        if (abs(actual.value - expected['sumw']) > sumw_tolerance or
-                abs(actual.sumw2 - expected['sumw2']) > sumw2_tolerance):
-            raise ValueError('family reconstructed/sparse pair population differs '
-                             'at {}'.format(key))
+    selected_triggers = set(primitives.selected_triggers)
+    profile_ids = set(primitives.profile_ids)
+    pair_oracle = {(row['profile_id'], row['tune_id'], row['block_id'],
+                    row['activity_bin'], row['trigger_pdg'], row['associate_pdg'],
+                    row['sign'], row['dphi_bin']): row for row in profile_pairs
+                   if row['profile_id'] in profile_ids and
+                   (row['trigger_pdg'], row['associate_pdg']) in selected_pairs}
+    if 'inclusive' in profile_ids:
+        for row in reconstructed:
+            if (row['trigger_pdg'], row['associate_pdg']) not in selected_pairs:
+                continue
+            key=('inclusive',row['tune_id'],row['block_id'],row['activity_bin'],
+                 row['trigger_pdg'],row['associate_pdg'],row['sign'],row['dphi_bin'])
+            if key in pair_oracle:
+                raise ValueError('duplicate inclusive exact profile pair')
+            pair_oracle[key]=row
+    trigger_oracle = {(row['profile_id'], row['tune_id'], row['block_id'],
+                       row['activity_bin'], row['trigger_pdg']): row
+                      for row in profile_triggers
+                      if row['profile_id'] in profile_ids and
+                      row['trigger_pdg'] in selected_triggers}
+    if not profile_ids <= set(proof['scanned_profile_ids']):
+        raise ValueError('exact profile oracle is absent')
+    for label, oracle, sparse in (
+            ('pair', pair_oracle, primitives.pairs),
+            ('trigger denominator', trigger_oracle, primitives.triggers)):
+        if set(oracle) != set(sparse):
+            missing = sorted(set(oracle) - set(sparse))[:3]
+            extra = sorted(set(sparse) - set(oracle))[:3]
+            raise ValueError('family reconstructed/sparse {} key domain differs: '
+                             'missing={} extra={}'.format(label, missing, extra))
+        epsilon = 2.220446049250313e-16
+        for key, expected in oracle.items():
+            actual = sparse[key]
+            sumw_tolerance = 64.0 * epsilon * max(1.0, expected['sumabsw'])
+            sumw2_tolerance = (64.0 * epsilon * max(1.0, expected['sumw2']) *
+                               max(1, expected['count']))
+            if (abs(actual.value - expected['sumw']) > sumw_tolerance or
+                    abs(actual.sumw2 - expected['sumw2']) > sumw2_tolerance):
+                raise ValueError('family reconstructed/sparse {} population differs '
+                                 'at {}'.format(label, key))
     proof['scientific_sparse_reconciliation'] = {
         'state': 'PASS',
-        'natural_key': ['tune_id', 'block_id', 'activity_bin', 'trigger_pdg',
+        'natural_key': ['profile_id', 'tune_id', 'block_id', 'activity_bin', 'trigger_pdg',
                         'associate_pdg', 'sign', 'dphi_bin'],
         'full_reconstructed_occupied_cells': len(reconstructed),
         'full_reconstructed_candidate_pairs': sum(
             row['count'] for row in reconstructed),
         'scope_pair_count': len(selected_pairs),
-        'occupied_cells': len(oracle),
-        'candidate_pairs': sum(row['count'] for row in oracle.values()),
+        'occupied_cells': len(pair_oracle),
+        'candidate_pairs': sum(row['count'] for row in pair_oracle.values()),
+        'denominator_cells': len(trigger_oracle),
+        'denominator_triggers': sum(row['count'] for row in trigger_oracle.values()),
         'oracle_sha256': hashlib.sha256(json.dumps(
-            [dict(key=list(key), **oracle[key]) for key in sorted(oracle)],
+            [dict(kind=label, key=list(key), **oracle[key])
+             for label, oracle in (('pair',pair_oracle),('trigger',trigger_oracle))
+             for key in sorted(oracle)],
             sort_keys=True, separators=(',', ':'), ensure_ascii=True,
             allow_nan=False).encode('ascii')).hexdigest(),
     }
@@ -690,6 +714,7 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
                 'physical_field'],include_diagnostics=True,
             work_root=work/'support-scan',pair_population_registry=pair_registry,
             analysis_version=construction['version'],
+            oracle_profiles=analysis['profiles'] if prove_all_selected else None,
             trigger_selection=(analysis['trigger_selection']['default']
                                if analysis['version']=='2.5.0' else 'historical_hard_root'))
         pre_support_seconds=time.perf_counter()-before_support
@@ -764,6 +789,7 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
             event_activity_field=activity['physical_field'],include_diagnostics=True,
             work_root=work/'support-scan',pair_population_registry=pair_registry,
             analysis_version=construction['version'],
+            oracle_profiles=analysis['profiles'] if prove_all_selected else None,
             trigger_selection=(analysis['trigger_selection']['default']
                                if analysis['version']=='2.5.0' else 'historical_hard_root'))
     t1,events,support_opens,support_upper,event_moments,raw_diagnostics=support_prepared[:6]
@@ -872,7 +898,9 @@ def run_diagnostic(index_path,index_sha256,analysis_path,analysis_sha256,
         event_block_moments=[dict(tune_id=tune,block_id=block,**moment.report())
             for (tune,block),moment in sorted(event_moments.items())],
         raw_origin_closure_diagnostics=[dict(tune_id=tune,block_id=block,
-            **raw_diagnostics.get((tune,block),n.RawDiagnostics()).report())
+            **raw_diagnostics.get((tune,block),n.RawDiagnostics()).report(
+                analysis['trigger_selection']['default']
+                if analysis['version']=='2.5.0' else None))
             for tune,block in sorted(event_moments)],
         wall_seconds=dict(total=finished-started,admission=admitted-started,
             request_support=pre_support_seconds,

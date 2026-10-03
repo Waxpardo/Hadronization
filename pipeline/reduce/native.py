@@ -527,8 +527,16 @@ class RawDiagnostics:
             self.strict_selected_final_hadrons+=1
             self.strict_selected_final_weighted_sum+=event_weight
 
-    def report(self):
-        return dict(natural_final_hadrons=self.natural_final_hadrons,
+    def report(self, trigger_selection=None):
+        if trigger_selection not in (None, 'all_origins', 'historical_hard_root'):
+            raise ValueError('diagnostic trigger-selection scope differs')
+        return dict(**({
+                    'origin_pair_population_scope': (
+                        'ALL_ORIGIN_SELECTED_PAIRS' if trigger_selection == 'all_origins'
+                        else 'HISTORICAL_HARD_ROOT_SELECTED_PAIRS'),
+                    'closure_population_scope': 'HISTORICAL_ANALYZED_CLOSURE_ROWS'}
+                    if trigger_selection is not None else {}),
+                    natural_final_hadrons=self.natural_final_hadrons,
                     natural_final_weighted_sum=self.natural_final_weighted_sum.hex(),
                     charm_constituents=self.charm_constituents,
                     charm_constituent_weighted_sum=self.charm_constituent_weighted_sum.hex(),
@@ -598,10 +606,25 @@ def _compile_support_scan(work_root):
 def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=False,
                event_activity_field=None, include_diagnostics=False, work_root=None,
                pair_population_registry=None, analysis_version='2.2.0',
-               trigger_selection='historical_hard_root'):
+               trigger_selection='historical_hard_root', oracle_profiles=None):
     """One compiled exact-support pass for additive T1, exposure and diagnostics."""
     selected_tunes = set(selected_tunes)
     verify_pairs = pair_population_registry is not None
+    if oracle_profiles is not None:
+        if not verify_pairs:
+            raise ValueError('exact profile oracle requires pair proof')
+        profiles = tuple(oracle_profiles)
+        if not profiles or len({item['id'] for item in profiles}) != len(profiles):
+            raise ValueError('exact profile oracle IDs differ')
+        for profile in profiles:
+            for role in ('trigger_pt', 'associate_pt'):
+                cut=profile[role]
+                if cut is not None and (cut['operator'] != '>=' or
+                                         not math.isfinite(cut['value']) or
+                                         cut['value'] < 0):
+                    raise ValueError('exact profile oracle threshold differs')
+    else:
+        profiles = ()
     if analysis_version not in ('2.2.0', '2.3.0', '2.4.0', '2.5.0'):
         raise ValueError('support analysis version differs')
     if trigger_selection not in ('all_origins', 'historical_hard_root') or \
@@ -636,6 +659,12 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
         included = [shard for shard in source.index['shards']
                     if any(member['tune'] in selected_tunes for member in shard['members'])]
         with mapping.open('x', encoding='utf-8', newline='\n') as stream:
+            for profile in profiles:
+                trigger = profile['trigger_pt']
+                associate = profile['associate_pt']
+                stream.write('PROFILE\t{}\t{}\t{}\n'.format(
+                    profile['id'], -1 if trigger is None else repr(trigger['value']),
+                    -1 if associate is None else repr(associate['value'])))
             for shard in included:
                 root = shard['query_root']['path']
                 if '\t' in root or '\n' in root or ' ' in root:
@@ -669,6 +698,7 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
         opened = None
         upper = {}
         pair_proofs, pair_counts, pair_cells = {}, {}, {}
+        profile_pair_cells, profile_trigger_cells, scanned_profiles = {}, {}, {}
         seen = set()
         with output.open(encoding='ascii') as stream:
             if stream.readline().rstrip('\n') != 'hadronization_support_scan_v1':
@@ -680,6 +710,12 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                 kind = fields[0]
                 if kind == 'OPEN' and len(fields) == 2:
                     opened = int(fields[1])
+                elif kind == 'PROFILE_SPEC' and len(fields) == 4:
+                    profile_id=fields[1]
+                    if profile_id in scanned_profiles:
+                        raise ValueError('duplicate exact profile oracle identity')
+                    scanned_profiles[profile_id]=(float.fromhex(fields[2]),
+                                                   float.fromhex(fields[3]))
                 elif kind == 'UPPER' and len(fields) == 3:
                     upper[fields[1]] = int(fields[2])
                 elif verify_pairs and kind == 'PAIR_PROOF' and len(fields) == 8:
@@ -705,6 +741,22 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                                 for name in ('sumw', 'sumw2', 'sumabsw'))):
                         raise ValueError('family reconstructed pair cell differs')
                     pair_cells[key] = value
+                elif verify_pairs and kind in ('PROFILE_PAIR_CELL','PROFILE_TRIGGER_CELL'):
+                    pair = kind == 'PROFILE_PAIR_CELL'
+                    if len(fields) != (13 if pair else 10):
+                        raise ValueError('exact profile oracle cell width differs')
+                    key = (fields[1], fields[2], *map(int, fields[3:9 if pair else 6]))
+                    offset = 9 if pair else 6
+                    value = dict(count=int(fields[offset]), sumw=float.fromhex(fields[offset+1]),
+                        sumw2=float.fromhex(fields[offset+2]),
+                        sumabsw=float.fromhex(fields[offset+3]))
+                    target = profile_pair_cells if pair else profile_trigger_cells
+                    if (key in target or key[0] not in {profile['id'] for profile in profiles} or
+                            value['count'] <= 0 or value['sumw2'] < 0 or
+                            value['sumabsw'] < 0 or not all(math.isfinite(value[name])
+                                for name in ('sumw','sumw2','sumabsw'))):
+                        raise ValueError('exact profile oracle cell differs')
+                    target[key] = value
                 elif kind == 'MOMENT' and len(fields) == 9:
                     key = (fields[1], int(fields[2]))
                     if key in moments:
@@ -769,6 +821,12 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                 raise ValueError('compiled exact-support output lacks END')
         if opened != len(included) or set(upper) != {'activity', 'triggers', 'pairs', 'kinematics'}:
             raise ValueError('compiled exact-support input coverage differs')
+        expected_profiles={profile['id']:(
+            -1. if profile['trigger_pt'] is None else float(profile['trigger_pt']['value']),
+            -1. if profile['associate_pt'] is None else float(profile['associate_pt']['value']))
+            for profile in profiles}
+        if scanned_profiles != expected_profiles:
+            raise ValueError('compiled exact profile oracle definitions differ')
         expected = {(m['tune'], m['block']) for shard in included
                     for m in shard['members'] if m['tune'] in selected_tunes}
         if expected != {key for key in moments if key[0] in selected_tunes}:
@@ -787,6 +845,7 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                     else 'legacy-cache-complete-v1'),
                 registry_sha256=hashlib.sha256(json.dumps(pair_population_registry,
                     sort_keys=True, separators=(',', ':')).encode('ascii')).hexdigest(),
+                scanned_profile_ids=sorted(scanned_profiles),
                 scan_sha256=hashlib.sha256(output.read_bytes()).hexdigest(),
                 blocks=[dict(tune_id=k[0], block_id=k[1], **v)
                     for k, v in sorted(pair_proofs.items()) if k[0] in selected_tunes],
@@ -795,7 +854,14 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                     if k[0] in selected_tunes],
                 cells=[dict(tune_id=k[0], block_id=k[1], activity_bin=k[2],
                     trigger_pdg=k[3], associate_pdg=k[4], sign=k[5], dphi_bin=k[6],
-                    **v) for k, v in sorted(pair_cells.items()) if k[0] in selected_tunes])
+                    **v) for k, v in sorted(pair_cells.items()) if k[0] in selected_tunes],
+                profile_pair_cells=[dict(profile_id=k[0], tune_id=k[1], block_id=k[2],
+                    activity_bin=k[3], trigger_pdg=k[4], associate_pdg=k[5],
+                    sign=k[6], dphi_bin=k[7], **v)
+                    for k,v in sorted(profile_pair_cells.items()) if k[1] in selected_tunes],
+                profile_trigger_cells=[dict(profile_id=k[0], tune_id=k[1], block_id=k[2],
+                    activity_bin=k[3], trigger_pdg=k[4], **v)
+                    for k,v in sorted(profile_trigger_cells.items()) if k[1] in selected_tunes])
         result = {key: row for key, row in result.items() if key[0] in selected_tunes}
         event_totals = {key: row for key, row in event_totals.items() if key[0] in selected_tunes}
         moments = {key: row for key, row in moments.items() if key[0] in selected_tunes}

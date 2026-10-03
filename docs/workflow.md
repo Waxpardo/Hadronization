@@ -105,7 +105,7 @@ The query stores five sparse families and exact support rows. Its pair-populatio
 
 `query prepare-pack` creates a fixed binary pack for repeated execution. Supply `--prepared-pack` to census, build, verify or scan to use that pack. A pack mismatch fails without a worker-side rebuild.
 
-For current construction, add `--analysis config/analysis-all-origin.json` to both census and build. Add `--layout config/query-all-origin.json` to build. Use the same campaign-stable 219-state catalog dictionary and accepted input receipts; the catalog does not replace the observed-source census. Every final heavy species receives its own signed-PDG bin. The approved 74-member family map applies only downstream. Existing query workspaces retain their original version and must not be relabeled.
+For current construction, add `--analysis config/analysis-all-origin.json` to both census and build. Add `--layout config/query-all-origin.json` to build. Use the same campaign-stable 219-state catalog dictionary and accepted input receipts; the catalog does not replace the observed-source census. Every final heavy species receives its own signed-PDG bin. The approved 82-member family map applies only downstream. Existing query workspaces retain their original version and must not be relabeled.
 
 ## Cluster query construction
 

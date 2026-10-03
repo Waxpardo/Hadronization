@@ -477,10 +477,7 @@ def checked_analysis(path):
         raise ValueError("analysis pair-query registry differs")
     if version in {"2.4.0", "2.5.0"}:
         approved = family.checked_family_map(
-            support.ROOT / ("config/associate-family-runtime.json"
-                            if version == "2.5.0" else
-                            "config/associate-family-runtime-all-heavy.json"),
-            family.MAP_SHA256 if version == "2.5.0" else
+            support.ROOT / "config/associate-family-runtime-all-heavy.json",
             family.ALL_HEAVY_MAP_SHA256)
         if (set(associates["charm"]) | set(associates["beauty"])) != set(approved.members):
             raise ValueError("paper pair registry differs from approved family support")
@@ -590,7 +587,8 @@ def checked_analysis(path):
             {"id": 10, "name": "T1", "scope_family": "tune"},
         ],
         "origin_ids": [
-            {"id": 0, "label": "selected_hard_companion"},
+            {"id": 0, "label": ("selected_hard_associate" if version == "2.5.0"
+                                  else "selected_hard_companion")},
             {"id": 1, "label": "shower"},
             {"id": 2, "label": "MPI"},
             {"id": 3, "label": "other_resolved"},
@@ -737,8 +735,8 @@ def state_registry(analysis):
                 family.ALL_HEAVY_MAP_SHA256)
         elif analysis["version"] == "2.5.0":
             admitted = family.checked_family_map(
-                support.ROOT / "config/associate-family-runtime.json",
-                family.MAP_SHA256)
+                support.ROOT / "config/associate-family-runtime-all-heavy.json",
+                family.ALL_HEAVY_MAP_SHA256)
         else:
             admitted = family.checked_family_map(
                 support.ROOT / analysis["associate_family_map"]["path"],

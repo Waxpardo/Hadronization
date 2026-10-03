@@ -295,6 +295,12 @@ SCHEMAS["SupportDiagnosticReceiptV4"] = dict(
     closure_terms=[dict(category="Int",visible="Bool",coefficient="Int",
                         rows="Count",weighted_sum="Hex64")],
     content_sha256="Digest")
+SCHEMAS["SupportDiagnosticReceiptV4Scoped"] = dict(
+    SCHEMAS["SupportDiagnosticReceiptV4"],
+    schema="=hadronization_observed_support_diagnostics_v2",
+    origin_pair_population_scope=("ALL_ORIGIN_SELECTED_PAIRS|"
+                                  "HISTORICAL_HARD_ROOT_SELECTED_PAIRS"),
+    closure_population_scope="=HISTORICAL_ANALYZED_CLOSURE_ROWS")
 SCHEMAS["ClassBoundaryDeletionV4"] = dict(tune_id="Id",class_id="Int",
     omitted_block="Count",source_family_digest="Digest",
     status="RESOLVED|UNRESOLVED",low=nullable("Int"),
@@ -371,7 +377,7 @@ SCHEMAS["ProjectionResultV4"]["resolved"]["g9_science"] = nullable("G9ScienceNoF
 SCHEMAS["ProjectionResultV4"]["points"] = ["PointResultV4"]
 SCHEMAS["ProjectionResultV4"]["covariance"] = ["CovarianceResultV4"]
 SCHEMAS["ProjectionResultV4"]["event_moment_receipts"] = ["EventMomentReceiptV4"]
-SCHEMAS["ProjectionResultV4"]["support_diagnostic_receipts"] = ["SupportDiagnosticReceiptV4"]
+SCHEMAS["ProjectionResultV4"]["support_diagnostic_receipts"] = ["SupportDiagnosticReceiptAny"]
 SCHEMAS["ProjectionResultV4"]["class_boundary_deletions"] = ["ClassBoundaryDeletionV4"]
 SCHEMAS["ProjectionResultV4"]["provenance"] = "ProvenanceV4"
 SCHEMAS["ProjectionResultV4"]["artifact_binding"] = "CollectionBindingV4"
@@ -439,6 +445,11 @@ def validate_g9_science(request, resolved, *, legacy=False):
 
 
 def validate(value, spec, path="projection"):
+    if spec == "SupportDiagnosticReceiptAny":
+        validate(value, "SupportDiagnosticReceiptV4Scoped" if isinstance(value, dict) and
+                 value.get("schema") == "hadronization_observed_support_diagnostics_v2"
+                 else "SupportDiagnosticReceiptV4", path)
+        return
     if spec == "ProjectionRequestAny":
         validate(value, "ProjectionRequestAllOrigin" if isinstance(value, dict) and
                  value.get("schema") == REQUEST_SCHEMA_ALL_ORIGIN else
@@ -1257,6 +1268,15 @@ def validate_native_v4_receipts(result,request):
         key=(item['tune_id'],item['block_id'])
         body={field:value for field,value in item.items()
               if field!='content_sha256'}
+        selection=request['science_contract'].get('trigger_selection')
+        if selection is not None and (
+                item['schema'] != 'hadronization_observed_support_diagnostics_v2' or
+                item['origin_pair_population_scope'] != (
+                    'ALL_ORIGIN_SELECTED_PAIRS' if selection == 'ALL_ORIGINS'
+                    else 'HISTORICAL_HARD_ROOT_SELECTED_PAIRS') or
+                item['closure_population_scope'] !=
+                    'HISTORICAL_ANALYZED_CLOSURE_ROWS'):
+            raise ValueError('support diagnostic pair/closure population scope differs')
         if item['event_moments_sha256']!=moment_by_group[key]['content_sha256'] or \
                 item['content_sha256']!=digest(body) or \
                 any(sum(row['events'] for row in item[name])!=moment_by_group[key]['events']

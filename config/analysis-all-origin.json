@@ -3,11 +3,11 @@
   "version": "2.5.0",
   "associate_family_map": {
     "schema": "hadronization_public_saved_state_family_map_v1",
-    "path": "config/associate-family-runtime.json",
-    "sha256": "9b441d5a6426999e7bd00f2f7935a32f5f97adc28b968c927e880e0249834d82",
-    "accepted_full_map_sha256": "f7aa4c13a88be93c0dc53b505d4f75d04a679ebfb94c90f022116ae1e87a5466",
-    "semantic_groups_sha256": "fea9ade870fc827d262a50d1bb8919f1a5a86e293d6f6dac6e18dad3b31714f4",
-    "signed_members": 74,
+    "path": "config/associate-family-runtime-all-heavy.json",
+    "sha256": "f2823dfee8fb11f7d84f2217ccc668df3dbbf8f0f69f61541ca418e105f3ba6f",
+    "accepted_full_map_sha256": "95a205e53baafca8d443a056f16b76026ce640cd14e298bfa62d220c774862e3",
+    "semantic_groups_sha256": "d42da49bf7601b82241584cfb938085ba3599436fcfcb3e0057afe7c986be25f",
+    "signed_members": 82,
     "signed_destinations": 42
   },
   "paper_defaults": {
@@ -325,7 +325,11 @@
         14122,
         -14122,
         20433,
-        -20433
+        -20433,
+        4314,
+        -4314,
+        4324,
+        -4324
       ],
       "beauty": [
         511,
@@ -363,7 +367,11 @@
         5332,
         -5332,
         5334,
-        -5334
+        -5334,
+        5314,
+        -5314,
+        5324,
+        -5324
       ]
     },
     "reference_meson_by_trigger": {
@@ -380,7 +388,7 @@
       "4122": -421,
       "5122": 521
     },
-    "expected_count": 444,
+    "expected_count": 492,
     "central_eligibility_source": "accepted saved-state family support registry"
   },
   "correlations": {
@@ -505,7 +513,7 @@
     "origin_ids": [
       {
         "id": 0,
-        "label": "selected_hard_companion"
+        "label": "selected_hard_associate"
       },
       {
         "id": 1,

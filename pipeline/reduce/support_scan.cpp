@@ -26,6 +26,8 @@ using ClosureKey = std::tuple<std::string, unsigned, int, int, int>;
 struct Member {std::string tune; unsigned block; std::uint64_t events;};
 struct Shard {std::string path; std::map<unsigned, Member> members;
   std::map<int,std::set<int>> associates;};
+struct Profile {std::string id; double trigger_min,associate_min;};
+struct InputsResult {std::vector<Shard> shards; std::vector<Profile> profiles;};
 struct Range {std::uint64_t first, end; unsigned local; std::uint64_t observed=0;};
 struct Event {ULong64_t event_id; Double_t weight,pthat,hard_scale; Int_t a15_eta1,a15_eta4,process_code,n_mpi;};
 struct Heavy {ULong64_t event_id; Int_t pdg,status,nc,ncbar,nb,nbbar,index,qc,qb,category; UChar_t final,selected,pair_eligible; Double_t pt,eta,phi;};
@@ -72,15 +74,26 @@ template<class T> void Bind(TTree* tree,const char* name,const char* type,T* des
 TTree* Tree(TFile& file,const char* name){auto* tree=file.Get<TTree>(name);
   if(!tree)throw std::runtime_error(std::string("required exact support tree absent: ")+name);
   return tree;}
-std::vector<Shard> Inputs(const std::string& path){
+InputsResult Inputs(const std::string& path){
   std::ifstream in(path);if(!in)throw std::runtime_error("support map absent");
-  std::vector<Shard> shards;std::string tag;
+  InputsResult result; auto& shards=result.shards;std::string tag;
   while(in>>tag){
     if(tag=="SHARD"){
       std::string name;in>>name;
       if(!in||name.find('\t')!=std::string::npos)
         throw std::runtime_error("support shard locator differs");
       shards.push_back({name,{}, {}});
+    }
+    else if(tag=="PROFILE"){
+      std::string id;double trigger,associate;in>>id>>trigger>>associate;
+      if(!in||!shards.empty()||id.empty()||!std::isfinite(trigger)||
+         !std::isfinite(associate)||trigger < -1.||associate < -1.||
+         (trigger < 0.) != (associate < 0.)||
+         (trigger >= 0. && trigger < associate)||
+         std::any_of(result.profiles.begin(),result.profiles.end(),
+           [&](const Profile& p){return p.id==id;}))
+        throw std::runtime_error("support profile differs");
+      result.profiles.push_back({id,trigger,associate});
     }
     else if(tag=="MEMBER"){
       if(shards.empty())throw std::runtime_error("support member precedes shard");
@@ -95,10 +108,11 @@ std::vector<Shard> Inputs(const std::string& path){
     } else throw std::runtime_error("support map record differs");
   }
   if(shards.empty())throw std::runtime_error("support map has no shards");
-  return shards;
+  return result;
 }
 void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
-          bool verifyPairs,bool familyReconstructed,const std::string& triggerMode){
+          bool verifyPairs,bool familyReconstructed,const std::string& triggerMode,
+          const std::vector<Profile>& profiles){
   std::map<Key,Moments> moments;std::map<HeavyKey,T1> t1;std::map<Key,Diag> diagnostics;
   std::map<OriginKey,Group> origins;std::map<ClosureKey,Group> closures;
   std::vector<Boundary> boundaries;
@@ -106,6 +120,8 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
   std::map<Key,PairProof> pairProofs;
   std::map<std::tuple<std::string,unsigned,int,int>,std::uint64_t> pairCounts;
   std::map<std::tuple<std::string,unsigned,int,int,int,int,int>,PairCell> pairCells;
+  std::map<std::tuple<std::string,std::string,unsigned,int,int>,PairCell> profileTriggers;
+  std::map<std::tuple<std::string,std::string,unsigned,int,int,int,int,int>,PairCell> profilePairs;
   std::uint64_t opened=0;
   for(const auto& shard:shards){
     if(verifyPairs&&(shard.associates.size()!=2||shard.associates.at(4).empty()||
@@ -283,6 +299,10 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
             if(!t.final||std::abs(t.eta)>4.||t.pt<0||
                (triggerMode=="historical_hard_root"&&mask!=0))continue;
             ++pairProofs[key].triggers;
+            for(const auto& profile:profiles)
+              if(t.pt>=profile.trigger_min)
+                profileTriggers[{profile.id,member.tune,member.block,
+                  eta1?ev.a15_eta1:ev.a15_eta4,t.pdg}].add(ev.weight);
             std::uint64_t partners=0;
             for(const auto& [associateIndex,a]:particles){
               const int aq=sector==4?a.qc:a.qb;
@@ -302,6 +322,11 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
                 std::floor(100.*(dphi+.5*piValue)/(2.*piValue)))));
               pairCells[{member.tune,member.block,eta1?ev.a15_eta1:ev.a15_eta4,
                 t.pdg,a.pdg,sign,dphiBin}].add(ev.weight);
+              for(const auto& profile:profiles)
+                if(profile.id!="inclusive"&&t.pt>=profile.trigger_min&&
+                   a.pt>=profile.associate_min)
+                  profilePairs[{profile.id,member.tune,member.block,
+                    eta1?ev.a15_eta1:ev.a15_eta4,t.pdg,a.pdg,sign,dphiBin}].add(ev.weight);
               ++pairCounts[{member.tune,member.block,t.pdg,a.pdg}];
               auto& group=origins[{member.tune,member.block,
                 ao->second.origin==0?5:ao->second.origin,a.category,sign}];
@@ -327,6 +352,10 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
               throw std::runtime_error("family support trigger provenance differs");
             if(std::abs(t.eta)<=4.){
               ++proof.triggers;std::uint64_t partners=0;
+              for(const auto& profile:profiles)
+                if(t.pt>=profile.trigger_min)
+                  profileTriggers[{profile.id,member.tune,member.block,
+                    eta1?ev.a15_eta1:ev.a15_eta4,t.pdg}].add(ev.weight);
               for(const auto& [index,a]:particles){
                 const int aq=trigger.sector==4?a.qc:a.qb;
                 if(index==trigger.index||!a.final||
@@ -349,6 +378,12 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
                   std::floor(100.*(dphi+.5*piValue)/(2.*piValue)))));
                 pairCells[{member.tune,member.block,eta1?ev.a15_eta1:ev.a15_eta4,
                   t.pdg,a.pdg,charge*aq<0?-1:1,dphiBin}].add(ev.weight);
+                for(const auto& profile:profiles)
+                  if(profile.id!="inclusive"&&t.pt>=profile.trigger_min&&
+                     a.pt>=profile.associate_min)
+                    profilePairs[{profile.id,member.tune,member.block,
+                      eta1?ev.a15_eta1:ev.a15_eta4,t.pdg,a.pdg,
+                      charge*aq<0?-1:1,dphiBin}].add(ev.weight);
                 ++pairCounts[{member.tune,member.block,t.pdg,a.pdg}];
               }
               if(!partners)++proof.zero;
@@ -403,6 +438,9 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
   out<<std::hexfloat;
   out<<"hadronization_support_scan_v1\n";
   out<<"OPEN\t"<<opened<<'\n';
+  for(const auto& profile:profiles)
+    out<<"PROFILE_SPEC\t"<<profile.id<<'\t'<<profile.trigger_min<<'\t'
+      <<profile.associate_min<<'\n';
   for(const auto& [name,count]:upper)out<<"UPPER\t"<<name<<'\t'<<count<<'\n';
   for(const auto& [key,p]:pairProofs)out<<"PAIR_PROOF\t"<<key.first<<'\t'<<key.second<<'\t'
     <<p.events<<'\t'<<p.triggers<<'\t'<<p.zero<<'\t'<<p.candidates<<'\t'<<p.stored<<'\n';
@@ -412,6 +450,15 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
     <<std::get<1>(key)<<'\t'<<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'
     <<std::get<4>(key)<<'\t'<<std::get<5>(key)<<'\t'<<std::get<6>(key)<<'\t'
     <<cell.count<<'\t'<<cell.sumw<<'\t'<<cell.sumw2<<'\t'<<cell.sumabsw<<'\n';
+  for(const auto& [key,cell]:profileTriggers)
+    out<<"PROFILE_TRIGGER_CELL\t"<<std::get<0>(key)<<'\t'<<std::get<1>(key)<<'\t'
+      <<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'<<std::get<4>(key)<<'\t'
+      <<cell.count<<'\t'<<cell.sumw<<'\t'<<cell.sumw2<<'\t'<<cell.sumabsw<<'\n';
+  for(const auto& [key,cell]:profilePairs)
+    out<<"PROFILE_PAIR_CELL\t"<<std::get<0>(key)<<'\t'<<std::get<1>(key)<<'\t'
+      <<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'<<std::get<4>(key)<<'\t'
+      <<std::get<5>(key)<<'\t'<<std::get<6>(key)<<'\t'<<std::get<7>(key)<<'\t'
+      <<cell.count<<'\t'<<cell.sumw<<'\t'<<cell.sumw2<<'\t'<<cell.sumabsw<<'\n';
   for(const auto& [key,m]:moments){
     out<<"MOMENT\t"<<key.first<<'\t'<<key.second<<'\t'<<m.events<<'\t'
        <<m.sumw<<'\t'<<m.sumw2<<'\t'<<m.sumabsw<<'\t'<<m.pthat<<'\t'<<m.hard_scale<<'\n';
@@ -447,7 +494,9 @@ int main(int argc,char** argv){
       throw std::runtime_error("support pair policy differs");
     const std::string triggerMode=policy=="family-all-origins"?"all_origins":
         policy=="family-historical-hard-root"?"historical_hard_root":"";
-    Scan(Inputs(argv[1]),field=="eta1",argv[3],!policy.empty(),
-         policy=="family-reconstructed"||!triggerMode.empty(),triggerMode);return 0;
+    const auto input=Inputs(argv[1]);
+    Scan(input.shards,field=="eta1",argv[3],!policy.empty(),
+         policy=="family-reconstructed"||!triggerMode.empty(),triggerMode,
+         input.profiles);return 0;
   }catch(const std::exception& error){std::cerr<<"ERROR: "<<error.what()<<'\n';return 2;}
 }

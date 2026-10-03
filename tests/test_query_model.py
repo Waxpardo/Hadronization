@@ -29,13 +29,54 @@ class ReleasedQueryModel(unittest.TestCase):
         self.assertEqual(analysis["trigger_selection"], {
             "default": "all_origins", "supported": ["all_origins", "historical_hard_root"]})
         self.assertEqual(len(catalog["states"]), 219)
-        self.assertEqual(len(paper), 74)
-        for deferred in (413, -413, 4314, -4314, 4324, -4324, 443, 4422):
-            self.assertIn(deferred, {state["pdg"] for state in catalog["states"]})
-            self.assertNotIn(deferred, paper)
+        self.assertEqual(len(paper), 82)
+        for reinstated in (4314, -4314, 4324, -4324,
+                           5314, -5314, 5324, -5324):
+            self.assertIn(reinstated, paper)
+        for ungrouped in (413, -413, 443, 4422):
+            self.assertIn(ungrouped, {state["pdg"] for state in catalog["states"]})
+            self.assertNotIn(ungrouped, paper)
         control, _ = model.checked_analysis(ROOT / "config/analysis-hard-root-control.json")
         self.assertEqual(control["trigger_selection"]["default"], "historical_hard_root")
         self.assertEqual(control["pair_query_registry"], analysis["pair_query_registry"])
+
+    def test_all_origin_preserves_preexisting_82_member_family_authority(self):
+        approved = "f2823dfee8fb11f7d84f2217ccc668df3dbbf8f0f69f61541ca418e105f3ba6f"
+        previous, _ = model.checked_analysis(ROOT / "config/analysis-all-heavy.json")
+        current, _ = model.checked_analysis(ROOT / "config/analysis-all-origin.json")
+        self.assertEqual(previous["associate_family_map"]["sha256"], approved)
+        self.assertEqual(current["associate_family_map"]["sha256"], approved)
+        self.assertEqual(previous["pair_query_registry"]["associate_pdgs"],
+                         current["pair_query_registry"]["associate_pdgs"])
+        admitted = model.family.checked_family_map(
+            ROOT / current["associate_family_map"]["path"], approved)
+        for signed, destination in ((4314, 4132), (4324, 4232),
+                                    (5314, 5132), (5324, 5232)):
+            for factor in (-1, 1):
+                self.assertEqual(admitted.destination_by_member[factor*signed],
+                                 factor*destination)
+        old = copy.deepcopy(current)
+        old["associate_family_map"] = copy.deepcopy(
+            json.loads((ROOT/"config/analysis-family.json").read_text())[
+                "associate_family_map"])
+        old["pair_query_registry"]["associate_pdgs"] = copy.deepcopy(
+            json.loads((ROOT/"config/analysis-family.json").read_text())[
+                "pair_query_registry"]["associate_pdgs"])
+        old["pair_query_registry"]["expected_count"] = 444
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/"old.json"
+            path.write_text(json.dumps(old))
+            with self.assertRaisesRegex(ValueError, "paper pair registry differs"):
+                model.checked_analysis(path)
+            example=ROOT/"config/grouping-xi-star-only.example.json"
+            subset=copy.deepcopy(current)
+            subset["associate_family_map"]={
+                "schema":"hadronization_saved_state_grouping_recipe_v2",
+                "path":str(example),"sha256":model.support.sha_file(example)}
+            path.write_text(json.dumps(subset))
+            requested,_=model.checked_analysis(path)
+            self.assertEqual(model.compatible_interpretation(current,requested)[
+                "family_map_sha256"],subset["associate_family_map"]["sha256"])
 
     def test_all_selected_pair_scope_preserves_frozen_eligibility(self):
         states, original = model.state_registry(self.analysis)
