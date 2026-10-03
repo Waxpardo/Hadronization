@@ -1,5 +1,8 @@
 """Cross-boundary regressions for the approved all-origin family release."""
 import copy
+import hashlib
+from pathlib import Path
+import tempfile
 import unittest
 from types import SimpleNamespace
 
@@ -45,6 +48,60 @@ class AllOriginRepair(unittest.TestCase):
         stale['profile_pair_cells'].pop()
         with self.assertRaisesRegex(ValueError,'pair key domain differs'):
             native_runner.verify_reconstructed_pair_cells(primitives,stale)
+
+    def test_streamed_pair_oracle_aggregates_repeated_keys_across_shards(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'support-scan.tsv'
+            parts = []
+            with path.open('w', encoding='ascii', newline='\n') as stream:
+                stream.write('hadronization_support_scan_v2\n')
+                for ordinal, weight in enumerate((2., 3.)):
+                    stream.write(f'PART_BEGIN\t{ordinal}\n')
+                    start = stream.tell()
+                    suffix = '\t1\t{}\t{}\t{}\n'.format(
+                        weight.hex(), (weight * weight).hex(), weight.hex())
+                    stream.write('PAIR_CELL\tMONASH\t1\t0\t421\t-421\t-1\t25'+suffix)
+                    stream.write('PROFILE_TRIGGER_CELL\tinclusive\tMONASH\t1\t0\t421'+suffix)
+                    stream.write('PROFILE_TRIGGER_CELL\tpt\tMONASH\t1\t0\t421'+suffix)
+                    stream.write('PROFILE_PAIR_CELL\tpt\tMONASH\t1\t0\t421\t-421\t-1\t25'+suffix)
+                    end = stream.tell()
+                    stream.write(f'PART_END\t{ordinal}\n')
+                    parts.append((start, end))
+                stream.write('PART_BEGIN\t2\n')
+                start = stream.tell()
+                stream.write('PAIR_CELL\tJUNCTIONS\t1\t0\t421\t-421\t-1\t25'
+                             '\t1\t0x1.0p+0\t0x1.0p+0\t0x1.0p+0\n')
+                end = stream.tell()
+                stream.write('PART_END\t2\n')
+                parts.append((start, end))
+                stream.write('END\n')
+            cell = native.AdditiveCell(5.,13.,2)
+            pair = ('MONASH',1,0,421,-421,-1,25)
+            trigger = ('MONASH',1,0,421)
+            primitives = native.NativePrimitives({},
+                {(profile,)+trigger:cell for profile in ('inclusive','pt')},
+                {(profile,)+pair:cell for profile in ('inclusive','pt')},
+                SimpleNamespace(),('inclusive','pt'),'a15_eta4',
+                (421,),((421,-421),))
+            proof = dict(_support_stream=dict(path=str(path),parts=parts,
+                selected_tunes=['MONASH']),
+                scan_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                cells=[],profile_pair_cells=[],profile_trigger_cells=[],
+                scanned_profile_ids=['inclusive','pt'])
+            native_runner.verify_reconstructed_pair_cells(primitives,proof)
+            self.assertEqual(proof['scientific_sparse_reconciliation'][
+                'full_reconstructed_candidate_pairs'],2)
+            self.assertEqual(proof['scientific_sparse_reconciliation'][
+                'occupied_cells'],2)
+            wrong = copy.deepcopy(primitives)
+            wrong.pairs[('pt',)+pair] = native.AdditiveCell(4.,13.,2)
+            with self.assertRaisesRegex(ValueError,'pair population differs'):
+                native_runner.verify_reconstructed_pair_cells(wrong,dict(
+                    _support_stream=dict(path=str(path),parts=parts,
+                        selected_tunes=['MONASH']),
+                    scan_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                    cells=[],profile_pair_cells=[],profile_trigger_cells=[],
+                    scanned_profile_ids=['inclusive','pt']))
 
     def test_scoped_diagnostics_are_versioned_and_old_receipts_stay_readable(self):
         legacy=native.RawDiagnostics().report()

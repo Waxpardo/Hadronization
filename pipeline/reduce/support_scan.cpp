@@ -122,6 +122,8 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
   std::map<std::tuple<std::string,unsigned,int,int,int,int,int>,PairCell> pairCells;
   std::map<std::tuple<std::string,std::string,unsigned,int,int>,PairCell> profileTriggers;
   std::map<std::tuple<std::string,std::string,unsigned,int,int,int,int,int>,PairCell> profilePairs;
+  std::ofstream out(output);if(!out)throw std::runtime_error("support output cannot create");
+  out<<std::hexfloat<<"hadronization_support_scan_v2\n";
   std::uint64_t opened=0;
   for(const auto& shard:shards){
     if(verifyPairs&&(shard.associates.size()!=2||shard.associates.at(4).empty()||
@@ -431,12 +433,28 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
     if(has_h||has_p||has_c||has_t||has_o)throw std::runtime_error("support rows remain after final event");
     for(const auto& range:intervals)if(range.observed!=range.end-range.first)
       throw std::runtime_error("support source exposure differs");
+    // Natural keys may recur in later shards. Bound the exact-row accumulator
+    // to one source shard and retain each sorted run for a streaming merge.
+    out<<"PART_BEGIN\t"<<(opened-1)<<'\n';
+    for(const auto& [key,cell]:pairCells)out<<"PAIR_CELL\t"<<std::get<0>(key)<<'\t'
+      <<std::get<1>(key)<<'\t'<<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'
+      <<std::get<4>(key)<<'\t'<<std::get<5>(key)<<'\t'<<std::get<6>(key)<<'\t'
+      <<cell.count<<'\t'<<cell.sumw<<'\t'<<cell.sumw2<<'\t'<<cell.sumabsw<<'\n';
+    for(const auto& [key,cell]:profileTriggers)
+      out<<"PROFILE_TRIGGER_CELL\t"<<std::get<0>(key)<<'\t'<<std::get<1>(key)<<'\t'
+        <<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'<<std::get<4>(key)<<'\t'
+        <<cell.count<<'\t'<<cell.sumw<<'\t'<<cell.sumw2<<'\t'<<cell.sumabsw<<'\n';
+    for(const auto& [key,cell]:profilePairs)
+      out<<"PROFILE_PAIR_CELL\t"<<std::get<0>(key)<<'\t'<<std::get<1>(key)<<'\t'
+        <<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'<<std::get<4>(key)<<'\t'
+        <<std::get<5>(key)<<'\t'<<std::get<6>(key)<<'\t'<<std::get<7>(key)<<'\t'
+        <<cell.count<<'\t'<<cell.sumw<<'\t'<<cell.sumw2<<'\t'<<cell.sumabsw<<'\n';
+    out<<"PART_END\t"<<(opened-1)<<'\n';
+    if(!out)throw std::runtime_error("support partition write failed");
+    pairCells.clear();profileTriggers.clear();profilePairs.clear();
   }
   if(familyReconstructed){upper["pairs"]=0;for(const auto& [key,p]:pairProofs){
     (void)key;upper["pairs"]+=p.candidates;}}
-  std::ofstream out(output);if(!out)throw std::runtime_error("support output cannot create");
-  out<<std::hexfloat;
-  out<<"hadronization_support_scan_v1\n";
   out<<"OPEN\t"<<opened<<'\n';
   for(const auto& profile:profiles)
     out<<"PROFILE_SPEC\t"<<profile.id<<'\t'<<profile.trigger_min<<'\t'
@@ -446,19 +464,6 @@ void Scan(const std::vector<Shard>& shards,bool eta1,const std::string& output,
     <<p.events<<'\t'<<p.triggers<<'\t'<<p.zero<<'\t'<<p.candidates<<'\t'<<p.stored<<'\n';
   for(const auto& [key,count]:pairCounts)out<<"PAIR_COUNT\t"<<std::get<0>(key)<<'\t'
     <<std::get<1>(key)<<'\t'<<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'<<count<<'\n';
-  for(const auto& [key,cell]:pairCells)out<<"PAIR_CELL\t"<<std::get<0>(key)<<'\t'
-    <<std::get<1>(key)<<'\t'<<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'
-    <<std::get<4>(key)<<'\t'<<std::get<5>(key)<<'\t'<<std::get<6>(key)<<'\t'
-    <<cell.count<<'\t'<<cell.sumw<<'\t'<<cell.sumw2<<'\t'<<cell.sumabsw<<'\n';
-  for(const auto& [key,cell]:profileTriggers)
-    out<<"PROFILE_TRIGGER_CELL\t"<<std::get<0>(key)<<'\t'<<std::get<1>(key)<<'\t'
-      <<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'<<std::get<4>(key)<<'\t'
-      <<cell.count<<'\t'<<cell.sumw<<'\t'<<cell.sumw2<<'\t'<<cell.sumabsw<<'\n';
-  for(const auto& [key,cell]:profilePairs)
-    out<<"PROFILE_PAIR_CELL\t"<<std::get<0>(key)<<'\t'<<std::get<1>(key)<<'\t'
-      <<std::get<2>(key)<<'\t'<<std::get<3>(key)<<'\t'<<std::get<4>(key)<<'\t'
-      <<std::get<5>(key)<<'\t'<<std::get<6>(key)<<'\t'<<std::get<7>(key)<<'\t'
-      <<cell.count<<'\t'<<cell.sumw<<'\t'<<cell.sumw2<<'\t'<<cell.sumabsw<<'\n';
   for(const auto& [key,m]:moments){
     out<<"MOMENT\t"<<key.first<<'\t'<<key.second<<'\t'<<m.events<<'\t'
        <<m.sumw<<'\t'<<m.sumw2<<'\t'<<m.sumabsw<<'\t'<<m.pthat<<'\t'<<m.hard_scale<<'\n';

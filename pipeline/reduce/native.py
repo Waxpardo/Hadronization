@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import bisect
 import hashlib
+import heapq
 import json
 import math
 import os
@@ -606,10 +607,13 @@ def _compile_support_scan(work_root):
 def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=False,
                event_activity_field=None, include_diagnostics=False, work_root=None,
                pair_population_registry=None, analysis_version='2.2.0',
-               trigger_selection='historical_hard_root', oracle_profiles=None):
+               trigger_selection='historical_hard_root', oracle_profiles=None,
+               defer_pair_cells=False):
     """One compiled exact-support pass for additive T1, exposure and diagnostics."""
     selected_tunes = set(selected_tunes)
     verify_pairs = pair_population_registry is not None
+    if defer_pair_cells and (not verify_pairs or work_root is None):
+        raise ValueError('deferred pair proof requires a persistent exact scan')
     if oracle_profiles is not None:
         if not verify_pairs:
             raise ValueError('exact profile oracle requires pair proof')
@@ -699,16 +703,44 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
         upper = {}
         pair_proofs, pair_counts, pair_cells = {}, {}, {}
         profile_pair_cells, profile_trigger_cells, scanned_profiles = {}, {}, {}
+        parts = []
+        current_part = None
+        def add_cell(target, key, value):
+            if (value['count'] <= 0 or value['sumw2'] < 0 or
+                    value['sumabsw'] < 0 or not all(math.isfinite(value[name])
+                        for name in ('sumw', 'sumw2', 'sumabsw'))):
+                raise ValueError('family reconstructed pair cell differs')
+            old = target.get(key)
+            if old is None:
+                target[key] = value
+            else:
+                for name in ('count', 'sumw', 'sumw2', 'sumabsw'):
+                    old[name] += value[name]
         seen = set()
-        with output.open(encoding='ascii') as stream:
-            if stream.readline().rstrip('\n') != 'hadronization_support_scan_v1':
+        with output.open(encoding='ascii', newline='') as stream:
+            if stream.readline().rstrip('\n') != 'hadronization_support_scan_v2':
                 raise ValueError('compiled exact-support output schema differs')
-            for raw in stream:
+            while True:
+                row_start = stream.tell()
+                raw = stream.readline()
+                if not raw:
+                    raise ValueError('compiled exact-support output lacks END')
                 fields = raw.rstrip('\n').split('\t')
                 if fields == ['END']:
+                    if current_part is not None or len(parts) != len(included) or stream.read():
+                        raise ValueError('compiled exact-support partition completion differs')
                     break
                 kind = fields[0]
-                if kind == 'OPEN' and len(fields) == 2:
+                if kind == 'PART_BEGIN' and len(fields) == 2:
+                    if current_part is not None or int(fields[1]) != len(parts):
+                        raise ValueError('compiled exact-support partition order differs')
+                    current_part = (stream.tell(), int(fields[1]))
+                elif kind == 'PART_END' and len(fields) == 2:
+                    if current_part is None or int(fields[1]) != current_part[1]:
+                        raise ValueError('compiled exact-support partition end differs')
+                    parts.append((current_part[0], row_start))
+                    current_part = None
+                elif kind == 'OPEN' and len(fields) == 2:
                     opened = int(fields[1])
                 elif kind == 'PROFILE_SPEC' and len(fields) == 4:
                     profile_id=fields[1]
@@ -733,30 +765,28 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                         raise ValueError('all-selected pair-population species count differs')
                     pair_counts[key] = int(fields[5])
                 elif verify_pairs and kind == 'PAIR_CELL' and len(fields) == 12:
-                    key = (fields[1], *map(int, fields[2:8]))
-                    value = dict(count=int(fields[8]), sumw=float.fromhex(fields[9]),
-                        sumw2=float.fromhex(fields[10]), sumabsw=float.fromhex(fields[11]))
-                    if (key in pair_cells or value['count'] <= 0 or value['sumw2'] < 0 or
-                            value['sumabsw'] < 0 or not all(math.isfinite(value[name])
-                                for name in ('sumw', 'sumw2', 'sumabsw'))):
-                        raise ValueError('family reconstructed pair cell differs')
-                    pair_cells[key] = value
+                    if current_part is None:
+                        raise ValueError('exact pair cell is outside source partition')
+                    if not defer_pair_cells:
+                        key = (fields[1], *map(int, fields[2:8]))
+                        value = dict(count=int(fields[8]), sumw=float.fromhex(fields[9]),
+                            sumw2=float.fromhex(fields[10]), sumabsw=float.fromhex(fields[11]))
+                        add_cell(pair_cells, key, value)
                 elif verify_pairs and kind in ('PROFILE_PAIR_CELL','PROFILE_TRIGGER_CELL'):
                     pair = kind == 'PROFILE_PAIR_CELL'
                     if len(fields) != (13 if pair else 10):
                         raise ValueError('exact profile oracle cell width differs')
-                    key = (fields[1], fields[2], *map(int, fields[3:9 if pair else 6]))
-                    offset = 9 if pair else 6
-                    value = dict(count=int(fields[offset]), sumw=float.fromhex(fields[offset+1]),
-                        sumw2=float.fromhex(fields[offset+2]),
-                        sumabsw=float.fromhex(fields[offset+3]))
-                    target = profile_pair_cells if pair else profile_trigger_cells
-                    if (key in target or key[0] not in {profile['id'] for profile in profiles} or
-                            value['count'] <= 0 or value['sumw2'] < 0 or
-                            value['sumabsw'] < 0 or not all(math.isfinite(value[name])
-                                for name in ('sumw','sumw2','sumabsw'))):
+                    if current_part is None or fields[1] not in {
+                            profile['id'] for profile in profiles}:
                         raise ValueError('exact profile oracle cell differs')
-                    target[key] = value
+                    if not defer_pair_cells:
+                        key = (fields[1], fields[2], *map(int, fields[3:9 if pair else 6]))
+                        offset = 9 if pair else 6
+                        value = dict(count=int(fields[offset]), sumw=float.fromhex(fields[offset+1]),
+                            sumw2=float.fromhex(fields[offset+2]),
+                            sumabsw=float.fromhex(fields[offset+3]))
+                        add_cell(profile_pair_cells if pair else profile_trigger_cells,
+                                 key, value)
                 elif kind == 'MOMENT' and len(fields) == 9:
                     key = (fields[1], int(fields[2]))
                     if key in moments:
@@ -817,8 +847,10 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                 else:
                     raise ValueError('compiled exact-support output record differs')
                 seen.add(kind)
-            else:
-                raise ValueError('compiled exact-support output lacks END')
+        scan_digest=hashlib.sha256()
+        with output.open('rb') as stream:
+            for chunk in iter(lambda: stream.read(4*1024*1024), b''):
+                scan_digest.update(chunk)
         if opened != len(included) or set(upper) != {'activity', 'triggers', 'pairs', 'kinematics'}:
             raise ValueError('compiled exact-support input coverage differs')
         expected_profiles={profile['id']:(
@@ -846,22 +878,28 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
                 registry_sha256=hashlib.sha256(json.dumps(pair_population_registry,
                     sort_keys=True, separators=(',', ':')).encode('ascii')).hexdigest(),
                 scanned_profile_ids=sorted(scanned_profiles),
-                scan_sha256=hashlib.sha256(output.read_bytes()).hexdigest(),
+                scan_sha256=scan_digest.hexdigest(),
                 blocks=[dict(tune_id=k[0], block_id=k[1], **v)
                     for k, v in sorted(pair_proofs.items()) if k[0] in selected_tunes],
                 species_counts=[dict(tune_id=k[0], block_id=k[1], trigger_pdg=k[2],
                     associate_pdg=k[3], count=v) for k, v in sorted(pair_counts.items())
                     if k[0] in selected_tunes],
+                **({'_support_stream': dict(path=str(output), parts=parts,
+                    selected_tunes=sorted(selected_tunes))}
+                    if defer_pair_cells else {}),
                 cells=[dict(tune_id=k[0], block_id=k[1], activity_bin=k[2],
                     trigger_pdg=k[3], associate_pdg=k[4], sign=k[5], dphi_bin=k[6],
-                    **v) for k, v in sorted(pair_cells.items()) if k[0] in selected_tunes],
+                    **v) for k, v in sorted(pair_cells.items()) if k[0] in selected_tunes]
+                    if not defer_pair_cells else [],
                 profile_pair_cells=[dict(profile_id=k[0], tune_id=k[1], block_id=k[2],
                     activity_bin=k[3], trigger_pdg=k[4], associate_pdg=k[5],
                     sign=k[6], dphi_bin=k[7], **v)
-                    for k,v in sorted(profile_pair_cells.items()) if k[1] in selected_tunes],
+                    for k,v in sorted(profile_pair_cells.items()) if k[1] in selected_tunes]
+                    if not defer_pair_cells else [],
                 profile_trigger_cells=[dict(profile_id=k[0], tune_id=k[1], block_id=k[2],
                     activity_bin=k[3], trigger_pdg=k[4], **v)
-                    for k,v in sorted(profile_trigger_cells.items()) if k[1] in selected_tunes])
+                    for k,v in sorted(profile_trigger_cells.items()) if k[1] in selected_tunes]
+                    if not defer_pair_cells else [])
         result = {key: row for key, row in result.items() if key[0] in selected_tunes}
         event_totals = {key: row for key, row in event_totals.items() if key[0] in selected_tunes}
         moments = {key: row for key, row in moments.items() if key[0] in selected_tunes}
@@ -882,6 +920,63 @@ def collect_t1(source, selected_tunes, boundary_axes=None, *, row_upper_bounds=F
     finally:
         if temporary is not None:
             temporary.cleanup()
+
+
+def iter_support_cells(stream_spec, kind):
+    """Merge exact sorted per-shard support cells with bounded resident state.
+
+    Each shard contributes one sorted run. Summation follows shard order for a
+    repeated natural key; the result has the same meaning as a campaign map.
+    The scan file has already passed the parser and is checked again by caller.
+    """
+    widths = {'PAIR_CELL': (12, 1, 8),
+              'PROFILE_PAIR_CELL': (13, 2, 9),
+              'PROFILE_TRIGGER_CELL': (10, 2, 6)}
+    if kind not in widths:
+        raise ValueError('unknown support cell kind')
+    width, strings, offset = widths[kind]
+    path = Path(stream_spec['path'])
+
+    def run(start, end):
+        with path.open(encoding='ascii', newline='') as stream:
+            stream.seek(start)
+            previous = None
+            while stream.tell() < end:
+                raw = stream.readline()
+                fields = raw.rstrip('\n').split('\t')
+                if fields[0] != kind:
+                    continue
+                if len(fields) != width:
+                    raise ValueError('exact support cell width differs')
+                key = tuple(fields[1:1+strings]) + tuple(
+                    map(int, fields[1+strings:offset]))
+                value = dict(count=int(fields[offset]),
+                             sumw=float.fromhex(fields[offset+1]),
+                             sumw2=float.fromhex(fields[offset+2]),
+                             sumabsw=float.fromhex(fields[offset+3]))
+                if (previous is not None and key <= previous or
+                        value['count'] <= 0 or value['sumw2'] < 0 or
+                        value['sumabsw'] < 0 or not all(math.isfinite(value[name])
+                            for name in ('sumw','sumw2','sumabsw'))):
+                    raise ValueError('exact per-shard support cell differs')
+                previous = key
+                yield key, value
+            if stream.tell() != end:
+                raise ValueError('exact support partition boundary differs')
+
+    merged = heapq.merge(*(run(*part) for part in stream_spec['parts']),
+                         key=lambda row: row[0])
+    pending_key, pending = None, None
+    for key, value in merged:
+        if key != pending_key:
+            if pending is not None:
+                yield pending_key, pending
+            pending_key, pending = key, value
+        else:
+            for name in ('count','sumw','sumw2','sumabsw'):
+                pending[name] += value[name]
+    if pending is not None:
+        yield pending_key, pending
 
 
 @dataclass
@@ -1017,56 +1112,69 @@ def write_native_transport(source, primitives, g9, t1, event_totals, path,
         if value.sumw2 < 0:
             raise ValueError('negative native transport Sumw2')
         return number(value.value),number(value.sumw2)
-    lines = ['hadronization_native_primitives_v1',
-             'SOURCE\t{}\t{}\t{}'.format(source.expected_sha256,
-                source.index['scientific_identity_sha256'],
-                source.index['analysis_sha256'])]
-    lines.append('ACTIVITY_FIELD\t'+primitives.activity_field)
-    if row_upper_bounds is not None:
-        if set(row_upper_bounds) != {'activity','triggers','pairs','kinematics'} or \
-                any(type(count) is not int or count < 0
-                    for count in row_upper_bounds.values()):
-            raise ValueError('native support row upper bounds differ')
-        for family,count in sorted(row_upper_bounds.items()):
-            lines.append('SUPPORT_UPPER\t{}\t{}'.format(family,count))
-    for profile in primitives.profile_ids:
-        lines.append('PROFILE\t'+profile)
-    for trigger in primitives.selected_triggers:
-        lines.append('TRIGGER_SCOPE\t'+str(trigger))
-    for trigger,associate in primitives.selected_pairs:
-        lines.append('PAIR_SCOPE\t{}\t{}'.format(trigger,associate))
-    for species in g9.species_pdgs:
-        lines.append('G9_SCOPE\t'+str(species))
-    for species in sorted({key[2] for key in t1}):
-        lines.append('T1_SCOPE\t'+str(species))
-    for (tune,block,activity),value in sorted(primitives.activity.items()):
-        lines.append('ACTIVITY\t{}\t{}\t{}\t{}\t{}'.format(
-            tune,block,activity,*cell(value)))
-    for (profile,tune,block,activity,trigger),value in sorted(primitives.triggers.items()):
-        lines.append('TRIGGER\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
-            profile,tune,block,activity,trigger,*cell(value)))
-    for (profile,tune,block,activity,trigger,associate,sign,dphi),value in sorted(primitives.pairs.items()):
-        lines.append('PAIR\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
-            profile,tune,block,activity,trigger,associate,sign,dphi,*cell(value)))
-    for (tune,block,species,axis,bin_id),value in sorted(g9.cells.items()):
-        lines.append('G9\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
-            tune,block,species,axis,bin_id,*cell(value)))
-    for (tune,block,species),value in sorted(t1.items()):
-        lines.append('T1\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
-            tune,block,species,value.hadrons,value.charm_constituents,
-            value.beauty_constituents,number(value.weighted_hadrons),
-            number(value.weighted_charm_constituents),
-            number(value.weighted_beauty_constituents)))
-    for (tune,block),events in sorted(event_totals.items()):
-        if type(events) is not int or events < 0:
-            raise ValueError('invalid native event exposure')
-        lines.append('EXPOSURE\t{}\t{}\t{}'.format(tune,block,events))
-    lines.append('END')
+    class _LineSink:
+        def __init__(self, stream):
+            self.stream = stream
+            self.count = 0
+        def append(self, line):
+            self.stream.write(line + '\n')
+            self.count += 1
+        def __len__(self):
+            return self.count
     descriptor,temporary_name = tempfile.mkstemp(prefix='.'+path.name+'.',
                                                  suffix='.tmp',dir=path.parent)
     try:
         with os.fdopen(descriptor,'w',encoding='ascii',newline='\n') as stream:
-            stream.write('\n'.join(lines)+'\n')
+            lines = ['hadronization_native_primitives_v1',
+                     'SOURCE\t{}\t{}\t{}'.format(source.expected_sha256,
+                        source.index['scientific_identity_sha256'],
+                        source.index['analysis_sha256'])]
+            sink = _LineSink(stream)
+            for header in lines:
+                sink.append(header)
+            lines = sink
+            lines.append('ACTIVITY_FIELD\t'+primitives.activity_field)
+            if row_upper_bounds is not None:
+                if set(row_upper_bounds) != {'activity','triggers','pairs','kinematics'} or \
+                        any(type(count) is not int or count < 0
+                            for count in row_upper_bounds.values()):
+                    raise ValueError('native support row upper bounds differ')
+                for family,count in sorted(row_upper_bounds.items()):
+                    lines.append('SUPPORT_UPPER\t{}\t{}'.format(family,count))
+            for profile in primitives.profile_ids:
+                lines.append('PROFILE\t'+profile)
+            for trigger in primitives.selected_triggers:
+                lines.append('TRIGGER_SCOPE\t'+str(trigger))
+            for trigger,associate in primitives.selected_pairs:
+                lines.append('PAIR_SCOPE\t{}\t{}'.format(trigger,associate))
+            for species in g9.species_pdgs:
+                lines.append('G9_SCOPE\t'+str(species))
+            for species in sorted({key[2] for key in t1}):
+                lines.append('T1_SCOPE\t'+str(species))
+            for (tune,block,activity),value in sorted(primitives.activity.items()):
+                lines.append('ACTIVITY\t{}\t{}\t{}\t{}\t{}'.format(
+                    tune,block,activity,*cell(value)))
+            for (profile,tune,block,activity,trigger),value in sorted(primitives.triggers.items()):
+                lines.append('TRIGGER\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
+                    profile,tune,block,activity,trigger,*cell(value)))
+            for profile,tune,block,activity,trigger,associate,sign,dphi in sorted(primitives.pairs):
+                value = primitives.pairs[(profile,tune,block,activity,trigger,associate,sign,dphi)]
+                lines.append('PAIR\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
+                    profile,tune,block,activity,trigger,associate,sign,dphi,*cell(value)))
+            for (tune,block,species,axis,bin_id),value in sorted(g9.cells.items()):
+                lines.append('G9\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
+                    tune,block,species,axis,bin_id,*cell(value)))
+            for (tune,block,species),value in sorted(t1.items()):
+                lines.append('T1\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}'.format(
+                    tune,block,species,value.hadrons,value.charm_constituents,
+                    value.beauty_constituents,number(value.weighted_hadrons),
+                    number(value.weighted_charm_constituents),
+                    number(value.weighted_beauty_constituents)))
+            for (tune,block),events in sorted(event_totals.items()):
+                if type(events) is not int or events < 0:
+                    raise ValueError('invalid native event exposure')
+                lines.append('EXPOSURE\t{}\t{}\t{}'.format(tune,block,events))
+            lines.append('END')
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary_name,path)

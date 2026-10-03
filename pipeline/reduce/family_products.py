@@ -101,7 +101,16 @@ def _pair_rows(primitives):
             for key, cell in sorted(primitives.pairs.items())]
 
 
-def _group_rows(fine_rows, family_map):
+def _iter_pair_rows(primitives):
+    for key in sorted(primitives.pairs):
+        cell = primitives.pairs[key]
+        yield dict(profile_id=key[0], tune_id=key[1], block=key[2],
+                   activity_bin=key[3], trigger_pdg=key[4], associate_pdg=key[5],
+                   sign=key[6], dphi_bin=key[7], count=cell.value,
+                   sumw2=cell.sumw2)
+
+
+def _group_cells(fine_rows, family_map):
     grouped = {}
     for row in fine_rows:
         destination = family_map.destination_by_member.get(row["associate_pdg"])
@@ -113,10 +122,19 @@ def _group_rows(fine_rows, family_map):
         cell = grouped.setdefault(key, [0.0, 0.0])
         cell[0] += row["count"]
         cell[1] += row["sumw2"]
-    return [dict(profile_id=key[0], tune_id=key[1], block=key[2],
-                 activity_bin=key[3], trigger_pdg=key[4], associate_pdg=key[5],
-                 sign=key[6], dphi_bin=key[7], count=value[0], sumw2=value[1])
-            for key, value in sorted(grouped.items())]
+    return grouped
+
+
+def _iter_group_rows(grouped):
+    for key in sorted(grouped):
+        value = grouped[key]
+        yield dict(profile_id=key[0], tune_id=key[1], block=key[2],
+                   activity_bin=key[3], trigger_pdg=key[4], associate_pdg=key[5],
+                   sign=key[6], dphi_bin=key[7], count=value[0], sumw2=value[1])
+
+
+def _group_rows(fine_rows, family_map):
+    return list(_iter_group_rows(_group_cells(fine_rows, family_map)))
 
 
 def _shared_rows(primitives):
@@ -159,8 +177,8 @@ def write_products(output, primitives, family_map, *, source_sha256,
     output.mkdir(parents=True, exist_ok=False)
     if not all_heavy:
         (output / "fine").mkdir()
-    fine_rows = _pair_rows(primitives)
-    grouped_rows = _group_rows(fine_rows, family_map)
+    fine_rows = None if all_heavy else _pair_rows(primitives)
+    grouped_rows = None if all_heavy else _group_rows(fine_rows, family_map)
     activity_rows, trigger_rows = _shared_rows(primitives)
     groups = [dict(destination_pdg=destination,
                    family=family_map.family_by_destination[destination],
@@ -206,19 +224,20 @@ def write_products(output, primitives, family_map, *, source_sha256,
         profiles=list(primitives.profile_ids), activity_field=primitives.activity_field)
         if configurable else common)
     by_species = {pdg: [] for pdg in fine_domain}
-    for row in fine_rows:
-        by_species[row["associate_pdg"]].append(row)
+    if not all_heavy:
+        for row in fine_rows:
+            by_species[row["associate_pdg"]].append(row)
     pair_tree = lambda rows: [("pair_primitives", ("profile_id", "tune_id"),
         PAIR_FIELDS[:6], PAIR_FIELDS[6:], rows)]
     if all_heavy:
         relative = "paper-fine.root"
-        _write_root(output / relative, pair_tree(fine_rows),
+        _write_root(output / relative, pair_tree(_iter_pair_rows(primitives)),
                     dict(independent, product="PAPER_FINE_PAIR_PRIMITIVES",
                          signed_species=sorted(by_species),
                          trigger_selection=trigger_selection))
         files[relative] = {"sha256": _sha(output / relative),
                            "bytes": (output / relative).stat().st_size,
-                           "rows": len(fine_rows)}
+                           "rows": len(primitives.pairs)}
     else:
         for pdg in sorted(by_species):
             relative = "fine/pdg-{}.root".format(str(pdg).replace("-", "m"))
@@ -227,12 +246,20 @@ def write_products(output, primitives, family_map, *, source_sha256,
             files[relative] = {"sha256": _sha(output / relative),
                                "bytes": (output / relative).stat().st_size,
                                "rows": len(by_species[pdg])}
+    if all_heavy:
+        grouped_cells = _group_cells(_iter_pair_rows(primitives), family_map)
+        grouped_count = len(grouped_cells)
+        grouped_rows = _iter_group_rows(grouped_cells)
+    else:
+        grouped_count = len(grouped_rows)
     _write_root(output / "families.root", pair_tree(grouped_rows),
                 dict(common, product="DERIVED_SAVED_STATE_FAMILIES",
                      destinations=list(family_map.destinations)))
+    if all_heavy:
+        del grouped_cells, grouped_rows
     files["families.root"] = {"sha256": _sha(output / "families.root"),
         "bytes": (output / "families.root").stat().st_size,
-        "rows": len(grouped_rows)}
+        "rows": grouped_count}
     shared_trees = [
         ("activity_primitives", ("tune_id",), ACTIVITY_FIELDS[:2],
          ACTIVITY_FIELDS[2:], activity_rows),
@@ -297,6 +324,120 @@ def read_rows(path):
     return metadata, trees.get("pair_primitives", [])
 
 
+def _verify_all_heavy_stream(output, manifest):
+    """Cold exact product check with one grouped accumulator, not ROOT row lists."""
+    import ROOT
+    if set(manifest['files']) != {'grouping-recipe.json', 'paper-fine.root',
+                                   'families.root', 'shared.root'}:
+        raise ValueError('all-heavy product fileset differs')
+    for relative, fact in manifest['files'].items():
+        path = output / relative
+        if (path.is_symlink() or not path.is_file() or
+                path.stat().st_size != fact['bytes'] or _sha(path) != fact['sha256']):
+            raise ValueError('family product file fact differs: ' + relative)
+
+    common_keys = ('schema','runtime_map_sha256','accepted_full_map_sha256',
+        'semantic_groups_sha256','source_sha256','analysis_sha256',
+        'content_sha256','block_count','profiles','activity_field',
+        'signed_fine_species','groups','fine_state_identities',
+        'denominator_scope','grouping_recipe_id','heavy_catalog_sha256',
+        'trigger_selection','fine_authority')
+    independent = {key:manifest[key] for key in
+        ('source_sha256','content_sha256','profiles','activity_field')}
+    independent['schema'] = 'hadronization_fine_pair_primitives_v1'
+
+    def opened(relative, expected):
+        file = ROOT.TFile.Open(str(output / relative), 'READ')
+        if not file or file.IsZombie():
+            raise ValueError('family ROOT product cannot be opened')
+        metadata = file.Get('family_product_metadata')
+        if not metadata:
+            file.Close(); raise ValueError('family ROOT product metadata is absent')
+        value = json.loads(str(metadata.GetString()))
+        if any(value.get(key) != expected[key] for key in expected):
+            file.Close(); raise ValueError('family product embedded metadata differs')
+        return file, value
+
+    destination = {member:group['destination_pdg'] for group in manifest['groups']
+                   for member in group['members']}
+    grouped = {}
+    fine, metadata = opened('paper-fine.root', independent)
+    try:
+        if (metadata.get('product') != 'PAPER_FINE_PAIR_PRIMITIVES' or
+                metadata.get('trigger_selection') != manifest['trigger_selection'] or
+                metadata.get('signed_species') != manifest['signed_fine_species']):
+            raise ValueError('paper fine primitive product differs')
+        tree = fine.Get('pair_primitives')
+        if not tree or tree.GetEntries() != manifest['files']['paper-fine.root']['rows']:
+            raise ValueError('paper fine primitive row count differs')
+        previous = None
+        for row in tree:
+            key = (str(row.profile_id),str(row.tune_id),int(row.block),
+                int(row.activity_bin),int(row.trigger_pdg),
+                int(row.associate_pdg),int(row.sign),int(row.dphi_bin))
+            if previous is not None and key <= previous:
+                raise ValueError('duplicate or unordered fine primitive natural key')
+            previous = key
+            if key[5] not in manifest['signed_fine_species']:
+                raise ValueError('fine primitive species differs')
+            target = destination.get(key[5])
+            if target is not None:
+                family_key = key[:5] + (target,) + key[6:]
+                cell = grouped.setdefault(family_key,[0.0,0.0])
+                cell[0] += float(row.count); cell[1] += float(row.sumw2)
+    finally:
+        fine.Close()
+
+    family, metadata = opened('families.root',
+                              {key:manifest[key] for key in common_keys})
+    try:
+        if (metadata.get('product') != 'DERIVED_SAVED_STATE_FAMILIES' or
+                metadata.get('destinations') !=
+                [group['destination_pdg'] for group in manifest['groups']]):
+            raise ValueError('derived family product identity differs')
+        tree = family.Get('pair_primitives')
+        if not tree or tree.GetEntries() != manifest['files']['families.root']['rows']:
+            raise ValueError('family primitive row count differs')
+        previous = None
+        for row in tree:
+            key = (str(row.profile_id),str(row.tune_id),int(row.block),
+                int(row.activity_bin),int(row.trigger_pdg),
+                int(row.associate_pdg),int(row.sign),int(row.dphi_bin))
+            if previous is not None and key <= previous:
+                raise ValueError('duplicate or unordered family primitive natural key')
+            previous = key
+            if grouped.pop(key,None) != [float(row.count),float(row.sumw2)]:
+                raise ValueError('family product additive conservation differs')
+        if grouped:
+            raise ValueError('family product additive conservation differs')
+    finally:
+        family.Close()
+
+    shared, metadata = opened('shared.root', independent)
+    try:
+        if metadata.get('product') != 'SHARED_ACTIVITY_AND_TRIGGER_PRIMITIVES':
+            raise ValueError('shared denominator product differs')
+        for name, fields, expected in (
+            ('activity_primitives',('tune_id','block','activity_bin'),
+             manifest['files']['shared.root']['activity_rows']),
+            ('trigger_primitives',('profile_id','tune_id','block',
+                                   'activity_bin','trigger_pdg'),
+             manifest['files']['shared.root']['trigger_rows'])):
+            tree = shared.Get(name)
+            if not tree or tree.GetEntries() != expected:
+                raise ValueError('shared denominator product differs')
+            previous = None
+            for row in tree:
+                key = tuple(str(getattr(row,field)) if field.endswith('_id')
+                            else int(getattr(row,field)) for field in fields)
+                if previous is not None and key <= previous:
+                    raise ValueError('duplicate shared primitive natural key')
+                previous = key
+    finally:
+        shared.Close()
+    return manifest
+
+
 def verify_products(output, expected_manifest_sha256):
     """Cold, relocation-safe exact-fileset and additive-conservation verifier."""
     output = Path(output)
@@ -348,6 +489,8 @@ def verify_products(output, expected_manifest_sha256):
                     if path.is_file()}
     if actual_files != expected_files:
         raise ValueError("family product exact fileset differs")
+    if all_heavy:
+        return _verify_all_heavy_stream(output, manifest)
     fine_rows = []
     fine_pdgs = set()
     common_keys = ("schema", "runtime_map_sha256", "accepted_full_map_sha256",
