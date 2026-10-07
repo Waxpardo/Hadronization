@@ -397,7 +397,7 @@ Audit all signed heavy identities in a merged version 2.5 collection and optiona
 | `--pdg` | signed integer, none | Include every occupied fine kinematic cell for this signed species. |
 | `--output` | Path, **required** | New inventory JSON path. |
 
-The command compares per-species final and pair weighted totals with exact accepted rows by tune and original block. An unobserved catalog entry is reported with zero rows rather than treated as a populated result.
+The command compares per-species final and pair weighted totals with exact accepted rows by tune and original block. It reports zero rows for an unobserved catalog entry.
 
 Source: [pipeline/query/fine.py](../pipeline/query/fine.py).
 
@@ -624,7 +624,7 @@ Evaluate native statistics and write typed numerical ROOT and exports.
 | `--collection-index-sha` | string, **required** | Independent SHA-256 pin for collection index. |
 | `--expected-sources` | Path, **required** | Independent ordered expected-source list. |
 | `--expected-sources-sha` | string, **required** | Independent SHA-256 pin for sources. |
-| `--analysis` | Path, `config/analysis.json` | Downstream analysis JSON. |
+| `--analysis` | Path, optional | Downstream analysis JSON. An omitted path requires the hash of a shipped default. |
 | `--analysis-sha` | string, **required** | Independent SHA-256 pin for analysis. |
 | `--request` | Path, `none` | Optional exact numerical request JSON. Requires its hash. |
 | `--request-sha` | string, `none` | Independent SHA-256 pin for request. |
@@ -644,6 +644,11 @@ Evaluate native statistics and write typed numerical ROOT and exports.
 | `--reference-tune` | string, `MONASH` | Reference for tune ratios. |
 | `--charm-trigger` | int, `421` | Charm-meson PDG, 421 or 411. Choices: `421`, `411`. |
 | `--representative` | flag, `false` | Restrict a synthetic request. Refused for full research results. |
+
+If you omit `--analysis`, its required SHA-256 must match `config/analysis.json` or `config/analysis-all-origin.json`.
+The first configuration interprets version 2.2 collections; the second interprets version 2.5 collections.
+The command checks the construction configuration separately and rejects incompatible interpretations.
+Specify both `--analysis` and `--analysis-sha` for the hard-root control or a modified configuration.
 
 Inspect its syntax before use:
 

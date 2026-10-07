@@ -6,13 +6,13 @@ The sample selects hard charm and beauty production. It is a generator-level, he
 
 ## Repository contents
 
-The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 57 PDFs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
+The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 53 PDFs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
 
 The source inventory records 3,000 accepted files and 300 million successful events. Each tune contributes 100 million events in ten original source blocks. The [data inventory](data/README.md) binds the distributed results and external inputs to checksums. The [sample accounting guide](docs/science.md#sample-accounting) explains the 127 discarded job attempts.
 
 ## Use the results
 
-Two complete result selections are available: [inclusive pair pT](data/results/manifest.json) and [trigger 1.0 / associate 0.15 GeV/c minima](data/results-pt-1-0p15/manifest.json). Both use the same accepted events. Their pair selections and dedicated trigger denominators differ.
+The [published result](data/results/manifest.json) uses inclusive pair pT and all-origin triggers. Associate families sum 82 saved signed states into 42 signed destinations. The fine query retains the 219-state catalog separately.
 
 Open the [multiplicity distribution](data/results/figures/multiplicity.composite.pdf) or the other [figure PDFs](data/results/figures). The [data guide](data/README.md) explains how to verify the package, change its presentation and download merged THnSparse files. These operations do not require event generation or merging.
 
@@ -51,7 +51,9 @@ flowchart LR
 
 Query files retain exact support rows and block-resolved THnSparse histograms. The physical merge stores sparse objects by tune and original block. Reduction still reads support rows from the query shards. Keep those shards with the merged collection.
 
-The version 2.5 construction retains each catalogued final heavy species in independent signed-PDG bins before applying the approved 82-member saved-state grouping recipe. The fixed catalog contains 219 signed identities; a catalog entry is not evidence that a species was produced. An independent fine inventory checks filled species and generic pair content against exact rows. The paper products project the narrower family domain and retain separate family and shared-denominator ROOT files. The [workflow](docs/workflow.md#build-a-reusable-query) explains construction and [fine-species export](docs/workflow.md#collection-and-physical-merge); result packages retain their recorded construction and grouping versions. Earlier products retain their recorded grouping identity and remain distinguishable from the current all-origin result.
+Version 2.5 retains each catalogued final heavy species in separate signed-PDG bins. A catalog entry does not prove that events contain that species. The fine inventory compares occupied species and generic pair content with exact rows.
+
+A separate saved-state recipe groups associates after query construction. The result package includes fine selected-state primitives, grouped primitives and shared trigger denominators. The [workflow](docs/workflow.md#build-a-reusable-query) explains construction and the [fine-species export](docs/workflow.md#collection-and-physical-merge).
 
 The native estimator computes pooled results and delete-one-source-block jackknife covariance. `numerics.root` stores values, uncertainties, covariance factors, statuses and provenance. The renderer reads these numerical results without recomputing observables.
 
@@ -75,7 +77,7 @@ The [science guide](docs/science.md) gives exact definitions and limitations. Th
 
 The renderer produces multiplicity, charm and beauty correlation, integrated balancing, activity-dependent balancing and baryon-to-meson ratio pages. It also produces signed heavy-hadron pT, eta and phi spectra, supporting views and ROOT canvases. Numerical packages include accounting tables, CSV and TeX exports, missing-value records and manifests.
 
-The default correlation presentation shows MONASH identified pairs and heavy-flavour sign sums. The [inclusive](data/figures-all-tune) and [cut-selection](data/figures-all-tune-pt-1-0p15) companions show correlation comparisons across tunes. Use `config/plot-all-tune.json` to reproduce that presentation. The [workflow](docs/workflow.md#figures-and-tables) describes presentation choices and display limits.
+The default correlation presentation shows MONASH identified pairs and heavy-flavour sign sums. The [all-tune companion](data/figures-all-tune) shows correlation comparisons across tunes. Use `config/plot-all-tune.json` to reproduce that presentation. The [workflow](docs/workflow.md#figures-and-tables) describes presentation choices and display limits.
 
 ## Documentation
 

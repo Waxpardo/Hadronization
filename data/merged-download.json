@@ -1,89 +1,107 @@
 {
   "block_count": 10,
   "campaign": "HF_RUN3_V1",
-  "collection_index_sha256": "160f3c3789395740ec0d0244e3d719a53dbf064c340aecb32670189a40e86dfc",
-  "dictionary_body_sha256": "dac82e9767dc0de1fb5c44abbc4cfb548bd92497fd3b568101ff4add04c70adc",
+  "collection_index_sha256": "2ed126cfeb209207f3b5001b74f958023ee5874dd00600d9dd453ecc785c0844",
+  "dictionary_body_sha256": "1854b4cb79080efb436ee5ac82d773f928589e7656da00c8db6e390423ef361d",
   "events": 300000000,
   "files": [
     {
-      "bytes": 2351995149,
+      "bytes": 3743012318,
       "name": "tune-00.root",
       "parts": [
         {
           "bytes": 1000000000,
           "name": "tune-00.root.part-00",
-          "sha256": "a64202eab57937fae101b6b3cbd2d97f95756708e3f9e78b8673eb1de8b937d1",
-          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-v1-20260922/tune-00.root.part-00"
+          "sha256": "a50718f96f833ff53a1cb013904d95d33b68ebf3bc13aa5644cc77d4be01518d",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-00.root.part-00"
         },
         {
           "bytes": 1000000000,
           "name": "tune-00.root.part-01",
-          "sha256": "17157be75e84587255878e7f61a051d199ed5a9a91a807848cc851e1acf3f75c",
-          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-v1-20260922/tune-00.root.part-01"
+          "sha256": "3d7b8b781e4aa6c181d721a307f8fba86fbd0395c6208a90e99493f7eaff3815",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-00.root.part-01"
         },
         {
-          "bytes": 351995149,
+          "bytes": 1000000000,
           "name": "tune-00.root.part-02",
-          "sha256": "dbfc3bc347829ebffd5465787e02b83da2984e7edec7edc5ed189dd9f885d9c1",
-          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-v1-20260922/tune-00.root.part-02"
+          "sha256": "10bd9d37d65823529002f06ed268d5d6a707867cf3dfd62246c508a74aa7a5c8",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-00.root.part-02"
+        },
+        {
+          "bytes": 743012318,
+          "name": "tune-00.root.part-03",
+          "sha256": "e2fa2987b537545e2022f3422c7444e79179e7e22538ea9dc51144e71ffff5b0",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-00.root.part-03"
         }
       ],
-      "sha256": "1a4a12efacf27b7681ede136324b0bc0e8e530eceefa4927ef1c30078714891b",
+      "sha256": "94d63a8037d54be5e62838ba26ceb958766033b4e85d572139bfb93e01b7f6ba",
       "tune": "MONASH"
     },
     {
-      "bytes": 2404877890,
+      "bytes": 3668024927,
       "name": "tune-01.root",
       "parts": [
         {
           "bytes": 1000000000,
           "name": "tune-01.root.part-00",
-          "sha256": "ca1458573c13f84d550eb7d41909ca5c5d5646491f6fea70539408587bd0dda5",
-          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-v1-20260922/tune-01.root.part-00"
+          "sha256": "e0b0083b776fcf23f71ed431c18b9d0bc152ac0903074bde775907b4c6087502",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-01.root.part-00"
         },
         {
           "bytes": 1000000000,
           "name": "tune-01.root.part-01",
-          "sha256": "3bca1186ecfc6d1075cf30384a4d91a2486332634a4f780290d56900b8a3dd72",
-          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-v1-20260922/tune-01.root.part-01"
+          "sha256": "3c918c82070fac6600375e4d73b11cd0680108c4f2ceac38e0b13064f5d35a41",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-01.root.part-01"
         },
         {
-          "bytes": 404877890,
+          "bytes": 1000000000,
           "name": "tune-01.root.part-02",
-          "sha256": "073771ffe927830c41dfa9627c9f390f90affe22c8fc31eb23c24020cd037d51",
-          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-v1-20260922/tune-01.root.part-02"
+          "sha256": "f7ff8dc9bb8339d02991f6200d8e05adb05066c62938333e19314c603dd80734",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-01.root.part-02"
+        },
+        {
+          "bytes": 668024927,
+          "name": "tune-01.root.part-03",
+          "sha256": "3dfad3e5186066c1ad19497b5d88525111d3eb4d3893a859dc8e1743262be2a3",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-01.root.part-03"
         }
       ],
-      "sha256": "f7e9dd0db90ac5bf6c67d5af9fdc15e0631d2cf683ac95d65602a9b30e3382b4",
+      "sha256": "36ea151567f368ae5f7e9471356849c78d90b7b40494ac196a440b03cfdfe650",
       "tune": "JUNCTIONS"
     },
     {
-      "bytes": 2245109299,
+      "bytes": 3613307259,
       "name": "tune-02.root",
       "parts": [
         {
           "bytes": 1000000000,
           "name": "tune-02.root.part-00",
-          "sha256": "5fb6e98e7b7e99fb95a0fd788ea52e26602e63768c4b3091d5c2d536deaae095",
-          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-v1-20260922/tune-02.root.part-00"
+          "sha256": "be16adae69134853857b955282c1b5ad11c630275f7a35d6ea2f0bf3c84b96b7",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-02.root.part-00"
         },
         {
           "bytes": 1000000000,
           "name": "tune-02.root.part-01",
-          "sha256": "9462819a3621c07fa69a000d514fe3e39477c45c0fc84e2342683fdd79a74397",
-          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-v1-20260922/tune-02.root.part-01"
+          "sha256": "3ba15c2d275094ce912b7ce87a9dbe42d023f30b1bd50b029f88eaa053c818ae",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-02.root.part-01"
         },
         {
-          "bytes": 245109299,
+          "bytes": 1000000000,
           "name": "tune-02.root.part-02",
-          "sha256": "2a14cfa1d1508033eed95487188f9b009ca3ef73863047c17b8f1ec35c657db6",
-          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-v1-20260922/tune-02.root.part-02"
+          "sha256": "793d054dcff4e390a728dd7cae0a3e5153857876229102684c799265e5c0c9b6",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-02.root.part-02"
+        },
+        {
+          "bytes": 613307259,
+          "name": "tune-02.root.part-03",
+          "sha256": "365d4d07d8cea9f8616f5b49811ffeae2530e1ca6372596528e411e17f68834d",
+          "url": "https://github.com/Waxpardo/Hadronization/releases/download/hf-run3-all-origin-20261007/tune-02.root.part-03"
         }
       ],
-      "sha256": "2e96df1a78be8e0f984e9d19cc8b93326b5b357acc8985e3dd6afc04434bf4c4",
+      "sha256": "623339ca4465417b77239804ca84f89c6030d296d36c34e67f535d25973347e1",
       "tune": "CLOSEPACKING"
     }
   ],
-  "release_url": "https://github.com/Waxpardo/Hadronization/releases/tag/hf-run3-v1-20260922",
+  "release_url": "https://github.com/Waxpardo/Hadronization/releases/tag/hf-run3-all-origin-20261007",
   "schema": "hadronization_merged_download_v1"
 }

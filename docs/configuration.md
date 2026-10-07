@@ -6,9 +6,13 @@
 
 | File | Consumer and role | Change policy |
 | --- | --- | --- |
-| [analysis.json](../config/analysis.json) | Query construction and numerical reduction | Change supported profiles or percentiles in a separately hashed copy |
-| [analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) | Optional pair-pT comparison | Adds `pt_1_0p15` to the inclusive configuration; select it with `--profile-id` |
-| [query.json](../config/query.json) | Query builder, verifier and collection reader | Fixed schema, not a free-form layout selector |
+| [analysis-all-origin.json](../config/analysis-all-origin.json) | Current fine-species query and default grouped reduction | Preserve construction fields; change supported projection choices in a separately hashed request |
+| [query-all-origin.json](../config/query-all-origin.json) | Current query layout and retained all-origin support | Fixed construction schema |
+| [associate-family-runtime-all-heavy.json](../config/associate-family-runtime-all-heavy.json) | Default saved-state associate grouping | Bind a compatible downstream recipe by its SHA-256 |
+| [heavy-catalog.json](../config/heavy-catalog.json) | Complete signed heavy-state registry | Keep exact bytes for accepted fine-species products |
+| [analysis.json](../config/analysis.json) | Version 2.2 query construction and reduction | Use only with its matching input contract |
+| [analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) | Version 2.2 pair-pT comparison | Adds `pt_1_0p15` to the inclusive configuration; select it with `--profile-id` |
+| [query.json](../config/query.json) | Version 2.2 query builder, verifier and collection reader | Fixed schema, not a free-form layout selector |
 | [plot.json](../config/plot.json) | Default renderer presentation | Change only supported display fields |
 | [plot-dplus.json](../config/plot-dplus.json) | D+ presentation | Pair with `reduce run --charm-trigger 411` |
 | [plot-all-tune.json](../config/plot-all-tune.json) | All-tune correlation presentation | Same default D0 scientific recipe |
@@ -42,7 +46,7 @@ Both rectangle minima must be exact regular-bin lower edges in the query pT axis
 
 The supplied `analysis-pt-1-0p15.json` adds a rectangular profile to the inclusive request. Its minima are 1.0 GeV/c for triggers and 0.15 GeV/c for associates. All other fields match `analysis.json`. Select `pt_1_0p15` explicitly; the default profile remains inclusive.
 
-This JSON value can replace `profiles` in a copy of `analysis.json`:
+This JSON value can replace `profiles` in a copy of `analysis-all-origin.json`:
 
 ```json
 [
@@ -54,7 +58,7 @@ This JSON value can replace `profiles` in a copy of `analysis.json`:
 ]
 ```
 
-The unchanged query can support all three profiles. Post-construction compatibility permits changes only to `profiles` and `percentile_intervals`. The charm CLI derives its coherent recipe separately. Other scientific changes need a new compatible data construction and source review.
+The unchanged query supports all three profiles. Version 2.2 permits profile and percentile changes. Version 2.5 also supports its retained trigger-origin selector and compatible grouping recipes. The charm CLI derives its coherent signed recipe separately. Other scientific changes require a compatible data contract.
 
 Class changes affect boundaries, deletions, covariance, labels and plots. The renderer has eleven noninclusive line patterns. A numerical partition beyond its display capacity does not automatically yield readable paper pages. The paper renderer accepts inclusive and supported rectangular profiles. It reads each selection from the numerical archive.
 
@@ -79,16 +83,22 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 | `estimator_policy` | Pooled center, ten-block jackknife, denominator resolution and status rules |
 | `compact_domain_registries`, `compact_storage` | Bound compatibility descriptors. They do not select another production science engine. |
 
-`config/analysis-family.json` is the bounded version 2.3.0 construction model. It expands only the associate support needed by the accepted map, keeps the inclusive pT and eta selections, and binds the public runtime contract `config/associate-family-runtime.json` by SHA-256. That compact contract carries the accepted full-map SHA and an exact semantic-groups digest without private review paths or status metadata. The original `config/analysis.json` remains the unchanged version 2.2.0 construction model for accepted historical products.
+`config/analysis-family.json` is the bounded version 2.3.0 construction model. It expands the associate support for the map and keeps inclusive pT and eta selections. It binds the public runtime contract `config/associate-family-runtime.json` by SHA-256. That compact contract carries the accepted full-map SHA and an exact semantic-groups digest without private review paths or status metadata. The original `config/analysis.json` remains the unchanged version 2.2.0 construction model for accepted historical products.
 
-For new construction, use [analysis-all-origin.json](../config/analysis-all-origin.json) with [query-all-origin.json](../config/query-all-origin.json). The former binds the complete [signed heavy catalog](../config/heavy-catalog.json) and the approved [82-member family map](../config/associate-family-runtime-all-heavy.json). The catalog controls fine storage and generic pairs, independently of the narrower paper pair registry and family map. `trigger_selection.default` is `all_origins`; a separately pinned [historical control](../config/analysis-hard-root-control.json) selects the retained selected-hard predicate during offline reduction. The trigger identities, activity, inclusive-pT and numerical-estimator definitions are unchanged. A new catalog or query-axis contract requires rebuilding the query. Version 2.4 construction remains a readable historical contract with its own source and trigger-selection identity.
+For new construction, use [analysis-all-origin.json](../config/analysis-all-origin.json) with [query-all-origin.json](../config/query-all-origin.json). The former binds the complete [signed heavy catalog](../config/heavy-catalog.json) and the approved [82-member family map](../config/associate-family-runtime-all-heavy.json). The catalog controls fine storage and generic pairs, independently of the narrower paper pair registry and family map. `trigger_selection.default` is `all_origins`; a separately pinned [historical control](../config/analysis-hard-root-control.json) selects the retained selected-hard predicate during offline reduction. The trigger identities, activity, inclusive-pT and numerical-estimator definitions remain fixed.
 
-To select a compatible subset of the approved 82-member paper domain, copy `analysis-all-origin.json` and change only `associate_family_map`. Keep `pair_query_registry` unchanged. Set the map binding to `{"schema":"hadronization_saved_state_grouping_recipe_v2","path":"/absolute/path/to/recipe.json","sha256":"<SHA-256 of recipe bytes>"}` and pass the separately hashed analysis copy to `reduce run`. The immutable fine THnSparse and shared trigger/activity content are reused; grouped ROOT, numerical results and plots are newly derived. A recipe that adds a member outside the approved paper domain is rejected; its species remains independently accessible through `hadronization fine`. The included [Xi-star-only example](../config/grouping-xi-star-only.example.json) is a supported subset interpretation, distinct from the complete default family result.
+A new catalog or query-axis contract requires rebuilding the query. Version 2.4 construction remains a readable historical contract with its own source and trigger-selection identity.
+
+To select a compatible subset of the approved 82-member paper domain, copy `analysis-all-origin.json` and change only `associate_family_map`. Keep `pair_query_registry` unchanged. Set the map binding to `{"schema":"hadronization_saved_state_grouping_recipe_v2","path":"/absolute/path/to/recipe.json","sha256":"<SHA-256 of recipe bytes>"}` and pass the separately hashed analysis copy to `reduce run`. Reduction reuses fine THnSparse and shared trigger/activity content. It derives new grouped ROOT, numerical results and plots.
+
+The validator rejects members outside the supported paper domain. Their species remain accessible through `hadronization fine`.
+
+The included [Xi-star-only example](../config/grouping-xi-star-only.example.json) is a supported subset interpretation, distinct from the complete default family result.
 
 For a version 2.5 collection, the following creates the included Xi-star subset request without editing its construction configuration:
 
 ```sh
-python3.14 - <<'PY'
+python3 - <<'PY'
 import hashlib
 import json
 from pathlib import Path
@@ -100,15 +110,18 @@ analysis['associate_family_map'] = {
     'path': str(recipe),
     'sha256': hashlib.sha256(recipe.read_bytes()).hexdigest(),
 }
-request = Path('analysis-xi-star-only.json')
+request = Path('data/work/analysis-xi-star-only.json')
+request.parent.mkdir(parents=True, exist_ok=True)
 request.write_text(json.dumps(analysis, sort_keys=True, indent=2) + '\n')
 print('analysis SHA-256:', hashlib.sha256(request.read_bytes()).hexdigest())
 PY
 ```
 
-Pass `analysis-xi-star-only.json` and the printed digest as `--analysis` and `--analysis-sha` to the [reduction command](workflow.md#numerical-reduction), with the matching version 2.5 collection and source pins. A changed recipe needs its own new digest and output directory.
+Pass `data/work/analysis-xi-star-only.json` and the printed digest as `--analysis` and `--analysis-sha` to the [reduction command](workflow.md#numerical-reduction), with the matching version 2.5 collection and source pins. A changed recipe needs its own new digest and output directory.
 
-The recipe pins the authenticated catalog and PYTHIA 8.317 unit-endpoint evidence, identifies each signed destination and lists its included signed members explicitly. The validator permits disjoint subsets of the approved unit-endpoint groups, including a group without its ground-state destination as a member. It rejects unknown, overlapping, duplicate or unconjugated members and altered endpoint evidence. The destination is a label for the grouped result, not an implicit contribution. Unlisted species remain in the fine collection. A subset yield must be described as that subset, not as the complete family yield. Missing input cannot be treated as a zero observation. The recipe bytes and checksum travel with the grouped and portable numerical products.
+The recipe pins the authenticated catalog and PYTHIA 8.317 unit-endpoint evidence, identifies each signed destination and lists its included signed members explicitly. The validator permits disjoint subsets of the approved unit-endpoint groups, including a group without its ground-state destination as a member. It rejects unknown, overlapping, duplicate or unconjugated members and altered endpoint evidence.
+
+The destination labels the grouped result. It does not imply a contribution. Unlisted species remain in the fine collection. Describe a subset yield as that subset, not as the complete family yield. Do not treat missing input as a zero observation. The recipe bytes and checksum travel with the grouped and portable numerical products.
 
 The nominal activity ID is `charged_light_sector_activity_a15_v1_eta4`. The alternate ID ends in `eta1`. Their physical fields are `a15_eta4` and `a15_eta1` respectively. Their `raw_definition_id` is an input metadata identifier, not an additional experimental-primary selection.
 

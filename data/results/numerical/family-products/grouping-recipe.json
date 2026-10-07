@@ -1,0 +1,558 @@
+{
+  "accepted_full_map_sha256": "95a205e53baafca8d443a056f16b76026ce640cd14e298bfa62d220c774862e3",
+  "basis": {
+    "kinematics": "sum saved-state associate primitives at saved kinematics",
+    "pair_pt": "inclusive",
+    "standalone_spectra": "unchanged fine species",
+    "triggers": "unchanged",
+    "unit_endpoint": "Exact unit endpoint probability in the pinned generator model; not a measured physical branching fraction"
+  },
+  "counts": {
+    "signed_members": 82,
+    "signed_destinations": 42,
+    "deferred_signed_xi_excitation_members": 0
+  },
+  "deferred_signed_pdgs": [],
+  "fine_state_identities": [
+    {
+      "id": "pythia-pdg-m20433",
+      "name": "D*_1s-",
+      "pdg": -20433,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-m14122",
+      "name": "Lambda_c(2593)bar-",
+      "pdg": -14122,
+      "spin2j1": 2
+    },
+    {
+      "id": "pythia-pdg-m10431",
+      "name": "D*_0s-",
+      "pdg": -10431,
+      "spin2j1": 1
+    },
+    {
+      "id": "pythia-pdg-m5334",
+      "name": "Omega*_bbar+",
+      "pdg": -5334,
+      "spin2j1": 4
+    },
+    {
+      "pdg": -5324,
+      "id": "pythia-pdg-m5324",
+      "name": "Xi*_bbar0",
+      "spin2j1": 4
+    },
+    {
+      "pdg": -5314,
+      "id": "pythia-pdg-m5314",
+      "name": "Xi*_bbar+",
+      "spin2j1": 4
+    },
+    {
+      "id": "pythia-pdg-m4334",
+      "name": "Omega*_cbar0",
+      "pdg": -4334,
+      "spin2j1": 4
+    },
+    {
+      "pdg": -4324,
+      "id": "pythia-pdg-m4324",
+      "name": "Xi*_cbar-",
+      "spin2j1": 4
+    },
+    {
+      "pdg": -4314,
+      "id": "pythia-pdg-m4314",
+      "name": "Xi*_cbar0",
+      "spin2j1": 4
+    },
+    {
+      "id": "pythia-pdg-m4124",
+      "name": "Lambda_c(2625)bar-",
+      "pdg": -4124,
+      "spin2j1": 4
+    },
+    {
+      "id": "pythia-pdg-m543",
+      "name": "B*_c-",
+      "pdg": -543,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-m533",
+      "name": "B*_sbar0",
+      "pdg": -533,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-m523",
+      "name": "B*-",
+      "pdg": -523,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-m513",
+      "name": "B*bar0",
+      "pdg": -513,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-m433",
+      "name": "D*_s-",
+      "pdg": -433,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-m423",
+      "name": "D*bar0",
+      "pdg": -423,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-p423",
+      "name": "D*0",
+      "pdg": 423,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-p433",
+      "name": "D*_s+",
+      "pdg": 433,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-p513",
+      "name": "B*0",
+      "pdg": 513,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-p523",
+      "name": "B*+",
+      "pdg": 523,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-p533",
+      "name": "B*_s0",
+      "pdg": 533,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-p543",
+      "name": "B*_c+",
+      "pdg": 543,
+      "spin2j1": 3
+    },
+    {
+      "id": "pythia-pdg-p4124",
+      "name": "Lambda_c(2625)+",
+      "pdg": 4124,
+      "spin2j1": 4
+    },
+    {
+      "pdg": 4314,
+      "id": "pythia-pdg-p4314",
+      "name": "Xi*_c0",
+      "spin2j1": 4
+    },
+    {
+      "pdg": 4324,
+      "id": "pythia-pdg-p4324",
+      "name": "Xi*_c+",
+      "spin2j1": 4
+    },
+    {
+      "id": "pythia-pdg-p4334",
+      "name": "Omega*_c0",
+      "pdg": 4334,
+      "spin2j1": 4
+    },
+    {
+      "pdg": 5314,
+      "id": "pythia-pdg-p5314",
+      "name": "Xi*_b-",
+      "spin2j1": 4
+    },
+    {
+      "pdg": 5324,
+      "id": "pythia-pdg-p5324",
+      "name": "Xi*_b0",
+      "spin2j1": 4
+    },
+    {
+      "id": "pythia-pdg-p5334",
+      "name": "Omega*_b-",
+      "pdg": 5334,
+      "spin2j1": 4
+    },
+    {
+      "id": "pythia-pdg-p10431",
+      "name": "D*_0s+",
+      "pdg": 10431,
+      "spin2j1": 1
+    },
+    {
+      "id": "pythia-pdg-p14122",
+      "name": "Lambda_c(2593)+",
+      "pdg": 14122,
+      "spin2j1": 2
+    },
+    {
+      "id": "pythia-pdg-p20433",
+      "name": "D*_1s+",
+      "pdg": 20433,
+      "spin2j1": 3
+    }
+  ],
+  "fine_state_identities_sha256": "9b6c33f0abc2d2046ba0a314ff670574c4e4e594c1e66d809a6482e4c08c1ef1",
+  "groups": [
+    {
+      "destination_pdg": -5332,
+      "family": "Omega_b",
+      "members": [
+        -5334,
+        -5332
+      ]
+    },
+    {
+      "destination_pdg": -5232,
+      "family": "Xi_b",
+      "members": [
+        -5324,
+        -5322,
+        -5232
+      ]
+    },
+    {
+      "destination_pdg": -5222,
+      "family": "Sigma_b",
+      "members": [
+        -5222
+      ]
+    },
+    {
+      "destination_pdg": -5212,
+      "family": "Sigma_b",
+      "members": [
+        -5212
+      ]
+    },
+    {
+      "destination_pdg": -5132,
+      "family": "Xi_b",
+      "members": [
+        -5314,
+        -5312,
+        -5132
+      ]
+    },
+    {
+      "destination_pdg": -5122,
+      "family": "Lambda_b",
+      "members": [
+        -5122
+      ]
+    },
+    {
+      "destination_pdg": -5112,
+      "family": "Sigma_b",
+      "members": [
+        -5112
+      ]
+    },
+    {
+      "destination_pdg": -4332,
+      "family": "Omega_c",
+      "members": [
+        -4334,
+        -4332
+      ]
+    },
+    {
+      "destination_pdg": -4232,
+      "family": "Xi_c",
+      "members": [
+        -4324,
+        -4322,
+        -4232
+      ]
+    },
+    {
+      "destination_pdg": -4222,
+      "family": "Sigma_c",
+      "members": [
+        -4222
+      ]
+    },
+    {
+      "destination_pdg": -4212,
+      "family": "Sigma_c",
+      "members": [
+        -4212
+      ]
+    },
+    {
+      "destination_pdg": -4132,
+      "family": "Xi_c",
+      "members": [
+        -4314,
+        -4312,
+        -4132
+      ]
+    },
+    {
+      "destination_pdg": -4122,
+      "family": "Lambda_c",
+      "members": [
+        -14122,
+        -4124,
+        -4122
+      ]
+    },
+    {
+      "destination_pdg": -4112,
+      "family": "Sigma_c",
+      "members": [
+        -4112
+      ]
+    },
+    {
+      "destination_pdg": -541,
+      "family": "Bc",
+      "members": [
+        -543,
+        -541
+      ]
+    },
+    {
+      "destination_pdg": -531,
+      "family": "Bs",
+      "members": [
+        -533,
+        -531
+      ]
+    },
+    {
+      "destination_pdg": -521,
+      "family": "B",
+      "members": [
+        -523,
+        -521
+      ]
+    },
+    {
+      "destination_pdg": -511,
+      "family": "B",
+      "members": [
+        -513,
+        -511
+      ]
+    },
+    {
+      "destination_pdg": -431,
+      "family": "Ds",
+      "members": [
+        -20433,
+        -10431,
+        -433,
+        -431
+      ]
+    },
+    {
+      "destination_pdg": -421,
+      "family": "D",
+      "members": [
+        -423,
+        -421
+      ]
+    },
+    {
+      "destination_pdg": -411,
+      "family": "D",
+      "members": [
+        -411
+      ]
+    },
+    {
+      "destination_pdg": 411,
+      "family": "D",
+      "members": [
+        411
+      ]
+    },
+    {
+      "destination_pdg": 421,
+      "family": "D",
+      "members": [
+        421,
+        423
+      ]
+    },
+    {
+      "destination_pdg": 431,
+      "family": "Ds",
+      "members": [
+        431,
+        433,
+        10431,
+        20433
+      ]
+    },
+    {
+      "destination_pdg": 511,
+      "family": "B",
+      "members": [
+        511,
+        513
+      ]
+    },
+    {
+      "destination_pdg": 521,
+      "family": "B",
+      "members": [
+        521,
+        523
+      ]
+    },
+    {
+      "destination_pdg": 531,
+      "family": "Bs",
+      "members": [
+        531,
+        533
+      ]
+    },
+    {
+      "destination_pdg": 541,
+      "family": "Bc",
+      "members": [
+        541,
+        543
+      ]
+    },
+    {
+      "destination_pdg": 4112,
+      "family": "Sigma_c",
+      "members": [
+        4112
+      ]
+    },
+    {
+      "destination_pdg": 4122,
+      "family": "Lambda_c",
+      "members": [
+        4122,
+        4124,
+        14122
+      ]
+    },
+    {
+      "destination_pdg": 4132,
+      "family": "Xi_c",
+      "members": [
+        4132,
+        4312,
+        4314
+      ]
+    },
+    {
+      "destination_pdg": 4212,
+      "family": "Sigma_c",
+      "members": [
+        4212
+      ]
+    },
+    {
+      "destination_pdg": 4222,
+      "family": "Sigma_c",
+      "members": [
+        4222
+      ]
+    },
+    {
+      "destination_pdg": 4232,
+      "family": "Xi_c",
+      "members": [
+        4232,
+        4322,
+        4324
+      ]
+    },
+    {
+      "destination_pdg": 4332,
+      "family": "Omega_c",
+      "members": [
+        4332,
+        4334
+      ]
+    },
+    {
+      "destination_pdg": 5112,
+      "family": "Sigma_b",
+      "members": [
+        5112
+      ]
+    },
+    {
+      "destination_pdg": 5122,
+      "family": "Lambda_b",
+      "members": [
+        5122
+      ]
+    },
+    {
+      "destination_pdg": 5132,
+      "family": "Xi_b",
+      "members": [
+        5132,
+        5312,
+        5314
+      ]
+    },
+    {
+      "destination_pdg": 5212,
+      "family": "Sigma_b",
+      "members": [
+        5212
+      ]
+    },
+    {
+      "destination_pdg": 5222,
+      "family": "Sigma_b",
+      "members": [
+        5222
+      ]
+    },
+    {
+      "destination_pdg": 5232,
+      "family": "Xi_b",
+      "members": [
+        5232,
+        5322,
+        5324
+      ]
+    },
+    {
+      "destination_pdg": 5332,
+      "family": "Omega_b",
+      "members": [
+        5332,
+        5334
+      ]
+    }
+  ],
+  "limitations": [
+    "Saved-state family sums use saved particle kinematics in the pinned PYTHIA model; they are not physical post-decay ground-state spectra.",
+    "Xi-prime and Xi-star membership follows pinned model unit endpoints even where physical state identification or decay channels differ."
+  ],
+  "schema": "hadronization_public_saved_state_family_map_v1",
+  "semantic_groups_sha256": "d42da49bf7601b82241584cfb938085ba3599436fcfcb3e0057afe7c986be25f",
+  "source_model": {
+    "generator": "PYTHIA 8.317",
+    "particle_data_sha256": "330ba4e7f5a081235b5055f7b312fe6f5c9fe9c95411a845cba7a3e82e67ecca"
+  },
+  "version": "1.1.0"
+}

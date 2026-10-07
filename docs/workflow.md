@@ -82,6 +82,7 @@ Repeat the three input arguments in matching order for every analyzed pair:
 ./hadronization query census \
   --input "${ANALYZED_ROOT:?}" --receipt "${ANALYZED_RECEIPT:?}" \
   --accepted-receipt-sha256 "${RECEIPT_SHA256:?}" \
+  --analysis config/analysis-all-origin.json \
   --expected-source-count 3000 --output "$RUN_ROOT/dictionary.json" \
   --work-root "$RUN_ROOT/query-work"
 ```
@@ -95,6 +96,7 @@ For a local query build, use the complete dictionary and one input pair:
   --input "${ANALYZED_ROOT:?}" --receipt "${ANALYZED_RECEIPT:?}" \
   --accepted-receipt-sha256 "${RECEIPT_SHA256:?}" \
   --dictionary "$RUN_ROOT/dictionary.json" \
+  --analysis config/analysis-all-origin.json --layout config/query-all-origin.json \
   --work-root "$RUN_ROOT/query-work" --output "$RUN_ROOT/query-0000"
 ./hadronization query verify --workspace "$RUN_ROOT/query-0000" \
   --expected-content-sha256 "${QUERY_CONTENT_SHA256:?}" \
@@ -105,7 +107,9 @@ The query stores five sparse families and exact support rows. Its pair-populatio
 
 `query prepare-pack` creates a fixed binary pack for repeated execution. Supply `--prepared-pack` to census, build, verify or scan to use that pack. A pack mismatch fails without a worker-side rebuild.
 
-For current construction, add `--analysis config/analysis-all-origin.json` to both census and build. Add `--layout config/query-all-origin.json` to build. Use the same campaign-stable 219-state catalog dictionary and accepted input receipts; the catalog does not replace the observed-source census. Every final heavy species receives its own signed-PDG bin. The approved 82-member family map applies only downstream. Existing query workspaces retain their original version and must not be relabeled.
+The example selects version 2.5 for both census and build. Its layout retains all-origin triggers and fine heavy species. Use the same campaign-stable 219-state catalog dictionary and accepted input receipts; the catalog does not replace the observed-source census.
+
+Every final heavy species receives its own signed-PDG bin. The approved 82-member family map applies only downstream. Query workspaces retain their original version. Do not change that identity.
 
 ## Cluster query construction
 
@@ -201,7 +205,7 @@ To inspect a merged all-heavy collection, hash its `index.json` independently an
   --output "$RUN_ROOT/xi-star-inventory.json"
 ```
 
-The output lists every catalog identity, exact observed and final rows, retained pair counts, grouped-pair eligibility, and an exact-cell export for signed PDG 4314. An unobserved species remains listed without invented yields. A family sum comes from numerical reduction and its separate `families.root` artifact; it does not replace the fine query collection. Keep the query shards because their exact support rows are required for the independent closure check.
+The output lists every catalog identity, exact observed and final rows, retained pair counts, grouped-pair eligibility, and an exact-cell export for signed PDG 4314. An unobserved species remains listed without invented yields. A family sum comes from numerical reduction and its separate `families.root` artifact; it does not replace the fine query collection. Keep the query shards because the independent closure check needs their exact support rows.
 
 Verify the merge with independent pins:
 
@@ -240,13 +244,15 @@ The default request covers multiplicity, correlations, balancing, signed spectra
 
 Add `--charm-trigger 411` to select the coherent D+ recipe. Add `--analysis` with a separately hashed compatible copy to change profiles or percentile classes. Optional rectangular profiles reuse the query bytes. Both profiles pass through the same numerical estimator and renderer.
 
-For a version 2.5 collection, pass `--analysis config/analysis-all-origin.json` and its SHA-256 to `reduce run`. The reducer projects the approved family members from the broad fine query, sums block-level OS and SS primitives, and applies each shared trigger denominator once. The merged query ROOT files remain the independent fine-species authority. Separate `paper-fine.root`, `families.root` and `shared.root` contain downstream additive primitives; pooled values and K=10 covariance are recomputed. A separately hashed compatible analysis copy can select another [grouping recipe](configuration.md#fixed-analysis-fields) without changing fine THnSparse content. The package includes the exact grouping recipe and checksum for portable verification. Version 2.4 products retain their 82-member family interpretation and cannot be relabeled as version 2.5.
+For a version 2.5 collection, pass `--analysis config/analysis-all-origin.json` and its SHA-256 to `reduce run`. The reducer projects the approved family members from the broad fine query, sums block-level OS and SS primitives, and applies each shared trigger denominator once. The merged query ROOT files remain the independent fine-species authority. Separate `paper-fine.root`, `families.root` and `shared.root` contain downstream additive primitives. The estimator recomputes pooled values and K=10 covariance.
+
+ A separately hashed compatible analysis copy can select another [grouping recipe](configuration.md#fixed-analysis-fields) without changing fine THnSparse content. The package includes the exact grouping recipe and checksum for portable verification. Version 2.4 products retain their 82-member family interpretation. They do not represent version 2.5.
 
 ### Compare inclusive and rectangular selections
 
-Keep the default analysis configuration unchanged. Use [analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) for the supplied comparison. Its SHA-256 is `4ffc605233dab2bae9e9d77c6515dff5cc7d63f04045c5e95cd0561c80597ec4`. Other supported profiles follow the [configuration example](configuration.md#analysis-choices).
+The published result is inclusive. Optional rectangles require a separate analysis copy, output directory and numerical result. Copy `analysis-all-origin.json` and use the [profile example](configuration.md#analysis-choices). The supplied `analysis-pt-1-0p15.json` belongs to the version 2.2 route; it cannot interpret a version 2.5 collection.
 
-For the inclusive result, use `--profile-id inclusive`. For the 1.0/0.15 GeV/c result, use `--profile-id pt_1_0p15` with the compatible request and its hash. Run reduction twice with distinct output and scratch directories. Use each numerical package to render and package its own figures.
+For the inclusive result, use `--profile-id inclusive`. For the 1.0/0.15 GeV/c result, use `--profile-id pt_1_0p15` with the compatible request and its hash. Run only the requested selections with distinct output and scratch directories. Use each numerical package to render and package its own figures.
 
 The rectangular selection requires trigger pT >= 1.0 GeV/c and associate pT >= 0.15 GeV/c. Both endpoints pass. An associate can have larger pT than its trigger. The cuts apply to all pair observables.
 

@@ -28,15 +28,19 @@ The selected-state registry in [study.json](../config/study.json) contains signe
 
 The default displayed triggers are D0 (421), Lambda_c+ (4122), B+ (521) and Lambda_b0 (5122). D+ (411) can replace D0 through `--charm-trigger 411`. The matching presentation configuration is `config/plot-dplus.json`.
 
-A paper trigger is a final hadron of one of the registered signed trigger identities, with finite nonnegative pT and |eta| <= 4. The default selection includes all production origins; its selected-hard ancestry and direct-state predicate are retained as a separately selectable historical control. Both modes retain trigger denominators even when no associate qualifies.
+A paper trigger is a final hadron of one of the registered signed trigger identities, with finite nonnegative pT and |eta| <= 4. The default selection includes all production origins. The query retains selected-hard ancestry and the direct-state predicate for a separate control selection. Both modes retain trigger denominators even when no associate qualifies.
 
 The complete fine-species query retains every catalogued final heavy hadron independently in its kinematic sparse, including excited, hidden-heavy, multiply-heavy and mixed charm–beauty states. It retains pairs between registered triggers and every final heavy associate within |eta| <= 4, excluding self-pairs. It does not extend the trigger set. Exact support retains nonfinal event-record history separately; those copies do not add to final-particle yields. Associate origins include selected-hard associates, showers, multiple parton interactions, other resolved origins and unresolved origins when the heavy-flavour sign applies.
 
 The selected-hard associate category describes the associate's own origin; it does not assert a shared root with the trigger. The version 2.5 diagnostic receipt labels pair-origin counts by the selected trigger population. Its closure rows retain the separate historical analyzed-closure population and do not measure closure for every all-origin trigger. Matched and rejected root indices remain event-local exact-support fields.
 
-The published pair observables select the configured signed family members from that broader retained domain. This includes Sigma_b0 (5212), Xi_b'- (5312), Xi_b'0 (5322) and their antiparticles. These are PYTHIA species identities; inclusion does not assert experimental observation. A catalog label alone does not establish that a species occurred: the fine inventory reports observed, final, direct-selection and pair counts by signed identity, tune and original block. The query and independent exact-row reader check filled weighted content, including sparse flow bins.
+The published pair observables select configured signed family members with direct-hadronization status codes 81–89 from the broader retained domain. This includes Sigma_b0 (5212), Xi_b'- (5312), Xi_b'0 (5322) and their antiparticles. These are PYTHIA species identities; inclusion does not assert experimental observation. A catalog label does not establish that a species occurred. The fine inventory reports observed, final, direct-selection and pair counts by signed identity, tune and original block.
 
-Define q_c = n_c - n_anticharm and q_b = n_b - n_antibeauty. Opposite-sign pairs have a negative product of the relevant heavy-flavour signs. Same-sign pairs have a positive product. Neutral particles participate through heavy valence, not electric charge. A zero-net-flavour associate is retained generically with sign 0 and inapplicable origin; it contributes to neither OS nor SS. A multiply-heavy hadron is one associate, not a constituent-weighted pair count.
+The query and independent exact-row reader check filled weighted content, including sparse flow bins.
+
+Define q_c = n_c - n_anticharm and q_b = n_b - n_antibeauty. Opposite-sign pairs have a negative product of the relevant heavy-flavour signs. Same-sign pairs have a positive product. Neutral particles participate through heavy valence, not electric charge.
+
+The generic query retains zero-net-flavour associates with sign 0 and inapplicable origin. They contribute to neither OS nor SS. A multiply-heavy hadron is one associate, not a constituent-weighted pair count.
 
 For example, B+ (521) contains an antibeauty quark. Positive-PDG Lambda_b0 (5122) contains a beauty quark. These form an opposite-heavy-flavour-sign channel. A plot label must not replace the signed registry identity.
 
@@ -54,15 +58,17 @@ The azimuthal coordinate is trigger phi minus associate phi. The implementation 
 
 The public table and plot label is **Charged primaries**. In this study that label means final charged particles without charm or beauty constituents, finite kinematics, pT > 0.15 GeV/c and |eta| <= 4. The corresponding unchanged event field is `a15_eta4`; `a15_eta1` uses |eta| <= 1. This is the study's generator-level definition and is not a claim of equivalence to an experimental primary-particle definition.
 
-This threshold belongs to the activity definition. It does not apply to inclusive heavy-particle pairs or signed heavy-hadron spectra. No retained value is recounted or relabelled at the technical-identity level.
+This threshold belongs to the activity definition. It does not apply to inclusive heavy-particle pairs or signed heavy-hadron spectra. The display label does not change retained values or their technical identities.
 
-All heavy-hadron decays were disabled, including strong and electromagnetic decays. The runtime also used `ParticleDecays:limitTau0 = on` and `ParticleDecays:tau0Max = 0.01 mm`. Light strong/electromagnetic resonance daughters and charged leptons can contribute, while heavy-hadron daughters are absent. The predicate is therefore not a stored-event ancestry veto. Plots and tables use the compact label **Charged primaries**; this methods section specifies its full generator-level definition and limitations.
+The generator disabled all heavy-hadron decays, including strong and electromagnetic decays. The runtime also used `ParticleDecays:limitTau0 = on` and `ParticleDecays:tau0Max = 0.01 mm`. Light strong/electromagnetic resonance daughters and charged leptons can contribute, while heavy-hadron daughters are absent. The predicate is therefore not a stored-event ancestry veto. Plots and tables use the compact label **Charged primaries**; this methods section specifies its full generator-level definition and limitations.
 
 ## Saved-state associate families
 
-The grouped observable sums additive OS and SS pair primitives for saved generator states at their saved kinematics. It then recomputes the pooled center, every K=10 delete-one value, covariance, validity mask and grouped meson reference. Trigger denominators are carried once. Ratios, normalized spectra and errors are never added after estimation.
+The grouped observable sums additive OS and SS pair primitives for saved generator states at their saved kinematics. It then recomputes the pooled center, every K=10 delete-one value, covariance, validity mask and grouped meson reference. The estimator carries each trigger denominator once. Ratios, normalized spectra and errors are never added after estimation.
 
-The approved default map has 82 signed members. Particle and antiparticle groups remain separate, as do Sigma and Lambda families. Xi-prime and Xi-star saved states contribute to their signed approved Xi-family destinations while remaining separate in fine storage. A separately pinned downstream recipe can be evaluated without rebuilding the fine THnSparse, but such an alternative is a distinct interpretation and does not change the default paper definition. Membership follows the configured PYTHIA 8.317 decay endpoints; unit endpoint probability in that configuration is not a measured physical branching fraction. States outside a recipe remain in the fine collection and do not enter that grouped observable. Version 2.4 products retain their original trigger-selection identity and cannot be reinterpreted as all-origin results.
+The default map has 82 signed members. Particle and antiparticle groups remain separate, as do Sigma and Lambda families. Xi-prime and Xi-star saved states contribute to their signed Xi-family destinations while remaining separate in fine storage. A separately pinned downstream recipe reuses the fine THnSparse. That recipe defines a distinct interpretation. It does not change the default paper definition.
+
+Membership follows the configured PYTHIA 8.317 decay endpoints; unit endpoint probability in that configuration is not a measured physical branching fraction. States outside a recipe remain in the fine collection and do not enter that grouped observable. Version 2.4 products retain their original trigger-selection identity. They do not represent all-origin results.
 
 The activity axis stores integers from 0 through 4095. Each integer occupies one regular bin. Values outside the supported domain fail the scientific contract rather than silently extending the axis.
 
@@ -80,7 +86,7 @@ Every aggregate activity bin must be nonnegative and the total must be positive.
 
 ### Identified balancing species
 
-The default grouping request has 10 charm and 11 beauty signed associate destinations for each heavy-flavour sign. Integrated and activity-dependent balancing use the same destinations. Their membership is specified by [the pinned default recipe](../config/associate-family-runtime-all-heavy.json); its 82 signed members and all other catalogued species remain independently addressable in fine storage.
+The default grouping request has 10 charm and 11 beauty signed associate destinations for each heavy-flavour sign. Integrated and activity-dependent balancing use the same destinations. The [pinned default recipe](../config/associate-family-runtime-all-heavy.json) specifies membership. Fine storage retains its 82 signed members and every other catalogued species separately.
 
 | Sector | Mesons | Baryons |
 | --- | --- | --- |
@@ -89,7 +95,7 @@ The default grouping request has 10 charm and 11 beauty signed associate destina
 
 The table names particle families. The trigger's heavy-flavour sign determines the opposite-sign particle or antiparticle. The estimator subtracts its same-sign conjugate.
 
-Each charge state remains a separate category. Saved excited states join only their approved signed destination; Xi-prime and Xi-star join the corresponding Xi charge state in the default recipe. Their fine signed identities remain separate. Distinct Sigma or Xi charges are not summed together. The numerical ROOT retains their joint jackknife covariance.
+Each charge state remains a separate category. Saved excited states join only their configured signed destination; Xi-prime and Xi-star join the corresponding Xi charge state in the default recipe. Their fine signed identities remain separate. Distinct Sigma or Xi charges are not summed together. The numerical ROOT retains their joint jackknife covariance.
 
 Figures show mesons before baryons. Baryon groups follow the order Lambda, Sigma, Xi, then Omega. Each family follows a fixed destination order. Short ticks delimit species bins, and labels sit at bin centers.
 
@@ -123,7 +129,7 @@ The partner bar denotes the conjugate signed PDG identity. There is no half-weig
 
 The baryon-to-meson observable divides two balancing yields with the same trigger. The canonical Lambda tuples `(trigger, baryon, reference)` are `(421, -4122, -421)` and `(521, 5122, -521)`. The D+ selection changes the first tuple to `(411, -4122, -411)`.
 
-The numerical request also includes each selected Sigma and Xi charge state, including primed Xi states. All charm baryons use the same D0 reference. All beauty baryons use the same charged B reference. This common denominator supports comparisons between baryon species. It does not isolate a strangeness mechanism.
+The numerical request includes each selected Sigma and grouped Xi charge state. Primed Xi members contribute through their assigned grouped destination. All charm baryons use the same D0 reference. All beauty baryons use the same charged B reference. This common denominator supports comparisons between baryon species. It does not isolate a strangeness mechanism.
 
 Additional figures compare meson and Lambda triggers in separate columns for each baryon species. The signed registry sets the numerator and reference identities. For example, the Xi_b0 tuples are `(521, 5232, -521)` and `(5122, -5232, 521)`. The latter contains an antibaryon numerator because the Lambda_b trigger contains a beauty quark.
 

@@ -1,7 +1,7 @@
 {
   "access": {
     "github_merged_inventory": "data/merged-download.json",
-    "github_release": "https://github.com/Waxpardo/Hadronization/releases/tag/hf-run3-v1-20260922",
+    "github_release": "https://github.com/Waxpardo/Hadronization/releases/tag/hf-run3-all-origin-20261007",
     "ssh_host": "login.nikhef.nl",
     "ssh_requirement": "An authorized individual Nikhef account and custodian-granted read access. No shared credentials."
   },
@@ -14,11 +14,11 @@
   "identity_policy": "Physical locators do not redefine scientific content. Git history and release manifest hashes preserve the independent checksum record.",
   "inventory_pins": {
     "data/analyzed-inventory.json": "22f0013b42984a6a7bf76556d880fd4de9cf230680ff6ce5a51f2f2be0934ed7",
-    "data/merged-download.json": "cbd21aa6630fe0e249d60ec0bd1ca1efe03eaa63a6dc8ce25f75ef170ba4d016",
-    "data/merged/dictionary.json": "cd8650018a54e82f57fb32777f2e943b92acec095548a0243479c973cdc10e5b",
-    "data/merged/index.json": "160f3c3789395740ec0d0244e3d719a53dbf064c340aecb32670189a40e86dfc",
-    "data/merged/merge-receipt.json": "e70f0831971dcabf6c508ed6ba104ee7ce85d8ee6cb10172abee83c95a275acf",
-    "data/merged/merge-verification.json": "e945a60e90bb76ffff53f50b1fb14968dd55746ea8f831ef178d05f0fd131ad4",
+    "data/merged-download.json": "c1b93809fc40f0d499ea2dde249d5e2e38bb84c2728e205a11d232b105ee91d2",
+    "data/merged/dictionary.json": "9a7bafe8051191dac250073fc31ff4516b1b4b99447c11274a8df5d8474038dc",
+    "data/merged/index.json": "2ed126cfeb209207f3b5001b74f958023ee5874dd00600d9dd453ecc785c0844",
+    "data/merged/merge-receipt.json": "6196c979faea96e74dbf1aef6a2f0eaf445c27d0134d05b9486660cdb5f0a3de",
+    "data/merged/merge-verification.json": "aa8f84de1ee967a27a59de42ee6bca20a4c34b97de23c3496c6c01e70a1f7e46",
     "data/raw_manifest.jsonl": "5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f8f247585912e2df247"
   },
   "planes": {
@@ -31,13 +31,13 @@
       "download_inventory": "data/merged-download.json",
       "inventory": "data/merged/index.json",
       "inventory_field": "partitions",
-      "root_bytes": 7001982338,
+      "root_bytes": 11024344504,
       "root_files": 3
     },
     "query": {
       "inventory": "data/merged/index.json",
       "inventory_field": "shards",
-      "root_bytes": 66635305537,
+      "root_bytes": 69805257918,
       "root_files": 323
     },
     "raw": {

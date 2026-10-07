@@ -1,40 +1,71 @@
 {
-  "admission_closure_path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-expanded-7979ec2-inclusive/numerical/admission-closure.json",
-  "admission_closure_sha256": "4686bc3ca17dcbce019d9632e03a6390dd90e05c1b5a368aaab8e8e39bd291ea",
-  "analysis_sha256": "e959e00f8f8c7ced7aa6ec07dbe0e2b19b5bc30aab6ec4defb1df31319085ff8",
+  "admission_closure_path": "/data/alice/ipardoza/hf/project/phasea-all-origin-production-20261003/bulk/numerical-inclusive-v1/admission-closure.json",
+  "admission_closure_sha256": "0a9819b12a505b97836c6c6547b6b083097742749bba96fa6827324074a9485d",
+  "analysis_sha256": "810703840cabc768f37eac244ef87d15091ca695321049237b59623daebceb3b",
   "campaign_state": "FULL_ACCEPTED_CAMPAIGN",
   "class_boundary_deletions": 396,
-  "collection_index_sha256": "160f3c3789395740ec0d0244e3d719a53dbf064c340aecb32670189a40e86dfc",
+  "collection_index_sha256": "2ed126cfeb209207f3b5001b74f958023ee5874dd00600d9dd453ecc785c0844",
   "covariance_groups": 1,
   "exports": {
     "files": {
       "accounting.csv": "dfad5ed47bf041b652a08f6e32d1e1a1ba62d8f1bb43b1153a45550fb67bae97",
       "accounting.tex": "69e4017aa5f0cd654e575d0475322c5b368b5e6badd66e637194e6a5a0f223ef",
-      "missing.csv": "b5624f9da6105beb4b5d2169f42880bc2aa6c8d0c6492549ac4eecb678666892",
+      "missing.csv": "64be7d49a6179da2402e3f3a4221a6e485f48c6d485a816c6efbc5962a8c5d42",
       "overleaf-check.tex": "12c09cb93ef395d74cc353479f9ec1ef88f003a39f03b34042b2b09ab1e41d34",
       "overleaf-preamble.tex": "b493cca93ecc6b47b74731863ba9da2c2e3e30b7be2ee0c974700a2362374da0",
       "overleaf-tables.tex": "612408fc7bdbaacbb3a34c43984e96c297faed6b121b526b73cf090527abff19",
-      "points.csv": "aeb805c335f983826592643e048bbf36606c004fee36e360f69ded3135bef1d4",
-      "t1.csv": "f1dc752b18b2acc335af6dfa18e3c03b6bf53c98cc5d660aa5d713bf99ade742",
+      "points.csv": "7eb33b6b6ae6b8c82d289ea4857870b609dcb3fcd79510007e484d230367bdd7",
+      "t1.csv": "323c0c5229500f7869deb52a0a1736c078238ede235e4792b1d5558fab6dd17c",
       "t1.tex": "a67771dbfaae09cd63f4eff320372286dd51750c02d4037d76c8a92caa332f4e"
     },
-    "numerical_root_sha256": "f5bd463c068399fb5816b512b517aea42c044d35304bcc588a4e63a4e7b90afa",
+    "numerical_root_sha256": "e35f4ded12e7a4b7830a5599e8f9187ec9b52fd6b1276730cc8efea4e5cced38",
     "schema": "hadronization_v4_root_exports_v1",
-    "value_sha256": "8f8df2a5cde62f3e176b5b35b41bd17a6845182ecda7b2036b4905fd82a8845b"
+    "value_sha256": "963b1be0ee353d2a8d7fb8dc80f74c87ae0597372deb8e19d3c3d6e42a156881"
   },
-  "merge_lineage_sha256": "e70f0831971dcabf6c508ed6ba104ee7ce85d8ee6cb10172abee83c95a275acf",
-  "merge_verification_sha256": "e945a60e90bb76ffff53f50b1fb14968dd55746ea8f831ef178d05f0fd131ad4",
-  "native_run_receipt_path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-expanded-7979ec2-inclusive/numerical/native-run-receipt.json",
-  "native_run_receipt_sha256": "dd28ad1bb1aa0b88822676ec65a40b2853debde229f18f6f972760eda0bc7f48",
+  "family_products": {
+    "family_destination_count": 42,
+    "files": {
+      "families.root": {
+        "bytes": 59863600,
+        "rows": 9796193,
+        "sha256": "70bea47003d9d364b908dfc6092dfd415a3d9fef5d4ddc25a29386859bae91e1"
+      },
+      "grouping-recipe.json": {
+        "bytes": 10020,
+        "sha256": "f2823dfee8fb11f7d84f2217ccc668df3dbbf8f0f69f61541ca418e105f3ba6f"
+      },
+      "paper-fine.root": {
+        "bytes": 72567678,
+        "rows": 12113325,
+        "sha256": "5f2da7eeb1a7a1083070ae9854556b299c7d4dcf6e488cc5d254592ae310d637"
+      },
+      "shared.root": {
+        "activity_rows": 9667,
+        "bytes": 388953,
+        "sha256": "f18d2a734cfdaf4c382b7bfbb298f8417abe8123672ab8262212099a54857408",
+        "trigger_rows": 33225
+      }
+    },
+    "fine_species_count": 82,
+    "grouping_recipe_id": "approved-pythia-endpoints",
+    "grouping_recipe_sha256": "f2823dfee8fb11f7d84f2217ccc668df3dbbf8f0f69f61541ca418e105f3ba6f",
+    "manifest_content_sha256": "13e5caf76f3c9681de5c9535c999eb5de0c59586791b3c5b932f6dfdd659a29b",
+    "manifest_sha256": "8dbb4a744be71570ce3cd7ba0f7ed86d8f81079d098758e9e9324da8ca0c7206"
+  },
+  "grouping_recipe_sha256": "f2823dfee8fb11f7d84f2217ccc668df3dbbf8f0f69f61541ca418e105f3ba6f",
+  "merge_lineage_sha256": "6196c979faea96e74dbf1aef6a2f0eaf445c27d0134d05b9486660cdb5f0a3de",
+  "merge_verification_sha256": "aa8f84de1ee967a27a59de42ee6bca20a4c34b97de23c3496c6c01e70a1f7e46",
+  "native_run_receipt_path": "/data/alice/ipardoza/hf/project/phasea-all-origin-production-20261003/bulk/numerical-inclusive-v1/native-run-receipt.json",
+  "native_run_receipt_sha256": "bdc3459ceae95a4d53b54dda37341b86748c871170ae20d89c6b795bfd0aa6fa",
   "point_status_counts": [
     {
       "center_status": "AVAILABLE",
-      "count": 28598,
+      "count": 28031,
       "uncertainty_status": "AVAILABLE"
     },
     {
       "center_status": "AVAILABLE",
-      "count": 11620,
+      "count": 11575,
       "uncertainty_status": "AVAILABLE_ZERO_DISPERSION"
     },
     {
@@ -44,55 +75,55 @@
     },
     {
       "center_status": "UNDEFINED",
-      "count": 7756,
+      "count": 7728,
       "uncertainty_status": "WITHHELD_UNCERTAINTY"
     },
     {
       "center_status": "UNSTABLE_DENOMINATOR",
-      "count": 626,
+      "count": 346,
       "uncertainty_status": "WITHHELD_UNCERTAINTY"
     }
   ],
-  "points": 51300,
-  "request_sha256": "5ca558684c964862e68528fb230985ae2096f523176bafc3a07899787bb9e31a",
+  "points": 50380,
+  "request_sha256": "bb64845a3ef0dcd173eed5bff75f2d4adf28239668e4df53e4d242935fa5d500",
   "root": {
     "direct_tables": {
       "bindings": 1,
-      "block_components": 1642460,
-      "block_values": 699200,
+      "block_components": 1591500,
+      "block_values": 686320,
       "campaign_attempt_evidence": 2,
       "campaign_trials": 3,
       "campaign_tunes": 3,
       "class_boundaries": 36,
       "class_boundary_deletions": 396,
       "collection_members": 972,
-      "covariance_factors": 1539000,
-      "covariance_points": 51300,
-      "denominator_deletions": 649120,
-      "denominator_parents": 64912,
+      "covariance_factors": 1511400,
+      "covariance_points": 50380,
+      "denominator_deletions": 630240,
+      "denominator_parents": 63024,
       "diagnostic_activity": 9667,
       "diagnostic_closure": 489,
       "diagnostic_n_mpi": 1119,
-      "diagnostic_origin": 270,
+      "diagnostic_origin": 900,
       "diagnostic_process": 120,
       "event_moments": 30,
       "g9_science": 1,
-      "materialization": 51300,
-      "points": 51300,
+      "materialization": 50380,
+      "points": 50380,
       "selected_tune_exposure": 3,
       "support_diagnostics": 30
     },
-    "path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-expanded-7979ec2-inclusive/numerical/numerics.root",
-    "root_bytes": 85408295,
-    "root_sha256": "f5bd463c068399fb5816b512b517aea42c044d35304bcc588a4e63a4e7b90afa",
+    "path": "/data/alice/ipardoza/hf/project/phasea-all-origin-production-20261003/bulk/numerical-inclusive-v1/numerics.root",
+    "root_bytes": 83703141,
+    "root_sha256": "e35f4ded12e7a4b7830a5599e8f9187ec9b52fd6b1276730cc8efea4e5cced38",
     "schema": "hadronization_self_contained_typed_root_v4",
-    "value_sha256": "8f8df2a5cde62f3e176b5b35b41bd17a6845182ecda7b2036b4905fd82a8845b"
+    "value_sha256": "963b1be0ee353d2a8d7fb8dc80f74c87ae0597372deb8e19d3c3d6e42a156881"
   },
   "schema": "hadronization_public_v4_numerical_report_v1",
-  "science_content_sha256": "547f0043de7b503aa8180812842f2ecfea11c50557c960a63c5f0424c927944b",
-  "scientific_request_sha256": "bf9782983c7605d64127f27c475af77bd7209f850791f3be3a94f8cd684ba1dd",
-  "source_ledger_path": "/data/alice/ipardoza/hf/project/publication-data-20260923/production-expanded-7979ec2-inclusive/numerical/source-build-ledger.json",
-  "source_ledger_sha256": "747d4c9fe0ebe752e0a0a55d7c97207b19c4530ddf69833b5ccabb1afb19a24a",
+  "science_content_sha256": "3d279d16d3a13df6b80f65e239aa3aafaccb98727ee15c36632305d927850658",
+  "scientific_request_sha256": "c0d295e53ba9963d932074c13275127c772e076f751c63c7a3e0890477e61748",
+  "source_ledger_path": "/data/alice/ipardoza/hf/project/phasea-all-origin-production-20261003/bulk/numerical-inclusive-v1/source-build-ledger.json",
+  "source_ledger_sha256": "75f50dc01314b1fe6f7e86156ef7d4eba17720dea01c498ca7bfcce64da9e1d4",
   "source_ledger_status": "COMMITTED_SOURCE",
   "source_state": "EXTERNAL_ACCEPTANCE_REQUIRED",
   "support_diagnostic_receipts": 30

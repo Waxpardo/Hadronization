@@ -61,7 +61,7 @@ The builder creates three tune domains with ten original blocks. `NONZERO_CHAIN_
 
 The resulting collection has `TEST_ONLY` state. Its `merged/index.json` and `expected-sources.json` can exercise `reduce run` without production site records. Supply independently recorded hashes for these files and `config/analysis.json`. Do not use `--representative` to claim complete figure coverage.
 
-The prebuilt [query fixture](../tests/fixtures/query_multitune/TEST_ONLY.md) exercises collection and merge contracts. Its version differs from the current numerical input model. Use the builder above for the current model.
+The prebuilt [query fixture](../tests/fixtures/query_multitune/TEST_ONLY.md) exercises collection and merge contracts. Its version differs from the current numerical input model. The builder above exercises the supported version 2.2 route. It does not construct the version 2.5 all-origin catalog.
 
 ## Verification boundaries
 

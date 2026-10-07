@@ -1,4 +1,4 @@
-"""Public A v2.2 collection to self-contained native v4 numerical ROOT route."""
+"""Versioned query collections to self-contained native v4 numerical ROOT."""
 
 import argparse
 from collections import Counter
@@ -19,6 +19,7 @@ from . import native_v4, native_v4_result, projection as p
 
 ROOT = Path(__file__).resolve().parents[2]
 ANALYSIS = ROOT / 'config/analysis-all-origin.json'
+LEGACY_ANALYSIS = ROOT / 'config/analysis.json'
 PACKAGE_SCHEMA = 'hadronization_public_v4_portable_package_v1'
 
 
@@ -30,6 +31,23 @@ def _json(path, expected_sha, label):
     if p.file_digest(path) != expected_sha:
         raise ValueError(label + ' differs from independently pinned SHA-256')
     return json.loads(path.read_text(encoding='utf-8'))
+
+
+def _analysis_path(path, expected_sha):
+    """Resolve an omitted path by its required pin, never by inferred physics."""
+    if path is not None:
+        return Path(path)
+    p.validate(expected_sha, 'Digest', 'requested analysis SHA-256')
+    candidates = (LEGACY_ANALYSIS, ANALYSIS)
+    for candidate in candidates:
+        p._reducer().reject_symlink_components(candidate, 'shipped analysis')
+        p._reducer().regular_file(candidate, 'shipped analysis')
+    matches = [candidate for candidate in candidates
+               if p.file_digest(candidate) == expected_sha]
+    if len(matches) != 1:
+        raise ValueError('analysis SHA-256 does not identify one shipped default; '
+                         'supply --analysis with the pinned configuration')
+    return matches[0]
 
 
 def _write(path, value):
@@ -209,7 +227,8 @@ def _representative_request(source, args, analysis):
             reference_high = max(reference_high, cell.coordinates[2])
     source.scan(('activity',), [args.reference_tune], reference_activity)
     t1, _, _ = native.collect_t1(source, tunes)
-    full = p.make_native_request(source, getattr(args, 'analysis', ANALYSIS), args.analysis_sha,
+    analysis_path = _analysis_path(getattr(args, 'analysis', None), args.analysis_sha)
+    full = p.make_native_request(source, analysis_path, args.analysis_sha,
         tunes, sorted({key[2] for key in t1}), _selection(args, analysis))
     payload = full.to_dict()
     preferred = [-args.charm_trigger, args.charm_trigger, -4122, 4122,
@@ -405,8 +424,7 @@ def run(args):
     _real_directory(output.parent, 'v4 output parent')
     if output.exists() or output.is_symlink():
         raise FileExistsError(output)
-    if ANALYSIS.is_symlink():
-        raise ValueError('public v4 shipped analysis is symlinked')
+    args.analysis = _analysis_path(args.analysis, args.analysis_sha)
     analysis = _json(args.analysis, args.analysis_sha, 'requested analysis')
     from pipeline.query import model as model_api
     checked, normalized_sha = model_api.checked_analysis(Path(args.analysis))
@@ -420,9 +438,9 @@ def run(args):
         args.collection_index,args.collection_index_sha,collection_api,
         verify_roots=args.merge_verification is None)
     if analysis['version'] == '2.2.0':
-        if source.index['analysis_sha256'] != p.file_digest(ANALYSIS):
-            raise ValueError('A collection/shipped construction analysis binding differs')
-        construction, _ = model_api.checked_analysis(ANALYSIS)
+        _json(LEGACY_ANALYSIS, source.index['analysis_sha256'],
+              'collection/shipped construction analysis')
+        construction, _ = model_api.checked_analysis(LEGACY_ANALYSIS)
         model_api.compatible_interpretation(construction, analysis)
     else:
         construction_path = Path(source.index['shards'][0][
@@ -795,7 +813,9 @@ def parser():
     command.add_argument('--collection-index-sha', required=True)
     command.add_argument('--expected-sources', type=Path, required=True)
     command.add_argument('--expected-sources-sha', required=True)
-    command.add_argument('--analysis', type=Path, default=ANALYSIS)
+    command.add_argument('--analysis', type=Path,
+        help='interpretation JSON; if omitted, --analysis-sha must match '
+             'config/analysis.json or config/analysis-all-origin.json')
     command.add_argument('--analysis-sha', required=True)
     command.add_argument('--request', type=Path)
     command.add_argument('--request-sha')

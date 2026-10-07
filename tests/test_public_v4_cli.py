@@ -8,13 +8,90 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 from helpers import ROOT
 
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+class PublicV4AnalysisBinding(unittest.TestCase):
+    """Exercise configuration admission even without an external ROOT fixture."""
+
+    def setUp(self):
+        from pipeline.reduce import public_v4
+        self.api = public_v4
+        environment = patch.dict(os.environ)
+        environment.start()
+        self.addCleanup(environment.stop)
+        self.addCleanup(setattr, tempfile, 'tempdir', tempfile.tempdir)
+        self.scratch = tempfile.TemporaryDirectory()
+        self.addCleanup(self.scratch.cleanup)
+        self.work = Path(self.scratch.name).resolve()
+
+    def arguments(self, config, explicit):
+        args = ['run', '--collection-index', str(self.work / 'index.json'),
+            '--collection-index-sha', 'a'*64,
+            '--expected-sources', str(self.work / 'sources.json'),
+            '--expected-sources-sha', 'b'*64,
+            '--analysis-sha', sha(config), '--work-root', str(self.work),
+            '--output-dir', str(self.work / 'output')]
+        if explicit:
+            args += ['--analysis', str(config)]
+        return self.api.parser().parse_args(args)
+
+    def source(self, construction):
+        shard = self.work / 'shard'
+        shard.mkdir(exist_ok=True)
+        shutil.copyfile(construction, shard / 'analysis.json')
+        return SimpleNamespace(index={
+            'analysis_sha256': sha(construction),
+            'shards': [{'workspace_manifest': {'path': str(shard / 'manifest.json')}}]})
+
+    def test_old_and_current_public_invocations_reach_admission(self):
+        class AdmissionReached(Exception):
+            pass
+        for name, explicit in (('analysis.json', False), ('analysis.json', True),
+                ('analysis-all-origin.json', False), ('analysis-all-origin.json', True),
+                ('analysis-hard-root-control.json', True)):
+            with self.subTest(config=name, explicit=explicit):
+                config = ROOT / 'config' / name
+                construction = (config if name == 'analysis.json' else
+                                ROOT / 'config/analysis-all-origin.json')
+                args = self.arguments(config, explicit)
+                with patch.object(self.api.native, 'NativeCollection',
+                        return_value=self.source(construction)), patch.object(
+                        self.api.native_v4, 'admission_closure',
+                        side_effect=AdmissionReached):
+                    with self.assertRaises(AdmissionReached):
+                        self.api.run(args)
+                self.assertEqual(args.analysis, config)
+                self.assertFalse((self.work / 'output').exists())
+
+    def test_wrong_and_cross_version_pins_fail_before_admission(self):
+        old = ROOT / 'config/analysis.json'
+        current = ROOT / 'config/analysis-all-origin.json'
+        for requested, construction in ((old, current), (current, old)):
+            with self.subTest(requested=requested.name):
+                args = self.arguments(requested, True)
+                with patch.object(self.api.native, 'NativeCollection',
+                        return_value=self.source(construction)), patch.object(
+                        self.api.native_v4, 'admission_closure') as admission:
+                    with self.assertRaises(ValueError):
+                        self.api.run(args)
+                    admission.assert_not_called()
+        for explicit in (False, True):
+            args = self.arguments(old, explicit)
+            args.analysis_sha = '0'*64
+            with patch.object(self.api.native, 'NativeCollection') as collection:
+                with self.assertRaises(ValueError):
+                    self.api.run(args)
+                collection.assert_not_called()
+        self.assertFalse((self.work / 'output').exists())
 
 
 class PublicV4CLI(unittest.TestCase):
@@ -157,7 +234,7 @@ sys.exit(main(["verify", "--mode", "portable", "--package-dir", sys.argv[2],
             analysis)
         self.assertEqual({key['curve']['role_id'] for key in
             bounded.expected_point_keys}, set(p.PAPER_ROLE_IDS))
-        self.assertTrue(114 < len(bounded.expected_point_keys) < 2000)
+        self.assertEqual(len(bounded.expected_point_keys), 2271)
         self.assertEqual({key['bins'][0]['index'] for key in
             bounded.expected_point_keys if key['curve']['role_id'] ==
             'multiplicity.composite'}, set(range(32)))
@@ -166,7 +243,13 @@ sys.exit(main(["verify", "--mode", "portable", "--package-dir", sys.argv[2],
                      key['curve']['reference_pdg']) for key in value.expected_point_keys
                     if key['curve']['role_id']=='balancing.baryon_meson.activity'}
         self.assertEqual(ratio_channels(bounded), ratio_channels(request))
-        self.assertEqual(len(ratio_channels(bounded)), 22)
+        charm_baryons = (4122, 4112, 4212, 4222, 4132, 4232, 4312, 4322)
+        beauty_baryons = (5122, 5112, 5212, 5222, 5132, 5232, 5312, 5322)
+        expected_channels = {(trigger, -pdg, -421)
+            for trigger in (421, 4122) for pdg in charm_baryons}
+        expected_channels |= {(521, pdg, -521) for pdg in beauty_baryons}
+        expected_channels |= {(5122, -pdg, 521) for pdg in beauty_baryons}
+        self.assertEqual(ratio_channels(bounded), expected_channels)
 
     def test_identical_query_bytes_support_pinned_rectangles_and_new_classes(self):
         from pipeline.reduce import archive_v4

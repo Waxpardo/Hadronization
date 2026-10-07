@@ -6,14 +6,11 @@ The `HF_RUN3_V1` result contains 300 million successful events from 3,000 accept
 
 ## Included results
 
-The [collaboration package](results/manifest.json) contains the numerical ROOT, 57 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 51,300 points with separate value and uncertainty statuses. The table preserves missing states. The [cut-selection package](results-pt-1-0p15/manifest.json) contains the same output types for trigger pT >= 1.0 and associate pT >= 0.15 GeV/c. Both endpoints pass; no event-wise pT ordering applies.
+The [collaboration package](results/manifest.json) contains numerical ROOT, 53 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 50,380 points with separate value and uncertainty statuses. The tables retain explicit missing values.
 
-| Selection | Complete package | All-tune correlation companion |
-| --- | --- | --- |
-| Inclusive pair pT | [results](results) | [figures-all-tune](figures-all-tune) |
-| Trigger 1.0 / associate 0.15 GeV/c | [results-pt-1-0p15](results-pt-1-0p15) | [figures-all-tune-pt-1-0p15](figures-all-tune-pt-1-0p15) |
+The result uses inclusive pair pT and final triggers from all origins. Associate families group 82 saved signed states into 42 signed destinations. The fine query retains all 219 catalog identities separately. The [all-tune companion](figures-all-tune) contains 53 PDFs with tune comparisons in the correlation pages.
 
-Each presentation contains 57 PDFs and a ROOT canvas archive. The 16 additional baryon/reference pages compare meson and Lambda triggers for every selected Lambda, Sigma and Xi state. The profiles share the activity distribution and standalone spectra because pair-pT thresholds do not define those quantities.
+The 12 supporting baryon/reference pages compare meson and Lambda triggers for each selected Lambda, Sigma and grouped Xi destination. These family sums use saved-state kinematics. They do not simulate decays.
 
 | Product | Location | Use |
 | --- | --- | --- |
@@ -29,24 +26,17 @@ The raw inventory records 284,750,292,184 ROOT bytes. The attempt ledger does no
 
 ## Verify or change figures
 
-Package verification needs the matching renderer runtime: ROOT 6.30.01 and GCC 14.2.0. Configure the environment as described in [installation](../docs/installation.md). The verifier writes its build files outside the result package.
+Package verification checks the renderer build identity in the figure manifest. The distributed figures record ROOT 6.40.04, `/usr/bin/c++` and Ghostscript 10.08.0. Configure the environment as described in [installation](../docs/installation.md). A different renderer identity can require fresh rendering from the same numerical ROOT.
+
+Numerical portable verification does not require the original production filesystem. The verifier writes build files outside the result package.
 
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=7af2aa3e61e23df43c612d6cdb251d395e528c1aaff9313bbb8964323f5bbcdf
+PACKAGE_SHA=14493e4dcbbbd216f7202a303b9a7f38db3dddbd98052bf974365d8d70665fed
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification
-```
-
-For the cut-selection package, use a separate verification directory:
-
-```sh
-./hadronization package verify \
-  --package data/results-pt-1-0p15 \
-  --manifest-sha256 aa3117a90998eef81456bcbaffa94f3ef3050d6f04388b2bb75e262efa6ae597 \
-  --work-dir data/work/cut-release-verification
 ```
 
 The checked-out Git revision supplies the trusted manifest bytes. Record the checked-out commit before verification. The verifier checks every packaged file against the manifest.
@@ -57,8 +47,8 @@ To change the presentation, copy `config/plot.json` and edit its display setting
 cp config/plot.json data/work/custom-plot.json
 ./hadronization plot render-cold \
   --numerics-root data/results/numerical/numerics.root \
-  --expected-root-sha256 f5bd463c068399fb5816b512b517aea42c044d35304bcc588a4e63a4e7b90afa \
-  --expected-value-sha256 8f8df2a5cde62f3e176b5b35b41bd17a6845182ecda7b2036b4905fd82a8845b \
+  --expected-root-sha256 e35f4ded12e7a4b7830a5599e8f9187ec9b52fd6b1276730cc8efea4e5cced38 \
+  --expected-value-sha256 963b1be0ee353d2a8d7fb8dc80f74c87ae0597372deb8e19d3c3d6e42a156881 \
   --plot-config data/work/custom-plot.json \
   --work-dir data/work/custom-render --output data/work/custom-figures
 ```
@@ -68,28 +58,26 @@ To verify an all-tune companion, use the matching numerical ROOT and the compani
 ```sh
 ./hadronization plot verify-render-cold \
   --numerics-root data/results/numerical/numerics.root \
-  --expected-root-sha256 f5bd463c068399fb5816b512b517aea42c044d35304bcc588a4e63a4e7b90afa \
-  --expected-value-sha256 8f8df2a5cde62f3e176b5b35b41bd17a6845182ecda7b2036b4905fd82a8845b \
-  --expected-manifest-sha256 48a7e1310ab20720e46af46b3b648630d3bca46c04bc6c107de2d61a5fc3f241 \
+  --expected-root-sha256 e35f4ded12e7a4b7830a5599e8f9187ec9b52fd6b1276730cc8efea4e5cced38 \
+  --expected-value-sha256 963b1be0ee353d2a8d7fb8dc80f74c87ae0597372deb8e19d3c3d6e42a156881 \
+  --expected-manifest-sha256 5fec3294dadc58d7af04bfc7b9c76ebb83a7c682664b9762d33a6c494fb69029 \
   --plot-config config/plot-all-tune.json \
   --work-dir data/work/all-tune-verification --output data/figures-all-tune
 ```
 
-For the cut companion, change the numerical directory, output directory, scratch directory and all three hashes. Read those hashes from the matching package and figure manifests in the checked-out revision. Do not combine figures and numerical files from different profiles.
-
 ## Download merged ROOT
 
-The [GitHub release](https://github.com/Waxpardo/Hadronization/releases/tag/hf-run3-v1-20260922) distributes the three completed ROOT files. The files occupy 7,001,982,338 bytes together. Each file contains five sparse families with ten original blocks. The [download manifest](merged-download.json) binds every transfer part and complete ROOT file to its size and SHA-256.
+The [GitHub release](https://github.com/Waxpardo/Hadronization/releases/tag/hf-run3-all-origin-20261007) distributes the three completed ROOT files. The files occupy 11,024,344,504 bytes together. Each file contains five sparse families with ten original blocks. The [download manifest](merged-download.json) binds every transfer part and complete ROOT file to its size and SHA-256.
 
 | File | Tune | Bytes |
 | --- | --- | --- |
-| `tune-00.root` | MONASH | 2,351,995,149 |
-| `tune-01.root` | JUNCTIONS | 2,404,877,890 |
-| `tune-02.root` | CLOSEPACKING | 2,245,109,299 |
+| `tune-00.root` | MONASH | 3,743,012,318 |
+| `tune-01.root` | JUNCTIONS | 3,668,024,927 |
+| `tune-02.root` | CLOSEPACKING | 3,613,307,259 |
 
 Each file exceeds GitHub's release-asset limit. The downloader concatenates transfer parts to restore the original bytes. This operation does not run ROOT or repeat the scientific merge.
 
-Allow 15 GB of free local storage for ROOT files, cached parts and temporary output. This command needs network access to GitHub. It needs neither site credentials nor ROOT.
+Allow 24 GB of free local storage for ROOT files, cached parts and temporary output. This command needs network access to GitHub. It needs neither site credentials nor ROOT.
 
 ```sh
 python3 data/fetch-merged.py --output data/work/merged
@@ -102,19 +90,23 @@ For parts downloaded through a browser or another transfer tool, use `--local-pa
 
 ## Explore sparse projections
 
-The files retain activity, trigger, pair, kinematic and closure histograms. Object names follow `sparse_FAMILY__block_NN`, where `NN` ranges from `01` to `10`. The [collection index](merged/index.json) lists every object and its block. The [dictionary](merged/dictionary.json) defines signed-PDG ordinals. See the [axis reference](../docs/data-model.md#sparse-axes) before selecting bins.
+The files retain activity, trigger, pair, kinematic and closure histograms. Object names include the sparse family, original block and physical component. Read the exact names from the index. The [collection index](merged/index.json) lists every object and its block. The [dictionary](merged/dictionary.json) defines signed-PDG ordinals. See the [axis reference](../docs/data-model.md#sparse-axes) before selecting bins.
 
 With PyROOT installed, this example projects the full MONASH activity count from all ten blocks:
 
 ```sh
 python3 - <<'PYCODE'
 import ROOT
+import json
+from pathlib import Path
 ROOT.gROOT.SetBatch(True)
 f = ROOT.TFile.Open("data/work/merged/tune-00.root", "READ")
 assert f and not f.IsZombie()
 total = None
-for block in range(1, 11):
-    h = f.Get("sparse_activity__block_%02d" % block)
+index = json.loads(Path("data/merged/index.json").read_text())
+partition = next(p for p in index["partitions"] if p["tune"] == "MONASH")
+for item in partition["sparse_objects"]["activity"]:
+    h = f.Get(item["name"])
     assert h and h.GetAxis(2).GetName() == "a15_eta4"
     ROOT.SetOwnership(h, True)
     projection = h.Projection(2)
@@ -135,9 +127,11 @@ Keep block contributions separate when constructing a new estimator. THnSparse S
 
 Merged files support new projections within their stored axes. They do not contain the query support TTrees. The production reducer still needs those exact rows for its complete estimators and provenance checks. A new scientific selection can require reduction from retained query files, but it does not require generation or merging.
 
+The numerical package also includes [fine selected-state primitives](results/numerical/family-products/paper-fine.root), [grouped primitives](results/numerical/family-products/families.root) and [shared counts](results/numerical/family-products/shared.root). Their [manifest](results/numerical/family-products/manifest.json) binds the exact grouping recipe. These compact files cover the selected paper domain; the merged query retains the full catalog.
+
 ## External data and retention
 
-[bulk-storage.json](bulk-storage.json) identifies the custodian, access method, checksum inventories and retention rules. The original query collection contains 323 ROOT files and 66,635,305,537 ROOT bytes. The collection index binds their identities and locations. Its `EXTERNAL_ACCEPTANCE_REQUIRED` state describes that index alone; the numerical package separately retains its admission closure.
+[bulk-storage.json](bulk-storage.json) identifies the custodian, access method, checksum inventories and retention rules. The original query collection contains 323 ROOT files and 69,805,257,918 ROOT bytes. The collection index binds their identities and locations. Its `EXTERNAL_ACCEPTANCE_REQUIRED` state describes that index alone; the numerical package separately retains its admission closure.
 
 Raw, analyzed and query inputs require custodian-approved Nikhef access. GitHub downloads of merged ROOT need no Nikhef account. The small files under [tests/fixtures](../tests/fixtures) contain synthetic data and cannot replace the research sample.
 
