@@ -7,6 +7,8 @@
 | File | Consumer and role | Change policy |
 | --- | --- | --- |
 | [analysis-all-origin.json](../config/analysis-all-origin.json) | Current fine-species query and default grouped reduction | Preserve construction fields; change supported projection choices in a separately hashed request |
+| [analysis-individual-species.json](../config/analysis-individual-species.json) | Individual-state reduction of the retained all-origin query | Keeps every eligible open-heavy catalog state separate |
+| [grouping-individual-species.json](../config/grouping-individual-species.json) | Singleton interpretation for that reduction | Each signed state maps to itself |
 | [query-all-origin.json](../config/query-all-origin.json) | Current query layout and retained all-origin support | Fixed construction schema |
 | [associate-family-runtime-all-heavy.json](../config/associate-family-runtime-all-heavy.json) | Default saved-state associate grouping | Bind a compatible downstream recipe by its SHA-256 |
 | [heavy-catalog.json](../config/heavy-catalog.json) | Complete signed heavy-state registry | Keep exact bytes for accepted fine-species products |
@@ -67,7 +69,7 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 | Field group | Meaning and consumer |
 | --- | --- |
 | `schema`, `version` | Downstream request contract. Version 2.2.0 is the historical route, 2.3.0 binds saved-state family support, 2.4.0 has the older broad fine content, and 2.5.0 retains the complete catalog with all-origin trigger selection. |
-| `associate_family_map` | Pinned downstream saved-state grouping recipe. Version 2.5.0 defaults to the approved 82 signed members and 42 destinations; compatible subsets of this approved domain are supported. |
+| `associate_family_map` | Pinned downstream saved-state grouping recipe. Version 2.5.0 defaults to the approved 82 signed members and 42 destinations; Compatible subsets and catalog-bound singleton interpretations are supported. |
 | `retained_heavy_catalog` | Versions 2.4.0 and 2.5.0 signed-PDG, constituent-content and charge catalog; independent of the family member list. |
 | `trigger_selection` | Version 2.5.0 default and supported offline trigger-origin selectors. The shipped paper default is `all_origins`; `historical_hard_root` is an explicit control. |
 | `paper_defaults` | Charm choice, selectable identities and signed baryon/reference tuple |
@@ -719,3 +721,36 @@ Fixture JSON files are test inputs, not user configuration. [The file reference]
 - Pair-population `positive-source.json`: analyzed PASS receipt, source membership, contract, ROOT bytes and provenance.
 
 Do not edit immutable fixtures to make a failed verification pass. Construct a separate synthetic input when a new test requires different data.
+
+## Individual-state figures
+
+Use `analysis-individual-species.json` to keep ground and excited associates separate.
+Its identity recipe maps 202 signed open-heavy states to themselves.
+The charm domain has 84 signed states, and the beauty domain has 118.
+A state with net beauty belongs to the beauty sector, including Bc.
+The charm sector excludes states with beauty constituents.
+Hidden-heavy states have no net heavy-flavour sign and do not enter these OS/SS yields.
+
+The recipe changes numerical interpretation after query construction.
+It preserves the inclusive pair cuts, trigger identities, activity definition and original statistical blocks.
+Each species keeps its own OS and SS primitives.
+The estimator recomputes its pooled yield and joint delete-one covariance.
+The summed correlation channel uses the complete eligible domain of this request.
+Identified correlation channels keep their signed particle definitions.
+
+`layout.balancing_species_views` controls the figure subsets only.
+Its `grouping_recipe_sha256` must occur in the verified numerical provenance.
+This check prevents the renderer from labelling grouped yields as individual-state yields.
+Omit this display recipe when rendering an older grouped numerical product.
+
+Its `overview_abs_pdgs` list selects ground-state mesons and Lambda for the paired overview.
+Its `expanded_abs_pdgs` list selects ground states and their star or prime partners.
+The list excludes higher orbital and mass-labelled excitations.
+It includes 28 charm and 43 beauty states per trigger, including multiply-heavy ground states.
+Each single-trigger figure shows its complete selected species axis in one PDF.
+The sheet widens with the number of bins to preserve readable particle labels.
+
+No PDF contains multiple pages.
+
+Unavailable centers and unavailable uncertainties retain their numerical statuses.
+Baryon-to-meson activity figures use linear vertical axes.

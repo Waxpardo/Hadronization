@@ -479,7 +479,17 @@ def checked_analysis(path):
         approved = family.checked_family_map(
             support.ROOT / "config/associate-family-runtime-all-heavy.json",
             family.ALL_HEAVY_MAP_SHA256)
-        if (set(associates["charm"]) | set(associates["beauty"])) != set(approved.members):
+        if version == "2.5.0" and set(payload["associate_family_map"]) == custom_fields:
+            catalog = checked_heavy_catalog(support.ROOT / "config/heavy-catalog.json",
+                                             family.CATALOG_SHA256)
+            by_pdg = {state["pdg"]: state for state in catalog["states"]}
+            for sector, pdgs in associates.items():
+                if any(pdg not in by_pdg or family.catalog_sector(by_pdg[pdg]) != sector
+                       for pdg in pdgs) or any(-pdg not in pdgs for pdg in pdgs):
+                    raise ValueError("individual pair registry differs from open-heavy catalog")
+            if not set(admitted.members) <= set(associates["charm"] + associates["beauty"]):
+                raise ValueError("grouping recipe exceeds requested fine pair domain")
+        elif (set(associates["charm"]) | set(associates["beauty"])) != set(approved.members):
             raise ValueError("paper pair registry differs from approved family support")
     if d0_default:
         for pdg in (421, -421, 411, -411):
@@ -688,16 +698,29 @@ def compatible_interpretation(construction, requested):
         interpretive.add("associate_family_map")
     if construction.get("version") == "2.5.0":
         interpretive.add("trigger_selection")
+        # Version 2.5 stores all catalog associates independently, including
+        # those outside its original paper registry. The input catalog and
+        # sparse axes stay frozen; checked_analysis validates the new domain.
+        interpretive.add("pair_query_registry")
+        for field in ("trigger_pdgs", "reference_meson_by_trigger", "expansion",
+                      "central_eligibility_source"):
+            if construction["pair_query_registry"][field] != requested["pair_query_registry"][field]:
+                raise ValueError("requested pair interpretation changes " + field)
         if (construction["trigger_selection"]["supported"] !=
                 requested["trigger_selection"]["supported"]):
             raise ValueError("requested trigger-selection support differs")
         admitted = family.checked_family_map(
             support.ROOT / requested["associate_family_map"]["path"],
             requested["associate_family_map"]["sha256"])
-        paper_pairs = {pdg for sector in construction["pair_query_registry"]["associate_pdgs"].values()
-                       for pdg in sector}
-        if not set(admitted.members) <= paper_pairs:
-            raise ValueError("requested family recipe exceeds approved paper pair domain")
+        catalog = checked_heavy_catalog(support.ROOT / "config/heavy-catalog.json",
+                                         family.CATALOG_SHA256)
+        retained = {state["pdg"]: state for state in catalog["states"]}
+        for sector, pdgs in requested["pair_query_registry"]["associate_pdgs"].items():
+            if any(pdg not in retained or family.catalog_sector(retained[pdg]) != sector
+                   for pdg in pdgs):
+                raise ValueError("requested pair interpretation exceeds retained catalog")
+        if not set(admitted.members) <= set(retained):
+            raise ValueError("requested family recipe exceeds retained catalog")
     for field in construction:
         if field in interpretive:
             continue
@@ -759,6 +782,23 @@ def state_registry(analysis):
             state["label"] = identity["name"]
             states.append(state)
             by_pdg[member] = state
+    if analysis.get("version") == "2.5.0":
+        catalog = checked_heavy_catalog(support.ROOT / "config/heavy-catalog.json",
+                                         family.CATALOG_SHA256)
+        for entry in catalog["states"]:
+            pdg = entry["pdg"]
+            if pdg in by_pdg or pdg not in query["associate_pdgs"].get(
+                    family.catalog_sector(entry), []):
+                continue
+            state = dict(pdg=pdg, name=entry["name"], label=entry["name"],
+                id="pythia-pdg-" + ("p" if pdg > 0 else "m") + str(abs(pdg)),
+                kind="baryon" if (abs(pdg) // 1000) % 10 else "meson",
+                sector=family.catalog_sector(entry), charge3=entry["charge3"],
+                qc=entry["nc"]-entry["ncbar"], qb=entry["nb"]-entry["nbbar"],
+                spin2j1=abs(pdg) % 10, pair_analysis_eligible=False,
+                status="retained_catalog", valence="catalog heavy content")
+            states.append(state)
+            by_pdg[pdg] = state
     pairs = []
     for trigger in query["trigger_pdgs"]:
         if trigger not in by_pdg or not by_pdg[trigger]["pair_analysis_eligible"]:

@@ -23,6 +23,88 @@ SPEC.loader.exec_module(plot)
 
 class ColdDrawingBoundary(unittest.TestCase):
     @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
+    def test_final_y_axes_keep_legible_numeric_anchors(self):
+        # These ranges exercise the two published failures: a narrow linear
+        # spectrum that formerly had only two labels, and a sub-decade log
+        # panel whose automatic labels bunched near its lower boundary.
+        source = r'''#define main render_program_main
+#include "pipeline/plot/render.cpp"
+#undef main
+int main() {
+  Page page{}; page.width=1900; page.height=1600; page.textPixels=18;
+  Panel panel{}; panel.geometry={0.,.32,.54,.895};
+  panel.margins={.185,0.,.06,.115};
+  panel.yLow=.008; panel.yHigh=.013;
+  auto ticks=YMajorTicks(page,panel);
+  if (ticks.size()<4 || ticks.front().value>.009 ||
+      ticks.back().value<.012) return 1;
+  panel.yLow=.0068070796899526555;
+  panel.yHigh=.013095221543846035;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()<5 || ticks.front().value>.008 ||
+      ticks.back().value<.012) return 6;
+  panel.logY=true; panel.yLow=.042; panel.yHigh=.196;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()<3 || ticks.size()>5 ||
+      ticks.front().value>.05 || ticks.back().value<.15) return 2;
+  for (std::size_t i=1;i<ticks.size();++i)
+    if ((YTickFraction(panel,ticks[i].value)-
+         YTickFraction(panel,ticks[i-1].value))*YFramePixels(page,panel)<
+        1.4*YTickTextPixels(page,panel)) return 3;
+  panel.geometry={0.,.08,.54,.32}; panel.margins={.185,0.,.32,0.};
+  panel.logY=false; panel.yLow=.786; panel.yHigh=3.858;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()!=3 || ticks[0].label!="1" ||
+      ticks[1].label!="2" || ticks[2].label!="3") return 4;
+  panel.geometry={0.,.32,.54,.895}; panel.margins={.185,0.,.06,.115};
+  panel.logY=true; panel.yLow=1.e-7; panel.yHigh=.5;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()<5 || ticks[0].label!="10^{-7}" ||
+      ticks.back().label!="10^{-1}") return 5;
+  page.height=2400;
+  panel.geometry={0.,.25,1.,.98};
+  panel.margins={.08,.04,0.,.02};
+  panel.yLow=1.e-9; panel.yHigh=1.;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()!=9 || ticks[0].label!="10^{-8}" ||
+      ticks[4].label!="10^{-4}" || ticks[8].label!="1") return 7;
+  page.width=1900; page.height=2600; page.textPixels=18;
+  panel.geometry={0.,.44,.545,.61};
+  panel.margins={.2018348623853211,0.,0.,.2307692307692308};
+  panel.logY=false;
+  panel.yLow=.00019223735786008463;
+  panel.yHigh=.002851517567546;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()<3 || ticks.front().label!="0.0005") return 8;
+  for (const auto& tick:ticks)
+    if (tick.label.find("#times")!=std::string::npos) return 9;
+  page.role="balancing.activity.charm";
+  page.filename="supplemental.balancing.activity.charm.trigger-421.pdf";
+  page.panels.resize(4); panel.id="upper.MONASH.421";
+  if (!SharedStackYTitle(page,panel)) return 10;
+  panel.id="lower.shared.421";
+  if (SharedStackYTitle(page,panel)) return 11;
+  page.role="balancing.integrated.charm"; panel.id="upper.421";
+  if (SharedStackYTitle(page,panel)) return 12;
+  page.width=4300;
+  if (PaperWidthCentimeters(page)<40. || BodyTextPixels(page)>36) return 13;
+  return 0;
+}
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cpp, binary = root / 'yaxis.cpp', root / 'yaxis'
+            cpp.write_text(source)
+            flags = shlex.split(subprocess.check_output(
+                ['root-config', '--cflags', '--libs'], text=True))
+            built = subprocess.run(
+                ['c++', '-std=c++17', '-I', str(ROOT), str(cpp),
+                 '-o', str(binary)] + flags, capture_output=True, text=True)
+            self.assertEqual(built.returncode, 0, built.stderr)
+            run = subprocess.run([str(binary)], capture_output=True, text=True)
+            self.assertEqual(run.returncode, 0, run.stderr)
+
+    @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
     def test_native_band_gaps_and_unavailable_errors(self):
         # A known bin topology supplies the oracle independently of the
         # renderer's serialized drawing-record verifier.
@@ -509,6 +591,101 @@ int main(int argc, char** argv) {
             self.assertCountEqual(plot.species_display_order(species),species)
         with self.assertRaisesRegex(ValueError, 'baryon-content'):
             plot.species_display_order(['999999'])
+
+    def test_full_catalog_labels_keep_excitation_and_conjugation(self):
+        states=json.loads((ROOT/'config/heavy-catalog.json').read_text())['states']
+        states=[s for s in states if s['nc']!=s['ncbar'] or s['nb']!=s['nbbar']]
+        self.assertEqual(len(states),202)
+        for state in states:
+            label=plot.species_latex_label(state['pdg'],state['name'])
+            self.assertIn('#it{',label)
+            if '*' in state['name']:self.assertIn('*',label)
+            if "'" in state['name']:self.assertIn("'",label)
+            if 'bar' in state['name']:self.assertIn('#bar{',label)
+            self.assertEqual(label.count('{'),label.count('}'))
+        self.assertEqual(len(plot.species_display_order([str(s['pdg']) for s in states])),202)
+        self.assertEqual(plot.species_latex_label(-10421,'D*_0bar0'),
+                         '#bar{#it{D}}_{0}^{*0}')
+
+    def test_separate_species_pdfs_are_exact_point_subsets(self):
+        import copy
+        role='balancing.integrated.charm'
+        order=plot.species_display_order([str(-s) for s in
+            (421,411,431,4122,413,423,433,4112,4212,4222,4132,4312,4314)])
+        panels=[]
+        original={}
+        for trigger in ('421','4122'):
+            for prefix in ('upper.','lower.shared.'):
+                points=[dict(semantic_id=prefix+trigger+':'+pdg,
+                    scientific_x=float(i),display_x=float(i),x=float(i),
+                    y=float(i)/10,error=.001,state='DRAW')
+                    for i,pdg in enumerate(order,1)]
+                original.update((p['semantic_id'],copy.deepcopy(p)) for p in points)
+                panels.append(dict(id=prefix+trigger,series=[dict(points=points)],
+                    ticks=[dict(x=i,label=pdg) for i,pdg in enumerate(order,1)],
+                    guides=[],x_range=[.5,len(order)+.5],y_range=[0,2],
+                    geometry=[0,.1,.5,.9],margins=[.2,0,.1,.1],
+                    title='Trigger',status='AVAILABLE'))
+        source=dict(role=role,filename='balancing_integrated_charm.pdf',width=1900,panels=panels)
+        config=json.loads((ROOT/'config/plot.json').read_text())
+        pages=plot.balancing_species_views([source],SimpleNamespace(
+            category_orders={role:{'421':order,'4122':order}}),config)
+        self.assertEqual(len(pages),3)
+        self.assertEqual(len({p['filename'] for p in pages}),len(pages))
+        self.assertTrue(all(p['page_count']==p['page_index']==1 for p in pages))
+        for panel in pages[0]['panels']:
+            self.assertEqual([t['label'] for t in panel['ticks']],['-421','-411','-431','-4122'])
+        seen=[]
+        for page in pages[1:]:
+            self.assertNotIn('.part-',page['filename'])
+            self.assertEqual(len(page['panels']),2)
+            for panel in page['panels']:
+                self.assertEqual(len(panel['ticks']),len(order))
+                self.assertEqual((panel['geometry'][0],panel['geometry'][2]),(0.,1.))
+                for point in panel['series'][0]['points']:
+                    before=original[point['semantic_id']]
+                    for field in ('semantic_id','y','error','state'):
+                        self.assertEqual(point[field],before[field])
+                    seen.append(point['semantic_id'])
+        self.assertCountEqual(seen,original)
+
+    def test_display_selection_excludes_higher_numbered_states(self):
+        config=json.loads((ROOT/'config/plot.json').read_text())
+        selected=set(config['layout']['balancing_species_views']['expanded_abs_pdgs'])
+        self.assertEqual(len(selected),71)
+        self.assertTrue({421,423,431,433,4122,4312,4314,511,513,5312,5314} <= selected)
+        self.assertTrue({415,425,435,4124,10411,10413,14122,20413,515,10513,20513}.isdisjoint(selected))
+
+    def test_complete_species_axis_preserves_physical_text_size(self):
+        page=dict(filename='supplemental.balancing.activity.beauty.trigger-521.pdf',
+                  width=4300,text_pixels=18)
+        self.assertAlmostEqual(plot.paper_width_cm(page),18*43/19)
+        self.assertEqual(plot.body_text_pixels(page),34)
+        page.update(width=1900)
+        self.assertEqual(plot.body_text_pixels(page),34)
+
+    def test_individual_species_views_refuse_unbound_numerical_grouping(self):
+        config=json.loads((ROOT/'config/plot.json').read_text())
+        context=SimpleNamespace(cold=True,parent_artifact_digests=['0'*64])
+        with self.assertRaisesRegex(ValueError,'pinned numerical grouping'):
+            plot.balancing_species_views([],context,config)
+        context.parent_artifact_digests=[config['layout'][
+            'balancing_species_views']['grouping_recipe_sha256']]
+        self.assertEqual(plot.balancing_species_views([],context,config),[])
+
+    def test_species_subset_keeps_undefined_ratio_materialization(self):
+        point=dict(semantic_id='ratio',state='MISSING_VALUE',
+            value_status='UNDEFINED',uncertainty_status='UNDEFINED_CENTER',
+            reasons='ZERO_DENOMINATOR')
+        context=SimpleNamespace(materialization_by_semantic_id={
+            'ratio':dict(status='PRESENT',reason_codes=[])})
+        panel=dict(id='lower.shared.421',series=[dict(points=[point])])
+        plot.selected_panel_status(panel,context,[])
+        self.assertEqual(panel['status'],'PRESENT_UNDEFINED')
+        self.assertEqual(panel['note'],'')
+        panel['id']='upper.421'
+        plot.selected_panel_status(panel,context,[])
+        self.assertIn('zero denominator',panel['note'])
 
     def test_joined_columns_have_equal_width_and_do_not_change_data(self):
         import copy

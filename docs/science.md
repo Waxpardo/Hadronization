@@ -66,7 +66,7 @@ The generator disabled all heavy-hadron decays, including strong and electromagn
 
 The grouped observable sums additive OS and SS pair primitives for saved generator states at their saved kinematics. It then recomputes the pooled center, every K=10 delete-one value, covariance, validity mask and grouped meson reference. The estimator carries each trigger denominator once. Ratios, normalized spectra and errors are never added after estimation.
 
-The default map has 82 signed members. Particle and antiparticle groups remain separate, as do Sigma and Lambda families. Xi-prime and Xi-star saved states contribute to their signed Xi-family destinations while remaining separate in fine storage. A separately pinned downstream recipe reuses the fine THnSparse. That recipe defines a distinct interpretation. It does not change the default paper definition.
+The default map has 82 signed members. Particle and antiparticle groups remain separate, as do Sigma and Lambda families. Xi-prime and Xi-star saved states contribute to their signed Xi-family destinations while remaining separate in fine storage. A separately pinned downstream recipe reuses the fine THnSparse. That recipe defines a distinct interpretation. The individual-state recipe instead preserves every eligible species as its own destination.
 
 Membership follows the configured PYTHIA 8.317 decay endpoints; unit endpoint probability in that configuration is not a measured physical branching fraction. States outside a recipe remain in the fine collection and do not enter that grouped observable. Version 2.4 products retain their original trigger-selection identity. They do not represent all-origin results.
 
@@ -129,7 +129,9 @@ The partner bar denotes the conjugate signed PDG identity. There is no half-weig
 
 The baryon-to-meson observable divides two balancing yields with the same trigger. The canonical Lambda tuples `(trigger, baryon, reference)` are `(421, -4122, -421)` and `(521, 5122, -521)`. The D+ selection changes the first tuple to `(411, -4122, -411)`.
 
-The numerical request includes each selected Sigma and grouped Xi charge state. Primed Xi members contribute through their assigned grouped destination. All charm baryons use the same D0 reference. All beauty baryons use the same charged B reference. This common denominator supports comparisons between baryon species. It does not isolate a strangeness mechanism.
+The numerical request includes each selected Sigma and grouped Xi charge state. Primed Xi members contribute through their assigned destination in a grouped interpretation. The individual-state interpretation keeps primed and starred partners separate.
+
+All charm baryons use the same D0 reference. All beauty baryons use the same charged B reference. This common denominator supports comparisons between baryon species. It does not isolate a strangeness mechanism.
 
 Additional figures compare meson and Lambda triggers in separate columns for each baryon species. The signed registry sets the numerator and reference identities. For example, the Xi_b0 tuples are `(521, 5232, -521)` and `(5122, -5232, 521)`. The latter contains an antibaryon numerator because the Lambda_b trigger contains a beauty quark.
 

@@ -43,6 +43,8 @@ This inventory identifies every tracked file. The release includes generated sci
 | [config/heavy-catalog.json](../config/heavy-catalog.json) | Query model and fine reader | Complete signed generator-heavy catalog and valence/charge identities. |
 | [config/plot-all-tune.json](../config/plot-all-tune.json) | Renderer | All-tune correlation presentation with comparison panels. |
 | [config/plot-dplus.json](../config/plot-dplus.json) | Renderer | Presentation for the explicit D+ numerical recipe. |
+| [config/analysis-individual-species.json](../config/analysis-individual-species.json) | Numerical reducer | Inclusive all-origin request for every eligible signed open-heavy state. |
+| [config/grouping-individual-species.json](../config/grouping-individual-species.json) | Family-map parser | Catalog-bound identity mapping that keeps ground and excited species separate. |
 | [config/plot.json](../config/plot.json) | Renderer | D0 default figure selection, layout and identities. |
 | [config/query.json](../config/query.json) | Query builder and verifier | Exact support-tree columns and sparse-axis families. |
 | [config/query-all-heavy.json](../config/query-all-heavy.json) | Query builder and verifier | Version 2.4 final-state and pair-stage sparse axes for broad retention. |
@@ -143,6 +145,7 @@ This inventory identifies every tracked file. The release includes generated sci
 | [tests/test_generator.py](../tests/test_generator.py) | Development suite | Native particle rules, seed/card materialization and optional producer linkage. |
 | [tests/test_hygiene.py](../tests/test_hygiene.py) | Development suite | Tracked topology, permitted file families, include resolution and output exclusions. |
 | [tests/test_nonzero_chain_fixture.py](../tests/test_nonzero_chain_fixture.py) | Development suite | Explicit fresh destinations for synthetic builder and oracle. |
+| [tests/test_individual_species.py](../tests/test_individual_species.py) | Development suite | Catalog partition, identity-map mutants, signed pair domain and separate block primitives. |
 | [tests/test_plot_cold.py](../tests/test_plot_cold.py) | Development suite | Numerical-only drawing, signed labels, statuses, axes, inset, layouts, error-band gaps, PDF font embedding and repeatable export. |
 | [tests/test_projection_interface.py](../tests/test_projection_interface.py) | Development suite | Exact point domains, request identity, source routes and independent validity states. |
 | [tests/test_public_v4_cli.py](../tests/test_public_v4_cli.py) | Development suite | External-fixture public numerical round trips, selection changes and immutable outputs. |

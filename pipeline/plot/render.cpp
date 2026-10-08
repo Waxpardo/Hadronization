@@ -126,9 +126,23 @@ constexpr const char* kClassPatternDigest =
 constexpr const char* kP1WithheldSeDisclosure =
     "Tune-ratio SE unavailable for unresolved sparse-tail denominators; "
     "see ROOT flags";
+double PaperWidthCentimeters(const Page& page) {
+  // Full single-trigger species axes use a wider sheet at unchanged font size.
+  if (page.filename.find(".trigger-") != std::string::npos)
+    return kPaperWidthCentimeters * std::max(1., page.width / 1900.);
+  return kPaperWidthCentimeters;
+}
+double SingleSpeciesWidthScale(const Page& page) {
+  return page.filename.find(".trigger-") != std::string::npos
+      ? std::min(1., 1900. / page.width) : 1.;
+}
+double YAxisTickLength(const Page& page) {
+  return page.filename.find(".trigger-") != std::string::npos
+      ? .015 * SingleSpeciesWidthScale(page) : .03;
+}
 int BodyTextPixels(const Page& page) {
   const double paperWidthPoints =
-      kPaperWidthCentimeters * kPointsPerCentimeter;
+      PaperWidthCentimeters(page) * kPointsPerCentimeter;
   return std::max(page.textPixels,
                   static_cast<int>(std::ceil(9. * page.width /
                                              paperWidthPoints)));
@@ -641,7 +655,10 @@ bool SharedXTitle(const Page& page) {
          SpeciesCategoryAxis(page);
 }
 bool SharedStackYTitle(const Page& page, const Panel& panel) {
-  return page.panels.size() == 8 &&
+  return (page.panels.size() == 8 ||
+          (page.panels.size() == 4 &&
+           page.role.rfind("balancing.activity.", 0) == 0 &&
+           page.filename.find(".trigger-") != std::string::npos)) &&
          page.role.rfind("balancing.", 0) == 0 &&
          panel.id.rfind("upper.", 0) == 0;
 }
@@ -827,11 +844,17 @@ double BlankNoteStep(const Page& page, const Panel& panel) {
 constexpr double P1InformationX = .50;
 constexpr std::array<double, 5> kP1InformationY = {{.835, .810, .785, .760, .735}};
 constexpr std::array<int, 5> kP1InformationPixels = {{20, 17, 16, 15, 15}};
+int CategoryTextPixels(const Page& page) {
+  if (!SpeciesCategoryAxis(page)) return BodyTextPixels(page);
+  const double points = page.filename.find(".trigger-") == std::string::npos ? 12. : 10.;
+  return std::max(BodyTextPixels(page), static_cast<int>(std::ceil(
+      points * page.width / (PaperWidthCentimeters(page) * kPointsPerCentimeter))));
+}
 double CategoryLabelY(const Page& page, const Panel& panel) {
   if (SpeciesCategoryAxis(page)) {
     // Use a common letter baseline, independent of bars and scripts.
     const double height = (panel.geometry[3]-panel.geometry[1])*page.height;
-    return panel.margins[2] - 1.65*BodyTextPixels(page)/height;
+    return panel.margins[2] - 1.50*CategoryTextPixels(page)/height;
   }
   return panel.margins[2] -
       (page.role == "balancing.baryon_meson.activity" ? .015 : .025);
@@ -976,6 +999,182 @@ bool FullYAxisTickValues(const Page& page, const Panel& panel) {
          panel.id.size() >= 10 &&
          panel.id.compare(panel.id.size() - 10, 10, ".inclusive") == 0);
 }
+struct YMajorTick {
+  double value;
+  std::string label;
+};
+double YFramePixels(const Page& page, const Panel& panel) {
+  return page.height * (panel.geometry[3] - panel.geometry[1]) *
+         (1. - panel.margins[2] - panel.margins[3]);
+}
+int YTickTextPixels(const Page& page, const Panel& panel) {
+  return panel.reusePanel.empty() ? BodyTextPixels(page) :
+      std::max(12, static_cast<int>(std::round(
+          .055 * page.height * (panel.geometry[3] - panel.geometry[1]))));
+}
+double YTickFraction(const Panel& panel, double value) {
+  return panel.logY ? std::log(value / panel.yLow) /
+          std::log(panel.yHigh / panel.yLow) :
+          (value - panel.yLow) / (panel.yHigh - panel.yLow);
+}
+double YTickBottomClearance(const Panel& panel, double separation) {
+  return panel.margins[2] == 0. ? separation / 2. : 0.;
+}
+double YTickTopClearance(const Panel& panel, double separation) {
+  return panel.margins[3] == 0. ? separation / 2. : 0.;
+}
+std::string YTickLabel(double value, double step, bool decade,
+                       bool scientific) {
+  if (std::abs(value) < std::abs(step) * 1.e-8) return "0";
+  const double magnitude = std::abs(value);
+  if (decade) {
+    const int exponent = static_cast<int>(std::round(std::log10(magnitude)));
+    return exponent == 0 ? "1" : exponent == 1 ? "10" :
+           "10^{" + std::to_string(exponent) + "}";
+  }
+  if (scientific) {
+    const int exponent = static_cast<int>(std::floor(std::log10(magnitude)));
+    const double mantissa = value / std::pow(10., exponent);
+    std::ostringstream out;
+    out << std::setprecision(3) << mantissa << "#times10^{" << exponent << "}";
+    return out.str();
+  }
+  int decimals = 0;
+  while (decimals < 8 &&
+         (std::abs(step * std::pow(10., decimals) -
+                   std::round(step * std::pow(10., decimals))) > 1.e-8 ||
+          std::abs(value * std::pow(10., decimals) -
+                   std::round(value * std::pow(10., decimals))) > 1.e-8))
+    ++decimals;
+  std::ostringstream out;
+  out << std::fixed << std::setprecision(decimals) << value;
+  return out.str();
+}
+std::vector<double> LinearYTickValues(const Page& page, const Panel& panel,
+                                      int limit, double minimumSeparation) {
+  const double span = panel.yHigh - panel.yLow;
+  const int order = static_cast<int>(std::floor(std::log10(span)));
+  std::vector<double> best;
+  double bestStep = 0.;
+  double bestScore = std::numeric_limits<double>::infinity();
+  const int target = std::min(limit, panel.logY ? 4 :
+      (YFramePixels(page, panel) > 450. ? 6 : 5));
+  for (int exponent = order - 3; exponent <= order + 1; ++exponent) {
+    for (double mantissa : {1., 2., 2.5, 5.}) {
+      const double step = mantissa * std::pow(10., exponent);
+      if (!(step > 0.) || span / step > 200.) continue;
+      std::vector<double> values;
+      const long long first = static_cast<long long>(
+          std::ceil(panel.yLow / step - 1.e-10));
+      const long long last = static_cast<long long>(
+          std::floor(panel.yHigh / step + 1.e-10));
+      int eligible = 0;
+      for (long long index = first; index <= last; ++index) {
+        const double value = index * step;
+        const double fraction = YTickFraction(panel, value);
+        if (fraction < YTickBottomClearance(panel, minimumSeparation) ||
+            fraction > 1. - YTickTopClearance(panel, minimumSeparation)) continue;
+        ++eligible;
+        if (!values.empty() && fraction - YTickFraction(panel, values.back()) <
+                                   minimumSeparation) continue;
+        values.push_back(value);
+      }
+      if (values.size() < 2 || static_cast<int>(values.size()) > limit) continue;
+      // Prefer four or five useful, evenly separated labels. An edge label
+      // omitted for clipping never counts as an interior numerical anchor.
+      const double score = std::abs(static_cast<int>(values.size()) - target) +
+          (values.size() < 3 ? 2. : 0.) +
+          .7 * (eligible - static_cast<int>(values.size())) +
+          (panel.logY && mantissa == 2.5 ? 1.5 : 0.);
+      if (score < bestScore ||
+          (score == bestScore && step > bestStep)) {
+        best = std::move(values); bestStep = step; bestScore = score;
+      }
+    }
+  }
+  Need(best.size() >= 2, "y-axis has fewer than two legible numeric anchors");
+  (void)page;
+  return best;
+}
+std::vector<YMajorTick> YMajorTicks(const Page& page, const Panel& panel) {
+  Need(panel.yHigh > panel.yLow && (!panel.logY || panel.yLow > 0.),
+       "invalid scientific y-axis range");
+  const double height = YFramePixels(page, panel);
+  const int pixels = YTickTextPixels(page, panel);
+  const int limit = std::clamp(static_cast<int>(height / (1.65 * pixels)), 2, 12);
+  const double separation = (limit == 2 ? 1.25 : 1.55) * pixels / height;
+  const double scale = std::max(std::abs(panel.yLow), std::abs(panel.yHigh));
+  const bool scientific = scale < 1.e-3 || scale >= 1.e4;
+  std::vector<YMajorTick> result;
+  if (panel.logY && panel.yHigh / panel.yLow >= 10.) {
+    std::vector<double> decades;
+    for (int exponent = static_cast<int>(std::ceil(std::log10(panel.yLow)));
+         exponent <= static_cast<int>(std::floor(std::log10(panel.yHigh)));
+         ++exponent) {
+      const double value = std::pow(10., exponent);
+      const double fraction = YTickFraction(panel, value);
+      if (fraction >= YTickBottomClearance(panel, separation) &&
+          fraction <= 1. - YTickTopClearance(panel, separation))
+        decades.push_back(value);
+    }
+    if (decades.size() >= 3) {
+      const int stride = static_cast<int>(
+          std::ceil(static_cast<double>(decades.size()) / limit));
+      for (std::size_t i = 0; i < decades.size(); i += stride)
+        result.push_back({decades[i], YTickLabel(decades[i], decades[i],
+                                                 true, scientific)});
+    }
+  }
+  if (result.empty() && panel.logY) {
+    std::vector<double> values;
+    for (int exponent = static_cast<int>(std::floor(std::log10(panel.yLow))) - 1;
+         exponent <= static_cast<int>(std::ceil(std::log10(panel.yHigh))) + 1;
+         ++exponent)
+      for (double coefficient : {1., 2., 5.}) {
+        const double value = coefficient * std::pow(10., exponent);
+        const double fraction = YTickFraction(panel, value);
+        if (fraction >= YTickBottomClearance(panel, separation) &&
+            fraction <= 1. - YTickTopClearance(panel, separation))
+          values.push_back(value);
+      }
+    if (values.size() >= 3) {
+      const int stride = static_cast<int>(
+          std::ceil(static_cast<double>(values.size()) / limit));
+      for (std::size_t i = 0; i < values.size(); i += stride) {
+        if (!result.empty() &&
+            YTickFraction(panel, values[i]) -
+                YTickFraction(panel, result.back().value) < separation)
+          continue;
+        result.push_back({values[i], YTickLabel(values[i], values[i],
+                                                false, scientific)});
+      }
+      if (result.size() < 2) result.clear();
+    }
+  }
+  if (result.empty()) {
+    const auto values = LinearYTickValues(page, panel, limit, separation);
+    const double step = values[1] - values[0];
+    for (double value : values)
+      result.push_back({value, YTickLabel(value, step, false, scientific)});
+  }
+  Need(result.size() >= 2, "y-axis has fewer than two numeric labels");
+  for (std::size_t i = 1; i < result.size(); ++i)
+    Need((YTickFraction(panel, result[i].value) -
+          YTickFraction(panel, result[i-1].value)) * height >=
+             (limit == 2 ? 1.2 : 1.4) * pixels,
+         "adjacent y-axis labels are too close at publication size");
+  return result;
+}
+double YTickLabelX(const Page& page, const Panel& panel) {
+  const double padWidth = page.width *
+      (panel.geometry[2] - panel.geometry[0]);
+  return panel.margins[0] - std::max(.008, .3 * YTickTextPixels(page, panel) /
+                                            padWidth);
+}
+double YTickLabelY(const Panel& panel, double value) {
+  return panel.margins[2] +
+      (1. - panel.margins[2] - panel.margins[3]) * YTickFraction(panel, value);
+}
 bool AxisLabelSuppressed(const TAxis& axis, int labelNumber) {
   const TList* modified = axis.GetModifiedLabels();
   if (modified == nullptr) return false;
@@ -1005,7 +1204,8 @@ double YTitleX(const Page& page, const Panel& panel) {
   const double base=page.role.find("correlations.")==0 ? .025 :
       (page.role.find("balancing.")==0 && panel.id.rfind("upper.",0)==0 ? .05 : .075);
   const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
-  return std::max(.012,base-.3*BodyTextPixels(page)/width);
+  return std::max(.012*SingleSpeciesWidthScale(page),
+                  base*SingleSpeciesWidthScale(page)-.3*BodyTextPixels(page)/width);
 }
 std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
                                              const Panel& panel,
@@ -1025,13 +1225,18 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
         (panel.margins[2] + 1 - panel.margins[3]) / 2,
         textPixels, 1, 23, 90));
   }
+  if (!SharedRightAxis(panel))
+    for (const auto& tick : YMajorTicks(page, panel))
+      result.push_back(TextExpectation(tick.label,
+          YTickLabelX(page, panel), YTickLabelY(panel, tick.value),
+          YTickTextPixels(page, panel), 1, 32));
   const double frameWidth = 1 - panel.margins[0] - panel.margins[1];
   for (const auto& tick : panel.ticks) {
     const bool rotate = RotateCategoryLabels(page, panel);
     result.push_back(TextExpectation(
         tick.second, panel.margins[0] + frameWidth * xFraction(tick.first) +
             JoinedEndLabelOffset(page, panel, tick.first),
-        CategoryLabelY(page, panel), inset ? 14 : textPixels, 1,
+        CategoryLabelY(page, panel), inset ? 14 : CategoryTextPixels(page), 1,
         SpeciesCategoryAxis(page) ? 21 : rotate ? 32 : 23, rotate ? 90 : 0));
   }
   for (double coordinate : StatusRailCoordinates(page, panel, pages)) {
@@ -1291,7 +1496,8 @@ void VerifyLegends(const TList& primitives,
 }
 bool InFrameClassKey(const Page& page) {
   return page.role.rfind("balancing.activity.", 0) == 0 &&
-      page.filename.find(".extremes.pdf") != std::string::npos;
+      (page.filename.find(".extremes.pdf") != std::string::npos ||
+       page.filename.find(".extremes.trigger-") != std::string::npos);
 }
 std::map<int, const Series*> ClassSamples(const Page& page) {
   std::map<int, const Series*> result;
@@ -1776,14 +1982,13 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
            frame->GetXaxis()->GetTitleFont() == (inset ? 42 : 43) &&
            frame->GetYaxis()->GetTitleFont() == (inset ? 42 : 43) &&
            StoredFloatClose(frame->GetXaxis()->GetLabelSize(), expectedXLabelSize) &&
-           StoredFloatClose(frame->GetYaxis()->GetLabelSize(),
-                            SharedRightAxis(panel) ? 0. : baseLabelSize) &&
+           StoredFloatClose(frame->GetYaxis()->GetLabelSize(), 0.) &&
+           StoredFloatClose(frame->GetYaxis()->GetTickLength(), YAxisTickLength(page)) &&
            StoredFloatClose(frame->GetXaxis()->GetTitleSize(), inset ? .062 : textPixels) &&
            StoredFloatClose(frame->GetYaxis()->GetTitleSize(), inset ? .060 : textPixels) &&
            frame->GetYaxis()->GetNdivisions() % 1000000 ==
                YAxisDivisions(page, panel, inset) &&
-           frame->GetYaxis()->GetMoreLogLabels() ==
-             (!inset && panel.logY && panel.yHigh / panel.yLow < 10.) &&
+           !frame->GetYaxis()->GetMoreLogLabels() &&
            frame->GetYaxis()->GetNoExponent() ==
              FullYAxisTickValues(page, panel) &&
            AxisLabelSuppressed(*frame->GetYaxis(), 1) ==
@@ -1859,11 +2064,26 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
           std::vector<double>{};
       const std::size_t dividers = panel.categoryDividers && boundaries.size() > 1 ?
           boundaries.size() - 2 : 0;
-      Need(actualGuides.size() == expectedGuides.size() +
+      const auto yTicks = SharedRightAxis(panel) ?
+          std::vector<YMajorTick>{} : YMajorTicks(page, panel);
+      Need(actualGuides.size() == expectedGuides.size() + yTicks.size() +
            2 * boundaries.size() + dividers,
            "scientific guide object set differs from drawing record");
+      const double yTickInnerX = panel.logX ?
+          panel.xLow * std::pow(panel.xHigh / panel.xLow, .012*SingleSpeciesWidthScale(page)) :
+          panel.xLow + .012*SingleSpeciesWidthScale(page) * (panel.xHigh - panel.xLow);
+      for (std::size_t index = 0; index < yTicks.size(); ++index) {
+        const TLine& tick = *actualGuides[index];
+        Need(SameBinary64(tick.GetX1(), panel.xLow) &&
+             SameBinary64(tick.GetX2(), yTickInnerX) &&
+             SameBinary64(tick.GetY1(), yTicks[index].value) &&
+             SameBinary64(tick.GetY2(), yTicks[index].value) &&
+             tick.GetLineColor() == kBlack &&
+             tick.GetLineStyle() == 1 && tick.GetLineWidth() == 1,
+             "scientific y-axis major tick differs from drawing record");
+      }
       for (std::size_t index = 0; index < boundaries.size(); ++index) {
-        const std::size_t start = 2 * index +
+        const std::size_t start = yTicks.size() + 2 * index +
             (panel.categoryDividers && index > 0 ? index - 1 : 0);
         for (int side = 0; side < 2; ++side) {
           const TLine& tick = *actualGuides[start + side];
@@ -1891,7 +2111,7 @@ void VerifyCanvasArchive(const std::filesystem::path& output,
       for (std::size_t guideIndex = 0; guideIndex < expectedGuides.size();
            ++guideIndex) {
         const TLine& actual = *actualGuides[
-            2 * boundaries.size() + dividers + guideIndex];
+            yTicks.size() + 2 * boundaries.size() + dividers + guideIndex];
         const Guide& guide = *expectedGuides[guideIndex];
         const bool insetClass = page.role == "multiplicity.composite" &&
             panel.id == "inset.monash_boundaries" &&
@@ -1993,8 +2213,8 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
   // ROOT's PDF driver places the canvas on the requested physical paper.
   // Pixel dimensions only set aspect ratio; treating 100 px as one inch
   // clips every wide manuscript panel at the default A4 boundary.
-  gStyle->SetPaperSize(kPaperWidthCentimeters,
-                       kPaperWidthCentimeters * page.height / page.width);
+  gStyle->SetPaperSize(PaperWidthCentimeters(page),
+                       PaperWidthCentimeters(page) * page.height / page.width);
   // Destroy owned primitives before their canvas; ROOT removes pad references.
   std::vector<std::unique_ptr<TPad>> pads;
   std::vector<std::unique_ptr<TGraphErrors>> graphs;
@@ -2035,10 +2255,13 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       axis->SetNdivisions(505); axis->SetMaxDigits(4);
       axis->SetTitleOffset(inset ? 1.02 : 1.25);
     }
-    frame->GetYaxis()->SetMoreLogLabels(
-        !inset && panel.logY && panel.yHigh / panel.yLow < 10.);
+    // ROOT's sub-decade auto-labels cluster at one end and its rounded
+    // linear optimization can omit nearly the whole narrow range. Retain
+    // its tick grid, but place deterministic, print-spaced numeric anchors.
+    frame->GetYaxis()->SetMoreLogLabels(false);
     frame->GetYaxis()->SetNdivisions(YAxisDivisions(page, panel, inset));
-    if (SharedRightAxis(panel)) frame->GetYaxis()->SetLabelSize(0.);
+    frame->GetYaxis()->SetLabelSize(0.);
+    frame->GetYaxis()->SetTickLength(YAxisTickLength(page));
     if (FullYAxisTickValues(page, panel))
       frame->GetYaxis()->SetNoExponent(true);
     const auto yLabelPolicy = JoinedYAxisLabelPolicy(page, panel, inset);
@@ -2079,6 +2302,24 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       label.DrawLatex(YTitleX(page, panel),
                       (panel.margins[2]+1-panel.margins[3])/2,panel.yTitle.c_str());
     }
+    if (!SharedRightAxis(panel)) {
+      const double yTickInnerX = panel.logX ?
+          panel.xLow * std::pow(panel.xHigh / panel.xLow, .012*SingleSpeciesWidthScale(page)) :
+          panel.xLow + .012*SingleSpeciesWidthScale(page) * (panel.xHigh - panel.xLow);
+      for (const auto& tick : YMajorTicks(page, panel)) {
+        TLatex label; label.SetNDC(); label.SetTextFont(43);
+        label.SetTextSize(YTickTextPixels(page, panel));
+        label.SetTextAlign(32); label.SetLineWidth(1);
+        label.DrawLatex(YTickLabelX(page, panel),
+                        YTickLabelY(panel, tick.value), tick.label.c_str());
+        lines.emplace_back(std::make_unique<TLine>(
+            panel.xLow, tick.value, yTickInnerX, tick.value));
+        lines.back()->SetLineColor(kBlack);
+        lines.back()->SetLineStyle(1);
+        lines.back()->SetLineWidth(1);
+        lines.back()->Draw();
+      }
+    }
     if (!panel.ticks.empty()) {
       frame->GetXaxis()->SetLabelSize(0);
       const double frameWidth = 1 - panel.margins[0] - panel.margins[1];
@@ -2086,7 +2327,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
         const bool rotate = RotateCategoryLabels(page, panel);
         TLatex label; label.SetNDC(); label.SetTextFont(43);
         label.SetLineWidth(1);
-        label.SetTextSize(inset ? 14 : textPixels);
+        label.SetTextSize(inset ? 14 : CategoryTextPixels(page));
         label.SetTextAngle(rotate ? 90 : 0);
         label.SetTextAlign(SpeciesCategoryAxis(page) ? 21 : rotate ? 32 : 23);
         const double x = panel.margins[0] + frameWidth * xFraction(tick.first) +

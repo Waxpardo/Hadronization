@@ -41,6 +41,19 @@ def file_sha256(path):
     return digest.hexdigest()
 
 
+def catalog_sector(state):
+    """Use the existing beauty-first open-heavy convention, including Bc.
+
+    A hidden-flavour state has no OS/SS sign. Multiply-heavy open states
+    remain individual hadrons, not constituent-weighted balancing counts.
+    """
+    if state["nb"] != state["nbbar"]:
+        return "beauty"
+    if state["nb"] + state["nbbar"] == 0 and state["nc"] != state["ncbar"]:
+        return "charm"
+    return None
+
+
 @dataclass(frozen=True)
 class FamilyMap:
     sha256: str
@@ -97,13 +110,22 @@ def _configured_recipe(value, actual, raw):
         if type(group) is not dict or set(group) != {"destination_pdg", "family", "members"}:
             raise ValueError("grouping recipe destination fields differ")
         destination, members = group["destination_pdg"], group["members"]
-        if (type(destination) is not int or destination not in
-                evidence.members_by_destination or destination in by_destination or
-                group["family"] != evidence.family_by_destination[destination] or
+        if (type(destination) is not int or not isinstance(members, list) or
+                not members or any(type(member) is not int for member in members)):
+            raise ValueError("grouping recipe destination or member types differ")
+        identity = (destination in catalog_by_pdg
+                    and catalog_sector(catalog_by_pdg[destination]) is not None
+                    and members == [destination]
+                    and group["family"] == "pdg-" + str(abs(destination)))
+        endpoint = (destination in evidence.members_by_destination and
+                    group["family"] == evidence.family_by_destination[destination]
+                    and isinstance(members, list) and
+                    set(members) <= set(evidence.members_by_destination[destination]))
+        if (type(destination) is not int or destination in by_destination or
+                not (identity or endpoint) or
                 not isinstance(members, list) or not members or
                 any(type(member) is not int for member in members) or
                 len(set(members)) != len(members) or
-                not set(members) <= set(evidence.members_by_destination[destination]) or
                 any(member in by_member or member not in catalog_by_pdg
                     for member in members)):
             raise ValueError("grouping recipe member has no approved unit endpoint")
@@ -116,8 +138,10 @@ def _configured_recipe(value, actual, raw):
             raise ValueError("grouping recipe charge-conjugate coverage differs")
     semantic = hashlib.sha256(json.dumps(groups, sort_keys=True,
         separators=(",", ":"), ensure_ascii=True).encode("ascii")).hexdigest()
-    identities = {pdg: evidence.fine_state_identities[pdg] for pdg in by_member
-                  if pdg in evidence.fine_state_identities}
+    identities = {pdg: dict(pdg=pdg,
+        id="pythia-pdg-" + ("p" if pdg > 0 else "m") + str(abs(pdg)),
+        name=catalog_by_pdg[pdg]["name"], spin2j1=abs(pdg) % 10)
+        for pdg in by_member}
     if any(identities[pdg]["name"] != catalog_by_pdg[pdg]["name"] for pdg in identities):
         raise ValueError("grouping recipe identity differs from authenticated catalog")
     return FamilyMap(actual, PARTICLE_DATA_SHA256, by_member, by_destination,

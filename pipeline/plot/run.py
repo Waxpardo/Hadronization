@@ -32,10 +32,19 @@ RECORD_NAME = "drawing-record.tsv.gz"
 # Display order only: mesons first, then Lambda, Sigma, Xi and Omega baryons.
 # Particle and antiparticle share an order; primed Xis follow unprimed Xis.
 # https://pdg.lbl.gov/2025/mcdata/mass_width_2025.mcd
-SPECIES_DISPLAY_ORDER = (421, 411, 431, 521, 511, 531, 541,
-                         4122, 4212, 4112, 4222, 4232, 4132, 4322, 4312,
-                         4332, 5122, 5222, 5212, 5112, 5232, 5132, 5322,
-                         5312, 5332)
+SPECIES_DISPLAY_ORDER = (
+    421, 411, 431, 423, 413, 433, 10421, 10411, 10431, 10423,
+    10413, 10433, 20423, 20413, 20433, 425, 415, 435, 521, 511,
+    531, 541, 523, 513, 533, 543, 10521, 10511, 10531, 10541,
+    10523, 10513, 10533, 10543, 20523, 20513, 20533, 20543, 525, 515,
+    535, 545, 4122, 14122, 4124, 4212, 4112, 4222, 4214, 4114,
+    4224, 4232, 4132, 4322, 4312, 4324, 4314, 4422, 4412, 4424,
+    4414, 4332, 4334, 4432, 4434, 4444, 5122, 5222, 5212, 5112,
+    5224, 5214, 5114, 5232, 5132, 5322, 5312, 5324, 5314, 5242,
+    5142, 5422, 5412, 5424, 5414, 5522, 5512, 5524, 5514, 5332,
+    5334, 5342, 5432, 5434, 5442, 5444, 5532, 5534, 5542, 5544,
+    5554,
+)
 P1_WITHHELD_SE_DISCLOSURE = (
     "Tune-ratio SE unavailable for unresolved sparse-tail denominators; "
     "see ROOT flags")
@@ -192,13 +201,27 @@ def checked_plot_config(path):
             presets["all_registered"] != {"selector": "all_registered"}):
         raise ValueError("complete plot presets differ")
     layout = payload["layout"]
-    exact_keys(layout, {"axis_padding_fraction", "facet_dimension",
+    layout_fields = {"axis_padding_fraction", "facet_dimension",
                         "grid_columns_maximum", "maximum_panels_per_page",
                         "shared_legend_reservation", "text_pixel_size",
                         "physical_width_cm", "minimum_body_text_pt",
                         "categorical_tune_dodge", "p1_inset_geometry",
-                        "correlation_view", "activity_category_dividers"},
-               "plot layout")
+                        "correlation_view", "activity_category_dividers"}
+    if 'balancing_species_views' in layout:
+        layout_fields.add('balancing_species_views')
+        views = layout['balancing_species_views']
+        exact_keys(views, {'overview_abs_pdgs', 'expanded_abs_pdgs',
+                          'grouping_recipe_sha256'}, 'species views')
+        if (views['overview_abs_pdgs'] != [421,411,431,521,511,531,541,4122,5122]
+                or not isinstance(views['grouping_recipe_sha256'], str)
+                or not re.fullmatch(r'[0-9a-f]{64}', views['grouping_recipe_sha256'])
+                or not isinstance(views['expanded_abs_pdgs'], list)
+                or not views['expanded_abs_pdgs']
+                or any(type(pdg) is not int or pdg <= 0
+                       for pdg in views['expanded_abs_pdgs'])
+                or len(set(views['expanded_abs_pdgs'])) != len(views['expanded_abs_pdgs'])):
+            raise ValueError('balancing species-view contract differs')
+    exact_keys(layout, layout_fields, "plot layout")
     if (type(layout["maximum_panels_per_page"]) is not int or
             layout["maximum_panels_per_page"] < 1 or
             type(layout["grid_columns_maximum"]) is not int or
@@ -836,6 +859,101 @@ def checked_paper_pair_profile(payload, config, profile):
     return caption+'; #it{N}_{trig}: eligible singles'
 
 
+def balancing_species_views(pages, context, config):
+    """Select saved species points for compact and separate single-trigger plots.
+
+    Every value, error and status is copied from one numerical point. Only
+    categorical coordinates and page geometry change here.
+    """
+    recipe = config['layout'].get('balancing_species_views')
+    if recipe is None:
+        return pages
+    if (getattr(context, 'cold', False) and recipe['grouping_recipe_sha256']
+            not in context.parent_artifact_digests):
+        raise ValueError('species views require their pinned numerical grouping recipe')
+    result = []
+    for source in pages:
+        role = source['role']
+        if not role.startswith(('balancing.integrated.', 'balancing.activity.')):
+            result.append(source)
+            continue
+        orders = {trigger: species_display_order(pdgs)
+                  for trigger, pdgs in context.category_orders[role].items()}
+
+        def selected_page(selections, filename, single=False):
+            page = copy.deepcopy(source)
+            page.update(filename=filename, page_index=1, page_count=1)
+            if single:
+                # Keep the complete species axis together. The physical PDF
+                # width grows with its bin count rather than shrinking labels.
+                bins = max(map(len, selections.values()))
+                page['width'] = max(page['width'], 100 * bins)
+            page['panels'] = [panel for panel in page['panels']
+                              if panel['id'].rsplit('.',1)[-1] in selections]
+            for panel in page['panels']:
+                trigger = panel['id'].rsplit('.',1)[-1]
+                selected = selections[trigger]
+                original = orders[trigger]
+                positions = {float(original.index(pdg)+1): float(i+1)
+                             for i,pdg in enumerate(selected)}
+                captions = {float(i+1): tick['label'] for i,tick in
+                            enumerate(next(p for p in source['panels']
+                                if p['id'].rsplit('.',1)[-1]==trigger and p['ticks'])['ticks'])}
+                for series in panel['series']:
+                    kept = []
+                    for point in series['points']:
+                        old = point['scientific_x']
+                        if old not in positions:
+                            continue
+                        shift = positions[old]-old
+                        point['scientific_x'] = positions[old]
+                        point['display_x'] += shift
+                        point['x'] += shift
+                        kept.append(point)
+                    series['points'] = kept
+                panel['x_range'] = [.5,len(selected)+.5]
+                if panel['ticks']:
+                    panel['ticks'] = [{'x':new,'label':captions[old]}
+                                      for old,new in positions.items()]
+                for guide in panel['guides']:
+                    guide['x_low'],guide['x_high'] = panel['x_range']
+                valid = [p for s in panel['series'] for p in s['points']
+                         if p['state'] in ('DRAW','LOG_NONPOSITIVE') and p['y'] is not None]
+                values = [v for p in valid for v in
+                          (p['y'],p['y']-(p['error'] or 0),p['y']+(p['error'] or 0))]
+                upper = panel['id'].startswith('upper.')
+                panel['log_y'] = upper and bool(values) and min(values)>0
+                for p in valid:p['state']='DRAW'
+                panel['y_range'] = _padded_range(values + ([] if upper else [1.]),
+                    config['layout']['axis_padding_fraction'],panel['log_y'])
+                selected_panel_status(panel, context, valid)
+                panel['guides'] = [g for g in panel['guides'] if g['id'] != 'signed_zero']
+                if values and min(values) < 0:
+                    panel['guides'].append(dict(id='signed_zero',
+                        x_low=panel['x_range'][0], x_high=panel['x_range'][1],
+                        y_low=0., y_high=0., color='#777777', line_style=7, label=''))
+                if single:
+                    panel['geometry'][0],panel['geometry'][2] = 0.,1.
+                    scale = min(1., 1900. / page['width'])
+                    panel['margins'][0],panel['margins'][1] = .14*scale,.04*scale
+            return page
+
+        overview = {trigger:[pdg for pdg in order
+                    if abs(int(pdg)) in recipe['overview_abs_pdgs']]
+                    for trigger,order in orders.items()}
+        if any(not values for values in overview.values()):
+            raise ValueError('ground-state overview is absent from numerics')
+        result.append(selected_page(overview,source['filename']))
+        for trigger,order in orders.items():
+            selected = [pdg for pdg in order
+                        if abs(int(pdg)) in recipe['expanded_abs_pdgs']]
+            if not selected:
+                raise ValueError('expanded species view is absent from numerics')
+            filename = 'supplemental.'+role+'.trigger-'+trigger+'.pdf'
+            result.append(selected_page({trigger:selected},filename,True))
+    return result
+
+
 def focused_extreme_pages(pages, context, padding):
     """Add supplemental P5/P7 views by filtering saved class series only."""
     if len(context.tunes) < 2:
@@ -859,8 +977,7 @@ def focused_extreme_pages(pages, context, padding):
                  if panel['id'].startswith('upper.')]
         if not upper or any(
                 not all(any(series['class_id'] == class_id and
-                            any(point['state'] == 'DRAW'
-                                for point in series['points'])
+                            bool(series['points'])
                             for series in panel['series'])
                         for class_id in selected)
                 for panel in upper):
@@ -868,7 +985,9 @@ def focused_extreme_pages(pages, context, padding):
                 raise ValueError('complete activity endpoint drawing absent')
             continue
         page = copy.deepcopy(source)
-        page['filename'] = 'supplemental.'+source['role']+'.extremes.pdf'
+        page['filename'] = (source.get('filename','').replace('.trigger-', '.extremes.trigger-')
+            if '.trigger-' in source.get('filename','') else
+            'supplemental.'+source['role']+'.extremes.pdf')
         page['title'] = ('Selected activity intervals: '+', '.join(descriptions))
         for panel in page['panels']:
             panel['series'] = [series for series in panel['series']
@@ -887,12 +1006,7 @@ def focused_extreme_pages(pages, context, padding):
                 values.append(1.)
             panel['y_range'] = _padded_range(values, padding,
                                               panel['log_y'])
-            panel['status'] = 'AVAILABLE' if valid else 'NOT_MATERIALIZED'
-            missing = sum(point['state'] != 'DRAW'
-                          for series in panel['series']
-                          for point in series['points'])
-            panel['note'] = ('signed y uses linear scale; ' if signed else '') + \
-                ('{} missing (#times)'.format(missing) if missing else '')
+            selected_panel_status(panel, context, valid)
             panel['guides'] = [guide for guide in panel['guides']
                                if guide['id'] != 'signed_zero']
             if signed:
@@ -918,7 +1032,7 @@ def tune_separated_activity_pages(pages, tunes):
         lower = sorted((panel for panel in source['panels']
                         if panel['id'].startswith('lower.')),
                        key=lambda panel: panel['geometry'][0])
-        if len(upper) != 2 or len(lower) != 2 or len(tunes) != 3:
+        if len(upper) not in (1,2) or len(lower) != len(upper) or len(tunes) != 3:
             raise ValueError('three-tune activity page topology differs')
         page = copy.deepcopy(source)
         page['height'] = 2850
@@ -1091,6 +1205,21 @@ def join_paired_columns(pages):
                         panel['title'] += ': '+panel['y_title']
                 left['y_title'] = 'Balancing yield ratio'
             right['y_title'] = ''
+
+def selected_panel_status(panel, context, valid):
+    """Keep subset status tied to the saved numerical materialization."""
+    points = [p for series in panel['series'] for p in series['points']]
+    if valid:
+        panel['status'] = 'AVAILABLE'
+        missing = sum(p['state'] != 'DRAW' for p in points)
+        panel['note'] = '{} missing (#times)'.format(missing) if missing else ''
+    else:
+        panel['status'], note = typed_panel_status(context, points)
+        panel['note'] = compact_paper_status_note(panel['status'], note)
+    if panel['id'].startswith('lower.'):
+        # The narrow comparison pad keeps point flags but no prose rail.
+        panel['note'] = ''
+
 
 def typed_panel_status(context, rows):
     """Summarize saved materialization and estimator statuses for a blank pad."""
@@ -1275,6 +1404,16 @@ def scientific_caption_lines(page, context):
     return lines
 
 
+def paper_width_cm(page):
+    return 18. * (max(1., page['width'] / 1900.)
+                  if '.trigger-' in page.get('filename', '') else 1.)
+
+
+def body_text_pixels(page):
+    return max(page['text_pixels'], math.ceil(
+        9 * page['width'] / (paper_width_cm(page) * 72 / 2.54)))
+
+
 def add_publication_captions(pages, context):
     """Place sample text inside frames and retain separate column titles."""
     for page in pages:
@@ -1285,7 +1424,7 @@ def add_publication_captions(pages, context):
         lines=scientific_caption_lines(page,context)
         page['scientific_caption']=lines
         for panel in page['panels']: panel['annotations']=[]
-        font=max(page['text_pixels'],math.ceil(9*page['width']/(18*72/2.54)))
+        font=body_text_pixels(page)
         if page['role'] == 'spectra.signed_heavy':
             for panel in row:
                 ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
@@ -1315,7 +1454,8 @@ def add_publication_captions(pages, context):
             x=target['margins'][0]+2.*font/pw
             # Compensate for the native pixel rounding of spectrum legend rows.
             y += .035*font/ph
-        if page['role'].startswith('balancing.') and page['role']!='balancing.baryon_meson.activity':
+        if (page['role'].startswith('balancing.') and
+                page['role']!='balancing.baryon_meson.activity' and len(row)>1):
             x=target['margins'][0]+.32*(1.-target['margins'][0])
         if page['role']=='multiplicity.composite':
             target['legend']=[.76,.705,.95,.825]
@@ -1694,6 +1834,7 @@ def cold_drawing_inputs(payload, config):
         activity_id=activity_id, public_rows=rows,
         activity_selection=activity,
         materialization_by_semantic_id=materialization_by_semantic_id,
+        parent_artifact_digests=payload['provenance']['parent_artifact_digests'],
         classes=classes,
         block_ids=request["statistics"]["block_ids"],
         events=event_count,
@@ -1770,7 +1911,21 @@ def species_latex_label(pdg, value):
         'Lambdabzero': '#it{#Lambda}_{b}^{0}',
         'Lambdabzerobar': '#bar{#it{#Lambda}}_{b}^{0}',
     }
-    return compact.get(value, value)
+    if value in compact:
+        return compact[value]
+    # Format the authenticated generator name; do not identify states by a label.
+    # A neutral charge is the final zero, distinct from spin subscripts such as _0.
+    match = re.fullmatch(r"(D|B|Lambda|Sigma|Xi|Omega)([\*']?)(?:_([0-9a-z]+?))?(\([0-9]+\))?(bar)?(\+\+|--|\+|-|0)", value)
+    if match:
+        base, excitation, subscript, mass, anti, charge = match.groups()
+        symbol = base if base in ('D','B') else '#'+base
+        symbol = '#it{'+symbol+'}'
+        if anti: symbol = '#bar{'+symbol+'}'
+        if subscript: symbol += '_{'+subscript+'}'
+        symbol += '^{'+excitation+charge+'}'
+        if mass: symbol += mass
+        return symbol
+    return value
 
 
 def reserve_spectrum_tune_key(pages):
@@ -1782,7 +1937,7 @@ def reserve_spectrum_tune_key(pages):
         tunes = {s['tune'] for s in panel['series']}
         if not tunes:
             continue
-        font = max(page['text_pixels'], math.ceil(9*page['width']/(18*72/2.54)))
+        font = body_text_pixels(page)
         font += 2 if page['width'] > 1500 else 0
         width = page['width']*(panel['geometry'][2]-panel['geometry'][0])
         height = page['height']*(panel['geometry'][3]-panel['geometry'][1])
@@ -1824,7 +1979,7 @@ def reserve_annotation_headroom(pages):
         for panel in row:
             pw=page['width']*(panel['geometry'][2]-panel['geometry'][0])
             ph=page['height']*(panel['geometry'][3]-panel['geometry'][1])
-            font=max(page['text_pixels'],math.ceil(9*page['width']/(18*72/2.54)))
+            font=body_text_pixels(page)
             left,right,bottom,margin_top=panel['margins']
             boxes=[]
             if panel['annotations']:
@@ -2059,7 +2214,7 @@ def drawing_plan(projection, manifest, config):
                             'Multiplicity Percentile Interval (%)',
                         y_title=('#it{Y}_{baryon}/#it{Y}_{meson}'
                                  if half=='upper' else 'TUNE/MONASH'),
-                        log_y=half=='upper',ratio=half=='lower',legend=False)
+                        log_y=False,ratio=half=='lower',legend=False)
         elif role=='multiplicity.composite':
             title=''
             activity=next(item for item in definitions['activities']
@@ -2474,6 +2629,7 @@ def drawing_plan(projection, manifest, config):
         for guide in inset['guides']:
             guide['y_low']=inset['y_range'][0]
             guide['y_high']=inset['y_range'][1]
+    pages = balancing_species_views(pages, context, config)
     focused = focused_extreme_pages(
         pages, context, config['layout']['axis_padding_fraction'])
     tune_order = [item['id'] for item in
@@ -3008,6 +3164,7 @@ def promote_render_pages(pages, output):
             shutil.rmtree(str(output))
             fsync_directory(output.parent)
         raise
+
 
 def cold_numerics(args):
     """Read S's frozen ROOT once, with trusted physical and logical digests."""

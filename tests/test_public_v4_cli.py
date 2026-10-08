@@ -57,7 +57,8 @@ class PublicV4AnalysisBinding(unittest.TestCase):
             pass
         for name, explicit in (('analysis.json', False), ('analysis.json', True),
                 ('analysis-all-origin.json', False), ('analysis-all-origin.json', True),
-                ('analysis-hard-root-control.json', True)):
+                ('analysis-hard-root-control.json', True),
+                ('analysis-individual-species.json', True)):
             with self.subTest(config=name, explicit=explicit):
                 config = ROOT / 'config' / name
                 construction = (config if name == 'analysis.json' else

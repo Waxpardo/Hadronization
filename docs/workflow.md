@@ -246,7 +246,7 @@ Add `--charm-trigger 411` to select the coherent D+ recipe. Add `--analysis` wit
 
 For a version 2.5 collection, pass `--analysis config/analysis-all-origin.json` and its SHA-256 to `reduce run`. The reducer projects the approved family members from the broad fine query, sums block-level OS and SS primitives, and applies each shared trigger denominator once. The merged query ROOT files remain the independent fine-species authority. Separate `paper-fine.root`, `families.root` and `shared.root` contain downstream additive primitives. The estimator recomputes pooled values and K=10 covariance.
 
- A separately hashed compatible analysis copy can select another [grouping recipe](configuration.md#fixed-analysis-fields) without changing fine THnSparse content. The package includes the exact grouping recipe and checksum for portable verification. Version 2.4 products retain their 82-member family interpretation. They do not represent version 2.5.
+A separately hashed compatible analysis copy can select another [grouping recipe](configuration.md#fixed-analysis-fields) without changing fine THnSparse content. The package includes the exact grouping recipe and checksum for portable verification. Version 2.4 products retain their 82-member family interpretation. They do not represent version 2.5.
 
 ### Compare inclusive and rectangular selections
 
@@ -361,3 +361,28 @@ Package construction checks file bindings. The separate verification command als
 Preserve ambiguous publication stages and reservations until their state is understood. A failed process may have completed a filesystem operation before losing its response. Verify durable bytes before selecting a new attempt. Never repair acceptance by rewriting a checksum beside the disputed file.
 
 `./hadronization clean` is a dry run. `./hadronization clean --apply` deletes listed compiler residue, caches and eligible aged accepted-attempt scratch. Review the list first. It does not implement bulk research-data retention.
+
+## Reduce individual species
+
+The same merged query supports an individual-state numerical interpretation.
+Use the complete reduction command above with these replacement arguments:
+
+```sh
+ANALYSIS=config/analysis-individual-species.json
+ANALYSIS_SHA=$(shasum -a 256 "$ANALYSIS" | cut -d ' ' -f 1)
+```
+
+Pass `--analysis "$ANALYSIS" --analysis-sha "$ANALYSIS_SHA"` to `reduce run`.
+Choose a new output directory.
+Keep every collection, source and acceptance pin from the verified input.
+The command needs the external merged query and its retained support rows.
+The compact numerical ROOT from a grouped interpretation cannot supply additional fine species.
+
+Render the resulting package with `config/plot.json`.
+The paired balancing figures show ground-state mesons and Lambda with larger category labels.
+Separate single-trigger PDFs show the selected ground states and their star or prime partners.
+
+Each file contains one figure with all selected associates for its trigger.
+Ground states and their star or prime partners share one continuous species axis.
+The numerical data retains higher orbital and mass-labelled states, but this view omits them.
+The selected activity intervals use the same species partition as the all-class figures.

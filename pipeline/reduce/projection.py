@@ -161,6 +161,8 @@ def category_order(request, label_by_pdg):
                 continue
             if role_id in ('balancing.integrated.beauty','balancing.activity.beauty'):
                 order = [a for a in PAPER_BEAUTY_ASSOCIATES.get(trigger, ()) if a in available]
+                order.extend(a for t, a in pair_order if t == trigger and
+                             a in available and a not in order)
             else:
                 order = list(dict.fromkeys(a for t,a in pair_order if t == trigger and a in available))
             if set(order) != available or any(a not in label_by_pdg for a in order):
@@ -984,6 +986,13 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
     eta = definitions.get("pair_acceptance", presentation["selection_definitions"]["pair_acceptance"])["eta"]["value"]
     selected_states, requested_pairs = _query_model().observable_pairs(
         requested_analysis, 'projection_formulas_v4')
+    individual_species = False
+    if requested_analysis.get('version') == '2.5.0':
+        binding = requested_analysis['associate_family_map']
+        family_map = _query_model().family.checked_family_map(
+            ROOT / binding['path'], binding['sha256'])
+        individual_species = all(members == (destination,) for destination, members
+                                 in family_map.members_by_destination.items())
     if native is not None and any(
             pair["trigger_pdg"] in paper["trigger_pdgs"] and
             pair["associate_pdg"] not in paper["signed_pdgs"]
@@ -1135,10 +1144,10 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
                     # Identified balancing categories share one definition
                     # across integrated and activity-resolved products.
                     # The C++ estimator obtains SS from each OS conjugate.
-                    if (role_id in ("balancing.integrated.beauty", "balancing.activity.beauty") and
+                    if (not individual_species and role_id in ("balancing.integrated.beauty", "balancing.activity.beauty") and
                             a not in PAPER_BEAUTY_ASSOCIATES.get(t, ())):
                         continue
-                    if (role_id in ("balancing.integrated.charm", "balancing.activity.charm") and
+                    if (not individual_species and role_id in ("balancing.integrated.charm", "balancing.activity.charm") and
                             (t not in (411, 421, 4122) or
                              a not in PAPER_CHARM_ASSOCIATES)):
                         continue

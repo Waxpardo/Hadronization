@@ -89,6 +89,7 @@ class LeanTreeContract(unittest.TestCase):
             "config/analysis-pt-1-0p15.json", "config/associate-family-runtime.json",
             "config/associate-family-runtime-all-heavy.json",
             "config/grouping-xi-star-only.example.json",
+            "config/analysis-individual-species.json", "config/grouping-individual-species.json",
             "config/query.json", "config/query-all-heavy.json",
             "config/query-all-origin.json",
             "config/plot.json", "config/plot-dplus.json", "config/plot-all-tune.json",

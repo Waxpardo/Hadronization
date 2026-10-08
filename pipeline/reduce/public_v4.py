@@ -310,7 +310,8 @@ def _provenance(source, request, run, ledger, analysis, campaign):
             (analysis['version'] == '2.5.0' and
              analysis_source_path not in
                 (None, 'config/analysis-all-origin.json',
-                 'config/analysis-hard-root-control.json')) or
+                 'config/analysis-hard-root-control.json',
+                 'config/analysis-individual-species.json')) or
             source.index['analysis_sha256'] != run['construction_analysis_sha256'] or
             req['bindings']['analysis_config_sha256'] != run[
                 'interpretation_analysis_sha256'] or

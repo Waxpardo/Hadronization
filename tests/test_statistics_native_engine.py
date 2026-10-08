@@ -208,9 +208,9 @@ class NativeEngineContract(unittest.TestCase):
 
     def test_extended_signed_species_use_pooled_counts_and_joint_deletions(self):
         # Explicit PDGs are an independent oracle for the new channel domain.
-        charm=(-431,-4112,-4212,-4222,-4132,-4232)
+        charm=(-431,-4112,-4212,-4222,-4132,-4232,-4312,-4314,-413,-4412)
         channels=[(t,a,'charm') for t in (421,4122) for a in charm]
-        channels += [(521,a,'beauty') for a in (5112,5222,5132,5232)]
+        channels += [(521,a,'beauty') for a in (5112,5222,5132,5232,5312,5314,5414)]
         channels += [(5122,a,'beauty') for a in (-5112,-5222,-5132,-5232)]
         sha='a'*64
         primitives=['hadronization_native_primitives_v1',
@@ -238,6 +238,9 @@ class NativeEngineContract(unittest.TestCase):
             'REQUEST\t'+'e'*64+'\t'+'f'*64,
             'AXES\t3\t1\t110','FAMILY\tMONASH\t'+'d'*64,
             'CLASS\t0\t1\t0\t100']
+        # Explicit singleton interpretation must not absorb a prime/star partner.
+        for pdg in sorted({signed for _,a,_ in channels for signed in (a,-a)}):
+            query.append(f'ASSOCIATE_GROUP\t{pdg}\t{pdg}')
         for index,(trigger,associate,sector) in enumerate(channels):
             query.append(f'POINT\t{index}\tbalancing.integrated.{sector}\tos_minus_ss_per_trigger\tMONASH\t-\tinclusive\t0\t{trigger}\t{associate}\t0\tNONE\t-\t-1\tTEST_ONLY_DIAGNOSTIC')
             numerators=[(index+1)*block+37-index for block in range(1,11)]
