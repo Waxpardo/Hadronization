@@ -1353,10 +1353,24 @@ double CategoryTickInnerY(const Page& page, const Panel& panel, bool top) {
   return top ? panel.yHigh - delta : panel.yLow + delta;
 }
 double YTitleX(const Page& page, const Panel& panel) {
-  const double base=page.role.find("correlations.")==0 ? .025 :
-      (page.role.find("balancing.")==0 && panel.id.rfind("upper.",0)==0 ? .05 : .075);
   const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
-  return std::max(.012*SingleSpeciesWidthScale(page),
+  const auto yTicks = YMajorTicks(page, panel);
+  const bool longCorrelationScale =
+      page.role.find("correlations.") == 0 &&
+      panel.yTitle.find("#frac") != std::string::npos &&
+      std::any_of(yTicks.begin(), yTicks.end(), [](const YMajorTick& tick) {
+                    return tick.label.find("^{") == std::string::npos &&
+                           tick.label.size() >= 7;
+                  });
+  // A stacked fraction is substantially deeper than ordinary rotated text.
+  // Move it one text height farther from long fixed-decimal labels; shorter
+  // correlation scales retain the established title position.
+  const double base=page.role.find("correlations.")==0 ?
+      (longCorrelationScale ? .005 : .025) :
+      (page.role.find("balancing.")==0 && panel.id.rfind("upper.",0)==0 ? .05 : .075);
+  const double minimum = (longCorrelationScale ? -.01 : .012) *
+      SingleSpeciesWidthScale(page);
+  return std::max(minimum,
                   base*SingleSpeciesWidthScale(page)-.3*BodyTextPixels(page)/width);
 }
 std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,

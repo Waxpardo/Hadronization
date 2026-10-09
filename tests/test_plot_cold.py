@@ -147,6 +147,28 @@ int main() {
   panel.yLow=.437976; panel.yHigh=1.5061;
   ticks=YMajorTicks(page,panel);
   if (ticks.size()!=3 || !Close(ticks.back().value,1.)) return 21;
+  // The actual beauty SS correlation geometry keeps its deep rotated fraction
+  // clear of seven-character fixed-decimal tick labels.
+  page.width=1900; page.height=2600; page.textPixels=18;
+  page.role="correlations.beauty";
+  panel.id="correlation.main.521.SS";
+  panel.geometry={0x0p+0,0x1.c28f5c28f5c29p-2,
+                  0x1.170a3d70a3d71p-1,0x1.3851eb851eb85p-1};
+  panel.margins={0x1.9d5b98a919d5cp-3,0x0p+0,0x0p+0,
+                 0x1.d89d89d89d89fp-3};
+  panel.logY=false;
+  panel.yLow=-0x1.672b40aab4522p-14;
+  panel.yHigh=0x1.2f04baa0f5cfap-10;
+  panel.yTitle="#frac{1}{#it{N}_{trig}} #frac{d#it{N}_{pair}}{d#Delta#varphi} (rad^{-1})";
+  const double longScaleTitleX=YTitleX(page,panel);
+  if (longScaleTitleX>.002) return 22;
+  // The ordinary correlation scale keeps the established title position.
+  panel.id="correlation.main.521.OS";
+  panel.yLow=-0x1.f1f6c278aa7cep-9;
+  panel.yHigh=0x1.b1bf900ebfe3cp-3;
+  const double shortScaleTitleX=YTitleX(page,panel);
+  if (shortScaleTitleX<.01 ||
+      shortScaleTitleX-longScaleTitleX<.01) return 23;
   page.role="balancing.activity.charm";
   page.filename="supplemental.balancing.activity.charm.trigger-421.pdf";
   page.panels.resize(4); panel.id="upper.MONASH.421";
