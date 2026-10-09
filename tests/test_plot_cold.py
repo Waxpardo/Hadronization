@@ -212,6 +212,29 @@ int main() {
   try { VerifyCanvasTitleBounds(titleCanvas,titled); }
   catch (const std::exception&) { refused=true; }
   if (!refused) return 17;
+  Page activity{}; activity.role="balancing.activity.charm";
+  activity.filename="supplemental.balancing.activity.charm.extremes.pdf";
+  activity.width=1900;activity.height=2950;activity.textPixels=18;
+  Panel topKey{};topKey.id="upper.MONASH.4122";
+  topKey.geometry={.54,.6,1.,.9};topKey.margins={0.,.04,0.,.1};
+  topKey.xLow=.5;topKey.xHigh=7.5;topKey.yLow=0.;topKey.yHigh=10.;
+  topKey.annotations.push_back({.02,.3,18.,"scientific text"});
+  Panel middle=topKey;middle.id="upper.JUNCTIONS.4122";
+  middle.geometry={.54,.3,1.,.6};middle.annotations.clear();
+  for (int style=2;style<=4;++style) {
+    Series item{};item.tune="MONASH";item.lineStyle=style;
+    item.label=style==2 ? "0-1%" : style==3 ? "40-50%" : "80-90%";
+    item.mode="categories";item.marker="none";
+    topKey.series.push_back(item);item.tune="JUNCTIONS";
+    Point q{};q.x=6.;q.y=8.;q.error=.2;q.state="DRAW";
+    item.points.push_back(q);middle.series.push_back(item);
+  }
+  activity.panels={topKey,middle};
+  const auto key=ActivityClassKey(activity);
+  if (key.first!=&activity.panels[1] || key.second[3]>=.75) return 18;
+  const double font=TuneLegendTextPixels(activity);
+  if (!ClassKeyClearsData(activity,*key.first,key.second,
+      .65*font/(1900*.46),.65*font/(2950*.3))) return 19;
   return bands==ranges.size() && central ? 0 : 6;
 }
 '''
@@ -565,6 +588,41 @@ int main(int argc, char** argv) {
         for before,after in zip(original,panels):
             self.assertEqual(before['series'],after['series'])
 
+    def test_log_ratio_axes_preserve_signed_science_and_upper_panels(self):
+        import copy
+        points = [dict(semantic_id=str(i), state='DRAW', y=y, error=error,
+                       value_status='VALID', uncertainty_status='AVAILABLE')
+                  for i, (y,error) in enumerate(((0.,.2),(-.4,.3),(.1,.3),(1.,.1),(20.,2.)))]
+        points.append(dict(semantic_id='missing',state='MISSING_VALUE',y=None,error=None))
+        upper = dict(id='upper.421',log_y=False,y_range=[-.5,21.],
+                     series=[dict(points=copy.deepcopy(points))],guides=[])
+        panels = [upper] + [dict(id=key,log_y=False,y_range=[-.5,21.],
+                   series=[dict(points=copy.deepcopy(points))],guides=[
+                   dict(id='unity',y_low=1.,y_high=1.),
+                   dict(id='signed_zero',y_low=0.,y_high=0.)])
+                   for key in ('lower.shared.421','correlation.compare.421.OS', 'g9.ratio')]
+        before = copy.deepcopy(panels)
+        config = dict(layout=dict(tune_ratio_y_scale='log',axis_padding_fraction=.08))
+        plot.apply_tune_ratio_scale([dict(role='balancing.activity.charm',panels=panels)],config)
+        self.assertEqual(panels[0], before[0])
+        for panel, original in zip(panels[1:], before[1:]):
+            self.assertTrue(panel['log_y'])
+            self.assertGreater(panel['y_range'][0],0.)
+            self.assertLess(panel['y_range'][0],.1)
+            self.assertGreater(panel['y_range'][1],22.)
+            self.assertEqual([g['id'] for g in panel['guides']],['unity'])
+            for actual, old in zip(panel['series'][0]['points'],original['series'][0]['points']):
+                for key in old:
+                    if key!='state':self.assertEqual(actual[key],old[key])
+                self.assertEqual(actual['state'],'LOG_NONPOSITIVE' if old['y'] is not None and old['y']<=0 else old['state'])
+        panel=copy.deepcopy(before[1]);panel['id']='lower.ratio'
+        plot.apply_tune_ratio_scale([dict(role='multiplicity.composite',panels=[panel])],config)
+        self.assertEqual(panel['y_range'][1],2.5)
+        config['layout']['tune_ratio_y_scale']='linear'
+        unchanged=copy.deepcopy(before)
+        plot.apply_tune_ratio_scale([dict(role='test',panels=unchanged)],config)
+        self.assertEqual(unchanged,before)
+
     def test_focused_intervals_never_use_nearby_class(self):
         classes=[{'id':'5','integrated':False,'percentile_interval':[0.,2.]},
                  {'id':'7','integrated':False,'percentile_interval':[40.,50.]},
@@ -634,7 +692,7 @@ int main(int argc, char** argv) {
         self.assertEqual(len({p['filename'] for p in pages}),len(pages))
         self.assertTrue(all(p['page_count']==p['page_index']==1 for p in pages))
         for panel in pages[0]['panels']:
-            self.assertEqual([t['label'] for t in panel['ticks']],['-421','-411','-431','-4122'])
+            self.assertEqual([t['label'] for t in panel['ticks']],['-421','-411','-431','-4122','-4212','-4112','-4222'])
         seen=[]
         for page in pages[1:]:
             self.assertNotIn('.part-',page['filename'])
@@ -655,6 +713,17 @@ int main(int argc, char** argv) {
         self.assertEqual(len(selected),71)
         self.assertTrue({421,423,431,433,4122,4312,4314,511,513,5312,5314} <= selected)
         self.assertTrue({415,425,435,4124,10411,10413,14122,20413,515,10513,20513}.isdisjoint(selected))
+
+    def test_excited_partners_follow_each_ground_state(self):
+        self.assertEqual(plot.species_display_order(
+            ['-531','-523','-513','-521','-511','-533']),
+            ['-521','-523','-511','-513','-531','-533'])
+        self.assertEqual(plot.species_display_order(
+            ['4314','4132','4322','4232','4324','4312']),
+            ['4232','4322','4324','4132','4312','4314'])
+        self.assertEqual(plot.species_display_order(
+            ['-5114','-5212','-5224','-5222','-5214','-5112']),
+            ['-5222','-5224','-5212','-5214','-5112','-5114'])
 
     def test_complete_species_axis_preserves_physical_text_size(self):
         page=dict(filename='supplemental.balancing.activity.beauty.trigger-521.pdf',

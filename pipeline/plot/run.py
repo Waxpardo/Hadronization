@@ -30,21 +30,23 @@ DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v9"
 CANVAS_NAME = "canvases.root"
 RECORD_NAME = "drawing-record.tsv.gz"
 # Display order only: mesons first, then Lambda, Sigma, Xi and Omega baryons.
-# Particle and antiparticle share an order; primed Xis follow unprimed Xis.
+# Each ground state precedes its star/prime partners with the same charge.
+# Particle and antiparticle share the same absolute-PDG display order.
 # https://pdg.lbl.gov/2025/mcdata/mass_width_2025.mcd
 SPECIES_DISPLAY_ORDER = (
-    421, 411, 431, 423, 413, 433, 10421, 10411, 10431, 10423,
-    10413, 10433, 20423, 20413, 20433, 425, 415, 435, 521, 511,
-    531, 541, 523, 513, 533, 543, 10521, 10511, 10531, 10541,
+    421, 423, 411, 413, 431, 433, 10421, 10411, 10431, 10423,
+    10413, 10433, 20423, 20413, 20433, 425, 415, 435, 521, 523,
+    511, 513, 531, 533, 541, 543, 10521, 10511, 10531, 10541,
     10523, 10513, 10533, 10543, 20523, 20513, 20533, 20543, 525, 515,
-    535, 545, 4122, 14122, 4124, 4212, 4112, 4222, 4214, 4114,
-    4224, 4232, 4132, 4322, 4312, 4324, 4314, 4422, 4412, 4424,
-    4414, 4332, 4334, 4432, 4434, 4444, 5122, 5222, 5212, 5112,
-    5224, 5214, 5114, 5232, 5132, 5322, 5312, 5324, 5314, 5242,
-    5142, 5422, 5412, 5424, 5414, 5522, 5512, 5524, 5514, 5332,
+    535, 545, 4122, 14122, 4124, 4212, 4214, 4112, 4114, 4222,
+    4224, 4232, 4322, 4324, 4132, 4312, 4314, 4422, 4424, 4412,
+    4414, 4332, 4334, 4432, 4434, 4444, 5122, 5222, 5224, 5212,
+    5214, 5112, 5114, 5232, 5322, 5324, 5132, 5312, 5314, 5242,
+    5422, 5424, 5142, 5412, 5414, 5522, 5524, 5512, 5514, 5332,
     5334, 5342, 5432, 5434, 5442, 5444, 5532, 5534, 5542, 5544,
     5554,
 )
+
 P1_WITHHELD_SE_DISCLOSURE = (
     "Tune-ratio SE unavailable for unresolved sparse-tail denominators; "
     "see ROOT flags")
@@ -207,12 +209,17 @@ def checked_plot_config(path):
                         "physical_width_cm", "minimum_body_text_pt",
                         "categorical_tune_dodge", "p1_inset_geometry",
                         "correlation_view", "activity_category_dividers"}
+    if 'tune_ratio_y_scale' in layout:
+        layout_fields.add('tune_ratio_y_scale')
+        if layout['tune_ratio_y_scale'] not in ('linear', 'log'):
+            raise ValueError('tune ratio y scale differs')
     if 'balancing_species_views' in layout:
         layout_fields.add('balancing_species_views')
         views = layout['balancing_species_views']
         exact_keys(views, {'overview_abs_pdgs', 'expanded_abs_pdgs',
                           'grouping_recipe_sha256'}, 'species views')
-        if (views['overview_abs_pdgs'] != [421,411,431,521,511,531,541,4122,5122]
+        if (views['overview_abs_pdgs'] != [421,411,431,521,511,531,541,4122,5122,
+                                               4112,4212,4222,5112,5212,5222]
                 or not isinstance(views['grouping_recipe_sha256'], str)
                 or not re.fullmatch(r'[0-9a-f]{64}', views['grouping_recipe_sha256'])
                 or not isinstance(views['expanded_abs_pdgs'], list)
@@ -1146,6 +1153,39 @@ def apply_display_limits(pages):
                           if q.get('y') is not None and q['y']>0.]
                 floor=min(1.e-5, min(positive)*.8) if positive else 1.e-5
                 panel['y_range'] = [floor, max(panel['y_range'][1], floor*10.)]
+
+
+def apply_tune_ratio_scale(pages, config):
+    """Set ratio display scales; preserve signed values and uncertainty flags."""
+    if config['layout'].get('tune_ratio_y_scale', 'linear') != 'log':
+        return
+    for page in pages:
+        for panel in page['panels']:
+            if not (panel['id'].startswith(('lower.', 'correlation.compare.'))
+                    or panel['id'] == 'g9.ratio'):
+                continue
+            points = [p for series in panel['series'] for p in series['points']
+                      if p['state'] in ('DRAW', 'LOG_NONPOSITIVE')
+                      and p['y'] is not None]
+            positive = [p for p in points if p['y'] > 0.]
+            centers = [1.] + [p['y'] for p in positive]
+            high = [1.] + [p['y'] + (p['error'] or 0.) for p in positive]
+            low = [1.] + [p['y'] - (p['error'] or 0.) for p in positive
+                          if p['y'] - (p['error'] or 0.) > 0.]
+            limits = _padded_range(centers + high + low,
+                                   config['layout']['axis_padding_fraction'], True)
+            # An error band approaching zero must not consume the entire frame.
+            # The full signed errors remain in the point and ROOT records.
+            limits[0] = max(limits[0], min(centers) / 2.)
+            if page['role'] == 'multiplicity.composite':
+                limits[1] = 2.5
+                limits[0] = min(limits[0], .5)
+            panel['log_y'] = True
+            panel['y_range'] = limits
+            panel['guides'] = [g for g in panel['guides']
+                               if g['y_low'] > 0. and g['y_high'] > 0.]
+            for point in points:
+                point['state'] = 'DRAW' if point['y'] > 0. else 'LOG_NONPOSITIVE'
 
 
 def synchronize_paired_y_ranges(pages):
@@ -2667,6 +2707,7 @@ def drawing_plan(projection, manifest, config):
     if getattr(context, 'cold', False):
         apply_cold_page_style(pages,context)
         add_publication_captions(pages,context)
+    apply_tune_ratio_scale(pages, config)
     reserve_spectrum_tune_key(pages)
     reserve_annotation_headroom(pages)
     synchronize_paired_y_ranges(pages)

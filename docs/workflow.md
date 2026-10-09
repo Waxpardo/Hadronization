@@ -379,7 +379,7 @@ The command needs the external merged query and its retained support rows.
 The compact numerical ROOT from a grouped interpretation cannot supply additional fine species.
 
 Render the resulting package with `config/plot.json`.
-The paired balancing figures show ground-state mesons and Lambda with larger category labels.
+The paired balancing figures show ground-state mesons, Lambda and Sigma with larger category labels.
 Separate single-trigger PDFs show the selected ground states and their star or prime partners.
 
 Each file contains one figure with all selected associates for its trigger.

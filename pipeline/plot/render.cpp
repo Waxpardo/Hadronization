@@ -458,7 +458,8 @@ std::vector<double> StatusRailCoordinates(const Page& page, const Panel& panel,
     for (const Point& point : series->points) {
       if (point.state == "DRAW" || !std::isfinite(point.scientificX) ||
           (page.role.rfind("correlations.",0)==0 &&
-           point.state=="LOG_NONPOSITIVE")) continue;
+           point.state=="LOG_NONPOSITIVE" &&
+           panel.id.rfind("correlation.compare.",0)!=0)) continue;
       if (point.scientificX < panel.xLow || point.scientificX > panel.xHigh)
         continue;
       if (panel.logX && point.scientificX <= 0) continue;
@@ -1561,7 +1562,17 @@ std::pair<const Panel*,std::array<double,4>> ActivityClassKey(const Page& page) 
     }
     const std::array<double,4> box{right-width,upper-height,right,upper};
     if (ClassKeyClearsData(page,*panel,box,gx,gy)) return {panel,box};
-    if (panel!=top) break;
+    if (panel!=top) {
+      // Added species can occupy the old upper-right class-key position.
+      // Search the same middle frame without crossing any error envelope.
+      const double step=.5*font/ph;
+      for (double y=upper-step; y-height>=panel->margins[2]+gy; y-=step) {
+        const std::array<double,4> lowerBox{right-width,y-height,right,y};
+        if (ClassKeyClearsData(page,*panel,lowerBox,gx,gy))
+          return {panel,lowerBox};
+      }
+      break;
+    }
   }
   throw std::runtime_error("no clear top or middle activity-class legend for "+page.filename);
 }
@@ -1681,6 +1692,24 @@ std::string LogBoundaryLabel(double value) {
 }
 std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
   std::vector<ExpectedText> result;
+  bool nonpositiveRatio=false, undefinedRatio=false;
+  for (const Panel& panel:page.panels) {
+    if (!panel.logY || !(panel.id.rfind("lower.",0)==0 ||
+        panel.id.rfind("correlation.compare.",0)==0 || panel.id=="g9.ratio")) continue;
+    for (const Series& series:panel.series)
+      for (const Point& point:series.points) {
+        nonpositiveRatio |= point.state=="LOG_NONPOSITIVE";
+        undefinedRatio |= point.state=="MISSING_VALUE";
+      }
+  }
+  if (nonpositiveRatio || undefinedRatio) {
+    const std::string note = nonpositiveRatio && undefinedRatio ?
+        "Ratio gaps: undefined or nonpositive on log axes; signed values saved in ROOT" :
+        nonpositiveRatio ?
+        "Nonpositive ratios not shown on log axes; signed values saved in ROOT" :
+        "Ratio gaps: undefined reference division; see ROOT flags";
+    result.push_back(TextExpectation(note,.015,.015,16,kGray+2));
+  }
   // Paint seam labels on the canvas so an adjacent pad cannot clip them.
   for (const Panel& panel : page.panels) {
     const double width=panel.geometry[2]-panel.geometry[0];

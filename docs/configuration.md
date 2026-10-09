@@ -743,7 +743,7 @@ Its `grouping_recipe_sha256` must occur in the verified numerical provenance.
 This check prevents the renderer from labelling grouped yields as individual-state yields.
 Omit this display recipe when rendering an older grouped numerical product.
 
-Its `overview_abs_pdgs` list selects ground-state mesons and Lambda for the paired overview.
+Its `overview_abs_pdgs` list selects ground-state mesons, Lambda and Sigma for the paired overview.
 Its `expanded_abs_pdgs` list selects ground states and their star or prime partners.
 The list excludes higher orbital and mass-labelled excitations.
 It includes 28 charm and 43 beauty states per trigger, including multiply-heavy ground states.
@@ -753,4 +753,19 @@ The sheet widens with the number of bins to preserve readable particle labels.
 No PDF contains multiple pages.
 
 Unavailable centers and unavailable uncertainties retain their numerical statuses.
-Baryon-to-meson activity figures use linear vertical axes.
+The upper baryon-to-meson activity panels use linear vertical axes.
+
+The `layout.tune_ratio_y_scale` setting selects `linear` or `log` for lower tune-comparison axes.
+The shipped plotting recipes use `log`.
+If this setting is absent, the renderer uses `linear`.
+Nonpositive ratio centers cannot appear on logarithmic axes.
+The numerical ROOT and drawing records retain their signed values and uncertainties.
+
+A figure note identifies omitted nonpositive centers.
+The multiplicity comparison retains its upper display limit of 2.5.
+
+Each displayed ground state precedes its star and prime partners with the same charge.
+
+A zero reference balancing yield makes the tune ratio undefined.
+A finite ratio can be negative when the two signed balancing yields have opposite signs.
+An unstable reference denominator can also cause the numerical output to withhold its uncertainty.
