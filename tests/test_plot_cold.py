@@ -78,6 +78,75 @@ int main() {
   if (ticks.size()<3 || ticks.front().label!="0.0005") return 8;
   for (const auto& tick:ticks)
     if (tick.label.find("#times")!=std::string::npos) return 9;
+  // Joined panels with an identical range must retain one common major step.
+  page.width=2800; page.height=2850; page.textPixels=34;
+  panel.geometry={0.,.612,1.,.808};
+  panel.margins={.095,.0271429,0.,.10956};
+  panel.logY=false;
+  panel.yLow=-.017516291789465045;
+  panel.yHigh=.40848741927917398;
+  const auto topTicks=YMajorTicks(page,panel);
+  panel.geometry={0.,.416,1.,.612};
+  panel.margins={.095,.0271429,0.,0.};
+  const auto middleTicks=YMajorTicks(page,panel);
+  if (topTicks.size()<3 || middleTicks.size()<3 ||
+      std::abs((topTicks[1].value-topTicks[0].value)-
+               (middleTicks[1].value-middleTicks[0].value))>1.e-12) return 14;
+  // Logarithmic tune/reference axes must always label the unit reference.
+  panel.geometry={0.,.08,1.,.22};
+  panel.margins={.095,.0271429,.43,0.};
+  page.role="balancing.integrated.beauty";
+  panel.logY=true; panel.id="lower.521"; panel.reusePanel="lower.5122";
+  panel.yLow=.415506; panel.yHigh=78.834042;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()<3 ||
+      std::none_of(ticks.begin(),ticks.end(),[](const YMajorTick& tick) {
+        return Close(tick.value,1.);
+      })) return 15;
+  // Unity at a joined edge is clipped instead of being forced into the seam.
+  page.height=1200; page.textPixels=34;
+  panel.geometry={0.,.5,1.,.7};
+  panel.margins={.095,.0271429,0.,.1};
+  panel.reusePanel.clear(); panel.yLow=1.; panel.yHigh=100.;
+  ticks=YMajorTicks(page,panel);
+  if (std::any_of(ticks.begin(),ticks.end(),[](const YMajorTick& tick) {
+        return Close(tick.value,1.);
+      })) return 16;
+  // A panel that physically fits only two anchors remains a valid fallback.
+  page.height=1000; page.textPixels=34;
+  panel.geometry={0.,.4,1.,.6};
+  panel.margins={.1,.03,.25,.25}; panel.logY=false;
+  panel.yLow=0.; panel.yHigh=1.;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()!=2) return 17;
+  // A joined scale with room for three labels retries a clean subdivision
+  // after both seam-edge anchors are clipped.
+  page.width=1900; page.height=1000; page.textPixels=34;
+  panel.geometry={0.,.1,1.,.3};
+  panel.margins={.1,.03,0.,0.}; panel.logY=false;
+  panel.yLow=0.; panel.yHigh=.3;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()!=3 || !Close(ticks[0].value,.05) ||
+      !Close(ticks[1].value,.15) || !Close(ticks[2].value,.25)) return 18;
+  // Narrow and broad logarithmic comparison panels keep three round anchors
+  // and retain the unit reference when it is drawable.
+  page.height=1000; page.textPixels=34; page.role="correlations.beauty";
+  panel.geometry={0.,.1,1.,.36}; panel.margins={.1,.03,.13,0.};
+  panel.logY=true; panel.id="correlation.compare.521.SS";
+  panel.yLow=.0608809; panel.yHigh=6.75912;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()!=3 || !Close(ticks[0].value,.1) ||
+      !Close(ticks[1].value,1.) || !Close(ticks[2].value,4.)) return 19;
+  page.role="correlations.charm";
+  panel.id="correlation.compare.421.SS";
+  panel.yLow=.623551; panel.yHigh=1.52942;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()!=3 || !Close(ticks[1].value,1.)) return 20;
+  panel.geometry={0.,.1,1.,.412}; panel.margins={.1,.03,.29,0.};
+  panel.id="correlation.compare.421.OS_MINUS_SS";
+  panel.yLow=.437976; panel.yHigh=1.5061;
+  ticks=YMajorTicks(page,panel);
+  if (ticks.size()!=3 || !Close(ticks.back().value,1.)) return 21;
   page.role="balancing.activity.charm";
   page.filename="supplemental.balancing.activity.charm.trigger-421.pdf";
   page.panels.resize(4); panel.id="upper.MONASH.421";

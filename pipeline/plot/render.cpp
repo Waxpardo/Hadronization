@@ -1004,6 +1004,11 @@ struct YMajorTick {
   double value;
   std::string label;
 };
+bool RatioYAxis(const Page& page, const Panel& panel) {
+  return panel.id.rfind("lower.", 0) == 0 || panel.id == "g9.ratio" ||
+      panel.id.rfind("correlation.compare.", 0) == 0 ||
+      page.role == "balancing.baryon_meson.activity";
+}
 double YFramePixels(const Page& page, const Panel& panel) {
   return page.height * (panel.geometry[3] - panel.geometry[1]) *
          (1. - panel.margins[2] - panel.margins[3]);
@@ -1058,44 +1063,90 @@ std::vector<double> LinearYTickValues(const Page& page, const Panel& panel,
   std::vector<double> best;
   double bestStep = 0.;
   double bestScore = std::numeric_limits<double>::infinity();
-  const int target = std::min(limit, panel.logY ? 4 :
-      (YFramePixels(page, panel) > 450. ? 6 : 5));
+  const int clippedEdges = static_cast<int>(panel.margins[2] == 0.) +
+      static_cast<int>(panel.margins[3] == 0.);
+  // Select the scale before removing labels at joined panel boundaries.
+  // Otherwise identical ranges can receive different steps solely because
+  // one panel touches one boundary and another touches two. Seven anchors are
+  // the largest useful linear scale at publication size; denser choices make
+  // adjacent decimals look like separate, competing scales.
+  const int candidateLimit = std::min(7, limit + clippedEdges);
+  const int target = std::min(candidateLimit, panel.logY ? 4 : 5);
+  struct ScaleCandidate {
+    double step;
+    std::vector<double> values;
+  };
+  std::vector<ScaleCandidate> scales;
   for (int exponent = order - 3; exponent <= order + 1; ++exponent) {
     for (double mantissa : {1., 2., 2.5, 5.}) {
       const double step = mantissa * std::pow(10., exponent);
       if (!(step > 0.) || span / step > 200.) continue;
-      std::vector<double> values;
+      std::vector<double> candidates;
       const long long first = static_cast<long long>(
           std::ceil(panel.yLow / step - 1.e-10));
       const long long last = static_cast<long long>(
           std::floor(panel.yHigh / step + 1.e-10));
-      int eligible = 0;
       for (long long index = first; index <= last; ++index) {
         const double value = index * step;
-        const double fraction = YTickFraction(panel, value);
-        if (fraction < YTickBottomClearance(panel, minimumSeparation) ||
-            fraction > 1. - YTickTopClearance(panel, minimumSeparation)) continue;
-        ++eligible;
-        if (!values.empty() && fraction - YTickFraction(panel, values.back()) <
-                                   minimumSeparation) continue;
-        values.push_back(value);
+        candidates.push_back(value);
       }
-      if (values.size() < 2 || static_cast<int>(values.size()) > limit) continue;
-      // Prefer four or five useful, evenly separated labels. An edge label
-      // omitted for clipping never counts as an interior numerical anchor.
-      const double score = std::abs(static_cast<int>(values.size()) - target) +
-          (values.size() < 3 ? 2. : 0.) +
-          .7 * (eligible - static_cast<int>(values.size())) +
+      if (candidates.size() < 2 || candidates.size() > 24) continue;
+      scales.push_back({step, candidates});
+      if (static_cast<int>(candidates.size()) > candidateLimit) continue;
+      // Prefer about five rounded anchors. Penalize sparse three-label scales
+      // when a legible finer scale is available.
+      const double score =
+          std::abs(static_cast<int>(candidates.size()) - target) +
+          (candidates.size() < 4 ? 2. : 0.) +
           (panel.logY && mantissa == 2.5 ? 1.5 : 0.);
       if (score < bestScore ||
           (score == bestScore && step > bestStep)) {
-        best = std::move(values); bestStep = step; bestScore = score;
+        best = std::move(candidates); bestStep = step; bestScore = score;
       }
     }
   }
-  Need(best.size() >= 2, "y-axis has fewer than two legible numeric anchors");
+  const auto visibleValues = [&](const std::vector<double>& values) {
+    std::vector<double> visible;
+    for (double value : values) {
+      const double fraction = YTickFraction(panel, value);
+      if (fraction < YTickBottomClearance(panel, minimumSeparation) ||
+          fraction > 1. - YTickTopClearance(panel, minimumSeparation)) continue;
+      if (!visible.empty() && fraction -
+              YTickFraction(panel, visible.back()) < minimumSeparation)
+        continue;
+      visible.push_back(value);
+    }
+    return visible;
+  };
+  std::vector<double> visible = visibleValues(best);
+  const std::size_t preferredCount = limit >= 3 ? 3 : 2;
+  if (visible.size() < preferredCount && bestStep > 0.) {
+    std::vector<double> fallback;
+    double fallbackScore = std::numeric_limits<double>::infinity();
+    double fallbackStep = 0.;
+    for (const auto& scaleCandidate : scales) {
+      auto candidate = visibleValues(scaleCandidate.values);
+      if (candidate.size() < preferredCount) continue;
+      // Stay as close as possible to the common pre-clipping scale. This
+      // normally selects its first clean subdivision and avoids arbitrary
+      // dense decimals merely to increase the label count.
+      const double score =
+          std::abs(std::log(scaleCandidate.step / bestStep)) +
+          .01 * std::abs(static_cast<int>(candidate.size()) - target);
+      if (score < fallbackScore ||
+          (Close(score, fallbackScore) &&
+           (fallback.empty() || scaleCandidate.step > fallbackStep))) {
+        fallback = std::move(candidate);
+        fallbackScore = score;
+        fallbackStep = scaleCandidate.step;
+      }
+    }
+    if (!fallback.empty()) visible = std::move(fallback);
+  }
+  Need(visible.size() >= 2,
+       "y-axis has fewer than two legible numeric anchors");
   (void)page;
-  return best;
+  return visible;
 }
 std::vector<YMajorTick> YMajorTicks(const Page& page, const Panel& panel) {
   Need(panel.yHigh > panel.yLow && (!panel.logY || panel.yLow > 0.),
@@ -1158,7 +1209,107 @@ std::vector<YMajorTick> YMajorTicks(const Page& page, const Panel& panel) {
     for (double value : values)
       result.push_back({value, YTickLabel(value, step, false, scientific)});
   }
-  Need(result.size() >= 2, "y-axis has fewer than two numeric labels");
+  const double referenceFraction = panel.logY && panel.yLow <= 1. &&
+      panel.yHigh >= 1. ? YTickFraction(panel, 1.) : -1.;
+  const bool referenceDrawable = referenceFraction >=
+      YTickBottomClearance(panel, separation) && referenceFraction <=
+      1. - YTickTopClearance(panel, separation);
+  // The unit reference is the scientifically essential anchor on every
+  // tune/reference ratio. Preserve it when it fits inside the frame, even
+  // when thinning a logarithmic scale. A joined boundary still owns clipping.
+  if (panel.logY && RatioYAxis(page, panel) && panel.yLow <= 1. &&
+      panel.yHigh >= 1. && referenceDrawable &&
+      std::none_of(result.begin(), result.end(), [](const YMajorTick& tick) {
+        return Close(tick.value, 1.);
+      })) {
+    result.erase(std::remove_if(result.begin(), result.end(),
+        [&](const YMajorTick& tick) {
+          return std::abs(YTickFraction(panel, tick.value) -
+                          referenceFraction) < separation;
+        }), result.end());
+    result.push_back({1., "1"});
+    std::sort(result.begin(), result.end(),
+              [](const YMajorTick& a, const YMajorTick& b) {
+                return a.value < b.value;
+              });
+  }
+  // If protecting the unit reference displaced both adjacent 1-2-5 ticks,
+  // rebuild a three-anchor canonical scale around it. This keeps every visible
+  // scale independently readable without crowding the reference label.
+  const double finalSeparation =
+      (limit == 2 ? 1.2 : 1.4) * pixels / height;
+  if (limit >= 3 && panel.logY && RatioYAxis(page, panel) &&
+      result.size() < 3 &&
+      panel.yLow <= 1. && panel.yHigh >= 1. && referenceDrawable) {
+    const auto bestReferenceScale = [&](const std::vector<double>& coefficients) {
+      std::vector<double> candidates;
+      for (int exponent =
+               static_cast<int>(std::floor(std::log10(panel.yLow))) - 1;
+           exponent <= static_cast<int>(std::ceil(std::log10(panel.yHigh))) + 1;
+           ++exponent) {
+        for (double coefficient : coefficients) {
+          const double value = coefficient * std::pow(10., exponent);
+          const double fraction = YTickFraction(panel, value);
+          if (value < panel.yLow || value > panel.yHigh ||
+              fraction < YTickBottomClearance(panel, finalSeparation) ||
+              fraction > 1. - YTickTopClearance(panel, finalSeparation))
+            continue;
+          candidates.push_back(value);
+        }
+      }
+      std::sort(candidates.begin(), candidates.end());
+      candidates.erase(std::unique(candidates.begin(), candidates.end(),
+          [](double a, double b) { return Close(a, b); }), candidates.end());
+      std::vector<double> selected;
+      double selectedScore = -1.;
+      for (std::size_t i = 0; i < candidates.size(); ++i)
+        for (std::size_t j = i + 1; j < candidates.size(); ++j)
+          for (std::size_t k = j + 1; k < candidates.size(); ++k) {
+            const std::vector<double> values = {
+                candidates[i], candidates[j], candidates[k]};
+            if (std::none_of(values.begin(), values.end(),
+                             [](double value) { return Close(value, 1.); }))
+              continue;
+            const double firstGap = YTickFraction(panel, values[1]) -
+                YTickFraction(panel, values[0]);
+            const double secondGap = YTickFraction(panel, values[2]) -
+                YTickFraction(panel, values[1]);
+            if (firstGap + 1.e-12 < finalSeparation ||
+                secondGap + 1.e-12 < finalSeparation)
+              continue;
+            const int nonPreferred = static_cast<int>(std::count_if(
+                values.begin(), values.end(), [](double value) {
+                  const double coefficient = value / std::pow(
+                      10., std::floor(std::log10(value)));
+                  return Close(coefficient, 7.5);
+                }));
+            const double score =
+                YTickFraction(panel, values[2]) -
+                YTickFraction(panel, values[0]) +
+                .1 * std::min(firstGap, secondGap) - .1 * nonPreferred;
+            if (score > selectedScore) {
+              selected = values;
+              selectedScore = score;
+            }
+          }
+      return selected;
+    };
+    auto best = bestReferenceScale({1., 2., 5.});
+    if (best.empty())
+      best = bestReferenceScale({1., 2., 3., 4., 5., 7.5});
+    if (!best.empty()) {
+      result.clear();
+      for (double value : best)
+        result.push_back({value,
+            YTickLabel(value, value, false, scientific)});
+    }
+  }
+  // Extremely short or tightly constrained panels may have room for only two
+  // independently legible anchors. Full publication packages apply a stricter
+  // three-label acceptance check after rendering, where the complete layout is
+  // available for review.
+  Need(result.size() >= 2,
+       "y-axis has fewer than two legible numeric labels");
   for (std::size_t i = 1; i < result.size(); ++i)
     Need((YTickFraction(panel, result[i].value) -
           YTickFraction(panel, result[i-1].value)) * height >=
