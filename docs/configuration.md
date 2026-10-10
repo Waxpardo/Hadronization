@@ -6,11 +6,11 @@
 
 | File | Consumer and role | Change policy |
 | --- | --- | --- |
-| [analysis-all-origin.json](../config/analysis-all-origin.json) | Current fine-species query and default grouped reduction | Preserve construction fields; change supported projection choices in a separately hashed request |
-| [analysis-individual-species.json](../config/analysis-individual-species.json) | Individual-state reduction of the retained all-origin query | Keeps every eligible open-heavy catalog state separate |
-| [grouping-individual-species.json](../config/grouping-individual-species.json) | Singleton interpretation for that reduction | Each signed state maps to itself |
+| [analysis-all-origin.json](../config/analysis-all-origin.json) | Current fine-species query and supported grouped reduction | Preserve construction fields; use a compatible interpretation for reduction |
+| [analysis-individual-species.json](../config/analysis-individual-species.json) | Published reduction of the retained all-origin query | Keeps every eligible open-heavy catalog state separate |
+| [grouping-individual-species.json](../config/grouping-individual-species.json) | Published singleton interpretation | Maps each of 202 signed open-heavy states to itself |
 | [query-all-origin.json](../config/query-all-origin.json) | Current query layout and retained all-origin support | Fixed construction schema |
-| [associate-family-runtime-all-heavy.json](../config/associate-family-runtime-all-heavy.json) | Default saved-state associate grouping | Bind a compatible downstream recipe by its SHA-256 |
+| [associate-family-runtime-all-heavy.json](../config/associate-family-runtime-all-heavy.json) | Supported 82-to-42 saved-state grouping | Bind a compatible downstream recipe by its SHA-256 |
 | [heavy-catalog.json](../config/heavy-catalog.json) | Complete signed heavy-state registry | Keep exact bytes for accepted fine-species products |
 | [analysis.json](../config/analysis.json) | Version 2.2 query construction and reduction | Use only with its matching input contract |
 | [analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) | Version 2.2 pair-pT comparison | Adds `pt_1_0p15` to the inclusive configuration; select it with `--profile-id` |
@@ -69,7 +69,7 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 | Field group | Meaning and consumer |
 | --- | --- |
 | `schema`, `version` | Downstream request contract. Version 2.2.0 is the historical route, 2.3.0 binds saved-state family support, 2.4.0 has the older broad fine content, and 2.5.0 retains the complete catalog with all-origin trigger selection. |
-| `associate_family_map` | Pinned downstream saved-state grouping recipe. Version 2.5.0 defaults to the approved 82 signed members and 42 destinations; Compatible subsets and catalog-bound singleton interpretations are supported. |
+| `associate_family_map` | Pinned downstream recipe. The published version 2.5 interpretation has 202 singleton destinations. The 82-to-42 recipe and compatible subsets remain supported. |
 | `retained_heavy_catalog` | Versions 2.4.0 and 2.5.0 signed-PDG, constituent-content and charge catalog; independent of the family member list. |
 | `trigger_selection` | Version 2.5.0 default and supported offline trigger-origin selectors. The shipped paper default is `all_origins`; `historical_hard_root` is an explicit control. |
 | `paper_defaults` | Charm choice, selectable identities and signed baryon/reference tuple |
@@ -87,15 +87,15 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 
 `config/analysis-family.json` is the bounded version 2.3.0 construction model. It expands the associate support for the map and keeps inclusive pT and eta selections. It binds the public runtime contract `config/associate-family-runtime.json` by SHA-256. That compact contract carries the accepted full-map SHA and an exact semantic-groups digest without private review paths or status metadata. The original `config/analysis.json` remains the unchanged version 2.2.0 construction model for accepted historical products.
 
-For new construction, use [analysis-all-origin.json](../config/analysis-all-origin.json) with [query-all-origin.json](../config/query-all-origin.json). The former binds the complete [signed heavy catalog](../config/heavy-catalog.json) and the approved [82-member family map](../config/associate-family-runtime-all-heavy.json). The catalog controls fine storage and generic pairs, independently of the narrower paper pair registry and family map. `trigger_selection.default` is `all_origins`; a separately pinned [historical control](../config/analysis-hard-root-control.json) selects the retained selected-hard predicate during offline reduction. The trigger identities, activity, inclusive-pT and numerical-estimator definitions remain fixed.
+For new construction, use [analysis-all-origin.json](../config/analysis-all-origin.json) with [query-all-origin.json](../config/query-all-origin.json). The construction binds the complete [signed heavy catalog](../config/heavy-catalog.json). The catalog controls fine storage and generic pairs independently of each downstream recipe. Use [analysis-individual-species.json](../config/analysis-individual-species.json) for the published reduction. `trigger_selection.default` is `all_origins`; a separately pinned [historical control](../config/analysis-hard-root-control.json) selects the retained selected-hard predicate during offline reduction. The trigger identities, activity, inclusive-pT and numerical-estimator definitions remain fixed.
 
 A new catalog or query-axis contract requires rebuilding the query. Version 2.4 construction remains a readable historical contract with its own source and trigger-selection identity.
 
 To select a compatible subset of the approved 82-member paper domain, copy `analysis-all-origin.json` and change only `associate_family_map`. Keep `pair_query_registry` unchanged. Set the map binding to `{"schema":"hadronization_saved_state_grouping_recipe_v2","path":"/absolute/path/to/recipe.json","sha256":"<SHA-256 of recipe bytes>"}` and pass the separately hashed analysis copy to `reduce run`. Reduction reuses fine THnSparse and shared trigger/activity content. It derives new grouped ROOT, numerical results and plots.
 
-The validator rejects members outside the supported paper domain. Their species remain accessible through `hadronization fine`.
+Combined groups must stay within the supported 82-member endpoint domain. Catalog-bound singleton groups can select any of the 202 open-heavy identities. Hidden-heavy identities remain accessible through `hadronization fine`; they do not define OS/SS categories.
 
-The included [Xi-star-only example](../config/grouping-xi-star-only.example.json) is a supported subset interpretation, distinct from the complete default family result.
+The included [Xi-star-only example](../config/grouping-xi-star-only.example.json) is a supported subset interpretation. It does not describe the published individual-state result.
 
 For a version 2.5 collection, the following creates the included Xi-star subset request without editing its construction configuration:
 
@@ -731,6 +731,8 @@ A state with net beauty belongs to the beauty sector, including Bc.
 The charm sector excludes states with beauty constituents.
 Hidden-heavy states have no net heavy-flavour sign and do not enter these OS/SS yields.
 
+The published numerical archive uses this interpretation.
+
 The recipe changes numerical interpretation after query construction.
 It preserves the inclusive pair cuts, trigger identities, activity definition and original statistical blocks.
 Each species keeps its own OS and SS primitives.
@@ -747,6 +749,8 @@ Its `overview_abs_pdgs` list selects ground-state mesons, Lambda and Sigma for t
 Its `expanded_abs_pdgs` list selects ground states and their star or prime partners.
 The list excludes higher orbital and mass-labelled excitations.
 It includes 28 charm and 43 beauty states per trigger, including multiply-heavy ground states.
+The paired overview contains seven charm and eight beauty states per trigger.
+
 Each single-trigger figure shows its complete selected species axis in one PDF.
 The sheet widens with the number of bins to preserve readable particle labels.
 

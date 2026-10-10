@@ -109,7 +109,7 @@ The query stores five sparse families and exact support rows. Its pair-populatio
 
 The example selects version 2.5 for both census and build. Its layout retains all-origin triggers and fine heavy species. Use the same campaign-stable 219-state catalog dictionary and accepted input receipts; the catalog does not replace the observed-source census.
 
-Every final heavy species receives its own signed-PDG bin. The approved 82-member family map applies only downstream. Query workspaces retain their original version. Do not change that identity.
+Every final heavy species receives its own signed-PDG bin. The published downstream recipe maps 202 open-heavy states to themselves. Query workspaces retain their original version. Do not change that identity.
 
 ## Cluster query construction
 
@@ -134,7 +134,9 @@ Prepare an inert bundle:
   --output "$RUN_ROOT/condor-inert"
 ```
 
-The bundle contains source, dictionary and construction-analysis pins, expected sources, worker scripts, DAG files, build instructions and site templates. Use `config/analysis-all-origin.json` for new construction and its matching full reduction; historical versions retain their distinct checksum identities. Preparation does not submit jobs. Build its Linux binary pack once on the specified runtime. Preserve the pack receipt and tar SHA-256.
+The bundle contains source, dictionary and construction-analysis pins, expected sources, worker scripts, DAG files, build instructions and site templates. Use `config/analysis-all-origin.json` for new construction. Use a compatible downstream analysis for reduction. Historical versions retain their distinct checksum identities.
+
+Preparation does not submit jobs. Build its Linux binary pack once on the specified runtime. Preserve the pack receipt and tar SHA-256.
 
 Run the generated preflight canary on an actual execute node before admitting the site. It checks the OS, architecture, libraries, ClassAds, input readability and destination write/readback behavior. The probe creates small files and collision-check directories. It is not read-only.
 
@@ -222,16 +224,18 @@ Keep the generated merge verification receipt. Its independent hash can avoid re
 
 Full research reduction requires a complete merged three-tune collection, original query support, ten blocks per tune and a clean committed source. It also requires independent expected-source, site-work, collector-closure and merge pins. A collection with `TEST_ONLY` state remains partial in numerical output.
 
-Create the reducer scratch directory before execution:
+Create the reducer scratch directory before execution. The published interpretation uses the singleton analysis recipe:
 
 ```sh
+ANALYSIS=config/analysis-individual-species.json
+ANALYSIS_SHA=$(shasum -a 256 "$ANALYSIS" | cut -d ' ' -f 1)
 mkdir -p "$RUN_ROOT/reduce-work"
 ./hadronization reduce run \
   --collection-index "${MERGED_INDEX:?}" \
   --collection-index-sha "${MERGED_INDEX_SHA256:?}" \
   --expected-sources "${EXPECTED_SOURCES:?}" \
   --expected-sources-sha "${EXPECTED_SOURCES_SHA256:?}" \
-  --analysis config/analysis-all-origin.json --analysis-sha "${ANALYSIS_SHA256:?}" \
+  --analysis "$ANALYSIS" --analysis-sha "$ANALYSIS_SHA" \
   --site-work "${SITE_WORK:?}" --site-work-sha "${SITE_WORK_SHA256:?}" \
   --collector-closure "${COLLECTOR_CLOSURE:?}" \
   --collector-closure-sha "${COLLECTOR_CLOSURE_SHA256:?}" \
@@ -240,17 +244,19 @@ mkdir -p "$RUN_ROOT/reduce-work"
   --work-root "$RUN_ROOT/reduce-work" --output-dir "$RUN_ROOT/numerical"
 ```
 
-The default request covers multiplicity, correlations, balancing, signed spectra and natural-heavy accounting. The center and uncertainty come from the native estimator. The reducer writes `numerics.root`, `report.json`, provenance receipts, exports and `package-manifest.json`.
+The request covers multiplicity, correlations, balancing, signed spectra and natural-heavy accounting. It keeps 202 signed open-heavy associates separate. The center and uncertainty come from the native estimator. The reducer writes `numerics.root`, `report.json`, provenance receipts, exports and `package-manifest.json`.
 
 Add `--charm-trigger 411` to select the coherent D+ recipe. Add `--analysis` with a separately hashed compatible copy to change profiles or percentile classes. Optional rectangular profiles reuse the query bytes. Both profiles pass through the same numerical estimator and renderer.
 
-For a version 2.5 collection, pass `--analysis config/analysis-all-origin.json` and its SHA-256 to `reduce run`. The reducer projects the approved family members from the broad fine query, sums block-level OS and SS primitives, and applies each shared trigger denominator once. The merged query ROOT files remain the independent fine-species authority. Separate `paper-fine.root`, `families.root` and `shared.root` contain downstream additive primitives. The estimator recomputes pooled values and K=10 covariance.
+For the published version 2.5 result, pass `config/analysis-individual-species.json` and its SHA-256 to `reduce run`. The reducer projects 202 open-heavy states from the broad query. It applies each shared trigger denominator once and preserves each state's OS and SS primitives. The merged query ROOT files remain the independent fine-species authority.
 
-A separately hashed compatible analysis copy can select another [grouping recipe](configuration.md#fixed-analysis-fields) without changing fine THnSparse content. The package includes the exact grouping recipe and checksum for portable verification. Version 2.4 products retain their 82-member family interpretation. They do not represent version 2.5.
+Separate `paper-fine.root`, `families.root` and `shared.root` contain downstream additive primitives. The estimator recomputes pooled values and K=10 covariance.
+
+A separately hashed compatible analysis can select the supported [82-to-42 family recipe](configuration.md#fixed-analysis-fields). This reduction does not change fine THnSparse content. The package includes the exact recipe and checksum for portable verification. Version 2.2 remains compatible with its matching historical input contract.
 
 ### Compare inclusive and rectangular selections
 
-The published result is inclusive. Optional rectangles require a separate analysis copy, output directory and numerical result. Copy `analysis-all-origin.json` and use the [profile example](configuration.md#analysis-choices). The supplied `analysis-pt-1-0p15.json` belongs to the version 2.2 route; it cannot interpret a version 2.5 collection.
+The published result is inclusive. Optional rectangles require a separate analysis copy, output directory and numerical result. Copy `analysis-individual-species.json` and use the [profile example](configuration.md#analysis-choices). The supplied `analysis-pt-1-0p15.json` belongs to the version 2.2 route; it cannot interpret a version 2.5 collection.
 
 For the inclusive result, use `--profile-id inclusive`. For the 1.0/0.15 GeV/c result, use `--profile-id pt_1_0p15` with the compatible request and its hash. Run only the requested selections with distinct output and scratch directories. Use each numerical package to render and package its own figures.
 
@@ -316,7 +322,7 @@ Correlation views distinguish identified pairs from sums over eligible associate
 | Activity-dependent balancing | Every requested class, tune rows and one shared comparison row |
 | Baryon-to-meson ratios | Class categories, absolute ratios and lower tune/reference ratios |
 | Signed heavy-hadron spectra | Separate pT, eta and phi pages for each signed species |
-| Supporting views | Selected activity intervals, tune-separated Lambda ratios and two-trigger Lambda, Sigma and Xi comparisons |
+| Supporting views | Selected activity intervals, per-trigger species sheets and two-trigger Lambda, Sigma and Xi comparisons |
 | Sample tables | Generated numerical CSV/TeX exports, not plot-derived values |
 
 The multiplicity display ends at the last occupied MONASH bin edge. Other tunes can have farther-tail bins in `numerics.root`. The inset shows positive MONASH support and its class boundaries. Numerical distributions retain the complete activity domain.
@@ -324,6 +330,8 @@ The multiplicity display ends at the last occupied MONASH bin edge. Other tunes 
 The default correlation view shows MONASH identified pairs with statistical bands. Solid and dotted lines distinguish opposite and same heavy-flavour signs. The alternative `config/plot-all-tune.json` uses tune colors and comparison panels. Neither presentation changes the numerical uncertainties.
 
 When tunes share a panel, MONASH uses black circles, JUNCTIONS blue squares and CLOSEPACKING orange triangles. Pages with separate tune rows and several activity classes omit markers. Their colors identify tunes, and line patterns identify classes. The inclusive class uses a solid line.
+
+View the complete single-trigger sheets at their native width. Their 28 or 43 categories do not fit a narrow journal column with legible labels. Use the paired overview for compact manuscript placement.
 
 The three-class view uses long dashes for 0–1%, dots for 40–50%, and short separated dashes for 80–90%. Its line-style key appears inside a right-hand panel. Undefined values and withheld errors retain explicit statuses.
 
@@ -362,27 +370,23 @@ Preserve ambiguous publication stages and reservations until their state is unde
 
 `./hadronization clean` is a dry run. `./hadronization clean --apply` deletes listed compiler residue, caches and eligible aged accepted-attempt scratch. Review the list first. It does not implement bulk research-data retention.
 
-## Reduce individual species
+## Reduce grouped families
 
-The same merged query supports an individual-state numerical interpretation.
-Use the complete reduction command above with these replacement arguments:
+The same merged query supports the separate 82-to-42 family interpretation.
+Use the complete reduction command with these replacement arguments:
 
 ```sh
-ANALYSIS=config/analysis-individual-species.json
+ANALYSIS=config/analysis-all-origin.json
 ANALYSIS_SHA=$(shasum -a 256 "$ANALYSIS" | cut -d ' ' -f 1)
 ```
 
 Pass `--analysis "$ANALYSIS" --analysis-sha "$ANALYSIS_SHA"` to `reduce run`.
 Choose a new output directory.
 Keep every collection, source and acceptance pin from the verified input.
-The command needs the external merged query and its retained support rows.
-The compact numerical ROOT from a grouped interpretation cannot supply additional fine species.
 
-Render the resulting package with `config/plot.json`.
-The paired balancing figures show ground-state mesons, Lambda and Sigma with larger category labels.
-Separate single-trigger PDFs show the selected ground states and their star or prime partners.
+The command needs the merged query and its retained support rows.
+It sums additive OS and SS primitives within each configured family before normalization.
+It then recomputes pooled values, K=10 deletions and covariance.
+This grouped result is a supported alternative, not the published interpretation.
 
-Each file contains one figure with all selected associates for its trigger.
-Ground states and their star or prime partners share one continuous species axis.
-The numerical data retains higher orbital and mass-labelled states, but this view omits them.
-The selected activity intervals use the same species partition as the all-class figures.
+Before rendering a grouped result, copy the plotting configuration and remove `layout.balancing_species_views`. That display request requires the individual-state recipe. Keep the copied configuration with the resulting figures.

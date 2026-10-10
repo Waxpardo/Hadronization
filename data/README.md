@@ -6,11 +6,13 @@ The `HF_RUN3_V1` result contains 300 million successful events from 3,000 accept
 
 ## Included results
 
-The [collaboration package](results/manifest.json) contains numerical ROOT, 53 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 50,380 points with separate value and uncertainty statuses. The tables retain explicit missing values.
+The [collaboration package](results/manifest.json) contains numerical ROOT, 69 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 60,660 points with separate value and uncertainty statuses. The tables retain explicit missing values.
 
-The result uses inclusive pair pT and final triggers from all origins. Associate families group 82 saved signed states into 42 signed destinations. The fine query retains all 219 catalog identities separately. The [all-tune companion](figures-all-tune) contains 53 PDFs with tune comparisons in the correlation pages.
+The result uses inclusive pair pT and final triggers from all origins. Its identity recipe keeps 202 signed open-heavy associates separate. The fine query retains all 219 catalog identities, including hidden-heavy states. The [all-tune companion](figures-all-tune) contains 69 PDFs with tune comparisons in the correlation pages.
 
-The 12 supporting baryon/reference pages compare meson and Lambda triggers for each selected Lambda, Sigma and grouped Xi destination. These family sums use saved-state kinematics. They do not simulate decays.
+The paired overview shows seven charm and eight beauty ground-state meson, Lambda and Sigma identities per trigger. Separate single-trigger figures show 28 charm and 43 beauty ground, star and prime identities. The numerical archive keeps all 202 signed open-heavy identities.
+
+Upper baryon-to-meson activity panels use linear vertical axes. Tune-comparison panels for balancing yields and baryon-to-meson ratios use logarithmic axes. ROOT and status records retain unavailable and nonpositive ratios that the logarithmic panels cannot draw.
 
 | Product | Location | Use |
 | --- | --- | --- |
@@ -26,14 +28,14 @@ The raw inventory records 284,750,292,184 ROOT bytes. The attempt ledger does no
 
 ## Verify or change figures
 
-Package verification checks the renderer build identity in the figure manifest. The distributed figures record ROOT 6.40.04, `/usr/bin/c++` and Ghostscript 10.08.0. Configure the environment as described in [installation](../docs/installation.md). A different renderer identity can require fresh rendering from the same numerical ROOT.
+Package verification checks the renderer build identity in the figure manifest. The distributed figures record ROOT 6.30.01, GCC 14.2.0 and Ghostscript 9.54.0 on Linux. Configure the environment as described in [installation](../docs/installation.md). A different renderer identity can require fresh rendering from the same numerical ROOT.
 
 Numerical portable verification does not require the original production filesystem. The verifier writes build files outside the result package.
 
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=14493e4dcbbbd216f7202a303b9a7f38db3dddbd98052bf974365d8d70665fed
+PACKAGE_SHA=d5991d574285f430038c025b11681a1faa03793c46a870b376242d38918c7135
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification
@@ -47,8 +49,8 @@ To change the presentation, copy `config/plot.json` and edit its display setting
 cp config/plot.json data/work/custom-plot.json
 ./hadronization plot render-cold \
   --numerics-root data/results/numerical/numerics.root \
-  --expected-root-sha256 e35f4ded12e7a4b7830a5599e8f9187ec9b52fd6b1276730cc8efea4e5cced38 \
-  --expected-value-sha256 963b1be0ee353d2a8d7fb8dc80f74c87ae0597372deb8e19d3c3d6e42a156881 \
+  --expected-root-sha256 e68ef7f1e9daa6bc7a7d2072ed4e0bc0cb6b69427646bcfb32c773158ee144b9 \
+  --expected-value-sha256 56309f1e787d03a6a43e6488015358fdfc747072866eeb474ddecbfce1a66bf9 \
   --plot-config data/work/custom-plot.json \
   --work-dir data/work/custom-render --output data/work/custom-figures
 ```
@@ -58,9 +60,9 @@ To verify an all-tune companion, use the matching numerical ROOT and the compani
 ```sh
 ./hadronization plot verify-render-cold \
   --numerics-root data/results/numerical/numerics.root \
-  --expected-root-sha256 e35f4ded12e7a4b7830a5599e8f9187ec9b52fd6b1276730cc8efea4e5cced38 \
-  --expected-value-sha256 963b1be0ee353d2a8d7fb8dc80f74c87ae0597372deb8e19d3c3d6e42a156881 \
-  --expected-manifest-sha256 5fec3294dadc58d7af04bfc7b9c76ebb83a7c682664b9762d33a6c494fb69029 \
+  --expected-root-sha256 e68ef7f1e9daa6bc7a7d2072ed4e0bc0cb6b69427646bcfb32c773158ee144b9 \
+  --expected-value-sha256 56309f1e787d03a6a43e6488015358fdfc747072866eeb474ddecbfce1a66bf9 \
+  --expected-manifest-sha256 36020df53a7213d81ef26f0ad230f47bfecb404d3904ac94ce05200d12d875fe \
   --plot-config config/plot-all-tune.json \
   --work-dir data/work/all-tune-verification --output data/figures-all-tune
 ```
@@ -127,7 +129,9 @@ Keep block contributions separate when constructing a new estimator. THnSparse S
 
 Merged files support new projections within their stored axes. They do not contain the query support TTrees. The production reducer still needs those exact rows for its complete estimators and provenance checks. A new scientific selection can require reduction from retained query files, but it does not require generation or merging.
 
-The numerical package also includes [fine selected-state primitives](results/numerical/family-products/paper-fine.root), [grouped primitives](results/numerical/family-products/families.root) and [shared counts](results/numerical/family-products/shared.root). Their [manifest](results/numerical/family-products/manifest.json) binds the exact grouping recipe. These compact files cover the selected paper domain; the merged query retains the full catalog.
+The numerical package also includes [selected-state primitives](results/numerical/family-products/paper-fine.root), [identity-mapped primitives](results/numerical/family-products/families.root) and [shared counts](results/numerical/family-products/shared.root). Their [manifest](results/numerical/family-products/manifest.json) binds the exact 202-state recipe. The merged query retains the complete 219-state catalog.
+
+The alternative 82-to-42 family recipe remains supported for a separate reduction. It does not describe the published result.
 
 ## External data and retention
 

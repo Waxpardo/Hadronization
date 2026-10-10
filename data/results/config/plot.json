@@ -38,7 +38,13 @@
     },
     "p1_inset_geometry": [0.18, 0.05, 0.65, 0.48],
     "correlation_view": "monash_pair_sign",
-    "activity_category_dividers": false
+    "activity_category_dividers": false,
+    "tune_ratio_y_scale": "log",
+    "balancing_species_views": {
+      "overview_abs_pdgs": [421, 411, 431, 521, 511, 531, 541, 4122, 5122, 4112, 4212, 4222, 5112, 5212, 5222],
+      "expanded_abs_pdgs": [411, 413, 421, 423, 431, 433, 511, 513, 521, 523, 531, 533, 541, 543, 4112, 4114, 4122, 4132, 4212, 4214, 4222, 4224, 4232, 4312, 4314, 4322, 4324, 4332, 4334, 4412, 4414, 4422, 4424, 4432, 4434, 4444, 5112, 5114, 5122, 5132, 5142, 5212, 5214, 5222, 5224, 5232, 5242, 5312, 5314, 5322, 5324, 5332, 5334, 5342, 5412, 5414, 5422, 5424, 5432, 5434, 5442, 5444, 5512, 5514, 5522, 5524, 5532, 5534, 5542, 5544, 5554],
+      "grouping_recipe_sha256": "129bf6f39b9eb3f505675de9081cfe8aafd6c3920a5bb0e2478b518e587d4802"
+    }
   },
   "style_identities": {
     "class_line_style_rule": "integrated=1;nonintegrated=2+typed_class_ordinal",

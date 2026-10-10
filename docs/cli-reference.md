@@ -648,7 +648,8 @@ Evaluate native statistics and write typed numerical ROOT and exports.
 If you omit `--analysis`, its required SHA-256 must match `config/analysis.json` or `config/analysis-all-origin.json`.
 The first configuration interprets version 2.2 collections; the second interprets version 2.5 collections.
 The command checks the construction configuration separately and rejects incompatible interpretations.
-Specify both `--analysis` and `--analysis-sha` for the hard-root control or a modified configuration.
+The published result specifies `config/analysis-individual-species.json` and its independent hash.
+Specify both `--analysis` and `--analysis-sha` for this recipe, the hard-root control or a modified configuration.
 
 Inspect its syntax before use:
 
