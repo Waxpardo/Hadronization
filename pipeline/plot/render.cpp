@@ -624,7 +624,108 @@ struct ExpectedText {
 };
 ExpectedText TextExpectation(const std::string& text, double x, double y,
                              double size, int color = 1, int align = 11,
-                             double angle = 0) {
+                             double angle = 0);
+
+std::string SemanticPanelTitle(const std::string& title) {
+  // Publication panel letters are renderer-owned annotations.  Historical
+  // drawing records may still carry a leading ``(a) `` title prefix; remove
+  // only that exact syntactic form and preserve the particle label verbatim.
+  if (title.size() < 4 || title.front() != '(') return title;
+  const auto close = title.find(')');
+  if (close == std::string::npos || close + 1 >= title.size() ||
+      title[close + 1] != ' ' || close == 1)
+    return title;
+  for (std::size_t index = 1; index < close; ++index)
+    if (title[index] < 'a' || title[index] > 'z') return title;
+  return title.substr(close + 2);
+}
+
+std::string AlphabeticPanelLabel(std::size_t ordinal) {
+  std::string letters;
+  do {
+    letters.push_back(static_cast<char>('a' + ordinal % 26));
+    ordinal = ordinal / 26;
+    if (ordinal == 0) break;
+    --ordinal;
+  } while (true);
+  std::reverse(letters.begin(), letters.end());
+  return letters + ")";
+}
+
+struct PanelLabelAssignment {
+  std::size_t panelIndex, row, column;
+  std::string text;
+};
+
+long long PanelGeometryKey(double value) {
+  return std::llround(value * 1000000000.);
+}
+
+std::vector<PanelLabelAssignment> PanelLabelAssignments(const Page& page) {
+  std::vector<std::size_t> indices;
+  for (std::size_t index = 0; index < page.panels.size(); ++index)
+    if (page.panels[index].reusePanel.empty()) indices.push_back(index);
+  std::sort(indices.begin(), indices.end(), [&](std::size_t left,
+                                                std::size_t right) {
+    const Panel& a = page.panels[left];
+    const Panel& b = page.panels[right];
+    return std::make_tuple(-PanelGeometryKey(a.geometry[3]),
+                           PanelGeometryKey(a.geometry[0]),
+                           -PanelGeometryKey(a.geometry[1]),
+                           PanelGeometryKey(a.geometry[2]), a.id) <
+           std::make_tuple(-PanelGeometryKey(b.geometry[3]),
+                           PanelGeometryKey(b.geometry[0]),
+                           -PanelGeometryKey(b.geometry[1]),
+                           PanelGeometryKey(b.geometry[2]), b.id);
+  });
+  std::vector<PanelLabelAssignment> result;
+  long long previousTop = std::numeric_limits<long long>::min();
+  long long previousLeft = std::numeric_limits<long long>::min();
+  std::size_t row = 0, column = 0;
+  for (std::size_t ordinal = 0; ordinal < indices.size(); ++ordinal) {
+    const std::size_t index = indices[ordinal];
+    const Panel& panel = page.panels[index];
+    const long long top = PanelGeometryKey(panel.geometry[3]);
+    const long long left = PanelGeometryKey(panel.geometry[0]);
+    if (ordinal == 0 || top != previousTop) {
+      if (ordinal != 0) ++row;
+      column = 0;
+      previousLeft = std::numeric_limits<long long>::min();
+    } else {
+      ++column;
+    }
+    Need(left > previousLeft,
+         "panel label geometry is duplicated or not row-addressable");
+    result.push_back({index, row, column, AlphabeticPanelLabel(ordinal)});
+    previousTop = top;
+    previousLeft = left;
+  }
+  Need(result.size() == indices.size(), "panel label census differs");
+  return result;
+}
+
+ExpectedText PanelLabelText(const Page& page, std::size_t panelIndex) {
+  const Panel& panel = page.panels.at(panelIndex);
+  Need(panel.reusePanel.empty(), "subordinate inset acquired a panel label");
+  const auto assignments = PanelLabelAssignments(page);
+  const auto assignment = std::find_if(
+      assignments.begin(), assignments.end(), [&](const auto& item) {
+        return item.panelIndex == panelIndex;
+      });
+  Need(assignment != assignments.end(), "main panel label is absent");
+  const int pixels = BodyTextPixels(page) + 1;
+  const double width = page.width * (panel.geometry[2] - panel.geometry[0]);
+  const double height = page.height * (panel.geometry[3] - panel.geometry[1]);
+  const double x = panel.margins[0] + .45 * pixels / width;
+  const double y = 1 - panel.margins[3] - .35 * pixels / height;
+  Need(x > panel.margins[0] && x < 1 - panel.margins[1] &&
+       y > panel.margins[2] && y < 1 - panel.margins[3],
+       "panel label anchor is outside the scientific frame");
+  return TextExpectation(assignment->text, x, y, pixels, 1, 13);
+}
+ExpectedText TextExpectation(const std::string& text, double x, double y,
+                             double size, int color, int align,
+                             double angle) {
   return {text, x, y, size, angle, color, align};
 }
 bool PanelHasDrawing(const Page& page, const Panel& panel,
@@ -1469,6 +1570,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
         panel.note, panel.margins[0], noteY,
         inset ? 11 : textPixels - 3));
   }
+  if (!inset) result.push_back(PanelLabelText(page, panelIndex));
   return result;
 }
 void VerifyTexts(const TList& primitives,
@@ -1820,9 +1922,11 @@ std::vector<ExpectedText> CanvasPanelTitleTexts(const Page& page) {
   std::vector<ExpectedText> result;
   for (const auto& panel : page.panels) {
     if (panel.title.empty()) continue;
+    const std::string title = SemanticPanelTitle(panel.title);
+    if (title.empty()) continue;
     const double width = panel.geometry[2] - panel.geometry[0];
     const double height = panel.geometry[3] - panel.geometry[1];
-    result.push_back(TextExpectation(panel.title,
+    result.push_back(TextExpectation(title,
         panel.geometry[0] + width * PanelTitleX(panel),
         panel.geometry[1] + height * PanelTitleY(page, panel),
         panel.reusePanel.empty() ? BodyTextPixels(page) + 1 : 15));
@@ -2705,6 +2809,14 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       const double noteY = upperNote ? .89 : .025;
       Text(panel.margins[0], noteY, panel.note,
            inset ? 11 : textPixels-3, 1);
+    }
+    if (!inset) {
+      const auto item = PanelLabelText(page, index);
+      TLatex label;
+      label.SetNDC(); label.SetTextFont(43); label.SetLineWidth(1);
+      label.SetTextSize(item.size); label.SetTextAlign(item.align);
+      label.SetTextColor(item.color); label.SetTextAngle(item.angle);
+      label.DrawLatex(item.x, item.y, item.text.c_str());
     }
     pad.RedrawAxis(); canvas.cd();
   }

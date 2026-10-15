@@ -196,6 +196,82 @@ int main() {
             self.assertEqual(run.returncode, 0, run.stderr)
 
     @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
+    def test_panel_letters_follow_visual_geometry_and_leave_titles_semantic(self):
+        source = r'''#define main render_program_main
+#include "pipeline/plot/render.cpp"
+#undef main
+int main() {
+  Page page{}; page.width=1900; page.height=1600; page.textPixels=18;
+  page.panels.resize(5);
+  page.panels[0].id="lower.right";
+  page.panels[0].geometry={.5,.1,1.,.5};
+  page.panels[1].id="top.right";
+  page.panels[1].geometry={.5,.5,1.,.9};
+  page.panels[2].id="inset";
+  page.panels[2].geometry={.2,.6,.4,.8};
+  page.panels[2].reusePanel="top.left";
+  page.panels[3].id="top.left";
+  page.panels[3].geometry={0.,.5,.5,.9};
+  page.panels[4].id="lower.left";
+  page.panels[4].geometry={0.,.1,.5,.5};
+  for (auto& panel:page.panels) panel.margins={.15,.04,.12,.08};
+  const auto labels=PanelLabelAssignments(page);
+  if (labels.size()!=4) return 1;
+  const std::array<std::size_t,4> indices={{3,1,4,0}};
+  const std::array<const char*,4> texts={{"a)","b)","c)","d)"}};
+  const std::array<std::size_t,4> rows={{0,0,1,1}};
+  const std::array<std::size_t,4> columns={{0,1,0,1}};
+  for (std::size_t i=0;i<labels.size();++i)
+    if (labels[i].panelIndex!=indices[i] || labels[i].text!=texts[i] ||
+        labels[i].row!=rows[i] || labels[i].column!=columns[i]) return 2;
+  const auto label=PanelLabelText(page,3);
+  if (label.text!="a)" || label.align!=13 ||
+      label.x<=page.panels[3].margins[0] ||
+      label.y>=1-page.panels[3].margins[3]) return 3;
+  if (SemanticPanelTitle("(a) #it{B}^{+} trigger")!=
+      "#it{B}^{+} trigger") return 4;
+  if (SemanticPanelTitle("#it{D}^{0} trigger")!=
+      "#it{D}^{0} trigger") return 5;
+  if (SemanticPanelTitle("(A) title")!="(A) title" ||
+      AlphabeticPanelLabel(25)!="z)" ||
+      AlphabeticPanelLabel(26)!="aa)") return 6;
+  TLatex actual;
+  actual.SetNDC(); actual.SetTextFont(43); actual.SetTextSize(label.size);
+  actual.SetTextAlign(label.align); actual.SetTextColor(label.color);
+  actual.SetTextAngle(label.angle); actual.SetTitle(label.text.c_str());
+  actual.SetX(label.x); actual.SetY(label.y);
+  TList primitives; primitives.Add(&actual);
+  VerifyTexts(primitives,{label});
+  actual.SetTitle("b)");
+  try { VerifyTexts(primitives,{label}); return 7; }
+  catch (const std::runtime_error&) {}
+  actual.SetTitle(label.text.c_str());
+  TLatex duplicate=actual; primitives.Add(&duplicate);
+  try { VerifyTexts(primitives,{label}); return 8; }
+  catch (const std::runtime_error&) {}
+  primitives.Clear();
+  try { VerifyTexts(primitives,{label}); return 9; }
+  catch (const std::runtime_error&) {}
+  page.panels[1].geometry={0.,.5,1.,.9};
+  try { (void)PanelLabelAssignments(page); }
+  catch (const std::runtime_error&) { return 0; }
+  return 10;
+}
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cpp, binary = root / 'panel_labels.cpp', root / 'panel_labels'
+            cpp.write_text(source)
+            flags = shlex.split(subprocess.check_output(
+                ['root-config', '--cflags', '--libs'], text=True))
+            built = subprocess.run(
+                ['c++', '-std=c++17', '-I', str(ROOT), str(cpp),
+                 '-o', str(binary)] + flags, capture_output=True, text=True)
+            self.assertEqual(built.returncode, 0, built.stderr)
+            run = subprocess.run([str(binary)], capture_output=True, text=True)
+            self.assertEqual(run.returncode, 0, run.stderr)
+
+    @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
     def test_native_band_gaps_and_unavailable_errors(self):
         # A known bin topology supplies the oracle independently of the
         # renderer's serialized drawing-record verifier.
@@ -292,7 +368,8 @@ int main() {
   small.title="(b) #it{#Lambda}_{b}^{0} trigger: #bar{#it{#Xi}}_{b}^{'0}";
   titled.panels={small};
   const auto titles=CanvasPanelTitleTexts(titled);
-  if (titles.size()!=1 || titles[0].text!=small.title ||
+  if (titles.size()!=1 ||
+      titles[0].text!="#it{#Lambda}_{b}^{0} trigger: #bar{#it{#Xi}}_{b}^{'0}" ||
       std::abs(titles[0].x-(.54+.46*.025))>1.e-12 ||
       std::abs(titles[0].y-(.55+.20*.94))>1.e-12 ||
       titles[0].size!=BodyTextPixels(titled)+1) return 16;
