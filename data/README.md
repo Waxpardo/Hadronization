@@ -28,14 +28,14 @@ The raw inventory records 284,750,292,184 ROOT bytes. The attempt ledger does no
 
 ## Verify or change figures
 
-Package verification checks the renderer build identity in the figure manifest. The distributed figures record ROOT 6.30.01, GCC 14.2.0 and Ghostscript 9.54.0 on Linux. Configure the environment as described in [installation](../docs/installation.md). A different renderer identity can require fresh rendering from the same numerical ROOT.
+Package verification checks the renderer build identity recorded in the figure manifest. Configure the environment as described in [installation](../docs/installation.md). A different renderer identity can require fresh rendering from the same numerical ROOT.
 
 Numerical portable verification does not require the original production filesystem. The verifier writes build files outside the result package.
 
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=d5991d574285f430038c025b11681a1faa03793c46a870b376242d38918c7135
+PACKAGE_SHA=d4bde5c8cfb5f8ddb4913909c856f7bbac68f1633c9ff5ff54ebe6bf3a932b9e
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification
@@ -62,7 +62,7 @@ To verify an all-tune companion, use the matching numerical ROOT and the compani
   --numerics-root data/results/numerical/numerics.root \
   --expected-root-sha256 e68ef7f1e9daa6bc7a7d2072ed4e0bc0cb6b69427646bcfb32c773158ee144b9 \
   --expected-value-sha256 56309f1e787d03a6a43e6488015358fdfc747072866eeb474ddecbfce1a66bf9 \
-  --expected-manifest-sha256 36020df53a7213d81ef26f0ad230f47bfecb404d3904ac94ce05200d12d875fe \
+  --expected-manifest-sha256 2390e4a697bfc0c6db84253bd3448a4161fc006fb17fc92eac11ea8e1d4a19b9 \
   --plot-config config/plot-all-tune.json \
   --work-dir data/work/all-tune-verification --output data/figures-all-tune
 ```
