@@ -718,7 +718,7 @@ ExpectedText PanelLabelText(const Page& page, std::size_t panelIndex) {
   const double height = page.height * (panel.geometry[3] - panel.geometry[1]);
   const double horizontalGap = .35 * pixels / width;
   const double verticalGap = .25 * pixels / height;
-  const double x = panel.margins[0] + YAxisTickLength(page) + horizontalGap;
+  double x = panel.margins[0] + YAxisTickLength(page) + horizontalGap;
   const bool lowerClearance =
       (page.role == "multiplicity.composite" && panel.id == "lower.ratio") ||
       (page.role == "correlations.beauty" &&
@@ -727,21 +727,62 @@ ExpectedText PanelLabelText(const Page& page, std::size_t panelIndex) {
       page.role == "spectra.signed_heavy" && panel.id == "g9.absolute";
   const double xTickLength =
       page.role == "multiplicity.composite" ? .025 : .03;
-  const double y = lowerClearance
+  double y = lowerClearance
       ? panel.margins[2] + xTickLength + verticalGap
       : spectrumAnnotationClearance ? 1 - panel.margins[3] - .15
       : 1 - panel.margins[3] - xTickLength - verticalGap;
-  const int align = lowerClearance ? 11 : 13;
+  int align = lowerClearance ? 11 : 13;
+  // These upper rows contain fixed information and tune-key blocks or high
+  // first-bin data.  Use the clear gap already present in each established
+  // layout instead of changing any annotation, legend or scientific drawing.
+  const bool topBaryonMesonActivity =
+      page.role == "balancing.baryon_meson.activity" && assignment->row == 0;
+  const bool topCharmIntegrated =
+      page.role == "balancing.integrated.charm" && assignment->row == 0;
+  const bool topActivity =
+      (page.role == "balancing.activity.charm" ||
+       page.role == "balancing.activity.beauty") && assignment->row == 0;
+  const bool rightTickClearance = assignment->column == 0 &&
+      (topBaryonMesonActivity || topCharmIntegrated || topActivity) &&
+      page.filename.find(".trigger-") == std::string::npos;
+  const bool topCorrelationLeft =
+      page.role.rfind("correlations.", 0) == 0 &&
+      assignment->row == 0 && assignment->column == 0;
+  const bool singleTrigger = page.filename.find(".trigger-") != std::string::npos;
+  if (topCorrelationLeft) {
+    y = panel.margins[2] + xTickLength + verticalGap;
+    align = 11;
+  } else if ((topCharmIntegrated || topActivity) && singleTrigger) {
+    x = .50;
+    align = 23;
+  } else if (topBaryonMesonActivity || topCharmIntegrated || topActivity) {
+    if (assignment->column == 0) {
+      x = 1 - panel.margins[1] - xTickLength - horizontalGap;
+      align = 33;
+    } else {
+      x = topBaryonMesonActivity ? .50 : .45;
+      align = 23;
+    }
+  }
   const double conservativeWidth = 2.6 * pixels / width;
   const double conservativeHeight = 1.15 * pixels / height;
-  const double left = x;
-  const double right = x + conservativeWidth;
-  const double bottom = lowerClearance ? y : y - conservativeHeight;
-  const double top = lowerClearance ? y + conservativeHeight : y;
+  const int horizontalAlign = align / 10;
+  const int verticalAlign = align % 10;
+  const double left = horizontalAlign == 1 ? x :
+      horizontalAlign == 2 ? x - conservativeWidth / 2. :
+      x - conservativeWidth;
+  const double right = horizontalAlign == 1 ? x + conservativeWidth :
+      horizontalAlign == 2 ? x + conservativeWidth / 2. : x;
+  const double bottom = verticalAlign == 1 ? y :
+      verticalAlign == 2 ? y - conservativeHeight / 2. :
+      y - conservativeHeight;
+  const double top = verticalAlign == 1 ? y + conservativeHeight :
+      verticalAlign == 2 ? y + conservativeHeight / 2. : y;
   Need(left > panel.margins[0] + YAxisTickLength(page) &&
-       right < 1 - panel.margins[1] &&
+       right < 1 - panel.margins[1] -
+           (rightTickClearance ? xTickLength : 0.) &&
        bottom > panel.margins[2] && top < 1 - panel.margins[3] &&
-       (lowerClearance
+       (verticalAlign == 1
           ? bottom > panel.margins[2] + xTickLength
           : top < 1 - panel.margins[3] - xTickLength),
        "panel label ink is not clear of the frame tick envelope");
