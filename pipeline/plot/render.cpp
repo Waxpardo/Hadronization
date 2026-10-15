@@ -716,12 +716,36 @@ ExpectedText PanelLabelText(const Page& page, std::size_t panelIndex) {
   const int pixels = BodyTextPixels(page) + 1;
   const double width = page.width * (panel.geometry[2] - panel.geometry[0]);
   const double height = page.height * (panel.geometry[3] - panel.geometry[1]);
-  const double x = panel.margins[0] + .45 * pixels / width;
-  const double y = 1 - panel.margins[3] - .35 * pixels / height;
-  Need(x > panel.margins[0] && x < 1 - panel.margins[1] &&
-       y > panel.margins[2] && y < 1 - panel.margins[3],
-       "panel label anchor is outside the scientific frame");
-  return TextExpectation(assignment->text, x, y, pixels, 1, 13);
+  const double horizontalGap = .35 * pixels / width;
+  const double verticalGap = .25 * pixels / height;
+  const double x = panel.margins[0] + YAxisTickLength(page) + horizontalGap;
+  const bool lowerClearance =
+      (page.role == "multiplicity.composite" && panel.id == "lower.ratio") ||
+      (page.role == "correlations.beauty" &&
+       panel.id == "correlation.compare.5122.SS");
+  const bool spectrumAnnotationClearance =
+      page.role == "spectra.signed_heavy" && panel.id == "g9.absolute";
+  const double xTickLength =
+      page.role == "multiplicity.composite" ? .025 : .03;
+  const double y = lowerClearance
+      ? panel.margins[2] + xTickLength + verticalGap
+      : spectrumAnnotationClearance ? 1 - panel.margins[3] - .15
+      : 1 - panel.margins[3] - xTickLength - verticalGap;
+  const int align = lowerClearance ? 11 : 13;
+  const double conservativeWidth = 2.6 * pixels / width;
+  const double conservativeHeight = 1.15 * pixels / height;
+  const double left = x;
+  const double right = x + conservativeWidth;
+  const double bottom = lowerClearance ? y : y - conservativeHeight;
+  const double top = lowerClearance ? y + conservativeHeight : y;
+  Need(left > panel.margins[0] + YAxisTickLength(page) &&
+       right < 1 - panel.margins[1] &&
+       bottom > panel.margins[2] && top < 1 - panel.margins[3] &&
+       (lowerClearance
+          ? bottom > panel.margins[2] + xTickLength
+          : top < 1 - panel.margins[3] - xTickLength),
+       "panel label ink is not clear of the frame tick envelope");
+  return TextExpectation(assignment->text, x, y, pixels, 1, align);
 }
 ExpectedText TextExpectation(const std::string& text, double x, double y,
                              double size, int color, int align,
@@ -1249,7 +1273,8 @@ std::vector<double> LinearYTickValues(const Page& page, const Panel& panel,
   (void)page;
   return visible;
 }
-std::vector<YMajorTick> YMajorTicks(const Page& page, const Panel& panel) {
+std::vector<YMajorTick> PanelYMajorTicks(const Page& page,
+                                        const Panel& panel) {
   Need(panel.yHigh > panel.yLow && (!panel.logY || panel.yLow > 0.),
        "invalid scientific y-axis range");
   const double height = YFramePixels(page, panel);
@@ -1418,6 +1443,103 @@ std::vector<YMajorTick> YMajorTicks(const Page& page, const Panel& panel) {
          "adjacent y-axis labels are too close at publication size");
   return result;
 }
+bool SameYAxisScale(const Panel& left, const Panel& right) {
+  return left.logY == right.logY &&
+      left.reusePanel.empty() == right.reusePanel.empty() &&
+      SameBinary64(left.yLow, right.yLow) &&
+      SameBinary64(left.yHigh, right.yHigh);
+}
+std::vector<YMajorTick> YMajorTicks(const Page& page, const Panel& panel) {
+  auto result = PanelYMajorTicks(page, panel);
+  if (!panel.reusePanel.empty() || SharedRightAxis(panel)) return result;
+  std::vector<const Panel*> peers;
+  for (const auto& candidate : page.panels)
+    if (!SharedRightAxis(candidate) && SameYAxisScale(panel, candidate))
+      peers.push_back(&candidate);
+  if (peers.size() < 2) return result;
+
+  std::vector<std::vector<YMajorTick>> peerTicks;
+  peerTicks.reserve(peers.size());
+  double minimumHeight = std::numeric_limits<double>::infinity();
+  int maximumPixels = 0;
+  for (const Panel* peer : peers) {
+    peerTicks.push_back(PanelYMajorTicks(page, *peer));
+    minimumHeight = std::min(minimumHeight, YFramePixels(page, *peer));
+    maximumPixels = std::max(maximumPixels, YTickTextPixels(page, *peer));
+  }
+  std::vector<YMajorTick> united;
+  for (const auto& ticks : peerTicks) {
+    for (const auto& tick : ticks) {
+      const auto found = std::find_if(united.begin(), united.end(),
+          [&](const YMajorTick& item) { return Close(item.value, tick.value); });
+      if (found == united.end()) united.push_back(tick);
+      else Need(found->label == tick.label,
+                "same-scale y-axis tick formatting differs");
+    }
+  }
+  // Same-range joined rows share one printed scale.  Recover a rounded edge
+  // anchor omitted solely by centred-text clipping when the glyph can instead
+  // be anchored inward without touching the seam.
+  if (!panel.logY && united.size() >= 2) {
+    double step = std::numeric_limits<double>::infinity();
+    std::sort(united.begin(), united.end(),
+              [](const YMajorTick& a, const YMajorTick& b) {
+                return a.value < b.value;
+              });
+    for (std::size_t index = 1; index < united.size(); ++index)
+      step = std::min(step, united[index].value - united[index - 1].value);
+    const double scale = std::max(std::abs(panel.yLow), std::abs(panel.yHigh));
+    const bool scientific = scale < 1.e-3 || scale >= 1.e4;
+    if (std::isfinite(step) && step > 0.) {
+      const long long first = static_cast<long long>(
+          std::ceil(panel.yLow / step - 1.e-10));
+      const long long last = static_cast<long long>(
+          std::floor(panel.yHigh / step + 1.e-10));
+      for (long long index = first; index <= last; ++index) {
+        const double value = index * step;
+        if (std::any_of(united.begin(), united.end(),
+              [&](const YMajorTick& item) { return Close(item.value, value); }))
+          continue;
+        double minimumEdgePixels = std::numeric_limits<double>::infinity();
+        for (const Panel* peer : peers) {
+          const double fraction = YTickFraction(*peer, value);
+          minimumEdgePixels = std::min(minimumEdgePixels,
+              std::min(fraction, 1. - fraction) * YFramePixels(page, *peer));
+        }
+        if (minimumEdgePixels >= .35 * maximumPixels)
+          united.push_back({value,
+              YTickLabel(value, step, false, scientific)});
+      }
+    }
+  }
+  std::sort(united.begin(), united.end(),
+            [](const YMajorTick& a, const YMajorTick& b) {
+              return a.value < b.value;
+            });
+  const auto legible = [&](const std::vector<YMajorTick>& ticks) {
+    for (std::size_t index = 1; index < ticks.size(); ++index)
+      if ((YTickFraction(panel, ticks[index].value) -
+           YTickFraction(panel, ticks[index - 1].value)) * minimumHeight <
+          1.2 * maximumPixels)
+        return false;
+    return ticks.size() >= 2;
+  };
+  if (legible(united)) return united;
+
+  std::vector<YMajorTick> common;
+  for (const auto& tick : peerTicks.front()) {
+    bool present = true;
+    for (std::size_t peer = 1; peer < peerTicks.size(); ++peer)
+      present = present && std::any_of(peerTicks[peer].begin(),
+          peerTicks[peer].end(), [&](const YMajorTick& item) {
+            return Close(item.value, tick.value) && item.label == tick.label;
+          });
+    if (present) common.push_back(tick);
+  }
+  Need(legible(common),
+       "same-scale y axes have no common legible label set");
+  return common;
+}
 double YTickLabelX(const Page& page, const Panel& panel) {
   const double padWidth = page.width *
       (panel.geometry[2] - panel.geometry[0]);
@@ -1427,6 +1549,16 @@ double YTickLabelX(const Page& page, const Panel& panel) {
 double YTickLabelY(const Panel& panel, double value) {
   return panel.margins[2] +
       (1. - panel.margins[2] - panel.margins[3]) * YTickFraction(panel, value);
+}
+int YTickTextAlign(const Page& page, const Panel& panel, double value) {
+  const double distance = .75 * YTickTextPixels(page, panel);
+  const double fromBottom = YTickFraction(panel, value) *
+      YFramePixels(page, panel);
+  const double fromTop = (1. - YTickFraction(panel, value)) *
+      YFramePixels(page, panel);
+  if (fromBottom < distance) return 31;
+  if (fromTop < distance) return 33;
+  return 32;
 }
 bool AxisLabelSuppressed(const TAxis& axis, int labelNumber) {
   const TList* modified = axis.GetModifiedLabels();
@@ -1496,7 +1628,8 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
     for (const auto& tick : YMajorTicks(page, panel))
       result.push_back(TextExpectation(tick.label,
           YTickLabelX(page, panel), YTickLabelY(panel, tick.value),
-          YTickTextPixels(page, panel), 1, 32));
+          YTickTextPixels(page, panel), 1,
+          YTickTextAlign(page, panel, tick.value)));
   const double frameWidth = 1 - panel.margins[0] - panel.margins[1];
   for (const auto& tick : panel.ticks) {
     const bool rotate = RotateCategoryLabels(page, panel);
@@ -2607,7 +2740,8 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
       for (const auto& tick : YMajorTicks(page, panel)) {
         TLatex label; label.SetNDC(); label.SetTextFont(43);
         label.SetTextSize(YTickTextPixels(page, panel));
-        label.SetTextAlign(32); label.SetLineWidth(1);
+        label.SetTextAlign(YTickTextAlign(page, panel, tick.value));
+        label.SetLineWidth(1);
         label.DrawLatex(YTickLabelX(page, panel),
                         YTickLabelY(panel, tick.value), tick.label.c_str());
         lines.emplace_back(std::make_unique<TLine>(

@@ -86,12 +86,23 @@ int main() {
   panel.yLow=-.017516291789465045;
   panel.yHigh=.40848741927917398;
   const auto topTicks=YMajorTicks(page,panel);
+  page.panels.push_back(panel);
   panel.geometry={0.,.416,1.,.612};
   panel.margins={.095,.0271429,0.,0.};
+  page.panels.push_back(panel);
   const auto middleTicks=YMajorTicks(page,panel);
+  const auto harmonizedTopTicks=YMajorTicks(page,page.panels[0]);
   if (topTicks.size()<3 || middleTicks.size()<3 ||
-      std::abs((topTicks[1].value-topTicks[0].value)-
-               (middleTicks[1].value-middleTicks[0].value))>1.e-12) return 14;
+      harmonizedTopTicks.size()!=middleTicks.size()) return 14;
+  for (std::size_t i=0;i<middleTicks.size();++i)
+    if (!Close(harmonizedTopTicks[i].value,middleTicks[i].value) ||
+        harmonizedTopTicks[i].label!=middleTicks[i].label) return 24;
+  if (harmonizedTopTicks.front().label!="0" ||
+      harmonizedTopTicks.back().label!="0.4") return 25;
+  if (YTickTextAlign(page,page.panels[0],harmonizedTopTicks.front().value)!=31 ||
+      YTickTextAlign(page,page.panels[1],harmonizedTopTicks.back().value)!=33)
+    return 26;
+  page.panels.clear();
   // Logarithmic tune/reference axes must always label the unit reference.
   panel.geometry={0.,.08,1.,.22};
   panel.margins={.095,.0271429,.43,0.};
@@ -226,8 +237,22 @@ int main() {
         labels[i].row!=rows[i] || labels[i].column!=columns[i]) return 2;
   const auto label=PanelLabelText(page,3);
   if (label.text!="a)" || label.align!=13 ||
-      label.x<=page.panels[3].margins[0] ||
-      label.y>=1-page.panels[3].margins[3]) return 3;
+      label.x<=page.panels[3].margins[0]+YAxisTickLength(page) ||
+      label.y>=1-page.panels[3].margins[3]-.03) return 3;
+  page.role="multiplicity.composite";
+  page.panels[4].id="lower.ratio";
+  const auto lowerLabel=PanelLabelText(page,4);
+  if (lowerLabel.align!=11 ||
+      lowerLabel.y<=page.panels[4].margins[2]+.025) return 11;
+  page.role.clear();
+  page.panels[4].id="lower.left";
+  page.role="spectra.signed_heavy";
+  page.panels[3].id="g9.absolute";
+  const auto spectrumLabel=PanelLabelText(page,3);
+  if (spectrumLabel.align!=13 ||
+      spectrumLabel.y>1-page.panels[3].margins[3]-.149) return 12;
+  page.role.clear();
+  page.panels[3].id="upper.left";
   if (SemanticPanelTitle("(a) #it{B}^{+} trigger")!=
       "#it{B}^{+} trigger") return 4;
   if (SemanticPanelTitle("#it{D}^{0} trigger")!=
