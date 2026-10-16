@@ -2224,7 +2224,12 @@ def reserve_panel_label_data_headroom(pages):
                 if panel.get('log_x'):
                     return xmin*math.exp(math.log(xmax/xmin)*fraction)
                 return xmin+(xmax-xmin)*fraction
-            label_x_low, label_x_high = x_value(label[0]), x_value(label[2])
+            # A marker or line can touch the label even when its stored bin
+            # stops just outside it. Include the native ink/clearance envelope
+            # in the horizontal peak search as well as the vertical reserve.
+            ink_x = (.34*body_text_pixels(page)+1.) / width
+            label_x_low = x_value(label[0]-ink_x)
+            label_x_high = x_value(label[2]+ink_x)
             peaks=[]
             for series in panel['series']:
                 for point in series['points']:
@@ -2243,6 +2248,12 @@ def reserve_panel_label_data_headroom(pages):
                         continue
                     high = y+(point.get('error') or 0.)
                     if not math.isfinite(high) or (panel.get('log_y') and high <= 0.):
+                        continue
+                    # Match native visibility. A wholly cropped marker must
+                    # not undo an intentional display limit such as the
+                    # multiplicity ratio cap.
+                    if (high < panel['y_range'][0] or
+                            y-(point.get('error') or 0.) > panel['y_range'][1]):
                         continue
                     peaks.append(high)
             if not peaks:

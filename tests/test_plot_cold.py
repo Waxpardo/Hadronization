@@ -978,6 +978,28 @@ int main(int argc, char** argv) {
                     .34*plot.body_text_pixels(charm)/panel_height)
         self.assertLessEqual(native_top+1./panel_height,label[1]+1.e-12)
 
+    def test_panel_label_headroom_counts_ink_outside_stored_bin(self):
+        panel={'id':'upper','geometry':[0.,0.,1.,1.],
+               'margins':[.16,.04,.1,.05],'x_range':[0.,10.],
+               'y_range':[0.,1.],'log_x':False,'log_y':False,
+               'reuse':None,'annotations':[],'series':[]}
+        page={'role':'spectra.signed_heavy','filename':'ink.pdf',
+              'width':1100,'height':700,'text_pixels':18,'panels':[panel]}
+        label=plot.panel_label_reserved_box(page,panel)
+        # The numerical bin misses the label, but the marker's visible ink
+        # reaches it. Preparation must match the native reopen validator.
+        x=(label[0]-.003-panel['margins'][0])/.8*10.
+        panel['series']=[{'draw_mode':'histogram','points':[{
+            'state':'DRAW','display_x':x,'bin_low':x-.001,
+            'bin_high':x+.001,'y':.97,'error':.01}]}]
+        self.assertLess(panel['series'][0]['points'][0]['bin_high'],
+                        (label[0]-.16)/.8*10.)
+        plot.reserve_panel_label_data_headroom([page])
+        self.assertGreater(panel['y_range'][1],1.)
+        self.assertLess(panel['y_range'][1],1.3)
+        top=.1+.85*.98/panel['y_range'][1]+.34*plot.body_text_pixels(page)/700.
+        self.assertLess(top,label[1])
+
     def test_spectrum_key_preserves_an_already_clear_frame(self):
         import copy
         panel = {'id':'g9.absolute', 'geometry':[0.,.34,1.,.9],
