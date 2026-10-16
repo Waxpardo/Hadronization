@@ -909,6 +909,106 @@ std::vector<ExpectedText> StateGlyphTexts(
   }
   return result;
 }
+double PanelXCoordinate(const Panel& panel, double value) {
+  const double fraction = panel.logX ?
+      std::log(std::max(value,panel.xLow)/panel.xLow) /
+          std::log(panel.xHigh/panel.xLow) :
+      (value-panel.xLow)/(panel.xHigh-panel.xLow);
+  return panel.margins[0]+fraction*(1-panel.margins[0]-panel.margins[1]);
+}
+double PanelYCoordinate(const Panel& panel, double value) {
+  const double fraction = panel.logY ?
+      std::log(std::max(value,panel.yLow)/panel.yLow) /
+          std::log(panel.yHigh/panel.yLow) :
+      (value-panel.yLow)/(panel.yHigh-panel.yLow);
+  return panel.margins[2]+fraction*(1-panel.margins[2]-panel.margins[3]);
+}
+std::vector<std::array<double,4>> PanelAnnotationBoxes(
+    const Page& page, const Panel& panel) {
+  const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
+  const double height=page.height*(panel.geometry[3]-panel.geometry[1]);
+  std::vector<std::array<double,4>> result;
+  for (const auto& item : panel.annotations) {
+    const double textWidth=std::min(.56,.62*item.size*item.text.size()/width);
+    result.push_back({item.x,item.y-.30*item.size/height,
+                      item.x+textWidth,item.y+item.size/height});
+  }
+  return result;
+}
+std::vector<std::array<double,4>> PanelDataBoxes(
+    const Page& page, const Panel& panel, std::size_t panelIndex) {
+  const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
+  const double height=page.height*(panel.geometry[3]-panel.geometry[1]);
+  const double gapX=.65*BodyTextPixels(page)/width;
+  const double gapY=.65*BodyTextPixels(page)/height;
+  std::vector<std::array<double,4>> result;
+  for (std::size_t seriesIndex=0;seriesIndex<panel.series.size();++seriesIndex) {
+    const auto graphs=ExpectedGraphs(
+        page,panel,panel.series[seriesIndex],panelIndex,seriesIndex);
+    for (const auto& graph : graphs) {
+      const bool connected=graph.title.rfind("line:",0)==0 ||
+                           graph.title.rfind("band:",0)==0;
+      for (std::size_t index=0;index<graph.x.size();++index) {
+        const double low=graph.y[index]-graph.ey[index];
+        const double high=graph.y[index]+graph.ey[index];
+        const double x=PanelXCoordinate(panel,graph.x[index]);
+        result.push_back({x-gapX,
+            low>panel.yLow ? PanelYCoordinate(panel,low)-gapY : panel.margins[2],
+            x+gapX,PanelYCoordinate(panel,high)+gapY});
+        // Marker/error graphs are drawn with P/PZ/PX and therefore do not
+        // connect adjacent categorical points.  Only reserve inter-point
+        // occupancy for the primitives ROOT actually draws continuously.
+        if (index==0 || !connected) continue;
+        const double previousLow=graph.y[index-1]-graph.ey[index-1];
+        const double previousHigh=graph.y[index-1]+graph.ey[index-1];
+        result.push_back({
+            std::min(PanelXCoordinate(panel,graph.x[index-1]),x)-gapX,
+            std::min(previousLow>panel.yLow ? PanelYCoordinate(panel,previousLow) :
+                         panel.margins[2],
+                     low>panel.yLow ? PanelYCoordinate(panel,low) :
+                         panel.margins[2])-gapY,
+            std::max(PanelXCoordinate(panel,graph.x[index-1]),x)+gapX,
+            std::max(PanelYCoordinate(panel,previousHigh),
+                     PanelYCoordinate(panel,high))+gapY});
+      }
+    }
+  }
+  return result;
+}
+std::array<double,4> TextInkBox(const Page& page, const Panel& panel,
+                                const ExpectedText& item) {
+  const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
+  const double height=page.height*(panel.geometry[3]-panel.geometry[1]);
+  const double inkWidth=.65*item.size*std::max<std::size_t>(1,item.text.size())/width;
+  const double inkHeight=1.15*item.size/height;
+  return {item.x,item.y-.30*item.size/height,
+          item.x+inkWidth,item.y+inkHeight};
+}
+void VerifyPanelLabelContentClearance(
+    const Page& page, const Panel& panel, const std::vector<Page>& pages,
+    std::size_t panelIndex) {
+  if (!panel.reusePanel.empty()) return;
+  const auto label=PanelLabelReservedBox(page,panelIndex);
+  for (const auto& box : PanelAnnotationBoxes(page,panel))
+    if (BoxesOverlap(label,box))
+      throw std::runtime_error(
+          "upper-left panel label overlaps scientific annotation: "+
+          page.filename+" "+panel.id);
+  for (const auto& box : PanelDataBoxes(page,panel,panelIndex))
+    if (BoxesOverlap(label,box))
+      throw std::runtime_error(
+          "upper-left panel label overlaps scientific data or error envelope: "+
+          page.filename+" "+panel.id+" label=["+
+          NumberToken(label[0])+","+NumberToken(label[1])+","+
+          NumberToken(label[2])+","+NumberToken(label[3])+"] data=["+
+          NumberToken(box[0])+","+NumberToken(box[1])+","+
+          NumberToken(box[2])+","+NumberToken(box[3])+"]");
+  for (const auto& item : StateGlyphTexts(page,panel,pages))
+    if (BoxesOverlap(label,TextInkBox(page,panel,item)))
+      throw std::runtime_error(
+          "upper-left panel label overlaps uncertainty-status glyph: "+
+          page.filename+" "+panel.id);
+}
 std::vector<double> CategoryCenters(const Panel& panel) {
   std::set<double> centers;
   for (const auto& series : panel.series)
@@ -1661,6 +1761,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
                                              std::size_t panelIndex) {
   std::vector<ExpectedText> result;
   const bool inset = !panel.reusePanel.empty();
+  VerifyPanelLabelContentClearance(page,panel,pages,panelIndex);
   const int textPixels = BodyTextPixels(page);
   const auto xFraction = [&](double value) {
     return panel.logX ? std::log(value / panel.xLow) /
@@ -2032,6 +2133,43 @@ std::pair<const Panel*,std::array<double,4>> ActivityClassKey(const Page& page) 
   }
   throw std::runtime_error("no clear top or middle activity-class legend for "+page.filename);
 }
+std::array<double,4> LegendBoxClearingPanelContent(
+    const Page& page, const Panel& panel, const std::vector<Page>& pages,
+    std::size_t panelIndex, const std::array<double,4>& original) {
+  std::vector<std::array<double,4>> occupied{
+      PanelLabelReservedBox(page,panelIndex)};
+  const auto annotations=PanelAnnotationBoxes(page,panel);
+  occupied.insert(occupied.end(),annotations.begin(),annotations.end());
+  const auto data=PanelDataBoxes(page,panel,panelIndex);
+  occupied.insert(occupied.end(),data.begin(),data.end());
+  for (const auto& glyph : StateGlyphTexts(page,panel,pages))
+    occupied.push_back(TextInkBox(page,panel,glyph));
+  const auto clear=[&](const std::array<double,4>& box) {
+    return std::none_of(occupied.begin(),occupied.end(),[&](const auto& item) {
+      return BoxesOverlap(box,item);
+    });
+  };
+  if (clear(original)) return original;
+  const double width=original[2]-original[0], height=original[3]-original[1];
+  const double pixelWidth=page.width*(panel.geometry[2]-panel.geometry[0]);
+  const double pixelHeight=page.height*(panel.geometry[3]-panel.geometry[1]);
+  const double gapX=.65*PanelLegendTextPixels(page)/pixelWidth;
+  const double gapY=.65*PanelLegendTextPixels(page)/pixelHeight;
+  const double left=panel.margins[0]+gapX;
+  const double right=1-panel.margins[1]-gapX;
+  const double bottom=panel.margins[2]+gapY;
+  const double top=1-panel.margins[3]-gapY;
+  Need(width<=right-left && height<=top-bottom,
+       "scientific legend cannot fit inside panel frame");
+  for (int row=0;row<=32;++row) for (int column=0;column<=32;++column) {
+    const double x=right-width-(right-left-width)*column/32.;
+    const double y=top-height-(top-bottom-height)*row/32.;
+    const std::array<double,4> box{{x,y,x+width,y+height}};
+    if (clear(box)) return box;
+  }
+  throw std::runtime_error("no content-clear scientific legend position for "+
+                           page.filename+" "+panel.id);
+}
 std::vector<ExpectedLegend> ExpectedPanelLegends(
     const Page& page, const Panel& panel, const std::vector<Page>& pages,
     std::size_t panelIndex) {
@@ -2076,6 +2214,25 @@ std::vector<ExpectedLegend> ExpectedPanelLegends(
       key.entries.push_back({item.second->label,"l",item.second,0.,
                               item.first,true});
     result.push_back(std::move(key));
+  }
+  const auto label=PanelLabelReservedBox(page,panelIndex);
+  const auto annotations=PanelAnnotationBoxes(page,panel);
+  const auto data=PanelDataBoxes(page,panel,panelIndex);
+  const auto glyphs=StateGlyphTexts(page,panel,pages);
+  for (auto& item : result) {
+    item.geometry=LegendBoxClearingPanelContent(
+        page,panel,pages,panelIndex,item.geometry);
+    Need(!BoxesOverlap(item.geometry,label),
+         "scientific legend overlaps upper-left panel label");
+    for (const auto& box : annotations)
+      Need(!BoxesOverlap(item.geometry,box),
+           "scientific legend overlaps scientific annotation");
+    for (const auto& box : data)
+      Need(!BoxesOverlap(item.geometry,box),
+           "scientific legend overlaps scientific data or error envelope");
+    for (const auto& glyph : glyphs)
+      Need(!BoxesOverlap(item.geometry,TextInkBox(page,panel,glyph)),
+           "scientific legend overlaps uncertainty-status glyph");
   }
   return result;
 }

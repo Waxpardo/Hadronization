@@ -2061,6 +2061,165 @@ def reserve_annotation_headroom(pages):
                 panel['y_range'][1]=required
 
 
+def panel_label_reserved_box(page, panel):
+    """Return the renderer's conservative upper-left label envelope."""
+    font = body_text_pixels(page) + 1
+    width = page['width'] * (panel['geometry'][2] - panel['geometry'][0])
+    height = page['height'] * (panel['geometry'][3] - panel['geometry'][1])
+    left, unused_right, unused_bottom, top = panel['margins']
+    y_tick = (.015 * min(1., 1900. / page['width'])
+              if '.trigger-' in page.get('filename', '') else .03)
+    x_tick = .025 if page['role'] == 'multiplicity.composite' else .03
+    gap_x, gap_y = .35 * font / width, .25 * font / height
+    x = left + y_tick + gap_x
+    y = 1. - top - x_tick - gap_y
+    return [x-gap_x, y-1.15*font/height-gap_y,
+            x+2.6*font/width+gap_x, y+gap_y]
+
+
+def boxes_overlap(left, right):
+    return (left[0] < right[2] and left[2] > right[0] and
+            left[1] < right[3] and left[3] > right[1])
+
+
+def annotation_box(page, panel, annotations):
+    """Conservative visible box for one same-x scientific text block."""
+    width = page['width'] * (panel['geometry'][2] - panel['geometry'][0])
+    height = page['height'] * (panel['geometry'][3] - panel['geometry'][1])
+    left = min(item['x'] for item in annotations)
+    # The scientific caption's longest rendered line is bounded by this
+    # physical-width estimate; cap it at the established ROOT annotation
+    # occupancy used by the native legend search.
+    text_width = min(.56, max(.62*item['size']*len(item['text'])/width
+                              for item in annotations))
+    bottom = min(item['y']-.30*item['size']/height for item in annotations)
+    top = max(item['y']+item['size']/height for item in annotations)
+    return [left, bottom, left+text_width, top]
+
+
+def move_annotation_blocks_from_panel_labels(pages):
+    """Translate each panel's complete annotation set clear of its label."""
+    for page in pages:
+        for panel in page['panels']:
+            if panel.get('reuse') or not panel.get('annotations'):
+                continue
+            label = panel_label_reserved_box(page, panel)
+            items = panel['annotations']
+            current = annotation_box(page,panel,items)
+            if not boxes_overlap(current,label):
+                continue
+            width = page['width']*(panel['geometry'][2]-panel['geometry'][0])
+            height = page['height']*(panel['geometry'][3]-panel['geometry'][1])
+            gap_x = .35*(body_text_pixels(page)+1)/width
+            gap_y = .35*(body_text_pixels(page)+1)/height
+            frame = [panel['margins'][0]+gap_x,panel['margins'][2]+gap_y,
+                     1.-panel['margins'][1]-gap_x,1.-panel['margins'][3]-gap_y]
+            candidates = [
+                (label[2]+gap_x-current[0],0.),
+                (0.,label[1]-gap_y-current[3]),
+            ]
+            feasible=[]
+            for dx,dy in candidates:
+                box=[current[0]+dx,current[1]+dy,current[2]+dx,current[3]+dy]
+                if (box[0] < frame[0] or box[1] < frame[1] or
+                        box[2] > frame[2] or box[3] > frame[3] or
+                        boxes_overlap(box,label)):
+                    continue
+                feasible.append((math.hypot(dx*width,dy*height),dx,dy))
+            if not feasible:
+                raise ValueError('scientific annotation block cannot clear panel label: '
+                                 +page['filename']+' '+panel['id'])
+            unused,dx,dy=min(feasible)
+            for item in items:
+                item['x'] += dx
+                item['y'] += dy
+            if boxes_overlap(annotation_box(page,panel,items),label):
+                raise ValueError('scientific annotation block still overlaps panel label: '
+                                 +page['filename']+' '+panel['id'])
+
+
+def _display_x_fraction(panel, value):
+    if panel.get('log_x'):
+        if value <= 0:
+            return None
+        return math.log(value/panel['x_range'][0])/math.log(
+            panel['x_range'][1]/panel['x_range'][0])
+    return ((value-panel['x_range'][0]) /
+            (panel['x_range'][1]-panel['x_range'][0]))
+
+
+def _required_upper_limit(low, peak, fraction, log_y):
+    if not 0. < fraction < 1.:
+        raise ValueError('panel-label clearance exceeds the scientific frame')
+    if log_y:
+        if low <= 0. or peak <= 0.:
+            raise ValueError('panel-label clearance has nonpositive log value')
+        return low*math.exp(math.log(peak/low)/fraction)
+    return low+(peak-low)/fraction
+
+
+def reserve_panel_label_data_headroom(pages):
+    """Add only the upper range required to clear data and status glyphs."""
+    for page in pages:
+        panels = [panel for panel in page['panels'] if not panel.get('reuse')]
+        for panel in panels:
+            label = panel_label_reserved_box(page,panel)
+            width = page['width']*(panel['geometry'][2]-panel['geometry'][0])
+            height = page['height']*(panel['geometry'][3]-panel['geometry'][1])
+            left,right,bottom,top = panel['margins']
+            frame_width,frame_height = 1.-left-right,1.-bottom-top
+            font = body_text_pixels(page)
+            x_gap = .65*font/width
+            data_top = label[1]-(.35+.65)*font/height
+            data_fraction = (data_top-bottom)/frame_height
+            required = panel['y_range'][1]
+            for series in panel['series']:
+                mode = series.get('draw_mode')
+                for point in series['points']:
+                    if (point.get('state') != 'DRAW' or point.get('y') is None or
+                            point.get('display_x') is None):
+                        continue
+                    x1 = point.get('bin_low')
+                    x2 = point.get('bin_high')
+                    if x1 is None or x2 is None:
+                        half = .5 if mode == 'categories' else 0.
+                        x1 = point['display_x']-half
+                        x2 = point['display_x']+half
+                    fx1,fx2 = (_display_x_fraction(panel,max(x1,panel['x_range'][0])),
+                               _display_x_fraction(panel,min(x2,panel['x_range'][1])))
+                    if fx1 is None or fx2 is None:
+                        continue
+                    box_x1 = left+frame_width*min(fx1,fx2)-x_gap
+                    box_x2 = left+frame_width*max(fx1,fx2)+x_gap
+                    overlaps_data = box_x1 < label[2] and box_x2 > label[0]
+                    peak = point['y']+(point.get('error') or 0.)
+                    if overlaps_data:
+                        required = max(required,_required_upper_limit(
+                            panel['y_range'][0],peak,data_fraction,
+                            panel.get('log_y',False)))
+                    if point.get('error') is not None:
+                        continue
+                    # The visible uncertainty-status question mark is offset
+                    # above and to the right of the point. Reserve its complete
+                    # ink box independently from the central marker/line.
+                    center_fx = _display_x_fraction(panel,point['display_x'])
+                    if center_fx is None:
+                        continue
+                    glyph = max(13,font-2)
+                    glyph_x = left+frame_width*center_fx + (
+                        -.018 if center_fx>.90 else .011)
+                    glyph_x2 = glyph_x+.65*glyph/width
+                    if glyph_x >= label[2] or glyph_x2 <= label[0]:
+                        continue
+                    glyph_top = label[1]-.35*font/height
+                    glyph_fraction = ((glyph_top-bottom)/frame_height -
+                                      .015-1.15*glyph/(height*frame_height))
+                    required = max(required,_required_upper_limit(
+                        panel['y_range'][0],point['y'],glyph_fraction,
+                        panel.get('log_y',False)))
+            panel['y_range'][1] = required
+
+
 def drawing_plan(projection, manifest, config):
     if not isinstance(projection, SimpleNamespace) or not projection.cold:
         raise ValueError("paper layout requires S-admitted cold numerics")
@@ -2709,7 +2868,13 @@ def drawing_plan(projection, manifest, config):
         add_publication_captions(pages,context)
     apply_tune_ratio_scale(pages, config)
     reserve_spectrum_tune_key(pages)
+    move_annotation_blocks_from_panel_labels(pages)
     reserve_annotation_headroom(pages)
+    # Panel-label clearance on logarithmic axes depends on both limits.  Fix
+    # the common peer-row lower limit before calculating the needed ceiling;
+    # synchronizing a lower limit afterwards would move already-cleared data.
+    synchronize_paired_y_ranges(pages)
+    reserve_panel_label_data_headroom(pages)
     synchronize_paired_y_ranges(pages)
     return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}
 

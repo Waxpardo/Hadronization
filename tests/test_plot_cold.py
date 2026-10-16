@@ -345,6 +345,48 @@ int main() {
             self.assertEqual(run.returncode, 0, run.stderr)
 
     @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
+    def test_native_panel_occupancy_does_not_connect_marker_only_points(self):
+        source = r'''#define main render_program_main
+#include "pipeline/plot/render.cpp"
+#undef main
+int main() {
+  Page page{}; page.role="balancing.baryon_meson.activity";
+  page.width=1900; page.height=1600; page.textPixels=34;
+  Panel panel{}; panel.id="lower.beauty.5122";
+  panel.geometry={.5,0.,1.,.2}; panel.margins={0.,.04,.2,0.};
+  panel.xLow=.5; panel.xHigh=11.5; panel.yLow=.5; panel.yHigh=145.;
+  panel.logY=true;
+  Series series{}; series.mode="categories"; series.tune="MONASH";
+  for (const auto& value : std::vector<std::pair<double,double>>{{1.,8.},{10.,80.}}) {
+    Point point{}; point.x=value.first; point.y=value.second;
+    point.error=0.; point.state="DRAW"; series.points.push_back(point);
+  }
+  panel.series.push_back(series);
+  const auto boxes=PanelDataBoxes(page,panel,0);
+  const double first=PanelXCoordinate(panel,1.);
+  const double second=PanelXCoordinate(panel,10.);
+  for (const auto& box : boxes)
+    if (box[0]<first && box[2]>second) return 1;
+  // The two category-bin handle line graphs and both individual point boxes
+  // must still contribute real occupied geometry.
+  if (boxes.size()!=8) return 2;
+  return 0;
+}
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cpp, binary = root / 'panel_occupancy.cpp', root / 'panel_occupancy'
+            cpp.write_text(source)
+            flags = shlex.split(subprocess.check_output(
+                ['root-config', '--cflags', '--libs'], text=True))
+            built = subprocess.run(
+                ['c++', '-std=c++17', '-I', str(ROOT), str(cpp),
+                 '-o', str(binary)] + flags, capture_output=True, text=True)
+            self.assertEqual(built.returncode, 0, built.stderr)
+            run = subprocess.run([str(binary)], capture_output=True, text=True)
+            self.assertEqual(run.returncode, 0, run.stderr)
+
+    @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
     def test_native_band_gaps_and_unavailable_errors(self):
         # A known bin topology supplies the oracle independently of the
         # renderer's serialized drawing-record verifier.
@@ -692,6 +734,92 @@ int main(int argc, char** argv) {
         self.assertLess(envelope,.7)
         self.assertEqual(absolute['series'],original['panels'][0]['series'])
         self.assertEqual(ratio,original['panels'][1])
+
+    def test_panel_label_moves_complete_annotation_block_without_rewriting_it(self):
+        import copy
+        panel={'id':'g9.absolute','geometry':[0.,.34,1.,.9],
+               'margins':[.16,.04,0.,.06], 'annotations':[], 'reuse':None}
+        page={'role':'spectra.signed_heavy','filename':'G9_421_eta.pdf',
+              'text_pixels':18,'width':1100,'height':1200,'panels':[panel]}
+        label=plot.panel_label_reserved_box(page,panel)
+        panel['annotations']=[
+            {'x':label[0],'y':.88,'size':20.,'text':'PYTHIA 8.317'},
+            {'x':label[0],'y':.84,'size':20.,'text':'Hard sample'}]
+        before=copy.deepcopy(panel['annotations'])
+        self.assertTrue(plot.boxes_overlap(
+            plot.annotation_box(page,panel,panel['annotations']),label))
+        plot.move_annotation_blocks_from_panel_labels([page])
+        after=panel['annotations']
+        self.assertFalse(plot.boxes_overlap(
+            plot.annotation_box(page,panel,after),label))
+        self.assertEqual([a['text'] for a in after],[a['text'] for a in before])
+        dx=[a['x']-b['x'] for a,b in zip(after,before)]
+        dy=[a['y']-b['y'] for a,b in zip(after,before)]
+        self.assertTrue(dx[0] or dy[0])
+        self.assertTrue(all(abs(value-dx[0])<1.e-12 for value in dx))
+        self.assertTrue(all(abs(value-dy[0])<1.e-12 for value in dy))
+        self.assertAlmostEqual(after[0]['y']-after[1]['y'],
+                               before[0]['y']-before[1]['y'])
+
+    def test_panel_label_data_and_status_occupancy_adds_minimal_upper_headroom(self):
+        import copy
+        def make(error, x=.5):
+            panel={'id':'correlation.compare.5122.SS',
+                   'geometry':[.5,.4,1.,.6], 'margins':[0.,.04,0.,0.],
+                   'x_range':[.5,7.5], 'y_range':[.1,1.],
+                   'log_y':False,'log_x':False,'reuse':None,
+                   'annotations':[], 'series':[{'draw_mode':'categories','points':[
+                       {'state':'DRAW','display_x':x,'y':.95,'error':error,
+                        'bin_low':None,'bin_high':None}]}]}
+            return {'role':'correlations.beauty','filename':'correlations.beauty.pdf',
+                    'text_pixels':18,'width':1900,'height':2850,
+                    'panels':[panel]}
+        finite=make(0.)
+        original=copy.deepcopy(finite)
+        label=plot.panel_label_reserved_box(finite,finite['panels'][0])
+        panel=finite['panels'][0]
+        frame_height=1-panel['margins'][2]-panel['margins'][3]
+        old_y=panel['margins'][2]+frame_height*(.95-.1)/(1.-.1)
+        self.assertGreater(old_y,label[1])
+        plot.reserve_panel_label_data_headroom([finite])
+        self.assertEqual(panel['y_range'][0],.1)
+        self.assertGreater(panel['y_range'][1],1.)
+        self.assertEqual(panel['series'],original['panels'][0]['series'])
+        status=make(None)
+        plot.reserve_panel_label_data_headroom([status])
+        self.assertGreater(status['panels'][0]['y_range'][1],
+                           finite['panels'][0]['y_range'][1])
+        clear=make(0.,x=7.)
+        plot.reserve_panel_label_data_headroom([clear])
+        self.assertEqual(clear['panels'][0]['y_range'],[.1,1.])
+        handle=make(0.,x=2.)
+        plot.reserve_panel_label_data_headroom([handle])
+        self.assertGreater(handle['panels'][0]['y_range'][1],1.)
+        marker=make(0.,x=2.)
+        marker['panels'][0]['series'][0]['draw_mode']='curve'
+        plot.reserve_panel_label_data_headroom([marker])
+        self.assertEqual(marker['panels'][0]['y_range'],[.1,1.])
+
+    def test_panel_label_headroom_remains_common_across_peer_axes(self):
+        import copy
+        left={'id':'upper.421','geometry':[0.,.3,.5,.9],
+              'margins':[.18,0.,0.,.06], 'x_range':[.5,7.5],
+              'y_range':[.001,.3], 'log_y':True,'log_x':False,
+              'reuse':None,'annotations':[], 'series':[{'draw_mode':'categories',
+              'points':[{'state':'DRAW','display_x':.5,'y':.25,'error':.01,
+                         'bin_low':None,'bin_high':None}]}]}
+        right=copy.deepcopy(left);right['id']='upper.4122';right['geometry']=[.5,.3,1.,.9]
+        right['margins']=[0.,.04,0.,.06];right['y_range'][0]=.0005
+        right['series'][0]['points'][0]['y']=.1
+        page={'role':'balancing.integrated.charm',
+              'filename':'balancing.integrated.charm.pdf','text_pixels':18,
+              'width':1900,'height':1600,'panels':[left,right]}
+        plot.synchronize_paired_y_ranges([page])
+        plot.reserve_panel_label_data_headroom([page])
+        plot.synchronize_paired_y_ranges([page])
+        self.assertEqual(left['y_range'],right['y_range'])
+        self.assertEqual(left['y_range'][0],.0005)
+        self.assertGreater(left['y_range'][1],.3)
 
     def test_spectrum_key_preserves_an_already_clear_frame(self):
         import copy
