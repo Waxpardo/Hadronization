@@ -235,71 +235,70 @@ int main() {
   for (std::size_t i=0;i<labels.size();++i)
     if (labels[i].panelIndex!=indices[i] || labels[i].text!=texts[i] ||
         labels[i].row!=rows[i] || labels[i].column!=columns[i]) return 2;
+  const auto exactUpperLeft=[&](std::size_t index) {
+    const auto& panel=page.panels[index];
+    const auto label=PanelLabelText(page,index);
+    const double pixels=BodyTextPixels(page)+1;
+    const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
+    const double height=page.height*(panel.geometry[3]-panel.geometry[1]);
+    const double xTickLength=page.role=="multiplicity.composite" ? .025 : .03;
+    const double expectedX=panel.margins[0]+YAxisTickLength(page)+.35*pixels/width;
+    const double expectedY=1-panel.margins[3]-xTickLength-.25*pixels/height;
+    return label.align==13 && Close(label.x,expectedX) && Close(label.y,expectedY) &&
+        label.x<.30 && label.y>.75;
+  };
   const auto label=PanelLabelText(page,3);
-  if (label.text!="a)" || label.align!=13 ||
-      label.x<=page.panels[3].margins[0]+YAxisTickLength(page) ||
-      label.y>=1-page.panels[3].margins[3]-.03) return 3;
+  if (label.text!="a)" || !exactUpperLeft(3)) return 3;
   page.role="multiplicity.composite";
   page.panels[4].id="lower.ratio";
-  const auto lowerLabel=PanelLabelText(page,4);
-  if (lowerLabel.align!=11 ||
-      lowerLabel.y<=page.panels[4].margins[2]+.025) return 11;
+  if (!exactUpperLeft(4)) return 11;
   page.role.clear();
   page.panels[4].id="lower.left";
   page.role="spectra.signed_heavy";
   page.panels[3].id="g9.absolute";
-  const auto spectrumLabel=PanelLabelText(page,3);
-  if (spectrumLabel.align!=13 ||
-      spectrumLabel.y>1-page.panels[3].margins[3]-.149) return 12;
+  if (!exactUpperLeft(3)) return 12;
   page.role="balancing.baryon_meson.activity";
   page.filename="balancing.baryon_meson.activity.pdf";
   page.panels[3].id="upper.charm.421";
-  const auto baryonMesonLeft=PanelLabelText(page,3);
-  const auto baryonMesonRight=PanelLabelText(page,1);
-  const double expectedRightTickClearanceX=
-      1-page.panels[3].margins[1]-.03-
-      .35*(BodyTextPixels(page)+1)/
-          (page.width*(page.panels[3].geometry[2]-page.panels[3].geometry[0]));
-  if (baryonMesonLeft.align!=33 || baryonMesonLeft.x<.90 ||
-      !Close(baryonMesonLeft.x,expectedRightTickClearanceX) ||
-      baryonMesonRight.align!=23 || !Close(baryonMesonRight.x,.50))
-    return 13;
+  if (!exactUpperLeft(3) || !exactUpperLeft(1)) return 13;
   page.role="balancing.integrated.charm";
   page.filename="balancing.integrated.charm.pdf";
   page.panels[3].id="upper.421";
   page.panels[1].id="upper.4122";
-  const auto integratedLeft=PanelLabelText(page,3);
-  const auto integratedRight=PanelLabelText(page,1);
-  if (integratedLeft.align!=33 || integratedLeft.x<.90 ||
-      !Close(integratedLeft.x,expectedRightTickClearanceX) ||
-      integratedRight.align!=23 || !Close(integratedRight.x,.45)) return 14;
+  if (!exactUpperLeft(3) || !exactUpperLeft(1)) return 14;
   page.filename="supplemental.balancing.integrated.charm.trigger-421.pdf";
-  const auto integratedTrigger=PanelLabelText(page,3);
-  if (integratedTrigger.align!=23 || !Close(integratedTrigger.x,.50)) return 15;
+  if (!exactUpperLeft(3)) return 15;
   page.role="balancing.activity.charm";
   page.filename="supplemental.balancing.activity.charm.trigger-421.pdf";
   page.panels[3].id="upper.MONASH.421";
-  const auto activityTrigger=PanelLabelText(page,3);
-  if (activityTrigger.align!=23 || !Close(activityTrigger.x,.50)) return 16;
+  if (!exactUpperLeft(3)) return 16;
   page.filename="supplemental.balancing.activity.charm.extremes.trigger-421.pdf";
-  const auto extremesTrigger=PanelLabelText(page,3);
-  if (extremesTrigger.align!=23 || !Close(extremesTrigger.x,.50)) return 17;
+  if (!exactUpperLeft(3)) return 17;
   page.role="balancing.activity.beauty";
   page.filename="balancing.activity.beauty.pdf";
   page.panels[3].id="upper.MONASH.521";
   page.panels[1].id="upper.MONASH.5122";
-  const auto activityBeautyLeft=PanelLabelText(page,3);
-  const auto activityBeautyRight=PanelLabelText(page,1);
-  if (activityBeautyLeft.align!=33 || activityBeautyLeft.x<.90 ||
-      !Close(activityBeautyLeft.x,expectedRightTickClearanceX) ||
-      activityBeautyRight.align!=23 || !Close(activityBeautyRight.x,.45))
-    return 18;
+  if (!exactUpperLeft(3) || !exactUpperLeft(1)) return 18;
   page.role="correlations.charm";
   page.filename="correlations.charm.pdf";
   page.panels[3].id="correlation.main.421.OS";
-  const auto correlationLeft=PanelLabelText(page,3);
-  if (correlationLeft.align!=11 ||
-      correlationLeft.y<=page.panels[3].margins[2]+.03) return 19;
+  if (!exactUpperLeft(3)) return 19;
+  // A scientific legend that occupied the new label anchor must move while
+  // retaining its dimensions and clearing the exact reserved ink envelope.
+  page.role.clear();
+  page.panels[3].legend={.18,.78,.36,.88};
+  const auto rawLegend=page.panels[3].legend;
+  const auto reserved=PanelLabelReservedBox(page,3);
+  if (!BoxesOverlap(rawLegend,reserved)) return 20;
+  const auto movedLegend=PanelScientificLegendBox(page,page.panels[3],3);
+  if (BoxesOverlap(movedLegend,reserved) ||
+      !Close(movedLegend[2]-movedLegend[0],rawLegend[2]-rawLegend[0]) ||
+      !Close(movedLegend[3]-movedLegend[1],rawLegend[3]-rawLegend[1]) ||
+      movedLegend==rawLegend) return 21;
+  page.role="balancing.baryon_meson.activity";
+  const auto movedTuneLegend=InsideTuneLegendBox(page,page.panels[3],3);
+  if (BoxesOverlap(movedTuneLegend,reserved) || movedTuneLegend==rawLegend)
+    return 22;
   page.role.clear();
   page.panels[3].id="upper.left";
   if (SemanticPanelTitle("(a) #it{B}^{+} trigger")!=

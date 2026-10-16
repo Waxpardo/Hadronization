@@ -718,52 +718,14 @@ ExpectedText PanelLabelText(const Page& page, std::size_t panelIndex) {
   const double height = page.height * (panel.geometry[3] - panel.geometry[1]);
   const double horizontalGap = .35 * pixels / width;
   const double verticalGap = .25 * pixels / height;
-  double x = panel.margins[0] + YAxisTickLength(page) + horizontalGap;
-  const bool lowerClearance =
-      (page.role == "multiplicity.composite" && panel.id == "lower.ratio") ||
-      (page.role == "correlations.beauty" &&
-       panel.id == "correlation.compare.5122.SS");
-  const bool spectrumAnnotationClearance =
-      page.role == "spectra.signed_heavy" && panel.id == "g9.absolute";
+  const double x = panel.margins[0] + YAxisTickLength(page) + horizontalGap;
   const double xTickLength =
       page.role == "multiplicity.composite" ? .025 : .03;
-  double y = lowerClearance
-      ? panel.margins[2] + xTickLength + verticalGap
-      : spectrumAnnotationClearance ? 1 - panel.margins[3] - .15
-      : 1 - panel.margins[3] - xTickLength - verticalGap;
-  int align = lowerClearance ? 11 : 13;
-  // These upper rows contain fixed information and tune-key blocks or high
-  // first-bin data.  Use the clear gap already present in each established
-  // layout instead of changing any annotation, legend or scientific drawing.
-  const bool topBaryonMesonActivity =
-      page.role == "balancing.baryon_meson.activity" && assignment->row == 0;
-  const bool topCharmIntegrated =
-      page.role == "balancing.integrated.charm" && assignment->row == 0;
-  const bool topActivity =
-      (page.role == "balancing.activity.charm" ||
-       page.role == "balancing.activity.beauty") && assignment->row == 0;
-  const bool rightTickClearance = assignment->column == 0 &&
-      (topBaryonMesonActivity || topCharmIntegrated || topActivity) &&
-      page.filename.find(".trigger-") == std::string::npos;
-  const bool topCorrelationLeft =
-      page.role.rfind("correlations.", 0) == 0 &&
-      assignment->row == 0 && assignment->column == 0;
-  const bool singleTrigger = page.filename.find(".trigger-") != std::string::npos;
-  if (topCorrelationLeft) {
-    y = panel.margins[2] + xTickLength + verticalGap;
-    align = 11;
-  } else if ((topCharmIntegrated || topActivity) && singleTrigger) {
-    x = .50;
-    align = 23;
-  } else if (topBaryonMesonActivity || topCharmIntegrated || topActivity) {
-    if (assignment->column == 0) {
-      x = 1 - panel.margins[1] - xTickLength - horizontalGap;
-      align = 33;
-    } else {
-      x = topBaryonMesonActivity ? .50 : .45;
-      align = 23;
-    }
-  }
+  // The publication convention is one frame-relative upper-left anchor for
+  // every main panel.  Role-specific lower, centre and right exceptions make
+  // otherwise parallel pages difficult to scan and are deliberately absent.
+  const double y = 1 - panel.margins[3] - xTickLength - verticalGap;
+  const int align = 13;
   const double conservativeWidth = 2.6 * pixels / width;
   const double conservativeHeight = 1.15 * pixels / height;
   const int horizontalAlign = align / 10;
@@ -779,14 +741,60 @@ ExpectedText PanelLabelText(const Page& page, std::size_t panelIndex) {
   const double top = verticalAlign == 1 ? y + conservativeHeight :
       verticalAlign == 2 ? y + conservativeHeight / 2. : y;
   Need(left > panel.margins[0] + YAxisTickLength(page) &&
-       right < 1 - panel.margins[1] -
-           (rightTickClearance ? xTickLength : 0.) &&
+       right < 1 - panel.margins[1] &&
        bottom > panel.margins[2] && top < 1 - panel.margins[3] &&
-       (verticalAlign == 1
-          ? bottom > panel.margins[2] + xTickLength
-          : top < 1 - panel.margins[3] - xTickLength),
+       top < 1 - panel.margins[3] - xTickLength,
        "panel label ink is not clear of the frame tick envelope");
   return TextExpectation(assignment->text, x, y, pixels, 1, align);
+}
+std::size_t PanelIndex(const Page& page, const Panel& panel) {
+  for (std::size_t index = 0; index < page.panels.size(); ++index)
+    if (&page.panels[index] == &panel) return index;
+  throw std::runtime_error("panel is not owned by page");
+}
+std::array<double, 4> PanelLabelReservedBox(const Page& page,
+                                            std::size_t panelIndex) {
+  const Panel& panel = page.panels.at(panelIndex);
+  const ExpectedText label = PanelLabelText(page, panelIndex);
+  const double width = page.width * (panel.geometry[2] - panel.geometry[0]);
+  const double height = page.height * (panel.geometry[3] - panel.geometry[1]);
+  const double horizontalGap = .35 * label.size / width;
+  const double verticalGap = .25 * label.size / height;
+  const double inkWidth = 2.6 * label.size / width;
+  const double inkHeight = 1.15 * label.size / height;
+  return {label.x - horizontalGap, label.y - inkHeight - verticalGap,
+          label.x + inkWidth + horizontalGap, label.y + verticalGap};
+}
+bool BoxesOverlap(const std::array<double, 4>& left,
+                  const std::array<double, 4>& right) {
+  return left[0] < right[2] && left[2] > right[0] &&
+         left[1] < right[3] && left[3] > right[1];
+}
+std::array<double, 4> LegendBoxClearingPanelLabel(
+    const Page& page, const Panel& panel, std::size_t panelIndex,
+    std::array<double, 4> box) {
+  const auto label = PanelLabelReservedBox(page, panelIndex);
+  if (!BoxesOverlap(box, label)) return box;
+  const double width = box[2] - box[0], height = box[3] - box[1];
+  const double pixelWidth =
+      page.width * (panel.geometry[2] - panel.geometry[0]);
+  const double pixelHeight =
+      page.height * (panel.geometry[3] - panel.geometry[1]);
+  const double gapX = .35 * (BodyTextPixels(page) + 1) / pixelWidth;
+  const double gapY = .25 * (BodyTextPixels(page) + 1) / pixelHeight;
+  const double right = 1 - panel.margins[1] - .03;
+  const double shiftedLeft = label[2] + gapX;
+  if (shiftedLeft + width < right)
+    return {shiftedLeft, box[1], shiftedLeft + width, box[3]};
+  const double shiftedTop = label[1] - gapY;
+  const double shiftedBottom = shiftedTop - height;
+  Need(shiftedBottom > panel.margins[2] + .03,
+       "scientific legend cannot clear upper-left panel label");
+  return {box[0], shiftedBottom, box[2], shiftedTop};
+}
+std::array<double, 4> PanelScientificLegendBox(
+    const Page& page, const Panel& panel, std::size_t panelIndex) {
+  return LegendBoxClearingPanelLabel(page, panel, panelIndex, panel.legend);
 }
 ExpectedText TextExpectation(const std::string& text, double x, double y,
                              double size, int color, int align,
@@ -1817,7 +1825,9 @@ std::array<double, 4> InsideTuneLegendBox(const Page& page, const Panel& panel,
                                         std::size_t count) {
   // Keep the reference multiplicity key exactly where it was specified.
   if (page.role == "multiplicity.composite" ||
-      page.role == "balancing.baryon_meson.activity") return panel.legend;
+      page.role == "balancing.baryon_meson.activity")
+    return LegendBoxClearingPanelLabel(
+        page, panel, PanelIndex(page, panel), panel.legend);
   if (panel.margins[3] > .25) {
     const double pw=page.width*(panel.geometry[2]-panel.geometry[0]);
     const double ph=page.height*(panel.geometry[3]-panel.geometry[1]);
@@ -1826,7 +1836,9 @@ std::array<double, 4> InsideTuneLegendBox(const Page& page, const Panel& panel,
     const double width=font*(.62*12+3.)/pw;
     const double height=1.65*font*count/ph;
     const double top=.97;
-    return {right-width,top-height,right,top};
+    const std::array<double,4> box{{right-width,top-height,right,top}};
+    return LegendBoxClearingPanelLabel(
+        page, panel, PanelIndex(page, panel), box);
   }
   const double pixelWidth = page.width * (panel.geometry[2]-panel.geometry[0]);
   const double pixelHeight = page.height * (panel.geometry[3]-panel.geometry[1]);
@@ -1853,6 +1865,7 @@ std::array<double, 4> InsideTuneLegendBox(const Page& page, const Panel& panel,
     return panel.margins[2]+fraction*(1-panel.margins[2]-panel.margins[3]);
   };
   std::vector<std::array<double, 4>> occupied;
+  occupied.push_back(PanelLabelReservedBox(page, PanelIndex(page, panel)));
   for (const auto& item : panel.annotations)
     occupied.push_back({item.x,item.y-.3*item.size/pixelHeight,
                        std::min(right,item.x+.56),item.y+item.size/pixelHeight});
@@ -1953,6 +1966,8 @@ bool ClassKeyClearsData(const Page& page, const Panel& panel,
       box[1] < panel.margins[2]+gapY ||
       box[2] > 1-panel.margins[1]-gapX ||
       box[3] > 1-panel.margins[3]-gapY) return false;
+  if (BoxesOverlap(box, PanelLabelReservedBox(page, PanelIndex(page, panel))))
+    return false;
   const auto xNdc = [&](double x) {
     return panel.margins[0]+(x-panel.xLow)/(panel.xHigh-panel.xLow)*
         (1-panel.margins[0]-panel.margins[1]);
@@ -2022,7 +2037,8 @@ std::vector<ExpectedLegend> ExpectedPanelLegends(
     std::size_t panelIndex) {
   if (!panel.reusePanel.empty()) return {};
   std::vector<ExpectedLegend> result;
-  ExpectedLegend legend{panel.legend, 1, double(PanelLegendTextPixels(page)), true,
+  ExpectedLegend legend{PanelScientificLegendBox(page, panel, panelIndex), 1,
+                        double(PanelLegendTextPixels(page)), true,
                         .12, {}};
   const bool sideLegend = panel.margins[1] > .3;
   if (!sideLegend) {
