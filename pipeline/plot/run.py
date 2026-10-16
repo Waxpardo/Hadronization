@@ -2061,20 +2061,28 @@ def reserve_annotation_headroom(pages):
                 panel['y_range'][1]=required
 
 
+PANEL_LABEL_LEFT_INSET_PIXELS = 64.
+
+
+def panel_label_pixels(page, panel):
+    height = page['height'] * (panel['geometry'][3] - panel['geometry'][1])
+    # Match std::lround for the positive physical pixel height used by ROOT.
+    return min(body_text_pixels(page) + 1,
+               max(24, math.floor(.085 * height + .5)))
+
+
 def panel_label_reserved_box(page, panel):
     """Return the renderer's conservative upper-left label envelope."""
-    font = body_text_pixels(page) + 1
+    font = panel_label_pixels(page, panel)
     width = page['width'] * (panel['geometry'][2] - panel['geometry'][0])
     height = page['height'] * (panel['geometry'][3] - panel['geometry'][1])
     left, unused_right, unused_bottom, top = panel['margins']
-    y_tick = (.015 * min(1., 1900. / page['width'])
-              if '.trigger-' in page.get('filename', '') else .03)
     x_tick = .025 if page['role'] == 'multiplicity.composite' else .03
-    gap_x, gap_y = .35 * font / width, .25 * font / height
-    x = left + y_tick + gap_x
-    y = 1. - top - x_tick - gap_y
-    return [x-gap_x, y-1.15*font/height-gap_y,
-            x+2.6*font/width+gap_x, y+gap_y]
+    x = left + PANEL_LABEL_LEFT_INSET_PIXELS / width
+    y = 1. - top - x_tick - .25 * font / height
+    gap_x, gap_y = .12 * font / width, .12 * font / height
+    return [x-gap_x, y-font/height-gap_y,
+            x+1.2*font/width+gap_x, y+gap_y]
 
 
 def boxes_overlap(left, right):
@@ -2178,6 +2186,91 @@ def verify_common_comparison_y_ranges(pages):
         if len(signatures) != 1:
             raise ValueError('stacked comparison panels lost their common y scale: '
                              + page['filename'])
+
+
+def reserve_panel_label_data_headroom(pages):
+    """Clear the immutable corner anchor without moving a scientific point."""
+    for page in pages:
+        for panel in page['panels']:
+            if panel.get('reuse'):
+                continue
+            label = panel_label_reserved_box(page, panel)
+            width = page['width'] * (panel['geometry'][2] - panel['geometry'][0])
+            height = page['height'] * (panel['geometry'][3] - panel['geometry'][1])
+            left, right, bottom, top = panel['margins']
+            frame_width, frame_height = 1.-left-right, 1.-bottom-top
+            # Match the native marker/error occupancy: visible ink plus one
+            # physical clearance margin below the panel-letter envelope.
+            # The renderer reserves .22 em of marker ink plus .12 em of
+            # clearance.  Keep one additional physical pixel so a point that
+            # lands exactly on the calculated boundary cannot overlap after
+            # TSV decimal serialization and ROOT coordinate reconstruction.
+            target_fraction = ((label[1]-bottom)/frame_height -
+                               (.34*body_text_pixels(page)+1.) /
+                               (height*frame_height))
+            if not 0. < target_fraction < 1.:
+                raise ValueError('panel-label clearance exceeds the frame: '
+                                 + page['filename']+' '+panel['id'])
+            xmin, xmax = panel['x_range']
+            def x_value(ndc):
+                fraction = (ndc-left)/frame_width
+                if panel.get('log_x'):
+                    return xmin*math.exp(math.log(xmax/xmin)*fraction)
+                return xmin+(xmax-xmin)*fraction
+            label_x_low, label_x_high = x_value(label[0]), x_value(label[2])
+            peaks=[]
+            for series in panel['series']:
+                for point in series['points']:
+                    y = point.get('y')
+                    x = point.get('display_x')
+                    if (point.get('state') != 'DRAW' or y is None or x is None or
+                            not math.isfinite(y) or not math.isfinite(x)):
+                        continue
+                    bin_low = point.get('bin_low')
+                    bin_high = point.get('bin_high')
+                    if bin_low is None or bin_high is None:
+                        half = .5 if series.get('draw_mode') == 'categories' else 0.
+                        bin_low, bin_high = x-half, x+half
+                    if (bin_high < xmin or bin_low > xmax or
+                            bin_high < label_x_low or bin_low > label_x_high):
+                        continue
+                    high = y+(point.get('error') or 0.)
+                    if not math.isfinite(high) or (panel.get('log_y') and high <= 0.):
+                        continue
+                    peaks.append(high)
+            if not peaks:
+                continue
+            low, high = panel['y_range']
+            peak=max(peaks)
+            if panel.get('log_y'):
+                if low <= 0. or peak <= low:
+                    continue
+                displayed = math.log(peak/low)/math.log(high/low)
+                required = low*math.exp(math.log(peak/low)/target_fraction)
+            else:
+                displayed = (peak-low)/(high-low)
+                required = low+(peak-low)/target_fraction
+            if displayed > target_fraction:
+                panel['y_range'][1] = max(high, required)
+
+
+def synchronize_complete_comparison_y_ranges(pages):
+    """Retain one full upper-panel scale for every balancing comparison."""
+    for page in pages:
+        if not page['role'].startswith('balancing.'):
+            continue
+        panels = [panel for panel in page['panels']
+                  if not panel.get('reuse') and panel['id'].startswith('upper.')]
+        if not panels:
+            continue
+        signatures={(panel.get('log_y',False),panel['y_range'][0])
+                    for panel in panels}
+        if len(signatures) != 1:
+            raise ValueError('balancing upper panels differ before synchronization: '
+                             +page['filename'])
+        high=max(panel['y_range'][1] for panel in panels)
+        for panel in panels:
+            panel['y_range'][1]=high
 
 
 def drawing_plan(projection, manifest, config):
@@ -2830,6 +2923,9 @@ def drawing_plan(projection, manifest, config):
     reserve_spectrum_tune_key(pages)
     move_annotation_blocks_from_panel_labels(pages)
     reserve_annotation_headroom(pages)
+    synchronize_paired_y_ranges(pages)
+    reserve_panel_label_data_headroom(pages)
+    synchronize_complete_comparison_y_ranges(pages)
     synchronize_paired_y_ranges(pages)
     verify_common_comparison_y_ranges(pages)
     return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}

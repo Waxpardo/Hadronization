@@ -662,6 +662,8 @@ struct PanelLabelAssignment {
   std::string text;
 };
 
+constexpr double kPanelLabelLeftInsetPixels = 64.;
+
 long long PanelGeometryKey(double value) {
   return std::llround(value * 1000000000.);
 }
@@ -732,9 +734,11 @@ ExpectedText BasePanelLabelText(const Page& page, std::size_t panelIndex) {
   const int pixels = PanelLabelPixels(page, panel);
   const double width = page.width * (panel.geometry[2] - panel.geometry[0]);
   const double height = page.height * (panel.geometry[3] - panel.geometry[1]);
-  const double horizontalGap = .35 * pixels / width;
   const double verticalGap = .25 * pixels / height;
-  const double x = panel.margins[0] + YAxisTickLength(page) + horizontalGap;
+  // One physical inset is used by every main panel.  It is independent of
+  // panel width, data density, role and tune, so paired columns retain the
+  // same visible corner anchor rather than wandering across the frame.
+  const double x = panel.margins[0] + kPanelLabelLeftInsetPixels / width;
   const double xTickLength =
       page.role == "multiplicity.composite" ? .025 : .03;
   // The publication convention is one frame-relative upper-left anchor for
@@ -1088,45 +1092,7 @@ std::array<double,4> TextInkBox(const Page& page, const Panel& panel,
           item.y+inkHeight+clearance/height};
 }
 ExpectedText PanelLabelText(const Page& page, std::size_t panelIndex) {
-  const Panel& panel=page.panels.at(panelIndex);
-  ExpectedText base=BasePanelLabelText(page,panelIndex);
-  std::vector<std::array<double,4>> occupied=PanelAnnotationBoxes(page,panel);
-  const auto data=PanelDataBoxes(page,panel,panelIndex);
-  occupied.insert(occupied.end(),data.begin(),data.end());
-  const auto clear=[&](const ExpectedText& candidate) {
-    const auto box=PanelLabelBox(page,panel,candidate);
-    return std::none_of(occupied.begin(),occupied.end(),[&](const auto& item) {
-      return BoxesOverlap(box,item);
-    });
-  };
-  if (clear(base)) return base;
-  const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
-  const double height=page.height*(panel.geometry[3]-panel.geometry[1]);
-  const double frameWidth=1-panel.margins[0]-panel.margins[1];
-  const double stepX=.22*base.size/width;
-  const double stepY=.22*base.size/height;
-  // Categorical handles and dense correlation curves can fill the first few
-  // narrow bins.  Keep the search on the upper edge and within the left half
-  // of the frame, where it remains an upper-left panel label while avoiding
-  // any need to alter a scientific range.
-  const double maximumX=panel.margins[0]+.45*frameWidth;
-  const double minimumY=1-panel.margins[3]-.20*(1-panel.margins[2]-panel.margins[3]);
-  // Prefer a horizontal move at the same visual height.  If the complete
-  // upper edge is occupied, permit a compact downward move while remaining
-  // inside the upper-left fifth of the scientific frame.
-  for (int row=0;row<=32;++row) {
-    ExpectedText candidate=base;
-    candidate.y-=row*stepY;
-    if (candidate.y<minimumY) break;
-    for (int column=(row==0 ? 1 : 0);column<=128;++column) {
-      candidate.x=base.x+column*stepX;
-      const auto box=PanelLabelBox(page,panel,candidate);
-      if (candidate.x>maximumX || box[2]>=1-panel.margins[1]) break;
-      if (clear(candidate)) return candidate;
-    }
-  }
-  throw std::runtime_error("no content-clear upper-left panel-label position for "+
-                           page.filename+" "+panel.id);
+  return BasePanelLabelText(page,panelIndex);
 }
 std::array<double,4> PanelLabelReservedBox(const Page& page,
                                            std::size_t panelIndex) {

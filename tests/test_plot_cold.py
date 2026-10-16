@@ -238,11 +238,11 @@ int main() {
   const auto exactUpperLeft=[&](std::size_t index) {
     const auto& panel=page.panels[index];
     const auto label=PanelLabelText(page,index);
-    const double pixels=BodyTextPixels(page)+1;
+    const double pixels=PanelLabelPixels(page,panel);
     const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
     const double height=page.height*(panel.geometry[3]-panel.geometry[1]);
     const double xTickLength=page.role=="multiplicity.composite" ? .025 : .03;
-    const double expectedX=panel.margins[0]+YAxisTickLength(page)+.35*pixels/width;
+    const double expectedX=panel.margins[0]+kPanelLabelLeftInsetPixels/width;
     const double expectedY=1-panel.margins[3]-xTickLength-.25*pixels/height;
     return label.align==13 && Close(label.x,expectedX) && Close(label.y,expectedY) &&
         label.x<.30 && label.y>.75;
@@ -387,7 +387,7 @@ int main() {
             self.assertEqual(run.returncode, 0, run.stderr)
 
     @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
-    def test_native_panel_label_moves_within_upper_left_without_changing_ranges(self):
+    def test_native_panel_label_uses_common_corner_anchor_without_changing_ranges(self):
         source = r'''#define main render_program_main
 #include "pipeline/plot/render.cpp"
 #undef main
@@ -408,8 +408,11 @@ int main() {
   page.panels.push_back(panel);
   const double low=page.panels[0].yLow,high=page.panels[0].yHigh;
   const auto base=BasePanelLabelText(page,0);
-  const auto moved=PanelLabelText(page,0);
-  if (!(moved.x>base.x) || moved.y!=base.y || moved.x>=.24) return 1;
+  const auto label=PanelLabelText(page,0);
+  const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
+  if (label.x!=base.x || label.y!=base.y || label.size!=24 ||
+      !Close((label.x-panel.margins[0])*width,
+             kPanelLabelLeftInsetPixels)) return 1;
   if (page.panels[0].yLow!=low || page.panels[0].yHigh!=high) return 2;
   const auto box=PanelLabelReservedBox(page,0);
   for (const auto& data:PanelDataBoxes(page,page.panels[0],0))
@@ -418,8 +421,8 @@ int main() {
   for (const auto& glyph:StateGlyphTexts(page,page.panels[0],none))
     if (BoxesOverlap(box,TextInkBox(page,page.panels[0],glyph))) return 4;
 
-  // The protected multiplicity ceiling remains exact; a clipped leading
-  // curve moves the letter horizontally rather than expanding the frame.
+  // The protected multiplicity ceiling and common physical anchor remain
+  // exact; display preparation, not renderer roaming, owns any clearance.
   Page multiplicity{}; multiplicity.role="multiplicity.composite";
   multiplicity.filename="multiplicity.composite.pdf";
   multiplicity.width=1900; multiplicity.height=2350; multiplicity.textPixels=18;
@@ -882,6 +885,59 @@ int main(int argc, char** argv) {
         panels[-1]['y_range'][1]=.15
         with self.assertRaisesRegex(ValueError,'common y scale'):
             plot.verify_common_comparison_y_ranges([activity])
+
+    def test_corner_anchor_headroom_preserves_protected_real_ranges(self):
+        beauty_panel={'id':'correlation.compare.5122.SS','geometry':[.5,.32,1.,.42],
+            'margins':[0.,.04,0.,0.], 'x_range':[-math.pi/2,3*math.pi/2],
+            'y_range':[.06088085489355096,6.759116416652745],
+            'log_x':False,'log_y':True,'reuse':None,'annotations':[],
+            'series':[{'draw_mode':'histogram','points':[{
+                'state':'DRAW','display_x':-1.413716694115407,
+                'bin_low':-math.pi/2,'bin_high':-1.2566370614359172,
+                'y':4.545770498718472,'error':None}]}]}
+        beauty={'role':'correlations.beauty','filename':'correlations.beauty.pdf',
+                'width':1900,'height':2850,'text_pixels':18,
+                'panels':[beauty_panel]}
+        plot.reserve_panel_label_data_headroom([beauty])
+        self.assertEqual(beauty_panel['y_range'][1],6.759116416652745)
+
+        multiplicity_panel={'id':'lower.ratio','geometry':[0.,.06,1.,.24],
+            'margins':[.16,.04,.25,0.], 'x_range':[0.,350.],
+            'y_range':[1./36.,2.5], 'log_x':False,'log_y':True,
+            'reuse':None,'annotations':[],
+            'series':[{'draw_mode':'histogram','points':[{
+                'state':'DRAW','display_x':5.,'bin_low':0.,'bin_high':10.,
+                'y':4.,'error':0.}]}]}
+        multiplicity={'role':'multiplicity.composite',
+            'filename':'multiplicity.composite.pdf','width':1900,'height':2350,
+            'text_pixels':18,'panels':[multiplicity_panel]}
+        plot.reserve_panel_label_data_headroom([multiplicity])
+        self.assertEqual(multiplicity_panel['y_range'][1],2.5)
+
+        # A real charm-correlation geometry whose upper-left data occupy the
+        # fixed anchor receives bounded display clearance, while the renderer
+        # coordinate remains immutable.
+        charm_panel={'id':'correlation.compare.4122.OS',
+            'geometry':[.5,.52,1.,.62], 'margins':[0.,.04,0.,0.],
+            'x_range':[-math.pi/2,3*math.pi/2], 'y_range':[.58,1.32],
+            'log_x':False,'log_y':False,'reuse':None,'annotations':[],
+            'series':[{'draw_mode':'histogram','points':[{
+                'state':'DRAW','display_x':-.95,'bin_low':-1.1,'bin_high':-.8,
+                'y':1.30,'error':.02}]}]}
+        charm={'role':'correlations.charm','filename':'correlations.charm.pdf',
+               'width':1900,'height':2600,'text_pixels':18,
+               'panels':[charm_panel]}
+        plot.reserve_panel_label_data_headroom([charm])
+        self.assertGreater(charm_panel['y_range'][1],1.32)
+        label=plot.panel_label_reserved_box(charm,charm_panel)
+        panel_height=charm['height']*(charm_panel['geometry'][3]-
+                                      charm_panel['geometry'][1])
+        frame_height=1.-charm_panel['margins'][2]-charm_panel['margins'][3]
+        fraction=(1.32-charm_panel['y_range'][0]) / (
+            charm_panel['y_range'][1]-charm_panel['y_range'][0])
+        native_top=(charm_panel['margins'][2]+fraction*frame_height+
+                    .34*plot.body_text_pixels(charm)/panel_height)
+        self.assertLessEqual(native_top+1./panel_height,label[1]+1.e-12)
 
     def test_spectrum_key_preserves_an_already_clear_frame(self):
         import copy
