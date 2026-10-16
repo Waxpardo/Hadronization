@@ -2087,14 +2087,40 @@ def annotation_box(page, panel, annotations):
     width = page['width'] * (panel['geometry'][2] - panel['geometry'][0])
     height = page['height'] * (panel['geometry'][3] - panel['geometry'][1])
     left = min(item['x'] for item in annotations)
-    # The scientific caption's longest rendered line is bounded by this
-    # physical-width estimate; cap it at the established ROOT annotation
-    # occupancy used by the native legend search.
-    text_width = min(.56, max(.62*item['size']*len(item['text'])/width
+    # ROOT TLatex control words and braces do not occupy one glyph per source
+    # character.  Count the visible payload so label/legend placement does not
+    # move a clear block merely because its source contains markup.
+    text_width = min(.56, max(.62*item['size']*
+                              tlatex_visible_units(item['text'])/width
                               for item in annotations))
     bottom = min(item['y']-.30*item['size']/height for item in annotations)
     top = max(item['y']+item['size']/height for item in annotations)
     return [left, bottom, left+text_width, top]
+
+
+def tlatex_visible_units(text):
+    """Return a stable physical-width proxy for ROOT TLatex source."""
+    units = 0.
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if char == '#':
+            index += 1
+            start = index
+            while index < len(text) and text[index].isalpha():
+                index += 1
+            # Symbol commands such as #eta and #geq paint one glyph.  Wrapper
+            # commands such as #bar{...} paint only their braced payload.
+            command = text[start:index]
+            if command not in {'bar','hat','tilde','vec','it','bf','font','scale','lower'}:
+                units += 1.
+            continue
+        if char in '{}_^':
+            index += 1
+            continue
+        units += .45 if char.isspace() else 1.
+        index += 1
+    return max(1., units)
 
 
 def move_annotation_blocks_from_panel_labels(pages):
@@ -2138,86 +2164,20 @@ def move_annotation_blocks_from_panel_labels(pages):
                                  +page['filename']+' '+panel['id'])
 
 
-def _display_x_fraction(panel, value):
-    if panel.get('log_x'):
-        if value <= 0:
-            return None
-        return math.log(value/panel['x_range'][0])/math.log(
-            panel['x_range'][1]/panel['x_range'][0])
-    return ((value-panel['x_range'][0]) /
-            (panel['x_range'][1]-panel['x_range'][0]))
-
-
-def _required_upper_limit(low, peak, fraction, log_y):
-    if not 0. < fraction < 1.:
-        raise ValueError('panel-label clearance exceeds the scientific frame')
-    if log_y:
-        if low <= 0. or peak <= 0.:
-            raise ValueError('panel-label clearance has nonpositive log value')
-        return low*math.exp(math.log(peak/low)/fraction)
-    return low+(peak-low)/fraction
-
-
-def reserve_panel_label_data_headroom(pages):
-    """Add only the upper range required to clear data and status glyphs."""
+def verify_common_comparison_y_ranges(pages):
+    """Fail closed if a final layout breaks an established comparison scale."""
     for page in pages:
-        panels = [panel for panel in page['panels'] if not panel.get('reuse')]
-        for panel in panels:
-            label = panel_label_reserved_box(page,panel)
-            width = page['width']*(panel['geometry'][2]-panel['geometry'][0])
-            height = page['height']*(panel['geometry'][3]-panel['geometry'][1])
-            left,right,bottom,top = panel['margins']
-            frame_width,frame_height = 1.-left-right,1.-bottom-top
-            font = body_text_pixels(page)
-            x_gap = .65*font/width
-            data_top = label[1]-(.35+.65)*font/height
-            data_fraction = (data_top-bottom)/frame_height
-            required = panel['y_range'][1]
-            for series in panel['series']:
-                mode = series.get('draw_mode')
-                for point in series['points']:
-                    if (point.get('state') != 'DRAW' or point.get('y') is None or
-                            point.get('display_x') is None):
-                        continue
-                    x1 = point.get('bin_low')
-                    x2 = point.get('bin_high')
-                    if x1 is None or x2 is None:
-                        half = .5 if mode == 'categories' else 0.
-                        x1 = point['display_x']-half
-                        x2 = point['display_x']+half
-                    fx1,fx2 = (_display_x_fraction(panel,max(x1,panel['x_range'][0])),
-                               _display_x_fraction(panel,min(x2,panel['x_range'][1])))
-                    if fx1 is None or fx2 is None:
-                        continue
-                    box_x1 = left+frame_width*min(fx1,fx2)-x_gap
-                    box_x2 = left+frame_width*max(fx1,fx2)+x_gap
-                    overlaps_data = box_x1 < label[2] and box_x2 > label[0]
-                    peak = point['y']+(point.get('error') or 0.)
-                    if overlaps_data:
-                        required = max(required,_required_upper_limit(
-                            panel['y_range'][0],peak,data_fraction,
-                            panel.get('log_y',False)))
-                    if point.get('error') is not None:
-                        continue
-                    # The visible uncertainty-status question mark is offset
-                    # above and to the right of the point. Reserve its complete
-                    # ink box independently from the central marker/line.
-                    center_fx = _display_x_fraction(panel,point['display_x'])
-                    if center_fx is None:
-                        continue
-                    glyph = max(13,font-2)
-                    glyph_x = left+frame_width*center_fx + (
-                        -.018 if center_fx>.90 else .011)
-                    glyph_x2 = glyph_x+.65*glyph/width
-                    if glyph_x >= label[2] or glyph_x2 <= label[0]:
-                        continue
-                    glyph_top = label[1]-.35*font/height
-                    glyph_fraction = ((glyph_top-bottom)/frame_height -
-                                      .015-1.15*glyph/(height*frame_height))
-                    required = max(required,_required_upper_limit(
-                        panel['y_range'][0],point['y'],glyph_fraction,
-                        panel.get('log_y',False)))
-            panel['y_range'][1] = required
+        if not page['role'].startswith('balancing.'):
+            continue
+        upper = [panel for panel in page['panels']
+                 if not panel.get('reuse') and panel['id'].startswith('upper.')]
+        if not upper:
+            continue
+        signatures = {(panel.get('log_y', False), tuple(panel['y_range']))
+                      for panel in upper}
+        if len(signatures) != 1:
+            raise ValueError('stacked comparison panels lost their common y scale: '
+                             + page['filename'])
 
 
 def drawing_plan(projection, manifest, config):
@@ -2870,12 +2830,8 @@ def drawing_plan(projection, manifest, config):
     reserve_spectrum_tune_key(pages)
     move_annotation_blocks_from_panel_labels(pages)
     reserve_annotation_headroom(pages)
-    # Panel-label clearance on logarithmic axes depends on both limits.  Fix
-    # the common peer-row lower limit before calculating the needed ceiling;
-    # synchronizing a lower limit afterwards would move already-cleared data.
     synchronize_paired_y_ranges(pages)
-    reserve_panel_label_data_headroom(pages)
-    synchronize_paired_y_ranges(pages)
+    verify_common_comparison_y_ranges(pages)
     return {'schema':DRAWING_SCHEMA,'request_id':manifest['request_id'],'pages':pages,'exclusions':sorted(exclusions)}
 
 def activity_lines_without_markers(pages):

@@ -387,6 +387,108 @@ int main() {
             self.assertEqual(run.returncode, 0, run.stderr)
 
     @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
+    def test_native_panel_label_moves_within_upper_left_without_changing_ranges(self):
+        source = r'''#define main render_program_main
+#include "pipeline/plot/render.cpp"
+#undef main
+int main() {
+  Page page{}; page.role="correlations.beauty";
+  page.filename="correlations.beauty.pdf";
+  page.width=1900; page.height=2850; page.textPixels=18;
+  Panel panel{}; panel.id="correlation.compare.5122.SS";
+  panel.geometry={.5,.32,1.,.42}; panel.margins={0.,.04,0.,0.};
+  panel.xLow=-1.5707963267948966; panel.xHigh=4.71238898038469;
+  panel.yLow=.06088085489355096; panel.yHigh=6.759116416652745;
+  panel.logY=true;
+  Series series{}; series.mode="histogram"; series.tune="CLOSEPACKING";
+  Point point{}; point.x=-1.413716694115407; point.y=4.545770498718472;
+  point.error=std::numeric_limits<double>::quiet_NaN(); point.state="DRAW";
+  point.binLow=-1.5707963267948966; point.binHigh=-1.2566370614359172;
+  series.points.push_back(point); panel.series.push_back(series);
+  page.panels.push_back(panel);
+  const double low=page.panels[0].yLow,high=page.panels[0].yHigh;
+  const auto base=BasePanelLabelText(page,0);
+  const auto moved=PanelLabelText(page,0);
+  if (!(moved.x>base.x) || moved.y!=base.y || moved.x>=.24) return 1;
+  if (page.panels[0].yLow!=low || page.panels[0].yHigh!=high) return 2;
+  const auto box=PanelLabelReservedBox(page,0);
+  for (const auto& data:PanelDataBoxes(page,page.panels[0],0))
+    if (BoxesOverlap(box,data)) return 3;
+  const std::vector<Page> none;
+  for (const auto& glyph:StateGlyphTexts(page,page.panels[0],none))
+    if (BoxesOverlap(box,TextInkBox(page,page.panels[0],glyph))) return 4;
+
+  // The protected multiplicity ceiling remains exact; a clipped leading
+  // curve moves the letter horizontally rather than expanding the frame.
+  Page multiplicity{}; multiplicity.role="multiplicity.composite";
+  multiplicity.filename="multiplicity.composite.pdf";
+  multiplicity.width=1900; multiplicity.height=2350; multiplicity.textPixels=18;
+  Panel ratio{}; ratio.id="lower.ratio"; ratio.geometry={0.,.06,1.,.24};
+  ratio.margins={.16,.04,.25,0.}; ratio.xLow=0.; ratio.xHigh=350.;
+  ratio.yLow=1./36.; ratio.yHigh=2.5; ratio.logY=true;
+  Series curve{}; curve.mode="histogram";
+  for (const auto& item:std::vector<std::pair<double,double>>{{0.,4.},{10.,1.}}) {
+    Point p{};p.x=item.first;p.y=item.second;p.error=0.;p.state="DRAW";
+    p.binLow=item.first;p.binHigh=item.first+10.;curve.points.push_back(p);
+  }
+  ratio.series.push_back(curve);multiplicity.panels.push_back(ratio);
+  (void)PanelLabelText(multiplicity,0);
+  if (multiplicity.panels[0].yHigh!=2.5) return 5;
+  return 0;
+}
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cpp, binary = root / 'panel_label_move.cpp', root / 'panel_label_move'
+            cpp.write_text(source)
+            flags = shlex.split(subprocess.check_output(
+                ['root-config', '--cflags', '--libs'], text=True))
+            built = subprocess.run(
+                ['c++', '-std=c++17', '-I', str(ROOT), str(cpp),
+                 '-o', str(binary)] + flags, capture_output=True, text=True)
+            self.assertEqual(built.returncode, 0, built.stderr)
+            run = subprocess.run([str(binary)], capture_output=True, text=True)
+            self.assertEqual(run.returncode, 0, run.stderr)
+
+    @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
+    def test_native_panel_label_ignores_nondrawable_log_domain_points(self):
+        source = r'''#define main render_program_main
+#include "pipeline/plot/render.cpp"
+#undef main
+int main() {
+  Page page{};page.width=1000;page.height=1000;page.textPixels=18;
+  page.filename="domain.pdf";
+  Panel panel{};panel.id="ratio";panel.geometry={0.,0.,1.,1.};
+  panel.margins={.15,.04,.12,.08};panel.xLow=0.;panel.xHigh=10.;
+  panel.yLow=.1;panel.yHigh=10.;panel.logY=true;
+  Series series{};series.mode="points";
+  for (const auto& item:std::vector<std::pair<double,double>>{{1.,0.},{2.,-1.},{20.,9.}}) {
+    Point point{};point.x=item.first;point.y=item.second;point.error=0.;
+    point.state="DRAW";series.points.push_back(point);
+  }
+  panel.series.push_back(series);page.panels.push_back(panel);
+  const auto base=BasePanelLabelText(page,0);
+  const auto label=PanelLabelText(page,0);
+  if (label.x!=base.x || label.y!=base.y) return 1;
+  if (!PanelDataBoxes(page,page.panels[0],0).empty()) return 2;
+  if (page.panels[0].yLow!=.1 || page.panels[0].yHigh!=10.) return 3;
+  return 0;
+}
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cpp, binary = root / 'panel_label_domain.cpp', root / 'panel_label_domain'
+            cpp.write_text(source)
+            flags = shlex.split(subprocess.check_output(
+                ['root-config', '--cflags', '--libs'], text=True))
+            built = subprocess.run(
+                ['c++', '-std=c++17', '-I', str(ROOT), str(cpp),
+                 '-o', str(binary)] + flags, capture_output=True, text=True)
+            self.assertEqual(built.returncode, 0, built.stderr)
+            run = subprocess.run([str(binary)], capture_output=True, text=True)
+            self.assertEqual(run.returncode, 0, run.stderr)
+
+    @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
     def test_native_band_gaps_and_unavailable_errors(self):
         # A known bin topology supplies the oracle independently of the
         # renderer's serialized drawing-record verifier.
@@ -761,65 +863,25 @@ int main(int argc, char** argv) {
         self.assertAlmostEqual(after[0]['y']-after[1]['y'],
                                before[0]['y']-before[1]['y'])
 
-    def test_panel_label_data_and_status_occupancy_adds_minimal_upper_headroom(self):
-        import copy
-        def make(error, x=.5):
-            panel={'id':'correlation.compare.5122.SS',
-                   'geometry':[.5,.4,1.,.6], 'margins':[0.,.04,0.,0.],
-                   'x_range':[.5,7.5], 'y_range':[.1,1.],
-                   'log_y':False,'log_x':False,'reuse':None,
-                   'annotations':[], 'series':[{'draw_mode':'categories','points':[
-                       {'state':'DRAW','display_x':x,'y':.95,'error':error,
-                        'bin_low':None,'bin_high':None}]}]}
-            return {'role':'correlations.beauty','filename':'correlations.beauty.pdf',
-                    'text_pixels':18,'width':1900,'height':2850,
-                    'panels':[panel]}
-        finite=make(0.)
-        original=copy.deepcopy(finite)
-        label=plot.panel_label_reserved_box(finite,finite['panels'][0])
-        panel=finite['panels'][0]
-        frame_height=1-panel['margins'][2]-panel['margins'][3]
-        old_y=panel['margins'][2]+frame_height*(.95-.1)/(1.-.1)
-        self.assertGreater(old_y,label[1])
-        plot.reserve_panel_label_data_headroom([finite])
-        self.assertEqual(panel['y_range'][0],.1)
-        self.assertGreater(panel['y_range'][1],1.)
-        self.assertEqual(panel['series'],original['panels'][0]['series'])
-        status=make(None)
-        plot.reserve_panel_label_data_headroom([status])
-        self.assertGreater(status['panels'][0]['y_range'][1],
-                           finite['panels'][0]['y_range'][1])
-        clear=make(0.,x=7.)
-        plot.reserve_panel_label_data_headroom([clear])
-        self.assertEqual(clear['panels'][0]['y_range'],[.1,1.])
-        handle=make(0.,x=2.)
-        plot.reserve_panel_label_data_headroom([handle])
-        self.assertGreater(handle['panels'][0]['y_range'][1],1.)
-        marker=make(0.,x=2.)
-        marker['panels'][0]['series'][0]['draw_mode']='curve'
-        plot.reserve_panel_label_data_headroom([marker])
-        self.assertEqual(marker['panels'][0]['y_range'],[.1,1.])
-
-    def test_panel_label_headroom_remains_common_across_peer_axes(self):
-        import copy
-        left={'id':'upper.421','geometry':[0.,.3,.5,.9],
-              'margins':[.18,0.,0.,.06], 'x_range':[.5,7.5],
-              'y_range':[.001,.3], 'log_y':True,'log_x':False,
-              'reuse':None,'annotations':[], 'series':[{'draw_mode':'categories',
-              'points':[{'state':'DRAW','display_x':.5,'y':.25,'error':.01,
-                         'bin_low':None,'bin_high':None}]}]}
-        right=copy.deepcopy(left);right['id']='upper.4122';right['geometry']=[.5,.3,1.,.9]
-        right['margins']=[0.,.04,0.,.06];right['y_range'][0]=.0005
-        right['series'][0]['points'][0]['y']=.1
-        page={'role':'balancing.integrated.charm',
-              'filename':'balancing.integrated.charm.pdf','text_pixels':18,
-              'width':1900,'height':1600,'panels':[left,right]}
-        plot.synchronize_paired_y_ranges([page])
-        plot.reserve_panel_label_data_headroom([page])
-        plot.synchronize_paired_y_ranges([page])
-        self.assertEqual(left['y_range'],right['y_range'])
-        self.assertEqual(left['y_range'][0],.0005)
-        self.assertGreater(left['y_range'][1],.3)
+    def test_final_layout_preserves_fixed_ratio_range_and_complete_stack_scale(self):
+        ratio={'id':'lower.ratio','log_y':True,
+               'y_range':[1./36.,2.5], 'reuse':None}
+        page={'role':'multiplicity.composite','filename':'multiplicity.composite.pdf',
+              'panels':[ratio]}
+        plot.verify_common_comparison_y_ranges([page])
+        self.assertEqual(ratio['y_range'],[1./36.,2.5])
+        panels=[]
+        for tune,row in zip(('MONASH','JUNCTIONS','CLOSEPACKING'),range(3)):
+            for pdg,column in ((521,0),(5122,1)):
+                panels.append({'id':f'upper.{tune}.{pdg}',
+                    'geometry':[column/2.,.3-row*.1,(column+1)/2.,.4-row*.1],
+                    'y_range':[-.01,.14], 'log_y':False, 'reuse':None})
+        activity={'role':'balancing.activity.beauty',
+                  'filename':'balancing.activity.beauty.pdf','panels':panels}
+        plot.verify_common_comparison_y_ranges([activity])
+        panels[-1]['y_range'][1]=.15
+        with self.assertRaisesRegex(ValueError,'common y scale'):
+            plot.verify_common_comparison_y_ranges([activity])
 
     def test_spectrum_key_preserves_an_already_clear_frame(self):
         import copy
