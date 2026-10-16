@@ -1880,7 +1880,8 @@ double YTitleX(const Page& page, const Panel& panel) {
   const double base=page.role.find("correlations.")==0 ?
       (longCorrelationScale ? .005 : .025) :
       (page.role.find("balancing.")==0 && panel.id.rfind("upper.",0)==0 ? .05 : .075);
-  const double minimum = (longCorrelationScale ? -.01 : .012) *
+  // Keep the rotated fraction inside the page even on long decimal scales.
+  const double minimum = (longCorrelationScale ? .006 : .012) *
       SingleSpeciesWidthScale(page);
   return std::max(minimum,
                   base*SingleSpeciesWidthScale(page)-.3*BodyTextPixels(page)/width);

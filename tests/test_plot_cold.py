@@ -172,14 +172,16 @@ int main() {
   panel.yHigh=0x1.2f04baa0f5cfap-10;
   panel.yTitle="#frac{1}{#it{N}_{trig}} #frac{d#it{N}_{pair}}{d#Delta#varphi} (rad^{-1})";
   const double longScaleTitleX=YTitleX(page,panel);
-  if (longScaleTitleX>.002) return 22;
+  // The old negative anchor clipped dN at the page edge. Keep the long-scale
+  // title at its positive page-safe anchor, then verify actual PDF ink.
+  if (!Close(longScaleTitleX,.006)) return 22;
   // The ordinary correlation scale keeps the established title position.
   panel.id="correlation.main.521.OS";
   panel.yLow=-0x1.f1f6c278aa7cep-9;
   panel.yHigh=0x1.b1bf900ebfe3cp-3;
   const double shortScaleTitleX=YTitleX(page,panel);
   if (shortScaleTitleX<.01 ||
-      shortScaleTitleX-longScaleTitleX<.01) return 23;
+      shortScaleTitleX<=longScaleTitleX) return 23;
   page.role="balancing.activity.charm";
   page.filename="supplemental.balancing.activity.charm.trigger-421.pdf";
   page.panels.resize(4); panel.id="upper.MONASH.421";
