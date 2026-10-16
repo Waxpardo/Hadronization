@@ -449,6 +449,30 @@ int main() {
   ratio.series.push_back(curve);multiplicity.panels.push_back(ratio);
   (void)PanelLabelText(multiplicity,0);
   if (multiplicity.panels[0].yHigh!=2.5) return 5;
+  // A shifted short spectrum caption must not acquire a fictitious .56-pad
+  // width.  Its tune key fits in the native top-right space at unchanged size.
+  Page spectrum{}; spectrum.filename="G9_-5122_phi.pdf";
+  spectrum.role="spectra.signed_heavy"; spectrum.width=1100;
+  spectrum.height=1200; spectrum.textPixels=18;
+  Panel absolute{}; absolute.id="g9.absolute";
+  absolute.geometry={0.,.34,1.,.90};
+  absolute.margins={.16,.04,0.,1.8*20./672.};
+  absolute.annotations={
+      {.22404740259740258,.8919642857142857,20.,
+       "PYTHIA 8.317; pp, #sqrt{#it{s}} = 13.6 TeV"},
+      {.22404740259740258,.8532738095238095,20.,
+       "Hard c#bar{c}, b#bar{b}; #hat{p}_{T} #geq 2 GeV/c; |#eta| #leq 4"},
+      {.22404740259740258,.8145833333333333,20.,
+       "Normalized probability per bin"}};
+  for (const std::string tune : {"MONASH","JUNCTIONS","CLOSEPACKING"}) {
+    Series sample{}; sample.tune=tune; absolute.series.push_back(sample);
+  }
+  spectrum.panels.push_back(absolute);
+  const auto key=InsideTuneLegendBox(spectrum,spectrum.panels[0],3);
+  if (!Close(key[2],1.-.04-.65*20./1100.) ||
+      !Close(key[3],1.-1.8*20./672.-.65*20./672.)) return 6;
+  for (const auto& box:PanelAnnotationBoxes(spectrum,spectrum.panels[0]))
+    if (BoxesOverlap(key,box)) return 7;
   return 0;
 }
 '''

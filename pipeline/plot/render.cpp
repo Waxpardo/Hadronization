@@ -2097,9 +2097,11 @@ std::array<double, 4> InsideTuneLegendBox(const Page& page, const Panel& panel,
   };
   std::vector<std::array<double, 4>> occupied;
   occupied.push_back(PanelLabelReservedBox(page, PanelIndex(page, panel)));
-  for (const auto& item : panel.annotations)
-    occupied.push_back({item.x,item.y-.3*item.size/pixelHeight,
-                       std::min(right,item.x+.56),item.y+item.size/pixelHeight});
+  // Use the same text envelopes as final content verification.  A fixed
+  // .56-pad width falsely blocks the tune key when a short caption moves
+  // beside the panel letter.
+  const auto annotations = PanelAnnotationBoxes(page, panel);
+  occupied.insert(occupied.end(), annotations.begin(), annotations.end());
   for (const auto& series : panel.series) for (const auto& point : series.points) {
     if (!Drawable(panel, point)) continue;
     double x1 = point.x, x2 = point.x;
