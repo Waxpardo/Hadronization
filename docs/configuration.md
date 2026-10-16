@@ -174,8 +174,14 @@ Their first lines align with the corresponding legend entries.
 The three selected activity intervals have a separate line-style key inside a right-hand panel.
 It sits beside the tune key when space permits, or in the next row.
 
+Panel letters sit inside the upper-left corner of each main panel.
+Their order runs from left to right, then from top to bottom.
+The letters share a physical left offset that clears the inward tick marks.
+Legends and scientific text leave space around each letter.
+Insets do not receive separate panel letters.
+
 Signed heavy-hadron spectra gain display headroom when their scientific text or tune key needs it.
-This adjustment preserves all numerical values and the ratio-panel range.
+Headroom changes preserve all numerical values.
 Their titles sit just above the absolute-panel frame.
 Three-row balancing pages have one shared yield title.
 One associate-species title sits beneath the center of both columns.

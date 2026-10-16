@@ -35,7 +35,7 @@ Numerical portable verification does not require the original production filesys
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=d4bde5c8cfb5f8ddb4913909c856f7bbac68f1633c9ff5ff54ebe6bf3a932b9e
+PACKAGE_SHA=798c499faf4961c2fdabd3ae9855a84525522e264188190376a5b40cddd1e885
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification
@@ -62,7 +62,7 @@ To verify an all-tune companion, use the matching numerical ROOT and the compani
   --numerics-root data/results/numerical/numerics.root \
   --expected-root-sha256 e68ef7f1e9daa6bc7a7d2072ed4e0bc0cb6b69427646bcfb32c773158ee144b9 \
   --expected-value-sha256 56309f1e787d03a6a43e6488015358fdfc747072866eeb474ddecbfce1a66bf9 \
-  --expected-manifest-sha256 2390e4a697bfc0c6db84253bd3448a4161fc006fb17fc92eac11ea8e1d4a19b9 \
+  --expected-manifest-sha256 fa9bf4340a020d7ac06211d5a1e947db0541e0a0e96d535736c0a92180d44346 \
   --plot-config config/plot-all-tune.json \
   --work-dir data/work/all-tune-verification --output data/figures-all-tune
 ```
