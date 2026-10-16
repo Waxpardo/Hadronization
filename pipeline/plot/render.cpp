@@ -662,8 +662,6 @@ struct PanelLabelAssignment {
   std::string text;
 };
 
-constexpr double kPanelLabelLeftInsetPixels = 64.;
-
 long long PanelGeometryKey(double value) {
   return std::llround(value * 1000000000.);
 }
@@ -722,6 +720,22 @@ int PanelLabelPixels(const Page& page, const Panel& panel) {
   return std::min(BodyTextPixels(page) + 1, shortPanelPixels);
 }
 
+double PanelLabelLeftInsetPixels(const Page& page) {
+  // TGaxis paints a vertical-axis tick with NDC length equal to the axis
+  // length times its tick size.  Reserve that actual envelope plus a small
+  // typographic gap, rather than a detached fixed 64-pixel gutter.  Use the
+  // largest requirement on the page so labels in stacked panels align.
+  double inset = 0.;
+  for (const auto& panel : page.panels) {
+    if (!panel.reusePanel.empty()) continue;
+    const double width = page.width * (panel.geometry[2] - panel.geometry[0]);
+    const double tick = YAxisTickLength(page) *
+        (1. - panel.margins[2] - panel.margins[3]) * width;
+    inset = std::max(inset, tick + .15 * PanelLabelPixels(page, panel) + 1.);
+  }
+  return inset;
+}
+
 ExpectedText BasePanelLabelText(const Page& page, std::size_t panelIndex) {
   const Panel& panel = page.panels.at(panelIndex);
   Need(panel.reusePanel.empty(), "subordinate inset acquired a panel label");
@@ -735,10 +749,9 @@ ExpectedText BasePanelLabelText(const Page& page, std::size_t panelIndex) {
   const double width = page.width * (panel.geometry[2] - panel.geometry[0]);
   const double height = page.height * (panel.geometry[3] - panel.geometry[1]);
   const double verticalGap = .25 * pixels / height;
-  // One physical inset is used by every main panel.  It is independent of
-  // panel width, data density, role and tune, so paired columns retain the
-  // same visible corner anchor rather than wandering across the frame.
-  const double x = panel.margins[0] + kPanelLabelLeftInsetPixels / width;
+  // The page-wide physical inset preserves alignment across columns and
+  // rows without depending on data density or allowing the label to roam.
+  const double x = panel.margins[0] + PanelLabelLeftInsetPixels(page) / width;
   const double xTickLength =
       page.role == "multiplicity.composite" ? .025 : .03;
   // The publication convention is one frame-relative upper-left anchor for
@@ -760,7 +773,9 @@ ExpectedText BasePanelLabelText(const Page& page, std::size_t panelIndex) {
       y - conservativeHeight;
   const double top = verticalAlign == 1 ? y + conservativeHeight :
       verticalAlign == 2 ? y + conservativeHeight / 2. : y;
-  Need(left > panel.margins[0] + YAxisTickLength(page) &&
+  const double yTickExtent = YAxisTickLength(page) *
+      (1. - panel.margins[2] - panel.margins[3]);
+  Need(left > panel.margins[0] + yTickExtent &&
        right < 1 - panel.margins[1] &&
        bottom > panel.margins[2] && top < 1 - panel.margins[3] &&
        top < 1 - panel.margins[3] - xTickLength,

@@ -242,7 +242,17 @@ int main() {
     const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
     const double height=page.height*(panel.geometry[3]-panel.geometry[1]);
     const double xTickLength=page.role=="multiplicity.composite" ? .025 : .03;
-    const double expectedX=panel.margins[0]+kPanelLabelLeftInsetPixels/width;
+    double expectedInset=0.;
+    for (const auto& peer:page.panels) {
+      if (!peer.reusePanel.empty()) continue;
+      const double peerWidth=page.width*(peer.geometry[2]-peer.geometry[0]);
+      const double tickSize=page.filename.find(".trigger-")!=std::string::npos
+          ? .015*std::min(1.,1900./page.width) : .03;
+      expectedInset=std::max(expectedInset,tickSize*
+          (1.-peer.margins[2]-peer.margins[3])*peerWidth+
+          .15*PanelLabelPixels(page,peer)+1.);
+    }
+    const double expectedX=panel.margins[0]+expectedInset/width;
     const double expectedY=1-panel.margins[3]-xTickLength-.25*pixels/height;
     return label.align==13 && Close(label.x,expectedX) && Close(label.y,expectedY) &&
         label.x<.30 && label.y>.75;
@@ -398,7 +408,9 @@ int main() {
   Panel panel{}; panel.id="correlation.compare.5122.SS";
   panel.geometry={.5,.32,1.,.42}; panel.margins={0.,.04,0.,0.};
   panel.xLow=-1.5707963267948966; panel.xHigh=4.71238898038469;
-  panel.yLow=.06088085489355096; panel.yHigh=6.759116416652745;
+  // Display preparation reserves the tighter left-corner label.  The native
+  // renderer must preserve that prepared range and clear the same real point.
+  panel.yLow=.06088085489355096; panel.yHigh=12.456076181822445;
   panel.logY=true;
   Series series{}; series.mode="histogram"; series.tune="CLOSEPACKING";
   Point point{}; point.x=-1.413716694115407; point.y=4.545770498718472;
@@ -412,7 +424,7 @@ int main() {
   const double width=page.width*(panel.geometry[2]-panel.geometry[0]);
   if (label.x!=base.x || label.y!=base.y || label.size!=24 ||
       !Close((label.x-panel.margins[0])*width,
-             kPanelLabelLeftInsetPixels)) return 1;
+             PanelLabelLeftInsetPixels(page))) return 1;
   if (page.panels[0].yLow!=low || page.panels[0].yHigh!=high) return 2;
   const auto box=PanelLabelReservedBox(page,0);
   for (const auto& data:PanelDataBoxes(page,page.panels[0],0))
@@ -886,7 +898,7 @@ int main(int argc, char** argv) {
         with self.assertRaisesRegex(ValueError,'common y scale'):
             plot.verify_common_comparison_y_ranges([activity])
 
-    def test_corner_anchor_headroom_preserves_protected_real_ranges(self):
+    def test_corner_anchor_headroom_preserves_cap_and_bounds_real_clearance(self):
         beauty_panel={'id':'correlation.compare.5122.SS','geometry':[.5,.32,1.,.42],
             'margins':[0.,.04,0.,0.], 'x_range':[-math.pi/2,3*math.pi/2],
             'y_range':[.06088085489355096,6.759116416652745],
@@ -899,7 +911,10 @@ int main(int argc, char** argv) {
                 'width':1900,'height':2850,'text_pixels':18,
                 'panels':[beauty_panel]}
         plot.reserve_panel_label_data_headroom([beauty])
-        self.assertEqual(beauty_panel['y_range'][1],6.759116416652745)
+        # A closer label now intersects this first bin.  Permit only the
+        # modest required headroom, not the former 486.98 range regression.
+        self.assertGreater(beauty_panel['y_range'][1],6.759116416652745)
+        self.assertLess(beauty_panel['y_range'][1],13.)
 
         multiplicity_panel={'id':'lower.ratio','geometry':[0.,.06,1.,.24],
             'margins':[.16,.04,.25,0.], 'x_range':[0.,350.],
@@ -922,7 +937,7 @@ int main(int argc, char** argv) {
             'x_range':[-math.pi/2,3*math.pi/2], 'y_range':[.58,1.32],
             'log_x':False,'log_y':False,'reuse':None,'annotations':[],
             'series':[{'draw_mode':'histogram','points':[{
-                'state':'DRAW','display_x':-.95,'bin_low':-1.1,'bin_high':-.8,
+                'state':'DRAW','display_x':-1.3,'bin_low':-1.4,'bin_high':-1.2,
                 'y':1.30,'error':.02}]}]}
         charm={'role':'correlations.charm','filename':'correlations.charm.pdf',
                'width':1900,'height':2600,'text_pixels':18,

@@ -2061,14 +2061,21 @@ def reserve_annotation_headroom(pages):
                 panel['y_range'][1]=required
 
 
-PANEL_LABEL_LEFT_INSET_PIXELS = 64.
-
-
 def panel_label_pixels(page, panel):
     height = page['height'] * (panel['geometry'][3] - panel['geometry'][1])
     # Match std::lround for the positive physical pixel height used by ROOT.
     return min(body_text_pixels(page) + 1,
                max(24, math.floor(.085 * height + .5)))
+
+
+def panel_label_left_inset_pixels(page):
+    """Clear the longest native y tick and align all page letters."""
+    tick_size = (.015 * min(1., 1900. / page['width'])
+                 if '.trigger-' in page['filename'] else .03)
+    return max(tick_size * (1. - panel['margins'][2] - panel['margins'][3]) *
+               page['width'] * (panel['geometry'][2] - panel['geometry'][0]) +
+               .15 * panel_label_pixels(page, panel) + 1.
+               for panel in page['panels'] if not panel.get('reuse'))
 
 
 def panel_label_reserved_box(page, panel):
@@ -2078,7 +2085,7 @@ def panel_label_reserved_box(page, panel):
     height = page['height'] * (panel['geometry'][3] - panel['geometry'][1])
     left, unused_right, unused_bottom, top = panel['margins']
     x_tick = .025 if page['role'] == 'multiplicity.composite' else .03
-    x = left + PANEL_LABEL_LEFT_INSET_PIXELS / width
+    x = left + panel_label_left_inset_pixels(page) / width
     y = 1. - top - x_tick - .25 * font / height
     gap_x, gap_y = .12 * font / width, .12 * font / height
     return [x-gap_x, y-font/height-gap_y,
