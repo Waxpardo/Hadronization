@@ -8,7 +8,7 @@ The `HF_RUN3_V1` result contains 300 million successful events from 3,000 accept
 
 The [collaboration package](results/manifest.json) contains numerical ROOT, 69 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 60,660 points with separate value and uncertainty statuses. The tables retain explicit missing values.
 
-The result uses inclusive pair pT and final triggers from all origins. Its identity recipe keeps 202 signed open-heavy associates separate. The fine query retains all 219 catalog identities, including hidden-heavy states. The [all-tune companion](figures-all-tune) contains 69 PDFs with tune comparisons in the correlation pages.
+The result uses inclusive pair pT and final triggers from all origins. Its identity recipe keeps 202 signed open-heavy associates separate. The fine query retains all 219 catalog identities, including hidden-heavy states.
 
 The paired overview shows seven charm and eight beauty ground-state meson, Lambda and Sigma identities per trigger. Separate single-trigger figures show 28 charm and 43 beauty ground, star and prime identities. The numerical archive keeps all 202 signed open-heavy identities.
 
@@ -55,17 +55,20 @@ cp config/plot.json data/work/custom-plot.json
   --work-dir data/work/custom-render --output data/work/custom-figures
 ```
 
-To verify an all-tune companion, use the matching numerical ROOT and the companion manifest hash. The inclusive example is:
+To render correlation comparisons across tunes, use `config/plot-all-tune.json`. This configuration changes only the correlation presentation. It produces a complete figure set in a new local directory. The numerical ROOT and its statistical results remain unchanged.
+
+This command needs ROOT and the renderer dependencies described in [installation](../docs/installation.md). Keep the output directory absent before the first run.
 
 ```sh
-./hadronization plot verify-render-cold \
+./hadronization plot render-cold \
   --numerics-root data/results/numerical/numerics.root \
   --expected-root-sha256 e68ef7f1e9daa6bc7a7d2072ed4e0bc0cb6b69427646bcfb32c773158ee144b9 \
   --expected-value-sha256 56309f1e787d03a6a43e6488015358fdfc747072866eeb474ddecbfce1a66bf9 \
-  --expected-manifest-sha256 fa9bf4340a020d7ac06211d5a1e947db0541e0a0e96d535736c0a92180d44346 \
   --plot-config config/plot-all-tune.json \
-  --work-dir data/work/all-tune-verification --output data/figures-all-tune
+  --work-dir data/work/all-tune-render --output data/work/figures-all-tune
 ```
+
+The command verifies the PDFs, drawing records and reopened ROOT canvases before it publishes the local output. Other observable pages repeat the default presentation.
 
 ## Download merged ROOT
 

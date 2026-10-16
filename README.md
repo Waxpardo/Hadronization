@@ -81,7 +81,7 @@ The renderer produces multiplicity, charm and beauty correlation, integrated bal
 
 Baryon-to-meson activity values use linear vertical axes. Tune-comparison panels for balancing yields and baryon-to-meson ratios use logarithmic vertical axes. Undefined or nonpositive ratios remain in ROOT and status records but appear as disclosed gaps on logarithmic axes.
 
-The default correlation presentation shows MONASH identified pairs and heavy-flavour sign sums. The [all-tune companion](data/figures-all-tune) shows correlation comparisons across tunes. Use `config/plot-all-tune.json` to reproduce that presentation. The [workflow](docs/workflow.md#figures-and-tables) describes presentation choices and display limits.
+The default correlation presentation shows MONASH identified pairs and heavy-flavour sign sums. Use `config/plot-all-tune.json` to render correlation comparisons across tunes from the same numerical ROOT. The [data guide](data/README.md#verify-or-change-figures) gives the command. The [workflow](docs/workflow.md#figures-and-tables) describes presentation choices and display limits.
 
 ## Documentation
 
