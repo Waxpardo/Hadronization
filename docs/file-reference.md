@@ -97,7 +97,7 @@ This inventory identifies every tracked file. The release includes generated sci
 | [pipeline/query/publication.py](../pipeline/query/publication.py) | Query, bundle and package writers | No-replace publication, Linux reservation fallback and readback checks. |
 | [pipeline/query/query.cpp](../pipeline/query/query.cpp) | Query wrapper | Builds support trees and sparse families and verifies complete pair populations. |
 | [pipeline/query/row_schema.hpp](../pipeline/query/row_schema.hpp) | Native query executable | Exact retained scalar branch types and schema macros. |
-| [config/associate-family-runtime.json](../config/associate-family-runtime.json) | Historical query and reducer | Version 2.3 public 74-member runtime family contract, retained for its recorded products. |
+| [config/associate-family-runtime.json](../config/associate-family-runtime.json) | Version 2.3 query and reducer | Version 2.3 public 74-member runtime family contract, retained for its recorded products. |
 | [pipeline/reduce/family.py](../pipeline/reduce/family.py) | Normalized model and reducer | Fail-closed map validation and additive primitive grouping. |
 | [pipeline/reduce/family_products.py](../pipeline/reduce/family_products.py) | Numerical serializer | Consolidated signed-species ROOT files, derived family ROOT and common manifest. |
 | [pipeline/query/run.py](../pipeline/query/run.py) | Query CLI and collection modules | Build packs, dictionary census, query construction and exact verification. |

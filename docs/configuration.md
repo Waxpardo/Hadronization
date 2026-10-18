@@ -68,7 +68,7 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 
 | Field group | Meaning and consumer |
 | --- | --- |
-| `schema`, `version` | Downstream request contract. Version 2.2.0 is the historical route, 2.3.0 binds saved-state family support, 2.4.0 has the older broad fine content, and 2.5.0 retains the complete catalog with all-origin trigger selection. |
+| `schema`, `version` | Downstream request contract. Version 2.2.0 specifies the selected-state input route, 2.3.0 binds saved-state family support, 2.4.0 specifies broad fine content, and 2.5.0 retains the complete catalog with all-origin trigger selection. |
 | `associate_family_map` | Pinned downstream recipe. The published version 2.5 interpretation has 202 singleton destinations. The 82-to-42 recipe and compatible subsets remain supported. |
 | `retained_heavy_catalog` | Versions 2.4.0 and 2.5.0 signed-PDG, constituent-content and charge catalog; independent of the family member list. |
 | `trigger_selection` | Version 2.5.0 default and supported offline trigger-origin selectors. The shipped paper default is `all_origins`; `historical_hard_root` is an explicit control. |
@@ -85,11 +85,11 @@ Class changes affect boundaries, deletions, covariance, labels and plots. The re
 | `estimator_policy` | Pooled center, ten-block jackknife, denominator resolution and status rules |
 | `compact_domain_registries`, `compact_storage` | Bound compatibility descriptors. They do not select another production science engine. |
 
-`config/analysis-family.json` is the bounded version 2.3.0 construction model. It expands the associate support for the map and keeps inclusive pT and eta selections. It binds the public runtime contract `config/associate-family-runtime.json` by SHA-256. That compact contract carries the accepted full-map SHA and an exact semantic-groups digest without private review paths or status metadata. The original `config/analysis.json` remains the unchanged version 2.2.0 construction model for accepted historical products.
+`config/analysis-family.json` is the bounded version 2.3.0 construction model. It expands the associate support for the map and keeps inclusive pT and eta selections. It binds the public runtime contract `config/associate-family-runtime.json` by SHA-256. That contract carries the full-map SHA and the exact semantic-groups digest. `config/analysis.json` specifies the version 2.2.0 construction model.
 
-For new construction, use [analysis-all-origin.json](../config/analysis-all-origin.json) with [query-all-origin.json](../config/query-all-origin.json). The construction binds the complete [signed heavy catalog](../config/heavy-catalog.json). The catalog controls fine storage and generic pairs independently of each downstream recipe. Use [analysis-individual-species.json](../config/analysis-individual-species.json) for the published reduction. `trigger_selection.default` is `all_origins`; a separately pinned [historical control](../config/analysis-hard-root-control.json) selects the retained selected-hard predicate during offline reduction. The trigger identities, activity, inclusive-pT and numerical-estimator definitions remain fixed.
+For new construction, use [analysis-all-origin.json](../config/analysis-all-origin.json) with [query-all-origin.json](../config/query-all-origin.json). The construction binds the complete [signed heavy catalog](../config/heavy-catalog.json). The catalog controls fine storage and generic pairs independently of each downstream recipe. Use [analysis-individual-species.json](../config/analysis-individual-species.json) for the published reduction. `trigger_selection.default` is `all_origins`; a separately pinned [selected-hard control](../config/analysis-hard-root-control.json) selects the retained selected-hard predicate during offline reduction. The trigger identities, activity, inclusive-pT and numerical-estimator definitions remain fixed.
 
-A new catalog or query-axis contract requires rebuilding the query. Version 2.4 construction remains a readable historical contract with its own source and trigger-selection identity.
+A new catalog or query-axis contract requires rebuilding the query. Version 2.4 construction has a separate contract with its own source and trigger-selection identity.
 
 To select a compatible subset of the approved 82-member paper domain, copy `analysis-all-origin.json` and change only `associate_family_map`. Keep `pair_query_registry` unchanged. Set the map binding to `{"schema":"hadronization_saved_state_grouping_recipe_v2","path":"/absolute/path/to/recipe.json","sha256":"<SHA-256 of recipe bytes>"}` and pass the separately hashed analysis copy to `reduce run`. Reduction reuses fine THnSparse and shared trigger/activity content. It derives new grouped ROOT, numerical results and plots.
 
@@ -190,7 +190,7 @@ The supplemental activity pages select the saved 0-1%, 40-50% and 80-90% interva
 
 `p1_inset_geometry` is the literal configuration key for the multiplicity percentile inset. The renderer transforms its normalized rectangle to preserve the intended physical aspect. It is not a scientific axis or a percentile definition.
 
-`monash_pair_sign` shows identified OS/SS pairs above and the inclusive heavy-flavour sign difference below. `monash_balance` shows the MONASH OS, SS and net components. `all_tune_ratio` shows tune comparisons. The selected numerical recipe remains authoritative in each case.
+`monash_pair_sign` shows identified OS and SS densities above their difference for the same associate species. `monash_balance` shows the MONASH OS, SS and net components. `all_tune_ratio` shows tune comparisons. The selected numerical recipe remains authoritative in each case.
 
 `plot-dplus.json` changes the charm trigger preset to 411. `plot-all-tune.json` changes only `correlation_view`. Neither file changes uncertainty calculation or acceptance.
 
@@ -743,13 +743,12 @@ The recipe changes numerical interpretation after query construction.
 It preserves the inclusive pair cuts, trigger identities, activity definition and original statistical blocks.
 Each species keeps its own OS and SS primitives.
 The estimator recomputes its pooled yield and joint delete-one covariance.
-The summed correlation channel uses the complete eligible domain of this request.
 Identified correlation channels keep their signed particle definitions.
 
 `layout.balancing_species_views` controls the figure subsets only.
 Its `grouping_recipe_sha256` must occur in the verified numerical provenance.
 This check prevents the renderer from labelling grouped yields as individual-state yields.
-Omit this display recipe when rendering an older grouped numerical product.
+Omit this display recipe when rendering a grouped numerical product.
 
 Its `overview_abs_pdgs` list selects ground-state mesons, Lambda and Sigma for the paired overview.
 Its `expanded_abs_pdgs` list selects ground states and their star or prime partners.

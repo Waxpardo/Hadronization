@@ -2654,7 +2654,9 @@ def drawing_plan(projection, manifest, config):
                 if family=='correlations':
                     component=ident['component']
                     line_style={'OS':1,'SS':2,'OS_MINUS_SS':7}[component]
-                    legend_label=((label(int(ident['trigger_pdg']))+
+                    legend_label=('OS - SS' if pair_sign_view and
+                                  component == 'OS_MINUS_SS' else
+                                  ((label(int(ident['trigger_pdg']))+
                                    ' - '+label(-int(ident['trigger_pdg'])
                                    if component=='OS' else
                                    int(ident['trigger_pdg']))
@@ -2663,7 +2665,7 @@ def drawing_plan(projection, manifest, config):
                                      'SS':'HF same sign (SS)',
                                      'OS_MINUS_SS':'OS - SS'}[component]))
                                   if pair_sign_view else
-                                  component if teaching_view else tune)
+                                  component if teaching_view else tune))
                 if role=='balancing.baryon_meson.activity':
                     line_style=1+species.index(ident['associate_pdg'])
                     legend_label=label(ident['associate_pdg'])+' / '+label(ident['reference_pdg'])

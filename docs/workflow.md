@@ -134,7 +134,7 @@ Prepare an inert bundle:
   --output "$RUN_ROOT/condor-inert"
 ```
 
-The bundle contains source, dictionary and construction-analysis pins, expected sources, worker scripts, DAG files, build instructions and site templates. Use `config/analysis-all-origin.json` for new construction. Use a compatible downstream analysis for reduction. Historical versions retain their distinct checksum identities.
+The bundle contains source, dictionary and construction-analysis pins, expected sources, worker scripts, DAG files, build instructions and site templates. Use `config/analysis-all-origin.json` for new construction. Use a compatible downstream analysis for reduction. Each version has its own checksum identity.
 
 Preparation does not submit jobs. Build its Linux binary pack once on the specified runtime. Preserve the pack receipt and tar SHA-256.
 
@@ -252,7 +252,7 @@ For the published version 2.5 result, pass `config/analysis-individual-species.j
 
 Separate `paper-fine.root`, `families.root` and `shared.root` contain downstream additive primitives. The estimator recomputes pooled values and K=10 covariance.
 
-A separately hashed compatible analysis can select the supported [82-to-42 family recipe](configuration.md#fixed-analysis-fields). This reduction does not change fine THnSparse content. The package includes the exact recipe and checksum for portable verification. Version 2.2 remains compatible with its matching historical input contract.
+A separately hashed compatible analysis can select the supported [82-to-42 family recipe](configuration.md#fixed-analysis-fields). This reduction does not change fine THnSparse content. The package includes the exact recipe and checksum for portable verification. Version 2.2 remains compatible with its matching input contract.
 
 ### Compare inclusive and rectangular selections
 
@@ -312,12 +312,12 @@ Use the three-class activity views for compact comparisons. They show 0–1%, 40
 
 The multiplicity inset identifies MONASH class boundaries. Other tunes have their own boundaries. The lower-panel limit of 2.5 hides ratios above that display range. The saved numerical values remain unchanged.
 
-Correlation views distinguish identified pairs from sums over eligible associates. Opposite and same sign refer to heavy-flavour content. Horizontal segments on species axes mark categories; they are not horizontal measurement uncertainties. Equal-width percentile slots can represent unequal percentile intervals.
+Opposite and same sign refer to heavy-flavour content. Horizontal segments on species axes mark categories; they are not horizontal measurement uncertainties. Equal-width percentile slots can represent unequal percentile intervals.
 
 | Product | Presentation |
 | --- | --- |
 | Multiplicity distribution | Logarithmic y, linear x, lower tune ratios and a lower-left logarithmic percentile inset |
-| Charm and beauty correlations | Default MONASH identified OS/SS and inclusive heavy-flavour sign difference |
+| Charm and beauty correlations | MONASH identified OS and SS densities, with their difference below |
 | Integrated balancing | Species categories and lower tune/reference ratios |
 | Activity-dependent balancing | Every requested class, tune rows and one shared comparison row |
 | Baryon-to-meson ratios | Class categories, absolute ratios and lower tune/reference ratios |
@@ -327,7 +327,9 @@ Correlation views distinguish identified pairs from sums over eligible associate
 
 The multiplicity display ends at the last occupied MONASH bin edge. Other tunes can have farther-tail bins in `numerics.root`. The inset shows positive MONASH support and its class boundaries. Numerical distributions retain the complete activity domain.
 
-The default correlation view shows MONASH identified pairs with statistical bands. Each lower panel subtracts the OS and SS densities shown directly above it, with the same associate species and trigger denominator. Solid and dotted lines distinguish opposite and same heavy-flavour signs. The alternative `config/plot-all-tune.json` uses tune colors and comparison panels. Neither presentation changes the numerical uncertainties.
+The default correlation view shows MONASH identified pairs with statistical bands. Upper panels use logarithmic density axes; lower panels use linear density axes. Each paired row shares its scale. Each lower panel subtracts the OS and SS densities shown directly above it, with the same associate species and trigger denominator.
+
+Solid and dotted lines distinguish opposite and same heavy-flavour signs. The alternative `config/plot-all-tune.json` uses tune colors and comparison panels. Neither presentation changes the numerical uncertainties.
 
 When tunes share a panel, MONASH uses black circles, JUNCTIONS blue squares and CLOSEPACKING orange triangles. Pages with separate tune rows and several activity classes omit markers. Their colors identify tunes, and line patterns identify classes. The inclusive class uses a solid line.
 

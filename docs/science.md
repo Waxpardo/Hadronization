@@ -24,7 +24,7 @@ Each source has a tune, logical job ID, attempt ID and original block. Block mem
 
 ## Particle identities and origins
 
-The selected-state registry in [study.json](../config/study.json) contains signed PDG identities, heavy valence, electric charge and structural eligibility. The generated [C++ contract](../pipeline/generate/study_contract.hpp) binds those exact bytes. Historical products use [analysis.json](../config/analysis.json); the current complete fine-species construction uses [analysis-all-origin.json](../config/analysis-all-origin.json) and its independently pinned [heavy catalog](../config/heavy-catalog.json).
+The selected-state registry in [study.json](../config/study.json) contains signed PDG identities, heavy valence, electric charge and structural eligibility. The generated [C++ contract](../pipeline/generate/study_contract.hpp) binds those exact bytes. Version 2.2 products use [analysis.json](../config/analysis.json); the current complete fine-species construction uses [analysis-all-origin.json](../config/analysis-all-origin.json) and its independently pinned [heavy catalog](../config/heavy-catalog.json).
 
 The default displayed triggers are D0 (421), Lambda_c+ (4122), B+ (521) and Lambda_b0 (5122). D+ (411) can replace D0 through `--charm-trigger 411`. The matching presentation configuration is `config/plot-dplus.json`.
 
@@ -32,7 +32,7 @@ A paper trigger is a final hadron of one of the registered signed trigger identi
 
 The complete fine-species query retains every catalogued final heavy hadron independently in its kinematic sparse, including excited, hidden-heavy, multiply-heavy and mixed charm–beauty states. It retains pairs between registered triggers and every final heavy associate within |eta| <= 4, excluding self-pairs. It does not extend the trigger set. Exact support retains nonfinal event-record history separately; those copies do not add to final-particle yields. Associate origins include selected-hard associates, showers, multiple parton interactions, other resolved origins and unresolved origins when the heavy-flavour sign applies.
 
-The selected-hard associate category describes the associate's own origin; it does not assert a shared root with the trigger. The version 2.5 diagnostic receipt labels pair-origin counts by the selected trigger population. Its closure rows retain the separate historical analyzed-closure population and do not measure closure for every all-origin trigger. Matched and rejected root indices remain event-local exact-support fields.
+The selected-hard associate category describes the associate's own origin; it does not assert a shared root with the trigger. The version 2.5 diagnostic receipt labels pair-origin counts by the selected trigger population. Its closure rows retain the separate analyzed-closure population and do not measure closure for every all-origin trigger. Matched and rejected root indices remain event-local exact-support fields.
 
 The published pair observables select 202 signed open-heavy states with direct-hadronization status codes 81–89. Each state remains a separate identity. The broader 219-state catalog also retains hidden-heavy states, which have no OS or SS heavy-flavour sign. These are PYTHIA species identities; inclusion does not assert experimental observation. A catalog label does not establish that a species occurred. The fine inventory reports observed, final, direct-selection and pair counts by signed identity, tune and original block.
 
@@ -56,7 +56,7 @@ The azimuthal coordinate is trigger phi minus associate phi. The implementation 
 
 ## Charged primaries (study definition)
 
-The public table and plot label is **Charged primaries**. In this study that label means final charged particles without charm or beauty constituents, finite kinematics, pT > 0.15 GeV/c and |eta| <= 4. The corresponding unchanged event field is `a15_eta4`; `a15_eta1` uses |eta| <= 1. This is the study's generator-level definition and is not a claim of equivalence to an experimental primary-particle definition.
+The public table and plot label is **Charged primaries**. In this study that label means final charged particles without charm or beauty constituents, finite kinematics, pT > 0.15 GeV/c and |eta| <= 4. The corresponding event field is `a15_eta4`; `a15_eta1` uses |eta| <= 1. This is the study's generator-level definition and is not a claim of equivalence to an experimental primary-particle definition.
 
 This threshold belongs to the activity definition. It does not apply to inclusive heavy-particle pairs or signed heavy-hadron spectra. The display label does not change retained values or their technical identities.
 
@@ -68,7 +68,7 @@ The published identity recipe maps each of 202 signed open-heavy states to itsel
 
 A separate supported recipe groups 82 signed saved states into 42 signed family destinations. It sums block-level OS and SS primitives before normalization, then recomputes all estimates and covariance. It does not describe the published result.
 
-Grouped membership follows configured PYTHIA 8.317 decay endpoints. Unit endpoint probability in that configuration is not a measured physical branching fraction. States outside a recipe remain in the fine collection. Version 2.2 remains compatible with its matching historical products and input contract.
+Grouped membership follows configured PYTHIA 8.317 decay endpoints. Unit endpoint probability in that configuration is not a measured physical branching fraction. States outside a recipe remain in the fine collection. Version 2.2 remains compatible with its matching versioned products and input contract.
 
 The activity axis stores integers from 0 through 4095. Each integer occupies one regular bin. Values outside the supported domain fail the scientific contract rather than silently extending the axis.
 
@@ -110,9 +110,7 @@ The identified correlation difference is
 
 $$C_{net,b}=\frac{N_{OS,b}-N_{SS,b}}{T_t\,\delta_b}=C_{OS,b}-C_{SS,b}.$$
 
-Each lower correlation panel subtracts the two identified-pair densities directly above it. The trigger, associate species, selections, angular bins and trigger denominator stay the same. The default columns use D0, Lambda_c, B+ and Lambda_b triggers with their conjugate associates. The same-sign curve uses the corresponding unconjugated associate. The lower curve does not sum other associate species. It is not a ratio of OS minus SS to OS plus SS.
-
-The numerical archive also retains separate sums over all selected registered associates in each heavy-flavour sector. The default figures do not display these sums.
+Each lower correlation panel subtracts the two identified-pair densities directly above it. The trigger, associate species, selections, angular bins and trigger denominator stay the same. The default columns use D0, Lambda_c, B+ and Lambda_b triggers with their conjugate associates. The same-sign curve uses the corresponding unconjugated associate.
 
 Each density uses its own stored bin width. The estimator applies this division to the pooled result and every deletion. Joint covariance therefore includes the width factors on both axes. A sum of densities times their bin widths gives the integrated yield for the same associate domain.
 
@@ -170,4 +168,4 @@ This block jackknife estimates finite-sample variability under the original bloc
 
 The numerical archive records the resolved model, source identities, class boundaries and estimator policy. The renderer consumes that archive. Presentation configuration controls layout and display selection, not formulas or statistical errors.
 
-The fixed raw compatibility contract contains selection and statistical labels that do not configure downstream reduction. Use `config/analysis-all-origin.json` for current query construction. Use `config/analysis-individual-species.json` for the published numerical interpretation. Historical analysis versions retain their own checksum identities. A change to checksum-bound raw metadata does not change the scientific meaning of existing data.
+The fixed raw compatibility contract contains selection and statistical labels that do not configure downstream reduction. Use `config/analysis-all-origin.json` for current query construction. Use `config/analysis-individual-species.json` for the published numerical interpretation. Each analysis version has its own checksum identity. A change to checksum-bound raw metadata does not change the scientific meaning of existing data.
