@@ -1401,8 +1401,8 @@ bool FullYAxisTickValues(const Page& page, const Panel& panel) {
   return (page.role == "spectra.signed_heavy" && panel.id == "g9.absolute") ||
         (page.role == "correlations.beauty" &&
          panel.id.rfind("correlation.teaching.", 0) == 0 &&
-         panel.id.size() >= 10 &&
-         panel.id.compare(panel.id.size() - 10, 10, ".inclusive") == 0);
+         panel.id.size() >= 12 &&
+         panel.id.compare(panel.id.size() - 12, 12, ".subtraction") == 0);
 }
 struct YMajorTick {
   double value;

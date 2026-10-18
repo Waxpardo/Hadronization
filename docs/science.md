@@ -106,11 +106,13 @@ For azimuthal bin b, let delta_b denote its width in radians. The identified pai
 
 $$C_{OS,b}=\frac{N_{OS,b}}{T_t\,\delta_b},\qquad C_{SS,b}=\frac{N_{SS,b}}{T_t\,\delta_b}.$$
 
-The sign-summed correlation difference is
+The identified correlation difference is
 
-$$C_{net,b}=\frac{N^{all}_{OS,b}-N^{all}_{SS,b}}{T_t\,\delta_b}.$$
+$$C_{net,b}=\frac{N_{OS,b}-N_{SS,b}}{T_t\,\delta_b}=C_{OS,b}-C_{SS,b}.$$
 
-Here, “all” means all selected registered associates in the selected heavy-flavour sector. It does not mean all generated particles. The default lower correlation panel uses this sign-summed difference. It is not a ratio of OS minus SS to OS plus SS.
+Each lower correlation panel subtracts the two identified-pair densities directly above it. The trigger, associate species, selections, angular bins and trigger denominator stay the same. The default columns use D0, Lambda_c, B+ and Lambda_b triggers with their conjugate associates. The same-sign curve uses the corresponding unconjugated associate. The lower curve does not sum other associate species. It is not a ratio of OS minus SS to OS plus SS.
+
+The numerical archive also retains separate sums over all selected registered associates in each heavy-flavour sector. The default figures do not display these sums.
 
 Each density uses its own stored bin width. The estimator applies this division to the pooled result and every deletion. Joint covariance therefore includes the width factors on both axes. A sum of densities times their bin widths gives the integrated yield for the same associate domain.
 

@@ -669,6 +669,15 @@ def selected_extreme_class_ids(classes):
     return [regular[interval] for interval in requested if interval in regular]
 
 
+def identified_correlation_rows(rows):
+    """Select one conjugate pair for both signs and their native subtraction."""
+    return [row for row in rows
+            if row['quantity'] in ('dphi_per_trigger',
+                                   'dphi_density_per_trigger')
+            and row['component'] in ('OS', 'SS', 'OS_MINUS_SS')
+            and row['associate_pdg'] == str(-int(row['trigger_pdg']))]
+
+
 def correlation_y_title(rows, component='OS'):
     """Label stored per-bin yields or densities without changing values."""
     quantities = {row['quantity'] for row in rows
@@ -757,8 +766,8 @@ def join_ratio_pads(pages):
                   lower_id.endswith('.lower')):
                 upper_id=lower_id[:-len('.lower')]+'.upper'
             elif (lower_id.startswith('correlation.teaching.') and
-                  lower_id.endswith('.inclusive')):
-                upper_id=lower_id[:-len('.inclusive')]+'.identified'
+                  lower_id.endswith('.subtraction')):
+                upper_id=lower_id[:-len('.subtraction')]+'.identified'
             elif lower_id.startswith('lower.'):
                 upper_id='upper.'+lower_id[len('lower.'):]
             elif lower_id.startswith('correlation.compare.'):
@@ -1540,9 +1549,8 @@ def add_publication_captions(pages, context):
                         panel['y_title']='R_{tune/MONASH}'
             if any(p['id'].startswith('correlation.teaching.') for p in panels):
                 for panel in panels:
-                    if panel['id'].endswith('.inclusive'):
+                    if panel['id'].endswith('.subtraction'):
                         for z in panel['series']: z['legend_label']=''
-                        panel['y_title']=panel['y_title'].replace('N}_{OS}', 'N}^{#Sigma}_{OS}').replace('N}_{SS}', 'N}^{#Sigma}_{SS}')
         # Column identifiers remain independent of particle labels and tune keys.
         for index,panel in enumerate(sorted(row,key=lambda p:p['geometry'][0])):
             if panel['title'] and page['role']!='spectra.signed_heavy':
@@ -2403,13 +2411,7 @@ def drawing_plan(projection, manifest, config):
         if family == 'correlations':
             unfiltered = trigger_shown
             if pair_sign_view:
-                trigger_shown = [r for r in trigger_shown
-                    if r['quantity'] in ('dphi_per_trigger',
-                                         'dphi_density_per_trigger') and
-                    ((r['component'] in ('OS', 'SS') and
-                      r['associate_pdg'] == str(-int(r['trigger_pdg']))) or
-                     (r['component'] == 'OS_MINUS_SS' and
-                      r['associate_pdg'] == ''))]
+                trigger_shown = identified_correlation_rows(trigger_shown)
             else:
                 reference_pairs = {(str(p['trigger_pdg']),
                     str(p['associate_pdg'])) for p in presentation['pairs']
@@ -2433,7 +2435,7 @@ def drawing_plan(projection, manifest, config):
         grouped={}
         for r in shown:
             key = ('correlation.teaching.{}.{}'.format(
-                r['trigger_pdg'], 'inclusive' if r['associate_pdg'] == ''
+                r['trigger_pdg'], 'subtraction' if r['component'] == 'OS_MINUS_SS'
                 else 'identified') if pair_sign_view else
                 'correlation.balance.{}.{}'.format(
                 r['trigger_pdg'], 'lower' if r['component'] ==
@@ -2534,7 +2536,7 @@ def drawing_plan(projection, manifest, config):
                         title=label(trigger)+' trigger (MONASH)',x_title='',
                         y_title=correlation_y_title(shown),
                         log_y=True,legend=True)
-                    add('correlation.teaching.'+trigger+'.inclusive',
+                    add('correlation.teaching.'+trigger+'.subtraction',
                         [left,.05,right,.48],title='',
                         x_title='#Delta#varphi (rad)',
                         y_title=correlation_y_title(shown, 'OS_MINUS_SS'),
@@ -2773,7 +2775,7 @@ def drawing_plan(projection, manifest, config):
                     legend=[.62,.91,.96,.98]
                 if pair_sign_view and name.endswith('.identified'):
                     legend=[.20,.62,.66,.75]
-                if pair_sign_view and name.endswith('.inclusive'):
+                if pair_sign_view and name.endswith('.subtraction'):
                     legend=[.20,.63,.70,.76]
             if name=='upper.distribution':
                 margins=[.16,.045,.0,.12]
@@ -3738,7 +3740,7 @@ def review_packet_coverage(plan, context, config):
             if config['layout']['correlation_view'] == 'monash_pair_sign':
                 for suffix, associate, components in (
                         ('identified', str(-int(trigger)), {'OS', 'SS'}),
-                        ('inclusive', '', {'OS_MINUS_SS'})):
+                        ('subtraction', str(-int(trigger)), {'OS_MINUS_SS'})):
                     item = require_points(owner,
                         'correlation.teaching.'+trigger+'.'+suffix,
                         [context.reference_tune],

@@ -458,7 +458,7 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
         request=projection.make_native_request(source,analysis_path,
             projection.file_digest(analysis_path),['MONASH'],species,selection)
         value=request.to_dict()
-        self.assertEqual(len(request.expected_point_keys),9953)
+        self.assertEqual(len(request.expected_point_keys),10153)
         correlation={
             (key['curve']['trigger_pdg'],key['curve']['associate_pdg'],
              key['curve']['component'])
@@ -469,7 +469,7 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
             for sign in ('OS','SS'):
                 self.assertIn((trigger,None,sign),correlation)
         for trigger in (4122,5122):
-            for sign in ('OS','SS'):
+            for sign in ('OS','SS','OS_MINUS_SS'):
                 self.assertIn((trigger,-trigger,sign),correlation)
         dplus_selection=dict(selection,trigger_pdgs=[411,4122,521,5122],
                              baryon_meson_trigger_pdgs=[411,521])
@@ -496,7 +496,7 @@ class AuthenticatedNativeLayoutParity(unittest.TestCase):
         full=projection.make_native_request(source,analysis_path,
             projection.file_digest(analysis_path),source.index['tune_ordinals'],
             full_species,selection)
-        self.assertEqual(len(full.expected_point_keys),45899)
+        self.assertEqual(len(full.expected_point_keys),46099)
         curves={projection.canonical(key['curve']) for key in full.expected_point_keys}
         def present(curve):return projection.canonical(curve) in curves
         for key in full.expected_point_keys:

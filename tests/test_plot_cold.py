@@ -1397,6 +1397,44 @@ int main(int argc, char** argv) {
         self.assertIn('lacks retained finite-MC error',
                       plot.review_uncertainty_presentation(page))
 
+    def test_identified_subtraction_pad_keeps_the_shared_frame(self):
+        upper = dict(id='correlation.teaching.4122.identified',
+            geometry=[.5,.48,1.,.97], margins=[.17,.04,.13,.10],
+            x_range=[-1.,1.])
+        lower = dict(id='correlation.teaching.4122.subtraction',
+            geometry=[.5,.05,1.,.48], margins=[.17,.04,.29,.10],
+            x_range=[-1.,1.])
+        plot.join_ratio_pads([dict(role='correlations.charm',panels=[upper,lower])])
+        self.assertEqual(upper['margins'][2], 0.)
+        self.assertEqual(lower['margins'][3], 0.)
+        self.assertEqual(upper['geometry'][1], lower['geometry'][3])
+
+    def test_identified_subtraction_never_selects_all_associate_sum(self):
+        rows = []
+        for trigger in (411, 421, 4122, 521, 5122):
+            for associate in (str(-trigger), '', '-431'):
+                for component in ('OS', 'SS', 'OS_MINUS_SS'):
+                    rows.append(dict(trigger_pdg=str(trigger),
+                        associate_pdg=associate, component=component,
+                        quantity='dphi_density_per_trigger'))
+        selected = plot.identified_correlation_rows(rows)
+        self.assertEqual(len(selected), 15)
+        for trigger in (411, 421, 4122, 521, 5122):
+            members = [r for r in selected if r['trigger_pdg']==str(trigger)]
+            self.assertEqual({r['component'] for r in members},
+                             {'OS', 'SS', 'OS_MINUS_SS'})
+            self.assertEqual({r['associate_pdg'] for r in members},
+                             {str(-trigger)})
+        self.assertTrue(all(any(row is original for original in rows)
+                            for row in selected))
+        # Missing native subtraction stays missing; never substitute a sum.
+        missing = [row for row in rows if not (
+            row['trigger_pdg']=='4122' and row['associate_pdg']=='-4122'
+            and row['component']=='OS_MINUS_SS')]
+        self.assertFalse(any(row['trigger_pdg']=='4122' and
+                             row['component']=='OS_MINUS_SS'
+                             for row in plot.identified_correlation_rows(missing)))
+
     def test_dplus_and_all_tune_are_explicit_presentation_alternates(self):
         config, _ = plot.checked_plot_config(ROOT / "config/plot.json")
         dplus, _ = plot.checked_plot_config(ROOT / "config/plot-dplus.json")

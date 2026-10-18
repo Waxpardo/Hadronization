@@ -1116,7 +1116,9 @@ def make_request(receipt, presentation, config, config_sha, roles, selection,
                         add(tune, "dphi_density_per_trigger", trigger, None,
                             component=component, class_id=0, axis="dphi")
                     if abs(trigger) in (4122, 5122):
-                        for component in ("OS", "SS"):
+                        # Keep the identified subtraction in the numerical
+                        # authority with its joint OS/SS deletion covariance.
+                        for component in ("OS", "SS", "OS_MINUS_SS"):
                             add(tune, "dphi_density_per_trigger", trigger, -trigger,
                                 component=component, class_id=0, axis="dphi")
             for pair in pairs:
