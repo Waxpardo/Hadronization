@@ -66,22 +66,22 @@ def phase_a_profile_kind(profile):
             profile["associate_pt"]["operator"] == ">=" and
             profile["relative_pt"] is None):
         return "ordered_minima"
-    raise ValueError("Phase-A profile must be inclusive or a configured independent-minima rectangle")
+    raise ValueError("Pair-selection profile must be inclusive or a configured independent-minima rectangle")
 
 def validate_phase_a_profiles(profiles, pt_edges=None):
     validate_profiles(profiles)
     kinds = [phase_a_profile_kind(profile) for profile in profiles]
     if kinds[0] != "inclusive" or any(kind != "ordered_minima" for kind in kinds[1:]):
-        raise ValueError("Phase-A profiles require inclusive first followed by supported selections")
+        raise ValueError("Pair-selection profiles require inclusive first followed by supported selections")
     if not isinstance(pt_edges, (list, tuple)) or len(pt_edges) < 2 or any(
             type(edge) not in (int, float) or not math.isfinite(edge) for edge in pt_edges) or any(
             a >= b for a, b in zip(pt_edges, pt_edges[1:])):
-        raise ValueError("Phase-A release requires a finite ordered pT axis")
+        raise ValueError("Query model requires a finite ordered pT axis")
     allowed = set(pt_edges[:-1])
     for profile in profiles[1:]:
         if any(profile[role]["value"] not in allowed for role in
                ("trigger_pt", "associate_pt")):
-            raise ValueError("Phase-A rectangle minimum is not an exact supported regular-bin lower edge")
+            raise ValueError("Pair-selection rectangle minimum is not an exact supported regular-bin lower edge")
     return profiles
 
 
@@ -262,7 +262,7 @@ def checked_analysis(path):
         historical_sha = "2d386155e65a35951dbd9545b9f157b2f643b20ab81282cc0a38d2fa3fb5e4f9"
         if support.sha_file(path) != historical_sha:
             raise ValueError("untrusted historical analysis identity")
-        raise ValueError("historical analysis request is not a released Phase-A model")
+        raise ValueError("analysis request does not match the supported model schema")
     version = payload.get("version")
     if version not in {"2.0.0", "2.1.0", "2.2.0", "2.3.0", "2.4.0", "2.5.0"}:
         raise ValueError("analysis request version differs")
@@ -298,13 +298,13 @@ def checked_analysis(path):
         paper = payload["paper_defaults"]
         support.exact_keys(paper, {"charm_meson_pdg", "selectable_charm_meson_pdgs",
                                    "historical_charm_meson_pdg", "p8_charm_tuple"},
-                           "Phase-A paper charm recipe")
+                           "Paper charm recipe")
         selected_charm = paper["charm_meson_pdg"]
         if (type(selected_charm) is not int or selected_charm not in (421, 411) or
                 paper["selectable_charm_meson_pdgs"] != [421, 411] or
                 paper["historical_charm_meson_pdg"] != 411 or
                 paper["p8_charm_tuple"] != [selected_charm, -4122, -selected_charm]):
-            raise ValueError("Phase-A paper charm recipe differs")
+            raise ValueError("Paper charm recipe differs")
     if payload["lossless_input"] != {
             "schema": "hadronization_lossless_analysis_v1",
             "schema_digest": "3a83a7550c27c3f59989b84eea0204bce45bd9c401744f321758e56f3bf422c9",
@@ -661,7 +661,7 @@ def select_charm_meson_recipe(analysis, meson_pdg, include_alternate_g9=False):
     """Derive one coherent D0/D+ analysis request before hashing or projection."""
     if (analysis.get("version") not in {"2.1.0", "2.2.0", "2.3.0", "2.4.0", "2.5.0"} or type(meson_pdg) is not int or
             meson_pdg not in (421, 411) or type(include_alternate_g9) is not bool):
-        raise ValueError("unsupported Phase-A charm-meson recipe")
+        raise ValueError("unsupported charm-meson recipe")
     selected = copy.deepcopy(analysis)
     selected["paper_defaults"]["charm_meson_pdg"] = meson_pdg
     selected["paper_defaults"]["p8_charm_tuple"] = [meson_pdg, -4122, -meson_pdg]

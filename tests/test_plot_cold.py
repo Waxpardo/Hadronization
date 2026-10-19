@@ -1366,13 +1366,13 @@ int main(int argc, char** argv) {
 
     def test_p1_nested_inset_preserves_reference_physical_aspect(self):
         relative=[.15,.05,.62,.48]
-        original=plot.prelean_inset_geometry(relative,[0.,.31,1.,1.],1800,1650)
+        original=plot.nested_inset_geometry(relative,[0.,.31,1.,1.],1800,1650)
         for actual,expected in zip(original,[.15,.31+.05*.69,.62,.31+.48*.69]):
             self.assertAlmostEqual(actual,expected)
         original_aspect=(original[2]-original[0])*1800/((original[3]-original[1])*1650)
         for width,height,parent in ((1050,1360,[0.,.26,1.,.98]),
                                      (1050,1360,[0.,0.,1.,.98])):
-            mapped=plot.prelean_inset_geometry(relative,parent,width,height)
+            mapped=plot.nested_inset_geometry(relative,parent,width,height)
             self.assertAlmostEqual((mapped[2]-mapped[0])*width/
                                    ((mapped[3]-mapped[1])*height),original_aspect)
             self.assertAlmostEqual((mapped[1]-parent[1])/(parent[3]-parent[1]),.05)

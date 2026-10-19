@@ -392,7 +392,7 @@ SCHEMAS["ProjectionResultV4"]["request_echo"] = "ProjectionRequestAny"
 
 
 def g9_science_legacy(request):
-    """The admitted Phase-A G9 model, expressed independently of plot labels."""
+    """The signed heavy-hadron spectrum model, independent of plot labels."""
     role = next((r for r in request["scope"]["roles"]
                  if r["role_id"] == "spectra.signed_heavy"), None)
     if role is None:
@@ -619,7 +619,7 @@ class ProjectionRequest:
         if scope["mode"] == "PAPER" and not cold:
             pt_axis = next((axis for axis in p["axes"] if axis["id"] == "query_pt"), None)
             if pt_axis is None:
-                raise ValueError("Phase-A request lacks its pT axis")
+                raise ValueError("Scientific request lacks its pT axis")
             validate_typed_phase_a_profiles(p["profiles"],
                                             list(map(number, pt_axis["edges"])))
         axes = {a["id"]: a for a in p["axes"]}
@@ -740,13 +740,13 @@ def typed_source_profile(profile):
     def cut(role):
         value = profile[role]
         if value["high"] is not None or value["high_operator"] is not None:
-            raise ValueError("Phase-A profile must be an ordered-minima rectangle")
+            raise ValueError("Pair-selection profile must be an ordered-minima rectangle")
         if value["low"] is None:
             if value != range_predicate():
-                raise ValueError("Phase-A unbounded pT predicate differs")
+                raise ValueError("Unbounded pT predicate differs")
             return None
         if value["low_operator"] not in ("GE", "GT") or value["units"] != "GeV":
-            raise ValueError("Phase-A pT predicate differs")
+            raise ValueError("Pair-selection pT predicate differs")
         return dict(operator={"GE": ">=", "GT": ">"}[value["low_operator"]], value=number(value["low"]))
     if profile["relative_pt"] != "NONE":
         raise ValueError("eventwise pair pT predicate is not current science")
@@ -754,7 +754,7 @@ def typed_source_profile(profile):
                   relative_pt=None)
     eta = number(profile["trigger_eta"]["high"])
     if eta is None or eta <= 0 or profile != normalized_profile(source, eta, profile["structural_acceptance_id"]):
-        raise ValueError("typed Phase-A profile is not an inclusive or ordered-minima rectangle")
+        raise ValueError("typed pair-selection profile is not an inclusive or ordered-minima rectangle")
     return source
 
 
@@ -774,7 +774,7 @@ def validate_typed_phase_a_profiles(profiles, pt_edges):
         for role in ("trigger_pt", "associate_pt"):
             threshold = source_profiles[0][role]
             if threshold is not None and threshold["value"] not in pt_edges[:-1]:
-                raise ValueError("Phase-A rectangle minimum is not an aligned pT edge")
+                raise ValueError("Pair-selection rectangle minimum is not an aligned pT edge")
     else:
         _query_model().validate_phase_a_profiles(source_profiles, pt_edges=pt_edges)
 

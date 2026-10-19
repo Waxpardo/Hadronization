@@ -156,7 +156,7 @@ class ExactProfileContract(unittest.TestCase):
         mutants.append(mutant)
         for mutant in mutants:
             with self.subTest(mutant=mutant):
-                with self.assertRaisesRegex(ValueError, "complete canonical Phase-A layout"):
+                with self.assertRaisesRegex(ValueError, "complete canonical query layout"):
                     runner.require_phase_a_layout(mutant)
 
     def test_public_backend_route_preserves_endpoint_and_combined_profile_semantics(self):
@@ -225,7 +225,7 @@ class ExactProfileContract(unittest.TestCase):
         self.assertEqual(model.profile_tokens(rectangle),['>=1.0','>=0.15','NONE'])
         for role in ('trigger_pt','associate_pt'):
             mutant=copy.deepcopy(rectangle);mutant[role]['operator']='>'
-            with self.assertRaisesRegex(ValueError,'released|Phase-A profile'):
+            with self.assertRaisesRegex(ValueError,'released|Pair-selection profile'):
                 model.validate_phase_a_profiles([profiles[0],mutant], analysis['axes']['pt']['edges'])
         for trigger, associate in ((.15, .5), (-1., .15), (math.inf, .15), (math.nan, .15)):
             mutant = [copy.deepcopy(profiles[0]),
@@ -885,7 +885,7 @@ int main(int argc,char** argv){
                     "--dictionary", self.dictionary, "--layout", layout_path,
                     "--prepared-pack", self.prepared_pack, "--output", output)
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn("complete canonical Phase-A layout", result.stderr)
+                self.assertIn("complete canonical query layout", result.stderr)
                 self.assertFalse(output.exists())
 
     def test_missing_retained_diagnostic_families_refuse(self):

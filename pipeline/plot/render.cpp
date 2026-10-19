@@ -1183,7 +1183,7 @@ std::vector<ExpectedText> InsetClassTexts(const Page& page,
     const double center = std::sqrt(low * high);
     const double x = panel.margins[0] + frameWidth *
         std::log(center / panel.xLow) / std::log(panel.xHigh / panel.xLow);
-    // Pre-lean places centered vertical labels 20% up the logarithmic frame,
+    // Place centered vertical labels 20% up the logarithmic frame,
     // at each interval's geometric center. Intervals remain numerics-owned.
     result.push_back(TextExpectation(guide.label, x,
         panel.margins[2] + .20*(1-panel.margins[2]-panel.margins[3]),

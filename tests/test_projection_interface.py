@@ -338,7 +338,7 @@ class ProjectionInterfaceContract(unittest.TestCase):
                         dict(id='historical_strict_1p0_0p15',trigger_pt=dict(operator='>',value=1.),associate_pt=dict(operator='>',value=.15),relative_pt=None)):
             analysis=copy.deepcopy(self.analysis);analysis['profiles']=[profile]
             self.selection['profile_id']=profile['id']
-            with self.assertRaisesRegex(ValueError,'Phase-A profile|relative/diagonal pT selection|released pT thresholds|eventwise relative pT selection'):
+            with self.assertRaisesRegex(ValueError,'Pair-selection profile|relative/diagonal pT selection|released pT thresholds|eventwise relative pT selection'):
                 self.request(analysis=analysis)
 
     def test_missing_emitter_role_cannot_shrink_request(self):

@@ -639,7 +639,7 @@ def checked_tune_ratio_layout(tunes, reference_tune, rows, role,
 
 def categorical_display_x(base, role, class_id, tune, tunes, class_order,
                           dodge, ratio=False):
-    """All tune/class markers coincide with their S-owned category center."""
+    """All tune/class markers coincide with their numerical category center."""
     if role.startswith('balancing.activity.') and class_id not in class_order:
         raise ValueError('activity class display identity differs')
     return base
@@ -1586,11 +1586,11 @@ def p1_uncertainty_display(synthetic):
     # the estimator or drawing thousands of overlapping vertical bars.
     return 'DENSE_BAND'
 
-def prelean_inset_geometry(relative, parent, width, height):
-    """Map the original nested TPad to this canvas without stretching it.
+def nested_inset_geometry(relative, parent, width, height):
+    """Map a nested TPad to this canvas without stretching it.
 
-    Pre-lean: 1800x1650 canvas, main pad height .69; inset .18,.07,.50,.38.
-    Preserve its physical aspect when the surrounding current page is taller.
+    Reference geometry: 1800x1650 canvas, main pad height .69.
+    Preserve its physical aspect when the surrounding page is taller.
     """
     x0,y0,x1,y1=relative
     left,bottom,right,top=parent
@@ -2389,7 +2389,7 @@ def drawing_plan(projection, manifest, config):
             science_charm = {r['trigger_pdg'] for r in rows
                              if r['trigger_pdg'] in ('411', '421')}
             if science_charm and configured_charm not in science_charm:
-                raise ValueError('configured charm meson lacks S-owned '
+                raise ValueError('configured charm meson lacks numerical '
                                  'science tuples: '+configured_charm)
         allowed_triggers = {str(value) for value in (view_triggers or (
             paper['baryon_meson_trigger_pdgs']
@@ -2494,7 +2494,7 @@ def drawing_plan(projection, manifest, config):
             selection=context.activity_selection
             information=activity_proxy_caption(
                 selection, threshold, activity['eta_window'])
-            # Retain the pre-lean portrait-like hierarchy: a dominant log-y
+            # Use a portrait layout: a dominant log-y
             # spectrum, a compact ratio pad and an embedded percentile inset.
             # The numerical archive retains all 4096 bins.  The paper page is
             # later restricted to the reference-tune occupied range so rare
@@ -2505,9 +2505,9 @@ def drawing_plan(projection, manifest, config):
                 y_title='Normalized event counts',log_y=True,legend=True)
             if has_tune_ratios:
                 add('lower.ratio',[0.,0.,1.,.26],title='',x_title='Multiplicity #it{N}_{ch}',y_title='TUNE/'+reference_tune,ratio=True)
-            # Original nested-pad placement, retaining its physical aspect.
+            # Nested-pad placement, retaining its physical aspect.
             add('inset.monash_boundaries',
-                prelean_inset_geometry(config['layout']['p1_inset_geometry'],
+                nested_inset_geometry(config['layout']['p1_inset_geometry'],
                     [0.,.26 if has_tune_ratios else 0.,1.,.98],width,height),
                 title='',x_title='Multiplicity #it{N}_{ch}',
                 y_title='Normalized event counts',inset=True)
@@ -3447,10 +3447,10 @@ def promote_render_pages(pages, output):
 
 
 def cold_numerics(args):
-    """Read S's frozen ROOT once, with trusted physical and logical digests."""
+    """Read the numerical ROOT once, with trusted physical and logical digests."""
     path = ROOT / "pipeline/reduce/archive.py"
     if not path.is_file():
-        raise ValueError("S cold reader has not been integrated into this tree")
+        raise ValueError("numerical ROOT reader is missing from this source tree")
     # Launching run.py by filename puts pipeline/plot, rather than the repository
     # root, on sys.path. Import the verified sibling as a package so its v4
     # reader can resolve its own relative imports on a cold CLI invocation.
@@ -3460,9 +3460,9 @@ def cold_numerics(args):
     finally:
         sys.path.pop(0)
     if Path(archive.__file__).resolve() != path.resolve():
-        raise ValueError("S cold reader resolves outside this source tree")
+        raise ValueError("numerical ROOT reader resolves outside this source tree")
     if not hasattr(archive, "read"):
-        raise ValueError("S cold reader lacks read(source, work, hashes)")
+        raise ValueError("numerical ROOT reader lacks read(source, work, hashes)")
     args.work_dir.mkdir(parents=True, exist_ok=True)
     return archive.read(args.numerics_root, args.work_dir,
                         args.expected_root_sha256,
@@ -3643,12 +3643,12 @@ def record_verifier_attestation(args, manifest, build, output):
 
 
 def review_packet_coverage(plan, context, config):
-    """Require visible S-owned test points in every approved paper panel."""
+    """Require visible numerical test points in every approved paper panel."""
     failures = []
     if context.campaign_state != 'PARTIAL_SAMPLE':
         failures.append('review packet must be a test-only partial sample')
     if not getattr(context, 'synthetic', False):
-        failures.append('review packet lacks S synthetic provenance')
+        failures.append('review packet lacks numerical synthetic provenance')
     expected_tunes = [item['id'] for item in
                       config['style_identities']['tunes']]
     if (len(context.tunes) != len(expected_tunes) or

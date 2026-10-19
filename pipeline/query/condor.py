@@ -42,8 +42,8 @@ ADMISSION_SCHEMA = "hadronization_query_site_admission_v1"
 # alma9-core:latest alias is not a production runtime identity.
 PINNED_EL9_IMAGE = ("/cvmfs/unpacked.cern.ch/.flat/80/"
                     "80fe7cc69c91332a0733c5aea408913df2f1944ab2e9a895ee51de8324cb232a")
-# Narrow legacy acceptance adapter for the current, independently reviewed
-# Phase-A source/data snapshot. These are identity pins, not scheduler sizes.
+# Bind query preparation to the accepted source/data snapshot.
+# These are identity pins, not scheduler sizes.
 CURRENT_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d"
 CURRENT_SOURCE_MANIFEST_SHA256 = "5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f8f247585912e2df247"
 TRANSIENT_ERRNOS = r.TRANSIENT_ERRNOS
@@ -293,7 +293,7 @@ def prepare(acquisition, acquisition_sha, dictionary, dictionary_sha, output,
     source_manifest_path = Path(source_manifest_path or ROOT / "data/raw_manifest.jsonl")
     if not test_only and (r.sha_file(campaign_path) != CURRENT_CAMPAIGN_SHA256 or
                           r.sha_file(source_manifest_path) != CURRENT_SOURCE_MANIFEST_SHA256):
-        raise ValueError("current accepted Phase-A campaign/source anchor differs")
+        raise ValueError("accepted campaign/source anchor differs")
     domain = _normalized_domain(campaign_path, source_manifest_path, manifest)
     r.lower_sha(dictionary_sha, "accepted campaign dictionary pin")
     if r.sha_file(dictionary) != dictionary_sha:

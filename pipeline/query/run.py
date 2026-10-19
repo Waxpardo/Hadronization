@@ -98,7 +98,7 @@ def execution_attestation(metadata):
 
 
 def require_phase_a_layout(layout, analysis=None):
-    """Require the complete repository-owned Phase-A object/column contract."""
+    """Require the complete repository-owned query object/column contract."""
     name = ("query-all-origin.json" if analysis is not None and
             analysis["version"] == "2.5.0" else
             "query-all-heavy.json" if analysis is not None and
@@ -107,7 +107,7 @@ def require_phase_a_layout(layout, analysis=None):
     if analysis is None and layout != canonical:
         canonical = reduce.json_file(ROOT / "config/query-all-heavy.json")
     if layout != canonical:
-        raise ValueError("query layout differs from the complete canonical Phase-A layout")
+        raise ValueError("query layout differs from the complete canonical query layout")
     return canonical
 
 

@@ -673,8 +673,8 @@ void RequireLengths(const RawEvent& r) {
   for(const char* name:{"hard_bottom_indices","hard_ids","hard_status","hard_bottom_ids","hard_bottom_status","hard_px","hard_py","hard_pz","hard_e"}) {
     const std::size_t size=(r.ints.count(name)?r.I(name).size():r.D(name).size());if(size!=h)throw std::runtime_error("raw hard vector length mismatch");
   }
-  for(const char* name:{"multAuditParticleIndex","multAuditPdg","multAuditStatus","multAuditIsHeavy"}) if(!r.I(name).empty()) throw std::runtime_error("nonempty Phase-A multAudit vector");
-  for(const char* name:{"multAuditPt","multAuditEta"}) if(!r.D(name).empty()) throw std::runtime_error("nonempty Phase-A multAudit vector");
+  for(const char* name:{"multAuditParticleIndex","multAuditPdg","multAuditStatus","multAuditIsHeavy"}) if(!r.I(name).empty()) throw std::runtime_error("nonempty reserved multAudit vector");
+  for(const char* name:{"multAuditPt","multAuditEta"}) if(!r.D(name).empty()) throw std::runtime_error("nonempty reserved multAudit vector");
 }
 
 template <typename T> void RequireFinite(const std::vector<T>& values, const char* name) {
