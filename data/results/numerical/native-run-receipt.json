@@ -143102,8 +143102,8 @@
       "source_id": 2999
     }
   ],
-  "block_primitive_path": "/scratch/condor_execute/dir_607860/phasea-reduce-93f8a4r4/reduce-work/v4-native-oo6v4j5o/native-block-primitives.tsv",
-  "block_primitive_sha256": "dcdfe324003b38baa693680bb10cfa0309f7e245ec0ae1e4ef7de07df9652326",
+  "block_primitive_path": "/scratch/condor_execute/dir_951322/phasea-reduce-0w5hbzgp/reduce-work/v4-native-ep8hojqo/native-block-primitives.tsv",
+  "block_primitive_sha256": "f39ac026c454c3383bda248dec285181d32165bf45957b088ab6fcbb65b73a78",
   "build": {
     "binary_sha256": "e3a8ba84f0f9be8a690b0e288943284628aebb6d0b4a7f1d0ac2fb594ba9e25a",
     "build_identity_sha256": "6351ee7878e3e9e3d03b05c93a7efdeca8f8243e6154c58021b12892010b403b",
@@ -143112,26 +143112,26 @@
     "source_sha256": "4d787cc005130a72d84e00392aaae1a35e31999ac775d4ac56a1ac5663f36680",
     "statistics_sha256": "004ced94c73c112313b176366b524449749b2c06471a5c107013c927f5490484"
   },
-  "checked_block_primitive_rows": 830240,
+  "checked_block_primitive_rows": 832240,
   "checked_boundary_rows": 396,
-  "checked_denominator_rows": 74272,
-  "checked_factor_rows": 830240,
-  "checked_points": 60660,
+  "checked_denominator_rows": 74472,
+  "checked_factor_rows": 832240,
+  "checked_points": 60860,
   "checked_status_counts": {
-    "available_errors": 46826,
+    "available_errors": 47026,
     "withheld_errors": 13834
   },
   "collection_index_sha256": "2ed126cfeb209207f3b5001b74f958023ee5874dd00600d9dd453ecc785c0844",
   "collection_scientific_identity_sha256": "2086b82cd3c47b8f4de05a700a61b12a18f7a1c4f4056208acee95c8e3a17cd0",
   "construction_analysis_sha256": "810703840cabc768f37eac244ef87d15091ca695321049237b59623daebceb3b",
-  "denominator_path": "/scratch/condor_execute/dir_607860/phasea-reduce-93f8a4r4/reduce-work/v4-native-oo6v4j5o/native-denominator-parents.tsv",
-  "denominator_sha256": "057f8607837d7fa446061b308737ab4ce3a3d681825ad50793eaf43569337476",
+  "denominator_path": "/scratch/condor_execute/dir_951322/phasea-reduce-0w5hbzgp/reduce-work/v4-native-ep8hojqo/native-denominator-parents.tsv",
+  "denominator_sha256": "207a0357a4e311daaab0c1e2ba7bee6a58d4aec57f48fae0bc1956aa9bddd7de",
   "denominator_status_counts": {
     "undefined": 0,
     "unstable": 10484
   },
-  "diagnostic_path": "/scratch/condor_execute/dir_607860/phasea-reduce-93f8a4r4/reduce-work/v4-native-oo6v4j5o/native-diagnostic.tsv",
-  "diagnostic_sha256": "b72ea42ba6017808689b69adc6dfce9d5e084a4506a481c1531a0fcbb45c1c19",
+  "diagnostic_path": "/scratch/condor_execute/dir_951322/phasea-reduce-0w5hbzgp/reduce-work/v4-native-ep8hojqo/native-diagnostic.tsv",
+  "diagnostic_sha256": "4a65a3b8db9723fd33995c00ea886dac22eaec2e3449099632d9f739f3a59814",
   "event_block_moments": [
     {
       "activity_counts": [
@@ -187305,15 +187305,15 @@
   },
   "lineage_selected_members_sha256": "fc541d9564ddb2541b5cf759d34537b91a8c1aa0aa5b41039e611d0b843d5de8",
   "point_transport": {
-    "path": "/scratch/condor_execute/dir_607860/phasea-reduce-93f8a4r4/reduce-work/v4-native-oo6v4j5o/native-points.tsv",
-    "points": 60660,
-    "request_sha256": "0e95ad6385f155a64858780076a17eaabe231b19624a1a46bba364084612ad83",
-    "scientific_request_sha256": "f6bd2a740ab278202a8462ee1831e41ba649df422930fcf5f3ac4f638f9b07f4",
-    "sha256": "c25ce3c9167a0d74116b0b42317b5f208291fad2d7fe47e8a089d98ed1679f87"
+    "path": "/scratch/condor_execute/dir_951322/phasea-reduce-0w5hbzgp/reduce-work/v4-native-ep8hojqo/native-points.tsv",
+    "points": 60860,
+    "request_sha256": "a04a3c74f99deecb6ba704ff5e748c88af0e3fb42d3902b04daf171ccc4dc3e5",
+    "scientific_request_sha256": "30825f5e41e33a4cd2b027f5e5ba1bdb2c2942162c979ebbe2ef9bdfc25eb83d",
+    "sha256": "ce6acb9c7bb7c1e0098200692a8558949388b565cb1d0731c2adb00b4e6d1e30"
   },
   "primitive_transport": {
     "bytes": 1303101611,
-    "path": "/scratch/condor_execute/dir_607860/phasea-reduce-93f8a4r4/reduce-work/v4-native-oo6v4j5o/native-primitives.tsv",
+    "path": "/scratch/condor_execute/dir_951322/phasea-reduce-0w5hbzgp/reduce-work/v4-native-ep8hojqo/native-primitives.tsv",
     "records": 14882100
   },
   "primitive_transport_sha256": "87100c21569ec117c3f1422fb399b55cc47b317276d515e6c62df3201d7346ff",
@@ -197981,12 +197981,12 @@
       "tune_id": "MONASH"
     }
   ],
-  "request_file_sha256": "92fb4907193cfade7886f0e76896ad256bb569712205c7834e3c1cc9a130394d",
-  "request_path": "/scratch/condor_execute/dir_607860/phasea-reduce-93f8a4r4/reduce-work/v4-native-oo6v4j5o/native-request.json",
-  "request_sha256": "0e95ad6385f155a64858780076a17eaabe231b19624a1a46bba364084612ad83",
+  "request_file_sha256": "30db478cde9fe98803047c52e0e4cbbb1f3a786f1c60ceda15417e43c6012939",
+  "request_path": "/scratch/condor_execute/dir_951322/phasea-reduce-0w5hbzgp/reduce-work/v4-native-ep8hojqo/native-request.json",
+  "request_sha256": "a04a3c74f99deecb6ba704ff5e748c88af0e3fb42d3902b04daf171ccc4dc3e5",
   "schema": "hadronization_native_diagnostic_run_v1",
-  "scientific_request_sha256": "f6bd2a740ab278202a8462ee1831e41ba649df422930fcf5f3ac4f638f9b07f4",
-  "scratch_transport_bytes": 1584536387,
+  "scientific_request_sha256": "30825f5e41e33a4cd2b027f5e5ba1bdb2c2942162c979ebbe2ef9bdfc25eb83d",
+  "scratch_transport_bytes": 1585291209,
   "sparse_scan_metrics": {
     "g9": {
       "family_passes": 3,
@@ -198012,12 +198012,12 @@
   },
   "unresolved_block_primitive_rows": 0,
   "wall_seconds": {
-    "admission": 3584.788655706914,
-    "engine": 201.5344539489597,
-    "g9": 8663.026061397977,
-    "request_support": 3549.4517667340115,
-    "sparse_primitives": 8868.90822321293,
-    "support": 6357.70572758303,
-    "total": 27675.96312184981
+    "admission": 3966.661126058083,
+    "engine": 267.65429928503,
+    "g9": 10660.899597145966,
+    "request_support": 3907.7810845860513,
+    "sparse_primitives": 9289.67007567198,
+    "support": 7037.649495181977,
+    "total": 31222.534593343036
   }
 }

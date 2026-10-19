@@ -52,7 +52,7 @@
     },
     "exports/missing.csv": {
       "bytes": 2287037,
-      "sha256": "189085295424b88b6053190423c82c9b456ab19315759de52c0da7f2d9fe9a70"
+      "sha256": "e497c03a5d9ba1d9734b8c397e648ff467fbba97f52d3a2887c997f2e955f5e8"
     },
     "exports/overleaf-check.tex": {
       "bytes": 149,
@@ -67,16 +67,16 @@
       "sha256": "612408fc7bdbaacbb3a34c43984e96c297faed6b121b526b73cf090527abff19"
     },
     "exports/points.csv": {
-      "bytes": 13950430,
-      "sha256": "7a0cc1d9c5bca76f327f4d93c3806c3032927d4675712eb395374238c933f457"
+      "bytes": 14000212,
+      "sha256": "0ccdf2360a3cb4cefc35ac1654d3c1c01150ff20e996fa4e3619ff13f3030c7b"
     },
     "exports/receipt.json": {
       "bytes": 978,
-      "sha256": "1c80c4940f6867d9868422e43d90d71b84163584fe3e62e5654c0d299f14d5e3"
+      "sha256": "1612b9fc8520ba477d4574e2b0b28c6fb3e2d8f93d4ba473a939dbc238e7aafc"
     },
     "exports/t1.csv": {
       "bytes": 572400,
-      "sha256": "993ed8f3d7e81b77f9797cc9e9d2864f3b985213feddb16b874f2563ddd0cb0c"
+      "sha256": "b9fc6e71960dd2e11e896f854bda77a19db8a7de4a13f3d698dc8219b0c252b6"
     },
     "exports/t1.tex": {
       "bytes": 85000,
@@ -103,23 +103,23 @@
       "sha256": "f18d2a734cfdaf4c382b7bfbb298f8417abe8123672ab8262212099a54857408"
     },
     "native-run-receipt.json": {
-      "bytes": 4152164,
-      "sha256": "26aac576a0e6e36a4e326783eb6eb8211ce4d93a744b76481eee24451c290abd"
+      "bytes": 4152165,
+      "sha256": "149d9aefa78c8a67db1dd9f7075d491464e23253114eae4febb65a31aee9e722"
     },
     "numerics.root": {
-      "bytes": 98700327,
-      "sha256": "e68ef7f1e9daa6bc7a7d2072ed4e0bc0cb6b69427646bcfb32c773158ee144b9"
+      "bytes": 98942311,
+      "sha256": "f70cb537abce0ba0646320d266ae946b95e33fa4e4dd59e49f7f33b0c78af4f4"
     },
     "report.json": {
-      "bytes": 5911,
-      "sha256": "06f2282db967ab7531c47cf26a364df9c40574eae47f1fe1eb7afdbc91cb31dc"
+      "bytes": 5931,
+      "sha256": "4e39da807075fb818bb0e7552ecef40a365467131dd54376fc15d93d2069e28b"
     },
     "source-build-ledger.json": {
-      "bytes": 89601,
-      "sha256": "bd4592b80d32df05844c16ad529452bd86d5362bce1e5a25d63523df3aa05cdc"
+      "bytes": 77164,
+      "sha256": "ca3898b512fc2c10e511cbc2c865f830ec94a97e1214908bf864fcec9cf923cc"
     }
   },
-  "root_sha256": "e68ef7f1e9daa6bc7a7d2072ed4e0bc0cb6b69427646bcfb32c773158ee144b9",
+  "root_sha256": "f70cb537abce0ba0646320d266ae946b95e33fa4e4dd59e49f7f33b0c78af4f4",
   "schema": "hadronization_public_v4_portable_package_v1",
-  "science_content_sha256": "9d902072ac0459ba5f34b09408a45411adb48cb47cba6d92a77ae35b4d1d9f37"
+  "science_content_sha256": "6d60b120ee9d650ce1e4bf0ddfab973a81e460eef122ba215a5533226167b007"
 }

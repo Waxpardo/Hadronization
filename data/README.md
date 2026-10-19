@@ -6,7 +6,7 @@ The `HF_RUN3_V1` result contains 300 million successful events from 3,000 accept
 
 ## Included results
 
-The [collaboration package](results/manifest.json) contains numerical ROOT, 69 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 60,660 points with separate value and uncertainty statuses. The tables retain explicit missing values.
+The [collaboration package](results/manifest.json) contains numerical ROOT, 69 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 60,860 points with separate value and uncertainty statuses. The tables retain explicit missing values.
 
 The result uses inclusive pair pT and final triggers from all origins. Its identity recipe keeps 202 signed open-heavy associates separate. The fine query retains all 219 catalog identities, including hidden-heavy states.
 
@@ -35,7 +35,7 @@ Numerical portable verification does not require the original production filesys
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=798c499faf4961c2fdabd3ae9855a84525522e264188190376a5b40cddd1e885
+PACKAGE_SHA=933e644fd7ddc6e76b5d79b7a94ad503b118993f7d34f6c0a27198a2a9063944
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification
@@ -49,8 +49,8 @@ To change the presentation, copy `config/plot.json` and edit its display setting
 cp config/plot.json data/work/custom-plot.json
 ./hadronization plot render-cold \
   --numerics-root data/results/numerical/numerics.root \
-  --expected-root-sha256 e68ef7f1e9daa6bc7a7d2072ed4e0bc0cb6b69427646bcfb32c773158ee144b9 \
-  --expected-value-sha256 56309f1e787d03a6a43e6488015358fdfc747072866eeb474ddecbfce1a66bf9 \
+  --expected-root-sha256 f70cb537abce0ba0646320d266ae946b95e33fa4e4dd59e49f7f33b0c78af4f4 \
+  --expected-value-sha256 fdc681d5cec7ddc8e4728eafa4b07caaa0b9bd8c9d4c2bf1f38ba0fe87b00271 \
   --plot-config data/work/custom-plot.json \
   --work-dir data/work/custom-render --output data/work/custom-figures
 ```
@@ -62,8 +62,8 @@ This command needs ROOT and the renderer dependencies described in [installation
 ```sh
 ./hadronization plot render-cold \
   --numerics-root data/results/numerical/numerics.root \
-  --expected-root-sha256 e68ef7f1e9daa6bc7a7d2072ed4e0bc0cb6b69427646bcfb32c773158ee144b9 \
-  --expected-value-sha256 56309f1e787d03a6a43e6488015358fdfc747072866eeb474ddecbfce1a66bf9 \
+  --expected-root-sha256 f70cb537abce0ba0646320d266ae946b95e33fa4e4dd59e49f7f33b0c78af4f4 \
+  --expected-value-sha256 fdc681d5cec7ddc8e4728eafa4b07caaa0b9bd8c9d4c2bf1f38ba0fe87b00271 \
   --plot-config config/plot-all-tune.json \
   --work-dir data/work/all-tune-render --output data/work/figures-all-tune
 ```
