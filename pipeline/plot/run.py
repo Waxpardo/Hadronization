@@ -3471,12 +3471,19 @@ def canonical_root_archive(path, drawing_record):
     finally:
         temporary.unlink(missing_ok=True)
 
+def render_artifacts(pages):
+    paths = list(pages.glob('*.pdf')) + [pages / CANVAS_NAME, pages / RECORD_NAME]
+    comparison = pages / 'trigger-comparison.root'
+    if comparison.exists():
+        paths.append(comparison)
+    return sorted(paths)
+
+
 def promote_render_pages(pages, output):
     """Publish regular PDF pages first and the verified manifest last."""
     output.mkdir(mode=0o700)
     try:
-        for path in sorted(list(pages.glob("*.pdf")) +
-                           [pages / CANVAS_NAME, pages / RECORD_NAME]):
+        for path in render_artifacts(pages):
             regular_file(path, "staged render page")
             os.link(str(path), str(output / path.name))
         fsync_directory(output)
@@ -3517,12 +3524,11 @@ def cold_numerics(args):
 def cold_render_manifest(args, payload, config, config_sha, build, plan,
                          pages, record, pdf_export):
     files = []
-    for path in sorted(list(pages.glob("*.pdf")) +
-                       [pages / CANVAS_NAME, pages / RECORD_NAME]):
+    for path in render_artifacts(pages):
         regular_file(path, "cold plot artifact")
         files.append({"name": path.name, "bytes": path.stat().st_size,
                       "sha256": sha_file(path)})
-    return {
+    result = {
         "schema": "hadronization_cold_plot_render_v1",
         "version": "1.0.0", "state": "COMPLETE",
         "campaign_state": payload["campaign_state"],
@@ -3571,6 +3577,106 @@ def cold_render_manifest(args, payload, config, config_sha, build, plan,
         "filesystem_set": sorted([item["name"] for item in files] +
                                  ["manifest.json"]),
     }
+    comparison = getattr(args, '_comparison', None)
+    if comparison is not None:
+        result['trigger_comparison'] = {
+            'path': 'trigger-comparison.root',
+            'sha256': sha_file(pages / 'trigger-comparison.root'),
+            'value_sha256': sha_bytes(canonical(comparison).encode('ascii')),
+            'recipe_sha256': comparison['recipe_sha256']}
+        for name in ('pipeline/reduce/trigger_comparison.py', 'pipeline/reduce/statistics.hpp'):
+            result['source_sha256'][name] = sha_file(ROOT / name)
+    return result
+
+
+def add_trigger_comparison(args, payload, context, adapter, config, plan, *, verify=False):
+    """Read and verify a separate numerical input before drawing its values."""
+    path = getattr(args, 'trigger_comparison_root', None)
+    digest = getattr(args, 'expected_trigger_comparison_sha256', None)
+    if verify and path is None:
+        if args.expected_manifest_sha256 and sha_file(args.output / 'manifest.json') != args.expected_manifest_sha256:
+            raise ValueError('trusted cold render manifest SHA256 differs')
+        binding = json_file(args.output / 'manifest.json').get('trigger_comparison')
+        if binding is not None:
+            if binding.get('path') != 'trigger-comparison.root':
+                raise ValueError('trigger comparison package locator differs')
+            path, digest = args.output / binding['path'], binding['sha256']
+    if (path is None) != (digest is None):
+        raise ValueError('trigger comparison requires a ROOT file and independent SHA-256')
+    if path is None:
+        return
+    from pipeline.reduce import trigger_comparison as comparison_api
+    value = comparison_api.read(path, digest)
+    comparison_api.verify(value, payload, args.expected_root_sha256, args.expected_value_sha256)
+    args._comparison, args._comparison_path = value, path
+    plan['pages'].append(trigger_comparison_page(value, context, adapter, config))
+
+
+def trigger_comparison_page(value, context, adapter, config):
+    """Lay out stored trigger ratios without recomputing a scientific value."""
+    role = 'balancing.trigger_comparison'
+    styles = {item['id']: item for item in config['style_identities']['tunes']}
+    labels = adapter['presentation']['species_labels']
+    def label(pdg):
+        if str(pdg) not in labels:
+            raise ValueError('trigger comparison species label is absent')
+        return species_latex_label(pdg, labels[str(pdg)])
+    page = dict(filename='supplemental.balancing.trigger_comparison.pdf',
+        role=role, page_index=1, page_count=1, width=1900, height=1050,
+        text_pixels=34, information='', title='', header_bottom=.98,
+        scientific_header='', style_header='class_patterns_sha256='+sha_bytes(
+            canonical(config['style_identities']['class_line_patterns']).encode('ascii')), panels=[])
+    bounds = [1.]
+    for q in value['points']:
+        if q['center'] is not None:
+            center = float.fromhex(q['center'])
+            error = float.fromhex(q['error']) if q['error'] is not None else 0.
+            bounds.extend([center-error, center+error])
+    yr = _padded_range(bounds, .15, False)
+    yr = [min(.4, yr[0]), max(1.6, yr[1])]
+    for column, sector in enumerate(value['recipe']['sectors']):
+        n = len(sector['associate_pairs'])
+        series = []
+        for tune in value['tunes']:
+            if tune not in styles:
+                raise ValueError('trigger comparison tune lacks a display style')
+            points = []
+            for q in value['points']:
+                if q['sector'] != sector['id'] or q['tune'] != tune:
+                    continue
+                x = float(q['slot'])
+                points.append(dict(semantic_id=q['semantic_id'], bin=q['slot']-1,
+                    scientific_x=x, display_x=x, x=x,
+                    y=None if q['center'] is None else float.fromhex(q['center']),
+                    error=None if q['error'] is None else float.fromhex(q['error']),
+                    bin_low=x-.5, bin_high=x+.5, support_low=x-.5, support_high=x+.5,
+                    class_id='0', value_status=q['value_status'], uncertainty_status=q['uncertainty_status'],
+                    state='DRAW' if q['center'] is not None else 'MISSING_VALUE', reasons=','.join(q['reasons'])))
+            series.append(dict(key=sector['id']+'.'+tune, tune=tune, class_id='0',
+                color=styles[tune]['color'], marker=styles[tune]['marker'], line_style=1,
+                label=tune, legend_label=tune if column else '', emphasis='NORMAL',
+                draw_mode='categories', points=points))
+        captions = []
+        if column == 0:
+            lines = scientific_caption_lines(page, context)
+            captions = [dict(x=.23, y=.835-i*.042, size=32, text=text)
+                        for i, text in enumerate(lines)]
+        panel = dict(id='comparison.'+sector['id'], status='AVAILABLE', log_y=False, log_x=False,
+            geometry=[0.,0.,.54,.98] if column == 0 else [.54,0.,1.,.98],
+            margins=[.18,0.,.27,.10] if column == 0 else [0.,.035,.27,.10],
+            x_range=[.5,n+.5], y_range=yr[:],
+            title=label(sector['numerator_trigger'])+' trigger / '+label(sector['denominator_trigger'])+' trigger',
+            x_title='Associate Species',
+            y_title='#it{Y}_{baryon trigger} / #it{Y}_{meson trigger}' if column == 0 else '',
+            note='', series=series, annotations=captions, reuse=None,
+            uncertainty_display='STANDARD', category_dividers=False,
+            legend=[.54,.747,.945,.867],
+            guides=[dict(id='unity',x_low=.5,x_high=n+.5,y_low=1.,y_high=1.,color='#777777',line_style=10,label='')],
+            ticks=[dict(x=float(i), label=label(a) if a==b else '#splitline{'+label(a)+'}{'+label(b)+'}')
+                   for i,(a,b) in enumerate(sector['associate_pairs'],1)])
+        page['panels'].append(panel)
+    move_annotation_blocks_from_panel_labels([page])
+    return page
 
 def render_cold(args):
     """Render persisted coordinates/errors/statuses; never run projection."""
@@ -3584,6 +3690,7 @@ def render_cold(args):
     pdf_export = pdf_export_runtime()
     context, adapter = cold_drawing_inputs(payload, config)
     plan = drawing_plan(context, adapter, config)
+    add_trigger_comparison(args, payload, context, adapter, config, plan)
     record_expected = drawing_payload(plan)
     output.parent.mkdir(parents=True, exist_ok=True)
     environment, binary, build = build_renderer(args.work_dir)
@@ -3608,6 +3715,8 @@ def render_cold(args):
         for page in pages.glob("*.pdf"):
             publication_pdf(page)
         write_payload(pages / RECORD_NAME, deterministic_gzip(record))
+        if getattr(args, '_comparison', None) is not None:
+            shutil.copyfile(args._comparison_path, pages / 'trigger-comparison.root')
         manifest = cold_render_manifest(args, payload, config, config_sha,
                                         build, plan, pages, record, pdf_export)
         atomic_json(pages / "manifest.json", manifest)
@@ -3962,6 +4071,7 @@ def verify_render_cold(args):
     payload = cold_numerics(args)
     context, adapter = cold_drawing_inputs(payload, config)
     plan = drawing_plan(context, adapter, config)
+    add_trigger_comparison(args, payload, context, adapter, config, plan, verify=True)
     environment, binary, build = build_renderer(args.work_dir)
     manifest = verify_cold_files(args, payload, config_sha, build, plan,
                                  args.output.resolve(), binary, environment)
@@ -3971,10 +4081,15 @@ def verify_render_cold(args):
         args.output.resolve(), len(manifest["filesystem_set"])))
     print(canonical(attestation))
 
-def cold_inputs(parser):
+def cold_inputs(parser, *, comparison=True):
     parser.add_argument("--numerics-root", type=Path, required=True)
     parser.add_argument("--expected-root-sha256", required=True)
     parser.add_argument("--expected-value-sha256", required=True)
+    if comparison:
+        parser.add_argument('--trigger-comparison-root', type=Path,
+                            help='optional numerical ROOT from reduce compare-triggers')
+        parser.add_argument('--expected-trigger-comparison-sha256',
+                            help='independent physical pin for the trigger comparison')
     parser.add_argument("--expected-manifest-sha256",
         help="optional independent manifest pin for verification")
     parser.add_argument("--plot-config", type=Path, default=PLOT_CONFIG)
@@ -3996,7 +4111,7 @@ def parser():
     review_parser = sub.add_parser(
         "verify-review-packet",
         help="check synthetic figure and signed-spectrum display coverage")
-    cold_inputs(review_parser)
+    cold_inputs(review_parser, comparison=False)
     return top
 
 def main():

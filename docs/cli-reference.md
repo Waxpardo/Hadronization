@@ -701,6 +701,22 @@ Inspect its syntax before use:
 
 Source: [pipeline/reduce/public_v4.py](../pipeline/reduce/public_v4.py).
 
+### `./hadronization reduce compare-triggers`
+
+Derive paired-block ratios of trigger-normalized balancing yields from verified numerical ROOT. This command writes a new ROOT companion and scratch files. It refuses an existing output path.
+
+| Option | Type and default | Meaning |
+| --- | --- | --- |
+| `--numerics-root` | Path, required | Parent numerical ROOT. |
+| `--expected-root-sha256` | String, required | Independent physical parent pin. |
+| `--expected-value-sha256` | String, required | Independent parent value digest. |
+| `--recipe` | Path, `config/trigger-comparison.json` | Signed comparison recipe. |
+| `--recipe-sha256` | String, required | Independent recipe file pin. |
+| `--work-root` | Path, required | Writable verification scratch. |
+| `--output` | Path, required | New numerical ROOT path. |
+
+See [trigger comparison](workflow.md#compare-trigger-samples) for an executable example and [science](science.md#comparison-between-trigger-species) for its interpretation.
+
 ### `./hadronization plot render-cold`
 
 Render verified numerical ROOT and publish figures.
@@ -712,6 +728,8 @@ Render verified numerical ROOT and publish figures.
 | `--numerics-root` | Path, **required** | Self-contained numerical ROOT input. |
 | `--expected-root-sha256` | string, **required** | Independent physical numerical-ROOT SHA-256. |
 | `--expected-value-sha256` | string, **required** | Independent decoded numerical-value digest. |
+| `--trigger-comparison-root` | Path, none | Optional numerical companion from `reduce compare-triggers`. |
+| `--expected-trigger-comparison-sha256` | String, none | Required physical pin when the companion is supplied. |
 | `--expected-manifest-sha256` | string, `none` | Optional independent figure-manifest SHA-256. |
 | `--plot-config` | Path, `config/plot.json` | Exact presentation JSON used by the renderer. |
 | `--work-dir` | Path, **required** | Writable archive or renderer scratch. |
@@ -734,6 +752,8 @@ Reopen every canvas and write verifier attestation in scratch.
 | `--numerics-root` | Path, **required** | Self-contained numerical ROOT input. |
 | `--expected-root-sha256` | string, **required** | Independent physical numerical-ROOT SHA-256. |
 | `--expected-value-sha256` | string, **required** | Independent decoded numerical-value digest. |
+| `--trigger-comparison-root` | Path, none | Optional numerical companion from `reduce compare-triggers`. |
+| `--expected-trigger-comparison-sha256` | String, none | Required physical pin when the companion is supplied. |
 | `--expected-manifest-sha256` | string, `none` | Optional independent figure-manifest SHA-256. |
 | `--plot-config` | Path, `config/plot.json` | Exact presentation JSON used by the renderer. |
 | `--work-dir` | Path, **required** | Writable archive or renderer scratch. |
@@ -744,6 +764,8 @@ Inspect its syntax before use:
 ```sh
 ./hadronization plot verify-render-cold --help
 ```
+
+Without an explicit companion option, verification uses the companion bound by the figure manifest, if present.
 
 ### `./hadronization plot verify-review-packet`
 

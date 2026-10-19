@@ -1,0 +1,19 @@
+{
+  "schema": "hadronization_trigger_comparison_recipe_v1",
+  "profile_id": "inclusive",
+  "class_id": 0,
+  "sectors": [
+    {
+      "id": "charm",
+      "numerator_trigger": 4122,
+      "denominator_trigger": 421,
+      "associate_pairs": [[-421, -421], [-411, -411], [-431, -431], [-4122, -4122], [-4212, -4212], [-4112, -4112], [-4222, -4222]]
+    },
+    {
+      "id": "beauty",
+      "numerator_trigger": 5122,
+      "denominator_trigger": 521,
+      "associate_pairs": [[521, -521], [511, -511], [531, -531], [541, -541], [-5122, 5122], [-5222, 5222], [-5212, 5212], [-5112, 5112]]
+    }
+  ]
+}

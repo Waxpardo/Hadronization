@@ -846,6 +846,16 @@ def parser():
         item.add_argument('--report-sha')
         item.add_argument('--package-dir', type=Path)
         item.add_argument('--package-manifest-sha')
+    comparison = sub.add_parser('compare-triggers',
+        help='derive joint-block ratios from verified numerical ROOT')
+    comparison.add_argument('--numerics-root', type=Path, required=True)
+    comparison.add_argument('--expected-root-sha256', required=True)
+    comparison.add_argument('--expected-value-sha256', required=True)
+    comparison.add_argument('--recipe', type=Path,
+                            default=ROOT / 'config/trigger-comparison.json')
+    comparison.add_argument('--recipe-sha256', required=True)
+    comparison.add_argument('--work-root', type=Path, required=True)
+    comparison.add_argument('--output', type=Path, required=True)
     return top
 
 
@@ -854,6 +864,20 @@ def main(arguments=None):
     try:
         if args.command == 'run':
             run(args)
+        elif args.command == 'compare-triggers':
+            from . import trigger_comparison
+            if args.output.exists() or args.output.is_symlink():
+                raise FileExistsError(args.output)
+            recipe = _json(args.recipe, args.recipe_sha256, 'trigger comparison recipe')
+            trigger_comparison.checked_recipe(recipe)
+            args.work_root.mkdir(parents=True, exist_ok=True)
+            parent = archive.read(args.numerics_root, args.work_root,
+                                  args.expected_root_sha256, args.expected_value_sha256)
+            value = trigger_comparison.derive(parent, recipe,
+                args.expected_root_sha256, args.expected_value_sha256)
+            physical_sha = trigger_comparison.write(value, args.output)
+            print(p.canonical(dict(root=str(args.output), root_sha256=physical_sha,
+                                   value_sha256=p.digest(value), points=len(value['points']))))
         else:
             report, value, verification_status = _verify(args)
             if args.command == 'explain':

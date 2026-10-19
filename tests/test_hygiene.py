@@ -93,7 +93,7 @@ class LeanTreeContract(unittest.TestCase):
             "config/query.json", "config/query-all-heavy.json",
             "config/query-all-origin.json",
             "config/plot.json", "config/plot-dplus.json", "config/plot-all-tune.json",
-            "config/site.example.conf",
+            "config/site.example.conf", "config/trigger-comparison.json",
             "config/tunes/monash.cmnd", "config/tunes/junctions.cmnd",
             "config/tunes/close_packing.cmnd"}
         paths = self.tracked_and_new_paths()
@@ -122,7 +122,8 @@ class LeanTreeContract(unittest.TestCase):
              "pipeline/reduce/native_v4.py", "pipeline/reduce/native_v4_result.py",
              "pipeline/reduce/family.py", "pipeline/reduce/family_products.py",
              "pipeline/reduce/projection.py", "pipeline/reduce/public_v4.py",
-             "pipeline/reduce/statistics.hpp", "pipeline/reduce/typed_nodes.py"})
+             "pipeline/reduce/statistics.hpp", "pipeline/reduce/typed_nodes.py",
+             "pipeline/reduce/trigger_comparison.py"})
         self.assertEqual(
             {path for path in paths if path.startswith("pipeline/plot/")},
             {"pipeline/plot/render.cpp", "pipeline/plot/run.py"})

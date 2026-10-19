@@ -783,3 +783,20 @@ Each displayed ground state precedes its star and prime partners with the same c
 A zero reference balancing yield makes the tune ratio undefined.
 A finite ratio can be negative when the two signed balancing yields have opposite signs.
 An unstable reference denominator can also cause the numerical output to withhold its uncertainty.
+
+## Trigger comparison recipe
+
+[trigger-comparison.json](../config/trigger-comparison.json) defines a derived comparison between trigger samples. It changes neither the query nor the parent numerical archive. The recipe must select parent yields already present in numerical ROOT.
+
+| Key | Type and shipped value | Meaning and constraints |
+| --- | --- | --- |
+| `schema` | String, `hadronization_trigger_comparison_recipe_v1` | Exact recipe version. |
+| `profile_id` | String, `inclusive` | Materialized pair selection. |
+| `class_id` | Integer, `0` | Integrated multiplicity class. |
+| `sectors` | Array, charm then beauty | Two comparison panels. |
+| `sectors[].id` | String, `charm` or `beauty` | Selects the integrated observable. |
+| `sectors[].numerator_trigger` | Signed PDG integer, 4122 or 5122 | Baryon trigger in the numerator. |
+| `sectors[].denominator_trigger` | Signed PDG integer, 421 or 521 | Meson trigger in the denominator. |
+| `sectors[].associate_pairs` | Array of two-integer arrays | Numerator and denominator associate identities, in display order. Identities cannot repeat within either column. |
+
+Charm uses identical signed associates in both samples. Beauty uses charge-conjugate associates because its triggers carry opposite heavy flavour. The figure labels both identities. Change this recipe only with an explicit scientific interpretation of the new signed pairings. A new recipe needs a new checksum and a new numerical companion.

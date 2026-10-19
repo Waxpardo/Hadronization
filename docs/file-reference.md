@@ -381,3 +381,13 @@ The verification suite exercises the distribution helper.
 | [data/results/numerical/family-products/paper-fine.root](../data/results/numerical/family-products/paper-fine.root) | Numerical reader and package verifier | Separate signed selected-state primitives before identity mapping. |
 | [data/results/numerical/family-products/shared.root](../data/results/numerical/family-products/shared.root) | Numerical reader and package verifier | Shared activity and eligible-trigger primitives, carried once. |
 | [tests/test_all_origin_repair.py](../tests/test_all_origin_repair.py) | Development suite | All-origin and selected-hard trigger populations, zero-partner denominators and exact retained-row pair closure. |
+
+## Trigger comparison files
+
+| Path | Caller or reader | Role or output |
+| --- | --- | --- |
+| [config/trigger-comparison.json](../config/trigger-comparison.json) | `reduce compare-triggers` | Selects signed parent yields and their order. |
+| [pipeline/reduce/trigger_comparison.py](../pipeline/reduce/trigger_comparison.py) | Reduction CLI and figure verifier | Derives ratios with the native estimator; writes and verifies the typed ROOT companion. |
+| [tests/test_trigger_comparison.py](../tests/test_trigger_comparison.py) | Development suite | Paired cancellation, denominator validity, block identities, exact primitives and ROOT corruption checks. |
+| [data/results/figures/trigger-comparison.root](../data/results/figures/trigger-comparison.root) | Figure renderer and package verifier | Derived ratios, covariance, signed parent identities, recipe and primitive counts. |
+| [data/results/figures/supplemental.balancing.trigger_comparison.pdf](../data/results/figures/supplemental.balancing.trigger_comparison.pdf) | Researcher | Charm and beauty comparisons of baryon-trigger to meson-trigger balancing yields. |

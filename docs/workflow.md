@@ -341,6 +341,30 @@ The three-class view uses long dashes for 0–1%, dots for 40–50%, and short s
 
 Use `config/plot-dplus.json` with D+ numerical results. Keep the selected configuration with the figures. A mismatched charm recipe fails before rendering.
 
+## Compare trigger samples
+
+This optional step needs a verified numerical archive with the integrated parent yields. It computes supplementary ratios without repeating query construction or event analysis. Set `NUMERICS_ROOT_SHA256` and `NUMERICS_VALUE_SHA256` to independently preserved parent hashes. Set `TRIGGER_RECIPE_SHA256` to the reviewed recipe file hash.
+
+```sh
+./hadronization reduce compare-triggers \
+  --numerics-root "$RUN_ROOT/numerical/numerics.root" \
+  --expected-root-sha256 "${NUMERICS_ROOT_SHA256:?}" \
+  --expected-value-sha256 "${NUMERICS_VALUE_SHA256:?}" \
+  --recipe config/trigger-comparison.json \
+  --recipe-sha256 "${TRIGGER_RECIPE_SHA256:?}" \
+  --work-root "$RUN_ROOT/comparison-work" \
+  --output "$RUN_ROOT/trigger-comparison.root"
+```
+
+Preserve the reported physical hash as `TRIGGER_COMPARISON_SHA256`. Add both options below to the `plot render-cold` command before rendering into a fresh directory:
+
+```sh
+--trigger-comparison-root "$RUN_ROOT/trigger-comparison.root" \
+--expected-trigger-comparison-sha256 "${TRIGGER_COMPARISON_SHA256:?}"
+```
+
+The figure directory includes the companion and `supplemental.balancing.trigger_comparison.pdf`. Package assembly includes both files. Package verification checks the companion against the parent archive and reopens the rendered graphs. The [scientific definition](science.md#comparison-between-trigger-species) explains the signed beauty labels and paired-block uncertainty.
+
 ## Assemble and verify the package
 
 This step requires verified numerical and figure manifests and their independent hashes. It copies the required files into a fresh package:

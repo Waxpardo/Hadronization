@@ -867,7 +867,8 @@ bool CategoricalAxis(const Page& page, const Panel& panel) {
   return page.role.find("balancing.") == 0 && panel.reusePanel.empty();
 }
 bool SpeciesCategoryAxis(const Page& page) {
-  return page.role.rfind("balancing.integrated.", 0) == 0 ||
+  return page.role == "balancing.trigger_comparison" ||
+         page.role.rfind("balancing.integrated.", 0) == 0 ||
          page.role.rfind("balancing.activity.", 0) == 0;
 }
 bool RotateCategoryLabels(const Page& page, const Panel& panel) {
@@ -1264,12 +1265,14 @@ constexpr double P1InformationX = .50;
 constexpr std::array<double, 5> kP1InformationY = {{.835, .810, .785, .760, .735}};
 constexpr std::array<int, 5> kP1InformationPixels = {{20, 17, 16, 15, 15}};
 int CategoryTextPixels(const Page& page) {
+  if (page.role == "balancing.trigger_comparison") return BodyTextPixels(page);
   if (!SpeciesCategoryAxis(page)) return BodyTextPixels(page);
   const double points = page.filename.find(".trigger-") == std::string::npos ? 12. : 10.;
   return std::max(BodyTextPixels(page), static_cast<int>(std::ceil(
       points * page.width / (PaperWidthCentimeters(page) * kPointsPerCentimeter))));
 }
 double CategoryLabelY(const Page& page, const Panel& panel) {
+  if (page.role == "balancing.trigger_comparison") return .175;
   if (SpeciesCategoryAxis(page)) {
     // Use a common letter baseline, independent of bars and scripts.
     const double height = (panel.geometry[3]-panel.geometry[1])*page.height;

@@ -260,3 +260,9 @@ The final package contains `numerical/`, `figures/`, the selected `config/*.json
 Analysis publishes files with exclusive hard links after validation. Query and package publication use a no-replace directory operation. Darwin and Linux have separate implementations. The Linux fallback requires owned, private staging and exclusive destination reservation.
 
 The publisher checks path confinement, file types, symlinks, hard links and filesystem boundaries where its contract requires them. It hashes readback after publication. A collision or ambiguous result fails closed. No storage protocol inherits POSIX guarantees without a successful site probe.
+
+## Trigger-comparison numerical companion
+
+`figures/trigger-comparison.root` stores the derived trigger ratios. Its `points` TTree contains signed identities, parent point keys, values, errors and separate status fields. Its `deletions` TTree contains block identities, deletion values, means, covariance factors and usability flags. The `covariance` TH2D and `covariance_valid` TH2I store joint covariance and its validity mask.
+
+The `payload` string contains the recipe, exact input block primitives and parent numerical hashes. `value_sha256` binds this complete logical content. Typed trees and covariance objects must agree with it. The figure manifest pins the physical ROOT bytes and recipe digest. Verification reconstructs the comparison from the parent archive with the native estimator. The companion has no authority to change its parent results.

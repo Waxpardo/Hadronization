@@ -164,6 +164,20 @@ A finite negative center can be valid. A missing uncertainty is not zero. Exact 
 
 This block jackknife estimates finite-sample variability under the original block design. It does not measure model uncertainty. There is no production switch to ordinary subsampling in the public CLI.
 
+## Comparison between trigger species
+
+The supplementary trigger comparison divides the baryon-trigger balancing yield by the meson-trigger yield, within each tune:
+
+$$R_a=\frac{(N_{\mathrm{OS}}-N_{\mathrm{SS}})_{B,a}/T_B}{(N_{\mathrm{OS}}-N_{\mathrm{SS}})_{M,a'}/T_M}.$$
+
+Here $B$ and $M$ denote the baryon and meson trigger samples. The charm panel compares $\Lambda_c^+$ with $D^0$ for the same signed associate, so $a'=a$. The beauty panel compares $\Lambda_b^0$ with $B^+$. These triggers contain opposite heavy-flavour signs, so the beauty panel compares the charge-conjugate associates used in the integrated figures. Its upper species label belongs to the numerator; its lower label belongs to the denominator.
+
+A value above one means a larger balancing yield per baryon trigger for the indicated associate. A raw net-count ratio also contains the trigger-population ratio and therefore answers a different question. Neither comparison isolates a causal fragmentation mechanism.
+
+The center uses pooled counts. Each uncertainty deletes the same original block from both trigger samples and recomputes the complete ratio. The numerical companion retains all deletion values and the joint covariance across associates. Independent tune families contribute separate covariance blocks. A zero or unresolved surviving denominator withholds the affected result or uncertainty. Negative valid centers remain signed.
+
+The shipped recipe selects inclusive pair pT and the integrated multiplicity class. The command currently requires ten original blocks with unit event weights. Its ROOT companion binds the parent numerical archive, signed recipe and native statistics source. The figure renderer verifies these bindings before drawing the stored values.
+
 ## Definition authority
 
 [physics.hpp](../pipeline/generate/physics.hpp) implements raw particle and ancestry rules. [model.py](../pipeline/query/model.py) validates downstream selections and the signed registry. [native_engine.cpp](../pipeline/reduce/native_engine.cpp) and [statistics.hpp](../pipeline/reduce/statistics.hpp) evaluate observables and covariance.
