@@ -3616,6 +3616,8 @@ def trigger_comparison_page(value, context, adapter, config):
     """Lay out stored trigger ratios without recomputing a scientific value."""
     role = 'balancing.trigger_comparison'
     styles = {item['id']: item for item in config['style_identities']['tunes']}
+    if set(value['tunes']) - set(styles):
+        raise ValueError('trigger comparison tune lacks a display style')
     labels = adapter['presentation']['species_labels']
     def label(pdg):
         if str(pdg) not in labels:
@@ -3637,7 +3639,8 @@ def trigger_comparison_page(value, context, adapter, config):
     for column, sector in enumerate(value['recipe']['sectors']):
         n = len(sector['associate_pairs'])
         series = []
-        for tune in value['tunes']:
+        for tune in [item['id'] for item in config['style_identities']['tunes']
+                     if item['id'] in value['tunes']]:
             if tune not in styles:
                 raise ValueError('trigger comparison tune lacks a display style')
             points = []
