@@ -95,6 +95,7 @@ struct Series {
   std::string key, tune, color, marker, label, legendLabel, mode, emphasis;
   int lineStyle;
   std::vector<Point> points;
+  double displayScale = 1.;
 };
 struct Guide {
   double x1, x2, y1, y2;
@@ -203,7 +204,7 @@ std::vector<Page> ReadPlan(const std::filesystem::path& path,
   std::string line;
   Need(bool(std::getline(input, line)), "missing plan header");
   const auto header = Fields(line);
-  Need(header.size() == 2 && header[0] == "hadronization_plot_drawing_plan_v9", "plan framing differs");
+  Need(header.size() == 2 && header[0] == "hadronization_plot_drawing_plan_v10", "plan framing differs");
   output << line << '\n';
   bool ended = false;
   while (std::getline(input, line)) {
@@ -277,6 +278,17 @@ std::vector<Page> ReadPlan(const std::filesystem::path& path,
           Need(!seriesIndex.count(key), "duplicate series");
           seriesIndex[key] = panel.series.size();
           panel.series.push_back({f[3], f[4], f[6], f[7], f[9], f[11], f[10], f[12], Integer(f[8]), {}});
+        } else if (f[0] == "DISPLAY_SCALE") {
+          Need(f.size() == 5 && page.role.rfind("correlations.",0) == 0 &&
+                   panel.id.rfind("correlation.compare.",0) != 0,
+               "display scale outside absolute correlations");
+          const auto key = std::make_tuple(f[1], f[2], f[3]);
+          Need(seriesIndex.count(key), "unknown scaled series parent");
+          auto& series = panel.series.at(seriesIndex.at(key));
+          const double factor = Number(f[4]);
+          Need(factor > 0 && factor != 1. && series.displayScale == 1. &&
+                   series.points.empty(), "invalid or repeated display scale");
+          series.displayScale = factor;
         } else if (f[0] == "POINT") {
           Need(f.size() == 19, "point differs");
           const auto key = std::make_tuple(f[1], f[2], f[3]);
@@ -375,6 +387,8 @@ std::string PageIdentity(const Page& page) {
     for (const auto& series : panel.series) {
       output << "SERIES\t" << series.key << '\t' << series.tune << '\t'
              << series.lineStyle << '\t' << series.mode << '\n';
+      if (series.displayScale != 1.)
+        output << "DISPLAY_SCALE\t" << NumberToken(series.displayScale) << '\n';
       for (const auto& point : series.points) {
         output << "POINT\t" << point.semanticId << '\t' << point.bin << '\t'
                << NumberToken(point.scientificX) << '\t'

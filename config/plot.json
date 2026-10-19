@@ -38,6 +38,7 @@
     },
     "p1_inset_geometry": [0.18, 0.05, 0.65, 0.48],
     "correlation_view": "monash_pair_sign",
+    "correlation_display_scales": {"4122": 10, "5122": 5},
     "activity_category_dividers": false,
     "tune_ratio_y_scale": "log",
     "balancing_species_views": {

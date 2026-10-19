@@ -160,6 +160,7 @@ The field `phase_a_t9_two_sided_quantile` is the literal key for the fixed nine-
 | `layout.categorical_tune_dodge` | Upper: -0.08, 0, 0.08. Lower: -0.04, 0.04. Fixed compatibility map. Current scientific category positions coincide. |
 | `layout.p1_inset_geometry` | `[0.18,0.05,0.65,0.48]`. Fixed normalized rectangle for the multiplicity inset |
 | `layout.correlation_view` | `monash_pair_sign`. Also accepts `monash_balance` and `all_tune_ratio` |
+| `layout.correlation_display_scales` | Optional map from selected trigger PDG strings to positive finite factors. Defaults: `4122: 10`, `5122: 5`. Omitted triggers use 1. |
 | `layout.activity_category_dividers` | false. Boolean. Adds vertical category dividers when true. |
 | `style_identities.class_line_style_rule` | Integrated style 1, others by class order. Fixed mapping |
 | `style_identities.class_line_patterns` | One solid and eleven distinct dash patterns. Exact ROOT style IDs, dash strings and inclusive role |
@@ -193,6 +194,10 @@ The supplemental activity pages select the saved 0-1%, 40-50% and 80-90% interva
 `monash_pair_sign` shows identified OS and SS densities above their difference for the same associate species. `monash_balance` shows the MONASH OS, SS and net components. `all_tune_ratio` shows tune comparisons. The selected numerical recipe remains authoritative in each case.
 
 `plot-dplus.json` changes the charm trigger preset to 411. `plot-all-tune.json` changes only `correlation_view`. Neither file changes uncertainty calculation or acceptance.
+
+Correlation display factors multiply the plotted OS, SS and OS-minus-SS values and their error bars. Each affected panel states its factor.
+The renderer uses the same factor for every bin and tune of a selected trigger. Tune ratios and other observables keep their original values.
+The numerical ROOT and exports keep physical values and uncertainties. Set an empty factor map to draw all correlations without scaling.
 
 ## Site settings
 

@@ -112,6 +112,8 @@ $$C_{net,b}=\frac{N_{OS,b}-N_{SS,b}}{T_t\,\delta_b}=C_{OS,b}-C_{SS,b}.$$
 
 Each lower correlation panel subtracts the two identified-pair densities directly above it. The trigger, associate species, selections, angular bins and trigger denominator stay the same. The default columns use D0, Lambda_c, B+ and Lambda_b triggers with their conjugate associates. The same-sign curve uses the corresponding unconjugated associate.
 
+The default figures multiply Lambda_c correlation values and errors by 10, and Lambda_b values and errors by 5, for visibility. Each affected panel labels this display factor. OS, SS and their difference share the same factor. Numerical ROOT values and exports retain the physical densities.
+
 Each density uses its own stored bin width. The estimator applies this division to the pooled result and every deletion. Joint covariance therefore includes the width factors on both axes. A sum of densities times their bin widths gives the integrated yield for the same associate domain.
 
 The numerical quantity `dphi_density_per_trigger` has units `per_trigger_per_radian`. Formula contract `projection_formulas_v4` identifies this convention and the complete selected-state pair domain. Archives with `projection_formulas_v3` retain their narrower pair selection. The reader retains the earlier `dphi_per_trigger` quantity with units `per_trigger_per_bin`. The renderer labels each convention from the numerical archive and rejects mixed conventions within a panel.
@@ -166,6 +168,6 @@ This block jackknife estimates finite-sample variability under the original bloc
 
 [physics.hpp](../pipeline/generate/physics.hpp) implements raw particle and ancestry rules. [model.py](../pipeline/query/model.py) validates downstream selections and the signed registry. [native_engine.cpp](../pipeline/reduce/native_engine.cpp) and [statistics.hpp](../pipeline/reduce/statistics.hpp) evaluate observables and covariance.
 
-The numerical archive records the resolved model, source identities, class boundaries and estimator policy. The renderer consumes that archive. Presentation configuration controls layout and display selection, not formulas or statistical errors.
+The numerical archive records the resolved model, source identities, class boundaries and estimator policy. The renderer consumes that archive. Presentation configuration controls layout, display selection and labelled scale factors. It does not change the estimator or its stored statistical uncertainty.
 
 The fixed raw compatibility contract contains selection and statistical labels that do not configure downstream reduction. Use `config/analysis-all-origin.json` for current query construction. Use `config/analysis-individual-species.json` for the published numerical interpretation. Each analysis version has its own checksum identity. A change to checksum-bound raw metadata does not change the scientific meaning of existing data.

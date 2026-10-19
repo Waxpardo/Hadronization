@@ -329,6 +329,8 @@ The multiplicity display ends at the last occupied MONASH bin edge. Other tunes 
 
 The default correlation view shows MONASH identified pairs with statistical bands. Upper panels use logarithmic density axes; lower panels use linear density axes. Each paired row shares its scale. Each lower panel subtracts the OS and SS densities shown directly above it, with the same associate species and trigger denominator.
 
+The Lambda_c and Lambda_b columns show labelled factors of 10 and 5, respectively. Each factor multiplies displayed OS, SS, their difference and their errors. Divide displayed values and errors by that factor to recover physical densities. [Presentation configuration](configuration.md) controls these factors without numerical reduction.
+
 Solid and dotted lines distinguish opposite and same heavy-flavour signs. The alternative `config/plot-all-tune.json` uses tune colors and comparison panels. Neither presentation changes the numerical uncertainties.
 
 When tunes share a panel, MONASH uses black circles, JUNCTIONS blue squares and CLOSEPACKING orange triangles. Pages with separate tune rows and several activity classes omit markers. Their colors identify tunes, and line patterns identify classes. The inclusive class uses a solid line.

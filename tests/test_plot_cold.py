@@ -1538,6 +1538,59 @@ int main(int argc, char** argv) {
                 ["MONASH", "JUNCTIONS"], "MONASH", rows[:-1],
                 "correlations.charm")
 
+    def test_display_scale_is_confined_to_absolute_correlations(self):
+        config, _ = plot.checked_plot_config(ROOT / 'config/plot.json')
+        for component in ('OS', 'SS', 'OS_MINUS_SS'):
+            identity = {'trigger_pdg': '4122', 'reference_tune': '',
+                        'component': component}
+            self.assertEqual(plot.correlation_display_scale(
+                'correlations.charm', identity, config), 10.)
+            identity['trigger_pdg'] = '5122'
+            self.assertEqual(plot.correlation_display_scale(
+                'correlations.beauty', identity, config), 5.)
+            identity['reference_tune'] = 'MONASH'
+            self.assertEqual(plot.correlation_display_scale(
+                'correlations.beauty', identity, config), 1.)
+            identity['reference_tune'] = ''
+            for role in ('balancing.integrated.beauty',
+                         'balancing.baryon_meson.activity',
+                         'spectra.signed_heavy', 'multiplicity.composite'):
+                self.assertEqual(plot.correlation_display_scale(
+                    role, identity, config), 1.)
+        identity['trigger_pdg'] = '421'
+        self.assertEqual(plot.correlation_display_scale(
+            'correlations.charm', identity, config), 1.)
+
+    def test_display_scale_refuses_invalid_or_unknown_configuration(self):
+        config, _ = plot.checked_plot_config(ROOT / 'config/plot.json')
+        with tempfile.TemporaryDirectory() as work:
+            path = Path(work) / 'plot.json'
+            for scales in ({'4122': 0}, {'4122': -5}, {'4122': True},
+                           {'4122': float('inf')}, {'4122': '10'},
+                           {'9999': 5}, [5, 10]):
+                config['layout']['correlation_display_scales'] = scales
+                path.write_text(json.dumps(config))
+                with self.subTest(scales=scales), self.assertRaisesRegex(
+                        ValueError, 'display scale'):
+                    plot.checked_plot_config(path)
+
+    def test_display_scale_labels_each_affected_panel(self):
+        page = {'role': 'correlations.charm', 'width': 1900, 'height': 1850,
+                'text_pixels': 18, 'filename': 'correlations.charm.pdf',
+                'panels': []}
+        for factor in (1., 10., 10.):
+            page['panels'].append({'geometry': [0., 0., .5, .5],
+                'margins': [.1, .03, .1, .1], 'annotations': [],
+                'series': [{'display_y_scale': factor}]})
+        plot.add_correlation_scale_labels([page])
+        self.assertEqual(page['panels'][0]['annotations'], [])
+        for panel in page['panels'][1:]:
+            self.assertEqual(panel['annotations'][0]['text'],
+                             'All curves #times 10')
+        page['panels'][1]['series'].append({'display_y_scale': 5.})
+        with self.assertRaisesRegex(ValueError, 'mixed display scales'):
+            plot.add_correlation_scale_labels([page])
+
     def test_reference_correlation_captions_use_registered_component_sign(self):
         for expected in (
                 {421: (-421, 421), 4122: (-421, 421),

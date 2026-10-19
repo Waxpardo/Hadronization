@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[2]
 PLOT_CONFIG = ROOT / "config/plot.json"
 TARGET_CAMPAIGN = ROOT / "data/campaign.json"
 TARGET_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d"
-DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v9"
+DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v10"
 CANVAS_NAME = "canvases.root"
 RECORD_NAME = "drawing-record.tsv.gz"
 # Display order only: mesons first, then Lambda, Sigma, Xi and Omega baryons.
@@ -213,6 +213,15 @@ def checked_plot_config(path):
         layout_fields.add('tune_ratio_y_scale')
         if layout['tune_ratio_y_scale'] not in ('linear', 'log'):
             raise ValueError('tune ratio y scale differs')
+    if 'correlation_display_scales' in layout:
+        layout_fields.add('correlation_display_scales')
+        scales = layout['correlation_display_scales']
+        if (not isinstance(scales, dict) or
+                any(key not in {str(pdg) for pdg in paper['trigger_pdgs']}
+                    or type(value) not in (int, float)
+                    or not math.isfinite(value) or value <= 0
+                    for key, value in scales.items())):
+            raise ValueError('correlation display scale differs')
     if 'balancing_species_views' in layout:
         layout_fields.add('balancing_species_views')
         views = layout['balancing_species_views']
@@ -676,6 +685,36 @@ def identified_correlation_rows(rows):
                                    'dphi_density_per_trigger')
             and row['component'] in ('OS', 'SS', 'OS_MINUS_SS')
             and row['associate_pdg'] == str(-int(row['trigger_pdg']))]
+
+
+def correlation_display_scale(role, identity, config):
+    """Select a fixed display multiplier for an absolute correlation curve."""
+    if not role.startswith('correlations.') or identity['reference_tune']:
+        return 1.
+    return float(config['layout'].get('correlation_display_scales', {}).get(
+        identity['trigger_pdg'], 1.))
+
+
+def add_correlation_scale_labels(pages):
+    """Label each scaled panel before annotation clearance is resolved."""
+    for page in pages:
+        if not page['role'].startswith('correlations.'):
+            continue
+        for panel in page['panels']:
+            factors = {s.get('display_y_scale', 1.) for s in panel['series']}
+            if not factors or factors == {1.}:
+                continue
+            if len(factors) != 1:
+                raise ValueError('correlation panel has mixed display scales')
+            factor = next(iter(factors))
+            font = body_text_pixels(page)
+            pw = page['width']*(panel['geometry'][2]-panel['geometry'][0])
+            ph = page['height']*(panel['geometry'][3]-panel['geometry'][1])
+            panel['annotations'].append({
+                'x': panel['margins'][0]+3.*font/pw,
+                'y': 1.-panel['margins'][3]-2.465*(font+2)/ph,
+                'size': float(font),
+                'text': 'All curves #times '+format(factor, '.15g')})
 
 
 def correlation_y_title(rows, component='OS'):
@@ -2623,6 +2662,7 @@ def drawing_plan(projection, manifest, config):
                     tunes.index(kv[1][0]['tune']),
                     int(kv[1][0]['class_id'] or 0),kv[0])):
                 ident=_series_identity(values[0]); tune=ident['tune'];cl=ident.get('class_id','')
+                display_scale = correlation_display_scale(role, ident, config)
                 points=[]
                 for r in values:
                     v=_render_numbers(r); low,high=v['bin_low'],v['bin_high']; sl,sh=low,high
@@ -2641,7 +2681,8 @@ def drawing_plan(projection, manifest, config):
                     state='FLOW_BIN' if family=='kinematics' and low is None else 'EMPTY_SUPPORT' if x is None else 'MISSING_VALUE' if v['value'] is None else 'DRAW'
                     points.append({'semantic_id':r['semantic_id'],'bin':int(r['bin_index']) if r['bin_index'] else -1,
                         'scientific_x':scientific_x,'display_x':x,
-                        'x':x,'y':v['value'],'error':v['finite_mc_error'],
+                        'x':x,'y':None if v['value'] is None else v['value']*display_scale,
+                        'error':None if v['finite_mc_error'] is None else v['finite_mc_error']*display_scale,
                         'bin_low':low,'bin_high':high,'support_low':sl,
                         'support_high':sh,'class_id':r['class_id'],
                         'value_status':r['value_status'],
@@ -2670,6 +2711,7 @@ def drawing_plan(projection, manifest, config):
                     line_style=1+species.index(ident['associate_pdg'])
                     legend_label=label(ident['associate_pdg'])+' / '+label(ident['reference_pdg'])
                 series.append({'key':key,'identity':ident,'tune':tune,'class_id':cl,
+                    'display_y_scale':display_scale,
                     'color':({'OS':'#000000','SS':'#000000',
                               'OS_MINUS_SS':'#000000'}[ident['component']]
                              if pair_sign_view else styles[tune]['color']),
@@ -2941,6 +2983,7 @@ def drawing_plan(projection, manifest, config):
     if getattr(context, 'cold', False):
         apply_cold_page_style(pages,context)
         add_publication_captions(pages,context)
+    add_correlation_scale_labels(pages)
     apply_tune_ratio_scale(pages, config)
     reserve_spectrum_tune_key(pages)
     move_annotation_blocks_from_panel_labels(pages)
@@ -3172,6 +3215,9 @@ def drawing_payload(plan):
             for s in a["series"]:
                 lines.append(["SERIES"]+prefix+[s["key"],s["tune"],s["class_id"] or "-",s["color"],s["marker"],
                                                 s["line_style"],s["label"],s["draw_mode"],s["legend_label"],s["emphasis"]])
+                if s.get('display_y_scale', 1.) != 1.:
+                    lines.append(['DISPLAY_SCALE']+prefix+[
+                        s['key'], s['display_y_scale']])
                 for q in s["points"]:
                     lines.append(["POINT"]+prefix+[s["key"],q["semantic_id"],
                         q["bin"],q["scientific_x"],q["display_x"],q["y"],
@@ -3199,7 +3245,7 @@ def drawing_payload(plan):
 def normalized_drawing_record(payload):
     """Canonicalize numbers reconstructed by C++, never just echo input bytes."""
     numeric = {"PAGE":[10], "PANEL":list(range(5,13))+list(range(17,25)),
-               "ANNOTATION":[3,4,5], "POINT":list(range(6,14)), "GUIDE":list(range(4,8)), "TICK":[3]}
+               "ANNOTATION":[3,4,5], "DISPLAY_SCALE":[4], "POINT":list(range(6,14)), "GUIDE":list(range(4,8)), "TICK":[3]}
     lines=[]
     for line in payload.decode("ascii").splitlines():
         fields=line.split("\t")
@@ -3494,6 +3540,8 @@ def cold_render_manifest(args, payload, config, config_sha, build, plan,
         "plot_config_sha256": config_sha,
         "presentation_scope": {
             "correlation_view": config['layout']['correlation_view'],
+            "correlation_display_scales": config['layout'].get(
+                'correlation_display_scales', {}),
             "paper_trigger_pdgs": config['presets']['paper_default'][
                 'trigger_pdgs'],
             "baryon_meson_trigger_pdgs": config['presets'][

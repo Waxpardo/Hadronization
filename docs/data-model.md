@@ -234,6 +234,10 @@ The literal filenames `t1.csv` and `t1.tex` contain natural-heavy accounting. Te
 
 Figure directories contain PDFs, `canvases.root`, `drawing-record.tsv.gz` and `manifest.json`. Canvas graph identities retain point semantics and statuses. The drawing record contains coordinates, styles, panel geometry and display decisions. It does not define scientific formulas.
 
+The drawing protocol uses schema `hadronization_plot_drawing_plan_v10`. A `DISPLAY_SCALE` record declares a correlation series multiplier.
+Its `POINT` records contain displayed values and errors. The factor multiplies both quantities from the unchanged numerical ROOT point identified by `semantic_id`.
+The figure manifest binds the factors and the source numerical ROOT hash. Panels without a scale record use a factor of 1.
+
 The final package contains `numerical/`, `figures/`, the selected `config/*.json` and a root manifest. Its exact file set excludes computation scratch and the native execution binary. The numerical report still records external execution references.
 
 ## Lifetimes and retention
