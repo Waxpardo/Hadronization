@@ -172,7 +172,7 @@ $$R_a=\frac{(N_{\mathrm{OS}}-N_{\mathrm{SS}})_{B,a}/T_B}{(N_{\mathrm{OS}}-N_{\ma
 
 Here $B$ and $M$ denote the baryon and meson trigger samples. The charm panel compares $\Lambda_c^+$ with $D^0$ for the same signed associate, so $a'=a$. The beauty panel compares $\Lambda_b^0$ with $B^+$. These triggers contain opposite heavy-flavour signs, so the beauty panel compares the charge-conjugate associates used in the integrated figures. Its upper species label belongs to the numerator; its lower label belongs to the denominator.
 
-A value above one means a larger balancing yield per baryon trigger for the indicated associate. A raw net-count ratio also contains the trigger-population ratio and therefore answers a different question. Neither comparison isolates a causal fragmentation mechanism.
+For positive parent yields, a ratio above one means a larger yield per baryon trigger for the indicated associate. A raw net-count ratio also contains the trigger-population ratio and therefore answers a different question. Neither comparison isolates a causal fragmentation mechanism.
 
 The center uses pooled counts. Each uncertainty deletes the same original block from both trigger samples and recomputes the complete ratio. The numerical companion retains all deletion values and the joint covariance across associates. Independent tune families contribute separate covariance blocks. A zero or unresolved surviving denominator withholds the affected result or uncertainty. Negative valid centers remain signed.
 

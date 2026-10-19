@@ -6,7 +6,7 @@ The sample selects hard charm and beauty production. It is a generator-level, he
 
 ## Repository contents
 
-The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 69 PDFs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
+The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 70 PDFs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
 
 The source inventory records 3,000 accepted files and 300 million successful events. Each tune contributes 100 million events in ten original source blocks. The [data inventory](data/README.md) binds the distributed results and external inputs to checksums. The [sample accounting guide](docs/science.md#sample-accounting) explains the 127 discarded job attempts.
 

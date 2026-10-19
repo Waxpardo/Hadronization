@@ -109,3 +109,49 @@ class TriggerComparison(unittest.TestCase):
         mutant=copy.deepcopy(parent); mutant['points'][0]['block_values'][0]['event_moments_sha256']='other'
         with self.assertRaisesRegex(ValueError,'populations differ'):
             tc.derive(mutant,recipe,'a'*64,'b'*64)
+
+    def test_full_drawing_roundtrip_and_shared_title(self):
+        from pipeline.plot import run as plot
+        from types import SimpleNamespace
+        import subprocess
+        recipe=json.loads((ROOT/'config/trigger-comparison.json').read_text())
+        tunes=['CLOSEPACKING','JUNCTIONS','MONASH']
+        points=[]
+        labels={str(x):'PDG '+str(x) for x in [421,4122,521,5122]}
+        for sector in recipe['sectors']:
+            for slot,(a,b) in enumerate(sector['associate_pairs'],1):
+                labels.update({str(x):'PDG '+str(x) for x in (a,b)})
+                for tune in tunes:
+                    points.append(dict(semantic_id=sector['id']+str(slot)+tune,
+                        sector=sector['id'],slot=slot,tune=tune,center=(1.1).hex(),
+                        error=(.01).hex(),value_status='AVAILABLE',
+                        uncertainty_status='AVAILABLE',reasons=[]))
+        value=dict(recipe=recipe,tunes=tunes,points=points)
+        context=SimpleNamespace(target_analysis_caption='TEST ONLY',
+            sample_caption=['Hard test sample'],profile_definition={
+                'trigger_eta':{'high':(4.).hex()},'trigger_pt':{'low':None}})
+        config,_=plot.checked_plot_config(ROOT/'config/plot.json')
+        page=plot.trigger_comparison_page(value,context,{'presentation':{'species_labels':labels}},config)
+        self.assertEqual([s['tune'] for s in page['panels'][0]['series']],
+                         ['MONASH','JUNCTIONS','CLOSEPACKING'])
+        with tempfile.TemporaryDirectory() as td:
+            work=Path(td);env,binary,_=plot.build_renderer(work)
+            expected=plot.drawing_payload(dict(request_id='test-comparison',pages=[page]))
+            plan=work/'plan.tsv';plan.write_bytes(expected)
+            subprocess.run([str(binary),str(plan),str(work/'pages'),str(work/'record.tsv')],
+                           check=True,capture_output=True,env=env)
+            record=(work/'record.tsv').read_bytes()
+            self.assertEqual(plot.normalized_drawing_record(record),expected)
+            plot.verify_canvas_archive(binary,env,work/'pages',record,work)
+            import ROOT as rt
+            f=rt.TFile.Open(str(work/'pages/canvases.root'))
+            labels=[]
+            def visit(obj):
+                if obj.InheritsFrom('TLatex'): labels.append(str(obj.GetTitle()))
+                if obj.InheritsFrom('TPad'):
+                    for child in obj.GetListOfPrimitives(): visit(child)
+            for key in f.GetListOfKeys():
+                obj=key.ReadObj()
+                if obj.InheritsFrom('TCanvas'):visit(obj)
+            f.Close()
+            self.assertEqual(labels.count('Associate Species'),1)

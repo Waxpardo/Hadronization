@@ -3662,7 +3662,7 @@ def trigger_comparison_page(value, context, adapter, config):
         captions = []
         if column == 0:
             lines = scientific_caption_lines(page, context)
-            captions = [dict(x=.23, y=.835-i*.042, size=32, text=text)
+            captions = [dict(x=.23, y=.835-i*.042, size=32., text=text)
                         for i, text in enumerate(lines)]
         panel = dict(id='comparison.'+sector['id'], status='AVAILABLE', log_y=False, log_x=False,
             geometry=[0.,0.,.54,.98] if column == 0 else [.54,0.,1.,.98],

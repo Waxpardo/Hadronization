@@ -6,11 +6,13 @@ The `HF_RUN3_V1` result contains 300 million successful events from 3,000 accept
 
 ## Included results
 
-The [collaboration package](results/manifest.json) contains numerical ROOT, 69 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 60,860 points with separate value and uncertainty statuses. The tables retain explicit missing values.
+The [collaboration package](results/manifest.json) contains numerical ROOT, 70 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 60,860 points with separate value and uncertainty statuses. The tables retain explicit missing values.
 
 The result uses inclusive pair pT and final triggers from all origins. Its identity recipe keeps 202 signed open-heavy associates separate. The fine query retains all 219 catalog identities, including hidden-heavy states.
 
 The paired overview shows seven charm and eight beauty ground-state meson, Lambda and Sigma identities per trigger. Separate single-trigger figures show 28 charm and 43 beauty ground, star and prime identities. The numerical archive keeps all 202 signed open-heavy identities.
+
+The [trigger comparison](results/figures/supplemental.balancing.trigger_comparison.pdf) shows the ratio of baryon-trigger to meson-trigger balancing yields within each tune. Its [ROOT companion](results/figures/trigger-comparison.root) stores 45 ratios and their joint block covariance. Charm compares the same signed associates. Beauty compares charge-conjugate associates: the upper species label denotes the numerator and the lower label denotes the denominator. See the [scientific definition](../docs/science.md#comparison-between-trigger-species).
 
 Upper baryon-to-meson activity panels use linear vertical axes. Tune-comparison panels for balancing yields and baryon-to-meson ratios use logarithmic axes. ROOT and status records retain unavailable and nonpositive ratios that the logarithmic panels cannot draw.
 
@@ -51,9 +53,13 @@ cp config/plot.json data/work/custom-plot.json
   --numerics-root data/results/numerical/numerics.root \
   --expected-root-sha256 f70cb537abce0ba0646320d266ae946b95e33fa4e4dd59e49f7f33b0c78af4f4 \
   --expected-value-sha256 fdc681d5cec7ddc8e4728eafa4b07caaa0b9bd8c9d4c2bf1f38ba0fe87b00271 \
+  --trigger-comparison-root data/results/figures/trigger-comparison.root \
+  --expected-trigger-comparison-sha256 f25d964055851bc2c3c28a269975d7bb81e4155a4c7410b29603779110d8483c \
   --plot-config data/work/custom-plot.json \
   --work-dir data/work/custom-render --output data/work/custom-figures
 ```
+
+To recompute the trigger comparison with another supported signed recipe, use [the comparison workflow](../docs/workflow.md#compare-trigger-samples). The standard render without its optional companion produces 69 figures.
 
 To render correlation comparisons across tunes, use `config/plot-all-tune.json`. This configuration changes only the correlation presentation. It produces a complete figure set in a new local directory. The numerical ROOT and its statistical results remain unchanged.
 
