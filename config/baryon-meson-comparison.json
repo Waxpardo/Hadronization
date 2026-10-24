@@ -1,0 +1,5 @@
+{
+  "schema": "hadronization_baryon_meson_comparison_recipe_v1",
+  "profile_id": "inclusive",
+  "ordered_trigger_pdgs": [421, 4122, 521, 5122]
+}

@@ -3473,10 +3473,81 @@ def canonical_root_archive(path, drawing_record):
 
 def render_artifacts(pages):
     paths = list(pages.glob('*.pdf')) + [pages / CANVAS_NAME, pages / RECORD_NAME]
-    comparison = pages / 'trigger-comparison.root'
-    if comparison.exists():
-        paths.append(comparison)
+    for name in ('trigger-comparison.root', 'baryon-meson-comparison.root',
+                 'baryon-meson-comparison.csv'):
+        companion = pages / name
+        if companion.exists():
+            paths.append(companion)
     return sorted(paths)
+
+
+def preserve_existing_pdfs(args, pages, record):
+    """Replace unchanged PDFs with a checksum-bound accepted set."""
+    source = getattr(args, 'preserve_pdfs_from', None)
+    expected = getattr(args, 'expected_preserved_manifest_sha256', None)
+    if (source is None) != (expected is None):
+        raise ValueError('PDF preservation requires a source and manifest SHA-256')
+    if source is None:
+        return None
+    source = Path(source).absolute()
+    reject_symlink_components(source, 'preserved PDF source')
+    if not source.is_dir():
+        raise ValueError('preserved PDF source is not a directory')
+    if re.fullmatch(r'[0-9a-f]{64}', expected or '') is None:
+        raise ValueError('preserved PDF manifest SHA-256 differs')
+    manifest_path = source / 'manifest.json'
+    regular_file(manifest_path, 'preserved PDF manifest')
+    if sha_file(manifest_path) != expected:
+        raise ValueError('preserved PDF manifest SHA-256 differs')
+    manifest = json_file(manifest_path, 'preserved PDF manifest')
+    if (manifest.get('schema') != 'hadronization_cold_plot_render_v1' or
+            manifest.get('state') != 'COMPLETE'):
+        raise ValueError('preserved PDF manifest state differs')
+    verify_flat_fileset(source, manifest.get('filesystem_set'),
+                        'preserved PDF source')
+    facts = manifest.get('files')
+    if not isinstance(facts, list):
+        raise ValueError('preserved PDF file inventory differs')
+    by_name = {item.get('name'):item for item in facts
+               if isinstance(item, dict)}
+    if len(by_name) != len(facts):
+        raise ValueError('preserved PDF file inventory differs')
+    for name, fact in by_name.items():
+        path = source / name
+        regular_file(path, 'preserved PDF artifact')
+        if (set(fact) != {'name', 'bytes', 'sha256'} or
+                path.stat().st_size != fact['bytes'] or
+                sha_file(path) != fact['sha256']):
+            raise ValueError('preserved PDF artifact identity differs: ' + name)
+    source_pdfs = {path.name for path in source.glob('*.pdf')}
+    output_pdfs = {path.name for path in pages.glob('*.pdf')}
+    added = sorted(output_pdfs - source_pdfs)
+    if not source_pdfs or not added or not source_pdfs < output_pdfs:
+        raise ValueError('preserved and newly rendered PDF domains differ')
+    if any(name not in by_name for name in source_pdfs):
+        raise ValueError('preserved PDF manifest coverage differs')
+    source_record = gzip.decompress((source / RECORD_NAME).read_bytes())
+    old_lines = source_record.decode('ascii').splitlines()[1:-1]
+    new_lines = record.decode('ascii').splitlines()[1:-1]
+    retained = [line for line in new_lines
+                if line.split('\t', 2)[1] in source_pdfs]
+    if old_lines != retained:
+        raise ValueError('preserved PDF drawing records differ')
+    for name in sorted(source_pdfs):
+        shutil.copyfile(source / name, pages / name)
+        verify_pdf_fonts(pages / name)
+    receipt = {
+        'schema':'hadronization_preserved_pdf_set_v1',
+        'source_manifest_sha256':expected,
+        'source_renderer_build_id':manifest['renderer_build']['build_id'],
+        'source_pdf_export':manifest['pdf_export'],
+        'preserved_pdf_count':len(source_pdfs),
+        'preserved_pdf_names_sha256':sha_bytes(canonical(
+            sorted(source_pdfs)).encode('ascii')),
+        'new_pdf_names':added,
+    }
+    args._pdf_preservation = receipt
+    return receipt
 
 
 def promote_render_pages(pages, output):
@@ -3586,6 +3657,24 @@ def cold_render_manifest(args, payload, config, config_sha, build, plan,
             'recipe_sha256': comparison['recipe_sha256']}
         for name in ('pipeline/reduce/trigger_comparison.py', 'pipeline/reduce/statistics.hpp'):
             result['source_sha256'][name] = sha_file(ROOT / name)
+    baryon_meson = getattr(args, '_baryon_meson', None)
+    if baryon_meson is not None:
+        result['baryon_meson_comparison'] = {
+            'path': 'baryon-meson-comparison.root',
+            'sha256': sha_file(pages / 'baryon-meson-comparison.root'),
+            'value_sha256': sha_bytes(canonical(baryon_meson).encode('ascii')),
+            'csv_path': 'baryon-meson-comparison.csv',
+            'csv_sha256': sha_file(pages / 'baryon-meson-comparison.csv'),
+            'recipe_sha256': baryon_meson['recipe_sha256'],
+            'family_manifest_sha256': baryon_meson['family_manifest_sha256']}
+        for name in ('pipeline/reduce/baryon_meson_comparison.py',
+                     'pipeline/reduce/family_products.py',
+                     'pipeline/reduce/statistics.hpp',
+                     'config/heavy-hadron-classification.json'):
+            result['source_sha256'][name] = sha_file(ROOT / name)
+    preservation = getattr(args, '_pdf_preservation', None)
+    if preservation is not None:
+        result['pdf_preservation'] = preservation
     return result
 
 
@@ -3610,6 +3699,112 @@ def add_trigger_comparison(args, payload, context, adapter, config, plan, *, ver
     comparison_api.verify(value, payload, args.expected_root_sha256, args.expected_value_sha256)
     args._comparison, args._comparison_path = value, path
     plan['pages'].append(trigger_comparison_page(value, context, adapter, config))
+
+
+def add_baryon_meson_comparison(args, payload, context, adapter, config, plan,
+                                *, verify=False):
+    """Authenticate the fine-species companion and add its saved-value page."""
+    path = getattr(args, 'baryon_meson_comparison_root', None)
+    digest = getattr(args, 'expected_baryon_meson_comparison_sha256', None)
+    products = getattr(args, 'family_products', None)
+    manifest_sha = getattr(args, 'family_manifest_sha256', None)
+    binding = None
+    if verify and path is None:
+        if (args.expected_manifest_sha256 and
+                sha_file(args.output / 'manifest.json') != args.expected_manifest_sha256):
+            raise ValueError('trusted cold render manifest SHA256 differs')
+        binding = json_file(args.output / 'manifest.json').get(
+            'baryon_meson_comparison')
+        if binding is not None:
+            if (binding.get('path') != 'baryon-meson-comparison.root' or
+                    binding.get('csv_path') != 'baryon-meson-comparison.csv'):
+                raise ValueError('baryon/meson comparison package locator differs')
+            path, digest = args.output / binding['path'], binding['sha256']
+            manifest_sha = manifest_sha or binding.get('family_manifest_sha256')
+    supplied = (path, digest, products, manifest_sha)
+    if any(item is not None for item in supplied) and any(item is None for item in supplied):
+        raise ValueError('baryon/meson comparison requires ROOT, family products, and independent pins')
+    if path is None:
+        return
+    from pipeline.reduce import baryon_meson_comparison as comparison_api
+    value = comparison_api.read(path, digest)
+    comparison_api.verify(value, payload, args.expected_root_sha256,
+                          args.expected_value_sha256, products, manifest_sha)
+    if binding is not None:
+        expected_csv = comparison_api.csv_bytes(value)
+        csv_path = args.output / binding['csv_path']
+        if (not csv_path.is_file() or csv_path.is_symlink() or
+                sha_bytes(expected_csv) != binding.get('csv_sha256') or
+                csv_path.read_bytes() != expected_csv):
+            raise ValueError('baryon/meson compact export differs')
+    args._baryon_meson, args._baryon_meson_path = value, path
+    plan['pages'].append(baryon_meson_comparison_page(
+        value, context, adapter, config))
+
+
+def baryon_meson_comparison_page(value, context, adapter, config):
+    """Lay out stored all-trigger baryon/meson ratios."""
+    role = 'balancing.baryon_meson.all_triggers'
+    styles = {item['id']: item for item in config['style_identities']['tunes']}
+    labels = adapter['presentation']['species_labels']
+    def label(pdg):
+        if str(pdg) not in labels:
+            raise ValueError('baryon/meson trigger label is absent')
+        return species_latex_label(pdg, labels[str(pdg)])
+    ordered_tunes = [item['id'] for item in config['style_identities']['tunes']
+                     if item['id'] in value['tunes']]
+    if ordered_tunes != ['MONASH', 'JUNCTIONS', 'CLOSEPACKING']:
+        raise ValueError('baryon/meson comparison tune order differs')
+    offsets = {'MONASH': -.12, 'JUNCTIONS': 0., 'CLOSEPACKING': .12}
+    series = []
+    for tune in ordered_tunes:
+        points = []
+        for slot, trigger in enumerate(value['recipe']['ordered_trigger_pdgs'], 1):
+            matches = [point for point in value['points'] if
+                       point['tune'] == tune and point['trigger_pdg'] == trigger and
+                       point['observable'] == 'R_BM']
+            if len(matches) != 1:
+                raise ValueError('baryon/meson plotted point domain differs')
+            point = matches[0]
+            x = float(slot) + offsets[tune]
+            points.append(dict(semantic_id='baryon-meson:{}:{}'.format(tune, trigger),
+                bin=slot-1, scientific_x=float(slot), display_x=x, x=x,
+                y=None if point['center'] is None else float.fromhex(point['center']),
+                error=None if point['error'] is None else float.fromhex(point['error']),
+                bin_low=slot-.5, bin_high=slot+.5,
+                support_low=slot-.5, support_high=slot+.5,
+                class_id='0', value_status=point['value_status'],
+                uncertainty_status=point['uncertainty_status'],
+                state='DRAW' if point['center'] is not None else 'MISSING_VALUE',
+                reasons=','.join(point['reasons'])))
+        style = styles[tune]
+        series.append(dict(key='baryon-meson.'+tune, tune=tune, class_id='0',
+            color=style['color'], marker=style['marker'], line_style=1,
+            label=tune, legend_label=tune, emphasis='NORMAL',
+            draw_mode='categories', points=points))
+    page = dict(filename='supplemental.balancing.baryon-meson.all-triggers.pdf',
+        role=role, page_index=1, page_count=1, width=1100, height=620,
+        text_pixels=26, information='', title='', header_bottom=.99,
+        scientific_header='', style_header='class_patterns_sha256='+sha_bytes(
+            canonical(config['style_identities']['class_line_patterns']).encode('ascii')),
+        panels=[])
+    lines = scientific_caption_lines(page, context)
+    annotations = [dict(x=.17, y=.72-i*.055, size=22., text=text)
+                   for i, text in enumerate(lines)]
+    panel = dict(id='baryon-meson.all-triggers', status='AVAILABLE',
+        log_y=False, log_x=False, geometry=[0., 0., 1., .99],
+        margins=[.14, .035, .22, .035], x_range=[.5, 4.5], y_range=[0., 1.08],
+        title='', x_title='Trigger Species',
+        y_title='#it{Y}_{#font[42]{Baryon}}/#it{Y}_{#font[42]{Meson}}',
+        note='', series=series, annotations=annotations, reuse=None,
+        uncertainty_display='STANDARD', category_dividers=False,
+        legend=[.64, .71, .955, .90],
+        guides=[dict(id='unity', x_low=.5, x_high=4.5, y_low=1., y_high=1.,
+                     color='#777777', line_style=3, label='')],
+        ticks=[dict(x=float(slot), label=label(trigger)) for slot, trigger in
+               enumerate(value['recipe']['ordered_trigger_pdgs'], 1)])
+    page['panels'].append(panel)
+    return page
 
 
 def trigger_comparison_page(value, context, adapter, config):
@@ -3694,6 +3889,7 @@ def render_cold(args):
     context, adapter = cold_drawing_inputs(payload, config)
     plan = drawing_plan(context, adapter, config)
     add_trigger_comparison(args, payload, context, adapter, config, plan)
+    add_baryon_meson_comparison(args, payload, context, adapter, config, plan)
     record_expected = drawing_payload(plan)
     output.parent.mkdir(parents=True, exist_ok=True)
     environment, binary, build = build_renderer(args.work_dir)
@@ -3720,6 +3916,13 @@ def render_cold(args):
         write_payload(pages / RECORD_NAME, deterministic_gzip(record))
         if getattr(args, '_comparison', None) is not None:
             shutil.copyfile(args._comparison_path, pages / 'trigger-comparison.root')
+        if getattr(args, '_baryon_meson', None) is not None:
+            from pipeline.reduce import baryon_meson_comparison as comparison_api
+            shutil.copyfile(args._baryon_meson_path,
+                            pages / 'baryon-meson-comparison.root')
+            (pages / 'baryon-meson-comparison.csv').write_bytes(
+                comparison_api.csv_bytes(args._baryon_meson))
+        preserve_existing_pdfs(args, pages, record)
         manifest = cold_render_manifest(args, payload, config, config_sha,
                                         build, plan, pages, record, pdf_export)
         atomic_json(pages / "manifest.json", manifest)
@@ -3769,6 +3972,31 @@ def verify_cold_files(args, payload, config_sha, build, plan, output,
             pdf_export.get('policy')!='vector_pdf_embedded_fonts_v1' or
             re.fullmatch(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?',str(pdf_export.get('ghostscript_version'))) is None):
         raise ValueError('PDF export receipt differs')
+    preservation = manifest.get('pdf_preservation')
+    if preservation is not None:
+        required = {'schema', 'source_manifest_sha256',
+                    'source_renderer_build_id', 'source_pdf_export',
+                    'preserved_pdf_count', 'preserved_pdf_names_sha256',
+                    'new_pdf_names'}
+        if (not isinstance(preservation, dict) or set(preservation) != required or
+                preservation.get('schema') !=
+                    'hadronization_preserved_pdf_set_v1' or
+                re.fullmatch(r'[0-9a-f]{64}', str(preservation.get(
+                    'source_manifest_sha256'))) is None or
+                re.fullmatch(r'[0-9a-f]{64}', str(preservation.get(
+                    'source_renderer_build_id'))) is None or
+                not isinstance(preservation.get('source_pdf_export'), dict) or
+                not isinstance(preservation.get('new_pdf_names'), list)):
+            raise ValueError('preserved PDF receipt differs')
+        new_names = preservation['new_pdf_names']
+        pdf_names = {path.name for path in output.glob('*.pdf')}
+        preserved_names = sorted(pdf_names - set(new_names))
+        if (not new_names or not set(new_names) <= pdf_names or
+                preservation['preserved_pdf_count'] != len(preserved_names) or
+                preservation['preserved_pdf_names_sha256'] != sha_bytes(
+                    canonical(preserved_names).encode('ascii'))):
+            raise ValueError('preserved PDF receipt domain differs')
+        args._pdf_preservation = preservation
     for path in output.glob('*.pdf'):
         verify_pdf_fonts(path)
     expected = cold_render_manifest(args, payload, config, config_sha,
@@ -4075,6 +4303,8 @@ def verify_render_cold(args):
     context, adapter = cold_drawing_inputs(payload, config)
     plan = drawing_plan(context, adapter, config)
     add_trigger_comparison(args, payload, context, adapter, config, plan, verify=True)
+    add_baryon_meson_comparison(args, payload, context, adapter, config, plan,
+                                verify=True)
     environment, binary, build = build_renderer(args.work_dir)
     manifest = verify_cold_files(args, payload, config_sha, build, plan,
                                  args.output.resolve(), binary, environment)
@@ -4093,9 +4323,21 @@ def cold_inputs(parser, *, comparison=True):
                             help='optional numerical ROOT from reduce compare-triggers')
         parser.add_argument('--expected-trigger-comparison-sha256',
                             help='independent physical pin for the trigger comparison')
+        parser.add_argument('--baryon-meson-comparison-root', type=Path,
+                            help='optional ROOT from reduce compare-baryon-meson')
+        parser.add_argument('--expected-baryon-meson-comparison-sha256',
+                            help='independent physical pin for the baryon/meson comparison')
+        parser.add_argument('--family-products', type=Path,
+                            help='verified retained fine/shared numerical products')
+        parser.add_argument('--family-manifest-sha256',
+                            help='independent physical pin for family-products/manifest.json')
     parser.add_argument("--expected-manifest-sha256",
         help="optional independent manifest pin for verification")
     parser.add_argument("--plot-config", type=Path, default=PLOT_CONFIG)
+    parser.add_argument('--preserve-pdfs-from', type=Path,
+                        help='accepted figure directory whose unchanged PDFs are retained')
+    parser.add_argument('--expected-preserved-manifest-sha256',
+                        help='independent manifest pin for --preserve-pdfs-from')
     parser.add_argument("--work-dir", type=Path, required=True,
                         help="renderer and archive build scratch")
     parser.add_argument("--output", type=Path, required=True)

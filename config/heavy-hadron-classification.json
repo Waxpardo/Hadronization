@@ -1,0 +1,1024 @@
+{
+  "basis": "particleData.isMeson/isBaryon",
+  "generator": {
+    "name": "PYTHIA",
+    "version": "8.317"
+  },
+  "heavy_catalog_sha256": "2d358f9e0a724602cf467c7d67df5e33d083f3d18196d60202fc450e5aba9433",
+  "particle_data_sha256": "330ba4e7f5a081235b5055f7b312fe6f5c9fe9c95411a845cba7a3e82e67ecca",
+  "schema": "hadronization_heavy_hadron_classification_v1",
+  "source_audit_sha256": "8ecf717354f8e759649b388c6149e4daa0e4c39e550cffb69bec921c36eb35f8",
+  "states": [
+    {
+      "kind": "meson",
+      "name": "B*_1c-",
+      "pdg": -20543
+    },
+    {
+      "kind": "meson",
+      "name": "B*_1sbar0",
+      "pdg": -20533
+    },
+    {
+      "kind": "meson",
+      "name": "B*_1-",
+      "pdg": -20523
+    },
+    {
+      "kind": "meson",
+      "name": "B*_1bar0",
+      "pdg": -20513
+    },
+    {
+      "kind": "meson",
+      "name": "D*_1s-",
+      "pdg": -20433
+    },
+    {
+      "kind": "meson",
+      "name": "D*_1bar0",
+      "pdg": -20423
+    },
+    {
+      "kind": "meson",
+      "name": "D*_1-",
+      "pdg": -20413
+    },
+    {
+      "kind": "baryon",
+      "name": "Lambda_c(2593)bar-",
+      "pdg": -14122
+    },
+    {
+      "kind": "meson",
+      "name": "B_1c-",
+      "pdg": -10543
+    },
+    {
+      "kind": "meson",
+      "name": "B*_0c-",
+      "pdg": -10541
+    },
+    {
+      "kind": "meson",
+      "name": "B_1sbar0",
+      "pdg": -10533
+    },
+    {
+      "kind": "meson",
+      "name": "B*_0sbar0",
+      "pdg": -10531
+    },
+    {
+      "kind": "meson",
+      "name": "B_1-",
+      "pdg": -10523
+    },
+    {
+      "kind": "meson",
+      "name": "B*_0-",
+      "pdg": -10521
+    },
+    {
+      "kind": "meson",
+      "name": "B_1bar0",
+      "pdg": -10513
+    },
+    {
+      "kind": "meson",
+      "name": "B*_0bar0",
+      "pdg": -10511
+    },
+    {
+      "kind": "meson",
+      "name": "D_1s-",
+      "pdg": -10433
+    },
+    {
+      "kind": "meson",
+      "name": "D*_0s-",
+      "pdg": -10431
+    },
+    {
+      "kind": "meson",
+      "name": "D_1bar0",
+      "pdg": -10423
+    },
+    {
+      "kind": "meson",
+      "name": "D*_0bar0",
+      "pdg": -10421
+    },
+    {
+      "kind": "meson",
+      "name": "D_1-",
+      "pdg": -10413
+    },
+    {
+      "kind": "meson",
+      "name": "D*_0-",
+      "pdg": -10411
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bbbbar+",
+      "pdg": -5554
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bbcbar0",
+      "pdg": -5544
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_bbcbar0",
+      "pdg": -5542
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bbbar+",
+      "pdg": -5534
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_bbbar+",
+      "pdg": -5532
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_bbbar0",
+      "pdg": -5524
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_bbbar0",
+      "pdg": -5522
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_bbbar+",
+      "pdg": -5514
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_bbbar+",
+      "pdg": -5512
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bccbar-",
+      "pdg": -5444
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_bccbar-",
+      "pdg": -5442
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bcbar0",
+      "pdg": -5434
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega'_bcbar0",
+      "pdg": -5432
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_bcbar-",
+      "pdg": -5424
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_bcbar-",
+      "pdg": -5422
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_bcbar0",
+      "pdg": -5414
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_bcbar0",
+      "pdg": -5412
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_bcbar0",
+      "pdg": -5342
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bbar+",
+      "pdg": -5334
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_bbar+",
+      "pdg": -5332
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_bbar0",
+      "pdg": -5324
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_bbar0",
+      "pdg": -5322
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_bbar+",
+      "pdg": -5314
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_bbar+",
+      "pdg": -5312
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_bcbar-",
+      "pdg": -5242
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_bbar0",
+      "pdg": -5232
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_bbar-",
+      "pdg": -5224
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_bbar-",
+      "pdg": -5222
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_bbar0",
+      "pdg": -5214
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_bbar0",
+      "pdg": -5212
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_bcbar0",
+      "pdg": -5142
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_bbar+",
+      "pdg": -5132
+    },
+    {
+      "kind": "baryon",
+      "name": "Lambda_bbar0",
+      "pdg": -5122
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_bbar+",
+      "pdg": -5114
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_bbar+",
+      "pdg": -5112
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_cccbar--",
+      "pdg": -4444
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_ccbar-",
+      "pdg": -4434
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_ccbar-",
+      "pdg": -4432
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_ccbar--",
+      "pdg": -4424
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_ccbar--",
+      "pdg": -4422
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_ccbar-",
+      "pdg": -4414
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_ccbar-",
+      "pdg": -4412
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_cbar0",
+      "pdg": -4334
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_cbar0",
+      "pdg": -4332
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_cbar-",
+      "pdg": -4324
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_cbar-",
+      "pdg": -4322
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_cbar0",
+      "pdg": -4314
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_cbar0",
+      "pdg": -4312
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_cbar-",
+      "pdg": -4232
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_cbar--",
+      "pdg": -4224
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_cbar--",
+      "pdg": -4222
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_cbar-",
+      "pdg": -4214
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_cbar-",
+      "pdg": -4212
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_cbar0",
+      "pdg": -4132
+    },
+    {
+      "kind": "baryon",
+      "name": "Lambda_c(2625)bar-",
+      "pdg": -4124
+    },
+    {
+      "kind": "baryon",
+      "name": "Lambda_cbar-",
+      "pdg": -4122
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_cbar0",
+      "pdg": -4114
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_cbar0",
+      "pdg": -4112
+    },
+    {
+      "kind": "meson",
+      "name": "B*_2c-",
+      "pdg": -545
+    },
+    {
+      "kind": "meson",
+      "name": "B*_c-",
+      "pdg": -543
+    },
+    {
+      "kind": "meson",
+      "name": "B_c-",
+      "pdg": -541
+    },
+    {
+      "kind": "meson",
+      "name": "B*_2sbar0",
+      "pdg": -535
+    },
+    {
+      "kind": "meson",
+      "name": "B*_sbar0",
+      "pdg": -533
+    },
+    {
+      "kind": "meson",
+      "name": "B_sbar0",
+      "pdg": -531
+    },
+    {
+      "kind": "meson",
+      "name": "B*_2-",
+      "pdg": -525
+    },
+    {
+      "kind": "meson",
+      "name": "B*-",
+      "pdg": -523
+    },
+    {
+      "kind": "meson",
+      "name": "B-",
+      "pdg": -521
+    },
+    {
+      "kind": "meson",
+      "name": "B*_2bar0",
+      "pdg": -515
+    },
+    {
+      "kind": "meson",
+      "name": "B*bar0",
+      "pdg": -513
+    },
+    {
+      "kind": "meson",
+      "name": "Bbar0",
+      "pdg": -511
+    },
+    {
+      "kind": "meson",
+      "name": "D*_2s(2573)-",
+      "pdg": -435
+    },
+    {
+      "kind": "meson",
+      "name": "D*_s-",
+      "pdg": -433
+    },
+    {
+      "kind": "meson",
+      "name": "D_s-",
+      "pdg": -431
+    },
+    {
+      "kind": "meson",
+      "name": "D*_2(2460)bar0",
+      "pdg": -425
+    },
+    {
+      "kind": "meson",
+      "name": "D*bar0",
+      "pdg": -423
+    },
+    {
+      "kind": "meson",
+      "name": "Dbar0",
+      "pdg": -421
+    },
+    {
+      "kind": "meson",
+      "name": "D*_2(2460)-",
+      "pdg": -415
+    },
+    {
+      "kind": "meson",
+      "name": "D*-",
+      "pdg": -413
+    },
+    {
+      "kind": "meson",
+      "name": "D-",
+      "pdg": -411
+    },
+    {
+      "kind": "meson",
+      "name": "D+",
+      "pdg": 411
+    },
+    {
+      "kind": "meson",
+      "name": "D*+",
+      "pdg": 413
+    },
+    {
+      "kind": "meson",
+      "name": "D*_2(2460)+",
+      "pdg": 415
+    },
+    {
+      "kind": "meson",
+      "name": "D0",
+      "pdg": 421
+    },
+    {
+      "kind": "meson",
+      "name": "D*0",
+      "pdg": 423
+    },
+    {
+      "kind": "meson",
+      "name": "D*_2(2460)0",
+      "pdg": 425
+    },
+    {
+      "kind": "meson",
+      "name": "D_s+",
+      "pdg": 431
+    },
+    {
+      "kind": "meson",
+      "name": "D*_s+",
+      "pdg": 433
+    },
+    {
+      "kind": "meson",
+      "name": "D*_2s(2573)+",
+      "pdg": 435
+    },
+    {
+      "kind": "meson",
+      "name": "B0",
+      "pdg": 511
+    },
+    {
+      "kind": "meson",
+      "name": "B*0",
+      "pdg": 513
+    },
+    {
+      "kind": "meson",
+      "name": "B*_20",
+      "pdg": 515
+    },
+    {
+      "kind": "meson",
+      "name": "B+",
+      "pdg": 521
+    },
+    {
+      "kind": "meson",
+      "name": "B*+",
+      "pdg": 523
+    },
+    {
+      "kind": "meson",
+      "name": "B*_2+",
+      "pdg": 525
+    },
+    {
+      "kind": "meson",
+      "name": "B_s0",
+      "pdg": 531
+    },
+    {
+      "kind": "meson",
+      "name": "B*_s0",
+      "pdg": 533
+    },
+    {
+      "kind": "meson",
+      "name": "B*_2s0",
+      "pdg": 535
+    },
+    {
+      "kind": "meson",
+      "name": "B_c+",
+      "pdg": 541
+    },
+    {
+      "kind": "meson",
+      "name": "B*_c+",
+      "pdg": 543
+    },
+    {
+      "kind": "meson",
+      "name": "B*_2c+",
+      "pdg": 545
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_c0",
+      "pdg": 4112
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_c0",
+      "pdg": 4114
+    },
+    {
+      "kind": "baryon",
+      "name": "Lambda_c+",
+      "pdg": 4122
+    },
+    {
+      "kind": "baryon",
+      "name": "Lambda_c(2625)+",
+      "pdg": 4124
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_c0",
+      "pdg": 4132
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_c+",
+      "pdg": 4212
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_c+",
+      "pdg": 4214
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_c++",
+      "pdg": 4222
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_c++",
+      "pdg": 4224
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_c+",
+      "pdg": 4232
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_c0",
+      "pdg": 4312
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_c0",
+      "pdg": 4314
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_c+",
+      "pdg": 4322
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_c+",
+      "pdg": 4324
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_c0",
+      "pdg": 4332
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_c0",
+      "pdg": 4334
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_cc+",
+      "pdg": 4412
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_cc+",
+      "pdg": 4414
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_cc++",
+      "pdg": 4422
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_cc++",
+      "pdg": 4424
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_cc+",
+      "pdg": 4432
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_cc+",
+      "pdg": 4434
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_ccc++",
+      "pdg": 4444
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_b-",
+      "pdg": 5112
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_b-",
+      "pdg": 5114
+    },
+    {
+      "kind": "baryon",
+      "name": "Lambda_b0",
+      "pdg": 5122
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_b-",
+      "pdg": 5132
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_bc0",
+      "pdg": 5142
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_b0",
+      "pdg": 5212
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_b0",
+      "pdg": 5214
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma_b+",
+      "pdg": 5222
+    },
+    {
+      "kind": "baryon",
+      "name": "Sigma*_b+",
+      "pdg": 5224
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_b0",
+      "pdg": 5232
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_bc+",
+      "pdg": 5242
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_b-",
+      "pdg": 5312
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_b-",
+      "pdg": 5314
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_b0",
+      "pdg": 5322
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_b0",
+      "pdg": 5324
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_b-",
+      "pdg": 5332
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_b-",
+      "pdg": 5334
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_bc0",
+      "pdg": 5342
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_bc0",
+      "pdg": 5412
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_bc0",
+      "pdg": 5414
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi'_bc+",
+      "pdg": 5422
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_bc+",
+      "pdg": 5424
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega'_bc0",
+      "pdg": 5432
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bc0",
+      "pdg": 5434
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_bcc+",
+      "pdg": 5442
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bcc+",
+      "pdg": 5444
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_bb-",
+      "pdg": 5512
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_bb-",
+      "pdg": 5514
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi_bb0",
+      "pdg": 5522
+    },
+    {
+      "kind": "baryon",
+      "name": "Xi*_bb0",
+      "pdg": 5524
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_bb-",
+      "pdg": 5532
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bb-",
+      "pdg": 5534
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega_bbc0",
+      "pdg": 5542
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bbc0",
+      "pdg": 5544
+    },
+    {
+      "kind": "baryon",
+      "name": "Omega*_bbb-",
+      "pdg": 5554
+    },
+    {
+      "kind": "meson",
+      "name": "D*_0+",
+      "pdg": 10411
+    },
+    {
+      "kind": "meson",
+      "name": "D_1+",
+      "pdg": 10413
+    },
+    {
+      "kind": "meson",
+      "name": "D*_00",
+      "pdg": 10421
+    },
+    {
+      "kind": "meson",
+      "name": "D_10",
+      "pdg": 10423
+    },
+    {
+      "kind": "meson",
+      "name": "D*_0s+",
+      "pdg": 10431
+    },
+    {
+      "kind": "meson",
+      "name": "D_1s+",
+      "pdg": 10433
+    },
+    {
+      "kind": "meson",
+      "name": "B*_00",
+      "pdg": 10511
+    },
+    {
+      "kind": "meson",
+      "name": "B_10",
+      "pdg": 10513
+    },
+    {
+      "kind": "meson",
+      "name": "B*_0+",
+      "pdg": 10521
+    },
+    {
+      "kind": "meson",
+      "name": "B_1+",
+      "pdg": 10523
+    },
+    {
+      "kind": "meson",
+      "name": "B*_0s0",
+      "pdg": 10531
+    },
+    {
+      "kind": "meson",
+      "name": "B_1s0",
+      "pdg": 10533
+    },
+    {
+      "kind": "meson",
+      "name": "B*_0c+",
+      "pdg": 10541
+    },
+    {
+      "kind": "meson",
+      "name": "B_1c+",
+      "pdg": 10543
+    },
+    {
+      "kind": "baryon",
+      "name": "Lambda_c(2593)+",
+      "pdg": 14122
+    },
+    {
+      "kind": "meson",
+      "name": "D*_1+",
+      "pdg": 20413
+    },
+    {
+      "kind": "meson",
+      "name": "D*_10",
+      "pdg": 20423
+    },
+    {
+      "kind": "meson",
+      "name": "D*_1s+",
+      "pdg": 20433
+    },
+    {
+      "kind": "meson",
+      "name": "B*_10",
+      "pdg": 20513
+    },
+    {
+      "kind": "meson",
+      "name": "B*_1+",
+      "pdg": 20523
+    },
+    {
+      "kind": "meson",
+      "name": "B*_1s0",
+      "pdg": 20533
+    },
+    {
+      "kind": "meson",
+      "name": "B*_1c+",
+      "pdg": 20543
+    }
+  ],
+  "states_sha256": "ac9b81effff76aa80b72724f958ab83b76e53376f84eee7a0c11f9fd7f9c7a3f"
+}

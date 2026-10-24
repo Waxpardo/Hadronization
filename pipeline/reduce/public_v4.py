@@ -856,6 +856,19 @@ def parser():
     comparison.add_argument('--recipe-sha256', required=True)
     comparison.add_argument('--work-root', type=Path, required=True)
     comparison.add_argument('--output', type=Path, required=True)
+    baryon_meson = sub.add_parser('compare-baryon-meson',
+        help='derive summed baryon/meson yields from retained fine species')
+    baryon_meson.add_argument('--numerics-root', type=Path, required=True)
+    baryon_meson.add_argument('--expected-root-sha256', required=True)
+    baryon_meson.add_argument('--expected-value-sha256', required=True)
+    baryon_meson.add_argument('--family-products', type=Path, required=True)
+    baryon_meson.add_argument('--family-manifest-sha256', required=True)
+    baryon_meson.add_argument('--recipe', type=Path,
+                              default=ROOT / 'config/baryon-meson-comparison.json')
+    baryon_meson.add_argument('--recipe-sha256', required=True)
+    baryon_meson.add_argument('--work-root', type=Path, required=True)
+    baryon_meson.add_argument('--output', type=Path, required=True)
+    baryon_meson.add_argument('--csv-output', type=Path)
     return top
 
 
@@ -878,6 +891,32 @@ def main(arguments=None):
             physical_sha = trigger_comparison.write(value, args.output)
             print(p.canonical(dict(root=str(args.output), root_sha256=physical_sha,
                                    value_sha256=p.digest(value), points=len(value['points']))))
+        elif args.command == 'compare-baryon-meson':
+            from . import baryon_meson_comparison as comparison
+            if (args.output.exists() or args.output.is_symlink() or
+                    (args.csv_output is not None and
+                     (args.csv_output.exists() or args.csv_output.is_symlink()))):
+                raise FileExistsError(args.output)
+            recipe = _json(args.recipe, args.recipe_sha256,
+                           'baryon/meson comparison recipe')
+            comparison.checked_recipe(recipe)
+            args.work_root.mkdir(parents=True, exist_ok=True)
+            parent = comparison.read_parent_binding(args.numerics_root,
+                args.expected_root_sha256, args.expected_value_sha256)
+            value = comparison.derive(parent, args.expected_root_sha256,
+                args.expected_value_sha256, args.family_products,
+                args.family_manifest_sha256, recipe)
+            physical_sha = comparison.write(value, args.output)
+            csv_sha = None
+            if args.csv_output is not None:
+                args.csv_output.parent.mkdir(parents=True, exist_ok=True)
+                with args.csv_output.open('xb') as stream:
+                    stream.write(comparison.csv_bytes(value))
+                csv_sha = p.file_digest(args.csv_output)
+            print(p.canonical(dict(root=str(args.output), root_sha256=physical_sha,
+                value_sha256=p.digest(value), csv=(str(args.csv_output)
+                    if args.csv_output is not None else None), csv_sha256=csv_sha,
+                points=len(value['points']))))
         else:
             report, value, verification_status = _verify(args)
             if args.command == 'explain':

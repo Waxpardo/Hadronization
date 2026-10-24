@@ -521,8 +521,13 @@ std::vector<ExpectedGraph> ExpectedGraphs(const Page& page,
     }
     ExpectedGraph& line = runs.back();
     if (categories) {
-      AddExpectedPoint(line, point.x - CategoryHalfWidth(page), point.y);
-      AddExpectedPoint(line, point.x + CategoryHalfWidth(page), point.y);
+      const bool savedEdges=page.role=="balancing.baryon_meson.all_triggers" &&
+          std::isfinite(point.binLow) &&
+          std::isfinite(point.binHigh) && point.binLow < point.binHigh;
+      AddExpectedPoint(line, savedEdges ? point.binLow :
+                       point.x-CategoryHalfWidth(page), point.y);
+      AddExpectedPoint(line, savedEdges ? point.binHigh :
+                       point.x+CategoryHalfWidth(page), point.y);
       breakRun = true;
     } else if (histogram && std::isfinite(point.binLow) &&
                std::isfinite(point.binHigh)) {
@@ -868,6 +873,7 @@ bool CategoricalAxis(const Page& page, const Panel& panel) {
 }
 bool SpeciesCategoryAxis(const Page& page) {
   return page.role == "balancing.trigger_comparison" ||
+         page.role == "balancing.baryon_meson.all_triggers" ||
          page.role.rfind("balancing.integrated.", 0) == 0 ||
          page.role.rfind("balancing.activity.", 0) == 0;
 }
@@ -1265,6 +1271,7 @@ constexpr double P1InformationX = .50;
 constexpr std::array<double, 5> kP1InformationY = {{.835, .810, .785, .760, .735}};
 constexpr std::array<int, 5> kP1InformationPixels = {{20, 17, 16, 15, 15}};
 int CategoryTextPixels(const Page& page) {
+  if (page.role == "balancing.baryon_meson.all_triggers") return 42;
   if (page.role == "balancing.trigger_comparison") return BodyTextPixels(page);
   if (!SpeciesCategoryAxis(page)) return BodyTextPixels(page);
   const double points = page.filename.find(".trigger-") == std::string::npos ? 12. : 10.;
@@ -1300,6 +1307,7 @@ double PanelTitleY(const Page& page, const Panel& panel) {
   return .94;
 }
 double CategoricalXTitleY(const Page& page) {
+  if (page.role == "balancing.baryon_meson.all_triggers") return .050;
   if (page.role.rfind("balancing.integrated.", 0) == 0) return .120;
   if (page.role.rfind("balancing.activity.", 0) == 0) return .105;
   return .075;
@@ -2123,7 +2131,13 @@ std::array<double, 4> InsideTuneLegendBox(const Page& page, const Panel& panel,
   for (const auto& series : panel.series) for (const auto& point : series.points) {
     if (!Drawable(panel, point)) continue;
     double x1 = point.x, x2 = point.x;
-    if (series.mode == "categories") { x1 -= CategoryHalfWidth(page); x2 += CategoryHalfWidth(page); }
+    if (series.mode == "categories") {
+      const bool savedEdges=page.role=="balancing.baryon_meson.all_triggers" &&
+          std::isfinite(point.binLow) &&
+          std::isfinite(point.binHigh) && point.binLow < point.binHigh;
+      x1=savedEdges?point.binLow:point.x-CategoryHalfWidth(page);
+      x2=savedEdges?point.binHigh:point.x+CategoryHalfWidth(page);
+    }
     if (series.mode == "histogram" && std::isfinite(point.binLow) && std::isfinite(point.binHigh)) {
       x1 = point.binLow; x2 = point.binHigh;
     }
@@ -2231,8 +2245,16 @@ bool ClassKeyClearsData(const Page& page, const Panel& panel,
   for (const auto& series : panel.series) for (const auto& point : series.points) {
     if (!Drawable(panel,point)) continue;
     const double error=std::isfinite(point.error) ? point.error : 0.;
-    if (box[0] < xNdc(point.x+CategoryHalfWidth(page))+gapX &&
-        box[2] > xNdc(point.x-CategoryHalfWidth(page))-gapX &&
+    const bool savedEdges=page.role=="balancing.baryon_meson.all_triggers" &&
+        series.mode=="categories" &&
+        std::isfinite(point.binLow) && std::isfinite(point.binHigh) &&
+        point.binLow < point.binHigh;
+    const double x1 = savedEdges ? point.binLow :
+        point.x-(series.mode=="categories"?CategoryHalfWidth(page):0.);
+    const double x2 = savedEdges ? point.binHigh :
+        point.x+(series.mode=="categories"?CategoryHalfWidth(page):0.);
+    if (box[0] < xNdc(x2)+gapX &&
+        box[2] > xNdc(x1)-gapX &&
         box[1] < yNdc(point.y+error)+gapY &&
         box[3] > yNdc(point.y-error)-gapY) return false;
   }

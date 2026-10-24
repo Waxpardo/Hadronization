@@ -6,13 +6,15 @@ The `HF_RUN3_V1` result contains 300 million successful events from 3,000 accept
 
 ## Included results
 
-The [collaboration package](results/manifest.json) contains numerical ROOT, 70 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 60,860 points with separate value and uncertainty statuses. The tables retain explicit missing values.
+The [collaboration package](results/manifest.json) contains numerical ROOT, 71 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 60,860 points with separate value and uncertainty statuses. The tables retain explicit missing values.
 
 The result uses inclusive pair pT and final triggers from all origins. Its identity recipe keeps 202 signed open-heavy associates separate. The fine query retains all 219 catalog identities, including hidden-heavy states.
 
 The paired overview shows seven charm and eight beauty ground-state meson, Lambda and Sigma identities per trigger. Separate single-trigger figures show 28 charm and 43 beauty ground, star and prime identities. The numerical archive keeps all 202 signed open-heavy identities.
 
 The [trigger comparison](results/figures/supplemental.balancing.trigger_comparison.pdf) shows the ratio of baryon-trigger to meson-trigger balancing yields within each tune. Its [ROOT companion](results/figures/trigger-comparison.root) stores 45 ratios and their joint block covariance. Charm compares the same signed associates. Beauty compares charge-conjugate associates: the upper species label denotes the numerator and the lower label denotes the denominator. See the [scientific definition](../docs/science.md#comparison-between-trigger-species).
+
+The [summed baryon-to-meson comparison](results/figures/supplemental.balancing.baryon-meson.all-triggers.pdf) shows the baryon sum divided by the meson sum for D0, Lambda_c+, B+ and Lambda_b0 triggers. Its [ROOT companion](results/figures/baryon-meson-comparison.root) preserves fine-species membership, original-block primitives, four observables, deletion factors and covariance. The [CSV](results/figures/baryon-meson-comparison.csv) is a compact view of the same payload.
 
 Upper baryon-to-meson activity panels use linear vertical axes. Tune-comparison panels for balancing yields and baryon-to-meson ratios use logarithmic axes. ROOT and status records retain unavailable and nonpositive ratios that the logarithmic panels cannot draw.
 
@@ -37,7 +39,7 @@ Numerical portable verification does not require the original production filesys
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=02e8c84538fca560c217b3bc8d186fa294ed3c77287bff6aa2d294c32d586290
+PACKAGE_SHA=10893c3407898b78acec5ffa2f874754fedcadd548bd084f934c1fcfa7bb190d
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification

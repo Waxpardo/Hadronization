@@ -6,7 +6,7 @@ The sample selects hard charm and beauty production. It is a generator-level, he
 
 ## Repository contents
 
-The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 70 PDFs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
+The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 71 PDFs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
 
 The source inventory records 3,000 accepted files and 300 million successful events. Each tune contributes 100 million events in ten original source blocks. The [data inventory](data/README.md) binds the distributed results and external inputs to checksums. The [sample accounting guide](docs/science.md#sample-accounting) explains the 127 discarded job attempts.
 
@@ -77,7 +77,7 @@ The [science guide](docs/science.md) gives exact definitions and limitations. Th
 
 ## Products
 
-The renderer produces multiplicity, charm and beauty correlation, integrated balancing, activity-dependent balancing and baryon-to-meson ratio pages. It also produces signed heavy-hadron pT, eta and phi spectra, supporting views and ROOT canvases. Numerical packages include accounting tables, CSV and TeX exports, missing-value records and manifests.
+The renderer produces multiplicity, charm and beauty correlation, integrated balancing, activity-dependent balancing and baryon-to-meson ratio pages. A supplementary all-trigger page compares the summed baryon and meson balancing yields over every eligible retained fine species. The release also includes signed heavy-hadron pT, eta and phi spectra, supporting views and ROOT canvases. Numerical packages include accounting tables, CSV and TeX exports, missing-value records and manifests.
 
 Baryon-to-meson activity values use linear vertical axes. Tune-comparison panels for balancing yields and baryon-to-meson ratios use logarithmic vertical axes. Undefined or nonpositive ratios remain in ROOT and status records but appear as disclosed gaps on logarithmic axes.
 

@@ -717,6 +717,25 @@ Derive paired-block ratios of trigger-normalized balancing yields from verified 
 
 See [trigger comparison](workflow.md#compare-trigger-samples) for an executable example and [science](science.md#comparison-between-trigger-species) for its interpretation.
 
+### `./hadronization reduce compare-baryon-meson`
+
+Sum all eligible retained fine species into baryon and meson balancing yields for four trigger species. The command verifies the parent numerical archive and family products, applies the native joint-block estimator, and writes a new typed ROOT companion. It refuses existing output paths.
+
+| Option | Type and default | Meaning |
+| --- | --- | --- |
+| `--numerics-root` | Path, required | Parent numerical ROOT. |
+| `--expected-root-sha256` | String, required | Independent physical parent pin. |
+| `--expected-value-sha256` | String, required | Independent parent value digest. |
+| `--family-products` | Path, required | Directory containing verified fine and shared primitives. |
+| `--family-manifest-sha256` | String, required | Independent pin for `family-products/manifest.json`. |
+| `--recipe` | Path, `config/baryon-meson-comparison.json` | Profile and trigger order. |
+| `--recipe-sha256` | String, required | Independent recipe file pin. |
+| `--work-root` | Path, required | Writable verification scratch. |
+| `--output` | Path, required | New typed ROOT companion. |
+| `--csv-output` | Path, none | Optional compact table written beside the companion. |
+
+See [summed baryon-to-meson comparison](workflow.md#compare-summed-baryon-and-meson-yields) for an executable example.
+
 ### `./hadronization plot render-cold`
 
 Render verified numerical ROOT and publish figures.
@@ -730,8 +749,14 @@ Render verified numerical ROOT and publish figures.
 | `--expected-value-sha256` | string, **required** | Independent decoded numerical-value digest. |
 | `--trigger-comparison-root` | Path, none | Optional numerical companion from `reduce compare-triggers`. |
 | `--expected-trigger-comparison-sha256` | String, none | Required physical pin when the companion is supplied. |
+| `--baryon-meson-comparison-root` | Path, none | Optional companion from `reduce compare-baryon-meson`. |
+| `--expected-baryon-meson-comparison-sha256` | String, none | Required physical pin when the baryon/meson companion is supplied. |
+| `--family-products` | Path, none | Verified fine/shared product directory required with the baryon/meson companion. |
+| `--family-manifest-sha256` | String, none | Independent family-product manifest pin. |
 | `--expected-manifest-sha256` | string, `none` | Optional independent figure-manifest SHA-256. |
 | `--plot-config` | Path, `config/plot.json` | Exact presentation JSON used by the renderer. |
+| `--preserve-pdfs-from` | Path, none | Accepted figure directory whose unchanged PDF bytes are retained after exact drawing-record comparison. |
+| `--expected-preserved-manifest-sha256` | String, none | Independent manifest pin required with `--preserve-pdfs-from`. |
 | `--work-dir` | Path, **required** | Writable archive or renderer scratch. |
 | `--output` | Path, **required** | Destination. Construction normally requires a new path. |
 
@@ -754,8 +779,14 @@ Reopen every canvas and write verifier attestation in scratch.
 | `--expected-value-sha256` | string, **required** | Independent decoded numerical-value digest. |
 | `--trigger-comparison-root` | Path, none | Optional numerical companion from `reduce compare-triggers`. |
 | `--expected-trigger-comparison-sha256` | String, none | Required physical pin when the companion is supplied. |
+| `--baryon-meson-comparison-root` | Path, none | Optional companion from `reduce compare-baryon-meson`. |
+| `--expected-baryon-meson-comparison-sha256` | String, none | Required physical pin when the baryon/meson companion is supplied. |
+| `--family-products` | Path, none | Verified fine/shared product directory required with the baryon/meson companion. |
+| `--family-manifest-sha256` | String, none | Independent family-product manifest pin. |
 | `--expected-manifest-sha256` | string, `none` | Optional independent figure-manifest SHA-256. |
 | `--plot-config` | Path, `config/plot.json` | Exact presentation JSON used by the renderer. |
+| `--preserve-pdfs-from` | Path, none | Accepted figure source used only during a preserving render. Normal verification reads its receipt from the output manifest. |
+| `--expected-preserved-manifest-sha256` | String, none | Independent source-manifest pin used only during a preserving render. |
 | `--work-dir` | Path, **required** | Writable archive or renderer scratch. |
 | `--output` | Path, **required** | Destination. Construction normally requires a new path. |
 

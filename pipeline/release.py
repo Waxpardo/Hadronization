@@ -131,6 +131,20 @@ def verify(package, manifest_sha, work_dir):
          "--plot-config", str(selected_config),
          "--work-dir", str(work_dir), "--output", str(figures)]
     ]
+    baryon_meson = figure_manifest.get("baryon_meson_comparison")
+    if baryon_meson is not None:
+        if (not isinstance(baryon_meson, dict) or
+                baryon_meson.get("path") != "baryon-meson-comparison.root" or
+                baryon_meson.get("csv_path") != "baryon-meson-comparison.csv"):
+            raise ValueError("baryon/meson comparison figure binding differs")
+        commands[1].extend([
+            "--baryon-meson-comparison-root",
+            str(figures / baryon_meson["path"]),
+            "--expected-baryon-meson-comparison-sha256",
+            baryon_meson["sha256"],
+            "--family-products", str(numerical / "family-products"),
+            "--family-manifest-sha256",
+            baryon_meson["family_manifest_sha256"]])
     for command in commands:
         result = subprocess.run(command, capture_output=True, text=True)
         if result.returncode:

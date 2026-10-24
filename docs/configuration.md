@@ -800,3 +800,17 @@ An unstable reference denominator can also cause the numerical output to withhol
 | `sectors[].associate_pairs` | Array of two-integer arrays | Numerator and denominator associate identities, in display order. Identities cannot repeat within either column. |
 
 Charm uses identical signed associates in both samples. Beauty uses charge-conjugate associates because its triggers carry opposite heavy flavour. The figure labels both identities. Change this recipe only with an explicit scientific interpretation of the new signed pairings. A new recipe needs a new checksum and a new numerical companion.
+
+## Summed baryon-to-meson comparison recipe
+
+[baryon-meson-comparison.json](../config/baryon-meson-comparison.json) selects the retained fine-species profile and display order. It changes neither the query nor the parent numerical archive.
+
+| Key | Type and shipped value | Meaning and constraints |
+| --- | --- | --- |
+| `schema` | String, `hadronization_baryon_meson_comparison_recipe_v1` | Exact recipe version. |
+| `profile_id` | String, `inclusive` | Fine-pair and shared-trigger profile. |
+| `ordered_trigger_pdgs` | Integer array, `[421, 4122, 521, 5122]` | D0, Lambda_c+, B+ and Lambda_b0 display order. |
+
+The reduction command derives membership from the independently pinned retained catalog. Charm sums exclude beauty-containing states. Opposite and same sign follow net heavy flavour rather than electric charge.
+
+[heavy-hadron-classification.json](../config/heavy-hadron-classification.json) records the independent PYTHIA 8.317 `particleData.isMeson` and `particleData.isBaryon` classification for every retained signed species. The reducer requires its particle-data and catalog identities to match the fine-product manifest, and it cross-checks every recorded class against the PDG encoding. The numerical companion pins this registry and its source audit.

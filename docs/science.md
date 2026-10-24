@@ -178,6 +178,19 @@ The center uses pooled counts. Each uncertainty deletes the same original block 
 
 The shipped recipe selects inclusive pair pT and the integrated multiplicity class. The command currently requires ten original blocks with unit event weights. Its ROOT companion binds the parent numerical archive, signed recipe and native statistics source. The figure renderer verifies these bindings before drawing the stored values.
 
+## Summed baryon-to-meson balancing yields
+
+The all-trigger comparison sums every eligible retained open-heavy fine associate once into baryon and meson sets. For trigger $t$,
+
+$$Y_{B,t}=\frac{\sum_{a\in B}[N(t,a)-N(t,\bar a)]}{T_t},\qquad
+Y_{M,t}=\frac{\sum_{a\in M}[N(t,a)-N(t,\bar a)]}{T_t},$$
+
+and the displayed observable is $R_t=Y_{B,t}/Y_{M,t}$. The sums contain 42 opposite-heavy-sign charm states, comprising 18 mesons and 24 baryons, or 59 beauty states, comprising 24 mesons and 35 baryons. Charm excludes states that contain beauty. Mixed-heavy states remain eligible in the beauty sector. Heavy-flavour sign defines OS and SS. An independently pinned PYTHIA particle-data registry supplies the meson and baryon classes, and the reducer cross-checks those classes against the PDG encoding.
+
+The implementation first sums additive OS, SS and trigger counts within each original source block. It then evaluates every pooled center and deletion with the native ten-block estimator. The shared trigger denominator cancels algebraically in $R_t$, while it remains explicit in $Y_{B,t}$, $Y_{M,t}$ and the provenance. Deletions are joint across all four observables and four triggers within a tune. Independent tunes have separate covariance blocks.
+
+These values describe finite-acceptance OS-minus-SS yields of production-stage stable heavy hadrons. They are not unique-partner probabilities, global baryon-number closure tests or post-decay fragmentation fractions.
+
 ## Definition authority
 
 [physics.hpp](../pipeline/generate/physics.hpp) implements raw particle and ancestry rules. [model.py](../pipeline/query/model.py) validates downstream selections and the signed registry. [native_engine.cpp](../pipeline/reduce/native_engine.cpp) and [statistics.hpp](../pipeline/reduce/statistics.hpp) evaluate observables and covariance.

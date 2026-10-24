@@ -391,3 +391,15 @@ The verification suite exercises the distribution helper.
 | [tests/test_trigger_comparison.py](../tests/test_trigger_comparison.py) | Development suite | Paired cancellation, denominator validity, block identities, exact primitives and ROOT corruption checks. |
 | [data/results/figures/trigger-comparison.root](../data/results/figures/trigger-comparison.root) | Figure renderer and package verifier | Derived ratios, covariance, signed parent identities, recipe and primitive counts. |
 | [data/results/figures/supplemental.balancing.trigger_comparison.pdf](../data/results/figures/supplemental.balancing.trigger_comparison.pdf) | Researcher | Charm and beauty comparisons of baryon-trigger to meson-trigger balancing yields. |
+
+## Summed baryon-to-meson comparison files
+
+| Path | Caller or reader | Role or output |
+| --- | --- | --- |
+| [config/baryon-meson-comparison.json](../config/baryon-meson-comparison.json) | `reduce compare-baryon-meson` | Selects the inclusive profile and four trigger species. |
+| [config/heavy-hadron-classification.json](../config/heavy-hadron-classification.json) | Baryon/meson reducer | Records the independent PYTHIA particle-data classification of retained signed species. |
+| [pipeline/reduce/baryon_meson_comparison.py](../pipeline/reduce/baryon_meson_comparison.py) | Reduction CLI and figure verifier | Sums retained fine species, applies the native estimator, and writes or verifies the typed companion. |
+| [tests/test_baryon_meson_comparison.py](../tests/test_baryon_meson_comparison.py) | Development suite | Checks estimator validity, typed ROOT, compact export and figure geometry. |
+| [data/results/figures/baryon-meson-comparison.root](../data/results/figures/baryon-meson-comparison.root) | Figure renderer and package verifier | Membership, block primitives, values, deletions, statuses and covariance. |
+| [data/results/figures/baryon-meson-comparison.csv](../data/results/figures/baryon-meson-comparison.csv) | Researcher | Compact table of the four observables for each trigger and tune. |
+| [data/results/figures/supplemental.balancing.baryon-meson.all-triggers.pdf](../data/results/figures/supplemental.balancing.baryon-meson.all-triggers.pdf) | Researcher | Summed baryon-to-meson balancing-yield ratios for four triggers. |

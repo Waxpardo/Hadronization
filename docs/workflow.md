@@ -304,6 +304,8 @@ The renderer requires PyROOT, ROOT libraries, a compiler, numerical ROOT and its
 
 The renderer writes PDFs, `canvases.root`, a compressed drawing record and `manifest.json`. It reopens canvases and checks coordinates, errors, statuses, axes, pads, styles, legends and reference lines. The PDF exporter embeds all fonts through Ghostscript. The verifier checks the exported fonts with Poppler. These checks do not replace visual inspection at publication size.
 
+When a release adds pages without changing accepted pages, `--preserve-pdfs-from` and `--expected-preserved-manifest-sha256` can retain the accepted PDF bytes. The renderer first requires the accepted directory and every file in its manifest to match the independent pin. It then requires every retained drawing-record line to match the fresh render before copying those PDFs. The new manifest records the preserved renderer and PDF-export identities separately from the new-page toolchain.
+
 Each figure contains a compact sample description in its upper panel. It states the generator, collision system, energy, hard heavy-flavour processes and applicable acceptance. Activity figures identify N_ch and its particle cuts. The [scientific reference](science.md) gives the complete selections, observable definitions and statistical method. A reserved area separates the sample description from data.
 
 Bands show pointwise statistical standard errors. They do not represent systematic uncertainty or a simultaneous confidence region. Histogram bands stop at nonpositive log bins, unavailable errors and gaps between bin edges. The numerical archive retains these bins and their statuses.
@@ -364,6 +366,35 @@ Preserve the reported physical hash as `TRIGGER_COMPARISON_SHA256`. Add both opt
 ```
 
 The figure directory includes the companion and `supplemental.balancing.trigger_comparison.pdf`. Package assembly includes both files. Package verification checks the companion against the parent archive and reopens the rendered graphs. The [scientific definition](science.md#comparison-between-trigger-species) explains the signed beauty labels and paired-block uncertainty.
+
+## Compare summed baryon and meson yields
+
+This optional derivation reuses the verified retained fine-species and shared-trigger primitives. It does not repeat event generation, query construction or the full numerical reduction. Set the hashes from the verified numerical report and family-product manifest.
+
+```sh
+./hadronization reduce compare-baryon-meson \
+  --numerics-root "$RUN_ROOT/numerical/numerics.root" \
+  --expected-root-sha256 "${NUMERICS_ROOT_SHA256:?}" \
+  --expected-value-sha256 "${NUMERICS_VALUE_SHA256:?}" \
+  --family-products "$RUN_ROOT/numerical/family-products" \
+  --family-manifest-sha256 "${FAMILY_MANIFEST_SHA256:?}" \
+  --recipe config/baryon-meson-comparison.json \
+  --recipe-sha256 "${BARYON_MESON_RECIPE_SHA256:?}" \
+  --work-root "$RUN_ROOT/baryon-meson-work" \
+  --output "$RUN_ROOT/baryon-meson-comparison.root" \
+  --csv-output "$RUN_ROOT/baryon-meson-comparison.csv"
+```
+
+Preserve the reported physical hash as `BARYON_MESON_COMPARISON_SHA256`. Add these options to `plot render-cold`:
+
+```sh
+--baryon-meson-comparison-root "$RUN_ROOT/baryon-meson-comparison.root" \
+--expected-baryon-meson-comparison-sha256 "${BARYON_MESON_COMPARISON_SHA256:?}" \
+--family-products "$RUN_ROOT/numerical/family-products" \
+--family-manifest-sha256 "${FAMILY_MANIFEST_SHA256:?}"
+```
+
+The figure package then contains the typed companion, compact CSV and `supplemental.balancing.baryon-meson.all-triggers.pdf`. Portable verification rechecks the numerical package, reconstructs the comparison from its fine primitives and reopens the saved canvas.
 
 ## Assemble and verify the package
 

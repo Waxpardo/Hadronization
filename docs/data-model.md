@@ -266,3 +266,9 @@ The publisher checks path confinement, file types, symlinks, hard links and file
 `figures/trigger-comparison.root` stores the derived trigger ratios. Its `points` TTree contains signed identities, parent point keys, values, errors and separate status fields. Its `deletions` TTree contains block identities, deletion values, means, covariance factors and usability flags. The `covariance` TH2D and `covariance_valid` TH2I store joint covariance and its validity mask.
 
 The `payload` string contains the recipe, exact input block primitives and parent numerical hashes. `value_sha256` binds this complete logical content. Typed trees and covariance objects must agree with it. The figure manifest pins the physical ROOT bytes and recipe digest. Verification reconstructs the comparison from the parent archive with the native estimator. The companion has no authority to change its parent results.
+
+## Summed baryon-to-meson numerical companion
+
+`figures/baryon-meson-comparison.root` stores four observables for each of four triggers and three tunes: the summed baryon yield, summed meson yield, their ratio and their difference. `membership` records each signed fine associate and its same-sign conjugate. `block_primitives` stores the ten original-block OS, SS and trigger counts. `deletions` stores the joint delete-one values and covariance factors. `covariance` and `covariance_valid` cover every stored observable within each tune; cross-tune elements are zero.
+
+The payload binds the parent numerical archive, family-product manifest, fine/shared ROOT hashes, authenticated particle catalog, independent PYTHIA baryon/meson classification, recipe and native statistics source. Typed objects must reproduce the payload exactly. The renderer derives the compact CSV from this payload, and the figure manifest pins it separately.
