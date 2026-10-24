@@ -190,6 +190,17 @@ int main() {
   if (SharedStackYTitle(page,panel)) return 11;
   page.role="balancing.integrated.charm"; panel.id="upper.421";
   if (SharedStackYTitle(page,panel)) return 12;
+  // The all-trigger ratio uses a narrower title anchor so that the complete
+  // rotated mathematical title clears the adjacent numeric tick labels.
+  page.width=1100; page.height=620; page.textPixels=26;
+  page.role="balancing.baryon_meson.all_triggers";
+  panel.id="baryon-meson.all-triggers";
+  panel.geometry={0.,0.,1.,.99}; panel.margins={.14,.035,.22,.035};
+  panel.logY=false; panel.yLow=0.; panel.yHigh=1.16;
+  const double baryonMesonTitleX=YTitleX(page,panel);
+  if (baryonMesonTitleX<=.05 || baryonMesonTitleX>=.055) return 27;
+  page.role="balancing.integrated.beauty";
+  if (YTitleX(page,panel)<=baryonMesonTitleX+.01) return 28;
   page.width=4300;
   if (PaperWidthCentimeters(page)<40. || BodyTextPixels(page)>36) return 13;
   return 0;

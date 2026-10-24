@@ -1904,7 +1904,8 @@ double YTitleX(const Page& page, const Panel& panel) {
   // correlation scales retain the established title position.
   const double base=page.role.find("correlations.")==0 ?
       (longCorrelationScale ? .005 : .025) :
-      (page.role.find("balancing.")==0 && panel.id.rfind("upper.",0)==0 ? .05 : .075);
+      (page.role=="balancing.baryon_meson.all_triggers" ? .060 :
+       (page.role.find("balancing.")==0 && panel.id.rfind("upper.",0)==0 ? .05 : .075));
   // Keep the rotated fraction inside the page even on long decimal scales.
   const double minimum = (longCorrelationScale ? .006 : .012) *
       SingleSpeciesWidthScale(page);
