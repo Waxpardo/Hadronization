@@ -29,6 +29,14 @@ class BaryonMesonComparison(unittest.TestCase):
         self.assertIsNone(invalid["R_BM"]["center"])
         self.assertNotIn(invalid["R_BM"]["uncertainty_status"], bm.AVAILABLE)
 
+    def test_signed_denominator_sign_change_retains_center_and_withholds_error(self):
+        result = bm.estimate([[2., -17., 100.]] + [[2., 2., 100.]] * 9)["R_BM"]
+        self.assertIsNotNone(result["center"])
+        self.assertIsNone(result["error"])
+        self.assertNotIn(result["uncertainty_status"], bm.AVAILABLE)
+        self.assertTrue(any(reason.startswith("LEAVE_DENOMINATOR_SIGN_CHANGE:")
+                            for reason in result["reasons"]))
+
     def test_recipe_and_exact_primitives(self):
         recipe = json.loads((ROOT / "config/baryon-meson-comparison.json").read_text())
         bm.checked_recipe(recipe)
@@ -151,8 +159,14 @@ class BaryonMesonComparison(unittest.TestCase):
         self.assertEqual(panel["y_title"],
                          "#it{Y}_{#font[42]{Baryon}}/#it{Y}_{#font[42]{Meson}}")
         self.assertEqual(panel["x_title"], "Trigger Species")
-        self.assertEqual(panel["y_range"], [0., 1.08])
-        self.assertEqual(panel["guides"][0]["line_style"], 3)
+        self.assertEqual(panel["y_range"], [0., 1.16])
+        self.assertEqual(panel["guides"][0]["line_style"], 10)
+        label_box = plot.panel_label_reserved_box(page, panel)
+        guide_y = (panel["margins"][2] +
+                   panel["guides"][0]["y_low"] / panel["y_range"][1] *
+                   (1. - panel["margins"][2] - panel["margins"][3]))
+        self.assertLess(guide_y, label_box[1])
+        self.assertGreater(guide_y, panel["legend"][3])
         for series in panel["series"]:
             for slot, point in enumerate(series["points"], 1):
                 self.assertEqual((point["bin_low"], point["bin_high"]),

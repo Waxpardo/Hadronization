@@ -2250,9 +2250,9 @@ bool ClassKeyClearsData(const Page& page, const Panel& panel,
         std::isfinite(point.binLow) && std::isfinite(point.binHigh) &&
         point.binLow < point.binHigh;
     const double x1 = savedEdges ? point.binLow :
-        point.x-(series.mode=="categories"?CategoryHalfWidth(page):0.);
+        point.x-CategoryHalfWidth(page);
     const double x2 = savedEdges ? point.binHigh :
-        point.x+(series.mode=="categories"?CategoryHalfWidth(page):0.);
+        point.x+CategoryHalfWidth(page);
     if (box[0] < xNdc(x2)+gapX &&
         box[2] > xNdc(x1)-gapX &&
         box[1] < yNdc(point.y+error)+gapY &&

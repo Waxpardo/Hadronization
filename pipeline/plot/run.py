@@ -3481,75 +3481,6 @@ def render_artifacts(pages):
     return sorted(paths)
 
 
-def preserve_existing_pdfs(args, pages, record):
-    """Replace unchanged PDFs with a checksum-bound accepted set."""
-    source = getattr(args, 'preserve_pdfs_from', None)
-    expected = getattr(args, 'expected_preserved_manifest_sha256', None)
-    if (source is None) != (expected is None):
-        raise ValueError('PDF preservation requires a source and manifest SHA-256')
-    if source is None:
-        return None
-    source = Path(source).absolute()
-    reject_symlink_components(source, 'preserved PDF source')
-    if not source.is_dir():
-        raise ValueError('preserved PDF source is not a directory')
-    if re.fullmatch(r'[0-9a-f]{64}', expected or '') is None:
-        raise ValueError('preserved PDF manifest SHA-256 differs')
-    manifest_path = source / 'manifest.json'
-    regular_file(manifest_path, 'preserved PDF manifest')
-    if sha_file(manifest_path) != expected:
-        raise ValueError('preserved PDF manifest SHA-256 differs')
-    manifest = json_file(manifest_path, 'preserved PDF manifest')
-    if (manifest.get('schema') != 'hadronization_cold_plot_render_v1' or
-            manifest.get('state') != 'COMPLETE'):
-        raise ValueError('preserved PDF manifest state differs')
-    verify_flat_fileset(source, manifest.get('filesystem_set'),
-                        'preserved PDF source')
-    facts = manifest.get('files')
-    if not isinstance(facts, list):
-        raise ValueError('preserved PDF file inventory differs')
-    by_name = {item.get('name'):item for item in facts
-               if isinstance(item, dict)}
-    if len(by_name) != len(facts):
-        raise ValueError('preserved PDF file inventory differs')
-    for name, fact in by_name.items():
-        path = source / name
-        regular_file(path, 'preserved PDF artifact')
-        if (set(fact) != {'name', 'bytes', 'sha256'} or
-                path.stat().st_size != fact['bytes'] or
-                sha_file(path) != fact['sha256']):
-            raise ValueError('preserved PDF artifact identity differs: ' + name)
-    source_pdfs = {path.name for path in source.glob('*.pdf')}
-    output_pdfs = {path.name for path in pages.glob('*.pdf')}
-    added = sorted(output_pdfs - source_pdfs)
-    if not source_pdfs or not added or not source_pdfs < output_pdfs:
-        raise ValueError('preserved and newly rendered PDF domains differ')
-    if any(name not in by_name for name in source_pdfs):
-        raise ValueError('preserved PDF manifest coverage differs')
-    source_record = gzip.decompress((source / RECORD_NAME).read_bytes())
-    old_lines = source_record.decode('ascii').splitlines()[1:-1]
-    new_lines = record.decode('ascii').splitlines()[1:-1]
-    retained = [line for line in new_lines
-                if line.split('\t', 2)[1] in source_pdfs]
-    if old_lines != retained:
-        raise ValueError('preserved PDF drawing records differ')
-    for name in sorted(source_pdfs):
-        shutil.copyfile(source / name, pages / name)
-        verify_pdf_fonts(pages / name)
-    receipt = {
-        'schema':'hadronization_preserved_pdf_set_v1',
-        'source_manifest_sha256':expected,
-        'source_renderer_build_id':manifest['renderer_build']['build_id'],
-        'source_pdf_export':manifest['pdf_export'],
-        'preserved_pdf_count':len(source_pdfs),
-        'preserved_pdf_names_sha256':sha_bytes(canonical(
-            sorted(source_pdfs)).encode('ascii')),
-        'new_pdf_names':added,
-    }
-    args._pdf_preservation = receipt
-    return receipt
-
-
 def promote_render_pages(pages, output):
     """Publish regular PDF pages first and the verified manifest last."""
     output.mkdir(mode=0o700)
@@ -3672,9 +3603,6 @@ def cold_render_manifest(args, payload, config, config_sha, build, plan,
                      'pipeline/reduce/statistics.hpp',
                      'config/heavy-hadron-classification.json'):
             result['source_sha256'][name] = sha_file(ROOT / name)
-    preservation = getattr(args, '_pdf_preservation', None)
-    if preservation is not None:
-        result['pdf_preservation'] = preservation
     return result
 
 
@@ -3793,14 +3721,14 @@ def baryon_meson_comparison_page(value, context, adapter, config):
                    for i, text in enumerate(lines)]
     panel = dict(id='baryon-meson.all-triggers', status='AVAILABLE',
         log_y=False, log_x=False, geometry=[0., 0., 1., .99],
-        margins=[.14, .035, .22, .035], x_range=[.5, 4.5], y_range=[0., 1.08],
+        margins=[.14, .035, .22, .035], x_range=[.5, 4.5], y_range=[0., 1.16],
         title='', x_title='Trigger Species',
         y_title='#it{Y}_{#font[42]{Baryon}}/#it{Y}_{#font[42]{Meson}}',
         note='', series=series, annotations=annotations, reuse=None,
         uncertainty_display='STANDARD', category_dividers=False,
-        legend=[.64, .71, .955, .90],
+        legend=[.64, .61, .955, .80],
         guides=[dict(id='unity', x_low=.5, x_high=4.5, y_low=1., y_high=1.,
-                     color='#777777', line_style=3, label='')],
+                     color='#777777', line_style=10, label='')],
         ticks=[dict(x=float(slot), label=label(trigger)) for slot, trigger in
                enumerate(value['recipe']['ordered_trigger_pdgs'], 1)])
     page['panels'].append(panel)
@@ -3922,7 +3850,6 @@ def render_cold(args):
                             pages / 'baryon-meson-comparison.root')
             (pages / 'baryon-meson-comparison.csv').write_bytes(
                 comparison_api.csv_bytes(args._baryon_meson))
-        preserve_existing_pdfs(args, pages, record)
         manifest = cold_render_manifest(args, payload, config, config_sha,
                                         build, plan, pages, record, pdf_export)
         atomic_json(pages / "manifest.json", manifest)
@@ -3972,31 +3899,6 @@ def verify_cold_files(args, payload, config_sha, build, plan, output,
             pdf_export.get('policy')!='vector_pdf_embedded_fonts_v1' or
             re.fullmatch(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?',str(pdf_export.get('ghostscript_version'))) is None):
         raise ValueError('PDF export receipt differs')
-    preservation = manifest.get('pdf_preservation')
-    if preservation is not None:
-        required = {'schema', 'source_manifest_sha256',
-                    'source_renderer_build_id', 'source_pdf_export',
-                    'preserved_pdf_count', 'preserved_pdf_names_sha256',
-                    'new_pdf_names'}
-        if (not isinstance(preservation, dict) or set(preservation) != required or
-                preservation.get('schema') !=
-                    'hadronization_preserved_pdf_set_v1' or
-                re.fullmatch(r'[0-9a-f]{64}', str(preservation.get(
-                    'source_manifest_sha256'))) is None or
-                re.fullmatch(r'[0-9a-f]{64}', str(preservation.get(
-                    'source_renderer_build_id'))) is None or
-                not isinstance(preservation.get('source_pdf_export'), dict) or
-                not isinstance(preservation.get('new_pdf_names'), list)):
-            raise ValueError('preserved PDF receipt differs')
-        new_names = preservation['new_pdf_names']
-        pdf_names = {path.name for path in output.glob('*.pdf')}
-        preserved_names = sorted(pdf_names - set(new_names))
-        if (not new_names or not set(new_names) <= pdf_names or
-                preservation['preserved_pdf_count'] != len(preserved_names) or
-                preservation['preserved_pdf_names_sha256'] != sha_bytes(
-                    canonical(preserved_names).encode('ascii'))):
-            raise ValueError('preserved PDF receipt domain differs')
-        args._pdf_preservation = preservation
     for path in output.glob('*.pdf'):
         verify_pdf_fonts(path)
     expected = cold_render_manifest(args, payload, config, config_sha,
@@ -4334,10 +4236,6 @@ def cold_inputs(parser, *, comparison=True):
     parser.add_argument("--expected-manifest-sha256",
         help="optional independent manifest pin for verification")
     parser.add_argument("--plot-config", type=Path, default=PLOT_CONFIG)
-    parser.add_argument('--preserve-pdfs-from', type=Path,
-                        help='accepted figure directory whose unchanged PDFs are retained')
-    parser.add_argument('--expected-preserved-manifest-sha256',
-                        help='independent manifest pin for --preserve-pdfs-from')
     parser.add_argument("--work-dir", type=Path, required=True,
                         help="renderer and archive build scratch")
     parser.add_argument("--output", type=Path, required=True)

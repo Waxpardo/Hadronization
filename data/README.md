@@ -39,7 +39,7 @@ Numerical portable verification does not require the original production filesys
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=10893c3407898b78acec5ffa2f874754fedcadd548bd084f934c1fcfa7bb190d
+PACKAGE_SHA=54dea1e2a788ddecb8fdf9bee1402ca75a42272f316f7a93775c5721cb70dc34
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification

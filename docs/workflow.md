@@ -304,8 +304,6 @@ The renderer requires PyROOT, ROOT libraries, a compiler, numerical ROOT and its
 
 The renderer writes PDFs, `canvases.root`, a compressed drawing record and `manifest.json`. It reopens canvases and checks coordinates, errors, statuses, axes, pads, styles, legends and reference lines. The PDF exporter embeds all fonts through Ghostscript. The verifier checks the exported fonts with Poppler. These checks do not replace visual inspection at publication size.
 
-When a release adds pages without changing accepted pages, `--preserve-pdfs-from` and `--expected-preserved-manifest-sha256` can retain the accepted PDF bytes. The renderer first requires the accepted directory and every file in its manifest to match the independent pin. It then requires every retained drawing-record line to match the fresh render before copying those PDFs. The new manifest records the preserved renderer and PDF-export identities separately from the new-page toolchain.
-
 Each figure contains a compact sample description in its upper panel. It states the generator, collision system, energy, hard heavy-flavour processes and applicable acceptance. Activity figures identify N_ch and its particle cuts. The [scientific reference](science.md) gives the complete selections, observable definitions and statistical method. A reserved area separates the sample description from data.
 
 Bands show pointwise statistical standard errors. They do not represent systematic uncertainty or a simultaneous confidence region. Histogram bands stop at nonpositive log bins, unavailable errors and gaps between bin edges. The numerical archive retains these bins and their statuses.

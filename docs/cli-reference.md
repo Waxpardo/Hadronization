@@ -755,8 +755,6 @@ Render verified numerical ROOT and publish figures.
 | `--family-manifest-sha256` | String, none | Independent family-product manifest pin. |
 | `--expected-manifest-sha256` | string, `none` | Optional independent figure-manifest SHA-256. |
 | `--plot-config` | Path, `config/plot.json` | Exact presentation JSON used by the renderer. |
-| `--preserve-pdfs-from` | Path, none | Accepted figure directory whose unchanged PDF bytes are retained after exact drawing-record comparison. |
-| `--expected-preserved-manifest-sha256` | String, none | Independent manifest pin required with `--preserve-pdfs-from`. |
 | `--work-dir` | Path, **required** | Writable archive or renderer scratch. |
 | `--output` | Path, **required** | Destination. Construction normally requires a new path. |
 
@@ -785,8 +783,6 @@ Reopen every canvas and write verifier attestation in scratch.
 | `--family-manifest-sha256` | String, none | Independent family-product manifest pin. |
 | `--expected-manifest-sha256` | string, `none` | Optional independent figure-manifest SHA-256. |
 | `--plot-config` | Path, `config/plot.json` | Exact presentation JSON used by the renderer. |
-| `--preserve-pdfs-from` | Path, none | Accepted figure source used only during a preserving render. Normal verification reads its receipt from the output manifest. |
-| `--expected-preserved-manifest-sha256` | String, none | Independent source-manifest pin used only during a preserving render. |
 | `--work-dir` | Path, **required** | Writable archive or renderer scratch. |
 | `--output` | Path, **required** | Destination. Construction normally requires a new path. |
 
