@@ -107,6 +107,8 @@ The query stores five sparse families and exact support rows. Its pair-populatio
 
 `query prepare-pack` creates a fixed binary pack for repeated execution. Supply `--prepared-pack` to census, build, verify or scan to use that pack. A pack mismatch fails without a worker-side rebuild.
 
+Verification requires the producing executable's attestation, even when another pack uses the same source. Preserve that pack or its original verified build cache.
+
 The example selects version 2.5 for both census and build. Its layout retains all-origin triggers and fine heavy species. Use the same campaign-stable 219-state catalog dictionary and accepted input receipts; the catalog does not replace the observed-source census.
 
 Every final heavy species receives its own signed-PDG bin. The published downstream recipe maps 202 open-heavy states to themselves. Query workspaces retain their original version. Do not change that identity.
@@ -307,6 +309,8 @@ The renderer writes PDFs, `canvases.root`, a compressed drawing record and `mani
 Each figure contains a compact sample description in its upper panel. It states the generator, collision system, energy, hard heavy-flavour processes and applicable acceptance. Activity figures identify N_ch and its particle cuts. The [scientific reference](science.md) gives the complete selections, observable definitions and statistical method. A reserved area separates the sample description from data.
 
 Bands show pointwise statistical standard errors. They do not represent systematic uncertainty or a simultaneous confidence region. Histogram bands stop at nonpositive log bins, unavailable errors and gaps between bin edges. The numerical archive retains these bins and their statuses.
+
+A finite center can have an unavailable uncertainty; this is not a zero statistical error. Stored statuses distinguish unavailable errors from genuine zero dispersion. Undefined estimates appear as gaps. Logarithmic panels omit nonpositive centers while retaining them in numerical ROOT. Display multipliers affect both the curve and its available errors.
 
 Use the three-class activity views for compact comparisons. They show 0–1%, 40–50% and 80–90%. The full-class views retain all classes. Use full-width placement for dense figures. Check label sizes after placing each figure in the manuscript.
 

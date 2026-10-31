@@ -76,6 +76,8 @@ The activity axis stores integers from 0 through 4095. Each integer occupies one
 
 The default percentile intervals are 0–1%, 1–10%, 10–20%, through 90–100%. A separate integrated class covers 0–100%. Each tune resolves its own integer boundaries from its weighted activity distribution.
 
+Equal percentile labels compare relative activity within each tune. They do not select a common absolute multiplicity.
+
 For percentile p, the threshold is the first ascending integer whose cumulative weight reaches (100-p)/100 of the total. A threshold integer belongs to the lower-activity class. The higher-activity class starts at the next integer.
 
 For [p_low, p_high], the integer lower bound is threshold(p_high)+1, except that p_high = 100 gives zero. The upper bound is threshold(p_low), except that p_low = 0 gives 4095. Discrete ties can produce unequal event fractions or empty classes.
@@ -123,6 +125,8 @@ The integrated balancing yield for an opposite-sign species a is
 $$B_{t,a}=\frac{N(t,a)-N(t,\bar a)}{T_t}.$$
 
 The partner bar denotes the conjugate signed PDG identity. There is no half-weight on the same-sign term. Integration covers the complete supported azimuthal interval. Activity-dependent balancing applies the same formula within each tune-local class.
+
+This is a raw net associated yield per trigger, not a unique-partner probability or a connected cumulant. The subtraction cancels contributions equal in both counts; it does not guarantee complete background removal. Finite acceptance and counting each hadron once do not establish unit heavy-charge closure.
 
 The baryon-to-meson observable divides two balancing yields with the same trigger. The canonical Lambda tuples `(trigger, baryon, reference)` are `(421, -4122, -421)` and `(521, 5122, -521)`. The D+ selection changes the first tuple to `(411, -4122, -411)`.
 

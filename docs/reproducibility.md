@@ -59,9 +59,9 @@ python3 tests/fixtures/nonzero_chain_v22/oracle.py
 
 The builder creates three tune domains with ten original blocks. `NONZERO_CHAIN_SOURCES_PER_BLOCK` accepts 1 or 2 and defaults to 1. The standalone oracle reads the declared block-object inventory. It independently sums the complete sparse domain and Sumw2, then compares them with the source-query domain.
 
-The resulting collection has `TEST_ONLY` state. Its `merged/index.json` and `expected-sources.json` can exercise `reduce run` without production site records. Supply independently recorded hashes for these files and `config/analysis.json`. Do not use `--representative` to claim complete figure coverage.
+The resulting collection has `TEST_ONLY` state. Its `merged/index.json` and `expected-sources.json` can exercise `reduce run` without production site records. Supply independently recorded hashes for these files and `config/analysis-all-origin.json`. Do not use `--representative` to claim complete figure coverage.
 
-The prebuilt [query fixture](../tests/fixtures/query_multitune/TEST_ONLY.md) exercises collection and merge contracts. Its version differs from the current numerical input model. The builder above exercises the supported version 2.2 route. It does not construct the version 2.5 all-origin catalog.
+The prebuilt [query fixture](../tests/fixtures/query_multitune/TEST_ONLY.md) exercises collection and merge contracts. Its version differs from the current numerical input model. The builder above uses the shipped version 2.5 construction defaults, including the all-origin trigger population and complete catalog.
 
 ## Verification boundaries
 

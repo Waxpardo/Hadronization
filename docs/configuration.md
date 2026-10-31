@@ -8,10 +8,19 @@
 | --- | --- | --- |
 | [analysis-all-origin.json](../config/analysis-all-origin.json) | Current fine-species query and supported grouped reduction | Preserve construction fields; use a compatible interpretation for reduction |
 | [analysis-individual-species.json](../config/analysis-individual-species.json) | Published reduction of the retained all-origin query | Keeps every eligible open-heavy catalog state separate |
+| [analysis-hard-root-control.json](../config/analysis-hard-root-control.json) | Offline selected-hard trigger control | Requires compatible version 2.5 retained support |
+| [analysis-all-heavy.json](../config/analysis-all-heavy.json) | Version 2.4 broad fine-species construction | Preserve its matching construction and trigger-population contract |
+| [analysis-family.json](../config/analysis-family.json) | Version 2.3 saved-state construction | Preserve its matching 74-member contract |
 | [grouping-individual-species.json](../config/grouping-individual-species.json) | Published singleton interpretation | Maps each of 202 signed open-heavy states to itself |
 | [query-all-origin.json](../config/query-all-origin.json) | Current query layout and retained all-origin support | Fixed construction schema |
+| [query-all-heavy.json](../config/query-all-heavy.json) | Version 2.4 fine-species layout | Fixed construction schema |
 | [associate-family-runtime-all-heavy.json](../config/associate-family-runtime-all-heavy.json) | Supported 82-to-42 saved-state grouping | Bind a compatible downstream recipe by its SHA-256 |
+| [associate-family-runtime.json](../config/associate-family-runtime.json) | Version 2.3 saved-state grouping | Preserve its matching 74-member identity |
+| [grouping-xi-star-only.example.json](../config/grouping-xi-star-only.example.json) | Xi-star subset recipe | Bind the separately hashed recipe in a compatible analysis copy |
 | [heavy-catalog.json](../config/heavy-catalog.json) | Complete signed heavy-state registry | Keep exact bytes for accepted fine-species products |
+| [heavy-hadron-classification.json](../config/heavy-hadron-classification.json) | Summed baryon/meson membership | Preserve the catalog, particle-data and source-audit bindings |
+| [trigger-comparison.json](../config/trigger-comparison.json) | Joint-block trigger comparison | Select existing signed parent yields and bind the recipe hash |
+| [baryon-meson-comparison.json](../config/baryon-meson-comparison.json) | Summed baryon/meson comparison | Select the retained profile and trigger order |
 | [analysis.json](../config/analysis.json) | Version 2.2 query construction and reduction | Use only with its matching input contract |
 | [analysis-pt-1-0p15.json](../config/analysis-pt-1-0p15.json) | Version 2.2 pair-pT comparison | Adds `pt_1_0p15` to the inclusive configuration; select it with `--profile-id` |
 | [query.json](../config/query.json) | Version 2.2 query builder, verifier and collection reader | Fixed schema, not a free-form layout selector |
@@ -125,6 +134,31 @@ The recipe pins the authenticated catalog and PYTHIA 8.317 unit-endpoint evidenc
 
 The destination labels the grouped result. It does not imply a contribution. Unlisted species remain in the fine collection. Describe a subset yield as that subset, not as the complete family yield. Do not treat missing input as a zero observation. The recipe bytes and checksum travel with the grouped and portable numerical products.
 
+### Registry and grouping fields
+
+These fields bind stored particle identities and downstream membership. They are not independent generator controls. The exact linked JSON supplies every record and digest.
+
+| File and fields | Meaning and change rule |
+| --- | --- |
+| Grouping recipes: `schema`, `version`, `id` | Recipe format and identity. A changed recipe needs new bytes and a separately retained hash. |
+| Grouping recipes: `basis.*` | Fixed trigger, pair-pT, kinematic, spectrum and endpoint conventions. Keep these conventions unchanged. |
+| Grouping recipes: `source_catalog.sha256`, `source_catalog.states_sha256` | Exact catalog-file and canonical-state identities. |
+| Grouping recipes: `endpoint_evidence.*` | Approved map, generator and particle-data bindings. Preserve this evidence when selecting a supported subset. |
+| Grouping recipes: `groups[].destination_pdg`, `groups[].members` | Signed destination and explicit member list. Groups must be disjoint and conjugate-complete within the supported domain. |
+| Grouping recipes: `groups[].family` | Validated family label for the signed destination. It does not add an unlisted member. |
+| Grouping recipes: `unlisted_species` | Fixed policy that preserves unlisted species upstream. |
+| Runtime family maps: `schema`, `version`, `source_model`, `basis`, `limitations` | Versioned format, PYTHIA identity and fixed interpretation rules. |
+| Runtime family maps: `groups`, `counts` | Exact approved groups and their signed member/destination counts. These are fixed map facts. |
+| Runtime family maps: `fine_state_identities`, `fine_state_identities_sha256` | Signed names, PDGs and spins with their canonical digest. |
+| Runtime family maps: `accepted_full_map_sha256`, `semantic_groups_sha256` | Bind the approved map and its normalized grouping content. |
+| Runtime maps: `deferred_signed_pdgs`, `counts.deferred_signed_xi_excitation_members` | Empty in the 82-member map. The 74-member compatibility map lists deferred Xi excitations. The current broad query retains their fine identities. |
+| Heavy catalog: `schema`, `generator`, `particle_data_sha256`, `states_sha256` | Format, generator, particle-data and canonical-state identities. |
+| Heavy catalog: `states[].pdg`, `name`, `charge3`, `nc`, `ncbar`, `nb`, `nbbar` | Signed identity, display name, electric charge in thirds and heavy-constituent counts. Preserve accepted catalog bytes. |
+| Classification: `schema`, `basis`, `generator`, `heavy_catalog_sha256`, `particle_data_sha256`, `source_audit_sha256`, `states_sha256` | Bind the independent meson/baryon classification to its exact source and catalog. |
+| Classification: `states[].pdg`, `name`, `kind` | Signed species, name and validated `meson` or `baryon` class. |
+
+The [singleton](../config/grouping-individual-species.json) and [Xi-star subset](../config/grouping-xi-star-only.example.json) recipes use the grouping fields above. The [family parser](../pipeline/reduce/family.py) validates their membership and bindings. The [query model](../pipeline/query/model.py) validates catalog identities. The [summed-yield reducer](../pipeline/reduce/baryon_meson_comparison.py) validates the independent classification.
+
 The nominal activity ID is `charged_light_sector_activity_a15_v1_eta4`. The alternate ID ends in `eta1`. Their physical fields are `a15_eta4` and `a15_eta1` respectively. Their `raw_definition_id` is an input metadata identifier, not an additional experimental-primary selection.
 
 | Axis | Default coordinates | Units and endpoints |
@@ -151,12 +185,12 @@ The field `phase_a_t9_two_sided_quantile` is the literal key for the fixed nine-
 | `presets.paper_default.baryon_meson_trigger_pdgs` | 421, 521. Trigger columns for the canonical Lambda comparison. Additional baryon pages use both saved triggers in each sector |
 | `layout.axis_padding_fraction` | 0.08. Number from 0 to 1. Adds display range padding. |
 | `layout.facet_dimension` | `associate_family`. Fixed |
-| `layout.grid_columns_maximum` | 3. Positive integer. Layout column limit. |
-| `layout.maximum_panels_per_page` | 8. Positive integer. Controls page splitting. |
+| `layout.grid_columns_maximum` | 3. Positive integer, retained for compatibility. The cold renderer does not derive its column count from this value. |
+| `layout.maximum_panels_per_page` | 8. Values 1–5 paginate main pages; values of 6 or more retain the paper layout. Signed spectra use a separate layout. |
 | `layout.shared_legend_reservation` | `page_top`. Fixed reservation for the multiplicity-class key. Tune keys appear inside a plot frame. |
 | `layout.text_pixel_size` | 18. Positive integer. ROOT drawing text scale. |
-| `layout.physical_width_cm` | 18. Fixed cm width |
-| `layout.minimum_body_text_pt` | 8. Fixed typographic point minimum |
+| `layout.physical_width_cm` | 18. Fixed compatibility metadata. Expanded species sheets use wider native pages. |
+| `layout.minimum_body_text_pt` | 8. Fixed declared minimum. The renderer does not measure font sizes after manuscript placement. |
 | `layout.categorical_tune_dodge` | Upper: -0.08, 0, 0.08. Lower: -0.04, 0.04. Fixed compatibility map. Current scientific category positions coincide. |
 | `layout.p1_inset_geometry` | `[0.18,0.05,0.65,0.48]`. Fixed normalized rectangle for the multiplicity inset |
 | `layout.correlation_view` | `monash_pair_sign`. Also accepts `monash_balance` and `all_tune_ratio` |

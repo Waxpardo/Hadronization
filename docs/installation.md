@@ -8,7 +8,7 @@
 | --- | --- |
 | Git | Required for repository identity, build provenance and source-based tests. Use a clone with commit history. |
 | Python | Version 3.9 or later according to `doctor`. Python entry points use the standard library and PyROOT. |
-| C++ compiler | C++17 support. Scientific builds use optimization, strict warnings and disabled floating-point contraction. |
+| C++ compiler | C++17 support. Builds record their compiler and flags. Query and native statistical builds disable floating-point contraction. |
 | ROOT | Required for analysis, query, merge, numerical archives and rendering. Provide `root-config` and matching PyROOT. |
 | PYTHIA | Version 8.317 for generation. Provide headers, library, XML data and `pythia8-config`. |
 | Bash or zsh | Required to source `setup.sh`. |

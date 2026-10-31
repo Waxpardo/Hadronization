@@ -200,9 +200,9 @@ Scan accepted analyzed pairs and write one campaign dictionary.
 | `--receipt` | Path, repeatable, **required** | Matching analyzed JSON receipt. |
 | `--accepted-receipt-sha256` | string, repeatable, `none` | Independent accepted parent-receipt SHA-256. |
 | `--expected-source-count` | int, **required** | Exact global source count for the census. |
-| `--analysis` | Path, `config/analysis.json` | Downstream analysis JSON. |
+| `--analysis` | Path, `config/analysis-all-origin.json` | Construction analysis JSON. Specify `config/analysis.json` explicitly for version 2.2 construction. |
 | `--output` | Path, **required** | Destination. Construction normally requires a new path. |
-| `--prepared-pack` | Path, `none` | Verified fixed query binary pack. No build fallback. |
+| `--prepared-pack` | Path, `none` | Optional fixed query binary pack. A supplied pack must match; there is no build fallback. |
 | `--work-root` | Path, **required** | Writable build and execution scratch. |
 
 Inspect its syntax before use:
@@ -226,7 +226,7 @@ Construct and publish one verified query workspace.
 | `--layout` | Path, selected by analysis by default | Exact repository query layout; version 2.5.0 uses `config/query-all-origin.json`. |
 | `--dictionary` | Path, **required** | Campaign-wide signed-PDG dictionary. |
 | `--accepted-receipt-sha256` | string, `none` | Independent accepted parent-receipt SHA-256. |
-| `--prepared-pack` | Path, `none` | Verified fixed query binary pack. No build fallback. |
+| `--prepared-pack` | Path, `none` | Optional fixed query binary pack. A supplied pack must match; there is no build fallback. |
 | `--work-root` | Path, **required** | Writable build and execution scratch. |
 
 Inspect its syntax before use:
@@ -245,7 +245,7 @@ Verify hashes, exact files, support rows and sparse content.
 | --- | --- | --- |
 | `--workspace` | Path, **required** | Query workspace directory. |
 | `--expected-content-sha256` | string, **required** | Independent scientific-content digest for the workspace. |
-| `--prepared-pack` | Path, `none` | Verified fixed query binary pack. No build fallback. |
+| `--prepared-pack` | Path, `none` | Optional fixed query binary pack. A supplied pack must match; there is no build fallback. |
 | `--work-root` | Path, **required** | Writable build and execution scratch. |
 
 Inspect its syntax before use:
@@ -265,7 +265,7 @@ Scan the named archived profile after verification.
 | `--workspace` | Path, **required** | Query workspace directory. |
 | `--expected-content-sha256` | string, **required** | Independent scientific-content digest for the workspace. |
 | `--profile` | string, **required** | Named archived profile for a query scan. |
-| `--prepared-pack` | Path, `none` | Verified fixed query binary pack. No build fallback. |
+| `--prepared-pack` | Path, `none` | Optional fixed query binary pack. A supplied pack must match; there is no build fallback. |
 | `--work-root` | Path, **required** | Writable build and execution scratch. |
 
 Inspect its syntax before use:
@@ -661,7 +661,7 @@ Inspect its syntax before use:
 
 Check numerical ROOT and report, or a portable numerical package.
 
-**Side effects:** Read-only.
+**Side effects:** Preserves scientific inputs; writes temporary export-verification files under `TMPDIR`.
 
 | Option or argument | Type and default | Meaning |
 | --- | --- | --- |
@@ -682,7 +682,7 @@ Inspect its syntax before use:
 
 Perform the same verification and report resolved provenance.
 
-**Side effects:** Read-only.
+**Side effects:** Preserves scientific inputs; writes temporary export-verification files under `TMPDIR`.
 
 | Option or argument | Type and default | Meaning |
 | --- | --- | --- |
@@ -732,7 +732,7 @@ Sum all eligible retained fine species into baryon and meson balancing yields fo
 | `--recipe-sha256` | String, required | Independent recipe file pin. |
 | `--work-root` | Path, required | Writable verification scratch. |
 | `--output` | Path, required | New typed ROOT companion. |
-| `--csv-output` | Path, none | Optional compact table written beside the companion. |
+| `--csv-output` | Path, none | Optional compact table at the named new path. |
 
 See [summed baryon-to-meson comparison](workflow.md#compare-summed-baryon-and-meson-yields) for an executable example.
 
@@ -931,9 +931,9 @@ Execute a reserved generation attempt and publish validated raw output.
 
 | Option or argument | Type and default | Meaning |
 | --- | --- | --- |
-| `--tune` | string, **required** | Select a tune for analysis planning. |
+| `--tune` | string, **required** | Tune of the reserved generation attempt. |
 | `--logical-id` | int, **required** | Select a logical source ID. |
-| `--attempt` | int, **required** | Unique attempt number. Query workers accept 0–2. |
+| `--attempt` | int, **required** | Generation attempt in the campaign domain; the shipped domain is 0–9. |
 | `--seed` | int, **required** | Deterministic attempt seed. |
 | `--card-sha256` | string, **required** | Independent SHA-256 pin for card. |
 | `--effective-card-sha256` | string, **required** | Independent SHA-256 pin for effective card. |
@@ -959,9 +959,9 @@ Record a held or failed preworker attempt outcome.
 
 | Option or argument | Type and default | Meaning |
 | --- | --- | --- |
-| `--tune` | string, **required** | Select a tune for analysis planning. |
+| `--tune` | string, **required** | Tune of the reserved generation attempt. |
 | `--logical-id` | int, **required** | Select a logical source ID. |
-| `--attempt` | int, **required** | Unique attempt number. Query workers accept 0–2. |
+| `--attempt` | int, **required** | Generation attempt in the campaign domain; the shipped domain is 0–9. |
 | `--state` | string, **required** | Record a held or failed preworker outcome. Choices: `held`, `failed`. |
 | `--reason` | string, **required** | Required outcome explanation. |
 | `--work-root` | Path, `none` | Writable build and execution scratch. |
@@ -983,7 +983,7 @@ check compares generated header bytes. generate writes the selected header outpu
 | Option or argument | Type and default | Meaning |
 | --- | --- | --- |
 | `command` | string, **required** | Select one of the listed operations. Choices: `generate`, `check`. |
-| `--output` | Path, `pipeline/generate/study_contract.hpp` | Destination. Construction normally requires a new path. |
+| `--output` | Path, `pipeline/generate/study_contract.hpp` | Header to compare in `check` mode or write, replacing existing bytes, in `generate` mode. |
 
 Inspect its syntax before use:
 
@@ -1001,7 +1001,7 @@ Measure the execute-node environment and bulk/control no-replace publication. Re
 
 | Option or argument | Type and default | Meaning |
 | --- | --- | --- |
-| `--input-root` | Path, **required** | Accepted analyzed-input directory. |
+| `--input-root` | Path, **required** | One accepted analyzed ROOT file, not a directory. |
 | `--input-sha256` | string, **required** | Independent SHA-256 pin for input. |
 | `--bulk-root` | Path, **required** | Allocated persistent bulk endpoint. |
 | `--control-root` | Path, **required** | Separate protected control endpoint. |
