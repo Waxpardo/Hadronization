@@ -25,7 +25,7 @@ from types import SimpleNamespace
 ROOT = Path(__file__).resolve().parents[2]
 PLOT_CONFIG = ROOT / "config/plot.json"
 TARGET_CAMPAIGN = ROOT / "data/campaign.json"
-TARGET_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d"
+TARGET_CAMPAIGN_SHA256 = "abb02e9317ed18360e518fb02a7aa2976c3e4179665c7f3357e91290a6652cb8"
 DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v10"
 CANVAS_NAME = "canvases.root"
 RECORD_NAME = "drawing-record.tsv.gz"

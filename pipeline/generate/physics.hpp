@@ -489,37 +489,26 @@ inline bool IsDirectPrimaryStatus(int status) {
 // ---------------------------------------------------------------------------
 // Charged-particle multiplicity, NCH_PRIMARY_CHARGED_*_V1.
 //
-// This is a genuine charged-particle multiplicity, not a count of directly
-// produced hadronisation products. It is the hadron-level analogue of the
-// conventional experimental primary-charged-particle definition: a charged
-// particle with proper lifetime c*tau0 > 1 cm that is either produced
-// directly in the collision or descends only from particles with
-// c*tau0 < 1 cm.
+// Count final charged particles without charm or beauty constituents, with
+// finite kinematics, pT > 0.15 GeV/c and |eta| <= the requested bound.
+// "Charged primaries" is the compact study label for this predicate. It does
+// not assert equivalence to an experimental primary-particle definition.
 //
-// That lifetime condition is enforced at generation time, not here. All three
-// tune cards set `ParticleDecays:limitTau0 = on` with `tau0Max = 0.01` mm, so
-// every strong and electromagnetic decay proceeds while every weakly decaying
-// light hadron stays final. No light hadron has 0.01 mm < c*tau0 < 10 mm, so
-// for light flavour this card value is exactly equivalent to the conventional
-// 1 cm/c threshold. Consequently `isFinal()` already excludes weak-decay
-// products for these light hadrons and no ancestry traversal is required.
-//
-// Open- and hidden-heavy hadrons are excluded from the count. Their decays are
-// disabled deliberately, so they are final here purely as an artefact of the
-// production policy, and an experiment would instead count their decay
-// daughters. Excluding them also removes the autocorrelation that would
-// otherwise exist between the event-activity classifier and the heavy-flavour
-// observable it classifies. The paper must state this exclusion.
+// The tune cards use limitTau0=on and tau0Max=0.01 mm for light particles.
+// Light resonance daughters and charged leptons may contribute. The producer
+// separately disables all heavy-hadron decays, so their daughters are absent.
+// The predicate performs no ancestry traversal. It excludes heavy hadrons
+// themselves; this exclusion does not prove that all correlations between
+// the activity classifier and heavy-flavour observables have been removed.
 // ---------------------------------------------------------------------------
 
 inline constexpr double kMultiplicityPtMin = 0.15;
 inline constexpr double kMultiplicityEtaCentral = 1.0;
 inline constexpr double kMultiplicityEtaWide = 4.0;
 
-// Diagnostic composition buckets. Index 5 collects every remaining charged
-// species (predominantly Sigma+-, Xi-, Omega-), which the conventional
-// primary definition includes and which a five-species list would silently
-// drop.
+// Diagnostic composition buckets. Index 5 collects the remaining selected
+// charged species, including Sigma+-, Xi- and Omega-. Do not replace the
+// final/charged/non-heavy predicate with a five-species list.
 inline constexpr int kMultiplicitySpeciesBuckets = 6;
 
 inline int MultiplicitySpeciesIndex(int absPdg) {

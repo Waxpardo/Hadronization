@@ -44,7 +44,7 @@ PINNED_EL9_IMAGE = ("/cvmfs/unpacked.cern.ch/.flat/80/"
                     "80fe7cc69c91332a0733c5aea408913df2f1944ab2e9a895ee51de8324cb232a")
 # Bind query preparation to the accepted source/data snapshot.
 # These are identity pins, not scheduler sizes.
-CURRENT_CAMPAIGN_SHA256 = "cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d"
+CURRENT_CAMPAIGN_SHA256 = "abb02e9317ed18360e518fb02a7aa2976c3e4179665c7f3357e91290a6652cb8"
 CURRENT_SOURCE_MANIFEST_SHA256 = "5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f8f247585912e2df247"
 TRANSIENT_ERRNOS = r.TRANSIENT_ERRNOS
 SOURCE_FILES = (

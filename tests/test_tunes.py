@@ -6,9 +6,9 @@ from helpers import ROOT, load_json, parse_card, sha256
 class TuneCardContract(unittest.TestCase):
     def test_current_card_files_and_digests_are_exact(self):
         expected = {
-            "monash.cmnd": "1945c5d1e2392915a5d35fe090649857150cfc34a13403cfdafdfa85a8f893d7",
-            "junctions.cmnd": "dfadfd8ffd2c9a386f159e239d3b582bdb038848b9bf55eb3ade571edce79128",
-            "close_packing.cmnd": "99a7ff824cdae94b44d5d3a547770f5b7cb02e7cd8dd2842a95bdb1ebafdfe2d",
+            "monash.cmnd": "35b8b01e72163e062834b8f942b97f3e765fa01a5a26ecf6814faac3155efa8a",
+            "junctions.cmnd": "86330d6f0116676bd83f802a39c595f9ab289f57eadaceed10cbd5897d22a9c7",
+            "close_packing.cmnd": "2e561e36f79297c60c8b3f08866933b4c6053786d96abb8ffde8677ceb943603",
         }
         self.assertEqual({path.name for path in (ROOT / "config/tunes").iterdir()},
                          set(expected))

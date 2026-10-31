@@ -520,7 +520,7 @@ class NativeV4Metadata(unittest.TestCase):
 
     def test_checked_campaign_ledger_separates_jobs_successes_and_unknown_trials(self):
         report=accounting.inventory(ROOT/'data/campaign.json',
-            'cc2c0593d8b48103560bed7ba46fa7f81a8137bae24994c6ef2316dd9265005d',
+            'abb02e9317ed18360e518fb02a7aa2976c3e4179665c7f3357e91290a6652cb8',
             ROOT/'data/raw_manifest.jsonl',
             '5f354cbc9e0bdfb7ead07adb341d74e4c98f14709d873f8f247585912e2df247',
             ROOT/'data/attempts.csv',

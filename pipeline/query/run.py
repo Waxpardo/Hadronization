@@ -830,7 +830,7 @@ def main():
     projection = None
     for command in (create, check, scan, census_parser):
         command.add_argument("--prepared-pack", type=Path,
-                             help="explicit executable/build receipt pack; absence or mismatch refuses and never rebuilds")
+                             help="optional executable/build receipt pack; when supplied, a missing or mismatched pack refuses without rebuilding")
     for command in (prepared, create, check, scan, census_parser):
         command.add_argument("--work-root", type=Path, required=True, help="external reproducible build/cache directory")
     args = parser.parse_args()

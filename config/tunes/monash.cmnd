@@ -24,26 +24,9 @@ Tune:pp = 14
 HardQCD:hardccbar = on
 HardQCD:hardbbbar = on
 
-! Processes become divergent at low pT, need to define a lower bound.
-!
-! 2.0 GeV, not 1.0, because event-activity classification is central to this
-! study. MultipartonInteractions:pT0Ref is 2.28 GeV: a threshold below that
-! asks for the hardest interaction in the event to be softer than the MPI
-! screening scale, which selects events with suppressed underlying activity.
-! Measured on 8.317, dN_ch/deta was 4.973 at pTHatMin 1.0 against 6.968 for
-! minimum bias -- 29% BELOW MB despite requiring a hard scattering -- so
-! percentiles taken inside that sample are not the classes an experiment
-! slices. At 2.0 the sample sits within 4.2% of minimum bias and the classes
-! mean what they say.
-!
-! This does NOT cost trigger statistics, contrary to the obvious worry. The
-! analysis already requires trigger pT > 1 GeV, and at pTHatMin 1.0 much of the
-! charm produced falls below that and never becomes a trigger. Measured on
-! 100k MONASH events: charm triggers per event rose 0.990 -> 1.196 (+21%) and
-! beauty 0.126 -> 0.212 (+68%) on moving 1.0 -> 2.0. The generated cross
-! section is smaller, but this is a generator study with a chosen event count,
-! so that does not enter.
-! The active raw validator audits the phase-space and multiplicity contract.
+! Selected hard charm and beauty processes use a 2 GeV/c hard-scattering
+! threshold. This is a heavy-flavour-biased sample. The downstream main
+! pair results use inclusive final-hadron pT.
 PhaseSpace:pTHatMin = 2.
 
 ! Light-particle decay policy. The producer programmatically disables every
