@@ -220,6 +220,115 @@ int main() {
             run = subprocess.run([str(binary)], capture_output=True, text=True)
             self.assertEqual(run.returncode, 0, run.stderr)
 
+    @unittest.skipUnless(all(shutil.which(x) for x in
+                             ('root-config', 'gs', 'pdftoppm', 'pdffonts')),
+                         'ROOT, Ghostscript and Poppler required')
+    def test_shared_fraction_title_clears_complete_stack_and_page_in_rendered_ink(self):
+        # Actual compact beauty/charm extremes and expanded species-stack axes.
+        # Rasterize title and tick ink separately, without relying on the
+        # placement helper's own estimate or a source-text assertion.
+        source = r"""#define main render_program_main
+#include "pipeline/plot/render.cpp"
+#undef main
+int main(int argc, char** argv) {
+  gROOT->SetBatch(true); gErrorIgnoreLevel=kWarning;
+  std::filesystem::path out(argv[1]); std::filesystem::create_directory(out);
+  for (int fixture=0;fixture<4;++fixture) {
+    const bool charm=fixture%2, expanded=fixture>=2;
+    Page page{}; page.width=expanded ? (charm ? 2800 : 4300) : 1900;
+    page.height=expanded ? 2850 : 2950; page.textPixels=18;
+    page.role=charm ? "balancing.activity.charm" : "balancing.activity.beauty";
+    page.filename=expanded ? "supplemental.stack.trigger-421.pdf" : "stack.pdf";
+    const std::string title="#it{Y} = #frac{#it{N}_{OS} - #it{N}_{SS}}{#it{N}_{trig}}";
+    const double left=expanded ? (charm ? .095 : .06186046511627908) : .18475750577367206;
+    const double right=expanded ? (charm ? .027142857142857146 : .017674418604651163) : 0.;
+    const double rows[4]={.22, expanded ? .416 : .43866666666666665,
+                               expanded ? .612 : .6573333333333333,
+                               expanded ? .808 : .876};
+    for(int row=0;row<3;++row) for(int col=0;col<(expanded?1:2);++col) {
+      Panel panel{}; panel.id="upper."+std::to_string(row)+"."+std::to_string(col);
+      panel.geometry={col ? .54125 : 0.,rows[2-row],col ? 1. : expanded ? 1. : .54125,rows[3-row]};
+      panel.margins={col ? 0. : left,col ? .03814713896457757 : right,0.,
+          row ? 0. : expanded ? .10955961331901179 : .09487391484084332};
+      panel.logY=charm && !expanded;
+      panel.yLow=expanded ? (charm ? -.01679178684398018 : -.022455703094770615)
+                          : charm ? .0004933188737822916 : -.010175844764722034;
+      panel.yHigh=expanded ? (charm ? .39476181112209435 : .5263116347787288)
+                           : charm ? .74578251597901 : .14332067142740346;
+      panel.yTitle=col ? "" : title; page.panels.push_back(panel);
+    }
+    for(int col=0;col<(expanded?1:2);++col) {
+      Panel panel{}; panel.id="lower."+std::to_string(col);
+      panel.geometry={col ? .54125 : 0.,.08,col ? 1. : expanded ? 1. : .54125,.22};
+      panel.margins={col ? 0. : left,right,.43,0.};
+      panel.logY=true; panel.yLow=.3; panel.yHigh=184.; page.panels.push_back(panel);
+    }
+    if(fixture==0) {
+      const auto ticks=YMajorTicks(page,page.panels[2]);
+      if(std::none_of(ticks.begin(),ticks.end(),[](const YMajorTick& t){return Close(t.value,.075);}))return 2;
+    }
+    for (int layer=0;layer<2;++layer) {
+      TCanvas canvas("ink","ink",page.width,page.height);
+      canvas.SetCanvasSize(page.width,page.height); canvas.SetFillColor(0);
+      gStyle->SetPaperSize(PaperWidthCentimeters(page),
+                          PaperWidthCentimeters(page)*page.height/page.width);
+      if(layer==0) {
+        auto* current=gPad; const auto texts=CanvasSupplementTexts(page);
+        if(gPad!=current)return 3;
+        for(const auto& item:texts) if(item.angle==90.) {
+          TLatex text; text.SetNDC(); text.SetTextFont(43); text.SetLineWidth(1);
+          text.SetTextSize(item.size); text.SetTextAlign(item.align); text.SetTextAngle(item.angle);
+          text.DrawLatex(item.x,item.y,item.text.c_str());
+        }
+      } else for(const auto& panel:page.panels) {
+        if(!SharedStackYTitle(page,panel)||SharedRightAxis(panel))continue;
+        for(const auto& tick:YMajorTicks(page,panel)) {
+          TLatex text; text.SetNDC(); text.SetTextFont(43); text.SetLineWidth(1);
+          text.SetTextSize(YTickTextPixels(page,panel));
+          text.SetTextAlign(YTickTextAlign(page,panel,tick.value));
+          text.DrawLatex(panel.geometry[0]+YTickLabelX(page,panel)*(panel.geometry[2]-panel.geometry[0]),
+                         panel.geometry[1]+YTickLabelY(panel,tick.value)*(panel.geometry[3]-panel.geometry[1]),
+                         tick.label.c_str());
+        }
+      }
+      canvas.Modified();canvas.Update();
+      canvas.SaveAs((out/(std::to_string(fixture)+(layer ? ".ticks.pdf" : ".title.pdf"))).c_str());
+    }
+  }
+  return 0;
+}
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); cpp=root/'stack.cpp'; binary=root/'stack'
+            cpp.write_text(source)
+            flags=shlex.split(subprocess.check_output(
+                ['root-config','--cflags','--libs'],text=True))
+            built=subprocess.run(['c++','-std=c++17','-I',str(ROOT),str(cpp),
+                                  '-o',str(binary)]+flags,capture_output=True,text=True)
+            self.assertEqual(built.returncode,0,built.stderr)
+            run=subprocess.run([str(binary),str(root/'out')],capture_output=True,text=True)
+            self.assertEqual(run.returncode,0,run.stderr)
+            for fixture,width in enumerate((1900,1900,4300,2800)):
+                bounds=[]
+                for layer in ('title','ticks'):
+                    pdf=root/'out'/f'{fixture}.{layer}.pdf'
+                    plot.publication_pdf(pdf)
+                    target=root/f'{fixture}.{layer}'
+                    subprocess.run(['pdftoppm','-gray','-singlefile','-scale-to-x',str(width),
+                                    '-scale-to-y','-1',str(pdf),str(target)],
+                                   check=True,capture_output=True)
+                    magic,w,h,maxval,pixels=target.with_suffix('.'+layer+'.pgm').read_bytes().split(maxsplit=4)
+                    w,h=int(w),int(h)
+                    self.assertEqual((magic,w,int(maxval),len(pixels)),(b'P5',width,255,w*h))
+                    occupied=[(i%w,i//w) for i,v in enumerate(pixels) if v<220]
+                    self.assertTrue(occupied)
+                    bounds.append((min(x for x,y in occupied),min(y for x,y in occupied),
+                                   max(x for x,y in occupied)+1,max(y for x,y in occupied)+1))
+                title,ticks=bounds
+                self.assertGreaterEqual(ticks[0]-title[2],.25*34,
+                                        f'fixture {fixture}: title {title}, ticks {ticks}')
+                self.assertGreaterEqual(min(title[0],title[1],width-title[2],h-title[3]),2)
+
     @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
     def test_panel_letters_follow_visual_geometry_and_leave_titles_semantic(self):
         source = r'''#define main render_program_main

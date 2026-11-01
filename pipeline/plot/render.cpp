@@ -2479,6 +2479,45 @@ std::string LogBoundaryLabel(double value) {
   text << std::setprecision(4) << coefficient << "#times10^{" << exponent << "}";
   return text.str();
 }
+double SharedStackYTitleX(const Page& page) {
+  // Pixel-font metrics must not depend on whichever panel is current during
+  // drawing or cold readback. Restore that pad after measuring on a fixed pad.
+  TVirtualPad::TContext context;
+  TCanvas metrics("shared_axis_text_metrics", "", 600, 600);
+  metrics.SetCanvasSize(600, 600);
+  double anchor = 1., tickLeft = page.width, titleDepth = 0.;
+  for (const auto& panel : page.panels) {
+    if (!SharedStackYTitle(page, panel)) continue;
+    const double width = panel.geometry[2] - panel.geometry[0];
+    TLatex text;
+    text.SetTextFont(43);
+    if (!panel.yTitle.empty()) {
+      anchor = std::min(anchor, panel.geometry[0] +
+          YTitleX(page, panel) * width);
+      text.SetTextSize(BodyTextPixels(page));
+      text.SetTitle(panel.yTitle.c_str());
+      UInt_t w = 0, h = 0;
+      text.GetBoundingBox(w, h);
+      // The complete unrotated line box bounds the rotated title's ink plus
+      // approximately 0.3 text height of clearance in the vector exporter.
+      titleDepth = std::max(titleDepth, double(h));
+    }
+    if (SharedRightAxis(panel)) continue;
+    text.SetTextSize(YTickTextPixels(page, panel));
+    for (const auto& tick : YMajorTicks(page, panel)) {
+      text.SetTitle(tick.label.c_str());
+      UInt_t w = 0, h = 0;
+      text.GetBoundingBox(w, h);
+      tickLeft = std::min(tickLeft, page.width *
+          (panel.geometry[0] + YTickLabelX(page, panel) * width) - w);
+    }
+  }
+  Need(titleDepth > 0., "shared y-title text metrics are unavailable");
+  anchor = std::min(anchor, (tickLeft - titleDepth) / page.width);
+  Need(anchor * page.width >= 2.,
+       "shared y title has no tick clearance inside the canvas");
+  return anchor;
+}
 std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
   std::vector<ExpectedText> result;
   bool nonpositiveRatio=false, undefinedRatio=false;
@@ -2573,7 +2612,7 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
     if (ratio!=page.panels.end() && !ratio->note.empty())
       result.push_back(TextExpectation(ratio->note,.015,.035,16));
   }
-  double stackBottom=1., stackTop=0., titleX=0.;
+  double stackBottom=1., stackTop=0.;
   std::string stackTitle;
   for (const auto& panel : page.panels) {
     if (!SharedStackYTitle(page,panel) || panel.yTitle.empty()) continue;
@@ -2583,10 +2622,10 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
     const double height=panel.geometry[3]-panel.geometry[1];
     stackBottom=std::min(stackBottom,panel.geometry[1]+height*panel.margins[2]);
     stackTop=std::max(stackTop,panel.geometry[3]-height*panel.margins[3]);
-    titleX=panel.geometry[0]+YTitleX(page,panel)*(panel.geometry[2]-panel.geometry[0]);
   }
   if (!stackTitle.empty())
-    result.push_back(TextExpectation(stackTitle,titleX,(stackBottom+stackTop)/2,
+    result.push_back(TextExpectation(stackTitle,SharedStackYTitleX(page),
+                                     (stackBottom+stackTop)/2,
                                      BodyTextPixels(page),1,23,90));
   if (SharedXTitle(page)) {
     double low=1., high=0., frameY=1.;
