@@ -928,12 +928,12 @@ std::vector<ExpectedText> StateGlyphTexts(
   // panel and do not add a scientific coordinate.
   if (page.role == "multiplicity.composite" &&
       page.scientificHeader.empty()) return {};
-  // Production balancing pages disclose unavailable SE once in the footer;
-  // the exact per-point status and reason remain in the drawing record.
+  // Production balancing pages retain exact per-point uncertainty states and
+  // reasons in the drawing record; manuscript captions explain their display.
   if (page.role.rfind("balancing.", 0) == 0 &&
       page.scientificHeader.empty()) return {};
   // G9 ratio pages can contain many unresolved-reference bins.  Per-point
-  // question marks obscure the curve; the panel footer and drawing record
+  // question marks obscure the curve; the numerical output and drawing record
   // retain the same explicit uncertainty state and reason.
   if (page.role == "spectra.signed_heavy") return {};
   std::vector<ExpectedText> result;
@@ -1912,6 +1912,16 @@ double YTitleX(const Page& page, const Panel& panel) {
   return std::max(minimum,
                   base*SingleSpeciesWidthScale(page)-.3*BodyTextPixels(page)/width);
 }
+bool ShowOperationalNotes(const Page& page) {
+  return !page.scientificHeader.empty();
+}
+bool DrawnPanelNote(const Page& page, const Panel& panel) {
+  return ShowOperationalNotes(page) && !panel.note.empty() &&
+      !(page.role=="multiplicity.composite" &&
+        (panel.id=="upper.distribution" || panel.id=="lower.ratio")) &&
+      page.role.rfind("balancing.",0)!=0 &&
+      page.role.rfind("correlations.",0)!=0;
+}
 std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
                                              const Panel& panel,
                                              const std::vector<Page>& pages,
@@ -1998,11 +2008,7 @@ std::vector<ExpectedText> ExpectedPanelTexts(const Page& page,
   result.insert(result.end(), classTexts.begin(), classTexts.end());
   const auto stateGlyphs = StateGlyphTexts(page, panel, pages);
   result.insert(result.end(), stateGlyphs.begin(), stateGlyphs.end());
-  if (drawn && !panel.note.empty() &&
-      !(page.role=="multiplicity.composite" &&
-        (panel.id=="upper.distribution" || panel.id=="lower.ratio")) &&
-      page.role.rfind("balancing.",0)!=0 &&
-      page.role.rfind("correlations.",0)!=0) {
+  if (drawn && DrawnPanelNote(page, panel)) {
     const bool upperNote = panel.id.rfind("upper.",0)==0 ||
                            panel.id == "g9.absolute";
     const double noteY = upperNote ? .89 : .025;
@@ -2530,7 +2536,7 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
         undefinedRatio |= point.state=="MISSING_VALUE";
       }
   }
-  if (nonpositiveRatio || undefinedRatio) {
+  if (ShowOperationalNotes(page) && (nonpositiveRatio || undefinedRatio)) {
     const std::string note = nonpositiveRatio && undefinedRatio ?
         "Ratio gaps: undefined or nonpositive on log axes; signed values saved in ROOT" :
         nonpositiveRatio ?
@@ -2579,10 +2585,10 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
                                     disclosure.size(),disclosure)==0,
            "centers-only teaching disclosure absent");
       note=disclosure;
-    } else if (exactZero) {
+    } else if (ShowOperationalNotes(page) && exactZero) {
       note="Exact-zero SE saved in ROOT";
     }
-    if (withheld) note += (note.empty() ? "" : "; ") +
+    if (ShowOperationalNotes(page) && withheld) note += (note.empty() ? "" : "; ") +
         std::string(page.role.rfind("balancing.", 0) == 0 &&
                     page.scientificHeader.empty() ?
                     "SE unavailable for unresolved ratios; see ROOT flags" :
@@ -2598,8 +2604,6 @@ std::vector<ExpectedText> CanvasSupplementTexts(const Page& page) {
       if (ratio!=page.panels.end() && !ratio->note.empty()) {
         Need(ratio->note==kP1WithheldSeDisclosure,
              "paper P1 withheld-SE disclosure differs");
-        if (page.panels.front().annotations.empty())
-          result.push_back(TextExpectation(ratio->note,.015,.015,14,kGray+2));
       }
       return result;
     }
@@ -3359,11 +3363,7 @@ void DrawPage(const Page& page, const std::filesystem::path& output,
     for (const auto& item : StateGlyphTexts(page, panel, pages))
       Text(item.x, item.y, item.text, static_cast<int>(item.size),
            item.color);
-    if (drawn && !panel.note.empty() &&
-        !(page.role=="multiplicity.composite" &&
-          (panel.id=="upper.distribution" || panel.id=="lower.ratio")) &&
-        page.role.rfind("balancing.",0)!=0 &&
-        page.role.rfind("correlations.",0)!=0) {
+    if (drawn && DrawnPanelNote(page, panel)) {
       const bool upperNote = panel.id.rfind("upper.",0)==0 ||
                              panel.id == "g9.absolute";
       const double noteY = upperNote ? .89 : .025;

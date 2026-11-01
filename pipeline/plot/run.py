@@ -1615,12 +1615,13 @@ def add_publication_captions(pages, context):
             for panel in panels:
                 panel['x_title']=panel['x_title'].replace(' (1)','')
                 panel['note']=''
-            flags=[q for p in panels for z in p['series'] for q in z['points']]
-            notes=[]
-            if any(q['state']=='DRAW' and q['error'] is None for q in flags): notes.append('? = uncertainty unavailable')
-            if any(q['state'] not in ('DRAW','LOG_NONPOSITIVE') for q in flags): notes.append('Gaps: undefined or unavailable bins')
-            target['annotations'].extend({'x':.56,'y':.74-i*.045,'size':float(font-2),'text':text}
-                                         for i,text in enumerate(notes))
+            if page.get('scientific_header'):
+                flags=[q for p in panels for z in p['series'] for q in z['points']]
+                notes=[]
+                if any(q['state']=='DRAW' and q['error'] is None for q in flags): notes.append('? = uncertainty unavailable')
+                if any(q['state'] not in ('DRAW','LOG_NONPOSITIVE') for q in flags): notes.append('Gaps: undefined or unavailable bins')
+                target['annotations'].extend({'x':.56,'y':.74-i*.045,'size':float(font-2),'text':text}
+                                             for i,text in enumerate(notes))
         if page['role'].startswith('correlations.'):
             if not any(p['id'].startswith('correlation.teaching.') for p in panels):
                 for panel in panels:

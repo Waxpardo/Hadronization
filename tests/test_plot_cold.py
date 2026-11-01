@@ -329,6 +329,128 @@ int main(int argc, char** argv) {
                                         f'fixture {fixture}: title {title}, ticks {ticks}')
                 self.assertGreaterEqual(min(title[0],title[1],width-title[2],h-title[3]),2)
 
+    def test_production_spectrum_captions_keep_science_and_point_statuses(self):
+        import copy
+        context=SimpleNamespace(target_analysis_caption='PYTHIA 8',sample_caption=['pp'],
+                                g9_science={'eta':{'high':float(4).hex()}})
+        for header in ('','TEST_ONLY / SYNTHETIC / PARTIAL_SAMPLE'):
+            point={'state':'DRAW','y':.03,'error':None,'uncertainty_status':'UNAVAILABLE'}
+            missing={'state':'MISSING_VALUE','y':None,'error':None,'reasons':['undefined']}
+            panel=dict(id='g9.absolute',geometry=[0.,.34,1.,.9],margins=[.185,.04,.06,.1],
+                       x_title='pT (1)',note='old',title='',series=[{'points':[point,missing]}])
+            page=dict(role='spectra.signed_heavy',filename='G9_421_pt.pdf',width=1900,
+                      height=1600,text_pixels=18,title='G9 particle (1)',
+                      scientific_header=header,panels=[panel])
+            before=copy.deepcopy(panel['series'])
+            plot.add_publication_captions([page],context)
+            texts=[a['text'] for a in panel['annotations']]
+            self.assertIn('PYTHIA 8',texts)
+            self.assertTrue(any('Normalized probability per bin' in t for t in texts))
+            self.assertEqual(panel['series'],before)
+            self.assertEqual(any('uncertainty unavailable' in t for t in texts),bool(header))
+            self.assertEqual(any('Gaps:' in t for t in texts),bool(header))
+
+    @unittest.skipUnless(shutil.which('root-config'),'ROOT development files required')
+    def test_publication_notes_are_absent_from_reopened_native_canvases(self):
+        source=r"""#define main render_program_main
+#include "pipeline/plot/render.cpp"
+#undef main
+bool Operational(const std::string& s) {
+  return s.find("Ratio gaps:")!=std::string::npos ||
+         s.find("Nonpositive ratios not shown")!=std::string::npos ||
+         s.find("Exact-zero SE")!=std::string::npos ||
+         s.find("withheld SE")!=std::string::npos ||
+         s==kP1WithheldSeDisclosure || s=="operational panel note";
+}
+void Texts(const TPad& pad,std::vector<std::string>& result) {
+  TIter next(pad.GetListOfPrimitives());
+  while(auto* obj=next()) {
+    if(auto* text=dynamic_cast<TLatex*>(obj))result.push_back(text->GetTitle());
+    else if(auto* child=dynamic_cast<TPad*>(obj))Texts(*child,result);
+  }
+}
+int main(int argc,char**argv) {
+  gROOT->SetBatch(true);gStyle->SetOptStat(0);gErrorIgnoreLevel=kWarning;
+  std::filesystem::path out(argv[1]);std::filesystem::create_directory(out);
+  std::vector<Page> pages;std::vector<std::string> identities;
+  for(int variant=0;variant<2;++variant)for(int kind=0;kind<5;++kind) {
+    Page page{};page.width=1900;page.height=1600;page.textPixels=18;
+    page.filename=std::to_string(variant)+"-"+std::to_string(kind)+".pdf";
+    page.role=kind==1 ? "multiplicity.composite" : kind==2 ? "spectra.signed_heavy" :
+              kind==3 ? "correlations.charm" : "balancing.integrated.charm";
+    page.title="Particle";
+    page.scientificHeader=variant ? "TEST_ONLY / SYNTHETIC / PARTIAL_SAMPLE" : "";
+    for(int row=0;row<2;++row) {
+      Panel panel{};panel.id=row ? "lower.ratio" : kind==1 ? "upper.distribution" :
+                            kind==2 ? "g9.absolute" : "upper.421";
+      panel.geometry={0.,row ? .08 : .34,1.,row ? .34 : .88};
+      panel.margins={.2,.04,row ? .25 : .05,row ? 0. : .1};
+      panel.legend={.7,.65,.95,.8};panel.uncertaintyDisplay="STANDARD";
+      panel.xLow=0.;panel.xHigh=5.;panel.yLow=.001;panel.yHigh=2.5;
+      panel.logY=true;panel.status="AVAILABLE";
+      panel.note=kind==1 && row ? kP1WithheldSeDisclosure : "operational panel note";
+      panel.annotations.push_back({.4,.84,24.,"Scientific sample"});
+      Series series{};series.key="fixture";series.tune="MONASH";
+      series.color="#000000";series.marker="filled_circle";
+      series.label="MONASH";series.mode="histogram";series.lineStyle=1;
+      for(int i=0;i<5;++i) {
+        Point q{};q.semanticId=std::to_string(i);q.bin=i;q.scientificX=q.x=i+.5;
+        q.y=.03;q.error=.003;q.binLow=i;q.binHigh=i+1.;q.state="DRAW";
+        q.valueStatus="AVAILABLE";q.uncertaintyStatus="AVAILABLE";
+        if(i==1){q.error=std::numeric_limits<double>::quiet_NaN();q.uncertaintyStatus="UNAVAILABLE";}
+        if(i==2){q.error=0.;q.uncertaintyStatus="AVAILABLE_ZERO_DISPERSION";}
+        if(i==3){q.state="MISSING_VALUE";q.y=q.error=std::numeric_limits<double>::quiet_NaN();q.valueStatus="UNDEFINED";q.reasons="undefined";}
+        if(i==4){q.state="LOG_NONPOSITIVE";q.y=-.03;}
+        if(kind==4){q.state="MISSING_VALUE";q.y=q.error=std::numeric_limits<double>::quiet_NaN();}
+        series.points.push_back(q);
+      }
+      if(kind==4){panel.status="PRESENT_UNDEFINED";panel.note="Undefined denominator";}
+      panel.series.push_back(series);page.panels.push_back(panel);
+    }
+    if(kind==3) {
+      page.panels[0].id="correlation.teaching.421.identified";
+      page.panels[0].uncertaintyDisplay="CENTERS_ONLY";
+      page.information="Statistical errors omitted for display; K10 errors and covariance saved in ROOT";
+      auto invalid=page;invalid.information="";bool rejected=false;
+      try{CanvasSupplementTexts(invalid);}catch(const std::exception&){rejected=true;}
+      if(!rejected)return 11;
+    }
+    identities.push_back(PageIdentity(page));pages.push_back(page);
+  }
+  std::filesystem::current_path(out);
+  {std::ofstream record("record.tsv");record<<"TEST_ONLY_NATIVE_NOTE_POLICY\n";}
+  {
+    TFile file("canvases.root","CREATE");
+    for(const auto&page:pages)DrawPage(page,".",pages,file);
+    TObjString record("TEST_ONLY_NATIVE_NOTE_POLICY\n");record.Write("drawing_record");file.Close();
+  }
+  VerifyCanvasArchive(".","record.tsv",pages);
+  TFile file("canvases.root","READ");
+  for(std::size_t i=0;i<pages.size();++i) {
+    const auto&page=pages[i];if(identities[i]!=PageIdentity(page))return 12;
+    auto* canvas=dynamic_cast<TCanvas*>(file.Get(CanvasName(page).c_str()));if(!canvas)return 13;
+    std::vector<std::string> texts;Texts(*canvas,texts);
+    const bool preview=i>=5,teaching=i%5==3,blank=i%5==4;
+    const bool hasNote=std::any_of(texts.begin(),texts.end(),Operational);
+    if(!preview && hasNote)return 14;
+    if(preview && !blank && !hasNote)return 15;
+    if(teaching && std::none_of(texts.begin(),texts.end(),[](const std::string& t){return t.find("Statistical errors omitted for display")!=std::string::npos;}))return 16;
+    if(blank && std::find(texts.begin(),texts.end(),"PRESENT / UNDEFINED")==texts.end())return 17;
+    if(std::find(texts.begin(),texts.end(),"Scientific sample")==texts.end())return 18;
+    if(preview && std::find(texts.begin(),texts.end(),page.scientificHeader)==texts.end())return 19;
+  }
+  return 0;
+}
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);cpp=root/'notes.cpp';binary=root/'notes';cpp.write_text(source)
+            flags=shlex.split(subprocess.check_output(['root-config','--cflags','--libs'],text=True))
+            built=subprocess.run(['c++','-std=c++17','-I',str(ROOT),str(cpp),'-o',str(binary)]+flags,
+                                 capture_output=True,text=True)
+            self.assertEqual(built.returncode,0,built.stderr)
+            result=subprocess.run([str(binary),str(root/'out')],capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+
     @unittest.skipUnless(shutil.which('root-config'), 'ROOT development files required')
     def test_panel_letters_follow_visual_geometry_and_leave_titles_semantic(self):
         source = r'''#define main render_program_main

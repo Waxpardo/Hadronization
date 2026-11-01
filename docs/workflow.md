@@ -314,6 +314,8 @@ Bands show pointwise statistical standard errors. They do not represent systemat
 
 A finite center can have an unavailable uncertainty; this is not a zero statistical error. Stored statuses distinguish unavailable errors from genuine zero dispersion. Undefined estimates appear as gaps. Logarithmic panels omit nonpositive centers while retaining them in numerical ROOT. Display multipliers affect both the curve and its available errors.
 
+Manuscript captions must explain that gaps can represent undefined estimates or values outside a logarithmic domain. An absent band or error bar does not establish zero uncertainty. The numerical output retains the exact reason for each point.
+
 Use the three-class activity views for compact comparisons. They show 0–1%, 40–50% and 80–90%. The full-class views retain all classes. Use full-width placement for dense figures. Check label sizes after placing each figure in the manuscript.
 
 The multiplicity inset identifies MONASH class boundaries. Other tunes have their own boundaries. The lower-panel limit of 2.5 hides ratios above that display range. The saved numerical values remain unchanged.
