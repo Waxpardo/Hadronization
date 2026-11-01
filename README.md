@@ -6,7 +6,7 @@ The sample selects hard charm and beauty production. It is a generator-level, he
 
 ## Repository contents
 
-The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 71 PDFs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
+The repository contains generation, analysis, ROOT query, statistical reduction, plotting and package verification code. It also contains configuration, the accepted source inventory and small synthetic ROOT fixtures. The [result package](data/results/manifest.json) includes numerical ROOT, canvases, 71 PDFs, 71 PNGs, tables and covariance records. Download the complete merged ROOT files from the [data access guide](data/README.md#download-merged-root). Bulk raw, analyzed and query support files remain in external storage.
 
 The source inventory records 3,000 accepted files and 300 million successful events. Each tune contributes 100 million events in ten original source blocks. The [data inventory](data/README.md) binds the distributed results and external inputs to checksums. The [sample accounting guide](docs/science.md#sample-accounting) explains the 127 discarded job attempts.
 
@@ -16,7 +16,7 @@ The [published result](data/results/manifest.json) uses inclusive pair pT and al
 
 The paired overview shows ground-state mesons, Lambda and Sigma states. Single-trigger figures show 28 charm and 43 beauty ground, star and prime states. The supported 82-to-42 family grouping remains available as a separate downstream interpretation.
 
-Open the [multiplicity distribution](data/results/figures/multiplicity.composite.pdf) or the other [figure PDFs](data/results/figures). The [data guide](data/README.md) explains how to verify the package, change its presentation and download merged THnSparse files. These operations do not require event generation or merging.
+Open the [multiplicity distribution](data/results/figures/pdfs/multiplicity.composite.pdf) or browse the [PDFs](data/results/figures/pdfs) and [PNGs](data/results/figures/pngs). Each PNG shows the full PDF page at 300 dpi. The [data guide](data/README.md) explains how to verify the package, change its presentation and download merged THnSparse files. These operations do not require event generation or merging.
 
 ## Start locally
 
@@ -46,7 +46,7 @@ flowchart LR
   C --> M[Merged sparse ROOT]
   Q --> N[Numerical ROOT]
   M --> N
-  N --> F[ROOT canvases and PDFs]
+  N --> F[ROOT canvases, PDFs and PNGs]
   N --> P[Collaboration package]
   F --> P
 ```

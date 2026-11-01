@@ -89,6 +89,6 @@ For bulk collection relocation, preserve all file bytes. Update only physical lo
 
 Keep bulk raw, analyzed and query ROOT outside ordinary Git. Keep all files required by active collection indexes. Merged sparse ROOT cannot replace query support rows or full analyzed ancestry.
 
-Keep the source commit, configuration, numerical ROOT, exports, canvases, PDFs and compact manifests with a research result. Keep credentials, build packs, scratch, controller state and logs outside tracked collaboration products. See the [retention table](data-model.md#lifetimes-and-retention).
+Keep the source commit, configuration, numerical ROOT, exports, canvases, paired PDFs and PNGs, and compact manifests with a research result. Keep credentials, build packs, scratch, controller state and logs outside tracked collaboration products. See the [retention table](data-model.md#lifetimes-and-retention).
 
 The cleanup command removes reproducible local residue. It does not determine the retention needs of scientific information. Review `clean --dry-run` before any `clean --apply` operation.

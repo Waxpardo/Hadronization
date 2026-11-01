@@ -6,22 +6,23 @@ The `HF_RUN3_V1` result contains 300 million successful events from 3,000 accept
 
 ## Included results
 
-The [collaboration package](results/manifest.json) contains numerical ROOT, 71 figure PDFs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 60,860 points with separate value and uncertainty statuses. The tables retain explicit missing values.
+The [collaboration package](results/manifest.json) contains numerical ROOT, 71 figure PDFs, 71 PNGs, ROOT canvases, tables and exact manifests. The [numerical report](results/numerical/report.json) records 60,860 points with separate value and uncertainty statuses. The tables retain explicit missing values.
 
 The result uses inclusive pair pT and final triggers from all origins. Its identity recipe keeps 202 signed open-heavy associates separate. The fine query retains all 219 catalog identities, including hidden-heavy states.
 
 The paired overview shows seven charm and eight beauty ground-state meson, Lambda and Sigma identities per trigger. Separate single-trigger figures show 28 charm and 43 beauty ground, star and prime identities. The numerical archive keeps all 202 signed open-heavy identities.
 
-The [trigger comparison](results/figures/supplemental.balancing.trigger_comparison.pdf) shows the ratio of baryon-trigger to meson-trigger balancing yields within each tune. Its [ROOT companion](results/figures/trigger-comparison.root) stores 45 ratios and their joint block covariance. Charm compares the same signed associates. Beauty compares charge-conjugate associates: the upper species label denotes the numerator and the lower label denotes the denominator. See the [scientific definition](../docs/science.md#comparison-between-trigger-species).
+The [trigger comparison](results/figures/pdfs/supplemental.balancing.trigger_comparison.pdf) shows the ratio of baryon-trigger to meson-trigger balancing yields within each tune. Its [ROOT companion](results/figures/trigger-comparison.root) stores 45 ratios and their joint block covariance. Charm compares the same signed associates. Beauty compares charge-conjugate associates: the upper species label denotes the numerator and the lower label denotes the denominator. See the [scientific definition](../docs/science.md#comparison-between-trigger-species).
 
-The [summed baryon-to-meson comparison](results/figures/supplemental.balancing.baryon-meson.all-triggers.pdf) shows the baryon sum divided by the meson sum for D0, Lambda_c+, B+ and Lambda_b0 triggers. Its [ROOT companion](results/figures/baryon-meson-comparison.root) preserves fine-species membership, original-block primitives, four observables, deletion factors and covariance. The [CSV](results/figures/baryon-meson-comparison.csv) is a compact view of the same payload.
+The [summed baryon-to-meson comparison](results/figures/pdfs/supplemental.balancing.baryon-meson.all-triggers.pdf) shows the baryon sum divided by the meson sum for D0, Lambda_c+, B+ and Lambda_b0 triggers. Its [ROOT companion](results/figures/baryon-meson-comparison.root) preserves fine-species membership, original-block primitives, four observables, deletion factors and covariance. The [CSV](results/figures/baryon-meson-comparison.csv) is a compact view of the same payload.
 
 Upper baryon-to-meson activity panels use linear vertical axes. Tune-comparison panels for balancing yields and baryon-to-meson ratios use logarithmic axes. ROOT and status records retain unavailable and nonpositive ratios that the logarithmic panels cannot draw.
 
 | Product | Location | Use |
 | --- | --- | --- |
 | Numerical authority | [numerics.root](results/numerical/numerics.root) | Values, covariance factors, statuses and provenance |
-| Figure package | [figures](results/figures) | Paper figures, supporting views and signed heavy-hadron spectra |
+| Vector figures | [PDFs](results/figures/pdfs) | Paper figures, supporting views and signed heavy-hadron spectra |
+| Raster figures | [PNGs](results/figures/pngs) | Matching full-page RGB images at 300 dpi |
 | Tables | [exports](results/numerical/exports) | Accounting, exact CSV values, TeX tables and missing states |
 | Selected presentation | [plot.json](results/config/plot.json) | Exact configuration for the distributed figures |
 | Source inventory | [raw_manifest.jsonl](raw_manifest.jsonl) | Accepted raw identities, original blocks, bytes and SHA-256 values |
@@ -39,13 +40,15 @@ Numerical portable verification does not require the original production filesys
 ```sh
 mkdir -p data/work/tmp
 export TMPDIR="$PWD/data/work/tmp"
-PACKAGE_SHA=e29383ae85445a96f4233e31390591e944b41452826d7b516820c78b6f580ac7
+PACKAGE_SHA=ffc1ca1227d495e9497e2528442abd4d1b9e8ce350e8c20db47cfd67621eb5a2
 ./hadronization package verify \
   --package data/results --manifest-sha256 "$PACKAGE_SHA" \
   --work-dir data/work/release-verification
 ```
 
 The checked-out Git revision supplies the trusted manifest bytes. Record the checked-out commit before verification. The verifier checks every packaged file against the manifest.
+
+Every normal render writes matching `pdfs/<stem>.pdf` and `pngs/<stem>.png` files below its output directory. Ghostscript creates opaque, white-background PNGs from the final PDFs at 300 dpi. ROOT, CSV, drawing-record and manifest companions remain at the figure root. The verifier checks PNG integrity and recreates each raster from its PDF.
 
 To change the presentation, copy `config/plot.json` and edit its display settings. Use the example below with a new output directory. The numerical ROOT and its statistical results remain unchanged.
 
@@ -57,13 +60,17 @@ cp config/plot.json data/work/custom-plot.json
   --expected-value-sha256 fdc681d5cec7ddc8e4728eafa4b07caaa0b9bd8c9d4c2bf1f38ba0fe87b00271 \
   --trigger-comparison-root data/results/figures/trigger-comparison.root \
   --expected-trigger-comparison-sha256 f25d964055851bc2c3c28a269975d7bb81e4155a4c7410b29603779110d8483c \
+  --baryon-meson-comparison-root data/results/figures/baryon-meson-comparison.root \
+  --expected-baryon-meson-comparison-sha256 b27349b4b55189f69b0e2d00ef0e5dd226314041c0d8a990d596ea8ba4141468 \
+  --family-products data/results/numerical/family-products \
+  --family-manifest-sha256 e3794ee1cac79592c2ea339216b8ccd1854196fcc3dc525649c28799430dbb64 \
   --plot-config data/work/custom-plot.json \
   --work-dir data/work/custom-render --output data/work/custom-figures
 ```
 
-To recompute the trigger comparison with another supported signed recipe, use [the comparison workflow](../docs/workflow.md#compare-trigger-samples). The standard render without its optional companion produces 69 figures.
+To recompute the trigger comparison with another supported signed recipe, use [the comparison workflow](../docs/workflow.md#compare-trigger-samples). With neither optional comparison companion, the renderer produces 69 PDF/PNG pairs. Each supplied companion adds one pair.
 
-To render correlation comparisons across tunes, use `config/plot-all-tune.json`. This configuration changes only the correlation presentation. It produces a complete figure set in a new local directory. The numerical ROOT and its statistical results remain unchanged.
+To render correlation comparisons across tunes, use `config/plot-all-tune.json`. This configuration changes only the correlation presentation. It writes matching PDF and PNG files in a new local directory. The numerical ROOT and its statistical results remain unchanged.
 
 This command needs ROOT and the renderer dependencies described in [installation](../docs/installation.md). Keep the output directory absent before the first run.
 
@@ -76,7 +83,7 @@ This command needs ROOT and the renderer dependencies described in [installation
   --work-dir data/work/all-tune-render --output data/work/figures-all-tune
 ```
 
-The command verifies the PDFs, drawing records and reopened ROOT canvases before it publishes the local output. Other observable pages repeat the default presentation.
+The command verifies both image formats, drawing records and reopened ROOT canvases before it publishes the local output. Other observable pages repeat the default presentation.
 
 ## Download merged ROOT
 

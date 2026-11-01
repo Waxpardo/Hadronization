@@ -16,9 +16,11 @@ import re
 from pathlib import Path
 import shlex
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
+import zlib
 from contextlib import contextmanager
 from types import SimpleNamespace
 
@@ -29,6 +31,11 @@ TARGET_CAMPAIGN_SHA256 = "abb02e9317ed18360e518fb02a7aa2976c3e4179665c7f3357e912
 DRAWING_SCHEMA = "hadronization_plot_drawing_plan_v10"
 CANVAS_NAME = "canvases.root"
 RECORD_NAME = "drawing-record.tsv.gz"
+FIGURE_SCHEMA = "hadronization_cold_plot_render_v2"
+IMAGE_LAYOUT = {"pdf": "pdfs", "png": "pngs"}
+PNG_POLICY = {"policy": "final_pdf_full_page_rgb_opaque_white_v1", "dpi": 300,
+              "device": "png16m", "text_antialias_bits": 4,
+              "graphics_antialias_bits": 4, "background": "#FFFFFF"}
 # Display order only: mesons first, then Lambda, Sigma, Xi and Omega baryons.
 # Each ground state precedes its star/prime partners with the same charge.
 # Particle and antiparticle share the same absolute-PDG display order.
@@ -466,6 +473,39 @@ def verify_flat_fileset(directory, names, label):
     entries = list(directory.iterdir())
     if (any(path.is_symlink() or not path.is_file() for path in entries) or
             {path.name for path in entries} != set(names)):
+        raise ValueError(label + " filesystem set differs")
+
+def relative_artifact_name(name):
+    if (not isinstance(name, str) or not name or "\\" in name or
+            Path(name).is_absolute() or Path(name).as_posix() != name or
+            any(part in ("", ".", "..") for part in name.split("/"))):
+        raise ValueError("unsafe artifact locator")
+    return name
+
+
+def verify_nested_fileset(directory, names, label):
+    """Require exact regular files and their canonical parent directories."""
+    reject_symlink_components(directory, label)
+    if not directory.is_dir() or not isinstance(names, list):
+        raise ValueError(label + " filesystem set differs")
+    for name in names:
+        relative_artifact_name(name)
+    if len(names) != len(set(names)):
+        raise ValueError(label + " has duplicate artifact locators")
+    expected_dirs = {parent.as_posix() for name in names
+                     for parent in Path(name).parents if parent != Path(".")}
+    files, directories = set(), set()
+    for path in directory.rglob("*"):
+        if path.is_symlink():
+            raise ValueError(label + " contains a symlink")
+        name = path.relative_to(directory).as_posix()
+        if path.is_file():
+            files.add(name)
+        elif path.is_dir():
+            directories.add(name)
+        else:
+            raise ValueError(label + " contains a nonregular artifact")
+    if files != set(names) or directories != expected_dirs:
         raise ValueError(label + " filesystem set differs")
 
 def _render_numbers(row):
@@ -3335,7 +3375,7 @@ def canonical_root_pdf(payload, filename):
 
 def pdf_export_runtime():
     """Check the external vector exporter before creating an output stage."""
-    for executable in ('gs', 'pdffonts'):
+    for executable in ('gs', 'pdffonts', 'pdfinfo'):
         if shutil.which(executable) is None:
             raise ValueError('PDF export requires '+executable+' on PATH')
     version=subprocess.run(['gs','--version'],check=True,capture_output=True,text=True).stdout.strip()
@@ -3418,6 +3458,167 @@ def publication_pdf(path):
         path.write_bytes(output.read_bytes())
 
 
+def png_export_runtime(pdf_export):
+    return {**PNG_POLICY, "exporter": {
+        "name": "Ghostscript", "version": pdf_export["ghostscript_version"],
+        "binary_sha256": sha_file(Path(shutil.which("gs")).resolve())}}
+
+
+def verify_png_export(export):
+    if not isinstance(export, dict) or set(export) != set(PNG_POLICY) | {"exporter"}:
+        raise ValueError("PNG export receipt differs")
+    if any(export[key] != value for key, value in PNG_POLICY.items()):
+        raise ValueError("PNG raster policy differs")
+    exporter = export["exporter"]
+    if (not isinstance(exporter, dict) or
+            set(exporter) != {"name", "version", "binary_sha256"} or
+            exporter["name"] != "Ghostscript" or
+            re.fullmatch(r"[0-9]+\.[0-9]+(?:\.[0-9]+)?", str(exporter["version"])) is None or
+            re.fullmatch(r"[0-9a-f]{64}", str(exporter["binary_sha256"])) is None):
+        raise ValueError("PNG exporter identity differs")
+
+
+def pdf_page_geometry(path):
+    """Read one complete PDF page before raster export."""
+    regular_file(path, "PDF page")
+    response = subprocess.run(["pdfinfo", "-box", str(path)], check=True,
+                              capture_output=True, text=True,
+                              env={**os.environ, "LC_ALL": "C"}).stdout
+    pages = re.search(r"^Pages:\s+(\d+)\s*$", response, re.M)
+    size = re.search(r"^Page size:\s+([0-9.]+) x ([0-9.]+) pts", response, re.M)
+    rotation = re.search(r"^Page rot:\s+(-?\d+)\s*$", response, re.M)
+    if pages is None or int(pages[1]) != 1:
+        raise ValueError("raster export requires exactly one PDF page")
+    if size is None or rotation is None or int(rotation[1]) % 90:
+        raise ValueError("PDF page geometry differs")
+    width, height = float(size[1]), float(size[2])
+    if not all(math.isfinite(v) and v > 0 for v in (width, height)):
+        raise ValueError("PDF page geometry differs")
+    if int(rotation[1]) % 180:
+        width, height = height, width
+    return {"width_points": width, "height_points": height}
+
+
+def png_info(path, geometry):
+    """Check RGB PNG framing, CRCs, density and complete scanline decoding."""
+    regular_file(path, "PNG page")
+    data = path.read_bytes()
+    if data[:8] != b"\x89PNG\r\n\x1a\n":
+        raise ValueError("PNG signature differs")
+    offset, chunks, compressed, density = 8, [], [], None
+    display_metadata = hashlib.sha256()
+    width = height = None
+    while offset < len(data):
+        if offset + 12 > len(data):
+            raise ValueError("truncated PNG chunk")
+        length, kind = struct.unpack(">I4s", data[offset:offset+8])
+        end = offset + 12 + length
+        if end > len(data):
+            raise ValueError("truncated PNG payload")
+        body = data[offset+8:end-4]
+        if zlib.crc32(kind + body) & 0xffffffff != struct.unpack(">I", data[end-4:end])[0]:
+            raise ValueError("PNG chunk CRC differs")
+        if not re.fullmatch(rb"[A-Za-z]{4}", kind):
+            raise ValueError("PNG chunk type differs")
+        if not chunks and kind != b"IHDR":
+            raise ValueError("PNG header missing")
+        if kind == b"IHDR":
+            if chunks or length != 13:
+                raise ValueError("PNG header differs")
+            width, height, depth, color, compression, filtering, interlace = struct.unpack(
+                ">IIBBBBB", body)
+            if not width or not height or (depth, color, compression, filtering, interlace) != (8, 2, 0, 0, 0):
+                raise ValueError("PNG must be opaque noninterlaced eight-bit RGB")
+            # pdfinfo rounds physical dimensions. Allow one output-pixel rounding unit.
+            if (abs(width - geometry["width_points"] * 300 / 72) > 1 or
+                    abs(height - geometry["height_points"] * 300 / 72) > 1):
+                raise ValueError("PNG dimensions differ from the full PDF page at 300 dpi")
+        elif kind == b"IDAT":
+            if b"IDAT" in chunks and chunks[-1] != b"IDAT":
+                raise ValueError("PNG image chunks are not consecutive")
+            compressed.append(body)
+        elif kind == b"pHYs":
+            if density is not None or length != 9:
+                raise ValueError("PNG density record differs")
+            density = struct.unpack(">IIB", body)
+        elif kind == b"IEND":
+            if length or end != len(data) or not compressed:
+                raise ValueError("PNG end framing differs")
+        elif kind in (b"tRNS", b"acTL", b"fcTL", b"fdAT") or not kind[0] & 32:
+            raise ValueError("PNG transparency, animation or critical chunk differs")
+        if kind not in (b"IDAT", b"IEND", b"tEXt", b"zTXt", b"iTXt"):
+            display_metadata.update(kind + body)
+        chunks.append(kind)
+        offset = end
+    if not chunks or chunks[-1] != b"IEND" or density != (11811, 11811, 1):
+        raise ValueError("PNG end or 300 dpi density differs")
+    size = height * (width * 3 + 1)
+    decoder = zlib.decompressobj()
+    try:
+        raw = decoder.decompress(b"".join(compressed), size + 1)
+    except zlib.error as error:
+        raise ValueError("PNG image stream is corrupt") from error
+    if (len(raw) != size or not decoder.eof or decoder.unused_data or
+            decoder.unconsumed_tail or any(value > 4 for value in raw[::width*3+1])):
+        raise ValueError("PNG scanline decoding differs")
+    return {"width": width, "height": height,
+            "pixels_per_meter": [11811, 11811],
+            "scanline_sha256": sha_bytes(raw),
+            "display_metadata_sha256": display_metadata.hexdigest()}
+
+
+def rasterize_pdf(pdf, png):
+    """Rasterize the final vector PDF without cropping or separate drawing."""
+    if os.path.lexists(png):
+        raise ValueError("no-overwrite PNG export collision")
+    geometry = pdf_page_geometry(pdf)
+    completed = subprocess.run([
+        "gs", "-q", "-dSAFER", "-dBATCH", "-dNOPAUSE", "-sDEVICE=png16m",
+        "-r300", "-dTextAlphaBits=4", "-dGraphicsAlphaBits=4",
+        "-dBackgroundColor=16#FFFFFF", "-sOutputFile=" + str(png),
+        "-f", str(pdf)], capture_output=True, text=True)
+    if completed.returncode or completed.stdout.strip() or completed.stderr.strip():
+        raise ValueError("PNG raster export failed: " + (completed.stderr or completed.stdout))
+    return png_info(png, geometry)
+
+
+def image_pair_records(directory):
+    records = []
+    for pdf in sorted((directory / "pdfs").glob("*.pdf")):
+        png = directory / "pngs" / (pdf.stem + ".png")
+        records.append({"pdf": "pdfs/" + pdf.name, "png": "pngs/" + png.name,
+                        "pdf_sha256": sha_file(pdf),
+                        **png_info(png, pdf_page_geometry(pdf))})
+    return records
+
+
+def verify_page_images(directory, work_dir):
+    """Recreate each PNG from its paired final PDF and compare scanlines."""
+    with tempfile.TemporaryDirectory(prefix='png-verify-', dir=str(work_dir)) as temporary:
+        for path in sorted((directory / 'pdfs').glob('*.pdf')):
+            verify_pdf_fonts(path)
+            actual = png_info(directory / 'pngs' / (path.stem + '.png'), pdf_page_geometry(path))
+            expected = rasterize_pdf(path, Path(temporary) / (path.stem + '.png'))
+            if actual != expected:
+                raise ValueError('PNG raster differs from the final PDF: ' + path.name)
+
+
+def export_page_images(pages, filenames):
+    if (not filenames or len(filenames) != len(set(filenames)) or
+            {p.name for p in pages.glob("*.pdf")} != set(filenames) or
+            any(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*\.pdf", name) is None
+                for name in filenames)):
+        raise ValueError("native PDF page coverage differs")
+    (pages / "pdfs").mkdir()
+    (pages / "pngs").mkdir()
+    for name in sorted(filenames):
+        source = pages / name
+        publication_pdf(source)
+        pdf = pages / "pdfs" / name
+        source.rename(pdf)
+        rasterize_pdf(pdf, pages / "pngs" / (pdf.stem + ".png"))
+
+
 def canonical_root_archive(path, drawing_record):
     """Normalize ROOT container metadata, leaving every object byte intact.
 
@@ -3472,22 +3673,37 @@ def canonical_root_archive(path, drawing_record):
         temporary.unlink(missing_ok=True)
 
 def render_artifacts(pages):
-    paths = list(pages.glob('*.pdf')) + [pages / CANVAS_NAME, pages / RECORD_NAME]
+    paths = list((pages / 'pdfs').glob('*.pdf')) + list((pages / 'pngs').glob('*.png'))
+    pdfs = {p.stem for p in paths if p.suffix == '.pdf'}
+    pngs = {p.stem for p in paths if p.suffix == '.png'}
+    if not pdfs or pdfs != pngs:
+        raise ValueError('PDF/PNG stem correspondence differs')
+    paths += [pages / CANVAS_NAME, pages / RECORD_NAME]
     for name in ('trigger-comparison.root', 'baryon-meson-comparison.root',
                  'baryon-meson-comparison.csv'):
         companion = pages / name
         if companion.exists():
             paths.append(companion)
+    verify_nested_fileset(pages, sorted(
+        [p.relative_to(pages).as_posix() for p in paths] +
+        (['manifest.json'] if (pages / 'manifest.json').exists() else [])), 'cold plots')
     return sorted(paths)
 
 
 def promote_render_pages(pages, output):
-    """Publish regular PDF pages first and the verified manifest last."""
+    """Publish both image directories and companions before the verified manifest."""
+    paths = render_artifacts(pages)
     output.mkdir(mode=0o700)
     try:
-        for path in render_artifacts(pages):
+        for name in IMAGE_LAYOUT.values():
+            (output / name).mkdir(mode=0o700)
+        for path in paths:
             regular_file(path, "staged render page")
-            os.link(str(path), str(output / path.name))
+            target = output / path.relative_to(pages)
+            os.link(str(path), str(target))
+            fsync_file(target)
+        for name in IMAGE_LAYOUT.values():
+            fsync_directory(output / name)
         fsync_directory(output)
         if os.environ.get("HADRONIZATION_RENDER_FAIL_BEFORE_MANIFEST") == "1":
             raise ValueError("injected interruption before render manifest commit")
@@ -3518,21 +3734,23 @@ def cold_numerics(args):
         raise ValueError("numerical ROOT reader resolves outside this source tree")
     if not hasattr(archive, "read"):
         raise ValueError("numerical ROOT reader lacks read(source, work, hashes)")
+    reject_symlink_components(args.work_dir, "plot work directory")
     args.work_dir.mkdir(parents=True, exist_ok=True)
     return archive.read(args.numerics_root, args.work_dir,
                         args.expected_root_sha256,
                         args.expected_value_sha256)
 
 def cold_render_manifest(args, payload, config, config_sha, build, plan,
-                         pages, record, pdf_export):
+                         pages, record, pdf_export, png_export):
     files = []
     for path in render_artifacts(pages):
         regular_file(path, "cold plot artifact")
-        files.append({"name": path.name, "bytes": path.stat().st_size,
+        files.append({"name": path.relative_to(pages).as_posix(), "bytes": path.stat().st_size,
                       "sha256": sha_file(path)})
     result = {
-        "schema": "hadronization_cold_plot_render_v1",
-        "version": "1.0.0", "state": "COMPLETE",
+        "schema": FIGURE_SCHEMA,
+        "version": "2.0.0", "state": "COMPLETE",
+        "image_layout": IMAGE_LAYOUT,
         "campaign_state": payload["campaign_state"],
         "presentation_state": (
             "TEST_ONLY_SYNTHETIC" if synthetic_provenance(payload) else
@@ -3572,6 +3790,8 @@ def cold_render_manifest(args, payload, config, config_sha, build, plan,
                  "hadronization_projection_result_v4" else ()))},
         "renderer_build": build,
         "pdf_export": pdf_export,
+        "png_export": png_export,
+        "image_pairs": image_pair_records(pages),
         "drawing_record_sha256": sha_bytes(record),
         "roles": [item["role_id"] for item in
                   payload["request_echo"]["scope"]["roles"]],
@@ -3812,8 +4032,9 @@ def render_cold(args):
     if output.exists():
         raise ValueError("no-overwrite cold plot output collision")
     config, config_sha = checked_plot_config(args.plot_config)
-    payload = cold_numerics(args)
     pdf_export = pdf_export_runtime()
+    png_export = png_export_runtime(pdf_export)
+    payload = cold_numerics(args)
     context, adapter = cold_drawing_inputs(payload, config)
     plan = drawing_plan(context, adapter, config)
     add_trigger_comparison(args, payload, context, adapter, config, plan)
@@ -3839,8 +4060,7 @@ def render_cold(args):
             raise ValueError("cold ROOT drawing record differs")
         canonical_root_archive(pages / CANVAS_NAME, record)
         verify_canvas_archive(binary, environment, pages, record, args.work_dir)
-        for page in pages.glob("*.pdf"):
-            publication_pdf(page)
+        export_page_images(pages, [page["filename"] for page in plan["pages"]])
         write_payload(pages / RECORD_NAME, deterministic_gzip(record))
         if getattr(args, '_comparison', None) is not None:
             shutil.copyfile(args._comparison_path, pages / 'trigger-comparison.root')
@@ -3851,11 +4071,12 @@ def render_cold(args):
             (pages / 'baryon-meson-comparison.csv').write_bytes(
                 comparison_api.csv_bytes(args._baryon_meson))
         manifest = cold_render_manifest(args, payload, config, config_sha,
-                                        build, plan, pages, record, pdf_export)
+                                        build, plan, pages, record, pdf_export, png_export)
         atomic_json(pages / "manifest.json", manifest)
-        promote_render_pages(pages, output)
         verify_cold_files(args, payload, config_sha, build, plan,
-                          output, binary, environment)
+                          pages, binary, environment)
+        promote_render_pages(pages, output)
+        verify_nested_fileset(output, manifest["filesystem_set"], "cold plots")
     finally:
         shutil.rmtree(stage)
     print("COLD_RENDERED OUTPUT={} ROOT_SHA256={} PAGES={}".format(
@@ -3870,10 +4091,15 @@ def verify_cold_files(args, payload, config_sha, build, plan, output,
             sha_file(output / "manifest.json") != expected_manifest):
         raise ValueError("trusted cold render manifest SHA256 differs")
     manifest = json_file(output / "manifest.json", "cold plot manifest")
-    verify_flat_fileset(output, manifest["filesystem_set"], "cold plots")
+    if (manifest.get('schema') != FIGURE_SCHEMA or manifest.get('version') != '2.0.0' or
+            manifest.get('state') != 'COMPLETE' or manifest.get('image_layout') != IMAGE_LAYOUT):
+        raise ValueError('dual-format cold plot schema/layout differs')
+    verify_nested_fileset(output, manifest["filesystem_set"], "cold plots")
     expected_pages = {page["filename"] for page in plan["pages"]}
-    actual_pages = {path.name for path in output.glob("*.pdf")}
-    if expected_pages != actual_pages:
+    actual_pages = {path.name for path in (output / 'pdfs').glob("*.pdf")}
+    actual_pngs = {path.stem + '.pdf' for path in (output / 'pngs').glob('*.png')}
+    if (expected_pages != actual_pages or expected_pages != actual_pngs or
+            len(expected_pages) != len(plan['pages'])):
         raise ValueError("cold page role/fileset differs")
     record = gzip.decompress((output / RECORD_NAME).read_bytes())
     if (manifest["drawing_record_sha256"] != sha_bytes(record) or
@@ -3899,10 +4125,11 @@ def verify_cold_files(args, payload, config_sha, build, plan, output,
             pdf_export.get('policy')!='vector_pdf_embedded_fonts_v1' or
             re.fullmatch(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?',str(pdf_export.get('ghostscript_version'))) is None):
         raise ValueError('PDF export receipt differs')
-    for path in output.glob('*.pdf'):
-        verify_pdf_fonts(path)
+    png_export = manifest.get('png_export')
+    verify_png_export(png_export)
+    verify_page_images(output, args.work_dir)
     expected = cold_render_manifest(args, payload, config, config_sha,
-                                    original_build, plan, output, record, pdf_export)
+                                    original_build, plan, output, record, pdf_export, png_export)
     if manifest != expected:
         raise ValueError("cold plot manifest/byte identity differs")
     verify_canvas_archive(binary, environment, output, record, args.work_dir)
@@ -4186,6 +4413,7 @@ def review_packet_coverage(plan, context, config):
 
 
 def verify_review_packet(args):
+    reject_symlink_components(args.output, "cold plot output")
     config, config_sha = checked_plot_config(args.plot_config)
     payload = cold_numerics(args)
     context, adapter = cold_drawing_inputs(payload, config)
@@ -4200,6 +4428,7 @@ def verify_review_packet(args):
                                                  output)}))
 
 def verify_render_cold(args):
+    reject_symlink_components(args.output, "cold plot output")
     config, config_sha = checked_plot_config(args.plot_config)
     payload = cold_numerics(args)
     context, adapter = cold_drawing_inputs(payload, config)
@@ -4238,7 +4467,8 @@ def cold_inputs(parser, *, comparison=True):
     parser.add_argument("--plot-config", type=Path, default=PLOT_CONFIG)
     parser.add_argument("--work-dir", type=Path, required=True,
                         help="renderer and archive build scratch")
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True,
+                        help="figure package root: pdfs/, pngs/ and ROOT/CSV companions")
 
 def parser():
     top = argparse.ArgumentParser(

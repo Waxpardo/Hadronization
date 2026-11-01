@@ -13,7 +13,7 @@
 | Sharded collection | Collector or `collection create` | One checked locator across exact global source membership |
 | Merged collection | `merge build` | Sparse partitions by tune and block, with original support-file references |
 | Numerical package | `reduce run` | Typed ROOT values, covariance, missing states, provenance and exports |
-| Figure directory | `plot render-cold` | PDFs, ROOT canvases, drawing record and exact manifest |
+| Figure directory | `plot render-cold` | Paired PDFs and PNGs, ROOT canvases, drawing record and exact manifest |
 | Collaboration package | `package build` | Required numerical and figure files with relative locators |
 
 ## Source and event identities
@@ -232,13 +232,15 @@ CSV exports include point values, missing states and accounting. Binary64 fields
 
 The literal filenames `t1.csv` and `t1.tex` contain natural-heavy accounting. TeX tables preserve integer counts and carry missing states. `overleaf-preamble.tex`, `overleaf-tables.tex` and the table check source support document assembly.
 
-Figure directories contain PDFs, `canvases.root`, `drawing-record.tsv.gz` and `manifest.json`. Canvas graph identities retain point semantics and statuses. The drawing record contains coordinates, styles, panel geometry and display decisions. It does not define scientific formulas.
+Figure directories contain `pdfs/`, `pngs/`, `canvases.root`, `drawing-record.tsv.gz` and `manifest.json`. Each single-page PDF has one PNG with the same stem. Ghostscript exports the complete PDF page as opaque RGB at 300 dpi, with a white background and antialiasing. Canvas graph identities retain point semantics and statuses. The drawing record contains coordinates, styles, panel geometry and display decisions. It does not define scientific formulas.
+
+The figure manifest uses schema `hadronization_cold_plot_render_v2`. It records the exact nested files, PDF-to-PNG pairs, dimensions, density, raster policy and exporter identity. Verification checks checksums, PNG decoding, page geometry and raster correspondence. Verification rejects incomplete pairs, extra paths and symbolic links.
 
 The drawing protocol uses schema `hadronization_plot_drawing_plan_v10`. A `DISPLAY_SCALE` record declares a correlation series multiplier.
 Its `POINT` records contain displayed values and errors. The factor multiplies both quantities from the unchanged numerical ROOT point identified by `semantic_id`.
 The figure manifest binds the factors and the source numerical ROOT hash. Panels without a scale record use a factor of 1.
 
-The final package contains `numerical/`, `figures/`, the selected `config/*.json` and a root manifest. Its exact file set excludes computation scratch and the native execution binary. The numerical report still records external execution references.
+The final package contains `numerical/`, `figures/`, the selected `config/*.json` and a root manifest. Its schema is `hadronization_portable_collaboration_package_v2`. Its exact nested file set excludes computation scratch and the native execution binary. The numerical report still records external execution references.
 
 ## Lifetimes and retention
 
@@ -250,7 +252,7 @@ The final package contains `numerical/`, `figures/`, the selected `config/*.json
 | Merged ROOT, index and merge receipts | Required for sparse projection and parent verification |
 | External acceptance pins and site records | Preserve separately from mutable attempts and adjacent manifests |
 | Numerical ROOT, reports, exports and manifests | Preserve with every scientific result |
-| Canvases, PDFs, drawing record and selected configuration | Preserve the exact scientific presentation |
+| Canvases, PDFs, PNGs, drawing record and selected configuration | Preserve the exact scientific presentation |
 | Build pack and execution receipts | Preserve while execution provenance or restart depends on them |
 | Build caches and temporary scratch | Reconstructible after successful output verification and retention review |
 | Failed attempts and ambiguous publication stages | Preserve until failure and publication state are resolved |

@@ -304,7 +304,9 @@ The renderer requires PyROOT, ROOT libraries, a compiler, numerical ROOT and its
   --work-dir "$RUN_ROOT/plot-verify-work" --output "$RUN_ROOT/figures"
 ```
 
-The renderer writes PDFs, `canvases.root`, a compressed drawing record and `manifest.json`. It reopens canvases and checks coordinates, errors, statuses, axes, pads, styles, legends and reference lines. The PDF exporter embeds all fonts through Ghostscript. The verifier checks the exported fonts with Poppler. These checks do not replace visual inspection at publication size.
+The renderer writes paired files in `pdfs/` and `pngs/` below `--output`. ROOT, CSV, drawing-record and manifest companions remain at the output root. It reopens canvases and checks coordinates, errors, statuses, axes, pads, styles, legends and reference lines.
+
+Ghostscript embeds PDF fonts, then exports the full final page as opaque RGB PNG at 300 dpi. The verifier checks fonts, single-page geometry, PNG integrity and raster correspondence. These checks do not replace visual inspection at publication size.
 
 Each figure contains a compact sample description in its upper panel. It states the generator, collision system, energy, hard heavy-flavour processes and applicable acceptance. Activity figures identify N_ch and its particle cuts. The [scientific reference](science.md) gives the complete selections, observable definitions and statistical method. A reserved area separates the sample description from data.
 

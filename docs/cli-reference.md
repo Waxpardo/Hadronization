@@ -738,7 +738,7 @@ See [summed baryon-to-meson comparison](workflow.md#compare-summed-baryon-and-me
 
 ### `./hadronization plot render-cold`
 
-Render verified numerical ROOT and publish figures.
+Render verified numerical ROOT and publish matching PDFs and PNGs at 300 dpi.
 
 **Side effects:** Local-mutating.
 
@@ -756,7 +756,7 @@ Render verified numerical ROOT and publish figures.
 | `--expected-manifest-sha256` | string, `none` | Optional independent figure-manifest SHA-256. |
 | `--plot-config` | Path, `config/plot.json` | Exact presentation JSON used by the renderer. |
 | `--work-dir` | Path, **required** | Writable archive or renderer scratch. |
-| `--output` | Path, **required** | Destination. Construction normally requires a new path. |
+| `--output` | Path, **required** | Figure package root with `pdfs/`, `pngs/` and non-image companions. |
 
 Inspect its syntax before use:
 
@@ -784,7 +784,7 @@ Reopen every canvas and write verifier attestation in scratch.
 | `--expected-manifest-sha256` | string, `none` | Optional independent figure-manifest SHA-256. |
 | `--plot-config` | Path, `config/plot.json` | Exact presentation JSON used by the renderer. |
 | `--work-dir` | Path, **required** | Writable archive or renderer scratch. |
-| `--output` | Path, **required** | Destination. Construction normally requires a new path. |
+| `--output` | Path, **required** | Figure package root with `pdfs/`, `pngs/` and non-image companions. |
 
 Inspect its syntax before use:
 
@@ -808,7 +808,7 @@ Check synthetic figure display coverage. This does not qualify research data.
 | `--expected-manifest-sha256` | string, `none` | Optional independent figure-manifest SHA-256. |
 | `--plot-config` | Path, `config/plot.json` | Exact presentation JSON used by the renderer. |
 | `--work-dir` | Path, **required** | Writable archive or renderer scratch. |
-| `--output` | Path, **required** | Destination. Construction normally requires a new path. |
+| `--output` | Path, **required** | Figure package root with `pdfs/`, `pngs/` and non-image companions. |
 
 Inspect its syntax before use:
 

@@ -12,6 +12,7 @@ import tempfile
 import time
 from types import SimpleNamespace
 import unittest
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -2286,6 +2287,145 @@ int main(int argc, char** argv) {
         with self.assertRaisesRegex(ValueError, 'G9 selection'):
             plot.g9_science_caption(dict(current, status_low=80),
                                     'MONASH', current_schema)
+
+
+@unittest.skipUnless(all(shutil.which(x) for x in ('gs', 'pdfinfo', 'pdffonts')),
+                     'Ghostscript and Poppler required')
+class DualFormatFigures(unittest.TestCase):
+    def _pdf(self, path, pages=1, text='format boundary'):
+        command = ['gs', '-q', '-dSAFER', '-dBATCH', '-dNOPAUSE',
+                   '-sDEVICE=pdfwrite', '-sOutputFile=' + str(path), '-']
+        body = ('<< /NeverEmbed [] >> setdistillerparams\n'
+                '<< /PageSize [144 72] >> setpagedevice\n'
+                '/Helvetica findfont 10 scalefont setfont\n')
+        body += ('10 30 moveto (' + text + ') show showpage\n') * pages
+        subprocess.run(command, input=body, text=True, check=True, capture_output=True)
+
+    def test_final_pdf_raster_has_exact_density_geometry_and_repeatable_scanlines(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); pdf = root / 'figure.pdf'
+            self._pdf(pdf)
+            geometry = plot.pdf_page_geometry(pdf)
+            self.assertEqual(geometry, {'width_points':144., 'height_points':72.})
+            first = plot.rasterize_pdf(pdf, root / 'first.png')
+            second = plot.rasterize_pdf(pdf, root / 'second.png')
+            self.assertEqual(first, second)
+            self.assertEqual((first['width'], first['height']), (600, 300))
+            self.assertEqual(first['pixels_per_meter'], [11811, 11811])
+            with self.assertRaisesRegex(ValueError, 'no-overwrite'):
+                plot.rasterize_pdf(pdf, root / 'first.png')
+            source = (root / 'first.png').read_bytes()
+            for mutant in (b'bad', source[:40], source + b'after IEND',
+                           source[:100] + bytes([source[100] ^ 1]) + source[101:]):
+                (root / 'bad.png').write_bytes(mutant)
+                with self.assertRaises(ValueError):
+                    plot.png_info(root / 'bad.png', geometry)
+            with self.assertRaisesRegex(ValueError, 'dimensions'):
+                plot.png_info(root / 'first.png', {'width_points':72., 'height_points':72.})
+
+    def test_multiframe_pdf_and_interrupted_raster_cannot_create_a_complete_output(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); pdf = root / 'multipage.pdf'
+            self._pdf(pdf, pages=2)
+            with self.assertRaisesRegex(ValueError, 'exactly one PDF page'):
+                plot.rasterize_pdf(pdf, root / 'wrong.png')
+            self.assertFalse((root / 'wrong.png').exists())
+            self._pdf(root / 'single.pdf')
+            actual = subprocess.run
+            def fail_raster(command, **kwargs):
+                if command[0] == 'gs':
+                    return subprocess.CompletedProcess(command, 1, '', 'TEST_ONLY export failure')
+                return actual(command, **kwargs)
+            with mock.patch.object(plot.subprocess, 'run', side_effect=fail_raster):
+                with self.assertRaisesRegex(ValueError, 'PNG raster export failed'):
+                    plot.rasterize_pdf(root / 'single.pdf', root / 'failed.png')
+            self.assertFalse((root / 'manifest.json').exists())
+            args = SimpleNamespace(output=root/'result', numerics_root=root/'input.root',
+                                   plot_config=ROOT/'config/plot.json', work_dir=root/'work')
+            record = b'TEST_ONLY_RASTER_TRANSACTION\n'
+            def native(command, **kwargs):
+                pages = Path(command[2]); pages.mkdir()
+                (pages/plot.CANVAS_NAME).write_bytes(b'TEST_ONLY canvas')
+                Path(command[3]).write_bytes(record)
+                return subprocess.CompletedProcess(command, 0, '', '')
+            def interrupted(pages, filenames):
+                (pages/'pngs').mkdir()
+                (pages/'pngs/figure.png').write_bytes(b'partial PNG')
+                raise ValueError('TEST_ONLY interrupted PNG export')
+            with mock.patch.multiple(plot,
+                    cold_numerics=mock.Mock(return_value={}),
+                    pdf_export_runtime=mock.Mock(return_value={'ghostscript_version':'1.2.3'}),
+                    cold_drawing_inputs=mock.Mock(return_value=(None,None)),
+                    drawing_plan=mock.Mock(return_value={'pages':[{'filename':'figure.pdf'}]}),
+                    drawing_payload=mock.Mock(return_value=record),
+                    build_renderer=mock.Mock(return_value=({},Path('TEST_ONLY_renderer'),{})),
+                    canonical_root_archive=mock.Mock(), verify_canvas_archive=mock.Mock(),
+                    export_page_images=mock.Mock(side_effect=interrupted)), \
+                    mock.patch.object(plot.subprocess,'run',side_effect=native):
+                with self.assertRaisesRegex(ValueError,'interrupted PNG export'):
+                    plot.render_cold(args)
+            self.assertFalse(args.output.exists())
+            self.assertFalse(list(root.glob('.result.cold-stage-*')))
+
+    def test_normal_configs_generic_page_names_and_manifest_last_publication(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); pages = root / 'pages'; pages.mkdir()
+            names = []
+            for name in ('plot.json', 'plot-dplus.json', 'plot-all-tune.json'):
+                plot.checked_plot_config(ROOT / 'config' / name)
+                names += [plot.canonical_page_name('future.' + Path(name).stem, i, 2)
+                          for i in (1, 2)]
+            for name in names: self._pdf(pages / name)
+            # This fixture already has embedded fonts; native ROOT export has its own test.
+            with mock.patch.object(plot, 'publication_pdf', side_effect=plot.verify_pdf_fonts):
+                plot.export_page_images(pages, names)
+            self.assertEqual({p.name for p in (pages / 'pdfs').iterdir()}, set(names))
+            self.assertEqual({p.stem + '.pdf' for p in (pages / 'pngs').iterdir()}, set(names))
+            plot.verify_page_images(pages, root)
+            other = root / 'different.pdf'; self._pdf(other, text='different drawing')
+            replacement = root / 'different.png'; plot.rasterize_pdf(other, replacement)
+            target = pages / 'pngs' / (Path(names[0]).stem + '.png')
+            original = target.read_bytes(); target.write_bytes(replacement.read_bytes())
+            with self.assertRaisesRegex(ValueError, 'PNG raster differs'):
+                plot.verify_page_images(pages, root)
+            target.write_bytes(original)
+            (pages / plot.CANVAS_NAME).write_bytes(b'TEST_ONLY canvas')
+            (pages / plot.RECORD_NAME).write_bytes(b'TEST_ONLY record')
+            artifacts = plot.render_artifacts(pages)
+            (pages / 'manifest.json').write_text('{"state":"COMPLETE"}')
+            output = root / 'output'
+            with mock.patch.dict('os.environ', {'HADRONIZATION_RENDER_FAIL_BEFORE_MANIFEST':'1'}):
+                with self.assertRaisesRegex(ValueError, 'injected interruption'):
+                    plot.promote_render_pages(pages, output)
+            self.assertFalse(output.exists())
+            plot.promote_render_pages(pages, output)
+            expected = sorted([p.relative_to(pages).as_posix() for p in artifacts] + ['manifest.json'])
+            plot.verify_nested_fileset(output, expected, 'test figures')
+            before = {p.relative_to(output).as_posix():p.read_bytes() for p in output.rglob('*') if p.is_file()}
+            with self.assertRaises(FileExistsError): plot.promote_render_pages(pages, output)
+            self.assertEqual(before, {p.relative_to(output).as_posix():p.read_bytes() for p in output.rglob('*') if p.is_file()})
+            (output / 'extra').mkdir()
+            with self.assertRaisesRegex(ValueError, 'filesystem set'):
+                plot.verify_nested_fileset(output, expected, 'test figures')
+
+    def test_nested_path_and_symlink_guards_reject_aliases_and_legacy_layout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); (root / 'pdfs').mkdir(); (root / 'pngs').mkdir()
+            (root / 'pdfs/a.pdf').write_bytes(b'PDF placeholder')
+            (root / 'pngs/a.png').write_bytes(b'PNG placeholder')
+            names = ['pdfs/a.pdf', 'pngs/a.png']
+            plot.verify_nested_fileset(root, names, 'test')
+            for invalid in ('/outside', '../outside', 'pdfs/../a.pdf', 'pdfs//a.pdf',
+                            'pdfs/./a.pdf', 'pdfs\\a.pdf', ''):
+                with self.assertRaises(ValueError):
+                    plot.verify_nested_fileset(root, [invalid], 'test')
+            with self.assertRaisesRegex(ValueError, 'duplicate'):
+                plot.verify_nested_fileset(root, names + [names[0]], 'test')
+            png = root / 'pngs/a.png'; png.unlink(); png.symlink_to(root / 'pdfs/a.pdf')
+            with self.assertRaisesRegex(ValueError, 'symlink'):
+                plot.verify_nested_fileset(root, names, 'test')
+            with self.assertRaises(ValueError):
+                plot.verify_png_export({'policy':'old PDF-only export'})
 
 
 if __name__ == "__main__":
