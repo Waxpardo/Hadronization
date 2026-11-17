@@ -704,7 +704,7 @@ int main() {
   absolute.margins={.16,.04,0.,1.8*20./672.};
   absolute.annotations={
       {.22404740259740258,.8919642857142857,20.,
-       "PYTHIA 8.317; pp, #sqrt{#it{s}} = 13.6 TeV"},
+       "PYTHIA-8.317; pp, #sqrt{#it{s}} = 13.6 TeV"},
       {.22404740259740258,.8532738095238095,20.,
        "Hard c#bar{c}, b#bar{b}; #hat{p}_{T} #geq 2 GeV/c; |#eta| #leq 4"},
       {.22404740259740258,.8145833333333333,20.,
@@ -1449,14 +1449,14 @@ int main(int argc, char** argv) {
         self.assertEqual(len(states),202)
         for state in states:
             label=plot.species_latex_label(state['pdg'],state['name'])
-            self.assertIn('#it{',label)
+            self.assertNotIn('#it{',label)
             if '*' in state['name']:self.assertIn('*',label)
             if "'" in state['name']:self.assertIn("'",label)
             if 'bar' in state['name']:self.assertIn('#bar{',label)
             self.assertEqual(label.count('{'),label.count('}'))
         self.assertEqual(len(plot.species_display_order([str(s['pdg']) for s in states])),202)
         self.assertEqual(plot.species_latex_label(-10421,'D*_0bar0'),
-                         '#bar{#it{D}}_{0}^{*0}')
+                         '#bar{D}_{0}^{*0}')
 
     def test_separate_species_pdfs_are_exact_point_subsets(self):
         import copy
@@ -2183,7 +2183,7 @@ int main(int argc, char** argv) {
                 self.assertAlmostEqual(upper['geometry'][1],
                                        lower['geometry'][3])
         self.assertEqual({item['y_title'] for item in page['panels'][-2:]},
-                         {'TUNE/MONASH'})
+                         {'TUNE/Monash'})
         self.assertEqual([item['title'] for item in page['panels'][:6]],
                          ['upper.421', 'upper.4122', '', '', '', ''])
 
@@ -2215,7 +2215,7 @@ int main(int argc, char** argv) {
                           'lower.shared.beauty.521'])
         self.assertTrue(all(item['x_title'] ==
             'Multiplicity Percentile Interval (%)' for item in page['panels'][-2:]))
-        self.assertTrue(all(item['y_title'] == 'TUNE/MONASH'
+        self.assertTrue(all(item['y_title'] == 'TUNE/Monash'
                             for item in page['panels'][-2:]))
         self.assertEqual([item['title'] for item in page['panels'][:6]],
                          ['upper.charm.421', 'upper.beauty.521',
@@ -2225,13 +2225,13 @@ int main(int argc, char** argv) {
                             for series in item['series']))
 
     def test_species_typography_covers_representative_mesons_and_baryons(self):
-        self.assertEqual(plot.species_latex_label(421, 'Dzero'), '#it{D}^{0}')
+        self.assertEqual(plot.species_latex_label(421, 'Dzero'), 'D^{0}')
         self.assertEqual(plot.species_latex_label(-421, 'Dzerobar'),
-                         '#bar{#it{D}}^{0}')
+                         '#bar{D}^{0}')
         self.assertEqual(plot.species_latex_label(5212, 'PDG 5212'),
-                         '#it{#Sigma}_{b}^{0}')
+                         '#Sigma_{b}^{0}')
         self.assertEqual(plot.species_latex_label(-5212, 'PDG -5212'),
-                         '#bar{#it{#Sigma}}_{b}^{0}')
+                         '#bar{#Sigma}_{b}^{0}')
 
     def test_left_and_right_facets_receive_one_shared_y_range(self):
         left = {'geometry': [0., .2, .5, .8], 'y_range': [1., 3.],
@@ -2331,7 +2331,7 @@ int main(int argc, char** argv) {
         plot.apply_cold_page_style(pages,SimpleNamespace(
             numerics_schema='hadronization_projection_result_v4',
             synthetic=True,campaign_state='PARTIAL_SAMPLE'))
-        self.assertEqual(pages[0]['title'],'G9 #it{#Sigma}_{b}^{0} #eta (1)')
+        self.assertEqual(pages[0]['title'],'G9 #Sigma_{b}^{0} #eta (1)')
         self.assertTrue(all(p['status']=='PRESENT_UNDEFINED'
                             for p in pages[0]['panels']))
         self.assertTrue(all('WITHHELD_UNCERTAINTY' in p['note'] and
@@ -2414,7 +2414,7 @@ int main(int argc, char** argv) {
                      'generator_name':'TEST_ONLY','generator_version':'2',
                      'collision_system':'TEST_ONLY','energy_gev':float(0).hex()}}
         self.assertEqual(plot.target_analysis_caption(payload),
-            'PYTHIA 8.317; pp, #sqrt{#it{s}} = 13.6 TeV')
+            'PYTHIA-8.317; pp, #sqrt{#it{s}} = 13.6 TeV')
         payload['provenance']['data_limitations']=[]
         payload['request_echo']['sources']['campaign_id']='HF_RUN3_V1'
         with self.assertRaisesRegex(ValueError,'contradicts target campaign'):
@@ -2445,10 +2445,10 @@ int main(int argc, char** argv) {
                      'generator_name':'PYTHIA','generator_version':'8.317',
                      'collision_system':'pp','energy_gev':float(13600).hex()}}
         self.assertEqual(plot.target_analysis_caption(payload),
-            'PYTHIA 8.317; pp, #sqrt{#it{s}} = 13.6 TeV')
+            'PYTHIA-8.317; pp, #sqrt{#it{s}} = 13.6 TeV')
         payload['provenance']['data_limitations'] = []
         self.assertEqual(plot.target_analysis_caption(payload),
-            'PYTHIA 8.317; pp, #sqrt{#it{s}} = 13.6 TeV')
+            'PYTHIA-8.317; pp, #sqrt{#it{s}} = 13.6 TeV')
         payload['request_echo']['scope']['ordered_tunes'] = [
             'CLOSEPACKING','JUNCTIONS','JUNCTIONS']
         with self.assertRaisesRegex(ValueError, 'target campaign scope'):
@@ -2488,7 +2488,7 @@ int main(int argc, char** argv) {
         self.assertIn('#it{p}_{T} > 0.15 GeV', caption)
         self.assertIn('|#eta| #leq 4', caption)
         self.assertIn('per species/tune', caption)
-        self.assertEqual(ratio, '#it{P}_{bin} / #it{P}_{bin,MONASH}')
+        self.assertEqual(ratio, '#it{P}_{bin} / #it{P}_{bin,Monash}')
         self.assertEqual(absolute, 'Probability / bin')
         with self.assertRaisesRegex(ValueError, 'G9 selection'):
             plot.g9_science_caption(dict(science,
@@ -2507,7 +2507,7 @@ int main(int argc, char** argv) {
         self.assertIn('all origins, no #it{p}_{T} floor', caption)
         self.assertNotIn('0.15', caption)
         self.assertIn('per species/tune', caption)
-        self.assertEqual(ratio, '#it{P}_{bin} / #it{P}_{bin,MONASH}')
+        self.assertEqual(ratio, '#it{P}_{bin} / #it{P}_{bin,Monash}')
         self.assertEqual(absolute, 'Probability / bin')
         for mutation in (
                 dict(current, origin_scope='SELECTED_HARD'),

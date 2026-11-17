@@ -146,8 +146,11 @@ class TriggerComparison(unittest.TestCase):
             import ROOT as rt
             f=rt.TFile.Open(str(work/'pages/canvases.root'))
             labels=[]
+            tune_keys=[]
             def visit(obj):
                 if obj.InheritsFrom('TLatex'): labels.append(str(obj.GetTitle()))
+                if obj.InheritsFrom('TLegend'):
+                    tune_keys.append([str(entry.GetLabel()) for entry in obj.GetListOfPrimitives()])
                 if obj.InheritsFrom('TPad'):
                     for child in obj.GetListOfPrimitives(): visit(child)
             for key in f.GetListOfKeys():
@@ -155,3 +158,4 @@ class TriggerComparison(unittest.TestCase):
                 if obj.InheritsFrom('TCanvas'):visit(obj)
             f.Close()
             self.assertEqual(labels.count('Associate Species'),1)
+            self.assertEqual(tune_keys, [['Monash', 'SJ', 'CP']])

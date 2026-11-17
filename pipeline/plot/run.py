@@ -1167,7 +1167,7 @@ def tune_separated_activity_pages(pages, tunes):
             panel['geometry'] = [original['geometry'][0], ratio_bottom,
                                  original['geometry'][2], ratio_top]
             panel['title'] = ''
-            panel['y_title'] = 'TUNE/MONASH'
+            panel['y_title'] = 'TUNE/Monash'
             panel['margins'][3] = 0.
             page['panels'].append(panel)
         result.append(page)
@@ -1220,7 +1220,7 @@ def tune_separated_baryon_meson_page(pages, tunes):
                              original['geometry'][2], ratio_top]
         panel['title'] = ''
         panel['x_title'] = 'Multiplicity Percentile Interval (%)'
-        panel['y_title'] = 'TUNE/MONASH'
+        panel['y_title'] = 'TUNE/Monash'
         panel['margins'][3] = 0.
         page['panels'].append(panel)
     return page
@@ -1427,15 +1427,27 @@ def g9_signed_species(curve):
         raise ValueError('G9 signed-species curve key differs')
     return curve['associate_pdg']
 
+def tune_display_name(tune):
+    return {'MONASH': 'Monash', 'JUNCTIONS': 'SJ', 'CLOSEPACKING': 'CP'}.get(tune, tune)
+
+
+def generator_display_name(name, version):
+    if name.upper() in ('PYTHIA', 'PYTHIA 8', 'PYTHIA-8'):
+        if version:
+            return 'PYTHIA-' + version
+        return 'PYTHIA' if name.upper() == 'PYTHIA' else 'PYTHIA-8'
+    return f'{name} {version}' if version else name
+
+
 def target_analysis_caption(payload):
     """Bind preview context to accepted campaign bytes, never synthetic provenance."""
     provenance=payload['provenance']
     synthetic=synthetic_provenance(payload)
     source_campaign=payload['request_echo']['sources']['campaign_id']
     if not synthetic and source_campaign!='HF_RUN3_V1':
-        return '{name} {version}; {beam}, #sqrt{{#it{{s}}}} = {energy} TeV'.format(
-            name=provenance['generator_name'],
-            version=provenance['generator_version'],
+        return '{generator}; {beam}, #sqrt{{#it{{s}}}} = {energy} TeV'.format(
+            generator=generator_display_name(provenance['generator_name'],
+                                             provenance['generator_version']),
             beam=provenance['collision_system'],
             energy=format(float.fromhex(provenance['energy_gev'])/1000,'.15g'))
     reject_symlink_components(TARGET_CAMPAIGN, 'target campaign descriptor')
@@ -1464,8 +1476,8 @@ def target_analysis_caption(payload):
                 provenance['collision_system']!=beam or
                 float.fromhex(provenance['energy_gev'])!=energy):
             raise ValueError('numerical provenance contradicts target campaign')
-    caption='PYTHIA {}; {}, #sqrt{{#it{{s}}}} = {} TeV'.format(
-        version, beam, format(energy/1000,'.15g'))
+    caption='{}; {}, #sqrt{{#it{{s}}}} = {} TeV'.format(
+        generator_display_name('PYTHIA', version), beam, format(energy/1000,'.15g'))
     # Synthetic packets carry their own visible TEST_ONLY marker.  The
     # authenticated target campaign is 13.6 TeV; calling it merely planned
     # here would misdescribe the existing production dataset.
@@ -1609,7 +1621,7 @@ def add_publication_captions(pages, context):
         if page['role']=='multiplicity.composite':
             for panel in page['panels']:
                 if panel.get('reuse'):
-                    panel['annotations'].append({'x':.24,'y':.85,'size':12.,'text':'MONASH percentile intervals'})
+                    panel['annotations'].append({'x':.24,'y':.85,'size':12.,'text':'Monash percentile intervals'})
         if page['role']=='spectra.signed_heavy':
             page['title']=page['title'].removeprefix('G9 ').replace(' (1)','')
             for panel in panels:
@@ -1626,7 +1638,7 @@ def add_publication_captions(pages, context):
             if not any(p['id'].startswith('correlation.teaching.') for p in panels):
                 for panel in panels:
                     if panel['id'].startswith('correlation.compare.') and panel['y_title']:
-                        panel['y_title']='R_{tune/MONASH}'
+                        panel['y_title']='R_{tune/Monash}'
             if any(p['id'].startswith('correlation.teaching.') for p in panels):
                 for panel in panels:
                     if panel['id'].endswith('.subtraction'):
@@ -1763,7 +1775,7 @@ def g9_science_caption(science, reference, numerics_schema):
                .format(science['status_low'], science['status_high'],
                        format(float.fromhex(pt['low']), '.15g'),
                        format(float.fromhex(eta['high']), '.15g')))
-    return cut, '#it{P}_{bin} / #it{P}_{bin,'+reference+'}', 'Probability / bin'
+    return cut, '#it{P}_{bin} / #it{P}_{bin,'+tune_display_name(reference)+'}', 'Probability / bin'
 
 def cold_drawing_inputs(payload, config):
     """Adapt one S-validated numerical DTO to presentation fields only.
@@ -1996,48 +2008,48 @@ def cold_drawing_inputs(payload, config):
 def species_latex_label(pdg, value):
     """Return ROOT TLatex typography for an authenticated species label."""
     signed_identity = {
-        '411':'#it{D}^{+}', '-411':'#it{D}^{-}',
-        '421':'#it{D}^{0}', '-421':'#bar{#it{D}}^{0}',
-        '431':'#it{D}_{s}^{+}', '-431':'#it{D}_{s}^{-}',
-        '4122':'#it{#Lambda}_{c}^{+}',
-        '-4122':'#bar{#it{#Lambda}}_{c}^{-}',
-        '521':'#it{B}^{+}', '-521':'#it{B}^{-}',
-        '511':'#it{B}^{0}', '-511':'#bar{#it{B}}^{0}',
-        '531':'#it{B}_{s}^{0}', '-531':'#bar{#it{B}}_{s}^{0}',
-        '541':'#it{B}_{c}^{+}', '-541':'#it{B}_{c}^{-}',
-        '5122':'#it{#Lambda}_{b}^{0}',
-        '-5122':'#bar{#it{#Lambda}}_{b}^{0}',
-        '4112':'#it{#Sigma}_{c}^{0}', '-4112':'#bar{#it{#Sigma}}_{c}^{0}',
-        '4212':'#it{#Sigma}_{c}^{+}', '-4212':'#bar{#it{#Sigma}}_{c}^{-}',
-        '4222':'#it{#Sigma}_{c}^{++}', '-4222':'#bar{#it{#Sigma}}_{c}^{--}',
-        '5112':'#it{#Sigma}_{b}^{-}', '-5112':'#bar{#it{#Sigma}}_{b}^{+}',
-        '5212':'#it{#Sigma}_{b}^{0}', '-5212':'#bar{#it{#Sigma}}_{b}^{0}',
-        '5222':'#it{#Sigma}_{b}^{+}', '-5222':'#bar{#it{#Sigma}}_{b}^{-}',
-        '4132':'#it{#Xi}_{c}^{0}', '-4132':'#bar{#it{#Xi}}_{c}^{0}',
-        '4232':'#it{#Xi}_{c}^{+}', '-4232':'#bar{#it{#Xi}}_{c}^{-}',
-        '5132':'#it{#Xi}_{b}^{-}', '-5132':'#bar{#it{#Xi}}_{b}^{+}',
-        '5232':'#it{#Xi}_{b}^{0}', '-5232':'#bar{#it{#Xi}}_{b}^{0}',
-        '4312':"#it{#Xi}_{c}^{'0}", '-4312':"#bar{#it{#Xi}}_{c}^{'0}",
-        '4322':"#it{#Xi}_{c}^{'+}", '-4322':"#bar{#it{#Xi}}_{c}^{'-}",
-        '5312':"#it{#Xi}_{b}^{'-}", '-5312':"#bar{#it{#Xi}}_{b}^{'+}",
-        '5322':"#it{#Xi}_{b}^{'0}", '-5322':"#bar{#it{#Xi}}_{b}^{'0}",
-        '4332':'#it{#Omega}_{c}^{0}', '-4332':'#bar{#it{#Omega}}_{c}^{0}',
-        '5332':'#it{#Omega}_{b}^{-}', '-5332':'#bar{#it{#Omega}}_{b}^{+}',
+        '411':'D^{+}', '-411':'D^{-}',
+        '421':'D^{0}', '-421':'#bar{D}^{0}',
+        '431':'D_{s}^{+}', '-431':'D_{s}^{-}',
+        '4122':'#Lambda_{c}^{+}',
+        '-4122':'#bar{#Lambda}_{c}^{-}',
+        '521':'B^{+}', '-521':'B^{-}',
+        '511':'B^{0}', '-511':'#bar{B}^{0}',
+        '531':'B_{s}^{0}', '-531':'#bar{B}_{s}^{0}',
+        '541':'B_{c}^{+}', '-541':'B_{c}^{-}',
+        '5122':'#Lambda_{b}^{0}',
+        '-5122':'#bar{#Lambda}_{b}^{0}',
+        '4112':'#Sigma_{c}^{0}', '-4112':'#bar{#Sigma}_{c}^{0}',
+        '4212':'#Sigma_{c}^{+}', '-4212':'#bar{#Sigma}_{c}^{-}',
+        '4222':'#Sigma_{c}^{++}', '-4222':'#bar{#Sigma}_{c}^{--}',
+        '5112':'#Sigma_{b}^{-}', '-5112':'#bar{#Sigma}_{b}^{+}',
+        '5212':'#Sigma_{b}^{0}', '-5212':'#bar{#Sigma}_{b}^{0}',
+        '5222':'#Sigma_{b}^{+}', '-5222':'#bar{#Sigma}_{b}^{-}',
+        '4132':'#Xi_{c}^{0}', '-4132':'#bar{#Xi}_{c}^{0}',
+        '4232':'#Xi_{c}^{+}', '-4232':'#bar{#Xi}_{c}^{-}',
+        '5132':'#Xi_{b}^{-}', '-5132':'#bar{#Xi}_{b}^{+}',
+        '5232':'#Xi_{b}^{0}', '-5232':'#bar{#Xi}_{b}^{0}',
+        '4312':"#Xi_{c}^{'0}", '-4312':"#bar{#Xi}_{c}^{'0}",
+        '4322':"#Xi_{c}^{'+}", '-4322':"#bar{#Xi}_{c}^{'-}",
+        '5312':"#Xi_{b}^{'-}", '-5312':"#bar{#Xi}_{b}^{'+}",
+        '5322':"#Xi_{b}^{'0}", '-5322':"#bar{#Xi}_{b}^{'0}",
+        '4332':'#Omega_{c}^{0}', '-4332':'#bar{#Omega}_{c}^{0}',
+        '5332':'#Omega_{b}^{-}', '-5332':'#bar{#Omega}_{b}^{+}',
     }
     if str(pdg) in signed_identity:
         return signed_identity[str(pdg)]
     compact = {
-        'Dplus': '#it{D}^{+}', 'Dminus': '#it{D}^{-}',
-        'Dzero': '#it{D}^{0}', 'Dzerobar': '#bar{#it{D}}^{0}',
-        'Dsplus': '#it{D}_{s}^{+}', 'Dsminus': '#it{D}_{s}^{-}',
-        'Lambdacplus': '#it{#Lambda}_{c}^{+}',
-        'Lambdacplusbar': '#bar{#it{#Lambda}}_{c}^{-}',
-        'Bminus': '#it{B}^{-}', 'Bplus': '#it{B}^{+}',
-        'Bzero': '#it{B}^{0}', 'Bzerobar': '#bar{#it{B}}^{0}',
-        'Bszero': '#it{B}_{s}^{0}', 'Bszerobar': '#bar{#it{B}}_{s}^{0}',
-        'Bcminus': '#it{B}_{c}^{-}', 'Bcplus': '#it{B}_{c}^{+}',
-        'Lambdabzero': '#it{#Lambda}_{b}^{0}',
-        'Lambdabzerobar': '#bar{#it{#Lambda}}_{b}^{0}',
+        'Dplus': 'D^{+}', 'Dminus': 'D^{-}',
+        'Dzero': 'D^{0}', 'Dzerobar': '#bar{D}^{0}',
+        'Dsplus': 'D_{s}^{+}', 'Dsminus': 'D_{s}^{-}',
+        'Lambdacplus': '#Lambda_{c}^{+}',
+        'Lambdacplusbar': '#bar{#Lambda}_{c}^{-}',
+        'Bminus': 'B^{-}', 'Bplus': 'B^{+}',
+        'Bzero': 'B^{0}', 'Bzerobar': '#bar{B}^{0}',
+        'Bszero': 'B_{s}^{0}', 'Bszerobar': '#bar{B}_{s}^{0}',
+        'Bcminus': 'B_{c}^{-}', 'Bcplus': 'B_{c}^{+}',
+        'Lambdabzero': '#Lambda_{b}^{0}',
+        'Lambdabzerobar': '#bar{#Lambda}_{b}^{0}',
     }
     if value in compact:
         return compact[value]
@@ -2047,13 +2059,19 @@ def species_latex_label(pdg, value):
     if match:
         base, excitation, subscript, mass, anti, charge = match.groups()
         symbol = base if base in ('D','B') else '#'+base
-        symbol = '#it{'+symbol+'}'
         if anti: symbol = '#bar{'+symbol+'}'
         if subscript: symbol += '_{'+subscript+'}'
         symbol += '^{'+excitation+charge+'}'
         if mass: symbol += mass
         return symbol
-    return value
+    quarkonium = re.fullmatch(
+        r'(eta|chi|h)_([012]?[bc])(\([0-9]+S?\))?', value)
+    if quarkonium:
+        base, subscript, state = quarkonium.groups()
+        return {'eta': '#eta', 'chi': '#chi', 'h': 'h'}[base] + '_{' + subscript + '}' + (state or '')
+    return {'J/psi': 'J/#psi'}.get(value, value.replace('Upsilon', '#Upsilon', 1)
+                                  if value.startswith('Upsilon') else
+                                  '#'+value if value.startswith('psi(') else value)
 
 
 def reserve_spectrum_tune_key(pages):
@@ -2396,8 +2414,9 @@ def drawing_plan(projection, manifest, config):
         return species_latex_label(pdg, value)
     threshold=context.activity_threshold
     provenance=presentation['scientific_provenance']
-    header='{name} {version}, {beam}, #sqrt{{#it{{s}}}} = {energy} TeV'.format(
-        **provenance['generator'],beam=provenance['collision_system']['beam'],
+    header='{generator}, {beam}, #sqrt{{#it{{s}}}} = {energy} TeV'.format(
+        generator=generator_display_name(**provenance['generator']),
+        beam=provenance['collision_system']['beam'],
         energy=format(provenance['collision_system']['sqrt_s_gev']/1000.,'.15g'))
     classes=context.classes
     labels={str(c['id']):'{}-{}'.format(
@@ -2446,9 +2465,9 @@ def drawing_plan(projection, manifest, config):
     quantities=['os_minus_ss_per_trigger','ratio_to_reference_tune',
                 'baryon_meson_reference_ratio','baryon_meson_ratio_to_reference_tune']
     ytitles={'os_minus_ss_per_trigger':'#it{Y} = (#it{N}_{OS}-#it{N}_{SS}) / #it{N}_{trig}',
-             'ratio_to_reference_tune':'#it{Y} / #it{Y}_{'+reference_tune+'}',
+             'ratio_to_reference_tune':'#it{Y} / #it{Y}_{'+tune_display_name(reference_tune)+'}',
              'baryon_meson_reference_ratio':'#it{Y}_{assoc} / #it{Y}_{ref}',
-             'baryon_meson_ratio_to_reference_tune':'(#it{Y}_{assoc}/#it{Y}_{ref}) / '+reference_tune}
+             'baryon_meson_ratio_to_reference_tune':'(#it{Y}_{assoc}/#it{Y}_{ref}) / '+tune_display_name(reference_tune)}
     views = []
     for role, rows in sorted(assigned.items()):
         if role == 'balancing.baryon_meson.activity':
@@ -2565,7 +2584,7 @@ def drawing_plan(projection, manifest, config):
                         x_title='' if half=='upper' else
                             'Multiplicity Percentile Interval (%)',
                         y_title=('#it{Y}_{baryon}/#it{Y}_{meson}'
-                                 if half=='upper' else 'TUNE/MONASH'),
+                                 if half=='upper' else 'TUNE/Monash'),
                         log_y=False,ratio=half=='lower',legend=False)
         elif role=='multiplicity.composite':
             title=''
@@ -2584,7 +2603,7 @@ def drawing_plan(projection, manifest, config):
                 title='',x_title='' if has_tune_ratios else 'Multiplicity #it{N}_{ch}',
                 y_title='Normalized event counts',log_y=True,legend=True)
             if has_tune_ratios:
-                add('lower.ratio',[0.,0.,1.,.26],title='',x_title='Multiplicity #it{N}_{ch}',y_title='TUNE/'+reference_tune,ratio=True)
+                add('lower.ratio',[0.,0.,1.,.26],title='',x_title='Multiplicity #it{N}_{ch}',y_title='TUNE/'+tune_display_name(reference_tune),ratio=True)
             # Nested-pad placement, retaining its physical aspect.
             add('inset.monash_boundaries',
                 nested_inset_geometry(config['layout']['p1_inset_geometry'],
@@ -2593,8 +2612,8 @@ def drawing_plan(projection, manifest, config):
                 y_title='Normalized event counts',inset=True)
         elif family=='correlations':
             sector=role.split('.')[-1]
-            title=(('' if pair_sign_view else 'MONASH balance' if teaching_view else
-                    'All-tune' if len(tunes)>1 else tunes[0])+' '+sector+
+            title=(('' if pair_sign_view else 'Monash balance' if teaching_view else
+                    'All-tune' if len(tunes)>1 else tune_display_name(tunes[0]))+' '+sector+
                    ' angular correlations')
             information=(base_information+
                          '; #Delta#varphi = #varphi_{trig}-#varphi_{assoc}')
@@ -2613,7 +2632,7 @@ def drawing_plan(projection, manifest, config):
                 if pair_sign_view:
                     add('correlation.teaching.'+trigger+'.identified',
                         [left,.48,right,.97],
-                        title=label(trigger)+' trigger (MONASH)',x_title='',
+                        title=label(trigger)+' trigger (Monash)',x_title='',
                         y_title=correlation_y_title(shown),
                         log_y=True,legend=True)
                     add('correlation.teaching.'+trigger+'.subtraction',
@@ -2625,7 +2644,7 @@ def drawing_plan(projection, manifest, config):
                 if teaching_view:
                     add('correlation.balance.'+trigger+'.upper',
                         [left,.45,right,.89],
-                        title='MONASH '+label(trigger)+' trigger',
+                        title='Monash '+label(trigger)+' trigger',
                         x_title='',y_title=correlation_y_title(shown),
                         legend=True)
                     add('correlation.balance.'+trigger+'.lower',
@@ -2664,7 +2683,7 @@ def drawing_plan(projection, manifest, config):
                             title='',
                             x_title='#Delta#varphi (rad)'
                                 if component=='OS_MINUS_SS' else '',
-                            y_title=caption+' / '+reference_tune,
+                            y_title=caption+' / '+tune_display_name(reference_tune),
                             ratio=True,legend=False)
         if not recipes:
             add('unavailable',[0.,0.,1.,.88],title='Unavailable',x_title='Bin coordinate',y_title='Value')
@@ -2731,7 +2750,7 @@ def drawing_plan(projection, manifest, config):
                         'reasons':r['reasons'],'state':state})
                 points.sort(key=lambda q:(q['x'] is None,q['x'] or 0,q['semantic_id']))
                 class_series=family=='balancing' and '.activity.' in role
-                legend_label=labels[cl]+'%' if class_series and cl else tune
+                legend_label=labels[cl]+'%' if class_series and cl else tune_display_name(tune)
                 line_style=class_styles.get(cl, 1)
                 if family=='correlations':
                     component=ident['component']
@@ -3178,7 +3197,8 @@ def g9_drawing_pages(context, rows, config, header, information, labels):
                     'tune':tune, 'class_id':'', 'color':style['color'],
                     'marker':style['marker'], 'line_style':1,
                     'emphasis':'NORMAL',
-                    'label':tune, 'legend_label':'' if ratio else tune,
+                    'label':tune_display_name(tune),
+                    'legend_label':'' if ratio else tune_display_name(tune),
                     'draw_mode':'histogram', 'points':points,
                 })
             valid = [point for item in series for point in item['points']
@@ -3929,7 +3949,7 @@ def baryon_meson_comparison_page(value, context, adapter, config):
         style = styles[tune]
         series.append(dict(key='baryon-meson.'+tune, tune=tune, class_id='0',
             color=style['color'], marker=style['marker'], line_style=1,
-            label=tune, legend_label=tune, emphasis='NORMAL',
+            label=tune_display_name(tune), legend_label=tune_display_name(tune), emphasis='NORMAL',
             draw_mode='categories', points=points))
     page = dict(filename='supplemental.balancing.baryon-meson.all-triggers.pdf',
         role=role, page_index=1, page_count=1, width=1100, height=620,
@@ -4001,7 +4021,8 @@ def trigger_comparison_page(value, context, adapter, config):
                     state='DRAW' if q['center'] is not None else 'MISSING_VALUE', reasons=','.join(q['reasons'])))
             series.append(dict(key=sector['id']+'.'+tune, tune=tune, class_id='0',
                 color=styles[tune]['color'], marker=styles[tune]['marker'], line_style=1,
-                label=tune, legend_label=tune if column else '', emphasis='NORMAL',
+                label=tune_display_name(tune),
+                legend_label=tune_display_name(tune) if column else '', emphasis='NORMAL',
                 draw_mode='categories', points=points))
         captions = []
         if column == 0:

@@ -176,6 +176,12 @@ int TuneRank(const std::string& label) {
   if (label == "CLOSEPACKING") return 2;
   return 3;
 }
+std::string TuneDisplayName(const std::string& tune) {
+  if (tune == "MONASH") return "Monash";
+  if (tune == "JUNCTIONS") return "SJ";
+  if (tune == "CLOSEPACKING") return "CP";
+  return tune;
+}
 template <typename T>
 void SortTuneSamples(std::vector<std::pair<std::string, T>>& samples) {
   std::stable_sort(samples.begin(), samples.end(),
@@ -2369,6 +2375,7 @@ std::vector<ExpectedLegend> ExpectedPanelLegends(
     const Series* series = selected[seriesIndex];
     if (!ExpectedGraphs(page, panel, *series, panelIndex, seriesIndex).empty() &&
         !series->legendLabel.empty() && series->legendLabel != series->tune &&
+        series->legendLabel != TuneDisplayName(series->tune) &&
         labels.insert(series->legendLabel).second) {
       legend.entries.push_back({series->legendLabel, "lp", series, 1.4,
                                 series->lineStyle});
@@ -2381,7 +2388,7 @@ std::vector<ExpectedLegend> ExpectedPanelLegends(
       ExpectedLegend key{InsideTuneLegendBox(page, panel, tunes.size()), 1,
                          double(TuneLegendTextPixels(page)), true, .12, {}};
       for (const auto& tune : tunes)
-        key.entries.push_back({tune.first, tune.second->marker == "none" ? "l" : "lp",
+        key.entries.push_back({TuneDisplayName(tune.first), tune.second->marker == "none" ? "l" : "lp",
                                tune.second, tune.second->marker == "none" ? 0. : 1.4, 1});
       result.push_back(std::move(key));
     }

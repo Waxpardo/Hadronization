@@ -308,6 +308,8 @@ The renderer writes paired files in `pdfs/` and `pngs/` below `--output`. ROOT, 
 
 Ghostscript embeds PDF fonts, then exports the full final page as opaque RGB PNG at 300 dpi. The verifier checks fonts, single-page geometry, PNG integrity and raster correspondence. These checks do not replace visual inspection at publication size.
 
+Figures use upright particle symbols and display the three configurations as Monash, SJ (string junctions), and CP (closepacking). Recipes and numerical records use the canonical IDs `MONASH`, `JUNCTIONS`, and `CLOSEPACKING`.
+
 Each figure contains a compact sample description in its upper panel. It states the generator, collision system, energy, hard heavy-flavour processes and applicable acceptance. Activity figures identify N_ch and its particle cuts. The [scientific reference](science.md) gives the complete selections, observable definitions and statistical method. A reserved area separates the sample description from data.
 
 Bands show pointwise statistical standard errors. They do not represent systematic uncertainty or a simultaneous confidence region. Histogram bands stop at nonpositive log bins, unavailable errors and gaps between bin edges. The numerical archive retains these bins and their statuses.

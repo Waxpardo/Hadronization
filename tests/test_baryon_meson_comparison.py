@@ -156,6 +156,12 @@ class BaryonMesonComparison(unittest.TestCase):
         page = plot.baryon_meson_comparison_page(
             value, context, {"presentation":{"species_labels":labels}}, config)
         panel = page["panels"][0]
+        self.assertEqual(
+            [(s["tune"], s["legend_label"], s["color"], s["marker"])
+             for s in panel["series"]],
+            [("MONASH", "Monash", "#000000", "filled_circle"),
+             ("JUNCTIONS", "SJ", "#0072B2", "filled_square"),
+             ("CLOSEPACKING", "CP", "#D55E00", "filled_up_triangle")])
         self.assertEqual(panel["y_title"],
                          "#it{Y}_{#font[42]{Baryon}}/#it{Y}_{#font[42]{Meson}}")
         self.assertEqual(panel["x_title"], "Trigger Species")
