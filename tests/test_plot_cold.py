@@ -1601,7 +1601,7 @@ int main(int argc, char** argv) {
     def test_p1_owner_inset_is_large_lower_left(self):
         config, _ = plot.checked_plot_config(ROOT / "config/plot.json")
         self.assertEqual(config["layout"]["p1_inset_geometry"],
-                         [.18, .05, .65, .48])
+                         [.163, .005, .702, .59])
         self.assertEqual(config['layout']['correlation_view'],
                          'monash_pair_sign')
         self.assertEqual(config['presets']['paper_default']['trigger_pdgs'][0],

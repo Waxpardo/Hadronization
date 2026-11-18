@@ -257,7 +257,7 @@ def checked_plot_config(path):
             layout["text_pixel_size"] < 1 or
             layout["physical_width_cm"] != 18.0 or
             layout["minimum_body_text_pt"] != 8.0 or
-            layout["p1_inset_geometry"] != [.18, .05, .65, .48] or
+            layout["p1_inset_geometry"] != [.163, .005, .702, .59] or
             type(layout["activity_category_dividers"]) is not bool or
             layout["correlation_view"] not in
                 ("monash_pair_sign", "monash_balance", "all_tune_ratio") or
@@ -1621,7 +1621,7 @@ def add_publication_captions(pages, context):
         if page['role']=='multiplicity.composite':
             for panel in page['panels']:
                 if panel.get('reuse'):
-                    panel['annotations'].append({'x':.24,'y':.85,'size':12.,'text':'Monash percentile intervals'})
+                    panel['annotations'].append({'x':.24,'y':.85,'size':15.,'text':'Monash percentile intervals'})
         if page['role']=='spectra.signed_heavy':
             page['title']=page['title'].removeprefix('G9 ').replace(' (1)','')
             for panel in panels:
